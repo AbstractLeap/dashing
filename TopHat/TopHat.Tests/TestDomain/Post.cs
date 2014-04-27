@@ -1,0 +1,19 @@
+﻿using System.Collections.Generic;
+
+namespace TopHat.Tests.TestDomain
+{
+    internal class Post
+    {
+        public virtual int PostId { get; set; }
+
+        public virtual string Title { get; set; }
+
+        public virtual string Content { get; set; }
+
+        public virtual User Author { get; set; }
+
+        public virtual Blog Blog { get; set; }
+
+        public virtual IList<Comment> Comments { get; set; }
+    }
+}
