@@ -39,9 +39,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\Column.cs" />
+    <Compile Include="Configuration\Configuration.cs" />
+    <Compile Include="Configuration\DefaultConfiguration.cs" />
     <Compile Include="Configuration\IMapping.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IMap.cs" />
+    <Compile Include="Configuration\Mapper\EntityMapper.cs" />
+    <Compile Include="Configuration\Mapper\Mapper.cs" />
+    <Compile Include="Configuration\Mapper\PropertyMapper.cs" />
     <Compile Include="QueryWriter\ISelect.cs" />
     <Compile Include="QueryWriter\OrderClause.cs" />
     <Compile Include="QueryWriter\Query.cs" />
