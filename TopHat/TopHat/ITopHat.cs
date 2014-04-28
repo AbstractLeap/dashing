@@ -82,14 +82,14 @@ namespace TopHat
         /// </summary>
         /// <typeparam name="T">Type of entity to select</typeparam>
         /// <returns></returns>
-        IProject<T> Query<T>();
+        ISelect<T> Query<T>();
 
         /// <summary>
         /// Construct a query against the database and add change tracking to any returned objects
         /// </summary>
         /// <typeparam name="T">Type of entities to return</typeparam>
         /// <returns></returns>
-        IProject<T> QueryTracked<T>();
+        ISelect<T> QueryTracked<T>();
 
         #endregion Querying
     }

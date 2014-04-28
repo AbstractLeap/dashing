@@ -69,12 +69,12 @@ namespace TopHat
             throw new NotImplementedException();
         }
 
-        public IProject<T> Query<T>()
+        public ISelect<T> Query<T>()
         {
             throw new NotImplementedException();
         }
 
-        public IProject<T> QueryTracked<T>()
+        public ISelect<T> QueryTracked<T>()
         {
             throw new NotImplementedException();
         }

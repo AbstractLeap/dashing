@@ -42,7 +42,7 @@
     <Compile Include="Configuration\IMapping.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IMap.cs" />
-    <Compile Include="QueryWriter\IProject.cs" />
+    <Compile Include="QueryWriter\ISelect.cs" />
     <Compile Include="QueryWriter\OrderClause.cs" />
     <Compile Include="QueryWriter\Query.cs" />
     <Compile Include="QueryWriter\WhereClause.cs" />

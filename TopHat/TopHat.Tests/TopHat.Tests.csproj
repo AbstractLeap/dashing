@@ -63,7 +63,7 @@
     <Compile Include="QueryWriter\CUDTest.cs" />
     <Compile Include="QueryWriter\FetchTest.cs" />
     <Compile Include="QueryWriter\OrderTest.cs" />
-    <Compile Include="QueryWriter\ProjectTest.cs" />
+    <Compile Include="QueryWriter\SelectTest.cs" />
     <Compile Include="QueryWriter\QueryTest.cs" />
     <Compile Include="QueryWriter\TrackedTest.cs" />
     <Compile Include="QueryWriter\WhereTest.cs" />

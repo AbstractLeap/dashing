@@ -10,6 +10,10 @@ namespace TopHat
 
         public Expression<Func<T, dynamic>> Project { get; private set; }
 
+        public IList<Expression> Includes { get; private set; }
+
+        public IList<Expression> Excludes { get; private set; }
+
         public IList<IList<Expression>> Fetches { get; private set; }
 
         public Queue<OrderClause<T>> OrderClauses { get; private set; }
