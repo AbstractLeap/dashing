@@ -16,7 +16,7 @@ namespace TopHat
         /// Include all columns in the result set
         /// </summary>
         /// <returns></returns>
-        IFetch<T> IncludeAll();
+        ISelect<T> IncludeAll();
 
         /// <summary>
         /// Enables inclusion of non-eager columns
