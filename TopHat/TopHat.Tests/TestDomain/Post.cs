@@ -10,10 +10,14 @@ namespace TopHat.Tests.TestDomain
 
         public virtual string Content { get; set; }
 
+        public virtual decimal Rating { get; set; }
+
         public virtual User Author { get; set; }
 
         public virtual Blog Blog { get; set; }
 
         public virtual IList<Comment> Comments { get; set; }
+
+        public virtual bool DoNotMap { get; set; }
     }
 }

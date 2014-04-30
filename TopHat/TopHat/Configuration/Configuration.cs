@@ -18,6 +18,10 @@ namespace TopHat.Configuration
 
         public bool AlwaysTrackEntities { get; set; }
 
+        public bool PrimaryKeysDatabaseGeneratedByDefault { get; set; }
+
+        public bool GenerateIndexesOnForeignKeysByDefault { get; set; }
+
         public IMapping Mapping { get; private set; }
 
         public abstract Mapper.Mapper Configure();

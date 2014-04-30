@@ -13,9 +13,11 @@ namespace TopHat.Configuration
 
         string PrimaryKey { get; set; }
 
-        bool IsAutomaticPrimaryKey { get; set; }
+        bool IsPrimaryKeyDatabaseGenerated { get; set; }
 
         IList<Column> Columns { get; set; }
+
+        IList<IList<string>> Indexes { get; set; }
     }
 
     public interface IMap<T> : IMap

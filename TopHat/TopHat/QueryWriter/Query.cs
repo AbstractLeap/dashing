@@ -6,7 +6,7 @@ namespace TopHat
 {
     public class Query<T>
     {
-        public QueryType QueryType { get; private set; }
+        public QueryType QueryType { get; set; }
 
         public Expression<Func<T, dynamic>> Project { get; private set; }
 

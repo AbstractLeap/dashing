@@ -22,7 +22,7 @@ namespace TopHat.Tests.QueryWriter
 
         protected ITopHat GetTopHat()
         {
-            return new TopHat(conn.Object, tran.Object, config.Object, sql.Object);
+            return new TopHat(config.Object, sql.Object, conn.Object, tran.Object);
         }
     }
 }

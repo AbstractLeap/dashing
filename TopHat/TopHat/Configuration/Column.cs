@@ -16,6 +16,12 @@ namespace TopHat.Configuration
 
         public DbType ColumnType { get; set; }
 
+        public int Precision { get; set; }
+
+        public int Scale { get; set; }
+
+        public int Length { get; set; }
+
         /// <summary>
         /// Indicates whether the column will be included by default in Query on this type
         /// </summary>

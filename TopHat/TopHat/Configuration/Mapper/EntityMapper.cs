@@ -60,5 +60,15 @@ namespace TopHat.Configuration.Mapper
         {
             return new PropertyMapper<T, TProperty>(this);
         }
+
+        public EntityMapper<T> PrimaryKeyDatabaseGenerated(bool databaseGenerated)
+        {
+            throw new NotImplementedException();
+        }
+
+        public EntityMapper<T> Index<TProperty>(Expression<Func<T, TProperty>> newExpression)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

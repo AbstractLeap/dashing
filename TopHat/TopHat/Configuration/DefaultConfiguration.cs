@@ -11,6 +11,8 @@ namespace TopHat.Configuration
         public override Mapper.Mapper Configure()
         {
             this.AlwaysTrackEntities = false;
+            this.PrimaryKeysDatabaseGeneratedByDefault = true;
+            this.GenerateIndexesOnForeignKeysByDefault = true;
 
             return this.mapper;
         }

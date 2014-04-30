@@ -30,5 +30,35 @@ namespace TopHat.Configuration.Mapper
         {
             throw new NotImplementedException();
         }
+
+        public PropertyMapper<TEntity, TProperty> DefaultExcluded()
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyMapper<TEntity, TProperty> Precision(int precision)
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyMapper<TEntity, TProperty> Scale(int precision)
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyMapper<TEntity, TProperty> Length(int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyMapper<TEntity, TProperty> IsDatabaseGenerated(bool isDBGenerated)
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyMapper<TEntity, TProperty> Ignore()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
