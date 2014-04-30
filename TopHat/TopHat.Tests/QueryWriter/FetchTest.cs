@@ -19,7 +19,7 @@ namespace TopHat.Tests.QueryWriter
         {
             var topHat = GetTopHat();
             var fetch = topHat.Query<Comment>().Fetch(c => c.Post).ThenFetch(p => p.Blog);
-            Assert.Equal(2, fetch.Count());
+            Assert.Equal(2, fetch.Query.Fetches.First().Count);
         }
     }
 }

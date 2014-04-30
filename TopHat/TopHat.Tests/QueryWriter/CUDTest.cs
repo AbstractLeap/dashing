@@ -36,5 +36,19 @@ namespace TopHat.Tests.QueryWriter
             GetTopHat().Delete<Post>(1);
             this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.Entity.PostId == 1 && q.QueryType == QueryType.Delete)));
         }
+
+        [Fact]
+        public void WhereClauseUpdateExecutes()
+        {
+            GetTopHat().Delete<Post>().Where(p => p.PostId < 5);
+            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Delete && q.WhereClauses.Count == 1)));
+        }
+
+        [Fact]
+        public void WhereClauseDeleteExecutes()
+        {
+            GetTopHat().Update<Post>().Where(p => p.PostId < 5);
+            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Update && q.WhereClauses.Count == 1)));
+        }
     }
 }

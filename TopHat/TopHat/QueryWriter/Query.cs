@@ -6,23 +6,32 @@ namespace TopHat
 {
     public class Query<T>
     {
+        public Query()
+        {
+            this.Includes = new List<Expression>();
+            this.Excludes = new List<Expression>();
+            this.Fetches = new List<IList<Expression>>();
+            this.OrderClauses = new Queue<OrderClause<T>>();
+            this.WhereClauses = new List<WhereClause<T>>();
+        }
+
         public QueryType QueryType { get; set; }
 
-        public Expression<Func<T, dynamic>> Project { get; private set; }
+        public Expression<Func<T, dynamic>> Project { get; set; }
 
-        public IList<Expression> Includes { get; private set; }
+        public IList<Expression> Includes { get; set; }
 
-        public IList<Expression> Excludes { get; private set; }
+        public IList<Expression> Excludes { get; set; }
 
-        public IList<IList<Expression>> Fetches { get; private set; }
+        public IList<IList<Expression>> Fetches { get; set; }
 
-        public Queue<OrderClause<T>> OrderClauses { get; private set; }
+        public Queue<OrderClause<T>> OrderClauses { get; set; }
 
-        public IList<WhereClause<T>> WhereClauses { get; private set; }
+        public IList<WhereClause<T>> WhereClauses { get; set; }
 
-        public int Skip { get; private set; }
+        public int Skip { get; set; }
 
-        public int Take { get; private set; }
+        public int Take { get; set; }
 
         public T Entity { get; set; }
 

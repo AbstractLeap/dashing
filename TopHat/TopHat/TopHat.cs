@@ -119,6 +119,11 @@ namespace TopHat
             this.sqlWriter.Execute(query);
         }
 
+        public IWhereExecute<T> Update<T>()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Delete<T>(T entity)
         {
             var query = new Query<T> { Entity = entity, QueryType = QueryType.Delete };
@@ -130,14 +135,19 @@ namespace TopHat
             throw new NotImplementedException();
         }
 
-        public ISelect<T> Query<T>()
+        public IWhereExecute<T> Delete<T>()
         {
             throw new NotImplementedException();
         }
 
+        public ISelect<T> Query<T>()
+        {
+            return new QueryWriter<T>(this.configuration, this.sqlWriter, false);
+        }
+
         public ISelect<T> QueryTracked<T>()
         {
-            throw new NotImplementedException();
+            return new QueryWriter<T>(this.configuration, this.sqlWriter, true);
         }
 
         public void Dispose()

@@ -59,6 +59,13 @@ namespace TopHat
         void Update<T>(T entity);
 
         /// <summary>
+        /// Enables updating entities directly in the database based on a where clause
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IWhereExecute<T> Update<T>();
+
+        /// <summary>
         /// Deletes the entity from the database
         /// </summary>
         /// <typeparam name="T">Type of entity</typeparam>
@@ -72,6 +79,13 @@ namespace TopHat
         /// <param name="id">The integer primary key of the entity to delete</param>
         /// <remarks>Will throw an exception if the entity has a non-integer primary key</remarks>
         void Delete<T>(int id);
+
+        /// <summary>
+        /// Enables deletion of multiple entities in the database without having to first fetch the entities
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IWhereExecute<T> Delete<T>();
 
         #endregion CUD
 

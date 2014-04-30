@@ -18,7 +18,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Add<Post>();
-            Assert.NotNull(config.Mapping.Maps[typeof(Post)]);
+            Assert.NotNull(config.Maps[typeof(Post)]);
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Setup<User>().Key(u => u.Username);
-            Assert.NotNull(config.Mapping.Maps[typeof(Post)]);
+            Assert.NotNull(config.Maps[typeof(Post)]);
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Setup<User>().Key(u => u.Username);
-            Assert.Equal("Username", config.Mapping.Maps[typeof(Post)].PrimaryKey);
+            Assert.Equal("Username", config.Maps[typeof(Post)].PrimaryKey);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Setup<User>().PrimaryKeyDatabaseGenerated(true);
-            Assert.True(config.Mapping.Maps[typeof(Post)].IsPrimaryKeyDatabaseGenerated);
+            Assert.True(config.Maps[typeof(Post)].IsPrimaryKeyDatabaseGenerated);
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Setup<User>().PrimaryKeyDatabaseGenerated(false);
-            Assert.False(config.Mapping.Maps[typeof(Post)].IsPrimaryKeyDatabaseGenerated);
+            Assert.False(config.Maps[typeof(Post)].IsPrimaryKeyDatabaseGenerated);
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Setup<User>().Schema("security");
-            Assert.Equal("security", config.Mapping.Maps[typeof(Post)].Schema);
+            Assert.Equal("security", config.Maps[typeof(Post)].Schema);
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Setup<User>().Table("Identities");
-            Assert.Equal("Identities", config.Mapping.Maps[typeof(Post)].Table);
+            Assert.Equal("Identities", config.Maps[typeof(Post)].Table);
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Add<Post>();
-            Assert.False(config.Mapping.Maps[typeof(Post)].IsPrimaryKeyDatabaseGenerated);
+            Assert.False(config.Maps[typeof(Post)].IsPrimaryKeyDatabaseGenerated);
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Setup<Post>().Index(p => p.Title);
-            Assert.True(config.Mapping.Maps[typeof(Post)].Indexes.Count(l => l.Count == 1 && l.First() == "Title") == 1);
+            Assert.True(config.Maps[typeof(Post)].Indexes.Count(l => l.Count == 1 && l.First() == "Title") == 1);
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration();
             var mapper = config.Configure();
             mapper.Setup<Post>().Index(p => new { p.PostId, p.Title });
-            Assert.True(config.Mapping.Maps[typeof(Post)].Indexes.Count(l => l.Count == 1 && l.Contains("Title") && l.Contains("PostId")) == 1);
+            Assert.True(config.Maps[typeof(Post)].Indexes.Count(l => l.Count == 1 && l.Contains("Title") && l.Contains("PostId")) == 1);
         }
     }
 }

@@ -10,12 +10,9 @@ namespace TopHat.Configuration.Mapper
     {
         private IConfiguration config;
 
-        private EntityMapper entityMapper;
-
         public Mapper(IConfiguration config)
         {
             this.config = config;
-            this.entityMapper = new EntityMapper(config, this);
         }
 
         public void SetDefaultSchema(string schemaName)
@@ -27,18 +24,21 @@ namespace TopHat.Configuration.Mapper
         {
             foreach (var type in types)
             {
-                this.entityMapper.Add(type);
+                this.Add(type);
             }
         }
 
         public void Add<T>()
         {
-            this.entityMapper.Add<T>();
+            this.Add(typeof(T));
         }
 
         public void Add(Type type)
         {
-            this.entityMapper.Add(type);
+            // let's create an instance of an EntityMapper for this type
+            // this will create the mapping
+            var mapperType = typeof(EntityMapper<>).MakeGenericType(type);
+            Activator.CreateInstance(mapperType, new object[] { this.config, this });
         }
 
         public EntityMapper<T> Setup<T>()

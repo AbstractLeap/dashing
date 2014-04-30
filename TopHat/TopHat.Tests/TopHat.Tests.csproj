@@ -58,6 +58,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Configuration\ConfigTests.cs" />
     <Compile Include="Configuration\EntityTests.cs" />
     <Compile Include="Configuration\PropertyTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

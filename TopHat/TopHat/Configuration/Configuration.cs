@@ -14,6 +14,7 @@ namespace TopHat.Configuration
         public Configuration()
         {
             this.mapper = new Mapper.Mapper(this);
+            this.Maps = new Dictionary<Type, IMap>();
         }
 
         public bool AlwaysTrackEntities { get; set; }
@@ -22,7 +23,15 @@ namespace TopHat.Configuration
 
         public bool GenerateIndexesOnForeignKeysByDefault { get; set; }
 
-        public IMapping Mapping { get; private set; }
+        public bool PluraliseNamesByDefault { get; set; }
+
+        public int DefaultDecimalPrecision { get; set; }
+
+        public int DefaultDecimalScale { get; set; }
+
+        public int DefaultStringLength { get; set; }
+
+        public IDictionary<Type, IMap> Maps { get; private set; }
 
         public abstract Mapper.Mapper Configure();
 

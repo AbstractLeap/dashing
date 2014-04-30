@@ -14,21 +14,21 @@ namespace TopHat.Tests.QueryWriter
         [Fact]
         public void ForUpdateSet()
         {
-            GetTopHat().Query<Post>().Where(p => p.PostId == 1).ForUpdate();
+            GetTopHat().Query<Post>().Where(p => p.PostId == 1).ForUpdate().ToList();
             this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.ForUpdate)));
         }
 
         [Fact]
         public void SkipSet()
         {
-            GetTopHat().Query<Post>().Skip(10);
+            GetTopHat().Query<Post>().Skip(10).ToList();
             this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.Skip == 10)));
         }
 
         [Fact]
         public void TakeSet()
         {
-            GetTopHat().Query<Post>().Take(10);
+            GetTopHat().Query<Post>().Take(10).ToList();
             this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.Take == 10)));
         }
     }

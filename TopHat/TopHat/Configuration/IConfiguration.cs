@@ -1,4 +1,7 @@
-﻿namespace TopHat.Configuration
+﻿using System;
+using System.Collections.Generic;
+
+namespace TopHat.Configuration
 {
     public interface IConfiguration
     {
@@ -19,6 +22,26 @@
         bool GenerateIndexesOnForeignKeysByDefault { get; set; }
 
         /// <summary>
+        /// If true all table names that aren't explicity set will be pluralised according to english rules
+        /// </summary>
+        bool PluraliseNamesByDefault { get; set; }
+
+        /// <summary>
+        /// Specifies the default decimal precision
+        /// </summary>
+        int DefaultDecimalPrecision { get; set; }
+
+        /// <summary>
+        /// Specifies the default decimal scale
+        /// </summary>
+        int DefaultDecimalScale { get; set; }
+
+        /// <summary>
+        /// Specifies the default string length
+        /// </summary>
+        int DefaultStringLength { get; set; }
+
+        /// <summary>
         /// Specifies the default schema name
         /// </summary>
         string DefaultSchema { get; set; }
@@ -26,7 +49,7 @@
         /// <summary>
         /// The object to table mappings
         /// </summary>
-        IMapping Mapping { get; }
+        IDictionary<Type, IMap> Maps { get; }
 
         /// <summary>
         /// Run the configuration

@@ -13,6 +13,10 @@ namespace TopHat.Configuration
             this.AlwaysTrackEntities = false;
             this.PrimaryKeysDatabaseGeneratedByDefault = true;
             this.GenerateIndexesOnForeignKeysByDefault = true;
+            this.PluraliseNamesByDefault = true;
+            this.DefaultStringLength = 255;
+            this.DefaultDecimalPrecision = 18;
+            this.DefaultDecimalScale = 10;
 
             return this.mapper;
         }

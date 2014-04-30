@@ -28,5 +28,7 @@ namespace TopHat.Configuration
         public bool IncludeByDefault { get; set; }
 
         public string ColumnTypeString { get; set; }
+
+        public RelationshipType Relationship { get; set; }
     }
 }

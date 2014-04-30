@@ -32,6 +32,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity.Design" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,15 +44,19 @@
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\Configuration.cs" />
     <Compile Include="Configuration\DefaultConfiguration.cs" />
-    <Compile Include="Configuration\IMapping.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IMap.cs" />
+    <Compile Include="Configuration\Map.cs" />
     <Compile Include="Configuration\Mapper\EntityMapper.cs" />
     <Compile Include="Configuration\Mapper\Mapper.cs" />
     <Compile Include="Configuration\Mapper\PropertyMapper.cs" />
+    <Compile Include="Configuration\RelationshipType.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="QueryWriter\ISelect.cs" />
+    <Compile Include="QueryWriter\IWhereExecute.cs" />
     <Compile Include="QueryWriter\OrderClause.cs" />
     <Compile Include="QueryWriter\Query.cs" />
+    <Compile Include="QueryWriter\QueryWriter.cs" />
     <Compile Include="QueryWriter\WhereClause.cs" />
     <Compile Include="SqlWriter\ISqlWriter.cs" />
     <Compile Include="ITopHat.cs" />
