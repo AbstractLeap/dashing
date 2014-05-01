@@ -67,8 +67,6 @@
     <Compile Include="QueryWriter\IQuery.cs" />
     <Compile Include="QueryWriter\IFetch.cs" />
     <Compile Include="QueryWriter\IWhere.cs" />
-    <Compile Include="SqlWriter\ISqlWriterFactory.cs" />
-    <Compile Include="SqlWriter\SqlWriterFactory.cs" />
     <Compile Include="SqlWriter\SqlWriterResult.cs" />
     <Compile Include="TopHat.cs" />
   </ItemGroup>
