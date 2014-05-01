@@ -27,5 +27,13 @@ namespace TopHat.Configuration
         public IList<Column> Columns { get; set; }
 
         public IList<IList<string>> Indexes { get; set; }
+
+        public string SqlSelectByPrimaryKey { get; set; }
+
+        public string SqlSelectByPrimaryKeyIncludeAllColumns { get; set; }
+
+        public string SqlInsert { get; set; }
+
+        public string SqlDeleteByPrimaryKey { get; set; }
     }
 }

@@ -23,8 +23,8 @@ namespace TopHat.Tests.Configuration
         public void CallingSetupInvokesAddIfNecessary()
         {
             var config = new DefaultConfiguration().Configure();
-            config.Setup<User>().Key(u => u.Username);
-            Assert.NotNull(config.Maps[typeof(Post)]);
+            config.Setup<User>();
+            Assert.NotNull(config.Maps[typeof(User)]);
         }
 
         [Fact]
