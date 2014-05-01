@@ -8,7 +8,7 @@ namespace TopHat.Configuration
 {
     public class DefaultConfiguration : Configuration
     {
-        public override Mapper.Mapper Configure()
+        public override IConfiguration Configure()
         {
             this.AlwaysTrackEntities = false;
             this.PrimaryKeysDatabaseGeneratedByDefault = true;
@@ -18,7 +18,7 @@ namespace TopHat.Configuration
             this.DefaultDecimalPrecision = 18;
             this.DefaultDecimalScale = 10;
 
-            return this.mapper;
+            return this;
         }
     }
 }

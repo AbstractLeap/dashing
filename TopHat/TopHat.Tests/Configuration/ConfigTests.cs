@@ -13,8 +13,7 @@ namespace TopHat.Tests.Configuration
         [Fact]
         public void DefaultConfigHasPluralisedTableNames()
         {
-            var config = new DefaultConfiguration();
-            var mapper = config.Configure();
+            var config = new DefaultConfiguration().Configure();
 
             Assert.True(config.PluraliseNamesByDefault);
         }
@@ -22,8 +21,7 @@ namespace TopHat.Tests.Configuration
         [Fact]
         public void DefaultConfigHas255StringLength()
         {
-            var config = new DefaultConfiguration();
-            var mapper = config.Configure();
+            var config = new DefaultConfiguration().Configure();
 
             Assert.Equal(255, config.DefaultStringLength);
         }
@@ -31,8 +29,7 @@ namespace TopHat.Tests.Configuration
         [Fact]
         public void DefaultConfigHasPrecision18()
         {
-            var config = new DefaultConfiguration();
-            var mapper = config.Configure();
+            var config = new DefaultConfiguration().Configure();
 
             Assert.Equal(18, config.DefaultDecimalPrecision);
         }
@@ -40,8 +37,7 @@ namespace TopHat.Tests.Configuration
         [Fact]
         public void DefaultConfigHasScale10()
         {
-            var config = new DefaultConfiguration();
-            var mapper = config.Configure();
+            var config = new DefaultConfiguration().Configure();
 
             Assert.Equal(10, config.DefaultDecimalScale);
         }

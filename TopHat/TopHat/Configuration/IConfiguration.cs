@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TopHat.Configuration.Mapper;
 
 namespace TopHat.Configuration
 {
@@ -54,6 +55,16 @@ namespace TopHat.Configuration
         /// <summary>
         /// Run the configuration
         /// </summary>
-        Mapper.Mapper Configure();
+        IConfiguration Configure();
+
+        IConfiguration Add(Type type);
+
+        IConfiguration Add<T>();
+
+        IConfiguration Add(IEnumerable<Type> types);
+
+        EntityMapper<T> Setup<T>();
+
+        IConfiguration AddNamespace(string nameSpace);
     }
 }
