@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -48,5 +49,10 @@ namespace TopHat.Configuration
         /// Specifies the default schema name
         /// </summary>
         public string DefaultSchema { get; set; }
+
+        /// <summary>
+        /// Indicates how to identify the primary key of a particular type by convention
+        /// </summary>
+        public Func<PropertyInfo, bool> PrimaryKeyIdentifier { get; set; }
     }
 }

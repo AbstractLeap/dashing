@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TopHat.Configuration;
+using TopHat.Tests.TestDomain;
 using Xunit;
 
 namespace TopHat.Tests.Configuration
@@ -40,6 +41,13 @@ namespace TopHat.Tests.Configuration
             var config = new DefaultConfiguration().Configure();
 
             Assert.Equal(10, config.Conventions.DefaultDecimalScale);
+        }
+
+        [Fact]
+        public void DefaultPrimaryKeyIdentifierWords()
+        {
+            var config = new DefaultConfiguration().AddNamespaceFromAssemblyOf<Blog>(typeof(Blog).Namespace).Configure();
+            Assert.Equal("BlogId", config.Maps[typeof(Blog)].PrimaryKey);
         }
     }
 }

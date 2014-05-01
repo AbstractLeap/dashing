@@ -59,6 +59,12 @@ namespace TopHat.Configuration.Mapper
                 {
                     var column = new Column { ColumnName = property.Name, PropertyName = property.Name, PropertyType = property.PropertyType };
 
+                    // check to see if primary key
+                    if (this.configuration.Conventions.PrimaryKeyIdentifier(property))
+                    {
+                        map.PrimaryKey = column.PropertyName;
+                    }
+
                     // need to determine the type of the column
                     // and then treat accordingly
                     if (!property.PropertyType.IsValueType && !extraValueTypes.Contains(property.PropertyType))
