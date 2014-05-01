@@ -33,7 +33,7 @@ namespace TopHat.Tests.Configuration
         public void SpecifyColumnName()
         {
             var config = new DefaultConfiguration().Configure();
-            config.Setup<Post>().Property(p => p.PostId).ColumnName("TEXT");
+            config.Setup<Post>().Property(p => p.PostId).ColumnName("Id");
             Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "PostId" && c.ColumnName == "Id") == 1);
         }
 
@@ -96,7 +96,7 @@ namespace TopHat.Tests.Configuration
         public void DefaultStringLengthCorrect()
         {
             var config = new DefaultConfiguration().Configure();
-            config.DefaultStringLength = 255;
+            config.Conventions.DefaultStringLength = 255;
             config.Add<Post>();
             Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Content" && c.Length == 255) == 1);
         }
@@ -105,7 +105,7 @@ namespace TopHat.Tests.Configuration
         public void DefaultDecimalPrecisionCorrect()
         {
             var config = new DefaultConfiguration().Configure();
-            config.DefaultDecimalPrecision = 6;
+            config.Conventions.DefaultDecimalPrecision = 6;
             config.Add<Post>();
             Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Rating" && c.Precision == 6) == 1);
         }
@@ -114,7 +114,7 @@ namespace TopHat.Tests.Configuration
         public void DefaultDecimalScaleCorrect()
         {
             var config = new DefaultConfiguration().Configure();
-            config.DefaultDecimalScale = 5;
+            config.Conventions.DefaultDecimalScale = 5;
             config.Add<Post>();
             Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Rating" && c.Scale == 5) == 1);
         }

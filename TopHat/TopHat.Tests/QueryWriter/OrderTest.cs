@@ -1,6 +1,7 @@
 ﻿using Moq;
 using System;
 using System.Linq;
+using TopHat.Configuration;
 using TopHat.Tests.TestDomain;
 using Xunit;
 
@@ -11,29 +12,29 @@ namespace TopHat.Tests.QueryWriter
         [Fact]
         public void OrderExpression()
         {
-            GetTopHat().Query<Post>().OrderBy(p => p.PostId).ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.OrderClauses.Count == 1 && q.OrderClauses.First().Direction == System.ComponentModel.ListSortDirection.Ascending && q.OrderClauses.First().IsExpression())));
+            var queryWriter = GetTopHat().Query<Post>().OrderBy(p => p.PostId);
+            Assert.True(queryWriter.Query.QueryType == QueryType.Select && queryWriter.Query.OrderClauses.Count == 1 && queryWriter.Query.OrderClauses.First().Direction == System.ComponentModel.ListSortDirection.Ascending && queryWriter.Query.OrderClauses.First().IsExpression());
         }
 
         [Fact]
         public void OrderDescendingExpression()
         {
-            GetTopHat().Query<Post>().OrderByDescending(p => p.PostId).ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.OrderClauses.Count == 1 && q.OrderClauses.First().Direction == System.ComponentModel.ListSortDirection.Descending && q.OrderClauses.First().IsExpression())));
+            var queryWriter = GetTopHat().Query<Post>().OrderByDescending(p => p.PostId);
+            Assert.True(queryWriter.Query.QueryType == QueryType.Select && queryWriter.Query.OrderClauses.Count == 1 && queryWriter.Query.OrderClauses.First().Direction == System.ComponentModel.ListSortDirection.Descending && queryWriter.Query.OrderClauses.First().IsExpression());
         }
 
         [Fact]
         public void OrderClause()
         {
-            GetTopHat().Query<Post>().OrderBy("blah").ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.OrderClauses.Count == 1 && q.OrderClauses.First().Direction == System.ComponentModel.ListSortDirection.Ascending && !q.OrderClauses.First().IsExpression() && q.OrderClauses.First().Clause == "blah")));
+            var queryWriter = GetTopHat().Query<Post>().OrderBy("blah");
+            Assert.True(queryWriter.Query.QueryType == QueryType.Select && queryWriter.Query.OrderClauses.Count == 1 && queryWriter.Query.OrderClauses.First().Direction == System.ComponentModel.ListSortDirection.Ascending && !queryWriter.Query.OrderClauses.First().IsExpression() && queryWriter.Query.OrderClauses.First().Clause == "blah");
         }
 
         [Fact]
         public void OrderClauseDescending()
         {
-            GetTopHat().Query<Post>().OrderByDescending("blah").ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.OrderClauses.Count == 1 && q.OrderClauses.First().Direction == System.ComponentModel.ListSortDirection.Descending && !q.OrderClauses.First().IsExpression() && q.OrderClauses.First().Clause == "blah")));
+            var queryWriter = GetTopHat().Query<Post>().OrderByDescending("blah");
+            Assert.True(queryWriter.Query.QueryType == QueryType.Select && queryWriter.Query.OrderClauses.Count == 1 && queryWriter.Query.OrderClauses.First().Direction == System.ComponentModel.ListSortDirection.Descending && !queryWriter.Query.OrderClauses.First().IsExpression() && queryWriter.Query.OrderClauses.First().Clause == "blah");
         }
     }
 }

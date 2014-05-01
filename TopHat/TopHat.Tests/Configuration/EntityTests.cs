@@ -63,7 +63,7 @@ namespace TopHat.Tests.Configuration
         {
             var config = new DefaultConfiguration().Configure();
             config.Setup<User>().Schema("security");
-            Assert.Equal("security", config.Maps[typeof(Post)].Schema);
+            Assert.Equal("security", config.Maps[typeof(User)].Schema);
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace TopHat.Tests.Configuration
         {
             var config = new DefaultConfiguration().Configure();
             config.Setup<User>().Table("Identities");
-            Assert.Equal("Identities", config.Maps[typeof(Post)].Table);
+            Assert.Equal("Identities", config.Maps[typeof(User)].Table);
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace TopHat.Tests.Configuration
         public void DefaultConfigurationFKIndexesGenerated()
         {
             var config = new DefaultConfiguration().Configure();
-            Assert.True(config.GenerateIndexesOnForeignKeysByDefault);
+            Assert.True(config.Conventions.GenerateIndexesOnForeignKeysByDefault);
         }
 
         [Fact]

@@ -34,7 +34,7 @@ namespace TopHat.Configuration.Mapper
 
                 // figure out the table name
                 var tableName = this.type.Name;
-                if (this.configuration.PluraliseNamesByDefault)
+                if (this.configuration.Conventions.PluraliseNamesByDefault)
                 {
                     tableName = pluraliser.Pluralize(tableName);
                 }
@@ -43,9 +43,9 @@ namespace TopHat.Configuration.Mapper
 
                 // figure out the schema
                 var schema = string.Empty;
-                if (this.configuration.DefaultSchema != null)
+                if (this.configuration.Conventions.DefaultSchema != null)
                 {
-                    schema = this.configuration.DefaultSchema;
+                    schema = this.configuration.Conventions.DefaultSchema;
                 }
 
                 map.Schema = schema;
@@ -84,12 +84,12 @@ namespace TopHat.Configuration.Mapper
                         // check particular types for defaults
                         if (column.ColumnType == System.Data.DbType.Decimal)
                         {
-                            column.Precision = this.configuration.DefaultDecimalPrecision;
-                            column.Scale = this.configuration.DefaultDecimalScale;
+                            column.Precision = this.configuration.Conventions.DefaultDecimalPrecision;
+                            column.Scale = this.configuration.Conventions.DefaultDecimalScale;
                         }
                         else if (column.ColumnType == System.Data.DbType.String)
                         {
-                            column.Length = this.configuration.DefaultStringLength;
+                            column.Length = this.configuration.Conventions.DefaultStringLength;
                         }
 
                         // TODO Add nullable column types

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TopHat.Configuration.Mapper;
+using TopHat.SqlWriter;
 
 namespace TopHat.Configuration
 {
@@ -15,29 +17,24 @@ namespace TopHat.Configuration
         {
             this.mapper = new Mapper.Mapper(this);
             this.Maps = new Dictionary<Type, IMap>();
+            this.Conventions = new Conventions();
         }
 
-        public bool AlwaysTrackEntities { get; set; }
-
-        public bool PrimaryKeysDatabaseGeneratedByDefault { get; set; }
-
-        public bool GenerateIndexesOnForeignKeysByDefault { get; set; }
-
-        public bool PluraliseNamesByDefault { get; set; }
-
-        public int DefaultDecimalPrecision { get; set; }
-
-        public int DefaultDecimalScale { get; set; }
-
-        public int DefaultStringLength { get; set; }
+        public Conventions Conventions { get; set; }
 
         public IDictionary<Type, IMap> Maps { get; private set; }
 
-        public string DefaultSchema { get; set; }
+        public IDbConnection GetSqlConnection()
+        {
+            throw new NotImplementedException();
+        }
+
+        public ISqlWriter GetSqlWriter()
+        {
+            throw new NotImplementedException();
+        }
 
         public abstract IConfiguration Configure();
-
-        #region MappingMethods
 
         /// <summary>
         /// Adds a particular type in to the configuration
@@ -90,7 +87,5 @@ namespace TopHat.Configuration
         {
             return this.Add(typeof(T).Assembly.GetTypes().Where(t => t.Namespace == nameSpace));
         }
-
-        #endregion MappingMethods
     }
 }

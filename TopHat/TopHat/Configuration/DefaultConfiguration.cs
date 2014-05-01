@@ -10,13 +10,13 @@ namespace TopHat.Configuration
     {
         public override IConfiguration Configure()
         {
-            this.AlwaysTrackEntities = false;
-            this.PrimaryKeysDatabaseGeneratedByDefault = true;
-            this.GenerateIndexesOnForeignKeysByDefault = true;
-            this.PluraliseNamesByDefault = true;
-            this.DefaultStringLength = 255;
-            this.DefaultDecimalPrecision = 18;
-            this.DefaultDecimalScale = 10;
+            this.Conventions.AlwaysTrackEntities = false;
+            this.Conventions.PrimaryKeysDatabaseGeneratedByDefault = true;
+            this.Conventions.GenerateIndexesOnForeignKeysByDefault = true;
+            this.Conventions.PluraliseNamesByDefault = true;
+            this.Conventions.DefaultStringLength = 255;
+            this.Conventions.DefaultDecimalPrecision = 18;
+            this.Conventions.DefaultDecimalScale = 10;
 
             return this;
         }

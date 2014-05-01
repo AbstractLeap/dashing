@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Dapper;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,18 +12,16 @@ namespace TopHat
 {
     internal class QueryWriter<T> : ISelect<T>
     {
-        private Configuration.IConfiguration configuration;
-        private SqlWriter.ISqlWriter sqlWriter;
+        private ITopHat topHat;
         private Query<T> query;
 
-        public QueryWriter(Configuration.IConfiguration configuration, SqlWriter.ISqlWriter sqlWriter, bool tracked)
+        public QueryWriter(ITopHat topHat, bool tracked)
         {
-            this.configuration = configuration;
-            this.sqlWriter = sqlWriter;
-            this.query = new Query<T> { Tracked = tracked };
+            this.topHat = topHat;
+            this.query = new Query<T> { Tracked = tracked, QueryType = QueryType.Select };
         }
 
-        public IFetch<T> Select(System.Linq.Expressions.Expression<Func<T, dynamic>> selectExpression)
+        public IFetch<T> Select(Expression<Func<T, dynamic>> selectExpression)
         {
             throw new NotImplementedException();
         }
@@ -30,27 +32,29 @@ namespace TopHat
             return this;
         }
 
-        public ISelect<T> Include<TResult>(System.Linq.Expressions.Expression<Func<T, TResult>> includeExpression)
+        public ISelect<T> Include<TResult>(Expression<Func<T, TResult>> includeExpression)
+        {
+            this.query.Includes.Add(includeExpression);
+            return this;
+        }
+
+        public ISelect<T> Exclude<TResult>(Expression<Func<T, TResult>> excludeExpression)
+        {
+            this.query.Excludes.Add(excludeExpression);
+            return this;
+        }
+
+        public IThenFetch<T, TFetch> Fetch<TFetch>(Expression<Func<T, TFetch>> relatedObjectSelector)
         {
             throw new NotImplementedException();
         }
 
-        public ISelect<T> Exclude<TResult>(System.Linq.Expressions.Expression<Func<T, TResult>> excludeExpression)
+        public IThenFetch<T, TFetch> FetchMany<TFetch>(Expression<Func<T, IEnumerable<TFetch>>> relatedObjectSelector)
         {
             throw new NotImplementedException();
         }
 
-        public IThenFetch<T, TFetch> Fetch<TFetch>(System.Linq.Expressions.Expression<Func<T, TFetch>> relatedObjectSelector)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IThenFetch<T, TFetch> FetchMany<TFetch>(System.Linq.Expressions.Expression<Func<T, IEnumerable<TFetch>>> relatedObjectSelector)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IWhere<T> Where(System.Linq.Expressions.Expression<Func<T, bool>> predicate)
+        public IWhere<T> Where(Expression<Func<T, bool>> predicate)
         {
             this.query.WhereClauses.Add(new WhereClause<T>(predicate));
             return this;
@@ -68,27 +72,27 @@ namespace TopHat
             return this;
         }
 
-        public IOrder<T> OrderBy<TResult>(System.Linq.Expressions.Expression<Func<T, TResult>> keySelector)
+        public IOrder<T> OrderBy<TResult>(Expression<Func<T, TResult>> keySelector)
         {
-            this.query.OrderClauses.Enqueue(new OrderClause<T>(keySelector, System.ComponentModel.ListSortDirection.Ascending));
+            this.query.OrderClauses.Enqueue(new OrderClause<T>(keySelector, ListSortDirection.Ascending));
             return this;
         }
 
-        public IOrder<T> OrderByDescending<TResult>(System.Linq.Expressions.Expression<Func<T, TResult>> keySelector)
+        public IOrder<T> OrderByDescending<TResult>(Expression<Func<T, TResult>> keySelector)
         {
-            this.query.OrderClauses.Enqueue(new OrderClause<T>(keySelector, System.ComponentModel.ListSortDirection.Descending));
+            this.query.OrderClauses.Enqueue(new OrderClause<T>(keySelector, ListSortDirection.Descending));
             return this;
         }
 
         public IOrder<T> OrderBy(string condition)
         {
-            this.query.OrderClauses.Enqueue(new OrderClause<T>(condition, System.ComponentModel.ListSortDirection.Ascending));
+            this.query.OrderClauses.Enqueue(new OrderClause<T>(condition, ListSortDirection.Ascending));
             return this;
         }
 
         public IOrder<T> OrderByDescending(string condition)
         {
-            this.query.OrderClauses.Enqueue(new OrderClause<T>(condition, System.ComponentModel.ListSortDirection.Descending));
+            this.query.OrderClauses.Enqueue(new OrderClause<T>(condition, ListSortDirection.Descending));
             return this;
         }
 
@@ -122,10 +126,26 @@ namespace TopHat
 
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            var sqlQuery = this.topHat.Configuration.GetSqlWriter().Execute(this.query);
+
+            if (this.query.Fetches.Count == 0)
+            {
+                if (!this.query.Tracked)
+                {
+                    return this.topHat.Connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters).GetEnumerator();
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
         }

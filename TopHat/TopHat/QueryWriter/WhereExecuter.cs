@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,7 @@ namespace TopHat
             var query = new Query<T> { QueryType = this.queryType };
             query.WhereClauses.Add(new WhereClause<T>(predicate));
 
-            this.topHat.SqlWriter.Execute(query);
+            ExecuteQuery(query);
         }
 
         public void Where(string condition)
@@ -32,7 +33,7 @@ namespace TopHat
             var query = new Query<T> { QueryType = this.queryType };
             query.WhereClauses.Add(new WhereClause<T>(condition));
 
-            this.topHat.SqlWriter.Execute(query);
+            ExecuteQuery(query);
         }
 
         public void Where(string condition, params dynamic[] parameters)
@@ -40,7 +41,13 @@ namespace TopHat
             var query = new Query<T> { QueryType = this.queryType };
             query.WhereClauses.Add(new WhereClause<T>(condition, parameters));
 
-            this.topHat.SqlWriter.Execute(query);
+            ExecuteQuery(query);
+        }
+
+        private void ExecuteQuery(Query<T> query)
+        {
+            var sqlQuery = this.topHat.Configuration.GetSqlWriter().Execute(query);
+            this.topHat.Connection.Execute(sqlQuery.Sql, sqlQuery.Parameters);
         }
     }
 }

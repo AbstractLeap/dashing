@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Dapper;
+using System;
 using System.Data;
-
 using TopHat.Configuration;
 using TopHat.SqlWriter;
 
@@ -11,26 +11,34 @@ namespace TopHat
         protected IDbConnection connection;
         protected IDbTransaction transaction;
         protected IConfiguration configuration;
-        protected ISqlWriter sqlWriter;
 
         protected bool topHatOwnsTransaction;
         protected bool isDisposed;
         protected bool isCompleted;
 
         public TopHat(IConfiguration configuration,
-            ISqlWriter sqlWriter,
             IDbConnection connection,
             IDbTransaction transaction = null)
         {
             this.connection = connection;
             this.configuration = configuration;
-            this.sqlWriter = sqlWriter;
 
             if (transaction != null)
             {
-                topHatOwnsTransaction = false;
+                this.topHatOwnsTransaction = false;
                 this.transaction = transaction;
             }
+            else
+            {
+                this.topHatOwnsTransaction = true;
+            }
+        }
+
+        public TopHat(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+            this.connection = this.configuration.GetSqlConnection();
+            this.topHatOwnsTransaction = true;
         }
 
         public IDbConnection Connection
@@ -86,11 +94,6 @@ namespace TopHat
             get { return this.configuration; }
         }
 
-        public ISqlWriter SqlWriter
-        {
-            get { return this.sqlWriter; }
-        }
-
         public void Complete()
         {
             if (this.isCompleted)
@@ -110,13 +113,13 @@ namespace TopHat
         public void Insert<T>(T entity)
         {
             var query = new Query<T> { Entity = entity, QueryType = QueryType.Insert };
-            this.sqlWriter.Execute(query);
+            this.ExecuteQuery(query);
         }
 
         public void Update<T>(T entity)
         {
             var query = new Query<T> { Entity = entity, QueryType = QueryType.Update };
-            this.sqlWriter.Execute(query);
+            this.ExecuteQuery(query);
         }
 
         public IWhereExecute<T> Update<T>()
@@ -127,7 +130,7 @@ namespace TopHat
         public void Delete<T>(T entity)
         {
             var query = new Query<T> { Entity = entity, QueryType = QueryType.Delete };
-            this.sqlWriter.Execute(query);
+            this.ExecuteQuery(query);
         }
 
         public void Delete<T>(int id)
@@ -142,12 +145,12 @@ namespace TopHat
 
         public ISelect<T> Query<T>()
         {
-            return new QueryWriter<T>(this.configuration, this.sqlWriter, false);
+            return new QueryWriter<T>(this, false);
         }
 
         public ISelect<T> QueryTracked<T>()
         {
-            return new QueryWriter<T>(this.configuration, this.sqlWriter, true);
+            return new QueryWriter<T>(this, true);
         }
 
         public void Dispose()
@@ -168,6 +171,12 @@ namespace TopHat
             }
 
             this.isDisposed = true;
+        }
+
+        private void ExecuteQuery<T>(Query<T> query)
+        {
+            var sqlQuery = this.Configuration.GetSqlWriter().Execute(query);
+            this.Connection.Execute(sqlQuery.Sql, sqlQuery.Parameters);
         }
     }
 }

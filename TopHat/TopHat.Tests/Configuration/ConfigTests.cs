@@ -15,7 +15,7 @@ namespace TopHat.Tests.Configuration
         {
             var config = new DefaultConfiguration().Configure();
 
-            Assert.True(config.PluraliseNamesByDefault);
+            Assert.True(config.Conventions.PluraliseNamesByDefault);
         }
 
         [Fact]
@@ -23,7 +23,7 @@ namespace TopHat.Tests.Configuration
         {
             var config = new DefaultConfiguration().Configure();
 
-            Assert.Equal(255, config.DefaultStringLength);
+            Assert.Equal(255, config.Conventions.DefaultStringLength);
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace TopHat.Tests.Configuration
         {
             var config = new DefaultConfiguration().Configure();
 
-            Assert.Equal(18, config.DefaultDecimalPrecision);
+            Assert.Equal(18, config.Conventions.DefaultDecimalPrecision);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace TopHat.Tests.Configuration
         {
             var config = new DefaultConfiguration().Configure();
 
-            Assert.Equal(10, config.DefaultDecimalScale);
+            Assert.Equal(10, config.Conventions.DefaultDecimalScale);
         }
     }
 }

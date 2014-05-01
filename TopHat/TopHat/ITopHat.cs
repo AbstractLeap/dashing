@@ -25,11 +25,6 @@ namespace TopHat
         /// </summary>
         IConfiguration Configuration { get; }
 
-        /// <summary>
-        /// The SqlWriter object that executes queries on behalf of TopHat
-        /// </summary>
-        ISqlWriter SqlWriter { get; }
-
         #endregion Properties
 
         #region Transactions

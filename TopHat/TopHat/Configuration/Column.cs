@@ -8,6 +8,11 @@ namespace TopHat.Configuration
 {
     public class Column
     {
+        public Column()
+        {
+            this.IncludeByDefault = true;
+        }
+
         public string PropertyName { get; set; }
 
         public string ColumnName { get; set; }
