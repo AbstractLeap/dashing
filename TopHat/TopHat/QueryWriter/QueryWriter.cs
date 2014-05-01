@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TopHat
 {
-    public class QueryWriter<T> : ISelect<T>
+    internal class QueryWriter<T> : ISelect<T>
     {
         private Configuration.IConfiguration configuration;
         private SqlWriter.ISqlWriter sqlWriter;
@@ -26,7 +26,8 @@ namespace TopHat
 
         public ISelect<T> IncludeAll()
         {
-            throw new NotImplementedException();
+            this.query.FetchAllProperties = true;
+            return this;
         }
 
         public ISelect<T> Include<TResult>(System.Linq.Expressions.Expression<Func<T, TResult>> includeExpression)

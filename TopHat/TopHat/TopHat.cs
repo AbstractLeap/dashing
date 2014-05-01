@@ -121,7 +121,7 @@ namespace TopHat
 
         public IWhereExecute<T> Update<T>()
         {
-            throw new NotImplementedException();
+            return new WhereExecuter<T>(this, QueryType.Update);
         }
 
         public void Delete<T>(T entity)
@@ -137,7 +137,7 @@ namespace TopHat
 
         public IWhereExecute<T> Delete<T>()
         {
-            throw new NotImplementedException();
+            return new WhereExecuter<T>(this, QueryType.Delete);
         }
 
         public ISelect<T> Query<T>()

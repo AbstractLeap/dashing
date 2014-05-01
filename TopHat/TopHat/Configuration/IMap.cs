@@ -15,7 +15,7 @@ namespace TopHat.Configuration
 
         bool IsPrimaryKeyDatabaseGenerated { get; set; }
 
-        IList<Column> Columns { get; set; }
+        IDictionary<string, Column> Columns { get; set; }
 
         IList<IList<string>> Indexes { get; set; }
 

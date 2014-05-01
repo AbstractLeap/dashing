@@ -20,6 +20,13 @@ namespace TopHat.Tests.Configuration
         }
 
         [Fact]
+        public void NamespaceAddWorks()
+        {
+            var config = new DefaultConfiguration().Configure().AddNamespaceFromAssemblyOf<Tests.TestDomain.Blog>("TopHat.Tests.TestDomain");
+            Assert.Equal(4, config.Maps.Select(t => t.Key.Name).Intersect(new string[] { "Post", "Blog", "User", "Comment" }).Count());
+        }
+
+        [Fact]
         public void CallingSetupInvokesAddIfNecessary()
         {
             var config = new DefaultConfiguration().Configure();

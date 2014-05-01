@@ -10,7 +10,7 @@ namespace TopHat.Configuration
     {
         public Map()
         {
-            this.Columns = new List<Column>();
+            this.Columns = new Dictionary<string, Column>();
             this.Indexes = new List<IList<string>>();
         }
 
@@ -24,7 +24,7 @@ namespace TopHat.Configuration
 
         public bool IsPrimaryKeyDatabaseGenerated { get; set; }
 
-        public IList<Column> Columns { get; set; }
+        public IDictionary<string, Column> Columns { get; set; }
 
         public IList<IList<string>> Indexes { get; set; }
 

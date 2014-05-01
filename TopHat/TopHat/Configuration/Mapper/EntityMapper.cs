@@ -80,8 +80,22 @@ namespace TopHat.Configuration.Mapper
                     {
                         column.Relationship = RelationshipType.None;
                         column.ColumnType = property.PropertyType.GetDBType();
+
+                        // check particular types for defaults
+                        if (column.ColumnType == System.Data.DbType.Decimal)
+                        {
+                            column.Precision = this.configuration.DefaultDecimalPrecision;
+                            column.Scale = this.configuration.DefaultDecimalScale;
+                        }
+                        else if (column.ColumnType == System.Data.DbType.String)
+                        {
+                            column.Length = this.configuration.DefaultStringLength;
+                        }
+
                         // TODO Add nullable column types
                     }
+
+                    map.Columns.Add(column.PropertyName, column);
                 }
 
                 this.configuration.Maps.Add(this.type, map);
@@ -107,7 +121,14 @@ namespace TopHat.Configuration.Mapper
 
         public PropertyMapper<T, TProperty> Property<TProperty>(Expression<Func<T, TProperty>> propertyExpression)
         {
-            throw new NotImplementedException();
+            var memberExpression = propertyExpression.Body as MemberExpression;
+            if (memberExpression == null)
+            {
+                throw new ArgumentException("propertyExpression must be a valid MemberExpression");
+            }
+
+            var propertyMapper = new PropertyMapper<T, TProperty>(this.configuration, this, memberExpression.Member.Name);
+            return propertyMapper;
         }
 
         public EntityMapper<T> PrimaryKeyDatabaseGenerated(bool databaseGenerated)

@@ -86,9 +86,9 @@ namespace TopHat.Configuration
         /// </summary>
         /// <param name="nameSpace"></param>
         /// <returns></returns>
-        public IConfiguration AddNamespace(string nameSpace)
+        public IConfiguration AddNamespaceFromAssemblyOf<T>(string nameSpace)
         {
-            throw new NotImplementedException();
+            return this.Add(typeof(T).Assembly.GetTypes().Where(t => t.Namespace == nameSpace));
         }
 
         #endregion MappingMethods

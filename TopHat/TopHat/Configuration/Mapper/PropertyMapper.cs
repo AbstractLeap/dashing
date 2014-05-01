@@ -9,56 +9,86 @@ namespace TopHat.Configuration.Mapper
 {
     public class PropertyMapper<TEntity, TProperty>
     {
+        private IConfiguration configuration;
         private EntityMapper<TEntity> entityMapper;
+        private IMap map;
+        private string propertyName;
 
-        public PropertyMapper(EntityMapper<TEntity> entityMapper)
+        public PropertyMapper(IConfiguration configuration, EntityMapper<TEntity> entityMapper, string propertyName)
         {
+            // TODO: Complete member initialization
             this.entityMapper = entityMapper;
+            this.propertyName = propertyName;
+            this.configuration = configuration;
+            this.map = this.configuration.Maps[typeof(TEntity)];
         }
 
         public PropertyMapper<TEntity, TProperty> ColumnType(DbType dbType)
         {
-            throw new NotImplementedException();
+            CheckColumnExists();
+            this.map.Columns[this.propertyName].ColumnType = dbType;
+            return this;
         }
 
         public PropertyMapper<TEntity, TProperty> ColumnType(string type)
         {
-            throw new NotImplementedException();
+            CheckColumnExists();
+            this.map.Columns[this.propertyName].ColumnTypeString = type;
+            return this;
         }
 
         public PropertyMapper<TEntity, TProperty> ColumnName(string name)
         {
-            throw new NotImplementedException();
+            CheckColumnExists();
+            this.map.Columns[this.propertyName].ColumnName = name;
+            return this;
         }
 
         public PropertyMapper<TEntity, TProperty> DefaultExcluded()
         {
-            throw new NotImplementedException();
+            CheckColumnExists();
+            this.map.Columns[this.propertyName].IncludeByDefault = false;
+            return this;
         }
 
         public PropertyMapper<TEntity, TProperty> Precision(int precision)
         {
-            throw new NotImplementedException();
+            CheckColumnExists();
+            this.map.Columns[this.propertyName].Precision = precision;
+            return this;
         }
 
-        public PropertyMapper<TEntity, TProperty> Scale(int precision)
+        public PropertyMapper<TEntity, TProperty> Scale(int scale)
         {
-            throw new NotImplementedException();
+            CheckColumnExists();
+            this.map.Columns[this.propertyName].Scale = scale;
+            return this;
         }
 
         public PropertyMapper<TEntity, TProperty> Length(int length)
         {
-            throw new NotImplementedException();
-        }
-
-        public PropertyMapper<TEntity, TProperty> IsDatabaseGenerated(bool isDBGenerated)
-        {
-            throw new NotImplementedException();
+            CheckColumnExists();
+            this.map.Columns[this.propertyName].Length = length;
+            return this;
         }
 
         public PropertyMapper<TEntity, TProperty> Ignore()
         {
-            throw new NotImplementedException();
+            // We won't use CheckColumnExists here as frankly it doesn't matter
+            if (this.map.Columns.ContainsKey(this.propertyName))
+            {
+                this.map.Columns.Remove(this.propertyName);
+            }
+
+            return this;
+        }
+
+        private void CheckColumnExists()
+        {
+            if (!this.map.Columns.ContainsKey(this.propertyName))
+            {
+                throw new ArgumentException("The property " + this.propertyName + " does not exist in the map");
+            }
         }
     }
 }

@@ -65,6 +65,6 @@ namespace TopHat.Configuration
 
         EntityMapper<T> Setup<T>();
 
-        IConfiguration AddNamespace(string nameSpace);
+        IConfiguration AddNamespaceFromAssemblyOf<T>(string nameSpace);
     }
 }

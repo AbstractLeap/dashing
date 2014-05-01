@@ -58,6 +58,7 @@
     <Compile Include="QueryWriter\Query.cs" />
     <Compile Include="QueryWriter\QueryWriter.cs" />
     <Compile Include="QueryWriter\WhereClause.cs" />
+    <Compile Include="QueryWriter\WhereExecuter.cs" />
     <Compile Include="SqlWriter\ISqlWriter.cs" />
     <Compile Include="ITopHat.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
