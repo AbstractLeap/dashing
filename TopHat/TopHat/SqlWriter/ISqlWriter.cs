@@ -2,6 +2,6 @@
 {
     public interface ISqlWriter
     {
-        void Execute<T>(Query<T> query);
+        SqlWriterResult Execute<T>(Query<T> query);
     }
 }
