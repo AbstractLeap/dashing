@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\Configuration.cs" />
+    <Compile Include="Configuration\DatabaseEngine.cs" />
     <Compile Include="Configuration\DefaultConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IMap.cs" />
@@ -66,6 +67,9 @@
     <Compile Include="QueryWriter\IQuery.cs" />
     <Compile Include="QueryWriter\IFetch.cs" />
     <Compile Include="QueryWriter\IWhere.cs" />
+    <Compile Include="SqlWriter\ISqlWriterFactory.cs" />
+    <Compile Include="SqlWriter\SqlWriterFactory.cs" />
+    <Compile Include="SqlWriter\SqlWriterResult.cs" />
     <Compile Include="TopHat.cs" />
   </ItemGroup>
   <ItemGroup>
