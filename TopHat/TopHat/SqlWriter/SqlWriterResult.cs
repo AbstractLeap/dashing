@@ -1,9 +1,11 @@
-﻿namespace TopHat.SqlWriter
+﻿using Dapper;
+
+namespace TopHat.SqlWriter
 {
     public struct SqlWriterResult
     {
         public string Sql { get; set; }
 
-        public dynamic Parameters { get; set; }
+        public DynamicParameters Parameters { get; set; }
     }
 }

@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dapper">
+      <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity.Design" />
@@ -46,6 +49,7 @@
     <Compile Include="Configuration\DatabaseEngine.cs" />
     <Compile Include="Configuration\DefaultConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
+    <Compile Include="Configuration\Conventions.cs" />
     <Compile Include="Configuration\IMap.cs" />
     <Compile Include="Configuration\Map.cs" />
     <Compile Include="Configuration\Mapper\EntityMapper.cs" />
@@ -74,6 +78,9 @@
     <Folder Include="ConnectionManager\" />
     <Folder Include="Generator\" />
     <Folder Include="Proxy\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
