@@ -51,21 +51,21 @@ namespace TopHat.Configuration.Mapper
             return this;
         }
 
-        public PropertyMapper<TEntity, TProperty> Precision(int precision)
+        public PropertyMapper<TEntity, TProperty> Precision(uint precision)
         {
             CheckColumnExists();
             this.map.Columns[this.propertyName].Precision = precision;
             return this;
         }
 
-        public PropertyMapper<TEntity, TProperty> Scale(int scale)
+        public PropertyMapper<TEntity, TProperty> Scale(uint scale)
         {
             CheckColumnExists();
             this.map.Columns[this.propertyName].Scale = scale;
             return this;
         }
 
-        public PropertyMapper<TEntity, TProperty> Length(int length)
+        public PropertyMapper<TEntity, TProperty> Length(uint length)
         {
             CheckColumnExists();
             this.map.Columns[this.propertyName].Length = length;

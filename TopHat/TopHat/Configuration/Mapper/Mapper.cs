@@ -15,11 +15,6 @@ namespace TopHat.Configuration.Mapper
             this.config = config;
         }
 
-        public void SetDefaultSchema(string schemaName)
-        {
-            this.config.Conventions.DefaultSchema = schemaName;
-        }
-
         public void Add(IEnumerable<Type> types)
         {
             foreach (var type in types)

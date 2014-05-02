@@ -28,27 +28,27 @@ namespace TopHat.Configuration
         /// <summary>
         /// If true all table names that aren't explicity set will be pluralised according to english rules
         /// </summary>
-        public bool PluraliseNamesByDefault { get; set; }
+        public Func<Type, bool> PluraliseNamesByDefault { get; set; }
 
         /// <summary>
         /// Specifies the default decimal precision
         /// </summary>
-        public int DefaultDecimalPrecision { get; set; }
+        public Func<PropertyInfo, uint> DefaultDecimalPrecision { get; set; }
 
         /// <summary>
         /// Specifies the default decimal scale
         /// </summary>
-        public int DefaultDecimalScale { get; set; }
+        public Func<PropertyInfo, uint> DefaultDecimalScale { get; set; }
 
         /// <summary>
         /// Specifies the default string length
         /// </summary>
-        public int DefaultStringLength { get; set; }
+        public Func<PropertyInfo, uint> DefaultStringLength { get; set; }
 
         /// <summary>
         /// Specifies the default schema name
         /// </summary>
-        public string DefaultSchema { get; set; }
+        public Func<Type, string> DefaultSchemaIdentifier { get; set; }
 
         /// <summary>
         /// Indicates how to identify the primary key of a particular type by convention

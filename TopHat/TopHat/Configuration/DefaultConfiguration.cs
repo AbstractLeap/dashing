@@ -14,10 +14,10 @@ namespace TopHat.Configuration
             this.Conventions.AlwaysTrackEntities = false;
             this.Conventions.PrimaryKeysDatabaseGeneratedByDefault = true;
             this.Conventions.GenerateIndexesOnForeignKeysByDefault = true;
-            this.Conventions.PluraliseNamesByDefault = true;
-            this.Conventions.DefaultStringLength = 255;
-            this.Conventions.DefaultDecimalPrecision = 18;
-            this.Conventions.DefaultDecimalScale = 10;
+            this.SetPluraliseNamesByDefault(true);
+            this.SetDefaultStringLength(255);
+            this.SetDefaultDecimalPrecision(18);
+            this.SetDefaultDecimalScale(10);
 
             this.Conventions.PrimaryKeyIdentifier = p => p.Name == p.DeclaringType.Name + "Id";
         }

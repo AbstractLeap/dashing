@@ -34,7 +34,8 @@ namespace TopHat.Configuration.Mapper
 
                 // figure out the table name
                 var tableName = this.type.Name;
-                if (this.configuration.Conventions.PluraliseNamesByDefault)
+                if (this.configuration.Conventions.PluraliseNamesByDefault != null
+                    && this.configuration.Conventions.PluraliseNamesByDefault(this.type))
                 {
                     tableName = pluraliser.Pluralize(tableName);
                 }
@@ -43,9 +44,9 @@ namespace TopHat.Configuration.Mapper
 
                 // figure out the schema
                 var schema = string.Empty;
-                if (this.configuration.Conventions.DefaultSchema != null)
+                if (this.configuration.Conventions.DefaultSchemaIdentifier != null)
                 {
-                    schema = this.configuration.Conventions.DefaultSchema;
+                    schema = this.configuration.Conventions.DefaultSchemaIdentifier(this.type);
                 }
 
                 map.Schema = schema;
@@ -90,12 +91,12 @@ namespace TopHat.Configuration.Mapper
                         // check particular types for defaults
                         if (column.ColumnType == System.Data.DbType.Decimal)
                         {
-                            column.Precision = this.configuration.Conventions.DefaultDecimalPrecision;
-                            column.Scale = this.configuration.Conventions.DefaultDecimalScale;
+                            column.Precision = this.configuration.Conventions.DefaultDecimalPrecision(property);
+                            column.Scale = this.configuration.Conventions.DefaultDecimalScale(property);
                         }
                         else if (column.ColumnType == System.Data.DbType.String)
                         {
-                            column.Length = this.configuration.Conventions.DefaultStringLength;
+                            column.Length = this.configuration.Conventions.DefaultStringLength(property);
                         }
 
                         // TODO Add nullable column types

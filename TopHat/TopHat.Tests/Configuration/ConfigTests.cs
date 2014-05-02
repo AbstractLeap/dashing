@@ -14,33 +14,33 @@ namespace TopHat.Tests.Configuration
         [Fact]
         public void DefaultConfigHasPluralisedTableNames()
         {
-            var config = new DefaultConfiguration().Configure();
+            var config = new DefaultConfiguration().Configure().Add<Post>();
 
-            Assert.True(config.Conventions.PluraliseNamesByDefault);
+            Assert.Equal("Posts", config.Maps[typeof(Post)].Table);
         }
 
         [Fact]
         public void DefaultConfigHas255StringLength()
         {
-            var config = new DefaultConfiguration().Configure();
+            var config = new DefaultConfiguration().Configure().Add<Post>();
 
-            Assert.Equal(255, config.Conventions.DefaultStringLength);
+            Assert.Equal<uint>(255, config.Maps[typeof(Post)].Columns["Content"].Length);
         }
 
         [Fact]
         public void DefaultConfigHasPrecision18()
         {
-            var config = new DefaultConfiguration().Configure();
+            var config = new DefaultConfiguration().Configure().Add<Post>();
 
-            Assert.Equal(18, config.Conventions.DefaultDecimalPrecision);
+            Assert.Equal<uint>(18, config.Maps[typeof(Post)].Columns["Rating"].Precision);
         }
 
         [Fact]
         public void DefaultConfigHasScale10()
         {
-            var config = new DefaultConfiguration().Configure();
+            var config = new DefaultConfiguration().Configure().Add<Post>();
 
-            Assert.Equal(10, config.Conventions.DefaultDecimalScale);
+            Assert.Equal<uint>(10, config.Maps[typeof(Post)].Columns["Rating"].Scale);
         }
 
         [Fact]

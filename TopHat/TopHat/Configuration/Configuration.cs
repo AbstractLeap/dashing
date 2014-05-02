@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TopHat.Configuration.Mapper;
@@ -20,28 +21,102 @@ namespace TopHat.Configuration
             this.Conventions = new Conventions();
         }
 
+        #region Conventions
+
         public Conventions Conventions { get; set; }
+
+        public virtual IConfiguration SetPrimaryKeyIdentifier(Func<PropertyInfo, bool> primaryKeyIdentifier)
+        {
+            this.Conventions.PrimaryKeyIdentifier = primaryKeyIdentifier;
+            return this;
+        }
+
+        public virtual IConfiguration SetPluraliseNamesByDefault(bool pluralise)
+        {
+            this.Conventions.PluraliseNamesByDefault = (t) => pluralise;
+            return this;
+        }
+
+        public virtual IConfiguration SetPluraliseNamesByDefault(Func<Type, bool> pluraliseExpression)
+        {
+            this.Conventions.PluraliseNamesByDefault = pluraliseExpression;
+            return this;
+        }
+
+        public virtual IConfiguration SetDefaultSchema(string schema)
+        {
+            this.Conventions.DefaultSchemaIdentifier = (t) => schema;
+            return this;
+        }
+
+        public virtual IConfiguration SetDefaultSchema(Func<Type, string> schemaIdentifier)
+        {
+            this.Conventions.DefaultSchemaIdentifier = schemaIdentifier;
+            return this;
+        }
+
+        public virtual IConfiguration SetDefaultStringLength(uint stringLength)
+        {
+            this.Conventions.DefaultStringLength = (p) => stringLength;
+            return this;
+        }
+
+        public virtual IConfiguration SetDefaultStringLength(Func<PropertyInfo, UInt32> stringLengthExpression)
+        {
+            this.Conventions.DefaultStringLength = stringLengthExpression;
+            return this;
+        }
+
+        public virtual IConfiguration SetDefaultDecimalPrecision(uint precision)
+        {
+            this.Conventions.DefaultDecimalPrecision = (p) => precision;
+            return this;
+        }
+
+        public virtual IConfiguration SetDefaultDecimalPrecision(Func<PropertyInfo, UInt32> precisionExpression)
+        {
+            this.Conventions.DefaultDecimalPrecision = precisionExpression;
+            return this;
+        }
+
+        public virtual IConfiguration SetDefaultDecimalScale(uint scale)
+        {
+            this.Conventions.DefaultDecimalScale = (p) => scale;
+            return this;
+        }
+
+        public virtual IConfiguration SetDefaultDecimalScale(Func<PropertyInfo, UInt32> scaleExpression)
+        {
+            this.Conventions.DefaultDecimalScale = scaleExpression;
+            return this;
+        }
+
+        #endregion Conventions
+
+        #region Databases
 
         public IDictionary<Type, IMap> Maps { get; private set; }
 
-        public IDbConnection GetSqlConnection()
+        public virtual IDbConnection GetSqlConnection()
         {
             throw new NotImplementedException();
         }
 
-        public ISqlWriter GetSqlWriter()
+        public virtual ISqlWriter GetSqlWriter()
         {
             throw new NotImplementedException();
         }
 
-        public abstract IConfiguration Configure();
+        #endregion Databases
+
+        #region Entities
 
         /// <summary>
         /// Adds a particular type in to the configuration
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public IConfiguration Add(Type type)
+        public virtual IConfiguration Add(Type type)
         {
             this.mapper.Add(type);
             return this;
@@ -51,7 +126,7 @@ namespace TopHat.Configuration
         /// Adds a particular type in to the configuration
         /// </summary>
         /// <returns></returns>
-        public IConfiguration Add<T>()
+        public virtual IConfiguration Add<T>()
         {
             this.mapper.Add<T>();
             return this;
@@ -62,7 +137,7 @@ namespace TopHat.Configuration
         /// </summary>
         /// <param name="types"></param>
         /// <returns></returns>
-        public IConfiguration Add(IEnumerable<Type> types)
+        public virtual IConfiguration Add(IEnumerable<Type> types)
         {
             this.mapper.Add(types);
             return this;
@@ -73,7 +148,7 @@ namespace TopHat.Configuration
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public EntityMapper<T> Setup<T>()
+        public virtual EntityMapper<T> Setup<T>()
         {
             return this.mapper.Setup<T>();
         }
@@ -83,9 +158,13 @@ namespace TopHat.Configuration
         /// </summary>
         /// <param name="nameSpace"></param>
         /// <returns></returns>
-        public IConfiguration AddNamespaceFromAssemblyOf<T>(string nameSpace)
+        public virtual IConfiguration AddNamespaceFromAssemblyOf<T>(string nameSpace)
         {
             return this.Add(typeof(T).Assembly.GetTypes().Where(t => t.Namespace == nameSpace));
         }
+
+        #endregion Entities
+
+        public abstract IConfiguration Configure();
     }
 }
