@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using System.Reflection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -8,6 +10,7 @@ using System.Threading.Tasks;
 using TopHat.Configuration;
 using TopHat.Tests.TestDomain;
 using Xunit;
+using Assert = Xunit.Assert;
 
 namespace TopHat.Tests.Configuration
 {
@@ -93,30 +96,74 @@ namespace TopHat.Tests.Configuration
         }
 
         [Fact]
-        public void DefaultStringLengthCorrect()
+        public void DefaultStringLengthCallsLambda()
         {
+            // instrumentation
+            var propertyInfos = new List<PropertyInfo>();
+            const int defaultLength = 255;
+
+            // assemble
             var config = new DefaultConfiguration().Configure();
-            config.Conventions.DefaultStringLength = 255;
+            config.Conventions.DefaultStringLength = (p) =>
+            {
+                propertyInfos.Add(p);
+                return defaultLength;
+            };
+
+            // act
             config.Add<Post>();
-            Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Content" && c.Length == 255) == 1);
+
+            // assert
+            Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Content" && c.Length == defaultLength) == 1);
+            CollectionAssert.Contains(propertyInfos, typeof(Post).GetProperty("Content"));
         }
 
         [Fact]
-        public void DefaultDecimalPrecisionCorrect()
+        public void DefaultDecimalPrecisionCallsLambda()
         {
+            // instrumentation
+            var propertyInfos = new List<PropertyInfo>();
+            const int defaultPrecision = 6;
+
+            // assemble
             var config = new DefaultConfiguration().Configure();
-            config.Conventions.DefaultDecimalPrecision = 6;
+            config.Conventions.DefaultDecimalPrecision = (p) =>
+            {
+                propertyInfos.Add(p);
+                return defaultPrecision;
+            };
+
+            // act
             config.Add<Post>();
-            Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Rating" && c.Precision == 6) == 1);
+
+            // assert
+            Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Rating" && c.Precision == defaultPrecision) == 1);
+            CollectionAssert.Contains(propertyInfos, typeof(Post).GetProperty("Rating"));
         }
 
         [Fact]
-        public void DefaultDecimalScaleCorrect()
+        public void DefaultDecimalScaleCallsLambda()
         {
+            // instrumentation
+            var propertyInfos = new List<PropertyInfo>();
+            const int defaultScale = 5;
+
+            // assemble
             var config = new DefaultConfiguration().Configure();
-            config.Conventions.DefaultDecimalScale = 5;
+            config.Conventions.DefaultDecimalScale = (p) =>
+            {
+                propertyInfos.Add(p);
+                return defaultScale;
+            };
+
+            // act
             config.Add<Post>();
-            Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Rating" && c.Scale == 5) == 1);
+
+            // assert
+            Assert.True(config.Maps[typeof(Post)].Columns.Select(k => k.Value).Count(c => c.PropertyName == "Rating" && c.Scale == defaultScale) == 1);
+            CollectionAssert.Contains(propertyInfos, typeof(Post).GetProperty("Rating"));
+            
         }
+
     }
 }
