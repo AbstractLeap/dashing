@@ -1,0 +1,782 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Dapper.1.12.1.1.Fakes</name>
+    </assembly>
+    <members>
+        <member name="T:Dapper.Fakes.ShimCustomPropertyTypeMap">
+            <summary>Shim type of Dapper.CustomPropertyTypeMap</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimCustomPropertyTypeMap.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimCustomPropertyTypeMap.#ctor(Dapper.CustomPropertyTypeMap)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimCustomPropertyTypeMap.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimCustomPropertyTypeMap.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimCustomPropertyTypeMap.Bind(Dapper.SqlMapper.ITypeMap)">
+            <summary>Binds the members of the interface to the shim.</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimCustomPropertyTypeMap.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimCustomPropertyTypeMap.ConstructorTypeFuncOfTypeStringPropertyInfo">
+            <summary>Sets the shim of CustomPropertyTypeMap.CustomPropertyTypeMap(Type type, Func`3&lt;Type,String,PropertyInfo&gt; propertySelector)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimCustomPropertyTypeMap.FindConstructorStringArrayTypeArray">
+            <summary>Sets the shim of CustomPropertyTypeMap.FindConstructor(String[] names, Type[] types)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimCustomPropertyTypeMap.GetConstructorParameterConstructorInfoString">
+            <summary>Sets the shim of CustomPropertyTypeMap.GetConstructorParameter(ConstructorInfo constructor, String columnName)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimCustomPropertyTypeMap.GetMemberString">
+            <summary>Sets the shim of CustomPropertyTypeMap.GetMember(String columnName)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimCustomPropertyTypeMap.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimCustomPropertyTypeMap.AllInstances.FindConstructorStringArrayTypeArray">
+            <summary>Sets the shim of CustomPropertyTypeMap.FindConstructor(String[] names, Type[] types)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimCustomPropertyTypeMap.AllInstances.GetConstructorParameterConstructorInfoString">
+            <summary>Sets the shim of CustomPropertyTypeMap.GetConstructorParameter(ConstructorInfo constructor, String columnName)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimCustomPropertyTypeMap.AllInstances.GetMemberString">
+            <summary>Sets the shim of CustomPropertyTypeMap.GetMember(String columnName)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimDbString">
+            <summary>Shim type of Dapper.DbString</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDbString.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDbString.#ctor(Dapper.DbString)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDbString.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDbString.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDbString.Bind(Dapper.SqlMapper.ICustomQueryParameter)">
+            <summary>Binds the members of the interface to the shim.</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AddParameterIDbCommandString">
+            <summary>Sets the shim of DbString.AddParameter(IDbCommand command, String name)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.Constructor">
+            <summary>Sets the shim of DbString.DbString()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.IsAnsiGet">
+            <summary>Sets the shim of DbString.get_IsAnsi()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.IsAnsiSetBoolean">
+            <summary>Sets the shim of DbString.set_IsAnsi(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.IsFixedLengthGet">
+            <summary>Sets the shim of DbString.get_IsFixedLength()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.IsFixedLengthSetBoolean">
+            <summary>Sets the shim of DbString.set_IsFixedLength(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.LengthGet">
+            <summary>Sets the shim of DbString.get_Length()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.LengthSetInt32">
+            <summary>Sets the shim of DbString.set_Length(Int32 value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.ValueGet">
+            <summary>Sets the shim of DbString.get_Value()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.ValueSetString">
+            <summary>Sets the shim of DbString.set_Value(String value)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimDbString.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.AddParameterIDbCommandString">
+            <summary>Sets the shim of DbString.AddParameter(IDbCommand command, String name)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.IsAnsiGet">
+            <summary>Sets the shim of DbString.get_IsAnsi()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.IsAnsiSetBoolean">
+            <summary>Sets the shim of DbString.set_IsAnsi(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.IsFixedLengthGet">
+            <summary>Sets the shim of DbString.get_IsFixedLength()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.IsFixedLengthSetBoolean">
+            <summary>Sets the shim of DbString.set_IsFixedLength(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.LengthGet">
+            <summary>Sets the shim of DbString.get_Length()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.LengthSetInt32">
+            <summary>Sets the shim of DbString.set_Length(Int32 value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.ValueGet">
+            <summary>Sets the shim of DbString.get_Value()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.ValueSetString">
+            <summary>Sets the shim of DbString.set_Value(String value)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimDefaultTypeMap">
+            <summary>Shim type of Dapper.DefaultTypeMap</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDefaultTypeMap.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDefaultTypeMap.#ctor(Dapper.DefaultTypeMap)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDefaultTypeMap.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDefaultTypeMap.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDefaultTypeMap.Bind(Dapper.SqlMapper.ITypeMap)">
+            <summary>Binds the members of the interface to the shim.</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.ConstructorType">
+            <summary>Sets the shim of DefaultTypeMap.DefaultTypeMap(Type type)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.FindConstructorStringArrayTypeArray">
+            <summary>Sets the shim of DefaultTypeMap.FindConstructor(String[] names, Type[] types)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.GetConstructorParameterConstructorInfoString">
+            <summary>Sets the shim of DefaultTypeMap.GetConstructorParameter(ConstructorInfo constructor, String columnName)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.GetMemberString">
+            <summary>Sets the shim of DefaultTypeMap.GetMember(String columnName)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.GetPropertySetterPropertyInfoType">
+            <summary>Sets the shim of DefaultTypeMap.GetPropertySetter(PropertyInfo propertyInfo, Type type)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.GetSettableFieldsType">
+            <summary>Sets the shim of DefaultTypeMap.GetSettableFields(Type t)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.GetSettablePropsType">
+            <summary>Sets the shim of DefaultTypeMap.GetSettableProps(Type t)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap._FindConstructorb__3ConstructorInfo">
+            <summary>Sets the shim of DefaultTypeMap.&lt;FindConstructor&gt;b__3(ConstructorInfo c)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap._FindConstructorb__4ConstructorInfo">
+            <summary>Sets the shim of DefaultTypeMap.&lt;FindConstructor&gt;b__4(ConstructorInfo c)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimDefaultTypeMap.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.AllInstances.FindConstructorStringArrayTypeArray">
+            <summary>Sets the shim of DefaultTypeMap.FindConstructor(String[] names, Type[] types)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.AllInstances.GetConstructorParameterConstructorInfoString">
+            <summary>Sets the shim of DefaultTypeMap.GetConstructorParameter(ConstructorInfo constructor, String columnName)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap.AllInstances.GetMemberString">
+            <summary>Sets the shim of DefaultTypeMap.GetMember(String columnName)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimDynamicParameters">
+            <summary>Shim type of Dapper.DynamicParameters</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDynamicParameters.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDynamicParameters.#ctor(Dapper.DynamicParameters)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDynamicParameters.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDynamicParameters.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDynamicParameters.Bind(Dapper.SqlMapper.IDynamicParameters)">
+            <summary>Binds the members of the interface to the shim.</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDynamicParameters.GetOf1String``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.String,``0})">
+            <summary>Sets the shim of DynamicParameters.Get(String name)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AddDynamicParamsObject">
+            <summary>Sets the shim of DynamicParameters.AddDynamicParams(Object param)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AddParametersIDbCommandSqlMapperIdentity">
+            <summary>Sets the shim of DynamicParameters.AddParameters(IDbCommand command, Identity identity)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AddStringObjectNullableOfDbTypeNullableOfParameterDirectionNullableOfInt32">
+            <summary>Sets the shim of DynamicParameters.Add(String name, Object value, Nullable`1&lt;DbType&gt; dbType, Nullable`1&lt;ParameterDirection&gt; direction, Nullable`1&lt;Int32&gt; size)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.CleanString">
+            <summary>Sets the shim of DynamicParameters.Clean(String name)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.Constructor">
+            <summary>Sets the shim of DynamicParameters.DynamicParameters()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.ConstructorObject">
+            <summary>Sets the shim of DynamicParameters.DynamicParameters(Object template)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.DapperSqlMapperIDynamicParametersAddParametersIDbCommandSqlMapperIdentity">
+            <summary>Sets the shim of DynamicParameters.Dapper.SqlMapper.IDynamicParameters.AddParameters(IDbCommand command, Identity identity)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.ParameterNamesGet">
+            <summary>Sets the shim of DynamicParameters.get_ParameterNames()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.StaticConstructor">
+            <summary>Sets the shim of DynamicParameters.DynamicParameters()</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimDynamicParameters.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimDynamicParameters.AllInstances.GetOf1String``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.DynamicParameters,System.String,``0})">
+            <summary>Sets the shim of DynamicParameters.Get(String name)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AllInstances.AddDynamicParamsObject">
+            <summary>Sets the shim of DynamicParameters.AddDynamicParams(Object param)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AllInstances.AddParametersIDbCommandSqlMapperIdentity">
+            <summary>Sets the shim of DynamicParameters.AddParameters(IDbCommand command, Identity identity)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AllInstances.AddStringObjectNullableOfDbTypeNullableOfParameterDirectionNullableOfInt32">
+            <summary>Sets the shim of DynamicParameters.Add(String name, Object value, Nullable`1&lt;DbType&gt; dbType, Nullable`1&lt;ParameterDirection&gt; direction, Nullable`1&lt;Int32&gt; size)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AllInstances.DapperSqlMapperIDynamicParametersAddParametersIDbCommandSqlMapperIdentity">
+            <summary>Sets the shim of DynamicParameters.Dapper.SqlMapper.IDynamicParameters.AddParameters(IDbCommand command, Identity identity)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AllInstances.ParameterNamesGet">
+            <summary>Sets the shim of DynamicParameters.get_ParameterNames()</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimFeatureSupport">
+            <summary>Shim type of Dapper.FeatureSupport</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimFeatureSupport.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimFeatureSupport.#ctor(Dapper.FeatureSupport)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimFeatureSupport.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimFeatureSupport.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.ArraysGet">
+            <summary>Sets the shim of FeatureSupport.get_Arrays()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.ArraysSetBoolean">
+            <summary>Sets the shim of FeatureSupport.set_Arrays(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.Constructor">
+            <summary>Sets the shim of FeatureSupport.FeatureSupport()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.GetIDbConnection">
+            <summary>Sets the shim of FeatureSupport.Get(IDbConnection connection)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.StaticConstructor">
+            <summary>Sets the shim of FeatureSupport.FeatureSupport()</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimFeatureSupport.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.AllInstances.ArraysGet">
+            <summary>Sets the shim of FeatureSupport.get_Arrays()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.AllInstances.ArraysSetBoolean">
+            <summary>Sets the shim of FeatureSupport.set_Arrays(Boolean value)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimSimpleMemberMap">
+            <summary>Shim type of Dapper.SimpleMemberMap</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSimpleMemberMap.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSimpleMemberMap.#ctor(Dapper.SimpleMemberMap)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSimpleMemberMap.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSimpleMemberMap.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSimpleMemberMap.Bind(Dapper.SqlMapper.IMemberMap)">
+            <summary>Binds the members of the interface to the shim.</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.ColumnNameGet">
+            <summary>Sets the shim of SimpleMemberMap.get_ColumnName()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.ConstructorStringFieldInfo">
+            <summary>Sets the shim of SimpleMemberMap.SimpleMemberMap(String columnName, FieldInfo field)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.ConstructorStringParameterInfo">
+            <summary>Sets the shim of SimpleMemberMap.SimpleMemberMap(String columnName, ParameterInfo parameter)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.ConstructorStringPropertyInfo">
+            <summary>Sets the shim of SimpleMemberMap.SimpleMemberMap(String columnName, PropertyInfo property)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.FieldGet">
+            <summary>Sets the shim of SimpleMemberMap.get_Field()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.MemberTypeGet">
+            <summary>Sets the shim of SimpleMemberMap.get_MemberType()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.ParameterGet">
+            <summary>Sets the shim of SimpleMemberMap.get_Parameter()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.PropertyGet">
+            <summary>Sets the shim of SimpleMemberMap.get_Property()</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimSimpleMemberMap.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.AllInstances.ColumnNameGet">
+            <summary>Sets the shim of SimpleMemberMap.get_ColumnName()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.AllInstances.FieldGet">
+            <summary>Sets the shim of SimpleMemberMap.get_Field()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.AllInstances.MemberTypeGet">
+            <summary>Sets the shim of SimpleMemberMap.get_MemberType()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.AllInstances.ParameterGet">
+            <summary>Sets the shim of SimpleMemberMap.get_Parameter()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSimpleMemberMap.AllInstances.PropertyGet">
+            <summary>Sets the shim of SimpleMemberMap.get_Property()</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimSqlMapper">
+            <summary>Shim type of Dapper.SqlMapper</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.GenerateMapperOf8FuncOfIDataReaderObjectFuncOfIDataReaderObjectArrayObject``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Func{System.Data.IDataReader,System.Object},System.Func{System.Data.IDataReader,System.Object}[],System.Object,System.Func{System.Data.IDataReader,``7}})">
+            <summary>Sets the shim of SqlMapper.GenerateMapper(Func`2&lt;IDataReader,Object&gt; deserializer, Func`2&lt;IDataReader,Object&gt;[] otherDeserializers, Object map)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.MultiMapAsyncOf8IDbConnectionStringObjectObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Object,System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Threading.Tasks.Task{System.Collections.Generic.IEnumerable{``7}}})">
+            <summary>Sets the shim of SqlMapper.MultiMapAsync(IDbConnection cnn, String sql, Object map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.MultiMapImplOf8IDbConnectionStringObjectObjectIDbTransactionStringNullableOfInt32NullableOfCommandTypeIDataReaderSqlMapperIdentity``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Object,System.Object,System.Data.IDbTransaction,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Data.IDataReader,Dapper.SqlMapper.Identity,System.Collections.Generic.IEnumerable{``7}})">
+            <summary>Sets the shim of SqlMapper.MultiMapImpl(IDbConnection cnn, String sql, Object map, Object param, IDbTransaction transaction, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType, IDataReader reader, Identity identity)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.MultiMapOf8IDbConnectionStringObjectObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Object,System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``7}})">
+            <summary>Sets the shim of SqlMapper.MultiMap(IDbConnection cnn, String sql, Object map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryAsyncOf1IDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Threading.Tasks.Task{System.Collections.Generic.IEnumerable{``0}}})">
+            <summary>Sets the shim of SqlMapper.QueryAsync(IDbConnection cnn, String sql, Object param, IDbTransaction transaction, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryAsyncOf3IDbConnectionStringFuncOfM0M1M2ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``3(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Threading.Tasks.Task{System.Collections.Generic.IEnumerable{``2}}})">
+            <summary>Sets the shim of SqlMapper.QueryAsync(IDbConnection cnn, String sql, Func`3&lt;!!0,!!1,!!2&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryAsyncOf4IDbConnectionStringFuncOfM0M1M2M3ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``4(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Threading.Tasks.Task{System.Collections.Generic.IEnumerable{``3}}})">
+            <summary>Sets the shim of SqlMapper.QueryAsync(IDbConnection cnn, String sql, Func`4&lt;!!0,!!1,!!2,!!3&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryAsyncOf5IDbConnectionStringFuncOfM0M1M2M3M4ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``5(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Threading.Tasks.Task{System.Collections.Generic.IEnumerable{``4}}})">
+            <summary>Sets the shim of SqlMapper.QueryAsync(IDbConnection cnn, String sql, Func`5&lt;!!0,!!1,!!2,!!3,!!4&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryAsyncOf6IDbConnectionStringFuncOfM0M1M2M3M4M5ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``6(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Threading.Tasks.Task{System.Collections.Generic.IEnumerable{``5}}})">
+            <summary>Sets the shim of SqlMapper.QueryAsync(IDbConnection cnn, String sql, Func`6&lt;!!0,!!1,!!2,!!3,!!4,!!5&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryAsyncOf7IDbConnectionStringFuncOfM0M1M2M3M4M5M6ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``7(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5,``6},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Threading.Tasks.Task{System.Collections.Generic.IEnumerable{``6}}})">
+            <summary>Sets the shim of SqlMapper.QueryAsync(IDbConnection cnn, String sql, Func`7&lt;!!0,!!1,!!2,!!3,!!4,!!5,!!6&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryAsyncOf8IDbConnectionStringFuncOfM0M1M2M3M4M5M6M7ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5,``6,``7},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Threading.Tasks.Task{System.Collections.Generic.IEnumerable{``7}}})">
+            <summary>Sets the shim of SqlMapper.QueryAsync(IDbConnection cnn, String sql, Func`8&lt;!!0,!!1,!!2,!!3,!!4,!!5,!!6,!!7&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryInternalOf1IDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``0}})">
+            <summary>Sets the shim of SqlMapper.QueryInternal(IDbConnection cnn, String sql, Object param, IDbTransaction transaction, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryOf1IDbConnectionStringObjectIDbTransactionBooleanNullableOfInt32NullableOfCommandType``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Boolean,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``0}})">
+            <summary>Sets the shim of SqlMapper.Query(IDbConnection cnn, String sql, Object param, IDbTransaction transaction, Boolean buffered, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryOf3IDbConnectionStringFuncOfM0M1M2ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``3(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``2}})">
+            <summary>Sets the shim of SqlMapper.Query(IDbConnection cnn, String sql, Func`3&lt;!!0,!!1,!!2&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryOf4IDbConnectionStringFuncOfM0M1M2M3ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``4(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``3}})">
+            <summary>Sets the shim of SqlMapper.Query(IDbConnection cnn, String sql, Func`4&lt;!!0,!!1,!!2,!!3&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryOf5IDbConnectionStringFuncOfM0M1M2M3M4ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``5(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``4}})">
+            <summary>Sets the shim of SqlMapper.Query(IDbConnection cnn, String sql, Func`5&lt;!!0,!!1,!!2,!!3,!!4&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryOf6IDbConnectionStringFuncOfM0M1M2M3M4M5ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``6(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``5}})">
+            <summary>Sets the shim of SqlMapper.Query(IDbConnection cnn, String sql, Func`6&lt;!!0,!!1,!!2,!!3,!!4,!!5&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryOf7IDbConnectionStringFuncOfM0M1M2M3M4M5M6ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``7(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5,``6},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``6}})">
+            <summary>Sets the shim of SqlMapper.Query(IDbConnection cnn, String sql, Func`7&lt;!!0,!!1,!!2,!!3,!!4,!!5,!!6&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.QueryOf8IDbConnectionStringFuncOfM0M1M2M3M4M5M6M7ObjectIDbTransactionBooleanStringNullableOfInt32NullableOfCommandType``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Data.IDbConnection,System.String,System.Func{``0,``1,``2,``3,``4,``5,``6,``7},System.Object,System.Data.IDbTransaction,System.Boolean,System.String,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType},System.Collections.Generic.IEnumerable{``7}})">
+            <summary>Sets the shim of SqlMapper.Query(IDbConnection cnn, String sql, Func`8&lt;!!0,!!1,!!2,!!3,!!4,!!5,!!6,!!7&gt; map, Object param, IDbTransaction transaction, Boolean buffered, String splitOn, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.AddTypeMapTypeDbType">
+            <summary>Sets the shim of SqlMapper.AddTypeMap(Type type, DbType dbType)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.CollectCacheGarbage">
+            <summary>Sets the shim of SqlMapper.CollectCacheGarbage()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ConnectionStringComparerGet">
+            <summary>Sets the shim of SqlMapper.get_ConnectionStringComparer()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ConnectionStringComparerSetIEqualityComparerOfString">
+            <summary>Sets the shim of SqlMapper.set_ConnectionStringComparer(IEqualityComparer`1&lt;String&gt; value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.CreateParamInfoGeneratorSqlMapperIdentityBoolean">
+            <summary>Sets the shim of SqlMapper.CreateParamInfoGenerator(Identity identity, Boolean checkForDuplicates)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.EmitInt32ILGeneratorInt32">
+            <summary>Sets the shim of SqlMapper.EmitInt32(ILGenerator il, Int32 value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ExecuteCommandIDbConnectionIDbTransactionStringActionOfIDbCommandObjectObjectNullableOfInt32NullableOfCommandType">
+            <summary>Sets the shim of SqlMapper.ExecuteCommand(IDbConnection cnn, IDbTransaction transaction, String sql, Action`2&lt;IDbCommand,Object&gt; paramReader, Object obj, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ExecuteIDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType">
+            <summary>Sets the shim of SqlMapper.Execute(IDbConnection cnn, String sql, Object param, IDbTransaction transaction, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.FilterParametersIEnumerableOfPropertyInfoString">
+            <summary>Sets the shim of SqlMapper.FilterParameters(IEnumerable`1&lt;PropertyInfo&gt; parameters, String sql)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.FindOrAddParameterIDataParameterCollectionIDbCommandString">
+            <summary>Sets the shim of SqlMapper.FindOrAddParameter(IDataParameterCollection parameters, IDbCommand command, String name)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GenerateDeserializersTypeArrayStringIDataReader">
+            <summary>Sets the shim of SqlMapper.GenerateDeserializers(Type[] types, String splitOn, IDataReader reader)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetBindByNameType">
+            <summary>Sets the shim of SqlMapper.GetBindByName(Type commandType)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetCachedSQLCount">
+            <summary>Sets the shim of SqlMapper.GetCachedSQLCount()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetCachedSQLInt32">
+            <summary>Sets the shim of SqlMapper.GetCachedSQL(Int32 ignoreHitCountAbove)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetColumnHashIDataReader">
+            <summary>Sets the shim of SqlMapper.GetColumnHash(IDataReader reader)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetDapperRowDeserializerIDataRecordInt32Int32Boolean">
+            <summary>Sets the shim of SqlMapper.GetDapperRowDeserializer(IDataRecord reader, Int32 startBound, Int32 length, Boolean returnNullIfFirstMissing)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetDeserializerTypeIDataReaderInt32Int32Boolean">
+            <summary>Sets the shim of SqlMapper.GetDeserializer(Type type, IDataReader reader, Int32 startBound, Int32 length, Boolean returnNullIfFirstMissing)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetHashCollissions">
+            <summary>Sets the shim of SqlMapper.GetHashCollissions()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetStructDeserializerTypeTypeInt32">
+            <summary>Sets the shim of SqlMapper.GetStructDeserializer(Type type, Type effectiveType, Int32 index)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetTypeDeserializerTypeIDataReaderInt32Int32Boolean">
+            <summary>Sets the shim of SqlMapper.GetTypeDeserializer(Type type, IDataReader reader, Int32 startBound, Int32 length, Boolean returnNullIfFirstMissing)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.GetTypeMapType">
+            <summary>Sets the shim of SqlMapper.GetTypeMap(Type type)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.LoadLocalAddressILGeneratorInt32">
+            <summary>Sets the shim of SqlMapper.LoadLocalAddress(ILGenerator il, Int32 index)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.LoadLocalILGeneratorInt32">
+            <summary>Sets the shim of SqlMapper.LoadLocal(ILGenerator il, Int32 index)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.LookupDbTypeTypeString">
+            <summary>Sets the shim of SqlMapper.LookupDbType(Type type, String name)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.OnQueryCachePurged">
+            <summary>Sets the shim of SqlMapper.OnQueryCachePurged()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.PackListParametersIDbCommandStringObject">
+            <summary>Sets the shim of SqlMapper.PackListParameters(IDbCommand command, String namePrefix, Object value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.PurgeQueryCache">
+            <summary>Sets the shim of SqlMapper.PurgeQueryCache()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.PurgeQueryCacheByTypeType">
+            <summary>Sets the shim of SqlMapper.PurgeQueryCacheByType(Type type)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.QueryCachePurgedAddEventHandler">
+            <summary>Sets the shim of SqlMapper.add_QueryCachePurged(EventHandler value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.QueryCachePurgedRemoveEventHandler">
+            <summary>Sets the shim of SqlMapper.remove_QueryCachePurged(EventHandler value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.QueryIDbConnectionStringObjectIDbTransactionBooleanNullableOfInt32NullableOfCommandType">
+            <summary>Sets the shim of SqlMapper.Query(IDbConnection cnn, String sql, Object param, IDbTransaction transaction, Boolean buffered, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.QueryMultipleIDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType">
+            <summary>Sets the shim of SqlMapper.QueryMultiple(IDbConnection cnn, String sql, Object param, IDbTransaction transaction, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ReadCharObject">
+            <summary>Sets the shim of SqlMapper.ReadChar(Object value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ReadNullableCharObject">
+            <summary>Sets the shim of SqlMapper.ReadNullableChar(Object value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.SetTypeMapTypeSqlMapperITypeMap">
+            <summary>Sets the shim of SqlMapper.SetTypeMap(Type type, ITypeMap map)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.SetupCommandIDbConnectionIDbTransactionStringActionOfIDbCommandObjectObjectNullableOfInt32NullableOfCommandType">
+            <summary>Sets the shim of SqlMapper.SetupCommand(IDbConnection cnn, IDbTransaction transaction, String sql, Action`2&lt;IDbCommand,Object&gt; paramReader, Object obj, Nullable`1&lt;Int32&gt; commandTimeout, Nullable`1&lt;CommandType&gt; commandType)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.StaticConstructor">
+            <summary>Sets the shim of SqlMapper.SqlMapper()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.StoreLocalILGeneratorInt32">
+            <summary>Sets the shim of SqlMapper.StoreLocal(ILGenerator il, Int32 index)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ThrowDataExceptionExceptionInt32IDataReader">
+            <summary>Sets the shim of SqlMapper.ThrowDataException(Exception ex, Int32 index, IDataReader reader)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._CreateParamInfoGeneratorb__49PropertyInfo">
+            <summary>Sets the shim of SqlMapper.&lt;CreateParamInfoGenerator&gt;b__49(PropertyInfo p)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._CreateParamInfoGeneratorb__4aPropertyInfo">
+            <summary>Sets the shim of SqlMapper.&lt;CreateParamInfoGenerator&gt;b__4a(PropertyInfo p)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._GetHashCollissionsb__5KeyValuePairOfInt32Int32">
+            <summary>Sets the shim of SqlMapper.&lt;GetHashCollissions&gt;b__5(KeyValuePair`2&lt;Int32,Int32&gt; pair)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._GetHashCollissionsb__6KeyValuePairOfInt32Int32">
+            <summary>Sets the shim of SqlMapper.&lt;GetHashCollissions&gt;b__6(KeyValuePair`2&lt;Int32,Int32&gt; pair)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._cctorb__9PropertyInfo">
+            <summary>Sets the shim of SqlMapper.&lt;.cctor&gt;b__9(PropertyInfo p)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._cctorb__aPropertyInfo">
+            <summary>Sets the shim of SqlMapper.&lt;.cctor&gt;b__a(PropertyInfo p)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimSqlMapper.ShimGridReader">
+            <summary>Shim type of Dapper.SqlMapper+GridReader</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.#ctor(Dapper.SqlMapper.GridReader)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.Bind(System.IDisposable)">
+            <summary>Binds the members of the interface to the shim.</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.MultiReadInternalOf8ObjectString``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Object,System.String,System.Collections.Generic.IEnumerable{``7}})">
+            <summary>Sets the shim of GridReader.MultiReadInternal(Object func, String splitOn)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadDeferredOf1Int32FuncOfIDataReaderObjectSqlMapperIdentity``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Int32,System.Func{System.Data.IDataReader,System.Object},Dapper.SqlMapper.Identity,System.Collections.Generic.IEnumerable{``0}})">
+            <summary>Sets the shim of GridReader.ReadDeferred(Int32 index, Func`2&lt;IDataReader,Object&gt; deserializer, Identity typedIdentity)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadOf1Boolean``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Boolean,System.Collections.Generic.IEnumerable{``0}})">
+            <summary>Sets the shim of GridReader.Read(Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadOf3FuncOfM0M1M2StringBoolean``3(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Func{``0,``1,``2},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``2}})">
+            <summary>Sets the shim of GridReader.Read(Func`3&lt;!!0,!!1,!!2&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadOf4FuncOfM0M1M2M3StringBoolean``4(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Func{``0,``1,``2,``3},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``3}})">
+            <summary>Sets the shim of GridReader.Read(Func`4&lt;!!0,!!1,!!2,!!3&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadOf5FuncOfM0M1M2M3M4StringBoolean``5(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Func{``0,``1,``2,``3,``4},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``4}})">
+            <summary>Sets the shim of GridReader.Read(Func`5&lt;!!0,!!1,!!2,!!3,!!4&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadOf6FuncOfM0M1M2M3M4M5StringBoolean``6(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Func{``0,``1,``2,``3,``4,``5},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``5}})">
+            <summary>Sets the shim of GridReader.Read(Func`6&lt;!!0,!!1,!!2,!!3,!!4,!!5&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadOf7FuncOfM0M1M2M3M4M5M6StringBoolean``7(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Func{``0,``1,``2,``3,``4,``5,``6},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``6}})">
+            <summary>Sets the shim of GridReader.Read(Func`7&lt;!!0,!!1,!!2,!!3,!!4,!!5,!!6&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadOf8FuncOfM0M1M2M3M4M5M6M7StringBoolean``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{System.Func{``0,``1,``2,``3,``4,``5,``6,``7},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``7}})">
+            <summary>Sets the shim of GridReader.Read(Func`8&lt;!!0,!!1,!!2,!!3,!!4,!!5,!!6,!!7&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimGridReader.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ConstructorIDbCommandIDataReaderSqlMapperIdentity">
+            <summary>Sets the shim of GridReader.GridReader(IDbCommand command, IDataReader reader, Identity identity)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimGridReader.Dispose">
+            <summary>Sets the shim of GridReader.Dispose()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimGridReader.NextResult">
+            <summary>Sets the shim of GridReader.NextResult()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimGridReader.ReadBoolean">
+            <summary>Sets the shim of GridReader.Read(Boolean buffered)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.MultiReadInternalOf8ObjectString``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Object,System.String,System.Collections.Generic.IEnumerable{``7}})">
+            <summary>Sets the shim of GridReader.MultiReadInternal(Object func, String splitOn)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadDeferredOf1Int32FuncOfIDataReaderObjectSqlMapperIdentity``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Int32,System.Func{System.Data.IDataReader,System.Object},Dapper.SqlMapper.Identity,System.Collections.Generic.IEnumerable{``0}})">
+            <summary>Sets the shim of GridReader.ReadDeferred(Int32 index, Func`2&lt;IDataReader,Object&gt; deserializer, Identity typedIdentity)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadOf1Boolean``1(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Boolean,System.Collections.Generic.IEnumerable{``0}})">
+            <summary>Sets the shim of GridReader.Read(Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadOf3FuncOfM0M1M2StringBoolean``3(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Func{``0,``1,``2},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``2}})">
+            <summary>Sets the shim of GridReader.Read(Func`3&lt;!!0,!!1,!!2&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadOf4FuncOfM0M1M2M3StringBoolean``4(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Func{``0,``1,``2,``3},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``3}})">
+            <summary>Sets the shim of GridReader.Read(Func`4&lt;!!0,!!1,!!2,!!3&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadOf5FuncOfM0M1M2M3M4StringBoolean``5(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Func{``0,``1,``2,``3,``4},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``4}})">
+            <summary>Sets the shim of GridReader.Read(Func`5&lt;!!0,!!1,!!2,!!3,!!4&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadOf6FuncOfM0M1M2M3M4M5StringBoolean``6(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Func{``0,``1,``2,``3,``4,``5},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``5}})">
+            <summary>Sets the shim of GridReader.Read(Func`6&lt;!!0,!!1,!!2,!!3,!!4,!!5&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadOf7FuncOfM0M1M2M3M4M5M6StringBoolean``7(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Func{``0,``1,``2,``3,``4,``5,``6},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``6}})">
+            <summary>Sets the shim of GridReader.Read(Func`7&lt;!!0,!!1,!!2,!!3,!!4,!!5,!!6&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadOf8FuncOfM0M1M2M3M4M5M6M7StringBoolean``8(Microsoft.QualityTools.Testing.Fakes.FakesDelegates.Func{Dapper.SqlMapper.GridReader,System.Func{``0,``1,``2,``3,``4,``5,``6,``7},System.String,System.Boolean,System.Collections.Generic.IEnumerable{``7}})">
+            <summary>Sets the shim of GridReader.Read(Func`8&lt;!!0,!!1,!!2,!!3,!!4,!!5,!!6,!!7&gt; func, String splitOn, Boolean buffered)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.Dispose">
+            <summary>Sets the shim of GridReader.Dispose()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.NextResult">
+            <summary>Sets the shim of GridReader.NextResult()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimGridReader.AllInstances.ReadBoolean">
+            <summary>Sets the shim of GridReader.Read(Boolean buffered)</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimSqlMapper.ShimIdentity">
+            <summary>Shim type of Dapper.SqlMapper+Identity</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimIdentity.#ctor">
+            <summary>Initializes a new shim instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimIdentity.#ctor(Dapper.SqlMapper.Identity)">
+            <summary>Initializes a new shim for the given instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimIdentity.BehaveAsCurrent">
+            <summary>Assigns the &apos;Current&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimIdentity.BehaveAsNotImplemented">
+            <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="M:Dapper.Fakes.ShimSqlMapper.ShimIdentity.Bind(System.IEquatable{Dapper.SqlMapper.Identity})">
+            <summary>Binds the members of the interface to the shim.</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.Behavior">
+            <summary>Assigns the behavior for all methods of the shimmed type</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.ConstructorStringNullableOfCommandTypeIDbConnectionTypeTypeTypeArray">
+            <summary>Sets the shim of Identity.Identity(String sql, Nullable`1&lt;CommandType&gt; commandType, IDbConnection connection, Type type, Type parametersType, Type[] otherTypes)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.ConstructorStringNullableOfCommandTypeStringTypeTypeTypeArrayInt32">
+            <summary>Sets the shim of Identity.Identity(String sql, Nullable`1&lt;CommandType&gt; commandType, String connectionString, Type type, Type parametersType, Type[] otherTypes, Int32 gridIndex)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.EqualsObject">
+            <summary>Sets the shim of Identity.Equals(Object obj)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.EqualsSqlMapperIdentity">
+            <summary>Sets the shim of Identity.Equals(Identity other)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.ForDynamicParametersType">
+            <summary>Sets the shim of Identity.ForDynamicParameters(Type type)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.ForGridTypeInt32">
+            <summary>Sets the shim of Identity.ForGrid(Type primaryType, Int32 gridIndex)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.ForGridTypeTypeArrayInt32">
+            <summary>Sets the shim of Identity.ForGrid(Type primaryType, Type[] otherTypes, Int32 gridIndex)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.GetHashCode">
+            <summary>Sets the shim of Identity.GetHashCode()</summary>
+        </member>
+        <member name="T:Dapper.Fakes.ShimSqlMapper.ShimIdentity.AllInstances">
+            <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.AllInstances.EqualsObject">
+            <summary>Sets the shim of Identity.Equals(Object obj)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.AllInstances.EqualsSqlMapperIdentity">
+            <summary>Sets the shim of Identity.Equals(Identity other)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.AllInstances.ForDynamicParametersType">
+            <summary>Sets the shim of Identity.ForDynamicParameters(Type type)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.AllInstances.ForGridTypeInt32">
+            <summary>Sets the shim of Identity.ForGrid(Type primaryType, Int32 gridIndex)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.AllInstances.ForGridTypeTypeArrayInt32">
+            <summary>Sets the shim of Identity.ForGrid(Type primaryType, Type[] otherTypes, Int32 gridIndex)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper.ShimIdentity.AllInstances.GetHashCode01">
+            <summary>Sets the shim of Identity.GetHashCode()</summary>
+        </member>
+        <member name="T:Dapper.Fakes.StubDynamicParameters">
+            <summary>Stub type of Dapper.DynamicParameters</summary>
+        </member>
+        <member name="M:Dapper.Fakes.StubDynamicParameters.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.StubDynamicParameters.#ctor(System.Object)">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.StubDynamicParameters.InitializeStub">
+            <summary>Initializes a new instance of type StubDynamicParameters</summary>
+        </member>
+        <member name="P:Dapper.Fakes.StubDynamicParameters.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:Dapper.Fakes.StubDynamicParameters.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="P:Dapper.Fakes.StubDynamicParameters.InstanceObserver">
+            <summary>Gets or sets the instance observer.</summary>
+        </member>
+        <member name="T:Dapper.Fakes.StubFeatureSupport">
+            <summary>Stub type of Dapper.FeatureSupport</summary>
+        </member>
+        <member name="M:Dapper.Fakes.StubFeatureSupport.#ctor">
+            <summary>Initializes a new instance</summary>
+        </member>
+        <member name="M:Dapper.Fakes.StubFeatureSupport.InitializeStub">
+            <summary>Initializes a new instance of type StubFeatureSupport</summary>
+        </member>
+        <member name="P:Dapper.Fakes.StubFeatureSupport.CallBase">
+            <summary>Gets or sets a value that indicates if the base method should be called instead of the fallback behavior</summary>
+        </member>
+        <member name="P:Dapper.Fakes.StubFeatureSupport.InstanceBehavior">
+            <summary>Gets or sets the instance behavior.</summary>
+        </member>
+        <member name="P:Dapper.Fakes.StubFeatureSupport.InstanceObserver">
+            <summary>Gets or sets the instance observer.</summary>
+        </member>
+    </members>
+</doc>
