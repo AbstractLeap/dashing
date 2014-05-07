@@ -22,7 +22,7 @@ namespace TopHat.Tests.Configuration
         [Fact]
         public void NamespaceAddWorks()
         {
-            var config = new DefaultConfiguration().Configure().AddNamespaceFromAssemblyOf<Tests.TestDomain.Blog>("TopHat.Tests.TestDomain");
+            var config = new DefaultConfiguration().Configure().AddNamespaceFromAssemblyOf<Tests.TestDomain.Blog>("Session.Tests.TestDomain");
             Assert.Equal(4, config.Maps.Select(t => t.Key.Name).Intersect(new string[] { "Post", "Blog", "User", "Comment" }).Count());
         }
 
@@ -85,7 +85,7 @@ namespace TopHat.Tests.Configuration
         public void DefaultConfigurationFKIndexesGenerated()
         {
             var config = new DefaultConfiguration().Configure();
-            Assert.True(config.Conventions.GenerateIndexesOnForeignKeysByDefault);
+            Assert.True(config.Convention.GenerateIndexesOnForeignKeysByDefault);
         }
 
         [Fact]

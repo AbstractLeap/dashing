@@ -14,7 +14,7 @@ namespace TopHat.Tests.QueryWriter
         {
             Dapper.Fakes.ShimSqlMapper.QueryOf1IDbConnectionStringObjectIDbTransactionBooleanNullableOfInt32NullableOfCommandType<Post>((connection, sql, parameters, transaction, buffered, timeout, type) => new List<Post>());
             GetTopHat().Query<Post>().Where(p => p.PostId == 1).ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.WhereClauses.Count == 1 && q.WhereClauses.First().IsExpression())));
+            this.SqlWriter.Verify(s => s.WriteSqlFor<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.WhereClauses.Count == 1 && q.WhereClauses.First().IsExpression())));
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace TopHat.Tests.QueryWriter
         {
             Dapper.Fakes.ShimSqlMapper.QueryOf1IDbConnectionStringObjectIDbTransactionBooleanNullableOfInt32NullableOfCommandType<Post>((connection, sql, parameters, transaction, buffered, timeout, type) => new List<Post>());
             GetTopHat().Query<Post>().Where("postid = 1").ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.WhereClauses.Count == 1 && !q.WhereClauses.First().IsExpression() && q.WhereClauses.First().Clause == "postid = 1")));
+            this.SqlWriter.Verify(s => s.WriteSqlFor<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.WhereClauses.Count == 1 && !q.WhereClauses.First().IsExpression() && q.WhereClauses.First().Clause == "postid = 1")));
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace TopHat.Tests.QueryWriter
         {
             Dapper.Fakes.ShimSqlMapper.QueryOf1IDbConnectionStringObjectIDbTransactionBooleanNullableOfInt32NullableOfCommandType<Post>((connection, sql, parameters, transaction, buffered, timeout, type) => new List<Post>());
             GetTopHat().Query<Post>().Where("postid = 1", new { PostId = 1 }).ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.WhereClauses.Count == 1 && !q.WhereClauses.First().IsExpression() && q.WhereClauses.First().Clause == "postid = 1")));
+            this.SqlWriter.Verify(s => s.WriteSqlFor<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.WhereClauses.Count == 1 && !q.WhereClauses.First().IsExpression() && q.WhereClauses.First().Clause == "postid = 1")));
         }
     }
 }

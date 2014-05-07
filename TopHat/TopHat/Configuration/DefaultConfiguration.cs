@@ -1,30 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TopHat.Configuration
-{
-    public class DefaultConfiguration : Configuration
-    {
-        public DefaultConfiguration()
-            : base()
-        {
-            this.Conventions.AlwaysTrackEntities = false;
-            this.Conventions.PrimaryKeysDatabaseGeneratedByDefault = true;
-            this.Conventions.GenerateIndexesOnForeignKeysByDefault = true;
-            this.SetPluraliseNamesByDefault(true);
-            this.SetDefaultStringLength(255);
-            this.SetDefaultDecimalPrecision(18);
-            this.SetDefaultDecimalScale(10);
+namespace TopHat.Configuration {
+	public class DefaultConfiguration : ConfigurationBase {
+		public DefaultConfiguration(IEngine engine, string connectionString) : base(engine, connectionString) {}
 
-            this.Conventions.PrimaryKeyIdentifier = p => p.Name == p.DeclaringType.Name + "Id";
-        }
+		public new DefaultConfiguration Add<T>() {
+			base.Add<T>();
+			return this;
+		}
 
-        public override IConfiguration Configure()
-        {
-            return this;
-        }
-    }
+		public new DefaultConfiguration Add(IEnumerable<Type> types) {
+			base.Add(types);
+			return this;
+		}
+
+		public new DefaultConfiguration AddNamespaceOf<T>() {
+			base.AddNamespaceOf<T>();
+			return this;
+		}
+
+		public new Map<T> Setup<T>() {
+			return base.Setup<T>();
+		}
+	}
 }

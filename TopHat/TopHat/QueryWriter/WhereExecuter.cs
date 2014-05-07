@@ -11,10 +11,10 @@ namespace TopHat
 {
     internal class WhereExecuter<T> : IWhereExecute<T>
     {
-        private ITopHat topHat;
+        private ISession topHat;
         private QueryType queryType;
 
-        public WhereExecuter(ITopHat topHat, QueryType queryType)
+				public WhereExecuter(ISession topHat, QueryType queryType)
         {
             this.topHat = topHat;
             this.queryType = queryType;
@@ -46,8 +46,7 @@ namespace TopHat
 
         private void ExecuteQuery(Query<T> query)
         {
-            var sqlQuery = this.topHat.Configuration.GetSqlWriter().Execute(query);
-            this.topHat.Connection.Execute(sqlQuery.Sql, sqlQuery.Parameters);
+            this.topHat.Execute(query);
         }
     }
 }

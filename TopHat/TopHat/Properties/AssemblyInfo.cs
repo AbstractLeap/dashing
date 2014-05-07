@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("TopHat")]
+[assembly: AssemblyTitle("Session")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("TopHat")]
+[assembly: AssemblyProduct("Session")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -36,4 +36,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // Ensure the tests can see the internal classes
-[assembly: InternalsVisibleTo("TopHat.Tests", AllInternalsVisible = true)]
+[assembly: InternalsVisibleTo("Session.Tests", AllInternalsVisible = true)]

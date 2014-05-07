@@ -1,17 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Reflection;
-using TopHat.Configuration.Mapper;
-using TopHat.SqlWriter;
+﻿using System.Collections.Generic;
 
-namespace TopHat.Configuration
-{
-    public interface IConfiguration
-    {
-        #region Conventions
+namespace TopHat.Configuration {
+	public interface IConfiguration {
+		IEnumerable<Map> Maps { get; }
+		ISession BeginSession();
+	}
 
-        Conventions Conventions { get; set; }
+	/*
+     *         
+        #region Database
+
+        /// <summary>
+        /// The object to table mappings
+        /// </summary>
+        IDictionary<Type, IMap> Maps { get; }
+
+        IDbConnection GetSqlConnection();
+
+        ISqlWriter GetSqlWriter();
+
+        #endregion Database
+
+        #region Entities
+
+        IConfiguration Add(Type type);
+
+        IConfiguration Add<T>();
+
+        IConfiguration Add(IEnumerable<Type> types);
+
+        FluentMapMutator<T> Setup<T>();
+
+        IConfiguration AddNamespaceFromAssemblyOf<T>(string nameSpace);
+
+        #endregion Entities
+
+        /// <summary>
+        /// Run the configuration
+        /// </summary>
+        IConfiguration Configure();
+    #region Convention
+
 
         /// <summary>
         /// Specify the primary key identifier for your domain
@@ -90,38 +119,6 @@ namespace TopHat.Configuration
         /// <returns></returns>
         IConfiguration SetDefaultDecimalScale(Func<PropertyInfo, uint> scaleExpression);
 
-        #endregion Conventions
-
-        #region Database
-
-        /// <summary>
-        /// The object to table mappings
-        /// </summary>
-        IDictionary<Type, IMap> Maps { get; }
-
-        IDbConnection GetSqlConnection();
-
-        ISqlWriter GetSqlWriter();
-
-        #endregion Database
-
-        #region Entities
-
-        IConfiguration Add(Type type);
-
-        IConfiguration Add<T>();
-
-        IConfiguration Add(IEnumerable<Type> types);
-
-        EntityMapper<T> Setup<T>();
-
-        IConfiguration AddNamespaceFromAssemblyOf<T>(string nameSpace);
-
-        #endregion Entities
-
-        /// <summary>
-        /// Run the configuration
-        /// </summary>
-        IConfiguration Configure();
-    }
+        #endregion Convention
+*/
 }

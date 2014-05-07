@@ -104,7 +104,7 @@ namespace TopHat.Tests.Configuration
 
             // assemble
             var config = new DefaultConfiguration().Configure();
-            config.Conventions.DefaultStringLength = (p) =>
+            config.Convention.DefaultStringLength = (p) =>
             {
                 propertyInfos.Add(p);
                 return defaultLength;
@@ -127,7 +127,7 @@ namespace TopHat.Tests.Configuration
 
             // assemble
             var config = new DefaultConfiguration().Configure();
-            config.Conventions.DefaultDecimalPrecision = (p) =>
+            config.Convention.DefaultDecimalPrecision = (p) =>
             {
                 propertyInfos.Add(p);
                 return defaultPrecision;
@@ -150,7 +150,7 @@ namespace TopHat.Tests.Configuration
 
             // assemble
             var config = new DefaultConfiguration().Configure();
-            config.Conventions.DefaultDecimalScale = (p) =>
+            config.Convention.DefaultDecimalScale = (p) =>
             {
                 propertyInfos.Add(p);
                 return defaultScale;

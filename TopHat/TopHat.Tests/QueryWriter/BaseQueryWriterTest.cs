@@ -1,40 +1,37 @@
-﻿using Dapper;
+﻿using System;
+using System.Data;
 using Microsoft.QualityTools.Testing.Fakes;
 using Moq;
-using System;
-using System.Data;
 using TopHat.Configuration;
 using TopHat.SqlWriter;
+using TopHat.Tests.TestDomain;
 
-namespace TopHat.Tests.QueryWriter
-{
-    public class BaseQueryWriterTest : IDisposable
-    {
-        protected Mock<IDbConnection> conn;
-        protected Mock<IDbTransaction> tran;
-        protected Mock<ISqlWriter> sql;
-        protected Mock<IConfiguration> config;
-        private IDisposable shimsContext;
+namespace TopHat.Tests.QueryWriter {
+	public class BaseQueryWriterTest : IDisposable {
+		protected readonly Mock<IDbConnection> Connection;
+		protected readonly Mock<IDbTransaction> Transaction;
+		protected readonly Mock<ISqlWriter> SqlWriter;
+		protected readonly Mock<IQueryFactory> QueryFactory;
+		private readonly IDisposable _shimsContext;
 
-        public BaseQueryWriterTest()
-        {
-            this.conn = new Mock<IDbConnection>();
-            this.tran = new Mock<IDbTransaction>();
-            this.sql = new Mock<ISqlWriter>();
-            this.config = new Mock<IConfiguration>();
-            this.shimsContext = ShimsContext.Create();
-        }
+		public BaseQueryWriterTest() {
+			Connection = new Mock<IDbConnection>(MockBehavior.Strict);
+			Transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
+			SqlWriter = new Mock<ISqlWriter>(MockBehavior.Strict);
+			QueryFactory = new Mock<IQueryFactory>(MockBehavior.Strict);
+			_shimsContext = ShimsContext.Create();
+		}
 
-        protected ITopHat GetTopHat()
-        {
-            config.Setup(c => c.GetSqlWriter()).Returns(this.sql.Object);
-            Dapper.Fakes.ShimSqlMapper.ExecuteIDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType = (connection, sql, parameters, transaction, timeout, type) => 1;
-            return new TopHat(config.Object, conn.Object, tran.Object);
-        }
+		protected ISession GetTopHat() {
+			//Dapper.Fakes.ShimSqlMapper.ExecuteIDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType = (connection, SqlWriter, parameters, transaction, timeout, type) => 1;
+			
+			var session = new Session(SqlWriter.Object, QueryFactory.Object, Connection.Object, Transaction.Object);
+			QueryFactory.Setup(m => m.Select<Post>(It.IsAny<ISession>())).Returns(new QueryWriter<Post>(session, false));
+			return session;
+		}
 
-        public void Dispose()
-        {
-            this.shimsContext.Dispose();
-        }
-    }
+		public void Dispose() {
+			_shimsContext.Dispose();
+		}
+	}
 }

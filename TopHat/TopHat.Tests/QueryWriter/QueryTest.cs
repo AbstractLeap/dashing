@@ -17,7 +17,7 @@ namespace TopHat.Tests.QueryWriter
         {
             Dapper.Fakes.ShimSqlMapper.QueryOf1IDbConnectionStringObjectIDbTransactionBooleanNullableOfInt32NullableOfCommandType<Post>((connection, sql, parameters, transaction, buffered, timeout, type) => new List<Post>());
             GetTopHat().Query<Post>().Where(p => p.PostId == 1).ForUpdate().ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.ForUpdate)));
+            this.SqlWriter.Verify(s => s.WriteSqlFor<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.ForUpdate)));
         }
 
         [Fact]
@@ -25,7 +25,7 @@ namespace TopHat.Tests.QueryWriter
         {
             Dapper.Fakes.ShimSqlMapper.QueryOf1IDbConnectionStringObjectIDbTransactionBooleanNullableOfInt32NullableOfCommandType<Post>((connection, sql, parameters, transaction, buffered, timeout, type) => new List<Post>());
             GetTopHat().Query<Post>().Skip(10).ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.Skip == 10)));
+            this.SqlWriter.Verify(s => s.WriteSqlFor<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.Skip == 10)));
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace TopHat.Tests.QueryWriter
         {
             Dapper.Fakes.ShimSqlMapper.QueryOf1IDbConnectionStringObjectIDbTransactionBooleanNullableOfInt32NullableOfCommandType<Post>((connection, sql, parameters, transaction, buffered, timeout, type) => new List<Post>());
             GetTopHat().Query<Post>().Take(10).ToList();
-            this.sql.Verify(s => s.Execute<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.Take == 10)));
+            this.SqlWriter.Verify(s => s.WriteSqlFor<Post>(It.Is<Query<Post>>(q => q.QueryType == QueryType.Select && q.Take == 10)));
         }
     }
 }

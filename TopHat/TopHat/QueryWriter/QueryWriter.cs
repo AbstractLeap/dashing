@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace TopHat
 {
-    internal class QueryWriter<T> : ISelect<T>
+    public class QueryWriter<T> : ISelect<T>
     {
-        private ITopHat topHat;
+        private ISession topHat;
         private Query<T> query;
 
-        public QueryWriter(ITopHat topHat, bool tracked)
+        public QueryWriter(ISession topHat, bool tracked)
         {
             this.topHat = topHat;
             this.query = new Query<T> { Tracked = tracked, QueryType = QueryType.Select };
@@ -126,13 +126,11 @@ namespace TopHat
 
         public IEnumerator<T> GetEnumerator()
         {
-            var sqlQuery = this.topHat.Configuration.GetSqlWriter().Execute(this.query);
-
-            if (this.query.Fetches.Count == 0)
+          if (this.query.Fetches.Count == 0)
             {
                 if (!this.query.Tracked)
                 {
-                    return this.topHat.Connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters).GetEnumerator();
+                    return this.topHat.Query<T>(query).GetEnumerator();
                 }
                 else
                 {
