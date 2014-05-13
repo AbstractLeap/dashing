@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using Dapper;
 using TopHat.Configuration;
-using TopHat.SqlWriter;
 
 namespace TopHat {
 	public sealed class Session : ISession {
-		private readonly ISqlWriter _writer;
+		private readonly IEngine _engine;
 		private readonly IQueryFactory _queryFactory;
 		private readonly IDbConnection _connection;
 		private readonly bool _isTheirTransaction;
@@ -15,26 +13,26 @@ namespace TopHat {
 		private bool _isDisposed;
 		private bool _isCompleted;
 
-		public Session(ISqlWriter sqlWriter, IQueryFactory queryFactory, IDbConnection connection) {
-			if (sqlWriter == null) throw new ArgumentNullException("writer");
+		public Session(IEngine engine, IQueryFactory queryFactory, IDbConnection connection) {
+			if (engine == null) throw new ArgumentNullException("engine");
 			if (queryFactory == null) throw new ArgumentNullException("queryFactory");
 			if (connection == null) throw new ArgumentNullException("connection");
 
-			_writer = sqlWriter;
+			_engine = engine;
 			_queryFactory = queryFactory;
 			_connection = connection;
 		}
 
 		public Session(
-			ISqlWriter sqlWriter,
+			IEngine sqlEngine,
 			IQueryFactory queryFactory,
 			IDbConnection connection,
 			IDbTransaction transaction = null) {
-			if (sqlWriter == null) throw new ArgumentNullException("writer");
+			if (sqlEngine == null) throw new ArgumentNullException("engine");
 			if (queryFactory == null) throw new ArgumentNullException("queryFactory");
 			if (connection == null) throw new ArgumentNullException("connection");
 
-			_writer = sqlWriter;
+			_engine = sqlEngine;
 			_queryFactory = queryFactory;
 			_connection = connection;
 
@@ -96,41 +94,32 @@ namespace TopHat {
 			return _queryFactory.Select<T>(this);
 		}
 
-		public IEnumerable<T> Query<T>(Query<T> query) {
-			var sqlQuery = _writer.WriteSqlFor(query);
-			return Connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters);
-		}
-
-		public int Execute<T>(Query<T> query) {
-			var sqlQuery = _writer.WriteSqlFor(query);
-			return Connection.Execute(sqlQuery.Sql, sqlQuery.Parameters);
+		public IEnumerable<T> Query<T>(ISelect<T> query) {
+			return _engine.Query(Connection, query);
 		}
 
 		public ISelect<T> QueryTracked<T>() {
 			throw new NotImplementedException();
-			return new QueryWriter<T>(this, true);
 		}
+
+		public IEnumerable<T> Query<T>(Query<T> query) {
+			throw new NotImplementedException();
+		}
+
 		public void Insert<T>(T entity) {
 			throw new NotImplementedException();
-			var query = new Query<T> { Entity = entity, QueryType = QueryType.Insert };
-			Execute(query);
 		}
 
 		public void Update<T>(T entity) {
 			throw new NotImplementedException();
-			var query = new Query<T> { Entity = entity, QueryType = QueryType.Update };
-			Execute(query);
 		}
 
 		public IWhereExecute<T> Update<T>() {
 			throw new NotImplementedException();
-			return new WhereExecuter<T>(this, QueryType.Update);
 		}
 
 		public void Delete<T>(T entity) {
 			throw new NotImplementedException();
-			var query = new Query<T> { Entity = entity, QueryType = QueryType.Delete };
-			Execute(query);
 		}
 
 		public void Delete<T>(int id) {
@@ -139,7 +128,6 @@ namespace TopHat {
 
 		public IWhereExecute<T> Delete<T>() {
 			throw new NotImplementedException();
-			return new WhereExecuter<T>(this, QueryType.Delete);
 		}
 	}
 }

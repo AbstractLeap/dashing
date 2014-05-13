@@ -9,7 +9,7 @@ namespace TopHat.Configuration {
 	public abstract class ConfigurationBase : IConfiguration {
 		private IEngine _engine;
 
-		protected String ConnectionString { get; set; }
+		private readonly String _connectionString;
 
 		protected IMapper Mapper { get; set; }
 
@@ -46,8 +46,8 @@ namespace TopHat.Configuration {
 			if (sessionFactory == null) throw new ArgumentNullException("sessionFactory");
 			if (queryFactory == null) throw new ArgumentNullException("queryFactory");
 
-			Engine = engine;
-			ConnectionString = connectionString;
+			_engine = engine;
+			_connectionString = connectionString;
 			Mapper = mapper;
 			SessionFactory = sessionFactory;
 			QueryFactory = queryFactory;
@@ -59,19 +59,22 @@ namespace TopHat.Configuration {
 			: this(engine, connectionString, new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory(), new DefaultQueryFactory()) {}
 
 		public ISession BeginSession() {
-			return BeginSession(Engine.ConnectionFactory.Open(ConnectionString));
+			return SessionFactory.Create(
+				Engine,
+				QueryFactory,
+				Engine.Open(_connectionString));
 		}
 
 		public ISession BeginSession(IDbConnection connection) {
 			return SessionFactory.Create(
-				Engine.SqlWriter,
+				Engine,
 				QueryFactory,
 				connection);
 		}
 
 		public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
 			return SessionFactory.Create(
-				Engine.SqlWriter,
+				Engine,
 				QueryFactory,
 				connection,
 				transaction);

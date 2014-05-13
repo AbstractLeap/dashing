@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using TopHat.Configuration;
-using TopHat.SqlWriter;
 
 namespace TopHat {
 	public interface IEngine {
-		IConnectionFactory ConnectionFactory { get; }
-		ISqlWriter SqlWriter { get; }
+		IDbConnection Open(string connectionString);
 
 		void UseMaps(IDictionary<Type, Map> maps);
+
+		IEnumerable<T> Query<T>(IDbConnection connection, ISelect<T> query);
 	}
 }

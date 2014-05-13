@@ -50,7 +50,6 @@
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
     <Compile Include="Configuration\DefaultSessionFactory.cs" />
-    <Compile Include="Configuration\IConnectionFactory.cs" />
     <Compile Include="Configuration\IMapper.cs" />
     <Compile Include="Configuration\IQueryFactory.cs" />
     <Compile Include="Configuration\ISessionFactory.cs" />
@@ -73,15 +72,12 @@
     <Compile Include="QueryWriter\Query.cs" />
     <Compile Include="QueryWriter\QueryWriter.cs" />
     <Compile Include="QueryWriter\WhereClause.cs" />
-    <Compile Include="QueryWriter\WhereExecuter.cs" />
-    <Compile Include="SqlWriter\ISqlWriter.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryWriter\IOrder.cs" />
     <Compile Include="QueryWriter\IQuery.cs" />
     <Compile Include="QueryWriter\IFetch.cs" />
     <Compile Include="QueryWriter\IWhere.cs" />
-    <Compile Include="SqlWriter\SqlWriterResult.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="TopHat.cs" />
   </ItemGroup>

@@ -93,7 +93,7 @@ namespace TopHat {
 
 		#endregion Querying
 
-		int Execute<T>(Query<T> query);
+		//int Execute<T>(Query<T> query);
 
 		IEnumerable<T> Query<T>(Query<T> query);
 	}

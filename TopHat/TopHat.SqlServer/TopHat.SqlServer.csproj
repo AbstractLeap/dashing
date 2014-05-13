@@ -41,9 +41,7 @@
   <ItemGroup>
     <Compile Include="Engines.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlServerConnectionManager.cs" />
     <Compile Include="SqlServerEngine.cs" />
-    <Compile Include="SqlServerSqlWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TopHat\TopHat.csproj">

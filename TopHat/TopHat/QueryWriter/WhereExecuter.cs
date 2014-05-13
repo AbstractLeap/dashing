@@ -1,52 +1,39 @@
-﻿using Dapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TopHat.Configuration;
-using TopHat.SqlWriter;
+﻿using System;
+using System.Linq.Expressions;
 
-namespace TopHat
-{
-    internal class WhereExecuter<T> : IWhereExecute<T>
-    {
-        private ISession topHat;
-        private QueryType queryType;
+namespace TopHat.QueryWriter {
+	internal class WhereExecuter<T> : IWhereExecute<T> {
+		private readonly ISession topHat;
+		private readonly QueryType queryType;
 
-				public WhereExecuter(ISession topHat, QueryType queryType)
-        {
-            this.topHat = topHat;
-            this.queryType = queryType;
-        }
+		public WhereExecuter(ISession topHat, QueryType queryType) {
+			this.topHat = topHat;
+			this.queryType = queryType;
+		}
 
-        public void Where(System.Linq.Expressions.Expression<Func<T, bool>> predicate)
-        {
-            var query = new Query<T> { QueryType = this.queryType };
-            query.WhereClauses.Add(new WhereClause<T>(predicate));
+		public void Where(Expression<Func<T, bool>> predicate) {
+			var query = new Query<T> {QueryType = queryType};
+			query.WhereClauses.Add(new WhereClause<T>(predicate));
 
-            ExecuteQuery(query);
-        }
+			ExecuteQuery(query);
+		}
 
-        public void Where(string condition)
-        {
-            var query = new Query<T> { QueryType = this.queryType };
-            query.WhereClauses.Add(new WhereClause<T>(condition));
+		public void Where(string condition) {
+			var query = new Query<T> {QueryType = queryType};
+			query.WhereClauses.Add(new WhereClause<T>(condition));
 
-            ExecuteQuery(query);
-        }
+			ExecuteQuery(query);
+		}
 
-        public void Where(string condition, params dynamic[] parameters)
-        {
-            var query = new Query<T> { QueryType = this.queryType };
-            query.WhereClauses.Add(new WhereClause<T>(condition, parameters));
+		public void Where(string condition, params dynamic[] parameters) {
+			var query = new Query<T> {QueryType = queryType};
+			query.WhereClauses.Add(new WhereClause<T>(condition, parameters));
 
-            ExecuteQuery(query);
-        }
+			ExecuteQuery(query);
+		}
 
-        private void ExecuteQuery(Query<T> query)
-        {
-            this.topHat.Execute(query);
-        }
-    }
+		private void ExecuteQuery(Query<T> query) {
+			topHat.Execute(query);
+		}
+	}
 }
