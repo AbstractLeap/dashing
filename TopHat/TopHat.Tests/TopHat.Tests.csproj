@@ -43,6 +43,9 @@
     <Reference Include="Dapper.1.12.1.1.Fakes">
       <HintPath>FakesAssemblies\Dapper.1.12.1.1.Fakes.dll</HintPath>
     </Reference>
+    <Reference Include="LinFu.Core">
+      <HintPath>..\packages\LinFu.Core.2.3.0.41559\lib\net35\LinFu.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Moq">
@@ -70,6 +73,8 @@
     <Compile Include="Configuration\DefaultConfigurationTests.cs" />
     <Compile Include="Configuration\ConfigurationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Proxy\ChangeTrackingTests.cs" />
+    <Compile Include="Proxy\ProxyTests.cs" />
     <Compile Include="QueryWriter\BaseQueryWriterTest.cs" />
     <Compile Include="QueryWriter\CUDTest.cs" />
     <Compile Include="QueryWriter\FetchTest.cs" />

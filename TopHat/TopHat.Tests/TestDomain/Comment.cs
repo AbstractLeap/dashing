@@ -2,7 +2,7 @@
 
 namespace TopHat.Tests.TestDomain
 {
-    internal class Comment
+    public class Comment
     {
         public virtual int CommentId { get; set; }
 

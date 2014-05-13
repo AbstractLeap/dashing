@@ -2,7 +2,7 @@
 
 namespace TopHat.Tests.TestDomain
 {
-    internal class Post
+    public class Post
     {
         public virtual int PostId { get; set; }
 

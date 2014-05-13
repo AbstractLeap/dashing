@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TopHat.Tests.TestDomain
 {
-    internal class Blog
+    public class Blog
     {
         public virtual int BlogId { get; set; }
 

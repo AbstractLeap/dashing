@@ -1,6 +1,6 @@
 ﻿namespace TopHat.Tests.TestDomain
 {
-    internal class User
+    public class User
     {
         public virtual string Username { get; set; }
 
