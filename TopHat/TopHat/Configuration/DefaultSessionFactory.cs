@@ -1,13 +1,43 @@
-﻿using System.Data;
+﻿namespace TopHat.Configuration {
+  using System.Data;
 
-namespace TopHat.Configuration {
-	public class DefaultSessionFactory : ISessionFactory {
-		public ISession Create(IEngine engine, IQueryFactory queryFactory, IDbConnection connection) {
-			return new Session(engine, queryFactory, connection);
-		}
+  /// <summary>
+  ///   The default session factory.
+  /// </summary>
+  public class DefaultSessionFactory : ISessionFactory {
+    /// <summary>
+    ///   The create.
+    /// </summary>
+    /// <param name="engine">
+    ///   The engine.
+    /// </param>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <returns>
+    ///   The <see cref="ISession" />.
+    /// </returns>
+    public ISession Create(IEngine engine, IDbConnection connection) {
+      return new Session(engine, connection);
+    }
 
-		public ISession Create(IEngine engine, IQueryFactory queryFactory, IDbConnection connection, IDbTransaction transaction) {
-			return new Session(engine, queryFactory, connection, transaction);
-		}
-	}
+    /// <summary>
+    ///   The create.
+    /// </summary>
+    /// <param name="engine">
+    ///   The engine.
+    /// </param>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <param name="transaction">
+    ///   The transaction.
+    /// </param>
+    /// <returns>
+    ///   The <see cref="ISession" />.
+    /// </returns>
+    public ISession Create(IEngine engine, IDbConnection connection, IDbTransaction transaction) {
+      return new Session(engine, connection, transaction);
+    }
+  }
 }

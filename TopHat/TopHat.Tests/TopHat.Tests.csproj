@@ -67,17 +67,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Configuration\ColumnExtensionTests.cs" />
+    <Compile Include="Configuration\DefaultConventionTests.cs" />
+    <Compile Include="Configuration\DefaultSessionFactoryTests.cs" />
+    <Compile Include="Configuration\MapExtensionsTests.cs" />
+    <Compile Include="Configuration\MapTests.cs" />
+    <Compile Include="Configuration\DefaultMapperTests.cs" />
+    <Compile Include="Configuration\ColumnTests.cs" />
     <Compile Include="Configuration\DefaultConfigurationTests.cs" />
-    <Compile Include="Configuration\ConfigurationTests.cs" />
+    <Compile Include="Configuration\ConfigurationBaseTests.cs" />
+    <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryWriter\BaseQueryWriterTest.cs" />
-    <Compile Include="QueryWriter\CUDTest.cs" />
-    <Compile Include="QueryWriter\FetchTest.cs" />
-    <Compile Include="QueryWriter\OrderTest.cs" />
-    <Compile Include="QueryWriter\SelectTest.cs" />
-    <Compile Include="QueryWriter\QueryTest.cs" />
-    <Compile Include="QueryWriter\TrackedTest.cs" />
-    <Compile Include="QueryWriter\WhereTest.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Post.cs" />

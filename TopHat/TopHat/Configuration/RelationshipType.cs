@@ -1,8 +1,26 @@
 ﻿namespace TopHat.Configuration {
-	public enum RelationshipType {
-		None,
-		OneToMany,
-		ManyToOne,
-		ManyToMany
-	}
+  /// <summary>
+  ///   The relationship type.
+  /// </summary>
+  public enum RelationshipType {
+    /// <summary>
+    ///   The none.
+    /// </summary>
+    None, 
+
+    /// <summary>
+    ///   The one to many.
+    /// </summary>
+    OneToMany, 
+
+    /// <summary>
+    ///   The many to one.
+    /// </summary>
+    ManyToOne, 
+
+    /// <summary>
+    ///   The many to many.
+    /// </summary>
+    ManyToMany
+  }
 }

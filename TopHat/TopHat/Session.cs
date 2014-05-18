@@ -1,133 +1,274 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using TopHat.Configuration;
+﻿namespace TopHat {
+  using System;
+  using System.Collections.Generic;
+  using System.Data;
 
-namespace TopHat {
-	public sealed class Session : ISession {
-		private readonly IEngine _engine;
-		private readonly IQueryFactory _queryFactory;
-		private readonly IDbConnection _connection;
-		private readonly bool _isTheirTransaction;
-		private IDbTransaction _transaction;
-		private bool _isDisposed;
-		private bool _isCompleted;
+  /// <summary>
+  ///   The session.
+  /// </summary>
+  public sealed class Session : ISession {
+    /// <summary>
+    ///   The _engine.
+    /// </summary>
+    private readonly IEngine _engine;
 
-		public Session(IEngine engine, IQueryFactory queryFactory, IDbConnection connection) {
-			if (engine == null) throw new ArgumentNullException("engine");
-			if (queryFactory == null) throw new ArgumentNullException("queryFactory");
-			if (connection == null) throw new ArgumentNullException("connection");
+    /// <summary>
+    ///   The _connection.
+    /// </summary>
+    private readonly IDbConnection _connection;
 
-			_engine = engine;
-			_queryFactory = queryFactory;
-			_connection = connection;
-		}
+    /// <summary>
+    ///   The _is their transaction.
+    /// </summary>
+    private readonly bool _isTheirTransaction;
 
-		public Session(
-			IEngine sqlEngine,
-			IQueryFactory queryFactory,
-			IDbConnection connection,
-			IDbTransaction transaction = null) {
-			if (sqlEngine == null) throw new ArgumentNullException("engine");
-			if (queryFactory == null) throw new ArgumentNullException("queryFactory");
-			if (connection == null) throw new ArgumentNullException("connection");
+    /// <summary>
+    ///   The _transaction.
+    /// </summary>
+    private IDbTransaction _transaction;
 
-			_engine = sqlEngine;
-			_queryFactory = queryFactory;
-			_connection = connection;
+    /// <summary>
+    ///   The _is disposed.
+    /// </summary>
+    private bool _isDisposed;
 
-			if (transaction != null) {
-				_isTheirTransaction = true;
-				_transaction = transaction;
-			}
-		}
+    /// <summary>
+    ///   The _is completed.
+    /// </summary>
+    private bool _isCompleted;
 
-		public IDbConnection Connection {
-			get {
-				if (_isDisposed)
-					throw new ObjectDisposedException("Session");
+    /// <summary>
+    ///   Initializes a new instance of the <see cref="Session" /> class.
+    /// </summary>
+    /// <param name="engine">
+    ///   The engine.
+    /// </param>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// </exception>
+    public Session(IEngine engine, IDbConnection connection) {
+      if (engine == null) {
+        throw new ArgumentNullException("engine");
+      }
 
-				if (_connection.State == ConnectionState.Closed)
-					_connection.Open();
+      if (connection == null) {
+        throw new ArgumentNullException("connection");
+      }
 
-				if (_connection.State == ConnectionState.Open)
-					return _connection;
+      this._engine = engine;
+      this._connection = connection;
+    }
 
-				throw new Exception("Connection in unknown state");
-			}
-		}
+    /// <summary>
+    ///   Initializes a new instance of the <see cref="Session" /> class.
+    /// </summary>
+    /// <param name="engine">
+    ///   The engine.
+    /// </param>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <param name="transaction">
+    ///   The transaction.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// </exception>
+    public Session(IEngine engine, IDbConnection connection, IDbTransaction transaction = null) {
+      if (engine == null) {
+        throw new ArgumentNullException("engine");
+      }
 
-		public IDbTransaction Transaction {
-			get {
-				if (_isDisposed)
-					throw new ObjectDisposedException("Session");
+      if (connection == null) {
+        throw new ArgumentNullException("connection");
+      }
 
-				return _transaction ?? (_transaction = Connection.BeginTransaction());
-			}
-		}
+      this._engine = engine;
+      this._connection = connection;
 
-		public void Complete() {
-			if (_isCompleted)
-				throw new InvalidOperationException("Only call complete once, when all of the transactional work is done");
+      if (transaction != null) {
+        this._isTheirTransaction = true;
+        this._transaction = transaction;
+      }
+    }
 
-			if (_transaction != null && !_isTheirTransaction)
-				_transaction.Commit();
+    /// <summary>
+    ///   Gets the connection.
+    /// </summary>
+    /// <exception cref="ObjectDisposedException">
+    /// </exception>
+    /// <exception cref="Exception">
+    /// </exception>
+    public IDbConnection Connection {
+      get {
+        if (this._isDisposed) {
+          throw new ObjectDisposedException("Session");
+        }
 
-			_isCompleted = true;
-		}
+        if (this._connection.State == ConnectionState.Closed) {
+          this._connection.Open();
+        }
 
-		public void Dispose() {
-			if (_isDisposed)
-				return;
+        if (this._connection.State == ConnectionState.Open) {
+          return this._connection;
+        }
 
-			if (_transaction != null && !_isTheirTransaction) {
-				if (!_isCompleted)
-					_transaction.Rollback();
+        throw new Exception("Connection in unknown state");
+      }
+    }
 
-				_transaction.Dispose();
-			}
+    /// <summary>
+    ///   Gets the transaction.
+    /// </summary>
+    /// <exception cref="ObjectDisposedException">
+    /// </exception>
+    public IDbTransaction Transaction {
+      get {
+        if (this._isDisposed) {
+          throw new ObjectDisposedException("Session");
+        }
 
-			_isDisposed = true;
-		}
+        return this._transaction ?? (this._transaction = this.Connection.BeginTransaction());
+      }
+    }
 
-		public ISelect<T> Query<T>() {
-			return _queryFactory.Select<T>(this);
-		}
+    /// <summary>
+    ///   The complete.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// </exception>
+    public void Complete() {
+      if (this._isCompleted) {
+        throw new InvalidOperationException("Only call complete once, when all of the transactional work is done");
+      }
 
-		public IEnumerable<T> Query<T>(ISelect<T> query) {
-			return _engine.Query(Connection, query);
-		}
+      if (this._transaction != null && !this._isTheirTransaction) {
+        this._transaction.Commit();
+      }
 
-		public ISelect<T> QueryTracked<T>() {
-			throw new NotImplementedException();
-		}
+      this._isCompleted = true;
+    }
 
-		public IEnumerable<T> Query<T>(Query<T> query) {
-			throw new NotImplementedException();
-		}
+    /// <summary>
+    ///   The dispose.
+    /// </summary>
+    public void Dispose() {
+      if (this._isDisposed) {
+        return;
+      }
 
-		public void Insert<T>(T entity) {
-			throw new NotImplementedException();
-		}
+      if (this._transaction != null && !this._isTheirTransaction) {
+        if (!this._isCompleted) {
+          this._transaction.Rollback();
+        }
 
-		public void Update<T>(T entity) {
-			throw new NotImplementedException();
-		}
+        this._transaction.Dispose();
+      }
 
-		public IWhereExecute<T> Update<T>() {
-			throw new NotImplementedException();
-		}
+      this._isDisposed = true;
+    }
 
-		public void Delete<T>(T entity) {
-			throw new NotImplementedException();
-		}
+    /// <summary>
+    ///   The query.
+    /// </summary>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="SelectQuery" />.
+    /// </returns>
+    public SelectQuery<T> Query<T>() {
+      return new ExecutableSelectQuery<T>(this._engine, this.Connection);
+    }
 
-		public void Delete<T>(int id) {
-			throw new NotImplementedException();
-		}
+    /// <summary>
+    ///   The insert.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public int Insert<T>(params T[] entities) {
+      return this._engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
+    }
 
-		public IWhereExecute<T> Delete<T>() {
-			throw new NotImplementedException();
-		}
-	}
+    /// <summary>
+    ///   The insert.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public int Insert<T>(IEnumerable<T> entities) {
+      return this._engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
+    }
+
+    /// <summary>
+    ///   The update.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public int Update<T>(params T[] entities) {
+      return this._engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+    }
+
+    /// <summary>
+    ///   The update.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public int Update<T>(IEnumerable<T> entities) {
+      return this._engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+    }
+
+    /// <summary>
+    ///   The delete.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public int Delete<T>(params T[] entities) {
+      return this._engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+    }
+
+    /// <summary>
+    ///   The delete.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public int Delete<T>(IEnumerable<T> entities) {
+      return this._engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+    }
+  }
 }

@@ -1,100 +1,113 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-
 namespace TopHat {
-	public interface ISession : IDisposable {
-		#region Properties
+  using System;
+  using System.Collections.Generic;
+  using System.Data;
 
-		/// <summary>
-		///   The IDbConnection object associated with this instance of Session
-		/// </summary>
-		IDbConnection Connection { get; }
+  /// <summary>
+  ///   The Session interface.
+  /// </summary>
+  public interface ISession : IDisposable {
+    /// <summary>
+    ///   Gets the connection.
+    /// </summary>
+    IDbConnection Connection { get; }
 
-		/// <summary>
-		///   The IDbTransaction object associated with this instance of Session
-		/// </summary>
-		IDbTransaction Transaction { get; }
+    /// <summary>
+    ///   Gets the transaction.
+    /// </summary>
+    IDbTransaction Transaction { get; }
 
-		#endregion Properties
+    /// <summary>
+    ///   The complete.
+    /// </summary>
+    void Complete();
 
-		#region Transactions
+    /// <summary>
+    ///   The query.
+    /// </summary>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="SelectQuery" />.
+    /// </returns>
+    SelectQuery<T> Query<T>();
 
-		/// <summary>
-		///   Indicate that the transactional worked completely successfully and therefore commit the transaction.
-		///   In order to rollback simply refrain from calling this method and dispose will rollback.
-		/// </summary>
-		void Complete();
+    /// <summary>
+    ///   The insert.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    int Insert<T>(params T[] entities);
 
-		#endregion Transactions
+    /// <summary>
+    ///   The insert.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    int Insert<T>(IEnumerable<T> entities);
 
-		#region CUD
+    /// <summary>
+    ///   The update.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    int Update<T>(params T[] entities);
 
-		/// <summary>
-		///   Inserts a new entity in to the database
-		/// </summary>
-		/// <typeparam name="T">Type of entity</typeparam>
-		/// <param name="entity">The entity to insert</param>
-		void Insert<T>(T entity);
+    /// <summary>
+    ///   The update.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    int Update<T>(IEnumerable<T> entities);
 
-		/// <summary>
-		///   Updates the entity in the database
-		/// </summary>
-		/// <typeparam name="T">Type of entity</typeparam>
-		/// <param name="entity">The entity to update</param>
-		void Update<T>(T entity);
+    /// <summary>
+    ///   The delete.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    int Delete<T>(params T[] entities);
 
-		/// <summary>
-		///   Enables updating entities directly in the database based on a where clause
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		IWhereExecute<T> Update<T>();
-
-		/// <summary>
-		///   Deletes the entity from the database
-		/// </summary>
-		/// <typeparam name="T">Type of entity</typeparam>
-		/// <param name="entity">The entity to delete</param>
-		void Delete<T>(T entity);
-
-		/// <summary>
-		///   Deletes an entity from the database based on the primary key
-		/// </summary>
-		/// <typeparam name="T">Type of entity</typeparam>
-		/// <param name="id">The integer primary key of the entity to delete</param>
-		/// <remarks>Will throw an exception if the entity has a non-integer primary key</remarks>
-		void Delete<T>(int id);
-
-		/// <summary>
-		///   Enables deletion of multiple entities in the database without having to first fetch the entities
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		IWhereExecute<T> Delete<T>();
-
-		#endregion CUD
-
-		#region Querying
-
-		/// <summary>
-		///   Construct a query against the database
-		/// </summary>
-		/// <typeparam name="T">Type of entity to select</typeparam>
-		/// <returns></returns>
-		ISelect<T> Query<T>();
-
-		/// <summary>
-		///   Construct a query against the database and add change tracking to any returned objects
-		/// </summary>
-		/// <typeparam name="T">Type of entities to return</typeparam>
-		/// <returns></returns>
-		ISelect<T> QueryTracked<T>();
-
-		#endregion Querying
-
-		//int Execute<T>(Query<T> query);
-
-		IEnumerable<T> Query<T>(Query<T> query);
-	}
+    /// <summary>
+    ///   The delete.
+    /// </summary>
+    /// <param name="entities">
+    ///   The entities.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    int Delete<T>(IEnumerable<T> entities);
+  }
 }

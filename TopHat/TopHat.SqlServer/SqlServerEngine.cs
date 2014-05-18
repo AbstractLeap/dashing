@@ -5,13 +5,23 @@ using System.Data.SqlClient;
 
 namespace TopHat.SqlServer {
 	public class SqlServerEngine : EngineBase {
-		public override IDbConnection Open(string connectionString) {
-			var sqlConnection = new SqlConnection(connectionString);
-			sqlConnection.Open();
-			return sqlConnection;
+		protected override IDbConnection NewConnection(string connectionString) {
+			return new SqlConnection(connectionString);
 		}
 
-		public override IEnumerable<T> Query<T>(IDbConnection connection, ISelect<T> query) {
+		public override IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query) {
+			throw new NotImplementedException();
+		}
+
+		public override int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query) {
+			throw new NotImplementedException();
+		}
+
+		public override int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query) {
+			throw new NotImplementedException();
+		}
+
+		public override int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query) {
 			throw new NotImplementedException();
 		}
 	}

@@ -1,65 +1,82 @@
-﻿using System;
-using System.Collections.Generic;
-
 namespace TopHat.Configuration {
-	public class Map {
-		public Map(Type type) {
-			if (type == null) throw new ArgumentNullException("type");
+  using System;
+  using System.Collections.Generic;
 
-			Type = type;
-			Columns = new Dictionary<string, Column>();
-			Indexes = new List<IEnumerable<string>>();
-		}
+  /// <summary>
+  ///   The map.
+  /// </summary>
+  /// <typeparam name="T">
+  /// </typeparam>
+  public class Map<T> : IMap {
+    public Map() {
+      this.Type = typeof(T);
+      this.Columns = new Dictionary<string, IColumn>();
 
-		public Type Type { get; private set; }
+      //// this.Indexes = new List<IEnumerable<string>>();
+    }
 
-		public string Table { get; set; }
+    /// <summary>
+    ///   Gets the type.
+    /// </summary>
+    public Type Type { get; private set; }
 
-		public string Schema { get; set; }
+    /// <summary>
+    ///   Gets or sets the table.
+    /// </summary>
+    public string Table { get; set; }
 
-		public string PrimaryKey { get; set; }
+    /// <summary>
+    ///   Gets or sets the schema.
+    /// </summary>
+    public string Schema { get; set; }
 
-		public bool IsPrimaryKeyDatabaseGenerated { get; set; }
+    /// <summary>
+    ///   Gets or sets the primary key.
+    /// </summary>
+    public string PrimaryKey { get; set; }
 
-		public IDictionary<string, Column> Columns { get; set; }
+    /// <summary>
+    ///   Gets or sets a value indicating whether is primary key database generated.
+    /// </summary>
+    public bool IsPrimaryKeyDatabaseGenerated { get; set; }
 
-		public IEnumerable<IEnumerable<string>> Indexes { get; set; }
+    /// <summary>
+    ///   Gets or sets the columns.
+    /// </summary>
+    public IDictionary<string, IColumn> Columns { get; set; }
 
-		/*
-		 * mark doing optimization
-		public string SqlSelectByPrimaryKey { get; set; }
+    //// commented out until we get basic stuff working
+    ///// <summary>
+    /////   Gets or sets the indexes.
+    ///// </summary>
+    //// public IEnumerable<IEnumerable<string>> Indexes { get; set; }
 
-		public string SqlSelectByPrimaryKeyIncludeAllColumns { get; set; }
+    /// <summary>
+    ///   The from.
+    /// </summary>
+    /// <param name="map">
+    ///   The map.
+    /// </param>
+    /// <remarks>
+    ///   Highly inelegant wrapping of all the members, but probably quite performant
+    /// </remarks>
+    /// <returns>
+    ///   The <see cref="Map" />.
+    /// </returns>
+    public static Map<T> From(IMap map) {
+      if (typeof(T) != map.Type) {
+        throw new ArgumentException("The argument does not represent a map of the correct generic type");
+      }
 
-		public string SqlInsert { get; set; }
-
-		public string SqlDeleteByPrimaryKey { get; set; }
-		 * */
-	}
-
-	public class Map<T> : Map {
-		public Map()
-			: base(typeof (T)) {}
-
-		/// <remarks>Highly inelegant wrapping of all the members, but probably quite performant</remarks>
-		public static Map<T> From(Map map) {
-			if (typeof (T) != map.Type) throw new ArgumentException("The argument does not represent a map of the correct generic type");
-
-			return new Map<T> {
-				Table = map.Table,
-				Schema = map.Schema,
-				PrimaryKey = map.PrimaryKey,
-				IsPrimaryKeyDatabaseGenerated = map.IsPrimaryKeyDatabaseGenerated,
-				Columns = map.Columns,
-				Indexes = map.Indexes,
-				/*
-				 * mark doing optimization
-				SqlSelectByPrimaryKey = map.SqlSelectByPrimaryKey,
-				SqlSelectByPrimaryKeyIncludeAllColumns = map.SqlSelectByPrimaryKeyIncludeAllColumns,
-				SqlInsert = map.SqlInsert,
-				SqlDeleteByPrimaryKey = map.SqlDeleteByPrimaryKey
-				 * */
-			};
-		}
-	}
+      return new Map<T> {
+                          Table = map.Table, 
+                          Schema = map.Schema, 
+                          PrimaryKey = map.PrimaryKey, 
+                          IsPrimaryKeyDatabaseGenerated = map.IsPrimaryKeyDatabaseGenerated, 
+                          Columns = map.Columns
+                          
+                          //// Indexes = map.Indexes
+                        };
+    }
+  }
 }

@@ -1,59 +1,167 @@
-﻿using System.Data;
+﻿namespace TopHat.Configuration {
+  using System.Data;
 
-/*
-		/// <summary>
-		///   Indicates whether the column will be excluded from select queries unless specifically requested
-		/// </summary>
-		public bool ExcludedByDefault { get; set; }
+  /// <summary>
+  ///   The column extensions.
+  /// </summary>
+  public static class ColumnExtensions {
+    /// <summary>
+    ///   The name.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <param name="name">
+    ///   The name.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn Name(this IColumn column, string name) {
+      column.Name = name;
+      return column;
+    }
 
-		public RelationshipType Relationship { get; set; }
-*/
+    /// <summary>
+    ///   The db type.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <param name="dbType">
+    ///   The db type.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn DbType(this IColumn column, DbType dbType) {
+      column.DbType = dbType;
+      return column;
+    }
 
-namespace TopHat.Configuration {
-	public static class ColumnExtensions {
-		public static Column<T> Name<T>(this Column<T> column, string name) {
-			column.Name = name;
-			return column;
-		}
+    /// <summary>
+    ///   The precision.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <param name="precision">
+    ///   The precision.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn Precision(this IColumn column, byte precision) {
+      column.Precision = precision;
+      return column;
+    }
 
-		public static Column<T> DbType<T>(this Column<T> column, DbType dbType) {
-			column.DbType = dbType;
-			return column;
-		}
+    /// <summary>
+    ///   The scale.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <param name="scale">
+    ///   The scale.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn Scale(this IColumn column, byte scale) {
+      column.Scale = scale;
+      return column;
+    }
 
-		public static Column<T> Precision<T>(this Column<T> column, byte precision) {
-			column.Precision = precision;
-			return column;
-		}
+    /// <summary>
+    ///   The length.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <param name="length">
+    ///   The length.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn Length(this IColumn column, ushort length) {
+      column.Length = length;
+      return column;
+    }
 
-		public static Column<T> Scale<T>(this Column<T> column, byte scale) {
-			column.Scale = scale;
-			return column;
-		}
+    /// <summary>
+    ///   The exclude by default.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn ExcludeByDefault(this IColumn column) {
+      column.ExcludeByDefault = true;
+      return column;
+    }
 
-		public static Column<T> Length<T>(this Column<T> column, ushort length) {
-			column.Length = length;
-			return column;
-		}
+    /// <summary>
+    ///   The dont exclude by default.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn DontExcludeByDefault(this IColumn column) {
+      column.ExcludeByDefault = false;
+      return column;
+    }
 
-		public static Column<T> ExcludeByDefault<T>(this Column<T> column) {
-			column.ExcludedByDefault = true;
-			return column;
-		}
+    /// <summary>
+    ///   The ignore.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn Ignore(this IColumn column) {
+      column.Ignore = true;
+      return column;
+    }
 
-		public static Column<T> DontExcludeByDefault<T>(this Column<T> column) {
-			column.ExcludedByDefault = false;
-			return column;
-		}
-
-		public static Column<T> Ignore<T>(this Column<T> column) {
-			column.Ignore = true;
-			return column;
-		}
-
-		public static Column<T> DontIgnore<T>(this Column<T> column) {
-			column.Ignore = false;
-			return column;
-		}
-	}
+    /// <summary>
+    ///   The dont ignore.
+    /// </summary>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IColumn" />.
+    /// </returns>
+    public static IColumn DontIgnore(this IColumn column) {
+      column.Ignore = false;
+      return column;
+    }
+  }
 }
