@@ -1,5 +1,6 @@
 ﻿namespace TopHat.Tests.Configuration {
   using System;
+  using System.Collections.Generic;
   using System.Data;
   using System.Linq;
 
@@ -16,119 +17,132 @@
 
     private const string ExampleTableName = "foo";
 
-    private static readonly Mock<IEngine> MockEngine = new Mock<IEngine>(MockBehavior.Strict);
-
-    private static readonly Mock<IMapper> MockMapper = new Mock<IMapper>(MockBehavior.Strict);
-
-    private static readonly Mock<ISessionFactory> MockSessionFactory = new Mock<ISessionFactory>(MockBehavior.Strict);
-
     [Fact]
     public void EmptyConfigurationReturnsEmptyMaps() {
-      var target = new CustomConfiguration();
+      var target = new CustomConfiguration(MakeMockMapper().Object);
       Assert.Empty(target.Maps);
     }
 
     [Fact]
     public void NonEmptyConfigurationReturnsNonEmptyMaps() {
-      var target = new CustomConfigurationWithIndividualAdds();
+      var target = new CustomConfigurationWithIndividualAdds(SetupPostAndUserMaps().Object);
       Assert.NotEmpty(target.Maps);
     }
 
     [Fact]
     public void ConstructorThrowsOnNullEngine() {
-      Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(null, DummyConnectionString, MockMapper.Object, MockSessionFactory.Object));
+      Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(null, DummyConnectionString, MakeMockMapper().Object, MakeMockSf().Object));
     }
 
     [Fact]
     public void ConstructorThrowsOnNullConnectionString() {
-      Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MockEngine.Object, null, MockMapper.Object, MockSessionFactory.Object));
+      Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, null, MakeMockMapper().Object, MakeMockSf().Object));
     }
 
     [Fact]
     public void ConstructorThrowsOnNullMapper() {
-      Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MockEngine.Object, DummyConnectionString, null, MockSessionFactory.Object));
+      Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, DummyConnectionString, null, MakeMockSf().Object));
     }
 
     [Fact]
     public void ConstructorThrowsOnNullSessionFactory() {
-      Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MockEngine.Object, DummyConnectionString, MockMapper.Object, null));
+      Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, DummyConnectionString, MakeMockMapper().Object, null));
     }
 
     [Fact]
     public void BeginSessionCreatesConnectionAndDelegatesToSessionFactory() {
+      // assemble
       var connection = new Mock<IDbConnection>();
       var session = new Mock<ISession>();
-      MockEngine.Setup(m => m.Open(DummyConnectionString)).Returns(connection.Object).Verifiable();
-      MockSessionFactory.Setup(m => m.Create(MockEngine.Object, connection.Object)).Returns(session.Object).Verifiable();
 
-      var target = new CustomConfiguration();
+      var mockEngine = MakeMockEngine();
+      mockEngine.Setup(m => m.Open(DummyConnectionString)).Returns(connection.Object).Verifiable();
+      mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
+
+      var mockSessionFactory = MakeMockSf();
+      mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object)).Returns(session.Object).Verifiable();
+
+      var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+
+      // act
       var actual = target.BeginSession();
 
+      // assert
       Assert.Equal(session.Object, actual);
-      MockEngine.Verify();
-      MockSessionFactory.Verify();
+      mockEngine.Verify();
+      mockSessionFactory.Verify();
     }
 
     [Fact]
     public void BeginSessionWithConnectionDelegatesToSessionFactory() {
+      // assemble
       var connection = new Mock<IDbConnection>();
       var session = new Mock<ISession>();
-      MockSessionFactory.Setup(m => m.Create(MockEngine.Object, connection.Object)).Returns(session.Object).Verifiable();
 
-      var target = new CustomConfiguration();
+      var mockEngine = MakeMockEngine();
+      mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
+
+      var mockSessionFactory = MakeMockSf();
+      mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object)).Returns(session.Object).Verifiable();
+
+      var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+
+      // act
       var actual = target.BeginSession(connection.Object);
 
+      // assert
       Assert.Equal(session.Object, actual);
-      MockSessionFactory.Verify();
+      mockSessionFactory.Verify();
     }
 
     [Fact]
     public void BeginSessionWithConnectionAndTransactionDelegatesToSessionFactory() {
+      // assemble
       var connection = new Mock<IDbConnection>();
       var transaction = new Mock<IDbTransaction>();
       var session = new Mock<ISession>();
-      MockSessionFactory.Setup(m => m.Create(MockEngine.Object, connection.Object, transaction.Object)).Returns(session.Object).Verifiable();
 
-      var target = new CustomConfiguration();
+      var mockEngine = MakeMockEngine();
+      mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
+
+      var mockSessionFactory = MakeMockSf();
+      mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, transaction.Object)).Returns(session.Object).Verifiable();
+
+      var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+
+      // act
       var actual = target.BeginSession(connection.Object, transaction.Object);
 
+      // assert
       Assert.Equal(session.Object, actual);
-      MockSessionFactory.Verify();
+      mockSessionFactory.Verify();
     }
 
     [Fact]
     public void AddEntitiesByGenericAreMapped() {
-      SetupPostAndUserMaps();
-
-      var target = new CustomConfigurationWithIndividualAdds();
+      var target = new CustomConfigurationWithIndividualAdds(SetupPostAndUserMaps().Object);
 
       Assert.NotNull(target);
       Assert.Equal(2, target.Maps.Count());
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(User)));
-      MockMapper.Verify();
+      new Mock<IMapper>(MockBehavior.Strict).Verify();
     }
 
     [Fact]
     public void AddEntitiesByTypeAreMapped() {
-      SetupPostAndUserMaps();
-
-      var target = new CustomConfigurationWithAddEnumerable();
+      var target = new CustomConfigurationWithAddEnumerable(SetupPostAndUserMaps().Object);
 
       Assert.NotNull(target);
       Assert.Equal(2, target.Maps.Count());
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(User)));
-      MockMapper.Verify();
+      new Mock<IMapper>(MockBehavior.Strict).Verify();
     }
 
     [Fact]
     public void AddEntiesInNamespaceAreMapped() {
-      MockMapper.Setup(m => m.MapFor<Blog>()).Returns(default(Map<Blog>)).Verifiable();
-      MockMapper.Setup(m => m.MapFor<Comment>()).Returns(default(Map<Comment>)).Verifiable();
-      SetupPostAndUserMaps();
-
-      var target = new CustomConfigurationWithAddNamespace();
+      var target = new CustomConfigurationWithAddNamespace(SetupAllMaps().Object);
 
       Assert.NotNull(target);
       Assert.Equal(4, target.Maps.Count());
@@ -136,65 +150,99 @@
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Comment)));
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(User)));
-      MockMapper.Verify();
-    }
-
-    private static void SetupPostAndUserMaps() {
-      MockMapper.Setup(m => m.MapFor<Post>()).Returns(default(Map<Post>)).Verifiable();
-      MockMapper.Setup(m => m.MapFor<User>()).Returns(default(Map<User>)).Verifiable();
+      new Mock<IMapper>(MockBehavior.Strict).Verify();
     }
 
     [Fact]
     public void SetupEntityCreatesAndConfiguresMap() {
-      var target = new CustomConfigurationWithSetup();
+      var target = new CustomConfigurationWithSetup(SetupUserMap().Object);
       var actual = target.Maps.Single(m => m.Type == typeof(User));
       Assert.Equal(ExampleTableName, actual.Table);
     }
 
     [Fact]
     public void AddEntityAndSetupConfiguresMap() {
-      var target = new CustomConfigurationWithAddAndSetup();
+      var target = new CustomConfigurationWithAddAndSetup(SetupAllMaps().Object);
       var actual = target.Maps.Single(m => m.Type == typeof(User));
       Assert.Equal(ExampleTableName, actual.Table);
     }
 
+    private static Mock<ISessionFactory> MakeMockSf() {
+      return new Mock<ISessionFactory>(MockBehavior.Strict);
+    }
+
+    private static Mock<IMapper> MakeMockMapper() {
+      return new Mock<IMapper>(MockBehavior.Strict);
+    }
+
+    private static Mock<IEngine> MakeMockEngine() {
+      return new Mock<IEngine>(MockBehavior.Strict);
+    }
+
+    private static Mock<IMapper> SetupAllMaps() {
+      var mockMapper = SetupPostAndUserMaps();
+      mockMapper.Setup(m => m.MapFor<Blog>()).Returns(new Map<Blog>()).Verifiable();
+      mockMapper.Setup(m => m.MapFor<Comment>()).Returns(new Map<Comment>()).Verifiable();
+      return mockMapper;
+    }
+
+    private static Mock<IMapper> SetupPostAndUserMaps() {
+      var mock = SetupUserMap();
+      mock.Setup(m => m.MapFor<Post>()).Returns(new Map<Post>()).Verifiable();
+      return mock;
+    }
+
+    private static Mock<IMapper> SetupUserMap() {
+      var mock = new Mock<IMapper>(MockBehavior.Strict);
+      mock.Setup(m => m.MapFor<User>()).Returns(new Map<User>()).Verifiable();
+      return mock;
+    }
+
     private class CustomConfiguration : ConfigurationBase {
       public CustomConfiguration(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory)
-        : base(engine, connectionString, mapper, sessionFactory) { }
+        : base(engine, connectionString, mapper, sessionFactory) {}
 
-      public CustomConfiguration()
-        : base(MockEngine.Object, ConfigurationBaseTests.DummyConnectionString, MockMapper.Object, MockSessionFactory.Object) { }
+      public CustomConfiguration(IEngine engine, IMapper mapper, ISessionFactory sessionFactory)
+        : this(engine, ConfigurationBaseTests.DummyConnectionString, mapper, sessionFactory) { }
+
+      public CustomConfiguration(IMapper mapper)
+        : base(MakeMockEngine().Object, ConfigurationBaseTests.DummyConnectionString, mapper, MakeMockSf().Object) {}
     }
 
     private class CustomConfigurationWithIndividualAdds : CustomConfiguration {
-      public CustomConfigurationWithIndividualAdds() {
+      public CustomConfigurationWithIndividualAdds(IMapper mapper)
+        : base(mapper) {
         this.Add<Post>();
         this.Add<User>();
       }
     }
 
     private class CustomConfigurationWithAddEnumerable : CustomConfiguration {
-      public CustomConfigurationWithAddEnumerable() {
+      public CustomConfigurationWithAddEnumerable(IMapper mapper)
+        : base(mapper) {
         this.Add(new[] { typeof(Post), typeof(User) });
       }
     }
 
     private class CustomConfigurationWithAddNamespace : CustomConfiguration {
-      public CustomConfigurationWithAddNamespace() {
+      public CustomConfigurationWithAddNamespace(IMapper mapper)
+        : base(mapper) {
         this.AddNamespaceOf<Post>();
       }
     }
 
     private class CustomConfigurationWithAddAndSetup : CustomConfiguration {
-      public CustomConfigurationWithAddAndSetup() {
+      public CustomConfigurationWithAddAndSetup(IMapper mapper)
+        : base(mapper) {
         this.AddNamespaceOf<Post>();
-        this.Setup<User>().Table = ConfigurationBaseTests.ExampleTableName;
+        this.Setup<User>().Table = ExampleTableName;
       }
     }
 
     private class CustomConfigurationWithSetup : CustomConfiguration {
-      public CustomConfigurationWithSetup() {
-        this.Setup<User>().Table = ConfigurationBaseTests.ExampleTableName;
+      public CustomConfigurationWithSetup(IMapper mapper)
+        : base(mapper) {
+        this.Setup<User>().Table = ExampleTableName;
       }
     }
   }

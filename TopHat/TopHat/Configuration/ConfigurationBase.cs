@@ -181,17 +181,9 @@
         this.Dirty();
         this.MappedTypes[type] = this.Mapper.MapFor<T>();
       }
+
       return this;
     }
-
-     private void Add(Type type) {
-       if (this.MappedTypes.ContainsKey(type)) {
-         return;
-       }
-
-       this.Dirty();
-       this.MappedTypes[type] = (IMap)this.mapperMapForMethodInfo.MakeGenericMethod(type).Invoke(this.mapper, new object[] { });
-     }
 
     /// <summary>
     ///   The add.
@@ -205,7 +197,11 @@
     protected IConfiguration Add(IEnumerable<Type> types) {
       this.Dirty();
 
-      types.Distinct().Where(t => !this.MappedTypes.ContainsKey(t)).AsParallel().ForAll(this.Add);
+      types.Distinct()
+           .Where(t => !this.MappedTypes.ContainsKey(t))
+           .AsParallel()
+           .ForAll(t => this.MappedTypes[t] = this.mapperMapForMethodInfo.MakeGenericMethod(t).Invoke(this.mapper, new object[] { }) as IMap);
+
       return this;
     }
 
@@ -220,10 +216,9 @@
     /// <exception cref="ArgumentException">
     /// </exception>
     protected IConfiguration AddNamespaceOf<T>() {
-      this.Dirty();
-
       var type = typeof(T);
       var ns = type.Namespace;
+
       if (ns == null) {
         throw new ArgumentException("Namespace of the indicator type is null");
       }
