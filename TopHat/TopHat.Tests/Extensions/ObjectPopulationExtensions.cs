@@ -15,8 +15,14 @@
         else if (prop.PropertyType == typeof(bool)) {
           prop.SetValue(obj, true);
         }
-        else if (prop.PropertyType == typeof(byte) || prop.PropertyType == typeof(ushort) || prop.PropertyType == typeof(int)) {
+        else if (prop.PropertyType == typeof(int)) {
           prop.SetValue(obj, 7);
+        }
+        else if (prop.PropertyType == typeof(ushort)) {
+          prop.SetValue(obj, (ushort)7);
+        }
+        else if (prop.PropertyType == typeof(byte)) {
+          prop.SetValue(obj, (byte)7);
         }
         else if (prop.PropertyType == typeof(Type)) {
           prop.SetValue(obj, typeof(string));

@@ -69,6 +69,10 @@
     /// <exception cref="ArgumentException">
     /// </exception>
     public static Column<T> From(IColumn column) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
+
       if (typeof(T) != column.Type) {
         throw new ArgumentException("The argument does not represent a column of the correct generic type");
       }
