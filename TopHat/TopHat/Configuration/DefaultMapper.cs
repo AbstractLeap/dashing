@@ -51,7 +51,7 @@
     private void Build(Type entity, IMap map) {
       map.Table = this.convention.TableFor(entity);
       map.Schema = this.convention.SchemaFor(entity);
-      map.PrimaryKey = this.convention.PrimaryKeyOf(entity);
+      map.PrimaryKey = this.convention.PrimaryKeyFor(entity);
       map.Columns = entity.GetProperties().Select(property => this.BuildColumn(entity, property)).ToDictionary(c => c.Name, c => c);
     }
 

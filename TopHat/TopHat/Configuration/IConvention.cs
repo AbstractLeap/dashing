@@ -36,7 +36,7 @@
     /// <returns>
     ///   The <see cref="string" />.
     /// </returns>
-    string PrimaryKeyOf(Type entity);
+    string PrimaryKeyFor(Type entity);
 
     /// <summary>
     ///   Identifies whether the primary key is auto-generated for a given entity

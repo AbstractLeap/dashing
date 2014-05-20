@@ -22,7 +22,7 @@
     [Fact]
     public void DefaultPrimaryKeyIsTheEntityNamePlusId() {
       var target = this.MakeTarget();
-      Assert.Equal("PostId", target.SchemaFor(typeof(Post)));
+      Assert.Equal("PostId", target.PrimaryKeyFor(typeof(Post)));
     }
 
     [Fact]

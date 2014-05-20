@@ -84,7 +84,7 @@
     /// <returns>
     ///   The <see cref="string" />.
     /// </returns>
-    public virtual string PrimaryKeyOf(Type entity) {
+    public virtual string PrimaryKeyFor(Type entity) {
       return entity.Name + "Id";
     }
 

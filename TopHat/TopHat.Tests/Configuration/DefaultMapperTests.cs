@@ -52,7 +52,7 @@
 
     [Fact]
     public void DelegatesPrimaryKeyNameToConvention() {
-      this.mockConvention.Setup(m => m.PrimaryKeyOf(typeof(User))).Returns(ExampleString).Verifiable();
+      this.mockConvention.Setup(m => m.PrimaryKeyFor(typeof(User))).Returns(ExampleString).Verifiable();
       var target = this.MakeTarget();
 
       var map = target.MapFor<User>();
