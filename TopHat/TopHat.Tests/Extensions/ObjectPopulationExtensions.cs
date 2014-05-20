@@ -28,7 +28,7 @@
           prop.SetValue(obj, RelationshipType.ManyToOne);
         }
         else if (prop.PropertyType.IsGenericType) {
-          if (prop.PropertyType.UnderlyingSystemType == typeof(IDictionary<,>)) {
+          if (obj.GetType().GetGenericTypeDefinition() == typeof(IDictionary<,>)) {
             var i = prop.PropertyType.GetInterface(typeof(IDictionary).FullName);
             var t = typeof(Dictionary<,>).MakeGenericType(i.GenericTypeArguments[0], i.GenericTypeArguments[1]);
             prop.SetValue(obj, Activator.CreateInstance(t));
