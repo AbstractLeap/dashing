@@ -5,6 +5,8 @@
   using System.Linq;
   using System.Reflection;
 
+  using LinFu.Proxy.Interfaces;
+
   /// <summary>
   ///   The configuration base.
   /// </summary>
@@ -197,10 +199,13 @@
     protected IConfiguration Add(IEnumerable<Type> types) {
       this.Dirty();
 
-      types.Distinct()
+      var maps = types.Distinct()
            .Where(t => !this.MappedTypes.ContainsKey(t))
            .AsParallel()
-           .ForAll(t => this.MappedTypes[t] = this.mapperMapForMethodInfo.MakeGenericMethod(t).Invoke(this.mapper, new object[] { }) as IMap);
+           .Select(t => this.mapperMapForMethodInfo.MakeGenericMethod(t).Invoke(this.mapper, new object[] { }) as IMap);
+
+      foreach (var map in maps) // force into sequential
+        this.MappedTypes[map.Type] = map;
 
       return this;
     }

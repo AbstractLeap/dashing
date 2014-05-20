@@ -1,5 +1,5 @@
 ﻿namespace TopHat.Tests.TestDomain {
-  internal class User {
+  public class User {
     public virtual int UserId { get; set; }
 
     public virtual string Username { get; set; }

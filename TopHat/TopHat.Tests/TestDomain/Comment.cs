@@ -1,7 +1,7 @@
 ﻿namespace TopHat.Tests.TestDomain {
   using System;
 
-  internal class Comment {
+  public class Comment {
     public virtual int CommentId { get; set; }
 
     public virtual string Content { get; set; }

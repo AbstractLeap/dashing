@@ -131,18 +131,20 @@
 
     [Fact]
     public void AddEntitiesByTypeAreMapped() {
-      var target = new CustomConfigurationWithAddEnumerable(SetupPostAndUserMaps().Object);
+      var mockMapper = SetupPostAndUserMaps();
+      var target = new CustomConfigurationWithAddEnumerable(mockMapper.Object);
 
       Assert.NotNull(target);
       Assert.Equal(2, target.Maps.Count());
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(User)));
-      new Mock<IMapper>(MockBehavior.Strict).Verify();
+      mockMapper.Verify();
     }
 
     [Fact]
     public void AddEntiesInNamespaceAreMapped() {
-      var target = new CustomConfigurationWithAddNamespace(SetupAllMaps().Object);
+      var mockMapper = SetupAllMaps();
+      var target = new CustomConfigurationWithAddNamespace(mockMapper.Object);
 
       Assert.NotNull(target);
       Assert.Equal(4, target.Maps.Count());
@@ -150,7 +152,7 @@
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Comment)));
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
       Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(User)));
-      new Mock<IMapper>(MockBehavior.Strict).Verify();
+      mockMapper.Verify();
     }
 
     [Fact]

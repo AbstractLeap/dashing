@@ -1,7 +1,7 @@
 ﻿namespace TopHat.Tests.TestDomain {
   using System.Collections.Generic;
 
-  internal class Post {
+  public class Post {
     public virtual int PostId { get; set; }
 
     public virtual string Title { get; set; }

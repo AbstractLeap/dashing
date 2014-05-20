@@ -2,7 +2,7 @@
   using System;
   using System.Collections.Generic;
 
-  internal class Blog {
+  public class Blog {
     public virtual int BlogId { get; set; }
 
     public virtual string Title { get; set; }

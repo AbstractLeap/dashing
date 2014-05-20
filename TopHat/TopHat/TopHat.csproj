@@ -35,6 +35,9 @@
     <Reference Include="Dapper">
       <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="LinFu.Core">
+      <HintPath>..\packages\LinFu.Core.2.3.0.41559\lib\net35\LinFu.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -71,6 +74,15 @@
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="IEngine.cs" />
     <Compile Include="InsertEntityQuery.cs" />
+    <Compile Include="Tracking\BaseBehaviour.cs" />
+    <Compile Include="Tracking\ChangeTrackedCollection.cs" />
+    <Compile Include="Tracking\ChangeTrackingBehaviour.cs" />
+    <Compile Include="Tracking\ChangeTrackingBehaviourFactory.cs" />
+    <Compile Include="Tracking\IBehaviour.cs" />
+    <Compile Include="Tracking\IBehaviourFactory.cs" />
+    <Compile Include="Tracking\IProxyManager.cs" />
+    <Compile Include="Tracking\Proxy.cs" />
+    <Compile Include="Tracking\ProxyManager.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="OrderClause.cs" />
     <Compile Include="QueryBase.cs" />
@@ -83,7 +95,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Generator\" />
-    <Folder Include="Proxy\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
