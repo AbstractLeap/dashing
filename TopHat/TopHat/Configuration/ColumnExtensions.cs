@@ -1,4 +1,5 @@
 ﻿namespace TopHat.Configuration {
+  using System;
   using System.Data;
 
   /// <summary>
@@ -20,6 +21,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn Name(this IColumn column, string name) {
+      if (column == null) {
+        throw new ArgumentNullException("column"); 
+      }
       column.Name = name;
       return column;
     }
@@ -39,6 +43,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn DbType(this IColumn column, DbType dbType) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
       column.DbType = dbType;
       return column;
     }
@@ -58,6 +65,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn Precision(this IColumn column, byte precision) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
       column.Precision = precision;
       return column;
     }
@@ -77,6 +87,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn Scale(this IColumn column, byte scale) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
       column.Scale = scale;
       return column;
     }
@@ -96,6 +109,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn Length(this IColumn column, ushort length) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
       column.Length = length;
       return column;
     }
@@ -112,6 +128,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn ExcludeByDefault(this IColumn column) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
       column.ExcludeByDefault = true;
       return column;
     }
@@ -128,6 +147,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn DontExcludeByDefault(this IColumn column) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
       column.ExcludeByDefault = false;
       return column;
     }
@@ -144,6 +166,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn Ignore(this IColumn column) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
       column.Ignore = true;
       return column;
     }
@@ -160,6 +185,9 @@
     ///   The <see cref="IColumn" />.
     /// </returns>
     public static IColumn DontIgnore(this IColumn column) {
+      if (column == null) {
+        throw new ArgumentNullException("column");
+      }
       column.Ignore = false;
       return column;
     }

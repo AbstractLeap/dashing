@@ -81,10 +81,22 @@
     }
 
     [Fact]
+    public void ExcludeByDefaultThrowsIfColumnIsNull() {
+      var column = MakeNullTarget();
+      Assert.Throws<ArgumentNullException>(() => { column.ExcludeByDefault(); });
+    }
+
+    [Fact]
     public void ExcludeByDefaultSetsFlag() {
       var column = MakeTarget();
       column.ExcludeByDefault();
       Assert.Equal(true, column.ExcludeByDefault);
+    }
+
+    [Fact]
+    public void DontExcludeByDefaultThrowsIfColumnIsNull() {
+      var column = MakeNullTarget();
+      Assert.Throws<ArgumentNullException>(() => { column.DontExcludeByDefault(); });
     }
 
     [Fact]
@@ -95,10 +107,22 @@
     }
 
     [Fact]
+    public void IgnoreThrowsIfColumnIsNull() {
+      var column = MakeNullTarget();
+      Assert.Throws<ArgumentNullException>(() => { column.Ignore(); });
+    }
+
+    [Fact]
     public void IgnoreSetsFlag() {
       var column = MakeTarget();
       column.Ignore();
       Assert.Equal(true, column.Ignore);
+    }
+
+    [Fact]
+    public void DontIgnoreThrowsIfColumnIsNull() {
+      var column = MakeNullTarget();
+      Assert.Throws<ArgumentNullException>(() => { column.DontIgnore(); });
     }
 
     [Fact]
