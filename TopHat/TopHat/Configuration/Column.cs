@@ -28,6 +28,11 @@
     public DbType DbType { get; set; }
 
     /// <summary>
+    ///   Gets or sets the db name.
+    /// </summary>
+    public string DbName { get; set; }
+
+    /// <summary>
     ///   Gets or sets the precision.
     /// </summary>
     public byte Precision { get; set; }
@@ -80,6 +85,7 @@
       return new Column<T> {
                              Name = column.Name, 
                              DbType = column.DbType, 
+                             DbName = column.DbName, 
                              Precision = column.Precision, 
                              Scale = column.Scale, 
                              Length = column.Length, 

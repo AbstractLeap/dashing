@@ -22,6 +22,10 @@
     ///   The convention.
     /// </param>
     public DefaultMapper(IConvention convention) {
+      if (convention == null) {
+        throw new ArgumentNullException("convention");
+      }
+
       this.convention = convention;
     }
 
@@ -91,41 +95,51 @@
     ///   The column.
     /// </param>
     private void ResolveRelationship(Type entity, PropertyInfo property, IColumn column) {
-      var propertyName = property.Name;
-      var propertyType = property.PropertyType;
-
-      // need to determine the type of the column
-      // and then treat accordingly
-      if (propertyType.IsEntityType()) {
-        if (propertyType.IsCollection()) {
-          // assume to be OneToMany
-          column.Relationship = RelationshipType.OneToMany;
+      if (property.PropertyType.IsEntityType()) {
+        if (property.PropertyType.IsCollection()) {
+          this.ResolveOneToManyColumn(column);
         }
         else {
-          column.Relationship = RelationshipType.ManyToOne;
-          column.Name = propertyName + "Id";
-
-          // TODO resolve column type of related primary key - be careful with infinite loops!
+          this.ResolveManyToOneColumn(column, property.Name);
         }
       }
       else {
-        column.Relationship = RelationshipType.None;
-        column.DbType = propertyType.GetDbType();
-
-        // check particular types for defaults
-        switch (column.DbType) {
-          case DbType.Decimal:
-            column.Precision = this.convention.DecimalPrecisionFor(entity, propertyName);
-            column.Scale = this.convention.DecimalScaleFor(entity, propertyName);
-            break;
-
-          case DbType.String:
-            column.Length = this.convention.StringLengthFor(entity, propertyName);
-            break;
-        }
-
-        // TODO Add nullable column types
+        this.ResolveValueColumn(entity, column, property.Name, property.PropertyType);
       }
+    }
+
+    private void ResolveValueColumn(Type entity, IColumn column, string propertyName, Type propertyType) {
+      column.Relationship = RelationshipType.None;
+      column.DbName = propertyName;
+      column.DbType = propertyType.GetDbType();
+
+      // check particular types for defaults
+      switch (column.DbType) {
+        case DbType.Decimal:
+          column.Precision = this.convention.DecimalPrecisionFor(entity, propertyName);
+          column.Scale = this.convention.DecimalScaleFor(entity, propertyName);
+          break;
+
+        case DbType.String:
+          column.Length = this.convention.StringLengthFor(entity, propertyName);
+          break;
+      }
+    }
+
+    private void ResolveManyToOneColumn(IColumn column, string propertyName) {
+      column.Relationship = RelationshipType.ManyToOne;
+      column.DbName = propertyName + "Id";
+      column.DbType = DbType.Int32;
+
+      // TODO resolve column type of related primary key - be careful with infinite loops!
+    }
+
+    private void ResolveOneToManyColumn(IColumn column) {
+      // assume to be OneToMany
+      column.Relationship = RelationshipType.OneToMany;
+
+      // what is the DbName?
+      // what is the DbType?
     }
 
     /// <summary>

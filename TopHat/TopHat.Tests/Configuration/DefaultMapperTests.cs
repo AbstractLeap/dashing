@@ -106,38 +106,44 @@
 
     [Fact]
     public void ColumnTypeIsSet() {
-      var property = this.MapAndGetProperty<User, string>(u => u.Username);
+      var property = this.MapAndGetProperty<Post, string>(u => u.Content);
       Assert.Equal(typeof(string), property.Type);
     }
 
     [Fact]
-    public void NonEntityColumnNameIsSet() {
-      var property = this.MapAndGetProperty<User, string>(u => u.Username);
-      Assert.Equal("Username", property.Name);
+    public void ColumnNameIsSet() {
+      var property = this.MapAndGetProperty<Post, string>(u => u.Content);
+      Assert.Equal("Content", property.Name);
     }
 
     [Fact]
     public void NonEntityColumnDbTypeIsSet() {
-      var property = this.MapAndGetProperty<User, string>(u => u.Username);
+      var property = this.MapAndGetProperty<Post, string>(u => u.Content);
       Assert.Equal(DbType.String, property.DbType);
     }
 
     [Fact]
-    public void NonEntityColumnRelationshipIsNone() {
-      var property = this.MapAndGetProperty<User, string>(u => u.Username);
-      Assert.Equal(RelationshipType.None, property.Relationship);
+    public void NonEntityColumnDbNameIsSet() {
+      var property = this.MapAndGetProperty<Post, string>(u => u.Content);
+      Assert.Equal("Content", property.DbName);
     }
 
     [Fact]
-    public void EntityColumnNameIsSet() {
-      var property = this.MapAndGetProperty<Post, User>(p => p.Author);
-      Assert.Equal("AuthorId", property.Name);
+    public void NonEntityColumnRelationshipIsNone() {
+      var property = this.MapAndGetProperty<Post, string>(u => u.Content);
+      Assert.Equal(RelationshipType.None, property.Relationship);
     }
 
     [Fact]
     public void EntityColumnDbTypeIsSet() {
       var property = this.MapAndGetProperty<Post, User>(p => p.Author);
       Assert.Equal(DbType.Int32, property.DbType);
+    }
+
+    [Fact]
+    public void EntityColumnDbNameIsSet() {
+      var property = this.MapAndGetProperty<Post, User>(p => p.Author);
+      Assert.Equal("AuthorId", property.DbName);
     }
 
     [Fact]
@@ -148,13 +154,13 @@
 
     [Fact(Skip = "Check with Mark what he expects here")]
     public void EntityCollectionIsIgnored() {
-      var property = this.MapAndGetProperty<Post, ICollection<Comment>>(p => p.Comments);
+      var property = this.MapAndGetProperty<Post, IList<Comment>>(p => p.Comments);
       Assert.Equal(true, property.Ignore);
     }
 
     [Fact]
     public void EntityCollectionColumnRelationshipIsOneToMany() {
-      var property = this.MapAndGetProperty<Post, User>(u => u.Author);
+      var property = this.MapAndGetProperty<Post, IList<Comment>>(p => p.Comments);
       Assert.Equal(RelationshipType.OneToMany, property.Relationship);
     }
 

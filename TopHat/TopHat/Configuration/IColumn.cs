@@ -19,6 +19,11 @@
     DbType DbType { get; set; }
 
     /// <summary>
+    ///   Gets or sets the database field name.
+    /// </summary>
+    string DbName { get; set; }
+
+    /// <summary>
     ///   Gets or sets the precision.
     /// </summary>
     byte Precision { get; set; }
