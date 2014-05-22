@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TopHat.CodeGenerator
+namespace TopHat.CodeGeneration
 {
     public class CodeGeneratorConfig
     {
@@ -13,6 +13,7 @@ namespace TopHat.CodeGenerator
             this.Namespace = "TopHat.Generated";
             this.ForeignKeyAccessClassSuffix = "_FK";
             this.ForeignKeyAccessEntityFieldSuffix = "_FKEntity";
+            this.TrackedClassSuffix = "_Tracked";
         }
 
         /// <summary>
@@ -31,6 +32,8 @@ namespace TopHat.CodeGenerator
         public string ForeignKeyAccessClassSuffix { get; set; }
 
         public string ForeignKeyAccessEntityFieldSuffix { get; set; }
+
+        public string TrackedClassSuffix { get; set; }
 
         public bool GenerateSource { get; set; }
 

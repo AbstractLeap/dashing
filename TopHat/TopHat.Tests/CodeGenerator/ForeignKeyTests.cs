@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using TopHat.Configuration;
 using TopHat.Tests.TestDomain;
 using Xunit;
-using Cg = TopHat.CodeGenerator;
+using Cg = TopHat.CodeGeneration;
 
 namespace TopHat.Tests.CodeGenerator
 {

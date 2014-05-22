@@ -50,9 +50,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeGenerator\CodeGenerator.cs" />
-    <Compile Include="CodeGenerator\CodeGeneratorConfig.cs" />
-    <Compile Include="CodeGenerator\ICodeGenerator.cs" />
+    <Compile Include="CodeGeneration\CodeGenerator.cs" />
+    <Compile Include="CodeGeneration\CodeGeneratorConfig.cs" />
+    <Compile Include="CodeGeneration\ICodeGenerator.cs" />
+    <Compile Include="CodeGeneration\ITrackedEntity.cs" />
+    <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
     <Compile Include="Configuration\DefaultSessionFactory.cs" />
