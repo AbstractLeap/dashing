@@ -20,7 +20,10 @@ namespace TopHat.Tests.CodeGenerator
         {
             var config = new CustomConfig(this.engine.Object);
             var codeGenerator = new Cg.CodeGenerator();
-            codeGenerator.Generate(config, new Cg.CodeGeneratorConfig());
+            var codeConfig = new Cg.CodeGeneratorConfig();
+            codeConfig.GenerateAssembly = true;
+            codeConfig.GenerateSource = true;
+            codeGenerator.Generate(config, codeConfig);
         }
 
         private class CustomConfig : DefaultConfiguration
@@ -28,7 +31,7 @@ namespace TopHat.Tests.CodeGenerator
             public CustomConfig(IEngine engine)
                 : base(engine, string.Empty)
             {
-                this.Add<Post>();
+                this.AddNamespaceOf<Post>();
             }
         }
     }
