@@ -138,19 +138,51 @@ namespace TopHat.CodeGeneration
                 var prop = this.GenerateGetSetProperty(trackingClass, valueTypeColumn.Key, valueTypeColumn.Value.Type, MemberAttributes.Public | MemberAttributes.Override);
                 // override the setter
                 // if isTracking && !this.DirtyProperties.ContainsKey(prop) add to dirty props and add oldvalue
-                //TODO also need to check that the value has actually changed
-                prop.SetStatements.Insert(0, new CodeConditionStatement(
-                    new CodeBinaryOperatorExpression(
-                        new CodeBinaryOperatorExpression(
-                            new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "IsTracking"),
-                            CodeBinaryOperatorType.IdentityEquality,
-                            new CodePrimitiveExpression(true)
-                        ),
+                bool propertyCanBeNull = valueTypeColumn.Value.Type.IsNullable() || !valueTypeColumn.Value.Type.IsValueType;
+                var changeCheck = new CodeBinaryOperatorExpression();
+                if (!propertyCanBeNull)
+                {
+                    // can't be null so just check values
+                    changeCheck.Left = new CodeMethodInvokeExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "backing" + valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression());
+                    changeCheck.Operator = CodeBinaryOperatorType.IdentityEquality;
+                    changeCheck.Right = new CodePrimitiveExpression(false);
+                }
+                else
+                {
+                    // can be null, need to be careful of null reference exceptions
+                    changeCheck.Left = new CodeBinaryOperatorExpression(
+                        CodeHelpers.ThisFieldIsNull("backing" + valueTypeColumn.Key),
                         CodeBinaryOperatorType.BooleanAnd,
                         new CodeBinaryOperatorExpression(
-                            new CodeMethodInvokeExpression(new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)),
+                            new CodePropertySetValueReferenceExpression(),
+                            CodeBinaryOperatorType.IdentityInequality,
+                            new CodePrimitiveExpression(null)
+                        )
+                    );
+                    changeCheck.Operator = CodeBinaryOperatorType.BooleanOr;
+                    changeCheck.Right = new CodeBinaryOperatorExpression(
+                        CodeHelpers.ThisFieldIsNotNull("backing" + valueTypeColumn.Key),
+                        CodeBinaryOperatorType.BooleanAnd,
+                        new CodeBinaryOperatorExpression(
+                            new CodeMethodInvokeExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "backing" + valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()),
                             CodeBinaryOperatorType.IdentityEquality,
                             new CodePrimitiveExpression(false)
+                        )
+                    );
+                }
+
+                prop.SetStatements.Insert(0, new CodeConditionStatement(
+                    new CodeBinaryOperatorExpression(
+                        CodeHelpers.ThisPropertyIsTrue("IsTracking"),
+                        CodeBinaryOperatorType.BooleanAnd,
+                        new CodeBinaryOperatorExpression(
+                            new CodeBinaryOperatorExpression(
+                                new CodeMethodInvokeExpression(new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)),
+                                CodeBinaryOperatorType.IdentityEquality,
+                                new CodePrimitiveExpression(false)
+                            ),
+                            CodeBinaryOperatorType.BooleanAnd,
+                            changeCheck
                         )
                     ),
                     new CodeStatement[] {
@@ -194,11 +226,7 @@ namespace TopHat.CodeGeneration
                 property.Attributes = MemberAttributes.Public | MemberAttributes.Override;
                 property.GetStatements.Add(new CodeConditionStatement(
                     // if backingField != null
-                    new CodeBinaryOperatorExpression(
-                        new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), backingField.Name),
-                        CodeBinaryOperatorType.IdentityInequality,
-                        new CodePrimitiveExpression(null)
-                    ),
+                        CodeHelpers.ThisFieldIsNotNull(backingField.Name),
                     new CodeStatement[] { // true
                         new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), backingField.Name)),
                     },
