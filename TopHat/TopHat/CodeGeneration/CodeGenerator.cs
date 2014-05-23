@@ -135,7 +135,7 @@ namespace TopHat.CodeGeneration
             // override value type properties to perform dirty checking
             foreach (var valueTypeColumn in map.Columns.Where(c => !c.Value.Type.IsCollection() && !c.Value.Ignore))
             {
-                var prop = this.GenerateGetSetProperty(trackingClass, valueTypeColumn.Key, valueTypeColumn.Value.Type, MemberAttributes.Public | MemberAttributes.Override, valueTypeColumn.Value.Relationship == RelationshipType.ManyToOne);
+                var prop = this.GenerateGetSetProperty(trackingClass, valueTypeColumn.Key, valueTypeColumn.Value.Type, MemberAttributes.Public | MemberAttributes.Override, true);
                 // override the setter
                 // if isTracking && !this.DirtyProperties.ContainsKey(prop) add to dirty props and add oldvalue
                 bool propertyCanBeNull = valueTypeColumn.Value.Type.IsNullable() || !valueTypeColumn.Value.Type.IsValueType;
@@ -143,7 +143,7 @@ namespace TopHat.CodeGeneration
                 if (!propertyCanBeNull)
                 {
                     // can't be null so just check values
-                    changeCheck.Left = new CodeMethodInvokeExpression(CodeHelpers.ThisField("backing" + valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression());
+                    changeCheck.Left = new CodeMethodInvokeExpression(CodeHelpers.BaseProperty(valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression());
                     changeCheck.Operator = CodeBinaryOperatorType.IdentityEquality;
                     changeCheck.Right = new CodePrimitiveExpression(false);
                 }
@@ -151,7 +151,7 @@ namespace TopHat.CodeGeneration
                 {
                     // can be null, need to be careful of null reference exceptions
                     changeCheck.Left = new CodeBinaryOperatorExpression(
-                        valueTypeColumn.Value.Relationship == RelationshipType.ManyToOne ? CodeHelpers.BasePropertyIsNull(valueTypeColumn.Key) : CodeHelpers.ThisFieldIsNull("backing" + valueTypeColumn.Key),
+                        CodeHelpers.BasePropertyIsNull(valueTypeColumn.Key),
                         CodeBinaryOperatorType.BooleanAnd,
                         new CodeBinaryOperatorExpression(
                             new CodePropertySetValueReferenceExpression(),
@@ -161,10 +161,10 @@ namespace TopHat.CodeGeneration
                     );
                     changeCheck.Operator = CodeBinaryOperatorType.BooleanOr;
                     changeCheck.Right = new CodeBinaryOperatorExpression(
-                        valueTypeColumn.Value.Relationship == RelationshipType.ManyToOne ? CodeHelpers.BasePropertyIsNotNull(valueTypeColumn.Key) : CodeHelpers.ThisFieldIsNotNull("backing" + valueTypeColumn.Key),
+                        CodeHelpers.BasePropertyIsNotNull(valueTypeColumn.Key),
                         CodeBinaryOperatorType.BooleanAnd,
                         new CodeBinaryOperatorExpression(
-                            new CodeMethodInvokeExpression(valueTypeColumn.Value.Relationship == RelationshipType.ManyToOne ? CodeHelpers.BaseProperty(valueTypeColumn.Key) : CodeHelpers.ThisField("backing" + valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()),
+                            new CodeMethodInvokeExpression(CodeHelpers.BaseProperty(valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()),
                             CodeBinaryOperatorType.IdentityEquality,
                             new CodePrimitiveExpression(false)
                         )
