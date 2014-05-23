@@ -43,6 +43,9 @@
     <Reference Include="Dapper.1.12.1.1.Fakes">
       <HintPath>FakesAssemblies\Dapper.1.12.1.1.Fakes.dll</HintPath>
     </Reference>
+    <Reference Include="LinFu.Core">
+      <HintPath>..\packages\LinFu.Core.2.3.0.41559\lib\net35\LinFu.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Moq">
@@ -67,17 +70,19 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Configuration\ColumnExtensionTests.cs" />
+    <Compile Include="Configuration\DefaultConventionTests.cs" />
+    <Compile Include="Configuration\DefaultSessionFactoryTests.cs" />
+    <Compile Include="Configuration\MapExtensionsTests.cs" />
+    <Compile Include="Configuration\MapTests.cs" />
+    <Compile Include="Configuration\DefaultMapperTests.cs" />
+    <Compile Include="Configuration\ColumnTests.cs" />
     <Compile Include="Configuration\DefaultConfigurationTests.cs" />
-    <Compile Include="Configuration\ConfigurationTests.cs" />
+    <Compile Include="Configuration\ConfigurationBaseTests.cs" />
+    <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryWriter\BaseQueryWriterTest.cs" />
-    <Compile Include="QueryWriter\CUDTest.cs" />
-    <Compile Include="QueryWriter\FetchTest.cs" />
-    <Compile Include="QueryWriter\OrderTest.cs" />
-    <Compile Include="QueryWriter\SelectTest.cs" />
-    <Compile Include="QueryWriter\QueryTest.cs" />
-    <Compile Include="QueryWriter\TrackedTest.cs" />
-    <Compile Include="QueryWriter\WhereTest.cs" />
+    <Compile Include="Tracking\ChangeTrackingTests.cs" />
+    <Compile Include="Tracking\ProxyTests.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Post.cs" />

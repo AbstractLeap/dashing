@@ -4,6 +4,6 @@
 // ReSharper disable once CheckNamespace
 namespace TopHat {
     public static class Engines {
-        public static IEngine SqlServer = new SqlServerEngine();
+        public static readonly IEngine SqlServer = new SqlServerEngine();
     }
 }

@@ -1,128 +1,263 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
+﻿namespace TopHat.Configuration {
+  using System;
+  using System.Collections.Generic;
+  using System.Data;
+  using System.Linq;
+  using System.Reflection;
 
-namespace TopHat.Configuration {
-	// Dear ReSharper, we are doing this deliberately so that the lovely users can extend
-	// ReSharper disable MemberCanBePrivate.Global
-	public abstract class ConfigurationBase : IConfiguration {
-		private IEngine _engine;
+  using LinFu.Proxy.Interfaces;
 
-		protected String ConnectionString { get; set; }
+  /// <summary>
+  ///   The configuration base.
+  /// </summary>
+  public abstract class ConfigurationBase : IConfiguration {
+    /// <summary>
+    ///   The _engine.
+    /// </summary>
+    private IEngine engine;
 
-		protected IMapper Mapper { get; set; }
+    /// <summary>
+    ///   The _connection string.
+    /// </summary>
+    private readonly string connectionString;
 
-		protected ISessionFactory SessionFactory { get; set; }
+    private IMapper mapper;
 
-		protected IQueryFactory QueryFactory { get; set; }
+    private MethodInfo mapperMapForMethodInfo;
 
-		protected IDictionary<Type, Map> MappedTypes { get; set; }
+    /// <summary>
+    ///   Gets or sets the mapper.
+    /// </summary>
+    protected IMapper Mapper {
+      get {
+        return this.mapper;
+      }
 
-		protected Boolean EngineHasLatestMaps { get; set; }
+      set {
+        this.mapper = value;
+        this.mapperMapForMethodInfo = this.mapper.GetType().GetMethod("MapFor");
+      }
+    }
 
-		public IEnumerable<Map> Maps {
-			get { return MappedTypes.Values; }
-		}
+    /// <summary>
+    ///   Gets or sets the session factory.
+    /// </summary>
+    protected ISessionFactory SessionFactory { get; set; }
 
-		protected IEngine Engine {
-			get {
-				if (!EngineHasLatestMaps) {
-					Engine.UseMaps(MappedTypes);
-					EngineHasLatestMaps = true;
-				}
-				return _engine;
-			}
-			set {
-				Dirty();
-				_engine = value;
-			}
-		}
+    /// <summary>
+    ///   Gets or sets the mapped types.
+    /// </summary>
+    protected IDictionary<Type, IMap> MappedTypes { get; set; }
 
-		protected ConfigurationBase(IEngine engine, String connectionString, IMapper mapper, ISessionFactory sessionFactory, IQueryFactory queryFactory) {
-			if (engine == null) throw new ArgumentNullException("engine");
-			if (connectionString == null) throw new ArgumentNullException("connectionString");
-			if (mapper == null) throw new ArgumentNullException("mapper");
-			if (sessionFactory == null) throw new ArgumentNullException("sessionFactory");
-			if (queryFactory == null) throw new ArgumentNullException("queryFactory");
+    /// <summary>
+    ///   Gets or sets a value indicating whether engine has latest maps.
+    /// </summary>
+    protected bool EngineHasLatestMaps { get; set; }
 
-			Engine = engine;
-			ConnectionString = connectionString;
-			Mapper = mapper;
-			SessionFactory = sessionFactory;
-			QueryFactory = queryFactory;
-			MappedTypes = new Dictionary<Type, Map>();
-		}
+    /// <summary>
+    ///   Gets the maps.
+    /// </summary>
+    public IEnumerable<IMap> Maps {
+      get {
+        return this.MappedTypes.Values;
+      }
+    }
 
-		// Poor man's DI
-		public ConfigurationBase(IEngine engine, string connectionString)
-			: this(engine, connectionString, new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory(), new DefaultQueryFactory()) {}
+    /// <summary>
+    ///   Gets or sets the engine.
+    /// </summary>
+    protected IEngine Engine {
+      get {
+        if (!this.EngineHasLatestMaps) {
+          this.engine.UseMaps(this.MappedTypes);
+          this.EngineHasLatestMaps = true;
+        }
 
-		public ISession BeginSession() {
-			return BeginSession(Engine.ConnectionFactory.Open(ConnectionString));
-		}
+        return this.engine;
+      }
 
-		public ISession BeginSession(IDbConnection connection) {
-			return SessionFactory.Create(
-				Engine.SqlWriter,
-				QueryFactory,
-				connection);
-		}
+      set {
+        this.Dirty();
+        this.engine = value;
+      }
+    }
 
-		public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-			return SessionFactory.Create(
-				Engine.SqlWriter,
-				QueryFactory,
-				connection,
-				transaction);
-		}
+    /// <summary>
+    ///   The dirty.
+    /// </summary>
+    private void Dirty() {
+      this.EngineHasLatestMaps = false;
+    }
 
-		protected Map<T> Setup<T>() {
-			Dirty();
+    /// <summary>
+    ///   Initializes a new instance of the <see cref="ConfigurationBase" /> class.
+    /// </summary>
+    /// <param name="engine">
+    ///   The engine.
+    /// </param>
+    /// <param name="connectionString">
+    ///   The connection string.
+    /// </param>
+    /// <param name="mapper">
+    ///   The mapper.
+    /// </param>
+    /// <param name="sessionFactory">
+    ///   The session factory.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    /// </exception>
+    protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory) {
+      if (engine == null) {
+        throw new ArgumentNullException("engine");
+      }
 
-			Map map;
-			Map<T> mapt;
-			var type = typeof (T);
+      if (connectionString == null) {
+        throw new ArgumentNullException("connectionString");
+      }
 
-			if (!MappedTypes.TryGetValue(type, out map))
-				MappedTypes[type] = mapt = Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
-			else {
-				mapt = map as Map<T>;
+      if (mapper == null) {
+        throw new ArgumentNullException("mapper");
+      }
 
-				if (mapt == null)
-					MappedTypes[type] = mapt = Map<T>.From(map); // lift the Map into a Map<T>
-			}
+      if (sessionFactory == null) {
+        throw new ArgumentNullException("sessionFactory");
+      }
 
-			return mapt;
-		}
+      this.engine = engine;
+      this.connectionString = connectionString;
+      this.Mapper = mapper;
+      this.SessionFactory = sessionFactory;
+      this.MappedTypes = new Dictionary<Type, IMap>();
+    }
 
-		protected IConfiguration Add<T>() {
-			Dirty();
+    /// <summary>
+    ///   The begin session.
+    /// </summary>
+    /// <returns>
+    ///   The <see cref="ISession" />.
+    /// </returns>
+    public ISession BeginSession() {
+      return this.SessionFactory.Create(this.Engine, this.Engine.Open(this.connectionString));
+    }
 
-			var type = typeof (T);
-			if (!MappedTypes.ContainsKey(type))
-				MappedTypes[type] = Mapper.MapFor(type);
-			return this;
-		}
+    /// <summary>
+    ///   The begin session.
+    /// </summary>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <returns>
+    ///   The <see cref="ISession" />.
+    /// </returns>
+    public ISession BeginSession(IDbConnection connection) {
+      return this.SessionFactory.Create(this.Engine, connection);
+    }
 
-		protected IConfiguration Add(IEnumerable<Type> types) {
-			Dirty();
+    /// <summary>
+    ///   The begin session.
+    /// </summary>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <param name="transaction">
+    ///   The transaction.
+    /// </param>
+    /// <returns>
+    ///   The <see cref="ISession" />.
+    /// </returns>
+    public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
+      return this.SessionFactory.Create(this.Engine, connection, transaction);
+    }
 
-			types.Distinct().Where(t => !MappedTypes.ContainsKey(t)).AsParallel().ForAll(t => MappedTypes[t] = Mapper.MapFor(t));
-			return this;
-		}
+    /// <summary>
+    ///   The add.
+    /// </summary>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IConfiguration" />.
+    /// </returns>
+    protected IConfiguration Add<T>() {
+      var type = typeof(T);
+      if (!this.MappedTypes.ContainsKey(type)) {
+        this.Dirty();
+        this.MappedTypes[type] = this.Mapper.MapFor<T>();
+      }
 
-		protected IConfiguration AddNamespaceOf<T>() {
-			Dirty();
+      return this;
+    }
 
-			var type = typeof (T);
-			var ns = type.Namespace;
-			if (ns == null) throw new ArgumentException("Namespace of the indicator type is null");
-			return Add(type.Assembly.GetTypes().Where(t => t.Namespace != null && t.Namespace.StartsWith(ns)));
-		}
+    /// <summary>
+    ///   The add.
+    /// </summary>
+    /// <param name="types">
+    ///   The types.
+    /// </param>
+    /// <returns>
+    ///   The <see cref="IConfiguration" />.
+    /// </returns>
+    protected IConfiguration Add(IEnumerable<Type> types) {
+      this.Dirty();
 
-		private void Dirty() {
-			EngineHasLatestMaps = false;
-		}
-	}
+      var maps = types.Distinct()
+           .Where(t => !this.MappedTypes.ContainsKey(t))
+           .AsParallel()
+           .Select(t => this.mapperMapForMethodInfo.MakeGenericMethod(t).Invoke(this.mapper, new object[] { }) as IMap);
+
+      foreach (var map in maps) // force into sequential
+        this.MappedTypes[map.Type] = map;
+
+      return this;
+    }
+
+    /// <summary>
+    ///   The add namespace of.
+    /// </summary>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IConfiguration" />.
+    /// </returns>
+    /// <exception cref="ArgumentException">
+    /// </exception>
+    protected IConfiguration AddNamespaceOf<T>() {
+      var type = typeof(T);
+      var ns = type.Namespace;
+
+      if (ns == null) {
+        throw new ArgumentException("Namespace of the indicator type is null");
+      }
+
+      return this.Add(type.Assembly.GetTypes().Where(t => t.Namespace != null && t.Namespace.StartsWith(ns)));
+    }
+
+    /// <summary>
+    ///   The setup.
+    /// </summary>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="Map" />.
+    /// </returns>
+    protected Map<T> Setup<T>() {
+      this.Dirty();
+
+      IMap map;
+      Map<T> mapt;
+      var type = typeof(T);
+
+      if (!this.MappedTypes.TryGetValue(type, out map)) {
+        this.MappedTypes[type] = mapt = this.Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
+      }
+      else {
+        mapt = map as Map<T>;
+
+        if (mapt == null) {
+          this.MappedTypes[type] = mapt = Map<T>.From(map); // lift the Map into a Map<T>
+        }
+      }
+
+      return mapt;
+    }
+  }
 }

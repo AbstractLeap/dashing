@@ -1,90 +1,161 @@
-﻿using System;
-using System.Data;
-using System.Linq;
-using System.Reflection;
-using TopHat.Extensions;
+﻿namespace TopHat.Configuration {
+  using System;
+  using System.Data;
+  using System.Linq;
+  using System.Reflection;
 
-namespace TopHat.Configuration {
-	public class DefaultMapper : IMapper {
-		private readonly IConvention _convention;
+  using global::TopHat.Extensions;
 
-		public DefaultMapper(IConvention convention) {
-			_convention = convention;
-		}
+  /// <summary>
+  ///   The default mapper.
+  /// </summary>
+  public class DefaultMapper : IMapper {
+    /// <summary>
+    ///   The _convention.
+    /// </summary>
+    private readonly IConvention convention;
 
-		public Map MapFor(Type entity) {
-			var map = new Map(entity);
-			Build(entity, map);
-			return map;
-		}
+    /// <summary>
+    ///   Initializes a new instance of the <see cref="DefaultMapper" /> class.
+    /// </summary>
+    /// <param name="convention">
+    ///   The convention.
+    /// </param>
+    public DefaultMapper(IConvention convention) {
+      if (convention == null) {
+        throw new ArgumentNullException("convention");
+      }
 
-		public Map<T> MapFor<T>() {
-			var map = new Map<T>();
-			Build(typeof (T), map);
-			return map;
-		}
+      this.convention = convention;
+    }
 
-		private void Build(Type entity, Map map) {
-			map.Table = _convention.TableFor(entity);
-			map.Schema = _convention.SchemaFor(entity);
-			map.PrimaryKey = _convention.PrimaryKeyOf(entity);
-			map.Columns = entity.GetProperties()
-			                    .Select(property => BuildColumn(entity, property))
-			                    .ToDictionary(c => c.Name, c => c);
-		}
+    /// <summary>
+    ///   The map for.
+    /// </summary>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="Map" />.
+    /// </returns>
+    public Map<T> MapFor<T>() {
+      var map = new Map<T>();
+      this.Build(typeof(T), map);
+      return map;
+    }
 
-		private Column BuildColumn(Type entity, PropertyInfo property) {
-			var column = new Column(property.PropertyType) {
-				Name = property.Name,
-				Ignore = !(property.CanRead && property.CanWrite)
-			};
+    /// <summary>
+    ///   The build.
+    /// </summary>
+    /// <param name="entity">
+    ///   The entity.
+    /// </param>
+    /// <param name="map">
+    ///   The map.
+    /// </param>
+    private void Build(Type entity, IMap map) {
+      map.Table = this.convention.TableFor(entity);
+      map.Schema = this.convention.SchemaFor(entity);
+      map.PrimaryKey = this.convention.PrimaryKeyFor(entity);
+      map.Columns = entity.GetProperties().Select(property => this.BuildColumn(entity, property)).ToDictionary(c => c.Name, c => c);
+    }
 
-			ResolveRelationship(entity, property, column);
-			ApplyAnnotations(entity, property, column);
+    /// <summary>
+    ///   The build column.
+    /// </summary>
+    /// <param name="entity">
+    ///   The entity.
+    /// </param>
+    /// <param name="property">
+    ///   The property.
+    /// </param>
+    /// <returns>
+    ///   The <see cref="Column" />.
+    /// </returns>
+    private IColumn BuildColumn(Type entity, PropertyInfo property) {
+      var column = (IColumn)Activator.CreateInstance(typeof(Column<>).MakeGenericType(property.PropertyType));
+      column.Name = property.Name;
+      column.Ignore = !(property.CanRead && property.CanWrite);
 
-			return column;
-		}
+      this.ResolveRelationship(entity, property, column);
+      this.ApplyAnnotations(entity, property, column);
 
-		private void ResolveRelationship(Type entity, PropertyInfo property, Column column) {
-			var propertyName = property.Name;
-			var propertyType = property.PropertyType;
+      return column;
+    }
 
-			// need to determine the type of the column
-			// and then treat accordingly
-			if (propertyType.IsEntityType()) {
-				if (propertyType.IsCollection()) {
-					// assume to be OneToMany
-					column.Relationship = RelationshipType.OneToMany;
-				}
-				else {
-					column.Relationship = RelationshipType.ManyToOne;
-					column.Name = propertyName + "Id";
+    /// <summary>
+    ///   The resolve relationship.
+    /// </summary>
+    /// <param name="entity">
+    ///   The entity.
+    /// </param>
+    /// <param name="property">
+    ///   The property.
+    /// </param>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    private void ResolveRelationship(Type entity, PropertyInfo property, IColumn column) {
+      if (property.PropertyType.IsEntityType()) {
+        if (property.PropertyType.IsCollection()) {
+          this.ResolveOneToManyColumn(column);
+        }
+        else {
+          this.ResolveManyToOneColumn(column, property.Name);
+        }
+      }
+      else {
+        this.ResolveValueColumn(entity, column, property.Name, property.PropertyType);
+      }
+    }
 
-					// TODO resolve column type of related primary key - be careful with infinite loops!
-				}
-			}
-			else {
-				column.Relationship = RelationshipType.None;
-				column.DbType = propertyType.GetDbType();
+    private void ResolveValueColumn(Type entity, IColumn column, string propertyName, Type propertyType) {
+      column.Relationship = RelationshipType.None;
+      column.DbName = propertyName;
+      column.DbType = propertyType.GetDbType();
 
-				// check particular types for defaults
-				switch (column.DbType) {
-					case DbType.Decimal:
-						column.Precision = _convention.DecimalPrecisionFor(entity, propertyName);
-						column.Scale = _convention.DecimalScaleFor(entity, propertyName);
-						break;
+      // check particular types for defaults
+      switch (column.DbType) {
+        case DbType.Decimal:
+          column.Precision = this.convention.DecimalPrecisionFor(entity, propertyName);
+          column.Scale = this.convention.DecimalScaleFor(entity, propertyName);
+          break;
 
-					case DbType.String:
-						column.Length = _convention.StringLengthFor(entity, propertyName);
-						break;
-				}
+        case DbType.String:
+          column.Length = this.convention.StringLengthFor(entity, propertyName);
+          break;
+      }
+    }
 
-				// TODO Add nullable column types
-			}
-		}
+    private void ResolveManyToOneColumn(IColumn column, string propertyName) {
+      column.Relationship = RelationshipType.ManyToOne;
+      column.DbName = propertyName + "Id";
+      column.DbType = DbType.Int32;
 
-		private void ApplyAnnotations(Type entity, PropertyInfo property, Column column) {
-			/* should do something, innit! */
-		}
-	}
+      // TODO resolve column type of related primary key - be careful with infinite loops!
+    }
+
+    private void ResolveOneToManyColumn(IColumn column) {
+      // assume to be OneToMany
+      column.Relationship = RelationshipType.OneToMany;
+
+      // what is the DbName?
+      // what is the DbType?
+    }
+
+    /// <summary>
+    ///   The apply annotations.
+    /// </summary>
+    /// <param name="entity">
+    ///   The entity.
+    /// </param>
+    /// <param name="property">
+    ///   The property.
+    /// </param>
+    /// <param name="column">
+    ///   The column.
+    /// </param>
+    private void ApplyAnnotations(Type entity, PropertyInfo property, IColumn column) {
+      /* should do something, innit! */
+    }
+  }
 }

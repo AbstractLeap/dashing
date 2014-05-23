@@ -1,29 +1,117 @@
-using System;
-using System.Collections.Generic;
-using TopHat.Configuration;
-using TopHat.SqlWriter;
-
 namespace TopHat {
-	public abstract class EngineBase : IEngine {
-		private readonly IConnectionFactory _connectionFactory;
-		private readonly ISqlWriter _sqlWriter;
+  using System;
+  using System.Collections.Generic;
+  using System.Data;
 
-		protected EngineBase(IConnectionFactory connectionFactory, ISqlWriter sqlWriter) {
-			_connectionFactory = connectionFactory;
-			_sqlWriter = sqlWriter;
-		}
+  using global::TopHat.Configuration;
 
-		public IConnectionFactory ConnectionFactory {
-			get { return _connectionFactory; }
-		}
+  /// <summary>
+  ///   The engine base.
+  /// </summary>
+  public abstract class EngineBase : IEngine {
+    /// <summary>
+    ///   Gets or sets the maps.
+    /// </summary>
+    protected IDictionary<Type, IMap> Maps { get; set; }
 
-		public ISqlWriter SqlWriter {
-			get { return _sqlWriter; }
-		}
+    /// <summary>
+    ///   The open.
+    /// </summary>
+    /// <param name="connectionString">
+    ///   The connection string.
+    /// </param>
+    /// <returns>
+    ///   The <see cref="IDbConnection" />.
+    /// </returns>
+    public IDbConnection Open(string connectionString) {
+      var connection = this.NewConnection(connectionString);
+      connection.Open();
+      return connection;
+    }
 
-		public void UseMaps(IDictionary<Type, Map> maps) {
-			if (SqlWriter == null) throw new InvalidOperationException("SqlWriter is null");
-			SqlWriter.UseMaps(maps);
-		}
-	}
+    /// <summary>
+    ///   The use maps.
+    /// </summary>
+    /// <param name="maps">
+    ///   The maps.
+    /// </param>
+    public void UseMaps(IDictionary<Type, IMap> maps) {
+      this.Maps = maps;
+    }
+
+    /// <summary>
+    ///   The new connection.
+    /// </summary>
+    /// <param name="connectionString">
+    ///   The connection string.
+    /// </param>
+    /// <returns>
+    ///   The <see cref="IDbConnection" />.
+    /// </returns>
+    protected abstract IDbConnection NewConnection(string connectionString);
+
+    /// <summary>
+    ///   The query.
+    /// </summary>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <param name="query">
+    ///   The query.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="IEnumerable" />.
+    /// </returns>
+    public abstract IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query);
+
+    /// <summary>
+    ///   The execute.
+    /// </summary>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <param name="query">
+    ///   The query.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public abstract int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query);
+
+    /// <summary>
+    ///   The execute.
+    /// </summary>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <param name="query">
+    ///   The query.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public abstract int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query);
+
+    /// <summary>
+    ///   The execute.
+    /// </summary>
+    /// <param name="connection">
+    ///   The connection.
+    /// </param>
+    /// <param name="query">
+    ///   The query.
+    /// </param>
+    /// <typeparam name="T">
+    /// </typeparam>
+    /// <returns>
+    ///   The <see cref="int" />.
+    /// </returns>
+    public abstract int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query);
+  }
 }

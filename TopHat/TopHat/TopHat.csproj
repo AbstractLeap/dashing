@@ -35,6 +35,9 @@
     <Reference Include="Dapper">
       <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="LinFu.Core">
+      <HintPath>..\packages\LinFu.Core.2.3.0.41559\lib\net35\LinFu.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -50,45 +53,48 @@
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
     <Compile Include="Configuration\DefaultSessionFactory.cs" />
-    <Compile Include="Configuration\IConnectionFactory.cs" />
+    <Compile Include="Configuration\IColumn.cs" />
+    <Compile Include="Configuration\IMap.cs" />
     <Compile Include="Configuration\IMapper.cs" />
-    <Compile Include="Configuration\IQueryFactory.cs" />
     <Compile Include="Configuration\ISessionFactory.cs" />
     <Compile Include="Configuration\ColumnExtensions.cs" />
     <Compile Include="Configuration\DefaultConfiguration.cs" />
     <Compile Include="Configuration\DefaultConvention.cs" />
-    <Compile Include="Configuration\DefaultQueryFactory.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IConvention.cs" />
-    <Compile Include="Configuration\Map.cs" />
     <Compile Include="Configuration\MapExtensions.cs" />
     <Compile Include="Configuration\DefaultMapper.cs" />
+    <Compile Include="Configuration\Map.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
+    <Compile Include="DeleteEntityQuery.cs" />
+    <Compile Include="DeleteQuery.cs" />
     <Compile Include="EngineBase.cs" />
+    <Compile Include="EntityQueryBase.cs" />
+    <Compile Include="ExecutableSelectQuery.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="IEngine.cs" />
-    <Compile Include="QueryWriter\ISelect.cs" />
-    <Compile Include="QueryWriter\IWhereExecute.cs" />
-    <Compile Include="QueryWriter\OrderClause.cs" />
-    <Compile Include="QueryWriter\Query.cs" />
-    <Compile Include="QueryWriter\QueryWriter.cs" />
-    <Compile Include="QueryWriter\WhereClause.cs" />
-    <Compile Include="QueryWriter\WhereExecuter.cs" />
-    <Compile Include="SqlWriter\ISqlWriter.cs" />
+    <Compile Include="InsertEntityQuery.cs" />
+    <Compile Include="Tracking\BaseBehaviour.cs" />
+    <Compile Include="Tracking\ChangeTrackedCollection.cs" />
+    <Compile Include="Tracking\ChangeTrackingBehaviour.cs" />
+    <Compile Include="Tracking\ChangeTrackingBehaviourFactory.cs" />
+    <Compile Include="Tracking\IBehaviour.cs" />
+    <Compile Include="Tracking\IBehaviourFactory.cs" />
+    <Compile Include="Tracking\IProxyManager.cs" />
+    <Compile Include="Tracking\Proxy.cs" />
+    <Compile Include="Tracking\ProxyManager.cs" />
     <Compile Include="ISession.cs" />
+    <Compile Include="OrderClause.cs" />
+    <Compile Include="QueryBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryWriter\IOrder.cs" />
-    <Compile Include="QueryWriter\IQuery.cs" />
-    <Compile Include="QueryWriter\IFetch.cs" />
-    <Compile Include="QueryWriter\IWhere.cs" />
-    <Compile Include="SqlWriter\SqlWriterResult.cs" />
+    <Compile Include="SelectQuery.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="TopHat.cs" />
+    <Compile Include="UpdateEntityQuery.cs" />
+    <Compile Include="UpdateQuery.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ConnectionManager\" />
     <Folder Include="Generator\" />
-    <Folder Include="Proxy\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
