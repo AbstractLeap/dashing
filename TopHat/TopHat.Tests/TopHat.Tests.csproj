@@ -82,6 +82,7 @@
     <Compile Include="Configuration\ColumnTests.cs" />
     <Compile Include="Configuration\DefaultConfigurationTests.cs" />
     <Compile Include="Configuration\ConfigurationBaseTests.cs" />
+    <Compile Include="Engine\EngineBaseTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDomain\Blog.cs" />
@@ -90,10 +91,6 @@
     <Compile Include="TestDomain\User.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TopHat.SqlServer\TopHat.SqlServer.csproj">
-      <Project>{FC3A4432-A5BE-478B-A6D7-31E2FE2DB8BE}</Project>
-      <Name>TopHat.SqlServer</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TopHat\TopHat.csproj">
       <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
       <Name>TopHat</Name>

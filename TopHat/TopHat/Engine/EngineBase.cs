@@ -1,4 +1,4 @@
-namespace TopHat {
+namespace TopHat.Engine {
   using System;
   using System.Collections.Generic;
   using System.Data;

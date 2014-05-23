@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{87B7CC
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopHat.SqlServer", "TopHat.SqlServer\TopHat.SqlServer.csproj", "{FC3A4432-A5BE-478B-A6D7-31E2FE2DB8BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopHat.MySql", "TopHat.MySql\TopHat.MySql.csproj", "{FC3A4432-A5BE-478B-A6D7-31E2FE2DB8BE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

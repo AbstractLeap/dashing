@@ -78,7 +78,9 @@
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DeleteEntityQuery.cs" />
     <Compile Include="DeleteQuery.cs" />
-    <Compile Include="EngineBase.cs" />
+    <Compile Include="Engines.cs" />
+    <Compile Include="Engine\EngineBase.cs" />
+    <Compile Include="Engine\SqlServerEngine.cs" />
     <Compile Include="EntityQueryBase.cs" />
     <Compile Include="ExecutableSelectQuery.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
