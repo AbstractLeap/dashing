@@ -50,6 +50,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeGeneration\CodeGenerator.cs" />
+    <Compile Include="CodeGeneration\CodeGeneratorConfig.cs" />
+    <Compile Include="CodeGeneration\CodeHelpers.cs" />
+    <Compile Include="CodeGeneration\GeneratedCodeManager.cs" />
+    <Compile Include="CodeGeneration\ICodeGenerator.cs" />
+    <Compile Include="CodeGeneration\IGeneratedCodeManager.cs" />
+    <Compile Include="CodeGeneration\ITrackedEntity.cs" />
+    <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
+    <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
+    <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
     <Compile Include="Configuration\DefaultSessionFactory.cs" />
@@ -71,18 +81,10 @@
     <Compile Include="EngineBase.cs" />
     <Compile Include="EntityQueryBase.cs" />
     <Compile Include="ExecutableSelectQuery.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="IEngine.cs" />
     <Compile Include="InsertEntityQuery.cs" />
-    <Compile Include="Tracking\BaseBehaviour.cs" />
-    <Compile Include="Tracking\ChangeTrackedCollection.cs" />
-    <Compile Include="Tracking\ChangeTrackingBehaviour.cs" />
-    <Compile Include="Tracking\ChangeTrackingBehaviourFactory.cs" />
-    <Compile Include="Tracking\IBehaviour.cs" />
-    <Compile Include="Tracking\IBehaviourFactory.cs" />
-    <Compile Include="Tracking\IProxyManager.cs" />
-    <Compile Include="Tracking\Proxy.cs" />
-    <Compile Include="Tracking\ProxyManager.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="OrderClause.cs" />
     <Compile Include="QueryBase.cs" />
