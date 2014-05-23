@@ -85,15 +85,6 @@
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="IEngine.cs" />
     <Compile Include="InsertEntityQuery.cs" />
-    <Compile Include="Tracking\BaseBehaviour.cs" />
-    <Compile Include="Tracking\ChangeTrackedCollection.cs" />
-    <Compile Include="Tracking\ChangeTrackingBehaviour.cs" />
-    <Compile Include="Tracking\ChangeTrackingBehaviourFactory.cs" />
-    <Compile Include="Tracking\IBehaviour.cs" />
-    <Compile Include="Tracking\IBehaviourFactory.cs" />
-    <Compile Include="Tracking\IProxyManager.cs" />
-    <Compile Include="Tracking\Proxy.cs" />
-    <Compile Include="Tracking\ProxyManager.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="OrderClause.cs" />
     <Compile Include="QueryBase.cs" />

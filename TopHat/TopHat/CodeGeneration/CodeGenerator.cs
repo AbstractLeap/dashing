@@ -239,7 +239,7 @@ namespace TopHat.CodeGeneration
                     },
                         new CodeStatement[] {  // false, return new object with foreign key set
                             new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)),
-                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.Maps.SingleOrDefault(m => m.Type == column.Value.Type).PrimaryKey), new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(fkBackingProperty.Name), "Value")),
+                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.GetMap(column.Value.Type).PrimaryKey), new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(fkBackingProperty.Name), "Value")),
                             new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")),
                             new CodeMethodReturnStatement(new CodeVariableReferenceExpression("val"))
                         }
