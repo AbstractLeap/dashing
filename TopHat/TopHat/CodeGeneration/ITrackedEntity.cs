@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace TopHat.CodeGeneration {
+    using System.Collections.Generic;
 
-namespace TopHat.CodeGeneration
-{
-    public interface ITrackedEntity
-    {
+    public interface ITrackedEntity {
         bool IsTracking { get; set; }
 
         ISet<string> DirtyProperties { get; set; }

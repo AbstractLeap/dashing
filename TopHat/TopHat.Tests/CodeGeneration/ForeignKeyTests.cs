@@ -1,62 +1,47 @@
-﻿using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿namespace TopHat.Tests.CodeGeneration {
+    using TopHat.CodeGeneration;
+    using TopHat.Tests.CodeGeneration.Fixtures;
+    using TopHat.Tests.TestDomain;
 
-using System.Text;
-using System.Threading.Tasks;
-using TopHat.Configuration;
-using TopHat.Tests.TestDomain;
-using Xunit;
-using Cg = TopHat.CodeGeneration;
+    using Xunit;
 
-namespace TopHat.Tests.CodeGeneration
-{
-    public class ForeignKeyTests : IUseFixture<Fixtures.GenerateCodeFixture>
-    {
-        private Cg.IGeneratedCodeManager codeManager;
+    public class ForeignKeyTests : IUseFixture<GenerateCodeFixture> {
+        private IGeneratedCodeManager codeManager;
 
-        public void SetFixture(Fixtures.GenerateCodeFixture data)
-        {
+        public void SetFixture(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 
         [Fact]
-        public void NullReferenceReturnsObjectIfColumnNotNull()
-        {
+        public void NullReferenceReturnsObjectIfColumnNotNull() {
             // generate Post object without Author but with AuthorId
-            var post = GetPostFKWithAuthorId(3);
+            var post = this.GetPostFKWithAuthorId(3);
 
             Assert.Equal(3, post.Author.UserId);
         }
 
         [Fact]
-        public void NullReferenceReturnsObjectIfColumnNotNullOnTrackedEntity()
-        {
+        public void NullReferenceReturnsObjectIfColumnNotNullOnTrackedEntity() {
             var post = this.GetPostTrackingWithAuthorId(3);
             Assert.Equal(3, post.Author.UserId);
         }
 
         [Fact]
-        public void NullReferenceReturnsNullIfColumnNull()
-        {
-            var post = GetPostFKWithoutAuthorId();
+        public void NullReferenceReturnsNullIfColumnNull() {
+            var post = this.GetPostFKWithoutAuthorId();
 
             Assert.Null(post.Author);
         }
 
         [Fact]
-        public void NullReferenceReturnsNullIfColumnNullOnTrackedEntity()
-        {
+        public void NullReferenceReturnsNullIfColumnNullOnTrackedEntity() {
             var post = this.GetPostTrackingWithoutAuthorId();
 
             Assert.Null(post.Author);
         }
 
         [Fact]
-        public void SecondGetReturnsSameObject()
-        {
+        public void SecondGetReturnsSameObject() {
             var post = this.GetPostFKWithAuthorId(3);
             var author = post.Author;
             var author2 = post.Author;
@@ -65,8 +50,7 @@ namespace TopHat.Tests.CodeGeneration
         }
 
         [Fact]
-        public void SetObjectReturnsObject()
-        {
+        public void SetObjectReturnsObject() {
             var post = this.GetPostFKWithAuthorId(3);
             var user = new User { UserId = 1 };
             post.Author = user;
@@ -74,30 +58,26 @@ namespace TopHat.Tests.CodeGeneration
             Assert.Same(post.Author, user);
         }
 
-        private Post GetPostTrackingWithoutAuthorId()
-        {
+        private Post GetPostTrackingWithoutAuthorId() {
             return this.codeManager.CreateTrackingInstance<Post>();
         }
 
-        private Post GetPostFKWithoutAuthorId()
-        {
+        private Post GetPostFKWithoutAuthorId() {
             return this.codeManager.CreateForeignKeyInstance<Post>();
         }
 
-        private Post GetPostFKWithAuthorId(int authorId)
-        {
+        private Post GetPostFKWithAuthorId(int authorId) {
             var postFkType = this.codeManager.GetForeignKeyType<Post>();
             var postFk = this.codeManager.CreateForeignKeyInstance<Post>();
             postFkType.GetProperty("AuthorId").SetValue(postFk, authorId);
-            return postFk as Post;
+            return postFk;
         }
 
-        private Post GetPostTrackingWithAuthorId(int authorId)
-        {
+        private Post GetPostTrackingWithAuthorId(int authorId) {
             var postTrackingType = this.codeManager.GetTrackingType<Post>();
             var postTracking = this.codeManager.CreateTrackingInstance<Post>();
             postTrackingType.GetProperty("AuthorId").SetValue(postTracking, authorId);
-            return postTracking as Post;
+            return postTracking;
         }
     }
 }

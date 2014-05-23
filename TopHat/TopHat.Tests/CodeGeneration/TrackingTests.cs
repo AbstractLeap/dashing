@@ -1,26 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TopHat.CodeGeneration;
-using TopHat.Tests.TestDomain;
-using Xunit;
+﻿namespace TopHat.Tests.CodeGeneration {
+    using TopHat.CodeGeneration;
+    using TopHat.Tests.CodeGeneration.Fixtures;
+    using TopHat.Tests.TestDomain;
 
-namespace TopHat.Tests.CodeGeneration
-{
-    public class TrackingTests : IUseFixture<Fixtures.GenerateCodeFixture>
-    {
+    using Xunit;
+
+    public class TrackingTests : IUseFixture<GenerateCodeFixture> {
         private IGeneratedCodeManager codeManager;
 
-        public void SetFixture(Fixtures.GenerateCodeFixture data)
-        {
+        public void SetFixture(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 
         [Fact]
-        public void ChangeRelationshipPropertyFromNullMarksAsDirty()
-        {
+        public void ChangeRelationshipPropertyFromNullMarksAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             this.codeManager.TrackInstance(post);
             var inspector = new TrackedEntityInspector<Post>(post);
@@ -31,8 +24,7 @@ namespace TopHat.Tests.CodeGeneration
         }
 
         [Fact]
-        public void ChangeRelationshipPropertyToNullMarksAsDirty()
-        {
+        public void ChangeRelationshipPropertyToNullMarksAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             post.Author = new User { UserId = 1 };
 
@@ -45,8 +37,7 @@ namespace TopHat.Tests.CodeGeneration
         }
 
         [Fact]
-        public void ChangeRelationshipPropertyNotNullMarksAsDirty()
-        {
+        public void ChangeRelationshipPropertyNotNullMarksAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             post.Author = new User { UserId = 1 };
 
@@ -59,8 +50,7 @@ namespace TopHat.Tests.CodeGeneration
         }
 
         [Fact]
-        public void ChangePropertyMarksEntityAsDirty()
-        {
+        public void ChangePropertyMarksEntityAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             this.codeManager.TrackInstance(post);
             var inspector = new TrackedEntityInspector<Post>(post);
@@ -71,8 +61,7 @@ namespace TopHat.Tests.CodeGeneration
         }
 
         [Fact]
-        public void ChangePropertyMarksPropertyAsDirty()
-        {
+        public void ChangePropertyMarksPropertyAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             this.codeManager.TrackInstance(post);
             var inspector = new TrackedEntityInspector<Post>(post);
@@ -83,8 +72,7 @@ namespace TopHat.Tests.CodeGeneration
         }
 
         [Fact]
-        public void AddtoCollectionMarksAsDirty()
-        {
+        public void AddtoCollectionMarksAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             this.codeManager.TrackInstance(post);
             var inspector = new TrackedEntityInspector<Post>(post);
@@ -95,8 +83,7 @@ namespace TopHat.Tests.CodeGeneration
         }
 
         [Fact]
-        public void AddtoCollectionMarksPropertyAsDirty()
-        {
+        public void AddtoCollectionMarksPropertyAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             this.codeManager.TrackInstance(post);
             var inspector = new TrackedEntityInspector<Post>(post);
@@ -107,8 +94,7 @@ namespace TopHat.Tests.CodeGeneration
         }
 
         [Fact]
-        public void DeleteFromCollectionMarksPropertyAsDirty()
-        {
+        public void DeleteFromCollectionMarksPropertyAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             post.Comments.Add(new Comment());
             this.codeManager.TrackInstance(post);

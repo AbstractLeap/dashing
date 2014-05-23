@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TopHat.CodeGeneration
-{
-    public class CodeGeneratorConfig
-    {
-        public CodeGeneratorConfig()
-        {
+﻿namespace TopHat.CodeGeneration {
+    public class CodeGeneratorConfig {
+        public CodeGeneratorConfig() {
             this.Namespace = "TopHat.Generated";
             this.ForeignKeyAccessClassSuffix = "_FK";
             this.ForeignKeyAccessEntityFieldSuffix = "_FKEntity";
@@ -17,13 +8,13 @@ namespace TopHat.CodeGeneration
         }
 
         /// <summary>
-        /// Indicates that classes will be created with extra fields matching the underlying foreign key column name
-        /// enabling resolving of foreign key ids
+        ///     Indicates that classes will be created with extra fields matching the underlying foreign key column name
+        ///     enabling resolving of foreign key ids
         /// </summary>
         public bool GenerateForeignKeyAccessClasses { get; set; }
 
         /// <summary>
-        /// Indicates that classes will be generated that enable tracking of changes
+        ///     Indicates that classes will be generated that enable tracking of changes
         /// </summary>
         public bool GenerateChangeTrackingClasses { get; set; }
 

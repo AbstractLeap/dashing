@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace TopHat.Extensions {
+    using System.Collections.Generic;
+    using System.Linq;
 
-namespace TopHat.Extensions
-{
-    public static class EnumerableExtensions
-    {
-        public static bool IsEmpty<T>(this IEnumerable<T> source)
-        {
+    public static class EnumerableExtensions {
+        public static bool IsEmpty<T>(this IEnumerable<T> source) {
             return !source.Any();
         }
     }
