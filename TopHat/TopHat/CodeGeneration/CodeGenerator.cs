@@ -83,25 +83,25 @@ namespace TopHat.CodeGeneration
             constructor.Attributes = MemberAttributes.Public;
             constructor.Statements.Add(
                 new CodeAssignStatement(
-                    new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "DirtyProperties"),
+                    CodeHelpers.ThisField("DirtyProperties"),
                     new CodeObjectCreateExpression(typeof(HashSet<>).MakeGenericType(typeof(string)))
                 )
             );
             constructor.Statements.Add(
                 new CodeAssignStatement(
-                    new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "OldValues"),
+                    CodeHelpers.ThisField("OldValues"),
                     new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(object)))
                 )
             );
             constructor.Statements.Add(
                 new CodeAssignStatement(
-                    new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "AddedEntities"),
+                    CodeHelpers.ThisField("AddedEntities"),
                     new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))))
                 )
             );
             constructor.Statements.Add(
                 new CodeAssignStatement(
-                    new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "DeletedEntities"),
+                    CodeHelpers.ThisField("DeletedEntities"),
                     new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))))
                 )
             );
@@ -135,7 +135,7 @@ namespace TopHat.CodeGeneration
             // override value type properties to perform dirty checking
             foreach (var valueTypeColumn in map.Columns.Where(c => !c.Value.Type.IsCollection() && !c.Value.Ignore))
             {
-                var prop = this.GenerateGetSetProperty(trackingClass, valueTypeColumn.Key, valueTypeColumn.Value.Type, MemberAttributes.Public | MemberAttributes.Override);
+                var prop = this.GenerateGetSetProperty(trackingClass, valueTypeColumn.Key, valueTypeColumn.Value.Type, MemberAttributes.Public | MemberAttributes.Override, valueTypeColumn.Value.Relationship == RelationshipType.ManyToOne);
                 // override the setter
                 // if isTracking && !this.DirtyProperties.ContainsKey(prop) add to dirty props and add oldvalue
                 bool propertyCanBeNull = valueTypeColumn.Value.Type.IsNullable() || !valueTypeColumn.Value.Type.IsValueType;
@@ -143,7 +143,7 @@ namespace TopHat.CodeGeneration
                 if (!propertyCanBeNull)
                 {
                     // can't be null so just check values
-                    changeCheck.Left = new CodeMethodInvokeExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "backing" + valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression());
+                    changeCheck.Left = new CodeMethodInvokeExpression(CodeHelpers.ThisField("backing" + valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression());
                     changeCheck.Operator = CodeBinaryOperatorType.IdentityEquality;
                     changeCheck.Right = new CodePrimitiveExpression(false);
                 }
@@ -151,7 +151,7 @@ namespace TopHat.CodeGeneration
                 {
                     // can be null, need to be careful of null reference exceptions
                     changeCheck.Left = new CodeBinaryOperatorExpression(
-                        CodeHelpers.ThisFieldIsNull("backing" + valueTypeColumn.Key),
+                        valueTypeColumn.Value.Relationship == RelationshipType.ManyToOne ? CodeHelpers.BasePropertyIsNull(valueTypeColumn.Key) : CodeHelpers.ThisFieldIsNull("backing" + valueTypeColumn.Key),
                         CodeBinaryOperatorType.BooleanAnd,
                         new CodeBinaryOperatorExpression(
                             new CodePropertySetValueReferenceExpression(),
@@ -161,10 +161,10 @@ namespace TopHat.CodeGeneration
                     );
                     changeCheck.Operator = CodeBinaryOperatorType.BooleanOr;
                     changeCheck.Right = new CodeBinaryOperatorExpression(
-                        CodeHelpers.ThisFieldIsNotNull("backing" + valueTypeColumn.Key),
+                        valueTypeColumn.Value.Relationship == RelationshipType.ManyToOne ? CodeHelpers.BasePropertyIsNotNull(valueTypeColumn.Key) : CodeHelpers.ThisFieldIsNotNull("backing" + valueTypeColumn.Key),
                         CodeBinaryOperatorType.BooleanAnd,
                         new CodeBinaryOperatorExpression(
-                            new CodeMethodInvokeExpression(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "backing" + valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()),
+                            new CodeMethodInvokeExpression(valueTypeColumn.Value.Relationship == RelationshipType.ManyToOne ? CodeHelpers.BaseProperty(valueTypeColumn.Key) : CodeHelpers.ThisField("backing" + valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()),
                             CodeBinaryOperatorType.IdentityEquality,
                             new CodePrimitiveExpression(false)
                         )
@@ -177,7 +177,7 @@ namespace TopHat.CodeGeneration
                         CodeBinaryOperatorType.BooleanAnd,
                         new CodeBinaryOperatorExpression(
                             new CodeBinaryOperatorExpression(
-                                new CodeMethodInvokeExpression(new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)),
+                                new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)),
                                 CodeBinaryOperatorType.IdentityEquality,
                                 new CodePrimitiveExpression(false)
                             ),
@@ -186,9 +186,9 @@ namespace TopHat.CodeGeneration
                         )
                     ),
                     new CodeStatement[] {
-                        new CodeExpressionStatement(new CodeMethodInvokeExpression(new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))),
+                        new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))),
                         new CodeAssignStatement(
-                            new CodeIndexerExpression(new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), "OldValues"), new CodePrimitiveExpression(prop.Name)),
+                            new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)),
                             new CodePropertySetValueReferenceExpression()
                         )
                     }
@@ -228,47 +228,55 @@ namespace TopHat.CodeGeneration
                     // if backingField != null
                         CodeHelpers.ThisFieldIsNotNull(backingField.Name),
                     new CodeStatement[] { // true
-                        new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), backingField.Name)),
+                        new CodeMethodReturnStatement(CodeHelpers.ThisField(backingField.Name)),
                     },
                         new CodeStatement[] {  // false, return new object with foreign key set
                             new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)),
-                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.Maps.SingleOrDefault(m => m.Type == column.Value.Type).PrimaryKey), new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), fkBackingField.Name)),
-                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), backingField.Name), new CodeVariableReferenceExpression("val")),
+                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.Maps.SingleOrDefault(m => m.Type == column.Value.Type).PrimaryKey), CodeHelpers.ThisField(fkBackingField.Name)),
+                            new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")),
                             new CodeMethodReturnStatement(new CodeVariableReferenceExpression("val"))
                         }
                     ));
-                property.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), backingField.Name), new CodePropertySetValueReferenceExpression()));
+                property.SetStatements.Add(new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodePropertySetValueReferenceExpression()));
                 fkClass.Members.Add(property);
             }
 
             this.codeNamespace.Types.Add(fkClass);
         }
 
-        private CodeMemberProperty GenerateGetSetProperty(CodeTypeDeclaration owningClass, string name, Type type, MemberAttributes attributes)
+        private CodeMemberProperty GenerateGetSetProperty(CodeTypeDeclaration owningClass, string name, Type type, MemberAttributes attributes, bool useBaseProperty = false)
         {
-            // generate the backing field for this property
-            var backingField = new CodeMemberField();
-            backingField.Name = "backing" + name;
-            backingField.Type = new CodeTypeReference(type);
-            owningClass.Members.Add(backingField);
-
             // generate the property
             var prop = new CodeMemberProperty();
             prop.Name = name;
             prop.Type = new CodeTypeReference(type);
             prop.Attributes = attributes;
 
-            prop.GetStatements.Add(
-                new CodeMethodReturnStatement(
-                    new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), backingField.Name)
-                )
-            );
-            prop.SetStatements.Add(
-                new CodeAssignStatement(
-                    new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), backingField.Name),
-                    new CodePropertySetValueReferenceExpression()
-                )
-            );
+            if (useBaseProperty)
+            {
+                prop.GetStatements.Add(new CodeMethodReturnStatement(CodeHelpers.BaseProperty(name)));
+                prop.SetStatements.Add(new CodeAssignStatement(CodeHelpers.BaseProperty(name), new CodePropertySetValueReferenceExpression()));
+            }
+            else
+            {
+                // generate the backing field for this property
+                var backingField = new CodeMemberField();
+                backingField.Name = "backing" + name;
+                backingField.Type = new CodeTypeReference(type);
+                owningClass.Members.Add(backingField);
+
+                prop.GetStatements.Add(
+                    new CodeMethodReturnStatement(
+                        CodeHelpers.ThisField(backingField.Name)
+                    )
+                );
+                prop.SetStatements.Add(
+                    new CodeAssignStatement(
+                        CodeHelpers.ThisField(backingField.Name),
+                        new CodePropertySetValueReferenceExpression()
+                    )
+                );
+            }
             owningClass.Members.Add(prop);
 
             return prop;
