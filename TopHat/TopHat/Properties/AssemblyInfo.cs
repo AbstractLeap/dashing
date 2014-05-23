@@ -34,4 +34,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 // Ensure the tests can see the internal classes
-[assembly: InternalsVisibleTo("Session.Tests", AllInternalsVisible = true)]
+[assembly: InternalsVisibleTo("TopHat.Tests", AllInternalsVisible = true)]

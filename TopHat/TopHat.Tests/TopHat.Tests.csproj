@@ -70,6 +70,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
+    <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
+    <Compile Include="CodeGeneration\TrackingTests.cs" />
     <Compile Include="Configuration\ColumnExtensionTests.cs" />
     <Compile Include="Configuration\DefaultConventionTests.cs" />
     <Compile Include="Configuration\DefaultSessionFactoryTests.cs" />
@@ -81,8 +84,6 @@
     <Compile Include="Configuration\ConfigurationBaseTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tracking\ChangeTrackingTests.cs" />
-    <Compile Include="Tracking\ProxyTests.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Post.cs" />
@@ -102,6 +103,7 @@
     <Fakes Include="Fakes\Dapper.fakes" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
