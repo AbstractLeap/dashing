@@ -4,26 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TopHat.CodeGeneration;
 using TopHat.Configuration;
 using TopHat.Tests.TestDomain;
-using Xunit;
-using Cg = TopHat.CodeGeneration;
 
-namespace TopHat.Tests.CodeGenerator
+namespace TopHat.Tests.CodeGeneration.Fixtures
 {
-    public class ForeignKeyTests
+    public class GenerateCodeFixture
     {
         private Mock<IEngine> engine = new Mock<IEngine>();
 
-        [Fact]
-        public void FKTest()
+        public IGeneratedCodeManager CodeManager { get; private set; }
+
+        public GenerateCodeFixture()
         {
-            var config = new CustomConfig(this.engine.Object);
-            var codeGenerator = new Cg.CodeGenerator();
-            var codeConfig = new Cg.CodeGeneratorConfig();
+            // generate config and assembly
+            IConfiguration config = new CustomConfig(this.engine.Object);
+            var codeGenerator = new CodeGenerator();
+            var codeConfig = new CodeGeneratorConfig();
             codeConfig.GenerateAssembly = true;
-            codeConfig.GenerateSource = true;
             codeGenerator.Generate(config, codeConfig);
+            this.CodeManager = new GeneratedCodeManager();
+            this.CodeManager.LoadCode(codeConfig);
         }
 
         private class CustomConfig : DefaultConfiguration

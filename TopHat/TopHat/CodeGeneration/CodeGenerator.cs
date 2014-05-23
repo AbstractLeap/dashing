@@ -210,10 +210,13 @@ namespace TopHat.CodeGeneration
 
             foreach (var column in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne))
             {
-                // create a backing field for storing the FK
-                var fkBackingField = new CodeMemberField(column.Value.DbType.GetCLRType(), column.Value.DbName); // TODO add alias to column names (as spaces will break this)
-                fkBackingField.Attributes = MemberAttributes.Public;
-                fkClass.Members.Add(fkBackingField);
+                // create a backing property for storing the FK
+                var backingType = column.Value.DbType.GetCLRType();
+                if (backingType.IsValueType)
+                {
+                    backingType = typeof(Nullable<>).MakeGenericType(backingType);
+                }
+                var fkBackingProperty = this.GenerateGetSetProperty(fkClass, column.Value.DbName, backingType, MemberAttributes.Public | MemberAttributes.Final);
 
                 // create a backing field for storing the related entity
                 var backingField = new CodeMemberField(column.Value.Type, column.Value.Name + generatorConfig.ForeignKeyAccessEntityFieldSuffix);
@@ -225,14 +228,18 @@ namespace TopHat.CodeGeneration
                 property.Type = new CodeTypeReference(column.Value.Type);
                 property.Attributes = MemberAttributes.Public | MemberAttributes.Override;
                 property.GetStatements.Add(new CodeConditionStatement(
-                    // if backingField != null
+                    // if backingField != null or Fk backing field is null return
+                    new CodeBinaryOperatorExpression(
                         CodeHelpers.ThisFieldIsNotNull(backingField.Name),
+                        CodeBinaryOperatorType.BooleanOr,
+                        CodeHelpers.ThisPropertyIsNull(fkBackingProperty.Name)
+                        ),
                     new CodeStatement[] { // true
                         new CodeMethodReturnStatement(CodeHelpers.ThisField(backingField.Name)),
                     },
                         new CodeStatement[] {  // false, return new object with foreign key set
                             new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)),
-                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.Maps.SingleOrDefault(m => m.Type == column.Value.Type).PrimaryKey), CodeHelpers.ThisField(fkBackingField.Name)),
+                            new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.Maps.SingleOrDefault(m => m.Type == column.Value.Type).PrimaryKey), new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(fkBackingProperty.Name), "Value")),
                             new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")),
                             new CodeMethodReturnStatement(new CodeVariableReferenceExpression("val"))
                         }
