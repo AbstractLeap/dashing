@@ -10,32 +10,32 @@
     /// <summary>
     ///   The _engine.
     /// </summary>
-    private readonly IEngine _engine;
+    private readonly IEngine engine;
 
     /// <summary>
     ///   The _connection.
     /// </summary>
-    private readonly IDbConnection _connection;
+    private readonly IDbConnection connection;
 
     /// <summary>
     ///   The _is their transaction.
     /// </summary>
-    private readonly bool _isTheirTransaction;
+    private readonly bool isTheirTransaction;
 
     /// <summary>
     ///   The _transaction.
     /// </summary>
-    private IDbTransaction _transaction;
+    private IDbTransaction transaction;
 
     /// <summary>
     ///   The _is disposed.
     /// </summary>
-    private bool _isDisposed;
+    private bool isDisposed;
 
     /// <summary>
     ///   The _is completed.
     /// </summary>
-    private bool _isCompleted;
+    private bool isCompleted;
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="Session" /> class.
@@ -57,8 +57,8 @@
         throw new ArgumentNullException("connection");
       }
 
-      this._engine = engine;
-      this._connection = connection;
+      this.engine = engine;
+      this.connection = connection;
     }
 
     /// <summary>
@@ -84,12 +84,12 @@
         throw new ArgumentNullException("connection");
       }
 
-      this._engine = engine;
-      this._connection = connection;
+      this.engine = engine;
+      this.connection = connection;
 
       if (transaction != null) {
-        this._isTheirTransaction = true;
-        this._transaction = transaction;
+        this.isTheirTransaction = true;
+        this.transaction = transaction;
       }
     }
 
@@ -102,16 +102,16 @@
     /// </exception>
     public IDbConnection Connection {
       get {
-        if (this._isDisposed) {
+        if (this.isDisposed) {
           throw new ObjectDisposedException("Session");
         }
 
-        if (this._connection.State == ConnectionState.Closed) {
-          this._connection.Open();
+        if (this.connection.State == ConnectionState.Closed) {
+          this.connection.Open();
         }
 
-        if (this._connection.State == ConnectionState.Open) {
-          return this._connection;
+        if (this.connection.State == ConnectionState.Open) {
+          return this.connection;
         }
 
         throw new Exception("Connection in unknown state");
@@ -125,11 +125,11 @@
     /// </exception>
     public IDbTransaction Transaction {
       get {
-        if (this._isDisposed) {
+        if (this.isDisposed) {
           throw new ObjectDisposedException("Session");
         }
 
-        return this._transaction ?? (this._transaction = this.Connection.BeginTransaction());
+        return this.transaction ?? (this.transaction = this.Connection.BeginTransaction());
       }
     }
 
@@ -139,34 +139,34 @@
     /// <exception cref="InvalidOperationException">
     /// </exception>
     public void Complete() {
-      if (this._isCompleted) {
+      if (this.isCompleted) {
         throw new InvalidOperationException("Only call complete once, when all of the transactional work is done");
       }
 
-      if (this._transaction != null && !this._isTheirTransaction) {
-        this._transaction.Commit();
+      if (this.transaction != null && !this.isTheirTransaction) {
+        this.transaction.Commit();
       }
 
-      this._isCompleted = true;
+      this.isCompleted = true;
     }
 
     /// <summary>
     ///   The dispose.
     /// </summary>
     public void Dispose() {
-      if (this._isDisposed) {
+      if (this.isDisposed) {
         return;
       }
 
-      if (this._transaction != null && !this._isTheirTransaction) {
-        if (!this._isCompleted) {
-          this._transaction.Rollback();
+      if (this.transaction != null && !this.isTheirTransaction) {
+        if (!this.isCompleted) {
+          this.transaction.Rollback();
         }
 
-        this._transaction.Dispose();
+        this.transaction.Dispose();
       }
 
-      this._isDisposed = true;
+      this.isDisposed = true;
     }
 
     /// <summary>
@@ -178,7 +178,7 @@
     ///   The <see cref="SelectQuery" />.
     /// </returns>
     public SelectQuery<T> Query<T>() {
-      return new ExecutableSelectQuery<T>(this._engine, this.Connection);
+      return new ExecutableSelectQuery<T>(this.engine, this.Connection);
     }
 
     /// <summary>
@@ -193,7 +193,7 @@
     ///   The <see cref="int" />.
     /// </returns>
     public int Insert<T>(params T[] entities) {
-      return this._engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
+      return this.engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
     }
 
     /// <summary>
@@ -208,7 +208,7 @@
     ///   The <see cref="int" />.
     /// </returns>
     public int Insert<T>(IEnumerable<T> entities) {
-      return this._engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
+      return this.engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
     }
 
     /// <summary>
@@ -223,7 +223,7 @@
     ///   The <see cref="int" />.
     /// </returns>
     public int Update<T>(params T[] entities) {
-      return this._engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+      return this.engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
     }
 
     /// <summary>
@@ -238,7 +238,7 @@
     ///   The <see cref="int" />.
     /// </returns>
     public int Update<T>(IEnumerable<T> entities) {
-      return this._engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+      return this.engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
     }
 
     /// <summary>
@@ -253,7 +253,7 @@
     ///   The <see cref="int" />.
     /// </returns>
     public int Delete<T>(params T[] entities) {
-      return this._engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+      return this.engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
     }
 
     /// <summary>
@@ -268,7 +268,7 @@
     ///   The <see cref="int" />.
     /// </returns>
     public int Delete<T>(IEnumerable<T> entities) {
-      return this._engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+      return this.engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
     }
   }
 }

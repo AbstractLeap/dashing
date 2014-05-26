@@ -12,12 +12,12 @@ namespace TopHat {
     /// <summary>
     ///   The _engine.
     /// </summary>
-    private readonly IEngine _engine;
+    private readonly IEngine engine;
 
     /// <summary>
     ///   The _connection.
     /// </summary>
-    private readonly IDbConnection _connection;
+    private readonly IDbConnection connection;
 
     /// <summary>
     ///   Initializes a new instance of the <see cref="ExecutableSelectQuery{T}" /> class.
@@ -29,8 +29,8 @@ namespace TopHat {
     ///   The connection.
     /// </param>
     public ExecutableSelectQuery(IEngine engine, IDbConnection connection) {
-      this._connection = connection;
-      this._engine = engine;
+      this.connection = connection;
+      this.engine = engine;
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ namespace TopHat {
     ///   The <see cref="IEnumerator" />.
     /// </returns>
     public IEnumerator<T> GetEnumerator() {
-      return this._engine.Query(this._connection, this).GetEnumerator();
+      return this.engine.Query(this.connection, this).GetEnumerator();
     }
 
     /// <summary>

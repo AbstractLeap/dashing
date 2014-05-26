@@ -24,6 +24,7 @@
       if (column == null) {
         throw new ArgumentNullException("column"); 
       }
+
       column.Name = name;
       return column;
     }
@@ -46,6 +47,7 @@
       if (column == null) {
         throw new ArgumentNullException("column");
       }
+
       column.DbType = dbType;
       return column;
     }
@@ -68,6 +70,7 @@
       if (column == null) {
         throw new ArgumentNullException("column");
       }
+
       column.Precision = precision;
       return column;
     }
@@ -90,6 +93,7 @@
       if (column == null) {
         throw new ArgumentNullException("column");
       }
+
       column.Scale = scale;
       return column;
     }
@@ -112,6 +116,7 @@
       if (column == null) {
         throw new ArgumentNullException("column");
       }
+
       column.Length = length;
       return column;
     }
@@ -131,6 +136,7 @@
       if (column == null) {
         throw new ArgumentNullException("column");
       }
+
       column.ExcludeByDefault = true;
       return column;
     }
@@ -150,6 +156,7 @@
       if (column == null) {
         throw new ArgumentNullException("column");
       }
+
       column.ExcludeByDefault = false;
       return column;
     }
@@ -169,6 +176,7 @@
       if (column == null) {
         throw new ArgumentNullException("column");
       }
+
       column.Ignore = true;
       return column;
     }
@@ -188,6 +196,7 @@
       if (column == null) {
         throw new ArgumentNullException("column");
       }
+
       column.Ignore = false;
       return column;
     }

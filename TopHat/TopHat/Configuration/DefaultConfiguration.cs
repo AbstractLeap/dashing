@@ -13,6 +13,6 @@
     ///   The connection string.
     /// </param>
     public DefaultConfiguration(IEngine engine, string connectionString)
-      : base(engine, connectionString, new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory()) {}
+      : base(engine, connectionString, new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory()) { }
   }
 }

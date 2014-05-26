@@ -202,13 +202,13 @@
 
     private class CustomConfiguration : ConfigurationBase {
       public CustomConfiguration(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory)
-        : base(engine, connectionString, mapper, sessionFactory) {}
+        : base(engine, connectionString, mapper, sessionFactory) { }
 
       public CustomConfiguration(IEngine engine, IMapper mapper, ISessionFactory sessionFactory)
         : this(engine, ConfigurationBaseTests.DummyConnectionString, mapper, sessionFactory) { }
 
       public CustomConfiguration(IMapper mapper)
-        : base(MakeMockEngine().Object, ConfigurationBaseTests.DummyConnectionString, mapper, MakeMockSf().Object) {}
+        : base(MakeMockEngine().Object, ConfigurationBaseTests.DummyConnectionString, mapper, MakeMockSf().Object) { }
     }
 
     private class CustomConfigurationWithIndividualAdds : CustomConfiguration {
@@ -237,14 +237,14 @@
       public CustomConfigurationWithAddAndSetup(IMapper mapper)
         : base(mapper) {
         this.AddNamespaceOf<Post>();
-        this.Setup<User>().Table = ExampleTableName;
+        this.Setup<User>().Table = ConfigurationBaseTests.ExampleTableName;
       }
     }
 
     private class CustomConfigurationWithSetup : CustomConfiguration {
       public CustomConfigurationWithSetup(IMapper mapper)
         : base(mapper) {
-        this.Setup<User>().Table = ExampleTableName;
+          this.Setup<User>().Table = ConfigurationBaseTests.ExampleTableName;
       }
     }
   }

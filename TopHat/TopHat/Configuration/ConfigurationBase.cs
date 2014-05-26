@@ -1,6 +1,5 @@
 ﻿namespace TopHat.Configuration
 {
-    using LinFu.Proxy.Interfaces;
     using System;
     using System.Collections.Generic;
     using System.Data;
