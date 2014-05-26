@@ -6,7 +6,9 @@
     using System.Linq;
     using System.Reflection;
 
-    /// <summary>
+    using TopHat.Engine;
+
+  /// <summary>
     ///   The configuration base.
     /// </summary>
     public abstract class ConfigurationBase : IConfiguration

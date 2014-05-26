@@ -2,7 +2,9 @@
 {
     using global::TopHat.Configuration;
 
-    /// <summary>
+    using TopHat.Engine;
+
+  /// <summary>
     ///   The top hat.
     /// </summary>
     public static class TH

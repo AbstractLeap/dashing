@@ -3,6 +3,8 @@ namespace TopHat {
   using System.Collections.Generic;
   using System.Data;
 
+  using TopHat.Engine;
+
   /// <summary>
   ///   The executable select query.
   /// </summary>

@@ -10,6 +10,8 @@
 
   using global::TopHat.Tests.TestDomain;
 
+  using TopHat.Engine;
+
   using Xunit;
 
   public class ConfigurationBaseTests {

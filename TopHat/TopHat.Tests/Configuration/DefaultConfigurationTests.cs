@@ -3,6 +3,8 @@
 
   using global::TopHat.Configuration;
 
+  using TopHat.Engine;
+
   using Xunit;
 
   public class DefaultConfigurationTests {

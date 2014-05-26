@@ -1,9 +1,9 @@
-namespace TopHat {
+namespace TopHat.Engine {
   using System;
   using System.Collections.Generic;
   using System.Data;
 
-  using global::TopHat.Configuration;
+  using TopHat.Configuration;
 
   /// <summary>
   ///   The Engine interface.

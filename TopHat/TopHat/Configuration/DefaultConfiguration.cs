@@ -1,4 +1,6 @@
 ﻿namespace TopHat.Configuration {
+  using TopHat.Engine;
+
   /// <summary>
   ///   The default configuration.
   /// </summary>
