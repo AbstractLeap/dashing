@@ -90,7 +90,7 @@
     public void ExcludeByDefaultSetsFlag() {
       var column = MakeTarget();
       column.ExcludeByDefault();
-      Assert.Equal(true, column.ExcludeByDefault);
+      Assert.Equal(true, column.IsExcludedByDefault);
     }
 
     [Fact]
@@ -103,7 +103,7 @@
     public void DontExcludeByDefaultSetsFlag() {
       var column = MakeTarget();
       column.DontExcludeByDefault();
-      Assert.Equal(false, column.ExcludeByDefault);
+      Assert.Equal(false, column.IsExcludedByDefault);
     }
 
     [Fact]
@@ -116,7 +116,7 @@
     public void IgnoreSetsFlag() {
       var column = MakeTarget();
       column.Ignore();
-      Assert.Equal(true, column.Ignore);
+      Assert.Equal(true, column.IsIgnored);
     }
 
     [Fact]
@@ -129,7 +129,7 @@
     public void DontIgnoreSetsFlag() {
       var column = MakeTarget();
       column.DontIgnore();
-      Assert.Equal(false, column.Ignore);
+      Assert.Equal(false, column.IsIgnored);
     }
 
     private static Column<string> MakeNullTarget() {

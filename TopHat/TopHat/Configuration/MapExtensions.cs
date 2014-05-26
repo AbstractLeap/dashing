@@ -62,39 +62,7 @@
     ///   The <see cref="Map" />.
     /// </returns>
     public static Map<T> PrimaryKey<T, TResult>(this Map<T> map, Expression<Func<T, TResult>> expression) {
-      map.PrimaryKey = NameFromMemberExpression(expression);
-      return map;
-    }
-
-    /// <summary>
-    ///   The primary key is generated.
-    /// </summary>
-    /// <param name="map">
-    ///   The map.
-    /// </param>
-    /// <typeparam name="T">
-    /// </typeparam>
-    /// <returns>
-    ///   The <see cref="Map" />.
-    /// </returns>
-    public static Map<T> PrimaryKeyIsGenerated<T>(this Map<T> map) {
-      map.IsPrimaryKeyDatabaseGenerated = true;
-      return map;
-    }
-
-    /// <summary>
-    ///   The primary key is not generated.
-    /// </summary>
-    /// <param name="map">
-    ///   The map.
-    /// </param>
-    /// <typeparam name="T">
-    /// </typeparam>
-    /// <returns>
-    ///   The <see cref="Map" />.
-    /// </returns>
-    public static Map<T> PrimaryKeyIsNotGenerated<T>(this Map<T> map) {
-      map.IsPrimaryKeyDatabaseGenerated = false;
+      map.PrimaryKey = map.Columns[NameFromMemberExpression(expression)];
       return map;
     }
 

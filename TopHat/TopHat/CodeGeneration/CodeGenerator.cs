@@ -124,7 +124,7 @@
             }
 
             // override value type properties to perform dirty checking
-            foreach (var valueTypeColumn in map.Columns.Where(c => !c.Value.Type.IsCollection() && !c.Value.Ignore)) {
+            foreach (var valueTypeColumn in map.Columns.Where(c => !c.Value.Type.IsCollection() && !c.Value.IsIgnored)) {
                 var prop = this.GenerateGetSetProperty(trackingClass, valueTypeColumn.Key, valueTypeColumn.Value.Type, MemberAttributes.Public | MemberAttributes.Override, true);
 
                 // override the setter
@@ -224,7 +224,7 @@
                                                 // false, return new object with foreign key set
                                                 new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)),
                                                 new CodeAssignStatement(
-                                                    new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.GetMap(column.Value.Type).PrimaryKey),
+                                                    new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.GetMap(column.Value.Type).PrimaryKey.Name),
                                                     new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(foreignKeyBackingProperty.Name), "Value")),
                                                 new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")),
                                                 new CodeMethodReturnStatement(new CodeVariableReferenceExpression("val"))

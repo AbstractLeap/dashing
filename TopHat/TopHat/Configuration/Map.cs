@@ -33,12 +33,7 @@ namespace TopHat.Configuration {
     /// <summary>
     ///   Gets or sets the primary key.
     /// </summary>
-    public string PrimaryKey { get; set; }
-
-    /// <summary>
-    ///   Gets or sets a value indicating whether is primary key database generated.
-    /// </summary>
-    public bool IsPrimaryKeyDatabaseGenerated { get; set; }
+    public IColumn PrimaryKey { get; set; }
 
     /// <summary>
     ///   Gets or sets the columns.
@@ -72,7 +67,6 @@ namespace TopHat.Configuration {
                           Table = map.Table, 
                           Schema = map.Schema, 
                           PrimaryKey = map.PrimaryKey, 
-                          IsPrimaryKeyDatabaseGenerated = map.IsPrimaryKeyDatabaseGenerated, 
                           Columns = map.Columns
                           
                           //// Indexes = map.Indexes

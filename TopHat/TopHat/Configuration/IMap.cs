@@ -21,12 +21,7 @@ namespace TopHat.Configuration {
     /// <summary>
     ///   Gets or sets the primary key.
     /// </summary>
-    string PrimaryKey { get; set; }
-
-    /// <summary>
-    ///   Gets or sets a value indicating whether is primary key database generated.
-    /// </summary>
-    bool IsPrimaryKeyDatabaseGenerated { get; set; }
+    IColumn PrimaryKey { get; set; }
 
     /// <summary>
     ///   Gets or sets the columns.

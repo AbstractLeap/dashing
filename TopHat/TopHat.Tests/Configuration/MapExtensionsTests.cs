@@ -30,23 +30,9 @@
     public void PrimaryIsSet() {
       var map = this.MakeMap();
       map.PrimaryKey(p => p.UserId);
-      Assert.Equal(UserId, map.PrimaryKey);
+      Assert.Equal(UserId, map.PrimaryKey.Name);
     }
-
-    [Fact]
-    public void PrimaryKeyIsGeneratedSetsFlag() {
-      var map = this.MakeMap();
-      map.PrimaryKeyIsGenerated();
-      Assert.Equal(true, map.IsPrimaryKeyDatabaseGenerated);
-    }
-
-    [Fact]
-    public void PrimaryKeyIsNotGeneratedSetsFlag() {
-      var map = this.MakeMap();
-      map.PrimaryKeyIsNotGenerated();
-      Assert.Equal(false, map.IsPrimaryKeyDatabaseGenerated);
-    }
-
+      
     [Fact]
     public void PropertyReturnsColumn() {
       var map = this.MakeMap();

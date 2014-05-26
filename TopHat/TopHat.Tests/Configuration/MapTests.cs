@@ -16,7 +16,7 @@
     [Fact]
     public void FromPopulatesAllProperties() {
       // assemble a populated column
-      var imap = new Map<string>().Populate() as IMap;
+      var imap = new Map<string>().Populate(new Column<string>() as IColumn) as IMap;
 
       // act
       var map = Map<string>.From(imap);

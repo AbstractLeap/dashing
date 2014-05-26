@@ -137,7 +137,7 @@
         throw new ArgumentNullException("column");
       }
 
-      column.ExcludeByDefault = true;
+      column.IsExcludedByDefault = true;
       return column;
     }
 
@@ -157,7 +157,7 @@
         throw new ArgumentNullException("column");
       }
 
-      column.ExcludeByDefault = false;
+      column.IsExcludedByDefault = false;
       return column;
     }
 
@@ -177,7 +177,7 @@
         throw new ArgumentNullException("column");
       }
 
-      column.Ignore = true;
+      column.IsIgnored = true;
       return column;
     }
 
@@ -197,7 +197,7 @@
         throw new ArgumentNullException("column");
       }
 
-      column.Ignore = false;
+      column.IsIgnored = false;
       return column;
     }
   }
