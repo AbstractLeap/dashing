@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using Moq;
@@ -203,12 +204,14 @@
         private class CustomConfiguration : ConfigurationBase {
             public CustomConfiguration(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory)
                 : base(engine, connectionString, mapper, sessionFactory) { }
-
+            
+            [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IEngine engine, IMapper mapper, ISessionFactory sessionFactory)
-                : this(engine, ConfigurationBaseTests.DummyConnectionString, mapper, sessionFactory) { }
+                : this(engine, DummyConnectionString, mapper, sessionFactory) { }
 
+            [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IMapper mapper)
-                : base(MakeMockEngine().Object, ConfigurationBaseTests.DummyConnectionString, mapper, MakeMockSf().Object) { }
+                : base(MakeMockEngine().Object, DummyConnectionString, mapper, MakeMockSf().Object) { }
         }
 
         private class CustomConfigurationWithIndividualAdds : CustomConfiguration {
@@ -234,17 +237,19 @@
         }
 
         private class CustomConfigurationWithAddAndSetup : CustomConfiguration {
+            [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfigurationWithAddAndSetup(IMapper mapper)
                 : base(mapper) {
                 this.AddNamespaceOf<Post>();
-                this.Setup<User>().Table = ConfigurationBaseTests.ExampleTableName;
+                this.Setup<User>().Table = ExampleTableName;
             }
         }
 
         private class CustomConfigurationWithSetup : CustomConfiguration {
+            [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfigurationWithSetup(IMapper mapper)
                 : base(mapper) {
-                this.Setup<User>().Table = ConfigurationBaseTests.ExampleTableName;
+                this.Setup<User>().Table = ExampleTableName;
             }
         }
     }

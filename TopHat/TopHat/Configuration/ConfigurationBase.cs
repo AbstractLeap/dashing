@@ -1,5 +1,4 @@
-﻿namespace TopHat.Configuration
-{
+﻿namespace TopHat.Configuration {
     using System;
     using System.Collections.Generic;
     using System.Data;
@@ -8,18 +7,17 @@
 
     using TopHat.Engine;
 
-  /// <summary>
-    ///   The configuration base.
+    /// <summary>
+    ///     The configuration base.
     /// </summary>
-    public abstract class ConfigurationBase : IConfiguration
-    {
+    public abstract class ConfigurationBase : IConfiguration {
         /// <summary>
-        ///   The _engine.
+        ///     The _engine.
         /// </summary>
         private IEngine engine;
 
         /// <summary>
-        ///   The _connection string.
+        ///     The _connection string.
         /// </summary>
         private readonly string connectionString;
 
@@ -28,46 +26,40 @@
         private MethodInfo mapperMapForMethodInfo;
 
         /// <summary>
-        ///   Gets or sets the mapper.
+        ///     Gets or sets the mapper.
         /// </summary>
-        protected IMapper Mapper
-        {
-            get
-            {
+        protected IMapper Mapper {
+            get {
                 return this.mapper;
             }
 
-            set
-            {
+            set {
                 this.mapper = value;
                 this.mapperMapForMethodInfo = this.mapper.GetType().GetMethod("MapFor");
             }
         }
 
         /// <summary>
-        ///   Gets or sets the session factory.
+        ///     Gets or sets the session factory.
         /// </summary>
         protected ISessionFactory SessionFactory { get; set; }
 
         /// <summary>
-        ///   Gets or sets the mapped types.
+        ///     Gets or sets the mapped types.
         /// </summary>
         protected IDictionary<Type, IMap> MappedTypes { get; set; }
 
         /// <summary>
-        ///   Gets or sets a value indicating whether engine has latest maps.
+        ///     Gets or sets a value indicating whether engine has latest maps.
         /// </summary>
         protected bool EngineHasLatestMaps { get; set; }
 
-        public IMap GetMap<T>()
-        {
+        public IMap GetMap<T>() {
             return this.GetMap(typeof(T));
         }
 
-        public IMap GetMap(Type type)
-        {
-            if (!this.MappedTypes.ContainsKey(type))
-            {
+        public IMap GetMap(Type type) {
+            if (!this.MappedTypes.ContainsKey(type)) {
                 throw new ArgumentException("That type is not mapped");
             }
 
@@ -75,25 +67,20 @@
         }
 
         /// <summary>
-        ///   Gets the maps.
+        ///     Gets the maps.
         /// </summary>
-        public IEnumerable<IMap> Maps
-        {
-            get
-            {
+        public IEnumerable<IMap> Maps {
+            get {
                 return this.MappedTypes.Values;
             }
         }
 
         /// <summary>
-        ///   Gets or sets the engine.
+        ///     Gets or sets the engine.
         /// </summary>
-        protected IEngine Engine
-        {
-            get
-            {
-                if (!this.EngineHasLatestMaps)
-                {
+        protected IEngine Engine {
+            get {
+                if (!this.EngineHasLatestMaps) {
                     this.engine.UseMaps(this.MappedTypes);
                     this.EngineHasLatestMaps = true;
                 }
@@ -101,57 +88,50 @@
                 return this.engine;
             }
 
-            set
-            {
+            set {
                 this.Dirty();
                 this.engine = value;
             }
         }
 
         /// <summary>
-        ///   The dirty.
+        ///     The dirty.
         /// </summary>
-        private void Dirty()
-        {
+        private void Dirty() {
             this.EngineHasLatestMaps = false;
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="ConfigurationBase" /> class.
+        ///     Initializes a new instance of the <see cref="ConfigurationBase" /> class.
         /// </summary>
         /// <param name="engine">
-        ///   The engine.
+        ///     The engine.
         /// </param>
         /// <param name="connectionString">
-        ///   The connection string.
+        ///     The connection string.
         /// </param>
         /// <param name="mapper">
-        ///   The mapper.
+        ///     The mapper.
         /// </param>
         /// <param name="sessionFactory">
-        ///   The session factory.
+        ///     The session factory.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory)
-        {
-            if (engine == null)
-            {
+        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory) {
+            if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
 
-            if (connectionString == null)
-            {
+            if (connectionString == null) {
                 throw new ArgumentNullException("connectionString");
             }
 
-            if (mapper == null)
-            {
+            if (mapper == null) {
                 throw new ArgumentNullException("mapper");
             }
 
-            if (sessionFactory == null)
-            {
+            if (sessionFactory == null) {
                 throw new ArgumentNullException("sessionFactory");
             }
 
@@ -163,60 +143,55 @@
         }
 
         /// <summary>
-        ///   The begin session.
+        ///     The begin session.
         /// </summary>
         /// <returns>
-        ///   The <see cref="ISession" />.
+        ///     The <see cref="ISession" />.
         /// </returns>
-        public ISession BeginSession()
-        {
+        public ISession BeginSession() {
             return this.SessionFactory.Create(this.Engine, this.Engine.Open(this.connectionString));
         }
 
         /// <summary>
-        ///   The begin session.
+        ///     The begin session.
         /// </summary>
         /// <param name="connection">
-        ///   The connection.
+        ///     The connection.
         /// </param>
         /// <returns>
-        ///   The <see cref="ISession" />.
+        ///     The <see cref="ISession" />.
         /// </returns>
-        public ISession BeginSession(IDbConnection connection)
-        {
+        public ISession BeginSession(IDbConnection connection) {
             return this.SessionFactory.Create(this.Engine, connection);
         }
 
         /// <summary>
-        ///   The begin session.
+        ///     The begin session.
         /// </summary>
         /// <param name="connection">
-        ///   The connection.
+        ///     The connection.
         /// </param>
         /// <param name="transaction">
-        ///   The transaction.
+        ///     The transaction.
         /// </param>
         /// <returns>
-        ///   The <see cref="ISession" />.
+        ///     The <see cref="ISession" />.
         /// </returns>
-        public ISession BeginSession(IDbConnection connection, IDbTransaction transaction)
-        {
+        public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
             return this.SessionFactory.Create(this.Engine, connection, transaction);
         }
 
         /// <summary>
-        ///   The add.
+        ///     The add.
         /// </summary>
         /// <typeparam name="T">
         /// </typeparam>
         /// <returns>
-        ///   The <see cref="IConfiguration" />.
+        ///     The <see cref="IConfiguration" />.
         /// </returns>
-        protected IConfiguration Add<T>()
-        {
+        protected IConfiguration Add<T>() {
             var type = typeof(T);
-            if (!this.MappedTypes.ContainsKey(type))
-            {
+            if (!this.MappedTypes.ContainsKey(type)) {
                 this.Dirty();
                 this.MappedTypes[type] = this.Mapper.MapFor<T>();
             }
@@ -225,46 +200,46 @@
         }
 
         /// <summary>
-        ///   The add.
+        ///     The add.
         /// </summary>
         /// <param name="types">
-        ///   The types.
+        ///     The types.
         /// </param>
         /// <returns>
-        ///   The <see cref="IConfiguration" />.
+        ///     The <see cref="IConfiguration" />.
         /// </returns>
-        protected IConfiguration Add(IEnumerable<Type> types)
-        {
+        protected IConfiguration Add(IEnumerable<Type> types) {
             this.Dirty();
 
-            var maps = types.Distinct()
-                 .Where(t => !this.MappedTypes.ContainsKey(t))
-                 .AsParallel()
-                 .Select(t => this.mapperMapForMethodInfo.MakeGenericMethod(t).Invoke(this.mapper, new object[] { }) as IMap);
+            var maps =
+                types.Distinct()
+                     .Where(t => !this.MappedTypes.ContainsKey(t))
+                     .AsParallel()
+                     .Select(t => this.mapperMapForMethodInfo.MakeGenericMethod(t).Invoke(this.mapper, new object[] { }) as IMap);
 
-            foreach (var map in maps) // force into sequential
+            foreach (var map in maps) {
+                // force into sequential
                 this.MappedTypes[map.Type] = map;
+            }
 
             return this;
         }
 
         /// <summary>
-        ///   The add namespace of.
+        ///     The add namespace of.
         /// </summary>
         /// <typeparam name="T">
         /// </typeparam>
         /// <returns>
-        ///   The <see cref="IConfiguration" />.
+        ///     The <see cref="IConfiguration" />.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// </exception>
-        protected IConfiguration AddNamespaceOf<T>()
-        {
+        protected IConfiguration AddNamespaceOf<T>() {
             var type = typeof(T);
             var ns = type.Namespace;
 
-            if (ns == null)
-            {
+            if (ns == null) {
                 throw new ArgumentException("Namespace of the indicator type is null");
             }
 
@@ -272,31 +247,27 @@
         }
 
         /// <summary>
-        ///   The setup.
+        ///     The setup.
         /// </summary>
         /// <typeparam name="T">
         /// </typeparam>
         /// <returns>
-        ///   The <see cref="Map" />.
+        ///     The <see cref="Map" />.
         /// </returns>
-        protected Map<T> Setup<T>()
-        {
+        protected Map<T> Setup<T>() {
             this.Dirty();
 
             IMap map;
             Map<T> mapt;
             var type = typeof(T);
 
-            if (!this.MappedTypes.TryGetValue(type, out map))
-            {
+            if (!this.MappedTypes.TryGetValue(type, out map)) {
                 this.MappedTypes[type] = mapt = this.Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
             }
-            else
-            {
+            else {
                 mapt = map as Map<T>;
 
-                if (mapt == null)
-                {
+                if (mapt == null) {
                     this.MappedTypes[type] = mapt = Map<T>.From(map); // lift the Map into a Map<T>
                 }
             }

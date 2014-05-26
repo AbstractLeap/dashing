@@ -6,9 +6,8 @@
 
     using Moq;
 
-    using global::TopHat.Configuration;
-
-    using global::TopHat.Tests.TestDomain;
+    using TopHat.Configuration;
+    using TopHat.Tests.TestDomain;
 
     using Xunit;
 

@@ -1,27 +1,25 @@
 ﻿namespace TopHat.Configuration {
     using System;
-    using System.Collections.Generic;
-    using System.Collections.Specialized;
     using System.Data;
     using System.Linq;
     using System.Reflection;
 
-    using global::TopHat.Extensions;
+    using TopHat.Extensions;
 
     /// <summary>
-    ///   The default mapper.
+    ///     The default mapper.
     /// </summary>
     public class DefaultMapper : IMapper {
         /// <summary>
-        ///   The _convention.
+        ///     The _convention.
         /// </summary>
         private readonly IConvention convention;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="DefaultMapper" /> class.
+        ///     Initializes a new instance of the <see cref="DefaultMapper" /> class.
         /// </summary>
         /// <param name="convention">
-        ///   The convention.
+        ///     The convention.
         /// </param>
         public DefaultMapper(IConvention convention) {
             if (convention == null) {
@@ -32,12 +30,12 @@
         }
 
         /// <summary>
-        ///   The map for.
+        ///     The map for.
         /// </summary>
         /// <typeparam name="T">
         /// </typeparam>
         /// <returns>
-        ///   The <see cref="Map" />.
+        ///     The <see cref="Map" />.
         /// </returns>
         public Map<T> MapFor<T>() {
             var map = new Map<T>();
@@ -46,13 +44,13 @@
         }
 
         /// <summary>
-        ///   The build.
+        ///     The build.
         /// </summary>
         /// <param name="entity">
-        ///   The entity.
+        ///     The entity.
         /// </param>
         /// <param name="map">
-        ///   The map.
+        ///     The map.
         /// </param>
         private void Build(Type entity, IMap map) {
             map.Table = this.convention.TableFor(entity);
@@ -63,7 +61,7 @@
         }
 
         /// <summary>
-        ///   The build column.
+        ///     The build column.
         /// </summary>
         /// <param name="entity">
         ///     The entity.
@@ -73,7 +71,7 @@
         /// </param>
         /// <param name="primaryKeyName"></param>
         /// <returns>
-        ///   The <see cref="Column" />.
+        ///     The <see cref="Column" />.
         /// </returns>
         private IColumn BuildColumn(Type entity, PropertyInfo property, string primaryKeyName) {
             // TODO: this can be cached
@@ -89,16 +87,16 @@
         }
 
         /// <summary>
-        ///   The resolve relationship.
+        ///     The resolve relationship.
         /// </summary>
         /// <param name="entity">
-        ///   The entity.
+        ///     The entity.
         /// </param>
         /// <param name="property">
-        ///   The property.
+        ///     The property.
         /// </param>
         /// <param name="column">
-        ///   The column.
+        ///     The column.
         /// </param>
         private void ResolveRelationship(Type entity, PropertyInfo property, IColumn column) {
             if (property.PropertyType.IsEntityType()) {
@@ -149,16 +147,16 @@
         }
 
         /// <summary>
-        ///   The apply annotations.
+        ///     The apply annotations.
         /// </summary>
         /// <param name="entity">
-        ///   The entity.
+        ///     The entity.
         /// </param>
         /// <param name="property">
-        ///   The property.
+        ///     The property.
         /// </param>
         /// <param name="column">
-        ///   The column.
+        ///     The column.
         /// </param>
         private void ApplyAnnotations(Type entity, PropertyInfo property, IColumn column) {
             /* should do something, innit! */

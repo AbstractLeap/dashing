@@ -1,54 +1,53 @@
 ﻿namespace TopHat.Tests.Configuration {
-  using global::TopHat.Configuration;
+    using TopHat.Configuration;
+    using TopHat.Tests.TestDomain;
 
-  using global::TopHat.Tests.TestDomain;
+    using Xunit;
 
-  using Xunit;
+    public class MapExtensionsTests {
+        private const string ExampleString = "foo";
 
-  public class MapExtensionsTests {
-    private const string ExampleString = "foo";
+        private const string Username = "Username";
 
-    private const string Username = "Username";
+        private const string UserId = "UserId";
 
-    private const string UserId = "UserId";
+        [Fact]
+        public void TableIsSet() {
+            var map = this.MakeMap();
+            map.Table(ExampleString);
+            Assert.Equal(ExampleString, map.Table);
+        }
 
-    [Fact]
-    public void TableIsSet() {
-      var map = this.MakeMap();
-      map.Table(ExampleString);
-      Assert.Equal(ExampleString, map.Table);
-    }
+        [Fact]
+        public void SchemaIsSet() {
+            var map = this.MakeMap();
+            map.Schema(ExampleString);
+            Assert.Equal(ExampleString, map.Schema);
+        }
 
-    [Fact]
-    public void SchemaIsSet() {
-      var map = this.MakeMap();
-      map.Schema(ExampleString);
-      Assert.Equal(ExampleString, map.Schema);
-    }
+        [Fact]
+        public void PrimaryIsSet() {
+            var map = this.MakeMap();
+            map.PrimaryKey(p => p.UserId);
+            Assert.Equal(UserId, map.PrimaryKey.Name);
+        }
 
-    [Fact]
-    public void PrimaryIsSet() {
-      var map = this.MakeMap();
-      map.PrimaryKey(p => p.UserId);
-      Assert.Equal(UserId, map.PrimaryKey.Name);
-    }
-      
-    [Fact]
-    public void PropertyReturnsColumn() {
-      var map = this.MakeMap();
-      var property = map.Property(u => u.Username);
-      Assert.NotNull(property);
-      Assert.Equal(Username, property.Name);
-    }
+        [Fact]
+        public void PropertyReturnsColumn() {
+            var map = this.MakeMap();
+            var property = map.Property(u => u.Username);
+            Assert.NotNull(property);
+            Assert.Equal(Username, property.Name);
+        }
 
-    private Map<User> MakeMap() {
-      var map = new Map<User>();
-      map.Columns.Add(UserId, new Column<int> { Name = UserId });
-      map.Columns.Add(Username, new Column<string> { Name = Username });
-      return map;
-    }
+        private Map<User> MakeMap() {
+            var map = new Map<User>();
+            map.Columns.Add(UserId, new Column<int> { Name = UserId });
+            map.Columns.Add(Username, new Column<string> { Name = Username });
+            return map;
+        }
 
-    /*
+        /*
     [Fact]
     public void SpecifySingleKey() {
       var config = new DefaultConfiguration().Configure();
@@ -109,5 +108,5 @@
       config.Setup<Post>().Index(p => new { p.PostId, p.Title });
       Assert.True(config.Maps[typeof(Post)].Indexes.Count(l => l.Count == 1 && l.Contains("Title") && l.Contains("PostId")) == 1);
     }*/
-  }
+    }
 }

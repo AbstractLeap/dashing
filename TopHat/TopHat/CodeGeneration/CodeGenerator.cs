@@ -3,6 +3,7 @@
     using System.CodeDom;
     using System.CodeDom.Compiler;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -53,7 +54,7 @@
             this.CreateTrackingClass(configuration, generatorConfig, map);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private void CreateTrackingClass(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map) {
             var trackingClass = new CodeTypeDeclaration(map.Type.Name + generatorConfig.TrackedClassSuffix);
             trackingClass.IsClass = true;
@@ -65,19 +66,19 @@
             this.GenerateGetSetProperty(trackingClass, "IsTracking", typeof(bool), MemberAttributes.Public | MemberAttributes.Final);
             this.GenerateGetSetProperty(trackingClass, "DirtyProperties", typeof(ISet<>).MakeGenericType(typeof(string)), MemberAttributes.Public | MemberAttributes.Final);
             this.GenerateGetSetProperty(
-                trackingClass,
-                "OldValues",
-                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)),
+                trackingClass, 
+                "OldValues", 
+                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), 
                 MemberAttributes.Public | MemberAttributes.Final);
             this.GenerateGetSetProperty(
-                trackingClass,
-                "AddedEntities",
-                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))),
+                trackingClass, 
+                "AddedEntities", 
+                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))), 
                 MemberAttributes.Public | MemberAttributes.Final);
             this.GenerateGetSetProperty(
-                trackingClass,
-                "DeletedEntities",
-                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))),
+                trackingClass, 
+                "DeletedEntities", 
+                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))), 
                 MemberAttributes.Public | MemberAttributes.Final);
 
             // add in a constructor to initialise collections
@@ -89,11 +90,11 @@
                 new CodeAssignStatement(CodeHelpers.ThisField("OldValues"), new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(object)))));
             constructor.Statements.Add(
                 new CodeAssignStatement(
-                    CodeHelpers.ThisField("AddedEntities"),
+                    CodeHelpers.ThisField("AddedEntities"), 
                     new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))))));
             constructor.Statements.Add(
                 new CodeAssignStatement(
-                    CodeHelpers.ThisField("DeletedEntities"),
+                    CodeHelpers.ThisField("DeletedEntities"), 
                     new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))))));
 
             // these constructor statements override the collection properties to use observable collections
@@ -101,26 +102,26 @@
                 constructor.Statements.Add(
                     new CodeConditionStatement(
                         new CodeBinaryOperatorExpression(
-                            new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key),
-                            CodeBinaryOperatorType.IdentityEquality,
-                            new CodePrimitiveExpression(null)),
+                            new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key), 
+                            CodeBinaryOperatorType.IdentityEquality, 
+                            new CodePrimitiveExpression(null)), 
                         new CodeStatement[] {
-                            new CodeAssignStatement(
-                                new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key),
-                                new CodeObjectCreateExpression(
-                                "TopHat.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">",
-                                new CodeThisReferenceExpression(),
-                                new CodePrimitiveExpression(collectionColumn.Key)))
-                        },
+                                                new CodeAssignStatement(
+                                                    new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key), 
+                                                    new CodeObjectCreateExpression(
+                                                    "TopHat.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">", 
+                                                    new CodeThisReferenceExpression(), 
+                                                    new CodePrimitiveExpression(collectionColumn.Key)))
+                                            }, 
                         new CodeStatement[] {
-                            new CodeAssignStatement(
-                                new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key),
-                                new CodeObjectCreateExpression(
-                                "TopHat.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">",
-                                new CodeThisReferenceExpression(),
-                                new CodePrimitiveExpression(collectionColumn.Key),
-                                new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key)))
-                        }));
+                                                new CodeAssignStatement(
+                                                    new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key), 
+                                                    new CodeObjectCreateExpression(
+                                                    "TopHat.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">", 
+                                                    new CodeThisReferenceExpression(), 
+                                                    new CodePrimitiveExpression(collectionColumn.Key), 
+                                                    new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key)))
+                                            }));
             }
 
             // override value type properties to perform dirty checking
@@ -140,39 +141,39 @@
                 else {
                     // can be null, need to be careful of null reference exceptions
                     changeCheck.Left = new CodeBinaryOperatorExpression(
-                        CodeHelpers.BasePropertyIsNull(valueTypeColumn.Key),
-                        CodeBinaryOperatorType.BooleanAnd,
+                        CodeHelpers.BasePropertyIsNull(valueTypeColumn.Key), 
+                        CodeBinaryOperatorType.BooleanAnd, 
                         new CodeBinaryOperatorExpression(
-                            new CodePropertySetValueReferenceExpression(),
-                            CodeBinaryOperatorType.IdentityInequality,
+                            new CodePropertySetValueReferenceExpression(), 
+                            CodeBinaryOperatorType.IdentityInequality, 
                             new CodePrimitiveExpression(null)));
                     changeCheck.Operator = CodeBinaryOperatorType.BooleanOr;
                     changeCheck.Right = new CodeBinaryOperatorExpression(
-                        CodeHelpers.BasePropertyIsNotNull(valueTypeColumn.Key),
-                        CodeBinaryOperatorType.BooleanAnd,
+                        CodeHelpers.BasePropertyIsNotNull(valueTypeColumn.Key), 
+                        CodeBinaryOperatorType.BooleanAnd, 
                         new CodeBinaryOperatorExpression(
-                            new CodeMethodInvokeExpression(CodeHelpers.BaseProperty(valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()),
-                            CodeBinaryOperatorType.IdentityEquality,
+                            new CodeMethodInvokeExpression(CodeHelpers.BaseProperty(valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()), 
+                            CodeBinaryOperatorType.IdentityEquality, 
                             new CodePrimitiveExpression(false)));
                 }
 
                 prop.SetStatements.Insert(
-                    0,
+                    0, 
                     new CodeConditionStatement(
                         new CodeBinaryOperatorExpression(
-                            CodeHelpers.ThisPropertyIsTrue("IsTracking"),
-                            CodeBinaryOperatorType.BooleanAnd,
+                            CodeHelpers.ThisPropertyIsTrue("IsTracking"), 
+                            CodeBinaryOperatorType.BooleanAnd, 
                             new CodeBinaryOperatorExpression(
                                 new CodeBinaryOperatorExpression(
-                                    new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)),
-                                    CodeBinaryOperatorType.IdentityEquality,
-                                    new CodePrimitiveExpression(false)),
-                                CodeBinaryOperatorType.BooleanAnd,
-                                changeCheck)),
+                                    new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)), 
+                                    CodeBinaryOperatorType.IdentityEquality, 
+                                    new CodePrimitiveExpression(false)), 
+                                CodeBinaryOperatorType.BooleanAnd, 
+                                changeCheck)), 
                         new CodeStatement[] {
-                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))),
+                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))), 
                                                 new CodeAssignStatement(
-                                                    new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)),
+                                                    new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)), 
                                                     new CodePropertySetValueReferenceExpression())
                                             }));
             }
@@ -182,9 +183,8 @@
             this.codeNamespace.Types.Add(trackingClass);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private void CreateFKClass(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map)
-        {
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
+        private void CreateFKClass(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map) {
             // generate the foreign key access class based on the original class
             var foreignKeyClass = new CodeTypeDeclaration(map.Type.Name + generatorConfig.ForeignKeyAccessClassSuffix);
             foreignKeyClass.IsClass = true;
@@ -213,20 +213,22 @@
                     new CodeConditionStatement(
                         //// if backingField != null or Fk backing field is null return
                         new CodeBinaryOperatorExpression(
-                            CodeHelpers.ThisFieldIsNotNull(backingField.Name),
-                            CodeBinaryOperatorType.BooleanOr,
-                            CodeHelpers.ThisPropertyIsNull(foreignKeyBackingProperty.Name)),
+                            CodeHelpers.ThisFieldIsNotNull(backingField.Name), 
+                            CodeBinaryOperatorType.BooleanOr, 
+                            CodeHelpers.ThisPropertyIsNull(foreignKeyBackingProperty.Name)), 
                         new CodeStatement[] {
                                                 // true
                                                 new CodeMethodReturnStatement(CodeHelpers.ThisField(backingField.Name))
-                                            },
+                                            }, 
                         new CodeStatement[] {
                                                 // false, return new object with foreign key set
-                                                new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)),
+                                                new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)), 
                                                 new CodeAssignStatement(
-                                                    new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), configuration.GetMap(column.Value.Type).PrimaryKey.Name),
-                                                    new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(foreignKeyBackingProperty.Name), "Value")),
-                                                new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")),
+                                                    new CodeFieldReferenceExpression(
+                                                    new CodeVariableReferenceExpression("val"), 
+                                                    configuration.GetMap(column.Value.Type).PrimaryKey.Name), 
+                                                    new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(foreignKeyBackingProperty.Name), "Value")), 
+                                                new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")), 
                                                 new CodeMethodReturnStatement(new CodeVariableReferenceExpression("val"))
                                             }));
                 property.SetStatements.Add(new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodePropertySetValueReferenceExpression()));

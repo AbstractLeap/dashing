@@ -2,10 +2,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
-
-    using global::TopHat.Configuration;
 
     public static class ObjectPopulationExtensions {
         public static T Populate<T>(this T obj, params object[] defaults) {
@@ -39,8 +36,9 @@
                     prop.SetValue(obj, typeof(string));
                 }
                 else if (prop.PropertyType.IsEnum) {
-                    if (prop.PropertyType.IsEnumDefined(1))
+                    if (prop.PropertyType.IsEnumDefined(1)) {
                         prop.SetValue(obj, 1);
+                    }
                 }
                 else if (prop.PropertyType.IsGenericType) {
                     if (obj.GetType().GetGenericTypeDefinition() == typeof(IDictionary<,>)) {

@@ -81,7 +81,9 @@
     <Compile Include="Configuration\DefaultMapperTests.cs" />
     <Compile Include="Configuration\ColumnTests.cs" />
     <Compile Include="Configuration\DefaultConfigurationTests.cs" />
-    <Compile Include="Configuration\ConfigurationBaseTests.cs" />
+    <Compile Include="Configuration\ConfigurationBaseTests.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Engine\EngineBaseTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
