@@ -154,12 +154,6 @@
             Assert.Equal(RelationshipType.ManyToOne, property.Relationship);
         }
 
-        [Fact(Skip = "Check with Mark what he expects here")]
-        public void EntityCollectionIsIgnored() {
-            var property = this.MapAndGetProperty<Post, IList<Comment>>(p => p.Comments);
-            Assert.Equal(true, property.IsIgnored);
-        }
-
         [Fact]
         public void EntityCollectionColumnRelationshipIsOneToMany() {
             var property = this.MapAndGetProperty<Post, IList<Comment>>(p => p.Comments);
