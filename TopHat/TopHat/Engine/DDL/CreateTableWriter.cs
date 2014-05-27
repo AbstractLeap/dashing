@@ -1,4 +1,5 @@
 namespace TopHat.Engine.DDL {
+    using System;
     using System.Linq;
     using System.Text;
 
@@ -8,6 +9,10 @@ namespace TopHat.Engine.DDL {
         private readonly ISqlDialect dialect;
 
         public CreateTableWriter(ISqlDialect dialect) {
+            if (dialect == null) {
+                throw new ArgumentNullException("dialect");
+            }
+
             this.dialect = dialect;
         }
 
@@ -20,12 +25,12 @@ namespace TopHat.Engine.DDL {
 
             this.dialect.AppendColumnSpecification(sql, map.PrimaryKey);
 
-            foreach (var column in map.Columns.Values.Where(c => !c.IsPrimaryKey && !c.IsIgnored)) {
+            foreach (var column in map.Columns.Values.Where(c => !c.IsPrimaryKey && !c.IsIgnored && (c.Relationship == RelationshipType.None || c.Relationship == RelationshipType.OneToMany))) {
                 sql.Append(", ");
                 this.dialect.AppendColumnSpecification(sql, column);
             }
 
-            sql.Append(" )");
+            sql.Append(")");
             return sql.ToString();
         }
     }
