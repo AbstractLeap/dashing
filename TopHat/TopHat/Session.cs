@@ -179,8 +179,8 @@
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> Query<T>() {
-            return new ExecutableSelectQuery<T>(this.engine, this.Connection);
+        public ISelectQuery<T> Query<T>() {
+            return new SelectQuery<T>(this.engine, this.Connection);
         }
 
         /// <summary>

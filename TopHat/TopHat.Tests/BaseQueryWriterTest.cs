@@ -1,32 +1,35 @@
 ﻿namespace TopHat.Tests {
-  using System;
-  using System.Data;
+    using System;
+    using System.Data;
 
-  using Microsoft.QualityTools.Testing.Fakes;
+    using Microsoft.QualityTools.Testing.Fakes;
 
-  using Moq;
+    using Moq;
 
-  public class BaseQueryWriterTest : IDisposable {
-    protected readonly Mock<IDbConnection> Connection;
+    using TopHat.Engine;
 
-    protected readonly Mock<IDbTransaction> Transaction;
+    public class BaseQueryWriterTest : IDisposable {
+        protected readonly Mock<IDbConnection> Connection;
 
-    private readonly IDisposable _shimsContext;
+        protected readonly Mock<IDbTransaction> Transaction;
 
-    public BaseQueryWriterTest() {
-      this.Connection = new Mock<IDbConnection>(MockBehavior.Strict);
-      this.Transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
-      this._shimsContext = ShimsContext.Create();
+        private readonly IDisposable shimsContext;
+
+        public BaseQueryWriterTest() {
+            this.Connection = new Mock<IDbConnection>(MockBehavior.Strict);
+            this.Connection.Setup(c => c.State).Returns(ConnectionState.Open);
+            this.Transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
+            this.shimsContext = ShimsContext.Create();
+        }
+
+        protected ISession GetTopHat() {
+            // Dapper.Fakes.ShimSqlMapper.ExecuteIDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType = (connection, SqlWriter, parameters, transaction, timeout, type) => 1;
+            var session = new Session(new SqlServerEngine(), this.Connection.Object, this.Transaction.Object);
+            return session;
+        }
+
+        public void Dispose() {
+            this.shimsContext.Dispose();
+        }
     }
-
-    protected ISession GetTopHat() {
-      // Dapper.Fakes.ShimSqlMapper.ExecuteIDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType = (connection, SqlWriter, parameters, transaction, timeout, type) => 1;
-      var session = new Session(Engines.SqlServer, this.Connection.Object, this.Transaction.Object);
-      return session;
-    }
-
-    public void Dispose() {
-      this._shimsContext.Dispose();
-    }
-  }
 }
