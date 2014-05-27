@@ -21,5 +21,14 @@ namespace TopHat.Engine.DDL {
             this.dialect.AppendQuotedTableName(sql, map);
             return sql.ToString();
         }
+
+        public string DropTableIfExists(IMap map) {
+            var sql = new StringBuilder();
+            sql.Append("if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '");
+            this.dialect.AppendEscaped(sql, map.Table);
+            sql.Append("') drop table ");
+            this.dialect.AppendQuotedTableName(sql, map);
+            return sql.ToString();
+        }
     }
 }

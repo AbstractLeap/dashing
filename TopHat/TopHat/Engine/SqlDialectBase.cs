@@ -45,6 +45,10 @@ namespace TopHat.Engine {
             }
         }
 
+        public virtual void AppendEscaped(StringBuilder sql, string s) {
+            sql.Append(s.Replace("'", "''"));
+        }
+
         protected virtual void AppendLength(StringBuilder sql, ushort length) {
             sql.Append("(");
             sql.Append(length);

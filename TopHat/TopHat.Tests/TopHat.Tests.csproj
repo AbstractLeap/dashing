@@ -84,6 +84,7 @@
     <Compile Include="Configuration\ConfigurationBaseTests.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="SchemaGenerationSandbox.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
     <Compile Include="Engine\EngineBaseTests.cs" />
