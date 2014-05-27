@@ -33,13 +33,17 @@ namespace TopHat.Engine {
             sql.Append(")");
         }
 
+        protected override void AppendAutoGenerateModifier(StringBuilder sql) {
+            sql.Append(" identity(1,1)");
+        }
+
         protected override string TypeName(DbType type) {
             switch (type) {
                 case DbType.Boolean:
                     return "bit";
 
                 case DbType.DateTime2:
-                    return "datetime";
+                    return "datetime2";
 
                 case DbType.Guid:
                     return "uniqueidentifier";
