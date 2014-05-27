@@ -1,4 +1,4 @@
-﻿namespace TopHat.Tests.Engine {
+﻿namespace TopHat.Tests.Engine.DDL {
     using System;
     using System.Linq;
     using System.Text;

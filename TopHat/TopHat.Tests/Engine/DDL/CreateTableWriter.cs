@@ -1,6 +1,5 @@
-﻿namespace TopHat.Tests.Engine {
+﻿namespace TopHat.Tests.Engine.DDL {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Text;
 
@@ -25,12 +24,9 @@
         public void SimpleMapGeneratesExpectedSql() {
             var target = this.MakeTarget();
 
-            this.mockDialect
-                .Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()))
-                .Callback<StringBuilder, IMap>((s, m) => s.Append("<tablename>"));
+            this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>())).Callback<StringBuilder, IMap>((s, m) => s.Append("<tablename>"));
 
-            this.mockDialect
-                .Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()))
+            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()))
                 .Callback<StringBuilder, IColumn>((s, m) => s.Append("<colspec:" + m.Name + ">"));
 
             var sql = target.CreateTable(MakeMap(new Column<string> { Name = "Username" }));
