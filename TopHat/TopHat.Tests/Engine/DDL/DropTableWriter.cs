@@ -1,0 +1,45 @@
+﻿namespace TopHat.Tests.Engine {
+    using System;
+    using System.Linq;
+    using System.Text;
+
+    using Moq;
+
+    using TopHat.Configuration;
+    using TopHat.Engine;
+    using TopHat.Engine.DDL;
+    using TopHat.Tests.TestDomain;
+
+    using Xunit;
+
+    public class DropTableWriterTests {
+        private readonly Mock<ISqlDialect> mockDialect = new Mock<ISqlDialect>(MockBehavior.Strict);
+
+        [Fact]
+        public void ThrowsOnNullDialect() {
+            Assert.Throws<ArgumentNullException>(() => new DropTableWriter(null));
+        }
+
+        [Fact]
+        public void GeneratesExpectedSql() {
+            var target = this.MakeTarget();
+
+            this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>())).Callback<StringBuilder, IMap>((s, m) => s.Append("<tablename>"));
+
+            var sql = target.DropTable(MakeMap(new Column<string> { Name = "Username" }));
+
+            Assert.Equal("drop table <tablename>", sql);
+
+            this.mockDialect.Verify(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()), Times.Once());
+        }
+
+        private static IMap MakeMap(params IColumn[] columns) {
+            var cols = new[] { new Column<int> { Name = "DummyId", IsPrimaryKey = true } }.Union(columns).ToArray();
+            return new Map<User> { Table = "Dummies", Columns = cols.ToDictionary(c => c.Name, c => c), PrimaryKey = cols.First() };
+        }
+
+        private DropTableWriter MakeTarget() {
+            return new DropTableWriter(this.mockDialect.Object);
+        }
+    }
+}

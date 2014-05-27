@@ -80,6 +80,7 @@
     <Compile Include="DeleteQuery.cs" />
     <Compile Include="Engine\AnsiSqlDialect.cs" />
     <Compile Include="Engine\DapperWrapper.cs" />
+    <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
     <Compile Include="Engine\EngineBase.cs" />
     <Compile Include="Engine\IDapperWrapper.cs" />
