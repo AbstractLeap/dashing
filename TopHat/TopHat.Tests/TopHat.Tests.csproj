@@ -85,8 +85,8 @@
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="SchemaGenerationSandbox.cs" />
-    <Compile Include="Engine\DDL\DropTableWriter.cs" />
-    <Compile Include="Engine\DDL\CreateTableWriter.cs" />
+    <Compile Include="Engine\DDL\DropTableWriterTests.cs" />
+    <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />
     <Compile Include="Engine\EngineBaseTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
