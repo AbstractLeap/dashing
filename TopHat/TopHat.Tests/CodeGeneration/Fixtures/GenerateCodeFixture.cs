@@ -3,6 +3,7 @@
 
     using TopHat.CodeGeneration;
     using TopHat.Configuration;
+    using TopHat.Engine;
     using TopHat.Tests.TestDomain;
 
     public class GenerateCodeFixture {

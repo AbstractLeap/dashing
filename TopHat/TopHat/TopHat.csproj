@@ -78,12 +78,20 @@
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DeleteEntityQuery.cs" />
     <Compile Include="DeleteQuery.cs" />
-    <Compile Include="EngineBase.cs" />
+    <Compile Include="Engine\AnsiSqlDialect.cs" />
+    <Compile Include="Engine\DapperWrapper.cs" />
+    <Compile Include="Engine\EngineBase.cs" />
+    <Compile Include="Engine\IDapperWrapper.cs" />
+    <Compile Include="Engine\IEngine.cs" />
+    <Compile Include="Engine\ISqlDialect.cs" />
+    <Compile Include="Engine\MySqlDialect.cs" />
+    <Compile Include="Engine\SqlDialectBase.cs" />
+    <Compile Include="Engine\SqlServerDialect.cs" />
+    <Compile Include="Engine\SqlServerEngine.cs" />
     <Compile Include="EntityQueryBase.cs" />
     <Compile Include="ExecutableSelectQuery.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
-    <Compile Include="IEngine.cs" />
     <Compile Include="InsertEntityQuery.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="OrderClause.cs" />
@@ -103,6 +111,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="$(ProgramFiles)\MSBuild\StyleCop\v4.7\StyleCop.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

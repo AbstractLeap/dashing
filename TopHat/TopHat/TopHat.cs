@@ -1,26 +1,24 @@
-﻿namespace TopHat
-{
-    using global::TopHat.Configuration;
+﻿namespace TopHat {
+    using TopHat.Configuration;
+    using TopHat.Engine;
 
     /// <summary>
-    ///   The top hat.
+    ///     The top hat.
     /// </summary>
-    public static class TH
-    {
+    public static class TH {
         /// <summary>
-        ///   The configure.
+        ///     The configure.
         /// </summary>
         /// <param name="engine">
-        ///   The engine.
+        ///     The engine.
         /// </param>
         /// <param name="connectionString">
-        ///   The connection string.
+        ///     The connection string.
         /// </param>
         /// <returns>
-        ///   The <see cref="DefaultConfiguration" />.
+        ///     The <see cref="DefaultConfiguration" />.
         /// </returns>
-        public static DefaultConfiguration Configure(IEngine engine, string connectionString)
-        {
+        public static DefaultConfiguration Configure(IEngine engine, string connectionString) {
             return new DefaultConfiguration(engine, connectionString);
         }
     }
