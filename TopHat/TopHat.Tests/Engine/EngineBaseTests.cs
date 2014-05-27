@@ -3,20 +3,19 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Diagnostics;
-    using System.Linq;
-    using System.Text;
 
     using Moq;
 
     using TopHat.Configuration;
     using TopHat.Engine;
+    using TopHat.Engine.DDL;
     using TopHat.Tests.TestDomain;
 
     using Xunit;
 
     public class EngineBaseTests {
         [Fact]
-        public void CreateTableGeneratesExpectedSql() {
+        public void FirstTest() {
             var sql = string.Empty;
             var wrapper = new Mock<IDapperWrapper>(MockBehavior.Strict);
             wrapper.Setup(m => m.Execute(It.IsAny<string>(), null, null, null)).Returns(1).Callback<string, object, int?, CommandType?>((s, a, b, c) => sql = s);
@@ -37,9 +36,30 @@
             Debug.WriteLine(sql);
         }
 
+        [Fact]
+        public void OtherTest() {
+            var sql = string.Empty;
+            var wrapper = new Mock<IDapperWrapper>(MockBehavior.Strict);
+            wrapper.Setup(m => m.Execute(It.IsAny<string>(), null, null, null)).Returns(1).Callback<string, object, int?, CommandType?>((s, a, b, c) => sql = s);
+
+            var target = this.MakeTarget(new SqlServerDialect());
+            target.UseMaps(MakeMaps());
+            target.CreateTable<User>(wrapper.Object);
+            Debug.WriteLine(sql);
+            target.CreateTable<Blog>(wrapper.Object);
+            Debug.WriteLine(sql);
+            target.CreateTable<Post>(wrapper.Object);
+            Debug.WriteLine(sql);
+            target.CreateTable<Comment>(wrapper.Object);
+            Debug.WriteLine(sql);
+        }
+
         private static IDictionary<Type, IMap> MakeMaps() {
             var mapper = new DefaultMapper(new DefaultConvention());
             IDictionary<Type, IMap> maps = new Dictionary<Type, IMap>();
+            maps[typeof(Blog)] = mapper.MapFor<Blog>();
+            maps[typeof(Comment)] = mapper.MapFor<Comment>();
+            maps[typeof(Post)] = mapper.MapFor<Post>();
             maps[typeof(User)] = mapper.MapFor<User>();
             return maps;
         }
@@ -49,6 +69,15 @@
         }
 
         private class TestEngine : EngineBase {
+            private readonly CreateTableWriter createTableWriter;
+
+            protected ISqlDialect Dialect { get; set; }
+
+            public TestEngine(ISqlDialect dialect) {
+                this.Dialect = dialect;
+                this.createTableWriter = new CreateTableWriter(dialect);
+            }
+
             protected override IDbConnection NewConnection(string connectionString) {
                 throw new NotImplementedException();
             }
@@ -69,37 +98,16 @@
                 throw new NotImplementedException();
             }
 
-            protected ISqlDialect Dialect { get; set; }
-
-            public TestEngine(ISqlDialect dialect) {
-                this.Dialect = dialect;
-            }
-
             public void CreateTable<T>(IDapperWrapper wrapper) {
-                var map = this.MapFor<T>();
-                var sql = new StringBuilder();
-
-                sql.Append("create table ");
-                this.Dialect.AppendQuotedTableName(sql, map);
-                sql.Append(" (");
-
-                this.Dialect.AppendColumnSpecification(sql, map.PrimaryKey);
-
-                foreach (var column in map.Columns.Where(c => !c.Value.IsPrimaryKey)) {
-                    sql.Append(", ");
-                    this.Dialect.AppendColumnSpecification(sql, column.Value);
-                }
-
-                sql.Append(" )");
-
-                wrapper.Execute(sql.ToString());
+                var sql = this.createTableWriter.CreateTable(this.MapFor<T>());
+                wrapper.Execute(sql);
             }
 
-            public IMap MapFor<T>() {
+            protected IMap MapFor<T>() {
                 return this.MapFor(typeof(T));
             }
 
-            public IMap MapFor(Type type) {
+            protected IMap MapFor(Type type) {
                 IMap map;
                 if (!this.Maps.TryGetValue(type, out map)) {
                     throw new Exception("Type not found in maps");
