@@ -19,9 +19,9 @@
             this.maps = maps;
         }
 
-        public WhereClauseWriterResult GenerateSql<T>(IList<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode) {
+        public SqlWriterResult GenerateSql<T>(IList<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode) {
             if (whereClauses.IsEmpty()) {
-                return new WhereClauseWriterResult(string.Empty, null);
+                return new SqlWriterResult(string.Empty, null);
             }
 
             var sql = new StringBuilder(" where ");
@@ -36,7 +36,7 @@
 
             // remove the last and
             sql.Remove(sql.Length - 5, 5);
-            return new WhereClauseWriterResult(sql.ToString(), parameters);
+            return new SqlWriterResult(sql.ToString(), parameters);
         }
     }
 }

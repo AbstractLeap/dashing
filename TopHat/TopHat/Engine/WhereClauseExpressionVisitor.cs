@@ -264,7 +264,7 @@
                 }
 
                 this.Sql.Append("@l_" + ++this.paramCounter);
-                this.Parameters.Add("@l_" + this.paramCounter, this.WrapValue(value));
+                this.Parameters.Add("@l_" + this.paramCounter, this.doAppendValue || this.doPrependValue ? this.WrapValue(value) : value);
             }
 
             return base.VisitConstant(c);

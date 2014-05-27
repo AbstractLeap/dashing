@@ -96,8 +96,9 @@
     <Compile Include="Engine\SqlServerEngine.cs" />
     <Compile Include="Engine\WhereClauseExpressionVisitor.cs" />
     <Compile Include="Engine\WhereClauseWriter.cs" />
-    <Compile Include="Engine\WhereClauseWriterResult.cs" />
+    <Compile Include="Engine\SqlWriterResult.cs" />
     <Compile Include="EntityQueryBase.cs" />
+    <Compile Include="Extensions\DapperExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />

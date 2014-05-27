@@ -1,12 +1,12 @@
 ﻿namespace TopHat.Engine {
     using Dapper;
 
-    internal class WhereClauseWriterResult {
+    internal class SqlWriterResult {
         public string Sql { get; private set; }
 
         public DynamicParameters Parameters { get; private set; }
 
-        public WhereClauseWriterResult(string sql, DynamicParameters parameters) {
+        public SqlWriterResult(string sql, DynamicParameters parameters) {
             this.Sql = sql;
             this.Parameters = parameters;
         }

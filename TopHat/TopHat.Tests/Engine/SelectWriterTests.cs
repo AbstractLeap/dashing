@@ -9,6 +9,7 @@
 
     using TopHat.Configuration;
     using TopHat.Engine;
+    using TopHat.Extensions;
     using TopHat.Tests.TestDomain;
 
     using Xunit;
@@ -21,7 +22,7 @@
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
             var selectWriter = new SelectWriter(new SqlServerDialect(), MakeMaps());
             var sql = selectWriter.GenerateSql(new SelectQuery<User>(engine, connection.Object));
-            Debug.Write(sql);
+            Debug.Write(sql.Sql);
         }
 
         [Fact]
@@ -29,10 +30,10 @@
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
-            Debug.Write(sql);
+            Debug.Write(sql.Sql);
             Assert.Equal(
                 "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[BlogId], t.[DoNotMap], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId",
-                sql);
+                sql.Sql);
         }
 
         [Fact]
@@ -40,8 +41,8 @@
             var query = this.GetSelectQuery<Post>().Where(p => p.PostId == 1);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
-            Debug.Write(sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", sql);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", sql.Sql);
         }
 
         [Fact]
@@ -49,10 +50,10 @@
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author).Where(p => p.Author.Username == "bob");
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
-            Debug.Write(sql);
+            Debug.Write(sql.Sql);
             Assert.Equal(
                 "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[BlogId], t.[DoNotMap], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where (t_1.[Username] = @l_1)",
-                sql);
+                sql.Sql);
         }
 
         [Fact]
@@ -60,10 +61,10 @@
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author).Where(p => p.Author.UserId == 1);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
-            Debug.Write(sql);
+            Debug.Write(sql.Sql);
             Assert.Equal(
                 "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[BlogId], t.[DoNotMap], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where (t.[AuthorId] = @l_1)",
-                sql);
+                sql.Sql);
         }
 
         [Fact]
@@ -71,7 +72,8 @@
             var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Author).Where(c => c.Post.Author.Username == "bob");
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
-            Debug.Write(sql);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[BlogId], t_1.[DoNotMap], t_2.[UserId], t_2.[Username], t_2.[EmailAddress], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Users] as t_2 on t_1.AuthorId = t_2.UserId where (t_2.[Username] = @l_1)", sql.Sql);
         }
 
         [Fact]
@@ -79,10 +81,18 @@
             var query = this.GetSelectQuery<Post>().OrderBy(p => p.Rating);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
-            Debug.Write(sql);
+            Debug.Write(sql.Sql);
             Assert.Equal(
                 "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Rating] asc",
-                sql);
+                sql.Sql);
+        }
+
+        [Fact]
+        public void WhereIdGetsGoodParams() {
+            var query = this.GetSelectQuery<Post>().Where(p => p.PostId == 1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Assert.Equal(1, sql.Parameters.GetValue("l_1"));
         }
 
         private SelectWriter GetWriter() {

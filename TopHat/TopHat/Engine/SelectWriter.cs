@@ -17,7 +17,8 @@
             : base(dialect, whereClauseWriter, maps) {
         }
 
-        public string GenerateSql<T>(SelectQuery<T> selectQuery) {
+        public SqlWriterResult GenerateSql<T>(SelectQuery<T> selectQuery)
+        {
             var sql = new StringBuilder();
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
@@ -34,7 +35,7 @@
             // add order by
             this.AddOrderByClause(selectQuery.OrderClauses, sql);
 
-            return sql.ToString();
+            return new SqlWriterResult(sql.ToString(), parameters);
         }
 
         private FetchNode AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql) {
