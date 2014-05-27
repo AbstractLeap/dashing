@@ -26,10 +26,22 @@
         }
 
         [Fact]
-        public void PrimaryIsSet() {
+        public void PrimaryKeyIsSet() {
             var map = this.MakeMap();
             map.PrimaryKey(p => p.UserId);
             Assert.Equal(UserId, map.PrimaryKey.Name);
+            Assert.True(map.PrimaryKey.IsPrimaryKey);
+        }
+
+        [Fact]
+        public void PrimaryKeyUnsetsFlagOnOtherColumns() {
+            var map = this.MakeMap();
+            map.Property(m => m.UserId).IsPrimaryKey = true;
+
+            map.PrimaryKey(p => p.Username);
+
+            Assert.False(map.Property(m => m.UserId).IsPrimaryKey);
+            Assert.True(map.Property(m => m.Username).IsPrimaryKey);
         }
 
         [Fact]
