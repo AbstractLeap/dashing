@@ -115,7 +115,7 @@
             // add the columns
             foreach (var column in this.Maps[node.PropertyType].Columns) {
                 // only include the column if not excluded and not fetched subsequently
-                if (!column.Value.IsExcludedByDefault && !node.Children.ContainsKey(column.Key)
+                if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault && !node.Children.ContainsKey(column.Key)
                     && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)) {
                     columnSql.Append(", ");
                     this.AddColumn(columnSql, column.Value, node.Alias);
@@ -138,7 +138,8 @@
 
             if (selectQuery.Projection == null) {
                 foreach (var column in this.Maps[typeof(T)].Columns) {
-                    if ((selectQuery.FetchAllProperties || !column.Value.IsExcludedByDefault)
+                    if (!column.Value.IsIgnored
+                        && (selectQuery.FetchAllProperties || !column.Value.IsExcludedByDefault)
                         && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)
                         && (rootNode == null || !rootNode.Children.ContainsKey(column.Key))) {
                         this.AddColumn(sql, column.Value, alias);

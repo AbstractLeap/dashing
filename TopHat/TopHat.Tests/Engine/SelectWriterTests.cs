@@ -73,7 +73,9 @@
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[BlogId], t_1.[DoNotMap], t_2.[UserId], t_2.[Username], t_2.[EmailAddress], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Users] as t_2 on t_1.AuthorId = t_2.UserId where (t_2.[Username] = @l_1)", sql.Sql);
+            Assert.Equal(
+                "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[BlogId], t_1.[DoNotMap], t_2.[UserId], t_2.[Username], t_2.[EmailAddress], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Users] as t_2 on t_1.AuthorId = t_2.UserId where (t_2.[Username] = @l_1)",
+                sql.Sql);
         }
 
         [Fact]
@@ -82,9 +84,7 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Rating] asc",
-                sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Rating] asc", sql.Sql);
         }
 
         [Fact]
@@ -95,8 +95,28 @@
             Assert.Equal(1, sql.Parameters.GetValue("l_1"));
         }
 
-        private SelectWriter GetWriter() {
-            return new SelectWriter(new SqlServerDialect(), MakeMaps());
+        [Fact]
+        public void IgnoreNotReturned() {
+            var query = this.GetSelectQuery<Post>();
+            var selectQuery = query;
+            var sql = this.GetWriter(true).GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId] from [Posts]", sql.Sql);
+        }
+
+        [Fact]
+        public void IgnoreNotReturnedOnFetch() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter(true).GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId",
+                sql.Sql);
+        }
+
+        private SelectWriter GetWriter(bool withIgnore = false) {
+            return new SelectWriter(new SqlServerDialect(), MakeMaps(withIgnore));
         }
 
         private SelectQuery<T> GetSelectQuery<T>() {
@@ -106,15 +126,25 @@
             return new SelectQuery<T>(engine, connection.Object);
         }
 
-        private static IDictionary<Type, IMap> MakeMaps() {
-            var config = new CustomConfig();
-            return config.Maps.ToDictionary(m => m.Type, m => m);
+        private static IDictionary<Type, IMap> MakeMaps(bool withIgnore = false) {
+            if (withIgnore) {
+                return new CustomConfigWithIgnore().Maps.ToDictionary(m => m.Type, m => m);
+            }
+            return new CustomConfig().Maps.ToDictionary(m => m.Type, m => m);
         }
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
                 : base(new SqlServerEngine(), string.Empty) {
                 this.AddNamespaceOf<Post>();
+            }
+        }
+
+        private class CustomConfigWithIgnore : DefaultConfiguration {
+            public CustomConfigWithIgnore()
+                : base(new SqlServerEngine(), string.Empty) {
+                this.AddNamespaceOf<Post>();
+                this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }
         }
     }
