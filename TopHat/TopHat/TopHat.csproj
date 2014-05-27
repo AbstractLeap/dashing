@@ -75,6 +75,7 @@
     <Compile Include="Configuration\MapExtensions.cs" />
     <Compile Include="Configuration\DefaultMapper.cs" />
     <Compile Include="Configuration\Map.cs" />
+    <Compile Include="Configuration\MutableConfiguration.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DeleteEntityQuery.cs" />
     <Compile Include="DeleteQuery.cs" />
