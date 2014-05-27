@@ -59,7 +59,7 @@
             this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()));
 
             var target = this.MakeTarget();
-            target.CreateTable(MakeMap(new Column<string> { Name = "Ignored", Relationship = RelationshipType.ManyToOne }));
+            target.CreateTable(MakeMap(new Column<string> { Name = "Ignored", Relationship = RelationshipType.OneToMany }));
 
             this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()), Times.Once());
         }
