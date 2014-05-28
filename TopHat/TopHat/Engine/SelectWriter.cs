@@ -35,7 +35,7 @@
             // add order by
             this.AddOrderByClause(selectQuery.OrderClauses, sql);
 
-            return new SqlWriterResult(sql.ToString(), parameters);
+            return new SqlWriterResult(sql.ToString(), parameters, rootNode);
         }
 
         private FetchNode AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql) {

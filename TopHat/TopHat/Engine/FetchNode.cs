@@ -2,7 +2,7 @@
     using System;
     using System.Collections.Generic;
 
-    internal class FetchNode {
+    public class FetchNode {
         public string PropertyName { get; set; }
 
         public Type PropertyType { get; set; }

@@ -69,9 +69,7 @@
                 throw new NotImplementedException();
             }
 
-            protected ISqlDialect Dialect { get; set; }
-
-            public TestEngine(ISqlDialect dialect) {
+            public TestEngine(ISqlDialect dialect) : base(dialect) {
                 this.Dialect = dialect;
             }
 

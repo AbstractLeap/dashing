@@ -21,7 +21,7 @@
 
         public SqlWriterResult GenerateSql<T>(IList<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode) {
             if (whereClauses.IsEmpty()) {
-                return new SqlWriterResult(string.Empty, null);
+                return new SqlWriterResult(string.Empty, null, rootNode);
             }
 
             var sql = new StringBuilder(" where ");
@@ -36,7 +36,7 @@
 
             // remove the last and
             sql.Remove(sql.Length - 5, 5);
-            return new SqlWriterResult(sql.ToString(), parameters);
+            return new SqlWriterResult(sql.ToString(), parameters, rootNode);
         }
     }
 }

@@ -8,12 +8,16 @@
     using TopHat.Engine;
 
     public class MySqlEngine : EngineBase {
-        protected override IDbConnection NewConnection(string connectionString) {
-            return new MySqlConnection(connectionString);
+        public MySqlEngine()
+            : base(new MySqlDialect()) {
         }
 
-        public override IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query) {
-            throw new NotImplementedException();
+        public MySqlEngine(ISqlDialect dialect)
+            : base(dialect) {
+        }
+
+        protected override IDbConnection NewConnection(string connectionString) {
+            return new MySqlConnection(connectionString);
         }
 
         public override int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query) {

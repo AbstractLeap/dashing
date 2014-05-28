@@ -130,6 +130,7 @@
             if (withIgnore) {
                 return new CustomConfigWithIgnore().Maps.ToDictionary(m => m.Type, m => m);
             }
+
             return new CustomConfig().Maps.ToDictionary(m => m.Type, m => m);
         }
 

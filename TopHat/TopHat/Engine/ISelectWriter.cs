@@ -1,5 +1,5 @@
 ﻿namespace TopHat.Engine {
-    internal interface ISelectWriter {
+    public interface ISelectWriter {
         /// <summary>
         /// Generate the sql for a select query
         /// </summary>
