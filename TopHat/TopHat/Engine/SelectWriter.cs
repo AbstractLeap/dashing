@@ -47,14 +47,13 @@
                 tableSql.Append(" as t");
 
                 // now we go through the fetches and generate the tree structure
-                var rootNode = new FetchNode { Alias = "t", PropertyType = typeof(T) };
+                var rootNode = new FetchNode { Alias = "t" };
                 int aliasCounter = 0;
                 foreach (var fetch in selectQuery.Fetches) {
                     var lambda = fetch as LambdaExpression;
                     if (lambda != null) {
                         var expr = lambda.Body as MemberExpression;
                         var currentNode = rootNode;
-                        Type parentType = typeof(T);
                         var entityNames = new Stack<string>();
                         var propTypes = new Stack<Type>();
 
@@ -77,7 +76,7 @@
                             // don't add duplicates
                             if (!currentNode.Children.ContainsKey(propName)) {
                                 // add to tree
-                                var node = new FetchNode { Parent = currentNode, PropertyName = propName, Alias = "t_" + ++aliasCounter, PropertyType = propType };
+                                var node = new FetchNode { Parent = currentNode, Column = this.Maps[currentNode == rootNode ? typeof(T) : currentNode.Column.Type].Columns[propName], Alias = "t_" + ++aliasCounter };
                                 currentNode.Children.Add(propName, node);
                                 currentNode = node;
                             }
@@ -85,7 +84,6 @@
                                 currentNode = currentNode.Children[propName];
                             }
 
-                            parentType = propType;
                             numNames--;
                         }
                     }
@@ -106,14 +104,15 @@
             // add this node and then it's children
             // add table sql
             tableSql.Append(" left join ");
-            this.Dialect.AppendQuotedTableName(tableSql, this.Maps[node.PropertyType]);
+            this.Dialect.AppendQuotedTableName(tableSql, this.Maps[node.Column.Type]);
             tableSql.Append(" as " + node.Alias);
             tableSql.Append(
-                " on " + node.Parent.Alias + "." + this.Maps[node.Parent.PropertyType].Columns[node.PropertyName].DbName + " = " + node.Alias + "."
-                + this.Maps[node.PropertyType].PrimaryKey.DbName);
+                " on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "."
+                + this.Maps[node.Column.Type].PrimaryKey.DbName);
 
             // add the columns
-            foreach (var column in this.Maps[node.PropertyType].Columns) {
+            foreach (var column in this.Maps[node.Column.Type].Columns)
+            {
                 // only include the column if not excluded and not fetched subsequently
                 if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault && !node.Children.ContainsKey(column.Key)
                     && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)) {

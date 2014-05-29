@@ -9,6 +9,11 @@
         Type Type { get; }
 
         /// <summary>
+        /// The map that this column belongs to
+        /// </summary>
+        IMap Map { get; set; }
+
+        /// <summary>
         ///     Gets or sets the name.
         /// </summary>
         string Name { get; set; }

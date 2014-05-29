@@ -17,6 +17,8 @@
         /// </summary>
         public Type Type { get; private set; }
 
+        public IMap Map { get; set; }
+
         /// <summary>
         ///     Gets or sets the name.
         /// </summary>
@@ -99,6 +101,7 @@
 
             return new Column<T> {
                                      Name = column.Name, 
+                                     Map = column.Map,
                                      DbType = column.DbType, 
                                      DbName = column.DbName, 
                                      Precision = column.Precision, 

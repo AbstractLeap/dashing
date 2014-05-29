@@ -56,7 +56,7 @@
             map.Table = this.convention.TableFor(entity);
             map.Schema = this.convention.SchemaFor(entity);
             var primaryKeyName = this.convention.PrimaryKeyFor(entity);
-            map.Columns = entity.GetProperties().Select(property => this.BuildColumn(entity, property, primaryKeyName)).ToDictionary(c => c.Name, c => c);
+            map.Columns = entity.GetProperties().Select(property => this.BuildColumn(entity, map, property, primaryKeyName)).ToDictionary(c => c.Name, c => c);
             map.PrimaryKey = map.Columns.Values.FirstOrDefault(c => c.IsPrimaryKey);
         }
 
@@ -66,6 +66,7 @@
         /// <param name="entity">
         ///     The entity.
         /// </param>
+        /// <param name="map"></param>
         /// <param name="property">
         ///     The property.
         /// </param>
@@ -73,9 +74,10 @@
         /// <returns>
         ///     The <see cref="Column" />.
         /// </returns>
-        private IColumn BuildColumn(Type entity, PropertyInfo property, string primaryKeyName) {
+        private IColumn BuildColumn(Type entity, IMap map, PropertyInfo property, string primaryKeyName) {
             // TODO: this can be cached
             var column = (IColumn)Activator.CreateInstance(typeof(Column<>).MakeGenericType(property.PropertyType));
+            column.Map = map;
             column.Name = property.Name;
             column.IsIgnored = !(property.CanRead && property.CanWrite);
             column.IsPrimaryKey = column.Name.Equals(primaryKeyName, StringComparison.OrdinalIgnoreCase);

@@ -2,10 +2,10 @@
     using System;
     using System.Collections.Generic;
 
-    public class FetchNode {
-        public string PropertyName { get; set; }
+    using TopHat.Configuration;
 
-        public Type PropertyType { get; set; }
+    public class FetchNode {
+        public IColumn Column { get; set; }
 
         public string Alias { get; set; }
 
