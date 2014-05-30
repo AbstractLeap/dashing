@@ -3,6 +3,7 @@
 
     using Moq;
 
+    using TopHat.CodeGeneration;
     using TopHat.Configuration;
     using TopHat.Engine;
 
@@ -15,16 +16,18 @@
 
         private readonly Mock<IDbTransaction> mockTransaction = new Mock<IDbTransaction>();
 
+        private readonly Mock<IGeneratedCodeManager> mockCodeManager = new Mock<IGeneratedCodeManager>();
+
         [Fact]
         public void CreateReturnsASession() {
             var target = this.MakeTarget();
-            Assert.IsType<Session>(target.Create(this.mockEngine.Object, this.mockConnection.Object));
+            Assert.IsType<Session>(target.Create(this.mockEngine.Object, this.mockConnection.Object, this.mockCodeManager.Object));
         }
 
         [Fact]
         public void CreateWithTransactionReturnsASession() {
             var target = this.MakeTarget();
-            Assert.IsType<Session>(target.Create(this.mockEngine.Object, this.mockConnection.Object, this.mockTransaction.Object));
+            Assert.IsType<Session>(target.Create(this.mockEngine.Object, this.mockConnection.Object, this.mockCodeManager.Object, this.mockTransaction.Object));
         }
 
         private DefaultSessionFactory MakeTarget() {

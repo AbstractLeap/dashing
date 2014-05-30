@@ -6,6 +6,7 @@
             this.ForeignKeyAccessEntityFieldSuffix = "_FKEntity";
             this.TrackedClassSuffix = "_Tracked";
             this.FetchMapperMaxFetches = 15;
+            this.SourceLocation = "generated.cs";
         }
 
         /// <summary>
@@ -28,6 +29,8 @@
         public string TrackedClassSuffix { get; set; }
 
         public bool GenerateSource { get; set; }
+
+        public string SourceLocation { get; set; }
 
         public bool GenerateAssembly { get; set; }
 

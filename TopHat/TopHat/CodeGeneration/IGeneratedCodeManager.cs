@@ -1,6 +1,10 @@
 ﻿namespace TopHat.CodeGeneration {
     using System;
+    using System.Collections.Generic;
+    using System.Data;
     using System.Reflection;
+
+    using TopHat.Engine;
 
     public interface IGeneratedCodeManager {
         /// <summary>
@@ -47,5 +51,15 @@
         ///     Convenience method for enabling tracking on a tracking instance
         /// </summary>
         void TrackInstance<T>(T entity);
+
+        /// <summary>
+        /// Calls the correct static function within the generated code for a particular fetch tree
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="result"></param>
+        /// <param name="query"></param>
+        /// <param name="conn"></param>
+        /// <returns></returns>
+        IEnumerable<T> Query<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn);
     }
 }

@@ -2,6 +2,8 @@
     using System;
     using System.Collections.Generic;
 
+    using TopHat.CodeGeneration;
+
     /// <summary>
     ///     The Configuration interface.
     /// </summary>
@@ -32,5 +34,11 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         ISession BeginSession();
+
+        /// <summary>
+        /// Returns the code manager for this configuration
+        /// </summary>
+        /// <returns></returns>
+        IGeneratedCodeManager GetCodeManager();
     }
 }

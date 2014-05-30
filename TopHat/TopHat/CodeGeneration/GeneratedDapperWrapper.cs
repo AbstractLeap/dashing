@@ -8,21 +8,25 @@
     using TopHat.Engine;
 
     public class GeneratedDapperWrapper {
-        private static readonly IDictionary<int, Delegate> PostDelegates = new Dictionary<int, Delegate> { { 1, new DelegateQuery<BlogPost>(PostAuthor) } };
+        private static readonly IDictionary<string, Delegate> PostDelegates = new Dictionary<string, Delegate> { { "1", new DelegateQuery<BlogPost>(PostAuthor) } };
 
-        private static readonly IDictionary<int, Delegate> AuthorDelegates = new Dictionary<int, Delegate> { { 1, new DelegateQuery<Author>(AuthorCountry) } };
+        private static readonly IDictionary<string, Delegate> AuthorDelegates = new Dictionary<string, Delegate> { { "1", new DelegateQuery<Author>(AuthorCountry) } };
 
-        private static readonly IDictionary<Type, IDictionary<int, Delegate>> TypeDelegates = new Dictionary<Type, IDictionary<int, Delegate>> {
+        private static readonly IDictionary<Type, IDictionary<string, Delegate>> TypeDelegates = new Dictionary<Type, IDictionary<string, Delegate>> {
                                                                                                                                                    { typeof(BlogPost), PostDelegates },
                                                                                                                                                    { typeof(Author), AuthorDelegates }
                                                                                                                                                };
 
         public static IEnumerable<T> Query<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn) {
-            var meth = (DelegateQuery<T>)TypeDelegates[typeof(T)][1];
+            var meth = (DelegateQuery<T>)TypeDelegates[typeof(T)][result.FetchTree.FetchSignature];
             return meth(result, query, conn);
         }
 
         public delegate IEnumerable<T> DelegateQuery<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn);
+
+        private GeneratedDapperWrapper() {
+            GeneratedDapperWrapper.PostDelegates.Add("2", new DelegateQuery<BlogPost>(PostAuthor));
+        }
 
         public static IEnumerable<BlogPost> PostAuthor(SqlWriterResult result, SelectQuery<BlogPost> query, IDbConnection conn) {
             if (query.IsTracked) {

@@ -1,6 +1,7 @@
 ﻿namespace TopHat.Configuration {
     using System.Data;
 
+    using TopHat.CodeGeneration;
     using TopHat.Engine;
 
     /// <summary>
@@ -19,7 +20,7 @@
         /// <returns>
         ///     The <see cref="ISession" />.
         /// </returns>
-        ISession Create(IEngine engine, IDbConnection connection);
+        ISession Create(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager);
 
         /// <summary>
         ///     The create.
@@ -36,6 +37,6 @@
         /// <returns>
         ///     The <see cref="ISession" />.
         /// </returns>
-        ISession Create(IEngine engine, IDbConnection connection, IDbTransaction transaction);
+        ISession Create(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager, IDbTransaction transaction);
     }
 }

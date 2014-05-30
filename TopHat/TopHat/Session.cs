@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Data;
 
+    using TopHat.CodeGeneration;
     using TopHat.Engine;
 
     /// <summary>
@@ -18,6 +19,11 @@
         ///     The _connection.
         /// </summary>
         private readonly IDbConnection connection;
+
+        /// <summary>
+        /// The code manager
+        /// </summary>
+        private readonly IGeneratedCodeManager codeManager;
 
         /// <summary>
         ///     The _is their transaction.
@@ -50,17 +56,8 @@
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public Session(IEngine engine, IDbConnection connection) {
-            if (engine == null) {
-                throw new ArgumentNullException("engine");
-            }
-
-            if (connection == null) {
-                throw new ArgumentNullException("connection");
-            }
-
-            this.engine = engine;
-            this.connection = connection;
+        public Session(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager) :
+        this(engine, connection, codeManager, null) {
         }
 
         /// <summary>
@@ -77,7 +74,8 @@
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public Session(IEngine engine, IDbConnection connection, IDbTransaction transaction = null) {
+        public Session(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager, IDbTransaction transaction = null)
+        {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -86,6 +84,11 @@
                 throw new ArgumentNullException("connection");
             }
 
+            if (codeManager == null) {
+                throw new ArgumentNullException("codeManager");
+            }
+
+            this.codeManager = codeManager;
             this.engine = engine;
             this.connection = connection;
 

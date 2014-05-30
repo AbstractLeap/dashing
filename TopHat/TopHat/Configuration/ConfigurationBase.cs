@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Reflection;
 
+    using TopHat.CodeGeneration;
     using TopHat.Engine;
 
     /// <summary>
@@ -20,6 +21,8 @@
         ///     The _connection string.
         /// </summary>
         private readonly string connectionString;
+
+        private IGeneratedCodeManager codeManager;
 
         private IMapper mapper;
 
@@ -140,6 +143,10 @@
             this.Mapper = mapper;
             this.SessionFactory = sessionFactory;
             this.MappedTypes = new Dictionary<Type, IMap>();
+            this.codeManager = new GeneratedCodeManager();
+
+            // TODO: allow overriding of the CodeGeneratorConfig
+            this.codeManager.LoadCode(new CodeGeneratorConfig());
         }
 
         /// <summary>
@@ -149,7 +156,11 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession() {
-            return this.SessionFactory.Create(this.Engine, this.Engine.Open(this.connectionString));
+            return this.SessionFactory.Create(this.Engine, this.Engine.Open(this.connectionString), this.codeManager);
+        }
+
+        public IGeneratedCodeManager GetCodeManager() {
+            return this.codeManager;
         }
 
         /// <summary>
@@ -162,7 +173,7 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession(IDbConnection connection) {
-            return this.SessionFactory.Create(this.Engine, connection);
+            return this.SessionFactory.Create(this.Engine, connection, this.codeManager);
         }
 
         /// <summary>
@@ -178,7 +189,7 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.SessionFactory.Create(this.Engine, connection, transaction);
+            return this.SessionFactory.Create(this.Engine, connection, this.codeManager, transaction);
         }
 
         /// <summary>
