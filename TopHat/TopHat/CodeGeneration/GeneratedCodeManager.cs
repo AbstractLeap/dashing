@@ -17,6 +17,8 @@
 
         private IDictionary<Type, Delegate> queryCalls;
 
+        public CodeGeneratorConfig Config { get; private set; }
+
         private delegate IEnumerable<T> DelegateQuery<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn);
 
         public Assembly GeneratedCodeAssembly {
@@ -29,8 +31,12 @@
             }
         }
 
-        public void LoadCode(CodeGeneratorConfig config) {
-            this.generatedCodeAssembly = Assembly.LoadFrom(config.Namespace + ".dll");
+        public GeneratedCodeManager(CodeGeneratorConfig config) {
+            this.Config = config;
+        }
+
+        public void LoadCode() {
+            this.generatedCodeAssembly = Assembly.LoadFrom(this.Config.Namespace + ".dll");
 
             // go through the defined types and add them
             this.foreignKeyTypes = new Dictionary<Type, Type>();
@@ -39,7 +45,8 @@
 
             foreach (var type in this.generatedCodeAssembly.DefinedTypes) {
                 // find the base type from the users code
-                if (type.Name.EndsWith(config.ForeignKeyAccessClassSuffix)) {
+                if (type.Name.EndsWith(this.Config.ForeignKeyAccessClassSuffix))
+                {
                     this.foreignKeyTypes.Add(type.BaseType, type);
 
                     // add the queryCall for this base type
@@ -61,7 +68,8 @@
                         Expression.Lambda(methodCallExpr, parameters).Compile();
                     this.queryCalls.Add(type.BaseType, queryCall);
                 }
-                else if (type.Name.EndsWith(config.TrackedClassSuffix)) {
+                else if (type.Name.EndsWith(this.Config.TrackedClassSuffix))
+                {
                     this.trackingTypes.Add(type.BaseType.BaseType, type); // tracking classes extend fkClasses
                 }
             }

@@ -1,4 +1,5 @@
 ﻿namespace TopHat.Configuration {
+    using TopHat.CodeGeneration;
     using TopHat.Engine;
 
     /// <summary>
@@ -15,6 +16,6 @@
         ///     The connection string.
         /// </param>
         public DefaultConfiguration(IEngine engine, string connectionString)
-            : base(engine, connectionString, new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory()) { }
+            : base(engine, connectionString, new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory(), new GeneratedCodeManager(new CodeGeneratorConfig())) { }
     }
 }

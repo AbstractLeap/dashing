@@ -121,7 +121,7 @@
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory) {
+        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory, IGeneratedCodeManager codeManager) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -138,15 +138,19 @@
                 throw new ArgumentNullException("sessionFactory");
             }
 
+            if (codeManager == null) {
+                throw new ArgumentNullException("codeManager");
+            }
+
             this.engine = engine;
             this.connectionString = connectionString;
             this.Mapper = mapper;
             this.SessionFactory = sessionFactory;
             this.MappedTypes = new Dictionary<Type, IMap>();
-            this.codeManager = new GeneratedCodeManager();
+            this.codeManager = codeManager;
 
             // TODO: allow overriding of the CodeGeneratorConfig
-            this.codeManager.LoadCode(new CodeGeneratorConfig());
+            this.codeManager.LoadCode();
         }
 
         /// <summary>

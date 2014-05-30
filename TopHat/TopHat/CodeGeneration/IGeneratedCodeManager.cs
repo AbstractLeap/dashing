@@ -8,6 +8,11 @@
 
     public interface IGeneratedCodeManager {
         /// <summary>
+        /// Gets the Code Generator Config
+        /// </summary>
+        CodeGeneratorConfig Config { get; }
+
+        /// <summary>
         ///     Returns a reference to the generated code assembly
         /// </summary>
         Assembly GeneratedCodeAssembly { get; }
@@ -17,7 +22,7 @@
         /// </summary>
         /// <param name="config"></param>
         /// <remarks>This method does not generate code nor check for updates</remarks>
-        void LoadCode(CodeGeneratorConfig config);
+        void LoadCode();
 
         /// <summary>
         ///     Returns a type for a Foreign Key class
