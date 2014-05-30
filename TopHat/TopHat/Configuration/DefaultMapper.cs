@@ -58,6 +58,19 @@
             var primaryKeyName = this.convention.PrimaryKeyFor(entity);
             map.Columns = entity.GetProperties().Select(property => this.BuildColumn(entity, map, property, primaryKeyName)).ToDictionary(c => c.Name, c => c);
             map.PrimaryKey = map.Columns.Values.FirstOrDefault(c => c.IsPrimaryKey);
+            this.AssignFetchIds(map);
+        }
+
+        /// <summary>
+        /// Assigns fetch ids to the non local columns using a consistent strategy (namely column name)
+        /// </summary>
+        /// <param name="map"></param>
+        private void AssignFetchIds(IMap map) {
+            int i = 0;
+            var columns = map.Columns.Where(c => c.Value.Relationship != RelationshipType.None).OrderBy(c => c.Key);
+            foreach (var column in columns) {
+                column.Value.FetchId = ++i;
+            }
         }
 
         /// <summary>

@@ -5,6 +5,7 @@
             this.ForeignKeyAccessClassSuffix = "_FK";
             this.ForeignKeyAccessEntityFieldSuffix = "_FKEntity";
             this.TrackedClassSuffix = "_Tracked";
+            this.FetchMapperMaxFetches = 15;
         }
 
         /// <summary>
@@ -29,5 +30,7 @@
         public bool GenerateSource { get; set; }
 
         public bool GenerateAssembly { get; set; }
+
+        public int FetchMapperMaxFetches { get; set; }
     }
 }

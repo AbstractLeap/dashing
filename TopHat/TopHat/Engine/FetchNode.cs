@@ -13,6 +13,11 @@
 
         public FetchNode Parent { get; set; }
 
+        /// <summary>
+        /// This signature is used to select the correct mapper for dapper
+        /// </summary>
+        public string FetchSignature { get; set; }
+
         public FetchNode() {
             this.Children = new Dictionary<string, FetchNode>();
         }

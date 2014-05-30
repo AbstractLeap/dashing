@@ -3,22 +3,18 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
     using System.Text;
 
     using TopHat.Configuration;
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
         public SelectWriter(ISqlDialect dialect, IDictionary<Type, IMap> maps)
-            : this(dialect, new WhereClauseWriter(dialect, maps), maps) {
-        }
+            : this(dialect, new WhereClauseWriter(dialect, maps), maps) {}
 
         public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IDictionary<Type, IMap> maps)
-            : base(dialect, whereClauseWriter, maps) {
-        }
+            : base(dialect, whereClauseWriter, maps) {}
 
-        public SqlWriterResult GenerateSql<T>(SelectQuery<T> selectQuery)
-        {
+        public SqlWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
             var sql = new StringBuilder();
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
@@ -55,15 +51,11 @@
                         var expr = lambda.Body as MemberExpression;
                         var currentNode = rootNode;
                         var entityNames = new Stack<string>();
-                        var propTypes = new Stack<Type>();
 
                         // TODO Change this so that algorithm only goes through tree once
                         // We go through the fetch expression (backwards)
                         while (expr != null) {
                             entityNames.Push(expr.Member.Name);
-                            var propInfo = expr.Member as PropertyInfo;
-                            propTypes.Push(propInfo.PropertyType);
-
                             expr = expr.Expression as MemberExpression;
                         }
 
@@ -71,12 +63,15 @@
                         int numNames = entityNames.Count;
                         while (numNames > 0) {
                             var propName = entityNames.Pop();
-                            var propType = propTypes.Pop();
 
                             // don't add duplicates
                             if (!currentNode.Children.ContainsKey(propName)) {
                                 // add to tree
-                                var node = new FetchNode { Parent = currentNode, Column = this.Maps[currentNode == rootNode ? typeof(T) : currentNode.Column.Type].Columns[propName], Alias = "t_" + ++aliasCounter };
+                                var node = new FetchNode {
+                                                             Parent = currentNode,
+                                                             Column = this.Maps[currentNode == rootNode ? typeof(T) : currentNode.Column.Type].Columns[propName],
+                                                             Alias = "t_" + ++aliasCounter
+                                                         };
                                 currentNode.Children.Add(propName, node);
                                 currentNode = node;
                             }
@@ -90,9 +85,13 @@
                 }
 
                 // now let's go through the tree and generate the sql
-                foreach (var node in rootNode.Children) {
-                    this.AddNode(node.Value, tableSql, columnSql);
+                StringBuilder signatureBuilder = new StringBuilder();
+                foreach (var node in rootNode.Children.OrderBy(c => c.Value.Column.FetchId)) {
+                    var signature = this.AddNode(node.Value, tableSql, columnSql);
+                    signatureBuilder.Append(node.Value.Column.FetchId + "S" + signature + "E");
                 }
+
+                rootNode.FetchSignature = signatureBuilder.ToString();
 
                 return rootNode;
             }
@@ -100,19 +99,16 @@
             return null;
         }
 
-        private void AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql) {
+        private string AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql) {
             // add this node and then it's children
             // add table sql
             tableSql.Append(" left join ");
             this.Dialect.AppendQuotedTableName(tableSql, this.Maps[node.Column.Type]);
             tableSql.Append(" as " + node.Alias);
-            tableSql.Append(
-                " on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "."
-                + this.Maps[node.Column.Type].PrimaryKey.DbName);
+            tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + this.Maps[node.Column.Type].PrimaryKey.DbName);
 
             // add the columns
-            foreach (var column in this.Maps[node.Column.Type].Columns)
-            {
+            foreach (var column in this.Maps[node.Column.Type].Columns) {
                 // only include the column if not excluded and not fetched subsequently
                 if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault && !node.Children.ContainsKey(column.Key)
                     && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)) {
@@ -122,9 +118,13 @@
             }
 
             // add its children
-            foreach (var child in node.Children) {
-                this.AddNode(child.Value, tableSql, columnSql);
+            StringBuilder signatureBuilder = new StringBuilder();
+            foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
+                var signature = this.AddNode(child.Value, tableSql, columnSql);
+                signatureBuilder.Append(child.Value.Column.FetchId + "S" + signature + "E");
             }
+
+            return signatureBuilder.ToString();
         }
 
         private void AddColumns<T>(SelectQuery<T> selectQuery, StringBuilder sql, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) {
@@ -137,8 +137,7 @@
 
             if (selectQuery.Projection == null) {
                 foreach (var column in this.Maps[typeof(T)].Columns) {
-                    if (!column.Value.IsIgnored
-                        && (selectQuery.FetchAllProperties || !column.Value.IsExcludedByDefault)
+                    if (!column.Value.IsIgnored && (selectQuery.FetchAllProperties || !column.Value.IsExcludedByDefault)
                         && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)
                         && (rootNode == null || !rootNode.Children.ContainsKey(column.Key))) {
                         this.AddColumn(sql, column.Value, alias);

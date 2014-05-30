@@ -109,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Fakes Include="Fakes\Dapper.fakes" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

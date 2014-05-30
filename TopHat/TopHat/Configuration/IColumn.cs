@@ -69,6 +69,12 @@
         bool IsExcludedByDefault { get; set; }
 
         /// <summary>
+        /// Use for indexing in to Query multimapping queries
+        /// </summary>
+        /// <remarks>Must be consistent across app restarts as CodeGeneration is only updated if the assemblies change</remarks>
+        int FetchId { get; set; }
+
+        /// <summary>
         ///     Gets or sets the relationship.
         /// </summary>
         RelationshipType Relationship { get; set; }

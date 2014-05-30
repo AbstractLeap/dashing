@@ -32,7 +32,7 @@
                 if (type.Name.EndsWith(config.ForeignKeyAccessClassSuffix)) {
                     this.foreignKeyTypes.Add(type.BaseType, type);
                 }
-                else {
+                else if (type.Name.EndsWith(config.TrackedClassSuffix)) {
                     this.trackingTypes.Add(type.BaseType.BaseType, type); // tracking classes extend fkClasses
                 }
             }
