@@ -37,9 +37,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper">
-      <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
-    </Reference>
     <Reference Include="Dapper.1.12.1.1.Fakes">
       <HintPath>FakesAssemblies\Dapper.1.12.1.1.Fakes.dll</HintPath>
     </Reference>
@@ -98,6 +95,10 @@
     <Compile Include="TestDomain\User.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\dapper-dot-net\Dapper NET45\Dapper NET45.csproj">
+      <Project>{0fff5bc7-0a4b-4d87-835e-4fad70937507}</Project>
+      <Name>Dapper NET45</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TopHat.MySql\TopHat.MySql.csproj">
       <Project>{fc3a4432-a5be-478b-a6d7-31e2fe2db8be}</Project>
       <Name>TopHat.MySql</Name>

@@ -11,6 +11,8 @@ namespace TopHat.Engine {
     ///     The engine base.
     /// </summary>
     public abstract class EngineBase : IEngine {
+        public IConfiguration Configuration { get; set; }
+
         protected ISelectWriter SelectWriter { get; set; }
 
         /// <summary>
@@ -81,14 +83,15 @@ namespace TopHat.Engine {
             }
 
             var sqlQuery = this.SelectWriter.GenerateSql(query);
-            if (sqlQuery.FetchTree == null) {
-                // TODO swap this out to use IDapperWrapper so that we can inject fk and tracking support
-                return connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters);
-            }
-            else {
-                // need to map result to tree
-                throw new NotImplementedException();
-            }
+            return this.Configuration.GetCodeManager().Query<T>(sqlQuery, query, connection);
+            //if (sqlQuery.FetchTree == null) {
+            //    // TODO swap this out to use IDapperWrapper so that we can inject fk and tracking support
+            //    return connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters);
+            //}
+            //else {
+            //    // need to map result to tree
+            //    throw new NotImplementedException();
+            //}
         }
 
         /// <summary>

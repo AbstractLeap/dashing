@@ -21,6 +21,11 @@ namespace TopHat.Engine {
         IDbConnection Open(string connectionString);
 
         /// <summary>
+        /// Get set the current configuration for this engine
+        /// </summary>
+        IConfiguration Configuration { get; set; }
+
+        /// <summary>
         ///     The use maps.
         /// </summary>
         /// <param name="maps">

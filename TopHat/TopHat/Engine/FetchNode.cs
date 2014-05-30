@@ -18,6 +18,11 @@
         /// </summary>
         public string FetchSignature { get; set; }
 
+        /// <summary>
+        /// This specifies the string to pass to dapper in order to split on
+        /// </summary>
+        public string SplitOn { get; set; }
+
         public FetchNode() {
             this.Children = new Dictionary<string, FetchNode>();
         }

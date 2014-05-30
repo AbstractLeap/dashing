@@ -86,12 +86,15 @@
 
                 // now let's go through the tree and generate the sql
                 StringBuilder signatureBuilder = new StringBuilder();
+                var splitOns = new List<string>();
                 foreach (var node in rootNode.Children.OrderBy(c => c.Value.Column.FetchId)) {
                     var signature = this.AddNode(node.Value, tableSql, columnSql);
-                    signatureBuilder.Append(node.Value.Column.FetchId + "S" + signature + "E");
+                    signatureBuilder.Append(node.Value.Column.FetchId + "S" + signature.Signature + "E");
+                    splitOns.AddRange(signature.SplitOn);
                 }
 
                 rootNode.FetchSignature = signatureBuilder.ToString();
+                rootNode.SplitOn = string.Join(",", splitOns);
 
                 return rootNode;
             }
@@ -99,9 +102,11 @@
             return null;
         }
 
-        private string AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql) {
+        private AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql) {
             // add this node and then it's children
             // add table sql
+            var splitOns = new List<string>();
+            splitOns.Add(this.Maps[node.Column.Type].PrimaryKey.DbName);
             tableSql.Append(" left join ");
             this.Dialect.AppendQuotedTableName(tableSql, this.Maps[node.Column.Type]);
             tableSql.Append(" as " + node.Alias);
@@ -122,9 +127,10 @@
             foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
                 var signature = this.AddNode(child.Value, tableSql, columnSql);
                 signatureBuilder.Append(child.Value.Column.FetchId + "S" + signature + "E");
+                splitOns.AddRange(signature.SplitOn);
             }
 
-            return signatureBuilder.ToString();
+            return new AddNodeResult { Signature = signatureBuilder.ToString(), SplitOn = splitOns};
         }
 
         private void AddColumns<T>(SelectQuery<T> selectQuery, StringBuilder sql, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) {
@@ -162,6 +168,12 @@
             if (column.DbName != column.Name && column.Relationship == RelationshipType.None) {
                 sql.Append(" as " + column.Name);
             }
+        }
+
+        private class AddNodeResult {
+            public string Signature { get; set; }
+
+            public IList<string> SplitOn { get; set; }
         }
     }
 }

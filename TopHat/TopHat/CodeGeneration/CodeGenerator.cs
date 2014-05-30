@@ -243,13 +243,21 @@
             query.Parameters.Add(new CodeParameterDeclarationExpression("SqlWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<" + rootType.Name + ">", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
+
+            query.Statements.Add(
+                new CodeMethodInvokeExpression(
+                    new CodeTypeReferenceExpression("Debug"),
+                    "Write",
+                    new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn")));
+
             var returnStatement =
                 new CodeMethodReturnStatement(
                     new CodeMethodInvokeExpression(
                         new CodeMethodReferenceExpression(new CodeTypeReferenceExpression("SqlMapper"), "Query"),
                         new CodeExpression[] {
                                                  new CodeVariableReferenceExpression("conn"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Sql"),
-                                                 new CodeVariableReferenceExpression("mapper"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Parameters")
+                                                 new CodeVariableReferenceExpression("mapper"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Parameters"),
+                                                 new CodePrimitiveExpression(null), new CodePrimitiveExpression(true), new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn")
                                              }));
             query.Statements.Add(
                 new CodeConditionStatement(
@@ -546,6 +554,7 @@
             this.codeNamespace.Imports.Add(new CodeNamespaceImport("System"));
             this.codeNamespace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
             this.codeNamespace.Imports.Add(new CodeNamespaceImport("System.Data"));
+            this.codeNamespace.Imports.Add(new CodeNamespaceImport("System.Diagnostics"));
             this.codeNamespace.Imports.Add(new CodeNamespaceImport("Dapper"));
             this.codeNamespace.Imports.Add(new CodeNamespaceImport("TopHat.Engine"));
 

@@ -143,6 +143,7 @@
             }
 
             this.engine = engine;
+            this.engine.Configuration = this;
             this.connectionString = connectionString;
             this.Mapper = mapper;
             this.SessionFactory = sessionFactory;
