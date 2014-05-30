@@ -62,9 +62,9 @@
             mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockSessionFactory = MakeMockSf();
-            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, It.IsAny<IGeneratedCodeManager>())).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+            mockSessionFactory.Setup(m => m.Create(connection.Object, target)).Returns(session.Object).Verifiable();
 
             // act
             var actual = target.BeginSession();
@@ -85,9 +85,9 @@
             mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockSessionFactory = MakeMockSf();
-            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, It.IsAny<IGeneratedCodeManager>())).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+            mockSessionFactory.Setup(m => m.Create(connection.Object, target)).Returns(session.Object).Verifiable();
 
             // act
             var actual = target.BeginSession(connection.Object);
@@ -108,9 +108,9 @@
             mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockSessionFactory = MakeMockSf();
-            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, It.IsAny<IGeneratedCodeManager>(), transaction.Object)).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+            mockSessionFactory.Setup(m => m.Create(connection.Object, transaction.Object, target)).Returns(session.Object).Verifiable();
 
             // act
             var actual = target.BeginSession(connection.Object, transaction.Object);

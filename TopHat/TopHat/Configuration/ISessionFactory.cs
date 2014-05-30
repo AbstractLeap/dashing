@@ -20,7 +20,7 @@
         /// <returns>
         ///     The <see cref="ISession" />.
         /// </returns>
-        ISession Create(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager);
+        ISession Create(IDbConnection connection, IConfiguration config);
 
         /// <summary>
         ///     The create.
@@ -37,6 +37,6 @@
         /// <returns>
         ///     The <see cref="ISession" />.
         /// </returns>
-        ISession Create(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager, IDbTransaction transaction);
+        ISession Create(IDbConnection connection, IDbTransaction transaction, IConfiguration config);
     }
 }

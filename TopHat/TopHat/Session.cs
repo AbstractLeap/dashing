@@ -4,17 +4,13 @@
     using System.Data;
 
     using TopHat.CodeGeneration;
+    using TopHat.Configuration;
     using TopHat.Engine;
 
     /// <summary>
     ///     The session.
     /// </summary>
     public sealed class Session : ISession {
-        /// <summary>
-        ///     The _engine.
-        /// </summary>
-        private readonly IEngine engine;
-
         /// <summary>
         ///     The _connection.
         /// </summary>
@@ -23,7 +19,7 @@
         /// <summary>
         /// The code manager
         /// </summary>
-        private readonly IGeneratedCodeManager codeManager;
+        private readonly IConfiguration config;
 
         /// <summary>
         ///     The _is their transaction.
@@ -56,8 +52,8 @@
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public Session(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager) :
-        this(engine, connection, codeManager, null) {
+        public Session(IDbConnection connection, IConfiguration config) :
+        this(connection, config, null) {
         }
 
         /// <summary>
@@ -74,22 +70,18 @@
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public Session(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager, IDbTransaction transaction = null)
+        public Session(IDbConnection connection, IConfiguration config, IDbTransaction transaction = null)
         {
-            if (engine == null) {
-                throw new ArgumentNullException("engine");
-            }
-
             if (connection == null) {
                 throw new ArgumentNullException("connection");
             }
 
-            if (codeManager == null) {
-                throw new ArgumentNullException("codeManager");
+            if (config == null)
+            {
+                throw new ArgumentNullException("config");
             }
 
-            this.codeManager = codeManager;
-            this.engine = engine;
+            this.config = config;
             this.connection = connection;
 
             if (transaction != null) {
@@ -183,7 +175,7 @@
         ///     The <see cref="SelectQuery" />.
         /// </returns>
         public ISelectQuery<T> Query<T>() {
-            return new SelectQuery<T>(this.engine, this.Connection);
+            return new SelectQuery<T>(this.config.GetEngine(), this.Connection);
         }
 
         /// <summary>
@@ -198,7 +190,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Insert<T>(params T[] entities) {
-            return this.engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
+            return this.config.GetEngine().Execute(this.Connection, new InsertEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -213,7 +205,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Insert<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
+            return this.config.GetEngine().Execute(this.Connection, new InsertEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -228,7 +220,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Update<T>(params T[] entities) {
-            return this.engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+            return this.config.GetEngine().Execute(this.Connection, new UpdateEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -243,7 +235,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Update<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+            return this.config.GetEngine().Execute(this.Connection, new UpdateEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -258,7 +250,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Delete<T>(params T[] entities) {
-            return this.engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+            return this.config.GetEngine().Execute(this.Connection, new DeleteEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -273,7 +265,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Delete<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+            return this.config.GetEngine().Execute(this.Connection, new DeleteEntityQuery<T>(entities));
         }
     }
 }

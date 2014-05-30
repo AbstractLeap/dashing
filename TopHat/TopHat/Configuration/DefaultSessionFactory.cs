@@ -20,9 +20,9 @@
         /// <returns>
         ///     The <see cref="ISession" />.
         /// </returns>
-        public ISession Create(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager)
+        public ISession Create(IDbConnection connection, IConfiguration config)
         {
-            return new Session(engine, connection, codeManager);
+            return new Session(connection, config);
         }
 
         /// <summary>
@@ -40,8 +40,9 @@
         /// <returns>
         ///     The <see cref="ISession" />.
         /// </returns>
-        public ISession Create(IEngine engine, IDbConnection connection, IGeneratedCodeManager codeManager, IDbTransaction transaction) {
-            return new Session(engine, connection, codeManager, transaction);
+        public ISession Create(IDbConnection connection, IDbTransaction transaction, IConfiguration config)
+        {
+            return new Session(connection, config, transaction);
         }
     }
 }

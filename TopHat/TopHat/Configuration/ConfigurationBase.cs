@@ -156,11 +156,15 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession() {
-            return this.SessionFactory.Create(this.Engine, this.Engine.Open(this.connectionString), this.codeManager);
+            return this.SessionFactory.Create(this.Engine.Open(this.connectionString), this);
         }
 
         public IGeneratedCodeManager GetCodeManager() {
             return this.codeManager;
+        }
+
+        public IEngine GetEngine() {
+            return this.engine;
         }
 
         /// <summary>
@@ -173,7 +177,7 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession(IDbConnection connection) {
-            return this.SessionFactory.Create(this.Engine, connection, this.codeManager);
+            return this.SessionFactory.Create(connection, this);
         }
 
         /// <summary>
@@ -189,7 +193,7 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.SessionFactory.Create(this.Engine, connection, this.codeManager, transaction);
+            return this.SessionFactory.Create(connection, transaction, this);
         }
 
         /// <summary>

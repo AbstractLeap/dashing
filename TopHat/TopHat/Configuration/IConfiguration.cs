@@ -3,6 +3,7 @@
     using System.Collections.Generic;
 
     using TopHat.CodeGeneration;
+    using TopHat.Engine;
 
     /// <summary>
     ///     The Configuration interface.
@@ -40,5 +41,11 @@
         /// </summary>
         /// <returns></returns>
         IGeneratedCodeManager GetCodeManager();
+
+        /// <summary>
+        /// Gets the engine for the current configuration
+        /// </summary>
+        /// <returns></returns>
+        IEngine GetEngine();
     }
 }
