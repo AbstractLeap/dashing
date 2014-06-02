@@ -106,7 +106,7 @@
             // add this node and then it's children
             // add table sql
             var splitOns = new List<string>();
-            splitOns.Add(this.Maps[node.Column.Type].PrimaryKey.DbName);
+            splitOns.Add(this.Maps[node.Column.Type].PrimaryKey.Name);
             tableSql.Append(" left join ");
             this.Dialect.AppendQuotedTableName(tableSql, this.Maps[node.Column.Type]);
             tableSql.Append(" as " + node.Alias);

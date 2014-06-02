@@ -244,11 +244,13 @@
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<" + rootType.Name + ">", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
 
+#if DEBUG
             query.Statements.Add(
                 new CodeMethodInvokeExpression(
                     new CodeTypeReferenceExpression("Debug"),
                     "Write",
                     new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn")));
+#endif
 
             var returnStatement =
                 new CodeMethodReturnStatement(
