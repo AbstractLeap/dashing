@@ -180,7 +180,9 @@
         }
 
         private static Mock<IEngine> MakeMockEngine() {
-            return new Mock<IEngine>(MockBehavior.Strict);
+            var engine =  new Mock<IEngine>(MockBehavior.Strict);
+            engine.SetupProperty(p => p.Configuration);
+            return engine;
         }
 
         private static Mock<IMapper> SetupAllMaps() {
