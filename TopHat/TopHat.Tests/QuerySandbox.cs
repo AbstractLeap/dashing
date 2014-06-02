@@ -24,6 +24,14 @@
             Assert.NotNull(posts.First().Blog.Title);
         }
 
+        [Fact]
+        public void ExecuteNestFetchQuery() {
+            var config = new CustomConfig();
+            var session = config.BeginSession();
+            var comment = session.Query<Comment>().Fetch(c => c.Post.Blog);
+            Assert.NotNull(comment.First().Post.Blog.Title);
+        }
+
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
                 : base(new MySqlEngine(), "Server=localhost;Database=tophattest;Uid=root;Pwd=treatme123;") {

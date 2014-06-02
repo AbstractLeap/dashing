@@ -126,7 +126,7 @@
             StringBuilder signatureBuilder = new StringBuilder();
             foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
                 var signature = this.AddNode(child.Value, tableSql, columnSql);
-                signatureBuilder.Append(child.Value.Column.FetchId + "S" + signature + "E");
+                signatureBuilder.Append(child.Value.Column.FetchId + "S" + signature.Signature + "E");
                 splitOns.AddRange(signature.SplitOn);
             }
 
