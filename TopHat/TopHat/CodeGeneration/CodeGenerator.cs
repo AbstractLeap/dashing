@@ -208,7 +208,7 @@
                 foreach (var column in orderedSubset) {
                     var childSignaturePrefix = thisSignature.Substring(0, currentSplitPoint + column.Value.FetchId.ToString().Length + 1);
                     var childSignatureSuffix = thisSignature.Substring(currentSplitPoint + column.Value.FetchId.ToString().Length + 1);
-                    this.TraverseAndGenerateMappersAndQueries(
+                    var childSignatures = this.TraverseAndGenerateMappersAndQueries(
                         dapperWrapperClass,
                         rootNode,
                         currentPath.Children.First(c => c.Key == column.Key).Value,
@@ -222,6 +222,7 @@
                         signaturePrefix + childSignaturePrefix,
                         childSignatureSuffix + signatureSuffix);
                     currentSplitPoint += column.Value.FetchId.ToString().Length + 2;
+                    signatures.AddRange(childSignatures);
                 }
 
 
