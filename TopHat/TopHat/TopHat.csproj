@@ -51,7 +51,6 @@
     <Compile Include="CodeGeneration\CodeGeneratorConfig.cs" />
     <Compile Include="CodeGeneration\CodeHelpers.cs" />
     <Compile Include="CodeGeneration\GeneratedCodeManager.cs" />
-    <Compile Include="CodeGeneration\GeneratedDapperWrapper.cs" />
     <Compile Include="CodeGeneration\ICodeGenerator.cs" />
     <Compile Include="CodeGeneration\IGeneratedCodeManager.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />

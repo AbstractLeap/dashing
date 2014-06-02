@@ -35,6 +35,7 @@
 
             var options = new CodeGeneratorOptions { BracingStyle = "C" };
             var sourceCodeName = "source_" + Guid.NewGuid().ToString("N") + ".cs";
+
             // TODO: Figure out why I can't write to a memory stream and then read that
             using (var sourceWriter = new StreamWriter(sourceCodeName)) {
                 provider.GenerateCodeFromCompileUnit(this.compileUnit, sourceWriter, options);
@@ -110,17 +111,20 @@
             query.Parameters.Add(new CodeParameterDeclarationExpression("SqlWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
-            //  var meth = (DelegateQuery<T>)TypeDelegates[typeof(T)][result.FetchTree.FetchSignature];
-            // return meth(result, query, conn);
+
+            //// var meth = (DelegateQuery<T>)TypeDelegates[typeof(T)][result.FetchTree.FetchSignature];
+            //// return meth(result, query, conn);
             query.Statements.Add(
-                new CodeVariableDeclarationStatement("var", "meth",  
-                new CodeCastExpression(
-                    "DelegateQuery<T>",
-                    new CodeIndexerExpression(
+                new CodeVariableDeclarationStatement(
+                    "var",
+                    "meth",
+                    new CodeCastExpression(
+                        "DelegateQuery<T>",
                         new CodeIndexerExpression(
-                            new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), "TypeDelegates"),
-                            new CodeTypeOfExpression("T")),
-                        new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "FetchSignature")))));
+                            new CodeIndexerExpression(
+                                new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), "TypeDelegates"),
+                                new CodeTypeOfExpression("T")),
+                            new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "FetchSignature")))));
             query.Statements.Add(
                 new CodeMethodReturnStatement(
                     new CodeDelegateInvokeExpression(
@@ -200,7 +204,17 @@
                 foreach (var column in orderedSubset) {
                     currentPath.Children.Add(column.Key, new FetchNode { Column = column.Value });
                 }
-                var dictionaryInitialiser = this.GenerateMappersAndQueries(dapperWrapperClass, rootNode, currentPath, rootType, signaturePrefix + thisSignature + signatureSuffix, config, orderedSubset, codeConfig, provider);
+
+                var dictionaryInitialiser = this.GenerateMappersAndQueries(
+                    dapperWrapperClass,
+                    rootNode,
+                    currentPath,
+                    rootType,
+                    signaturePrefix + thisSignature + signatureSuffix,
+                    config,
+                    orderedSubset,
+                    codeConfig,
+                    provider);
                 signatures.AddRange(dictionaryInitialiser);
 
                 // TODO: now iterate over children
@@ -225,7 +239,6 @@
                     signatures.AddRange(childSignatures);
                 }
 
-
                 currentPath.Children.Clear();
             }
 
@@ -243,16 +256,24 @@
             CodeGeneratorConfig codeConfig,
             CodeDomProvider provider) {
             // generate the fk and tracked mappers
-            var fkMapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature, codeConfig.ForeignKeyAccessClassSuffix);
+            var foreignKeyMapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature, codeConfig.ForeignKeyAccessClassSuffix);
             var trackingMapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature, codeConfig.TrackedClassSuffix);
 
             // Generate the query method
-            var query = GenerateQueryMethod(dapperWrapperClass, rootType, signature, provider, trackingMapper, fkMapper, codeConfig);
+            var query = this.GenerateQueryMethod(dapperWrapperClass, rootType, signature, provider, trackingMapper, foreignKeyMapper, codeConfig);
 
             return new List<Tuple<string, string>> { new Tuple<string, string>(signature, query.Name) };
         }
 
-        private CodeMemberMethod GenerateQueryMethod(CodeTypeDeclaration dapperWrapperClass, Type rootType, string signature, CodeDomProvider provider, CodeMemberMethod trackingMapper, CodeMemberMethod fkMapper, CodeGeneratorConfig codeConfig) {
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
+        private CodeMemberMethod GenerateQueryMethod(
+            CodeTypeDeclaration dapperWrapperClass,
+            Type rootType,
+            string signature,
+            CodeDomProvider provider,
+            CodeMemberMethod trackingMapper,
+            CodeMemberMethod foreignKeyMapper,
+            CodeGeneratorConfig codeConfig) {
             // TODO: Add in mapped on
             var query = new CodeMemberMethod();
             query.Name = rootType.Name + "_" + signature;
@@ -277,24 +298,30 @@
                         new CodeExpression[] {
                                                  new CodeVariableReferenceExpression("conn"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Sql"),
                                                  new CodeVariableReferenceExpression("mapper"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Parameters"),
-                                                 new CodePrimitiveExpression(null), new CodePrimitiveExpression(true), new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn")
+                                                 new CodePrimitiveExpression(null), new CodePrimitiveExpression(true),
+                                                 new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn")
                                              }));
 
             var trackingDeclaration =
                 new CodeVariableDeclarationStatement(
-                    "Func`" + (trackingMapper.Parameters.Count + 1) + "[" + trackingMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType).First() + ","
-                    + string.Join(", ", trackingMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType + codeConfig.ForeignKeyAccessClassSuffix).Skip(1)) + ", "
+                    "Func`" + (trackingMapper.Parameters.Count + 1) + "["
+                    + trackingMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType).First() + ","
+                    + string.Join(
+                        ", ",
+                        trackingMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType + codeConfig.ForeignKeyAccessClassSuffix).Skip(1)) + ", "
                     + trackingMapper.Parameters.Cast<CodeParameterDeclarationExpression>().First().Type.BaseType + "]",
                     "mapper",
                     new CodeMethodReferenceExpression(null, trackingMapper.Name));
 
-            var fkDeclaration =
+            var foreignKeyDeclaration =
                 new CodeVariableDeclarationStatement(
-                    "Func`" + (fkMapper.Parameters.Count + 1) + "[" + fkMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType).First() + ","
-                    + string.Join(", ", fkMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType + codeConfig.ForeignKeyAccessClassSuffix).Skip(1)) + ", "
-                    + fkMapper.Parameters.Cast<CodeParameterDeclarationExpression>().First().Type.BaseType + "]",
+                    "Func`" + (foreignKeyMapper.Parameters.Count + 1) + "[" + foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType).First() + ","
+                    + string.Join(
+                        ", ",
+                        foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType + codeConfig.ForeignKeyAccessClassSuffix).Skip(1)) + ", "
+                    + foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().First().Type.BaseType + "]",
                     "mapper",
-                    new CodeMethodReferenceExpression(null, fkMapper.Name));
+                    new CodeMethodReferenceExpression(null, foreignKeyMapper.Name));
 
             query.Statements.Add(
                 new CodeConditionStatement(
@@ -302,14 +329,8 @@
                         new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("query"), "IsTracked"),
                         CodeBinaryOperatorType.IdentityEquality,
                         new CodePrimitiveExpression(true)),
-                    new CodeStatement[] {
-                                            trackingDeclaration,
-                                            returnStatement
-                                        },
-                    new CodeStatement[] {
-                                            fkDeclaration,
-                                            returnStatement
-                                        }));
+                    new CodeStatement[] { trackingDeclaration, returnStatement },
+                    new CodeStatement[] { foreignKeyDeclaration, returnStatement }));
 
             dapperWrapperClass.Members.Add(query);
             return query;
@@ -321,14 +342,14 @@
             mapper.ReturnType = new CodeTypeReference(rootType.Name + suffix);
             mapper.Attributes = MemberAttributes.Static;
 
-            const string rootName = "root";
-            mapper.Parameters.Add(new CodeParameterDeclarationExpression(rootType.Name + suffix, rootName));
+            const string RootName = "root";
+            mapper.Parameters.Add(new CodeParameterDeclarationExpression(rootType.Name + suffix, RootName));
             foreach (var node in rootNode.Children) {
-                this.AddParameterAndAssignment(mapper, rootName, node);
+                this.AddParameterAndAssignment(mapper, RootName, node);
             }
 
             // add a return statement
-            mapper.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression(rootName)));
+            mapper.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression(RootName)));
 
             dapperWrapperClass.Members.Add(mapper);
 

@@ -9,10 +9,12 @@
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
         public SelectWriter(ISqlDialect dialect, IDictionary<Type, IMap> maps)
-            : this(dialect, new WhereClauseWriter(dialect, maps), maps) {}
+            : this(dialect, new WhereClauseWriter(dialect, maps), maps) {
+        }
 
         public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IDictionary<Type, IMap> maps)
-            : base(dialect, whereClauseWriter, maps) {}
+            : base(dialect, whereClauseWriter, maps) {
+        }
 
         public SqlWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
             var sql = new StringBuilder();
@@ -130,7 +132,7 @@
                 splitOns.AddRange(signature.SplitOn);
             }
 
-            return new AddNodeResult { Signature = signatureBuilder.ToString(), SplitOn = splitOns};
+            return new AddNodeResult { Signature = signatureBuilder.ToString(), SplitOn = splitOns };
         }
 
         private void AddColumns<T>(SelectQuery<T> selectQuery, StringBuilder sql, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) {

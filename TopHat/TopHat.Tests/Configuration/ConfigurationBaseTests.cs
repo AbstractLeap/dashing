@@ -180,7 +180,7 @@
         }
 
         private static Mock<IEngine> MakeMockEngine() {
-            var engine =  new Mock<IEngine>(MockBehavior.Strict);
+            var engine = new Mock<IEngine>(MockBehavior.Strict);
             engine.SetupProperty(p => p.Configuration);
             return engine;
         }

@@ -24,8 +24,10 @@
                     {
                         subset.Add(list[(int)rs]);
                     }
+
                     rs++;
                 }
+
                 yield return subset;
             }
         }
