@@ -145,7 +145,7 @@
                     map.Type,
                     configuration,
                     0,
-                    generatorConfig.FetchMapperMaxFetches,
+                    generatorConfig.MapperGenerationMaxRecursion,
                     generatorConfig,
                     provider);
 
@@ -186,8 +186,8 @@
             Type rootType,
             Type currentType,
             IConfiguration config,
-            int numFetches,
-            int maxFetches,
+            int recursionLevel,
+            int maxRecursion,
             CodeGeneratorConfig codeConfig,
             CodeDomProvider provider,
             string signaturePrefix = "",
@@ -217,26 +217,28 @@
                     provider);
                 signatures.AddRange(dictionaryInitialiser);
 
-                // TODO: now iterate over children
-                int currentSplitPoint = 0;
-                foreach (var column in orderedSubset) {
-                    var childSignaturePrefix = thisSignature.Substring(0, currentSplitPoint + column.Value.FetchId.ToString().Length + 1);
-                    var childSignatureSuffix = thisSignature.Substring(currentSplitPoint + column.Value.FetchId.ToString().Length + 1);
-                    var childSignatures = this.TraverseAndGenerateMappersAndQueries(
-                        dapperWrapperClass,
-                        rootNode,
-                        currentPath.Children.First(c => c.Key == column.Key).Value,
-                        rootType,
-                        column.Value.Type,
-                        config,
-                        numFetches,
-                        maxFetches,
-                        codeConfig,
-                        provider,
-                        signaturePrefix + childSignaturePrefix,
-                        childSignatureSuffix + signatureSuffix);
-                    currentSplitPoint += column.Value.FetchId.ToString().Length + 2;
-                    signatures.AddRange(childSignatures);
+                // we have to limit recursion level otherwise possible to get stuck in infinite loop
+                if (recursionLevel < maxRecursion) {
+                    int currentSplitPoint = 0;
+                    foreach (var column in orderedSubset) {
+                        var childSignaturePrefix = thisSignature.Substring(0, currentSplitPoint + column.Value.FetchId.ToString().Length + 1);
+                        var childSignatureSuffix = thisSignature.Substring(currentSplitPoint + column.Value.FetchId.ToString().Length + 1);
+                        var childSignatures = this.TraverseAndGenerateMappersAndQueries(
+                            dapperWrapperClass,
+                            rootNode,
+                            currentPath.Children.First(c => c.Key == column.Key).Value,
+                            rootType,
+                            column.Value.Type,
+                            config,
+                            recursionLevel + 1,
+                            maxRecursion,
+                            codeConfig,
+                            provider,
+                            signaturePrefix + childSignaturePrefix,
+                            childSignatureSuffix + signatureSuffix);
+                        currentSplitPoint += column.Value.FetchId.ToString().Length + 2;
+                        signatures.AddRange(childSignatures);
+                    }
                 }
 
                 currentPath.Children.Clear();
