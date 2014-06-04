@@ -85,6 +85,27 @@ namespace TopHat.Configuration {
             this.primaryKeySetter(entity, value);
         }
 
+        private object propertyGettersLock = new object();
+
+        private IDictionary<IColumn, Func<T, object>> propertyGetters;
+
+        public object GetColumnValue(T entity, IColumn column) {
+            if (this.propertyGetters == null) {
+                lock (this.propertyGettersLock) {
+                    if (this.propertyGetters == null) {
+                        this.propertyGetters = new Dictionary<IColumn, Func<T, object>>();
+                        foreach (var col in this.Columns) {
+                            var param = Expression.Parameter(typeof(T));
+                            var getter = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, col.Key), typeof(object)), param).Compile();
+                            this.propertyGetters.Add(col.Value, getter);
+                        }
+                    }
+                }
+            }
+
+            return this.propertyGetters[column](entity);
+        }
+
         //// commented out until we get basic stuff working
         ///// <summary>
         /////   Gets or sets the indexes.
@@ -104,6 +125,11 @@ namespace TopHat.Configuration {
         ///     The <see cref="Map" />.
         /// </returns>
         public static Map<T> From(IMap map) {
+            var genericMap = map as Map<T>;
+            if (genericMap != null) {
+                return genericMap;
+            }
+
             if (typeof(T) != map.Type) {
                 throw new ArgumentException("The argument does not represent a map of the correct generic type");
             }

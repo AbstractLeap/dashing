@@ -33,5 +33,7 @@ namespace TopHat.Configuration {
         object GetPrimaryKeyValue(T entity);
 
         void SetPrimaryKeyValue(T entity, object value);
+
+        object GetColumnValue(T entity, IColumn column);
     }
 }
