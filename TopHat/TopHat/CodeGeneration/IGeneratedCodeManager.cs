@@ -18,13 +18,6 @@
         Assembly GeneratedCodeAssembly { get; }
 
         /// <summary>
-        ///     Loads the Generated code for this project
-        /// </summary>
-        /// <param name="config"></param>
-        /// <remarks>This method does not generate code nor check for updates</remarks>
-        void LoadCode();
-
-        /// <summary>
         ///     Returns a type for a Foreign Key class
         /// </summary>
         /// <typeparam name="T"></typeparam>
