@@ -89,6 +89,7 @@
     <Compile Include="Engine\FetchNode.cs" />
     <Compile Include="Engine\IDapperWrapper.cs" />
     <Compile Include="Engine\IEngine.cs" />
+    <Compile Include="Engine\IEntitySqlWriter.cs" />
     <Compile Include="Engine\ISelectWriter.cs" />
     <Compile Include="Engine\ISqlDialect.cs" />
     <Compile Include="Engine\IWhereClauseWriter.cs" />
@@ -97,9 +98,11 @@
     <Compile Include="Engine\SqlDialectBase.cs" />
     <Compile Include="Engine\SqlServerDialect.cs" />
     <Compile Include="Engine\SqlServerEngine.cs" />
+    <Compile Include="Engine\SqlWriterResult.cs" />
+    <Compile Include="Engine\UpdateWriter.cs" />
     <Compile Include="Engine\WhereClauseExpressionVisitor.cs" />
     <Compile Include="Engine\WhereClauseWriter.cs" />
-    <Compile Include="Engine\SqlWriterResult.cs" />
+    <Compile Include="Engine\SelectWriterResult.cs" />
     <Compile Include="EntityQueryBase.cs" />
     <Compile Include="Extensions\DapperExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />

@@ -13,7 +13,7 @@
     internal class WhereClauseExpressionVisitor : BaseExpressionVisitor {
         private readonly ISqlDialect dialect;
 
-        private readonly IDictionary<Type, IMap> maps;
+        private readonly IConfiguration configuration;
 
         private readonly FetchNode rootNode;
 
@@ -49,12 +49,12 @@
 
         public DynamicParameters Parameters { get; private set; }
 
-        public WhereClauseExpressionVisitor(ISqlDialect dialect, IDictionary<Type, IMap> maps, FetchNode rootNode) {
+        public WhereClauseExpressionVisitor(ISqlDialect dialect, IConfiguration config, FetchNode rootNode) {
             this.Sql = new StringBuilder();
             this.Parameters = new DynamicParameters();
             this.chainedEntityNames = new Stack<string>();
             this.dialect = dialect;
-            this.maps = maps;
+            this.configuration = config;
             this.rootNode = rootNode;
         }
 
@@ -75,7 +75,7 @@
                 if (this.isChainedMemberAccess) {
                     if (this.getForeignKeyName) {
                         // at this point let's fetch the foreign key name
-                        this.chainedColumnName = this.maps[m.Member.DeclaringType].Columns[m.Member.Name].DbName;
+                        this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                         this.chainedColumnType = m.Member.DeclaringType;
                         this.getForeignKeyName = false;
                     }
@@ -88,12 +88,13 @@
                     this.chainedMemberAccessExpression = m;
 
                     // we want to check for a primary key here because in that case we can put the where clause on the referencing object
-                    if (this.maps[m.Member.DeclaringType].PrimaryKey.Name == m.Member.Name) {
+                    if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name)
+                    {
                         this.getForeignKeyName = true;
                     }
                     else {
                         // we need this column name
-                        this.chainedColumnName = this.maps[m.Member.DeclaringType].Columns[m.Member.Name].DbName;
+                        this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                         this.chainedColumnType = m.Member.DeclaringType;
                     }
                 }
@@ -112,7 +113,7 @@
                             this.Sql.Append(this.rootNode.Alias + ".");
                         }
 
-                        this.dialect.AppendQuotedName(this.Sql, this.maps[m.Member.DeclaringType].Columns[m.Member.Name].DbName);
+                        this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName);
                     }
                     else {
                         // we need to find the alias
@@ -133,7 +134,7 @@
                             this.Sql.Append(currentNode.Alias + ".");
                         }
 
-                        this.dialect.AppendQuotedName(this.Sql, this.maps[this.chainedColumnType].Columns[this.chainedColumnName].DbName);
+                        this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(this.chainedColumnType).Columns[this.chainedColumnName].DbName);
                     }
                 }
                 else {
@@ -141,7 +142,7 @@
                         this.Sql.Append(this.rootNode.Alias + ".");
                     }
 
-                    this.dialect.AppendQuotedName(this.Sql, this.maps[m.Member.DeclaringType].Columns[m.Member.Name].DbName);
+                    this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName);
                 }
             }
 
@@ -227,7 +228,7 @@
                 case "Any":
                     memberExpr = m.Arguments[1];
                     var relatedType = m.Arguments[0].Type.GenericTypeArguments[0];
-                    var map = this.maps[relatedType];
+                    var map = this.configuration.GetMap(relatedType);
                     this.Sql.Append("exists (select 1 from ");
                     this.dialect.AppendQuotedTableName(this.Sql, map);
                     this.Sql.Append(" where ");

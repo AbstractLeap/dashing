@@ -49,7 +49,7 @@ namespace TopHat.Engine {
         /// </param>
         public void UseMaps(IDictionary<Type, IMap> maps) {
             this.Maps = maps;
-            this.SelectWriter = new SelectWriter(this.Dialect, this.Maps);
+            this.SelectWriter = new SelectWriter(this.Dialect, this.Configuration);
         }
 
         /// <summary>

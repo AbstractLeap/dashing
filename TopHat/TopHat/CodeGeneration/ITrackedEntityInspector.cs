@@ -22,6 +22,12 @@
         IDictionary<string, object> OldValues { get; }
 
         /// <summary>
+        /// Returns the new values for dirty properties
+        /// </summary>
+        /// <remarks>Does not include dirty collection properties</remarks>
+        IDictionary<string, object> NewValues { get; }
+
+        /// <summary>
         ///     Returns a dictionary of collection type properties and the entities added to them
         /// </summary>
         IDictionary<string, IList<object>> AddedEntities { get; }
@@ -68,6 +74,14 @@
         /// <param name="propertyExpression"></param>
         /// <returns></returns>
         TResult OldValueFor<TResult>(Expression<Func<T, TResult>> propertyExpression);
+
+        /// <summary>
+        /// Fetches the new value for a dirty property
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="propertyExpression"></param>
+        /// <returns></returns>
+        TResult NewValueFor<TResult>(Expression<Func<T, TResult>> propertyExpression);
 
         /// <summary>
         ///     Fetches the added entities for a property

@@ -25,7 +25,7 @@
 
         public CodeGeneratorConfig Config { get; private set; }
 
-        private delegate IEnumerable<T> DelegateQuery<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn);
+        private delegate IEnumerable<T> DelegateQuery<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
 
         private delegate IEnumerable<T> NoFetchDelegate<T>(IDbConnection conn, string sql, dynamic parameters, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null);
 
@@ -63,7 +63,7 @@
                     // compile dynamic expression for calling Query<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn)
                     // on the generated DapperWrapper
                     var parameters = new List<ParameterExpression> {
-                                                              Expression.Parameter(typeof(SqlWriterResult), "result"),
+                                                              Expression.Parameter(typeof(SelectWriterResult), "result"),
                                                               Expression.Parameter(typeof(SelectQuery<>).MakeGenericType(type.BaseType), "query"),
                                                               Expression.Parameter(typeof(IDbConnection), "conn")
                                                           };
@@ -104,7 +104,7 @@
             fetchCalls.Add(baseType, noFetchQueryCall);
         }
 
-        public IEnumerable<T> Query<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn) {
+        public IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn) {
             if (query.HasFetches()) {
                 return ((DelegateQuery<T>)this.queryCalls[typeof(T)])(result, query, conn);
             }

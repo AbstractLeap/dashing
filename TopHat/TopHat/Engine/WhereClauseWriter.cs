@@ -12,22 +12,22 @@
     internal class WhereClauseWriter : IWhereClauseWriter {
         private ISqlDialect dialect;
 
-        private IDictionary<Type, IMap> maps;
+        private IConfiguration configuration;
 
-        public WhereClauseWriter(ISqlDialect dialect, IDictionary<Type, IMap> maps) {
+        public WhereClauseWriter(ISqlDialect dialect, IConfiguration config) {
             this.dialect = dialect;
-            this.maps = maps;
+            this.configuration = config;
         }
 
-        public SqlWriterResult GenerateSql<T>(IList<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode) {
+        public SelectWriterResult GenerateSql<T>(IList<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode) {
             if (whereClauses.IsEmpty()) {
-                return new SqlWriterResult(string.Empty, null, rootNode);
+                return new SelectWriterResult(string.Empty, null, rootNode);
             }
 
             var sql = new StringBuilder(" where ");
             var parameters = new DynamicParameters();
             foreach (var whereClause in whereClauses) {
-                var expressionVisitor = new WhereClauseExpressionVisitor(this.dialect, this.maps, rootNode);
+                var expressionVisitor = new WhereClauseExpressionVisitor(this.dialect, configuration, rootNode);
                 expressionVisitor.VisitTree(whereClause);
                 sql.Append(expressionVisitor.Sql);
                 sql.Append(" and ");
@@ -36,7 +36,7 @@
 
             // remove the last and
             sql.Remove(sql.Length - 5, 5);
-            return new SqlWriterResult(sql.ToString(), parameters, rootNode);
+            return new SelectWriterResult(sql.ToString(), parameters, rootNode);
         }
     }
 }

@@ -20,7 +20,7 @@
             var engine = new SqlServerEngine();
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
-            var selectWriter = new SelectWriter(new SqlServerDialect(), MakeMaps());
+            var selectWriter = new SelectWriter(new SqlServerDialect(), MakeConfig());
             var sql = selectWriter.GenerateSql(new SelectQuery<User>(engine, connection.Object));
             Debug.Write(sql.Sql);
         }
@@ -116,7 +116,7 @@
         }
 
         private SelectWriter GetWriter(bool withIgnore = false) {
-            return new SelectWriter(new SqlServerDialect(), MakeMaps(withIgnore));
+            return new SelectWriter(new SqlServerDialect(), MakeConfig(withIgnore));
         }
 
         private SelectQuery<T> GetSelectQuery<T>() {
@@ -126,12 +126,12 @@
             return new SelectQuery<T>(engine, connection.Object);
         }
 
-        private static IDictionary<Type, IMap> MakeMaps(bool withIgnore = false) {
+        private static IConfiguration MakeConfig(bool withIgnore = false) {
             if (withIgnore) {
-                return new CustomConfigWithIgnore().Maps.ToDictionary(m => m.Type, m => m);
+                return new CustomConfigWithIgnore();
             }
 
-            return new CustomConfig().Maps.ToDictionary(m => m.Type, m => m);
+            return new CustomConfig();
         }
 
         private class CustomConfig : DefaultConfiguration {
