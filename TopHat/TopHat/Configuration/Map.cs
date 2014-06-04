@@ -51,8 +51,13 @@ namespace TopHat.Configuration {
             if (this.primaryKeyGetter == null) {
                 lock (this.primaryKeyGetSetLock) {
                     if (this.primaryKeyGetter == null) {
+                        if (this.PrimaryKey == null)
+                        {
+                            throw new Exception("Primary Key is null on the Map");
+                        }
+
                         var param = Expression.Parameter(typeof(T));
-                        this.primaryKeyGetter = Expression.Lambda<Func<T, object>>(Expression.Property(param, this.PrimaryKey.Name), param).Compile();
+                        this.primaryKeyGetter = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, this.PrimaryKey.Name), typeof(object)), param).Compile();
                     }
                 }
             }
@@ -64,10 +69,14 @@ namespace TopHat.Configuration {
             if (this.primaryKeySetter == null) {
                 lock (this.primaryKeyGetSetLock) {
                     if (this.primaryKeySetter == null) {
+                        if (this.PrimaryKey == null) {
+                            throw new Exception("Primary Key is null on the Map");
+                        }
+
                         var param = Expression.Parameter(typeof(T));
                         var valueParam = Expression.Parameter(typeof(object));
                         this.primaryKeySetter =
-                            Expression.Lambda<Action<T, object>>(Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), valueParam), new[] { param, valueParam })
+                            Expression.Lambda<Action<T, object>>(Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), Expression.Convert(valueParam, typeof(int))), new[] { param, valueParam })
                                       .Compile();
                     }
                 }
