@@ -83,7 +83,7 @@ namespace TopHat.Engine {
             }
 
             var sqlQuery = this.SelectWriter.GenerateSql(query);
-            return this.Configuration.GetCodeManager().Query<T>(sqlQuery, query, connection);
+            return this.Configuration.CodeManager.Query<T>(sqlQuery, query, connection);
         }
 
         /// <summary>

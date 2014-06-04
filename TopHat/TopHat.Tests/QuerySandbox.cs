@@ -8,7 +8,7 @@
     using Xunit;
 
     public class QuerySandbox {
-        [Fact]
+        [Fact(Skip = "connects to real database")]
         public void ExecuteSimpleQuery() {
             var config = new CustomConfig();
             var session = config.BeginSession();
@@ -16,7 +16,7 @@
             Assert.NotEmpty(blogs);
         }
 
-        [Fact]
+        [Fact(Skip = "connects to real database")]
         public void ExecuteOneFetchQuery() {
             var config = new CustomConfig();
             var session = config.BeginSession();
@@ -24,7 +24,7 @@
             Assert.NotNull(posts.First().Blog.Title);
         }
 
-        [Fact]
+        [Fact(Skip = "connects to real database")]
         public void ExecuteNestFetchQuery() {
             var config = new CustomConfig();
             var session = config.BeginSession();

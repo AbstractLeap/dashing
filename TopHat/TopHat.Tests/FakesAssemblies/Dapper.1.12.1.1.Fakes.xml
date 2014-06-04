@@ -97,11 +97,59 @@
         <member name="P:Dapper.Fakes.ShimDbString.Constructor">
             <summary>Sets the shim of DbString.DbString()</summary>
         </member>
+        <member name="P:Dapper.Fakes.ShimDbString.IsAnsiGet">
+            <summary>Sets the shim of DbString.get_IsAnsi()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.IsAnsiSetBoolean">
+            <summary>Sets the shim of DbString.set_IsAnsi(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.IsFixedLengthGet">
+            <summary>Sets the shim of DbString.get_IsFixedLength()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.IsFixedLengthSetBoolean">
+            <summary>Sets the shim of DbString.set_IsFixedLength(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.LengthGet">
+            <summary>Sets the shim of DbString.get_Length()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.LengthSetInt32">
+            <summary>Sets the shim of DbString.set_Length(Int32 value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.ValueGet">
+            <summary>Sets the shim of DbString.get_Value()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.ValueSetString">
+            <summary>Sets the shim of DbString.set_Value(String value)</summary>
+        </member>
         <member name="T:Dapper.Fakes.ShimDbString.AllInstances">
             <summary>Define shims for all instances members</summary>
         </member>
         <member name="P:Dapper.Fakes.ShimDbString.AllInstances.AddParameterIDbCommandString">
             <summary>Sets the shim of DbString.AddParameter(IDbCommand command, String name)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.IsAnsiGet">
+            <summary>Sets the shim of DbString.get_IsAnsi()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.IsAnsiSetBoolean">
+            <summary>Sets the shim of DbString.set_IsAnsi(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.IsFixedLengthGet">
+            <summary>Sets the shim of DbString.get_IsFixedLength()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.IsFixedLengthSetBoolean">
+            <summary>Sets the shim of DbString.set_IsFixedLength(Boolean value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.LengthGet">
+            <summary>Sets the shim of DbString.get_Length()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.LengthSetInt32">
+            <summary>Sets the shim of DbString.set_Length(Int32 value)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.ValueGet">
+            <summary>Sets the shim of DbString.get_Value()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDbString.AllInstances.ValueSetString">
+            <summary>Sets the shim of DbString.set_Value(String value)</summary>
         </member>
         <member name="T:Dapper.Fakes.ShimDefaultTypeMap">
             <summary>Shim type of Dapper.DefaultTypeMap</summary>
@@ -144,6 +192,12 @@
         </member>
         <member name="P:Dapper.Fakes.ShimDefaultTypeMap.GetSettablePropsType">
             <summary>Sets the shim of DefaultTypeMap.GetSettableProps(Type t)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap._FindConstructorb__3ConstructorInfo">
+            <summary>Sets the shim of DefaultTypeMap.&lt;FindConstructor&gt;b__3(ConstructorInfo c)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDefaultTypeMap._FindConstructorb__4ConstructorInfo">
+            <summary>Sets the shim of DefaultTypeMap.&lt;FindConstructor&gt;b__4(ConstructorInfo c)</summary>
         </member>
         <member name="T:Dapper.Fakes.ShimDefaultTypeMap.AllInstances">
             <summary>Define shims for all instances members</summary>
@@ -211,6 +265,12 @@
         <member name="P:Dapper.Fakes.ShimDynamicParameters.ParameterNamesGet">
             <summary>Sets the shim of DynamicParameters.get_ParameterNames()</summary>
         </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.RemoveUnusedGet">
+            <summary>Sets the shim of DynamicParameters.get_RemoveUnused()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.RemoveUnusedSetBoolean">
+            <summary>Sets the shim of DynamicParameters.set_RemoveUnused(Boolean value)</summary>
+        </member>
         <member name="P:Dapper.Fakes.ShimDynamicParameters.StaticConstructor">
             <summary>Sets the shim of DynamicParameters.DynamicParameters()</summary>
         </member>
@@ -238,6 +298,12 @@
         <member name="P:Dapper.Fakes.ShimDynamicParameters.AllInstances.ParameterNamesGet">
             <summary>Sets the shim of DynamicParameters.get_ParameterNames()</summary>
         </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AllInstances.RemoveUnusedGet">
+            <summary>Sets the shim of DynamicParameters.get_RemoveUnused()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimDynamicParameters.AllInstances.RemoveUnusedSetBoolean">
+            <summary>Sets the shim of DynamicParameters.set_RemoveUnused(Boolean value)</summary>
+        </member>
         <member name="T:Dapper.Fakes.ShimFeatureSupport">
             <summary>Shim type of Dapper.FeatureSupport</summary>
         </member>
@@ -253,6 +319,12 @@
         <member name="M:Dapper.Fakes.ShimFeatureSupport.BehaveAsNotImplemented">
             <summary>Assigns the &apos;NotImplemented&apos; behavior for all methods of the shimmed type</summary>
         </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.ArraysGet">
+            <summary>Sets the shim of FeatureSupport.get_Arrays()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.ArraysSetBoolean">
+            <summary>Sets the shim of FeatureSupport.set_Arrays(Boolean value)</summary>
+        </member>
         <member name="P:Dapper.Fakes.ShimFeatureSupport.Behavior">
             <summary>Assigns the behavior for all methods of the shimmed type</summary>
         </member>
@@ -267,6 +339,12 @@
         </member>
         <member name="T:Dapper.Fakes.ShimFeatureSupport.AllInstances">
             <summary>Define shims for all instances members</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.AllInstances.ArraysGet">
+            <summary>Sets the shim of FeatureSupport.get_Arrays()</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimFeatureSupport.AllInstances.ArraysSetBoolean">
+            <summary>Sets the shim of FeatureSupport.set_Arrays(Boolean value)</summary>
         </member>
         <member name="T:Dapper.Fakes.ShimSimpleMemberMap">
             <summary>Shim type of Dapper.SimpleMemberMap</summary>
@@ -609,6 +687,36 @@
         </member>
         <member name="P:Dapper.Fakes.ShimSqlMapper.ThrowDataExceptionExceptionInt32IDataReader">
             <summary>Sets the shim of SqlMapper.ThrowDataException(Exception ex, Int32 index, IDataReader reader)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._CreateParamInfoGeneratorb__4ePropertyInfo">
+            <summary>Sets the shim of SqlMapper.&lt;CreateParamInfoGenerator&gt;b__4e(PropertyInfo p)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._CreateParamInfoGeneratorb__4fPropertyInfo">
+            <summary>Sets the shim of SqlMapper.&lt;CreateParamInfoGenerator&gt;b__4f(PropertyInfo x)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._GenerateDeserializersb__3aString">
+            <summary>Sets the shim of SqlMapper.&lt;GenerateDeserializers&gt;b__3a(String s)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._GetHashCollissionsb__5KeyValuePairOfInt32Int32">
+            <summary>Sets the shim of SqlMapper.&lt;GetHashCollissions&gt;b__5(KeyValuePair`2&lt;Int32,Int32&gt; pair)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._GetHashCollissionsb__6KeyValuePairOfInt32Int32">
+            <summary>Sets the shim of SqlMapper.&lt;GetHashCollissions&gt;b__6(KeyValuePair`2&lt;Int32,Int32&gt; pair)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._PackListParametersb__45Match">
+            <summary>Sets the shim of SqlMapper.&lt;PackListParameters&gt;b__45(Match match)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._cctorb__9Type">
+            <summary>Sets the shim of SqlMapper.&lt;.cctor&gt;b__9(Type x)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._cctorb__aType">
+            <summary>Sets the shim of SqlMapper.&lt;.cctor&gt;b__a(Type x)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._cctorb__bPropertyInfo">
+            <summary>Sets the shim of SqlMapper.&lt;.cctor&gt;b__b(PropertyInfo p)</summary>
+        </member>
+        <member name="P:Dapper.Fakes.ShimSqlMapper._cctorb__cPropertyInfo">
+            <summary>Sets the shim of SqlMapper.&lt;.cctor&gt;b__c(PropertyInfo p)</summary>
         </member>
         <member name="T:Dapper.Fakes.ShimSqlMapper.ShimGridReader">
             <summary>Shim type of Dapper.SqlMapper+GridReader</summary>

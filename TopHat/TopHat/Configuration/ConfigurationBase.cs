@@ -12,96 +12,49 @@
     ///     The configuration base.
     /// </summary>
     public abstract class ConfigurationBase : IConfiguration {
-        /// <summary>
-        ///     The _engine.
-        /// </summary>
-        private IEngine engine;
+        private readonly IEngine engine;
 
-        /// <summary>
-        ///     The _connection string.
-        /// </summary>
         private readonly string connectionString;
 
-        private IGeneratedCodeManager codeManager;
+        private readonly IGeneratedCodeManager codeManager;
 
-        private IMapper mapper;
+        private readonly IMapper mapper;
 
-        private MethodInfo mapperMapForMethodInfo;
+        private readonly MethodInfo mapperMapForMethodInfo;
 
-        /// <summary>
-        ///     Gets or sets the mapper.
-        /// </summary>
-        protected IMapper Mapper {
+        private readonly IDictionary<Type, IMap> mappedTypes;
+
+        private readonly ISessionFactory sessionFactory;
+
+        private bool engineHasLatestMaps;
+
+        public IMapper Mapper {
             get {
                 return this.mapper;
             }
-
-            set {
-                this.mapper = value;
-                this.mapperMapForMethodInfo = this.mapper.GetType().GetMethod("MapFor");
-            }
         }
 
-        /// <summary>
-        ///     Gets or sets the session factory.
-        /// </summary>
-        protected ISessionFactory SessionFactory { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the mapped types.
-        /// </summary>
-        protected IDictionary<Type, IMap> MappedTypes { get; set; }
-
-        /// <summary>
-        ///     Gets or sets a value indicating whether engine has latest maps.
-        /// </summary>
-        protected bool EngineHasLatestMaps { get; set; }
-
-        public IMap<T> GetMap<T>() {
-            return this.GetMap(typeof(T)) as IMap<T>;
-        }
-
-        public IMap GetMap(Type type) {
-            if (!this.MappedTypes.ContainsKey(type)) {
-                throw new ArgumentException("That type is not mapped");
-            }
-
-            return this.MappedTypes[type];
-        }
-
-        /// <summary>
-        ///     Gets the maps.
-        /// </summary>
         public IEnumerable<IMap> Maps {
             get {
-                return this.MappedTypes.Values;
+                return this.mappedTypes.Values;
             }
         }
 
-        /// <summary>
-        ///     Gets or sets the engine.
-        /// </summary>
-        protected IEngine Engine {
+        public IEngine Engine {
             get {
-                if (!this.EngineHasLatestMaps) {
-                    this.engine.UseMaps(this.MappedTypes);
-                    this.EngineHasLatestMaps = true;
+                if (!this.engineHasLatestMaps) {
+                    this.engine.UseMaps(this.mappedTypes);
+                    this.engineHasLatestMaps = true;
                 }
 
                 return this.engine;
             }
-
-            set {
-                this.Dirty();
-                this.engine = value;
-            }
         }
 
-        /// <summary>
-        ///     The dirty.
-        /// </summary>
-        private void Dirty() {
-            this.EngineHasLatestMaps = false;
+        public IGeneratedCodeManager CodeManager {
+            get {
+                return this.codeManager;
+            }
         }
 
         /// <summary>
@@ -145,31 +98,32 @@
             this.engine = engine;
             this.engine.Configuration = this;
             this.connectionString = connectionString;
-            this.Mapper = mapper;
-            this.SessionFactory = sessionFactory;
-            this.MappedTypes = new Dictionary<Type, IMap>();
+            this.mapper = mapper;
+            this.mapperMapForMethodInfo = mapper.GetType().GetMethod("MapFor");
+            this.sessionFactory = sessionFactory;
+            this.mappedTypes = new Dictionary<Type, IMap>();
             this.codeManager = codeManager;
-
-            // TODO: allow overriding of the CodeGeneratorConfig
-            this.codeManager.LoadCode();
         }
 
-        /// <summary>
-        ///     The begin session.
-        /// </summary>
-        /// <returns>
-        ///     The <see cref="ISession" />.
-        /// </returns>
+        public IMap<T> GetMap<T>() {
+            // TODO: check that the Map is indeed an IMap<T> or lift if it isn't
+            return this.GetMap(typeof(T)) as IMap<T>;
+        }
+
+        public IMap GetMap(Type type) {
+            if (!this.mappedTypes.ContainsKey(type)) {
+                throw new ArgumentException("That type is not mapped");
+            }
+
+            return this.mappedTypes[type];
+        }
+
+        private void Dirty() {
+            this.engineHasLatestMaps = false;
+        }
+
         public ISession BeginSession() {
-            return this.SessionFactory.Create(this.Engine.Open(this.connectionString), this);
-        }
-
-        public IGeneratedCodeManager GetCodeManager() {
-            return this.codeManager;
-        }
-
-        public IEngine GetEngine() {
-            return this.engine;
+            return this.sessionFactory.Create(this.Engine.Open(this.connectionString), this);
         }
 
         /// <summary>
@@ -182,7 +136,7 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession(IDbConnection connection) {
-            return this.SessionFactory.Create(connection, this);
+            return this.sessionFactory.Create(connection, this);
         }
 
         /// <summary>
@@ -198,7 +152,7 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.SessionFactory.Create(connection, transaction, this);
+            return this.sessionFactory.Create(connection, transaction, this);
         }
 
         /// <summary>
@@ -211,9 +165,9 @@
         /// </returns>
         protected IConfiguration Add<T>() {
             var type = typeof(T);
-            if (!this.MappedTypes.ContainsKey(type)) {
+            if (!this.mappedTypes.ContainsKey(type)) {
                 this.Dirty();
-                this.MappedTypes[type] = this.Mapper.MapFor<T>();
+                this.mappedTypes[type] = this.Mapper.MapFor<T>();
             }
 
             return this;
@@ -233,13 +187,13 @@
 
             var maps =
                 types.Distinct()
-                     .Where(t => !this.MappedTypes.ContainsKey(t))
+                     .Where(t => !this.mappedTypes.ContainsKey(t))
                      .AsParallel()
                      .Select(t => this.mapperMapForMethodInfo.MakeGenericMethod(t).Invoke(this.mapper, new object[] { }) as IMap);
 
             foreach (var map in maps) {
                 // force into sequential
-                this.MappedTypes[map.Type] = map;
+                this.mappedTypes[map.Type] = map;
             }
 
             return this;
@@ -281,14 +235,14 @@
             Map<T> mapt;
             var type = typeof(T);
 
-            if (!this.MappedTypes.TryGetValue(type, out map)) {
-                this.MappedTypes[type] = mapt = this.Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
+            if (!this.mappedTypes.TryGetValue(type, out map)) {
+                this.mappedTypes[type] = mapt = this.Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
             }
             else {
                 mapt = map as Map<T>;
 
                 if (mapt == null) {
-                    this.MappedTypes[type] = mapt = Map<T>.From(map); // lift the Map into a Map<T>
+                    this.mappedTypes[type] = mapt = Map<T>.From(map); // lift the Map into a Map<T>
                 }
             }
 

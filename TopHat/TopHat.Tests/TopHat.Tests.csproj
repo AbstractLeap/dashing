@@ -37,6 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dapper">
+      <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
+    </Reference>
     <Reference Include="Dapper.1.12.1.1.Fakes">
       <HintPath>FakesAssemblies\Dapper.1.12.1.1.Fakes.dll</HintPath>
     </Reference>
@@ -82,6 +85,13 @@
     <Compile Include="Configuration\ConfigurationBaseTests.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Engine\MySqlDialectBaseTests.cs" />
+    <Compile Include="Engine\SqlServerDialectBaseTests.cs" />
+    <Compile Include="Engine\AnsiSqlDialectTests.cs" />
+    <Compile Include="Engine\SqlDialectBaseTests.cs" />
+    <Compile Include="SchemaGenerationSandbox.cs" />
+    <Compile Include="Engine\DDL\DropTableWriterTests.cs" />
+    <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />
     <Compile Include="Engine\EngineBaseTests.cs" />
     <Compile Include="Engine\SelectWriterTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
@@ -95,10 +105,6 @@
     <Compile Include="TestDomain\User.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\dapper-dot-net\Dapper NET45\Dapper NET45.csproj">
-      <Project>{0fff5bc7-0a4b-4d87-835e-4fad70937507}</Project>
-      <Name>Dapper NET45</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TopHat.MySql\TopHat.MySql.csproj">
       <Project>{fc3a4432-a5be-478b-a6d7-31e2fe2db8be}</Project>
       <Name>TopHat.MySql</Name>
@@ -110,7 +116,6 @@
   </ItemGroup>
   <ItemGroup>
     <Fakes Include="Fakes\Dapper.fakes" />
-    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

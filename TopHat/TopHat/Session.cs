@@ -175,7 +175,7 @@
         ///     The <see cref="SelectQuery" />.
         /// </returns>
         public ISelectQuery<T> Query<T>() {
-            return new SelectQuery<T>(this.config.GetEngine(), this.Connection);
+            return new SelectQuery<T>(this.config.Engine, this.Connection);
         }
 
         /// <summary>
@@ -190,7 +190,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Insert<T>(params T[] entities) {
-            return this.config.GetEngine().Execute(this.Connection, new InsertEntityQuery<T>(entities));
+            return this.config.Engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -205,7 +205,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Insert<T>(IEnumerable<T> entities) {
-            return this.config.GetEngine().Execute(this.Connection, new InsertEntityQuery<T>(entities));
+            return this.config.Engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -220,7 +220,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Update<T>(params T[] entities) {
-            return this.config.GetEngine().Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+            return this.config.Engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -235,7 +235,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Update<T>(IEnumerable<T> entities) {
-            return this.config.GetEngine().Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+            return this.config.Engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -250,7 +250,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Delete<T>(params T[] entities) {
-            return this.config.GetEngine().Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+            return this.config.Engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
         }
 
         /// <summary>
@@ -265,7 +265,7 @@
         ///     The <see cref="int" />.
         /// </returns>
         public int Delete<T>(IEnumerable<T> entities) {
-            return this.config.GetEngine().Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+            return this.config.Engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
         }
     }
 }
