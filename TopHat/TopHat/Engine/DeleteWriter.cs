@@ -26,11 +26,11 @@
             var paramIdx = 0;
             foreach (var entity in query.Entities) {
                 string paramName = "@p_" + ++paramIdx;
-                sql.Append(paramName + ",");
+                sql.Append(paramName + ", ");
                 parameters.Add(paramName, map.GetPrimaryKeyValue(entity));
             }
 
-            sql.Remove(sql.Length - 1, 1); // remove trailing ,
+            sql.Remove(sql.Length - 2, 2); // remove trailing ,
             sql.Append(")");
             return new SqlWriterResult(sql.ToString(), parameters);
         }

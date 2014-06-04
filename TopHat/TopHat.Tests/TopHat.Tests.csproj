@@ -85,6 +85,8 @@
     <Compile Include="Configuration\ConfigurationBaseTests.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Engine\DeleteWriterTests.cs" />
+    <Compile Include="Engine\InsertWriterTests.cs" />
     <Compile Include="Engine\MySqlDialectBaseTests.cs" />
     <Compile Include="Engine\SqlServerDialectBaseTests.cs" />
     <Compile Include="Engine\AnsiSqlDialectTests.cs" />

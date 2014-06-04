@@ -59,5 +59,7 @@
         /// <param name="conn"></param>
         /// <returns></returns>
         IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
+
+        int Execute(string sql, IDbConnection conn, dynamic param = null);
     }
 }

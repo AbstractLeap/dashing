@@ -22,13 +22,13 @@
 
             // we'll chuck these all in one query
             foreach (var entity in query.Entities) {
-                this.GenerateUpdateSql(entity, sql, parameters, paramIdx);
+                this.GenerateUpdateSql(entity, sql, parameters, ref paramIdx);
             }
 
             return new SqlWriterResult(sql.ToString(), parameters);
         }
 
-        private void GenerateUpdateSql<T>(T entity, StringBuilder sql, DynamicParameters parameters, int paramIdx) {
+        private void GenerateUpdateSql<T>(T entity, StringBuilder sql, DynamicParameters parameters, ref int paramIdx) {
             ITrackedEntityInspector<T> inspector = new TrackedEntityInspector<T>(entity);
 
             if (!inspector.IsDirty() || inspector.HasOnlyDirtyCollections()) {
@@ -51,6 +51,7 @@
             sql.Append(" = ");
             string idParamName = "@p_" + ++paramIdx;
             parameters.Add(idParamName, this.Configuration.GetMap<T>().GetPrimaryKeyValue(entity));
+            sql.Append(idParamName);
 
             sql.Append(";");
 
