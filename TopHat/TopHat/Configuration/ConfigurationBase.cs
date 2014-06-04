@@ -16,8 +16,6 @@
 
         private readonly string connectionString;
 
-        private readonly IGeneratedCodeManager codeManager;
-
         private readonly IMapper mapper;
 
         private readonly MethodInfo mapperMapForMethodInfo;
@@ -26,7 +24,11 @@
 
         private readonly ISessionFactory sessionFactory;
 
+        private readonly ICodeGenerator codeGenerator;
+
         private bool engineHasLatestMaps;
+
+        private IGeneratedCodeManager codeManager;
 
         public IMapper Mapper {
             get {
@@ -53,7 +55,7 @@
 
         public IGeneratedCodeManager CodeManager {
             get {
-                return this.codeManager;
+                return this.codeManager ?? (this.codeManager = this.codeGenerator.Generate(this));
             }
         }
 
@@ -72,9 +74,12 @@
         /// <param name="sessionFactory">
         ///     The session factory.
         /// </param>
+        /// <param name="codeGenerator">
+        ///     The code generator
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory, IGeneratedCodeManager codeManager) {
+        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -91,8 +96,8 @@
                 throw new ArgumentNullException("sessionFactory");
             }
 
-            if (codeManager == null) {
-                throw new ArgumentNullException("codeManager");
+            if (codeGenerator == null) {
+                throw new ArgumentNullException("codeGenerator");
             }
 
             this.engine = engine;
@@ -101,8 +106,9 @@
             this.mapper = mapper;
             this.mapperMapForMethodInfo = mapper.GetType().GetMethod("MapFor");
             this.sessionFactory = sessionFactory;
+            this.codeGenerator = codeGenerator;
+
             this.mappedTypes = new Dictionary<Type, IMap>();
-            this.codeManager = codeManager;
         }
 
         public IMap<T> GetMap<T>() {
@@ -120,6 +126,7 @@
 
         private void Dirty() {
             this.engineHasLatestMaps = false;
+            this.codeManager = null;
         }
 
         public ISession BeginSession() {

@@ -3,6 +3,7 @@
     using System.CodeDom;
     using System.CodeDom.Compiler;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
@@ -16,56 +17,77 @@
 
     // TODO: Use Refly instead of CodeDom - http://www.codeproject.com/Articles/6283/Refly-makes-the-CodeDom-er-life-easier
     internal class CodeGenerator : ICodeGenerator {
-        private CodeCompileUnit compileUnit;
+        private readonly CodeGeneratorConfig generatorConfig;
 
-        private CodeNamespace codeNamespace;
+        public long ElapsedMilliseconds { get; private set; }
 
-        private HashSet<string> referencedAssemblies;
+        public CodeGenerator(CodeGeneratorConfig codeGeneratorConfiguration) {
+            this.generatorConfig = codeGeneratorConfiguration;
+        }
 
-        public void Generate(IConfiguration configuration, CodeGeneratorConfig generatorConfig) {
-            this.Init(configuration, generatorConfig);
+        // TODO: sense if we can just reuse last times ?
+        public IGeneratedCodeManager Generate(IConfiguration configuration) {
+            var timer = new Stopwatch();
+            timer.Start();
+            var maps = configuration.Maps.ToArray();
 
-            Parallel.ForEach(configuration.Maps, i => this.Generate(configuration, generatorConfig, i));
+            // generate proxies
+            var parallelMaps = maps.AsParallel();
+            var extendedTypes = parallelMaps.Select(m => this.CreateFkClass(m, configuration.GetMap));
+            var trackingTypes = parallelMaps.Select(this.CreateTrackingClass);
 
-            // generate the code
-            CodeDomProvider provider = CodeDomProvider.CreateProvider("CSharp");
+            // generate query layer
+            var dapperWrapper = this.GenerateDapperWrapper(maps, configuration.GetMap);
 
-            // generate the GeneratedDapperWrapper
-            this.GenerateDapperWrapper(configuration, generatorConfig, provider);
+            // extract metadata from map types
+            var mappedTypes = maps.Select(m => m.Type).ToArray();
+            var mapNamespaces = mappedTypes.Select(type => type.Namespace).Distinct().Union(new[] { "System", "System.Collections.Generic", "System.Data", "System.Diagnostics", "Dapper", "TopHat.Engine" });
 
-            var options = new CodeGeneratorOptions { BracingStyle = "C" };
-            var sourceCodeName = "source_" + Guid.NewGuid().ToString("N") + ".cs";
+            // construct the reference space
+            var codeReferences = mappedTypes.Select(type => type.Assembly)
+                .Distinct()
+                .Select(a => a.GetName().Name + ".dll")
+                .Union(new[] { "System.dll", "System.Core.dll", "System.Data.dll", "TopHat.dll", "Dapper.dll" });
 
-            // TODO: Figure out why I can't write to a memory stream and then read that
-            using (var sourceWriter = new StreamWriter(sourceCodeName)) {
-                provider.GenerateCodeFromCompileUnit(this.compileUnit, sourceWriter, options);
-            }
+            // construct the namespace
+            var codeNamespace = new CodeNamespace(this.generatorConfig.Namespace);
+            codeNamespace.Imports.AddRange(mapNamespaces.Select(ns => new CodeNamespaceImport(ns)).ToArray());
+            codeNamespace.Types.AddRange(extendedTypes.ToArray());
+            codeNamespace.Types.AddRange(trackingTypes.ToArray());
+            codeNamespace.Types.Add(dapperWrapper);
 
-            var source = new StringBuilder();
-            using (var streamReader = new StreamReader(sourceCodeName)) {
-                string line;
-                while ((line = streamReader.ReadLine()) != null) {
-                    line = line.Replace("DelegateQuery(", "DelegateQuery<T>(");
-                    source.AppendLine(line);
+            // construct the compile unit
+            var compileUnit = new CodeCompileUnit();
+            compileUnit.Namespaces.Add(codeNamespace);
+
+            // ok, so far so abstract
+            var provider = CodeDomProvider.CreateProvider("CSharp");
+
+            using (var sw = new StringWriter()) {
+                // write the code into the string
+                provider.GenerateCodeFromCompileUnit(compileUnit, sw, new CodeGeneratorOptions { BracingStyle = "C" });
+
+                // do some hinky string replace because the DOM doesnt have the right method
+                var source = sw.ToString().Replace("DelegateQuery(", "DelegateQuery<T>(");
+
+                // generate the assembly
+                var results = provider.CompileAssemblyFromSource(new CompilerParameters(codeReferences.ToArray(), this.generatorConfig.Namespace + ".dll", true), source);
+
+                timer.Stop();
+                this.ElapsedMilliseconds = timer.ElapsedMilliseconds;
+                
+                // write the source
+                if (this.generatorConfig.GenerateSource) {
+                    var annotatedsource = string.Format("// Generated on {0} in {1}ms \n", DateTime.Now, this.ElapsedMilliseconds) + source;
+                    File.WriteAllText(this.generatorConfig.Namespace + ".cs", annotatedsource);
                 }
-            }
 
-            File.Delete(sourceCodeName);
-            if (generatorConfig.GenerateSource) {
-                using (var streamWriter = new StreamWriter(generatorConfig.SourceLocation)) {
-                    streamWriter.Write(source);
-                }
-            }
-
-            var sources = new List<string> { source.ToString() };
-
-            if (generatorConfig.GenerateAssembly) {
-                var parameters = new CompilerParameters(this.referencedAssemblies.ToArray(), generatorConfig.Namespace + ".dll", true);
-                var results = provider.CompileAssemblyFromSource(parameters, sources.ToArray());
+                // return the wrapper
+                return new GeneratedCodeManager(this.generatorConfig, results.CompiledAssembly);
             }
         }
 
-        private void GenerateDapperWrapper(IConfiguration configuration, CodeGeneratorConfig generatorConfig, CodeDomProvider provider) {
+        private CodeTypeDeclaration GenerateDapperWrapper(IEnumerable<IMap> maps, Func<Type, IMap> getMap) {
             // can't create a static class using CodeDom so create a Public Sealed class with private constructor
             var dapperWrapperClass = new CodeTypeDeclaration("DapperWrapper");
             dapperWrapperClass.IsClass = true;
@@ -80,11 +102,11 @@
             dapperWrapperClass.Members.Add(staticConstructor);
 
             // generate the delegate function
-            // public delegate IEnumerable<T> DelegateQuery<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn);
+            // public delegate IEnumerable<T> DelegateQuery<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
             var del = new CodeTypeDelegate("DelegateQuery");
             del.TypeParameters.Add("T");
             del.ReturnType = new CodeTypeReference("IEnumerable<T>");
-            del.Parameters.Add(new CodeParameterDeclarationExpression("SqlWriterResult", "result"));
+            del.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             del.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
             del.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
             dapperWrapperClass.Members.Add(del);
@@ -108,7 +130,7 @@
             query.TypeParameters.Add("T");
             query.ReturnType = new CodeTypeReference("IEnumerable<T>");
             dapperWrapperClass.Members.Add(query);
-            query.Parameters.Add(new CodeParameterDeclarationExpression("SqlWriterResult", "result"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
 
@@ -134,7 +156,7 @@
                         new CodeVariableReferenceExpression("conn"))));
 
             // now foreach type we wish to find all possible fetch trees (up to a certain depth) and generate mappers and query functions
-            foreach (var map in configuration.Maps) {
+            foreach (var map in maps) {
                 // TODO: Support fetching collections
                 var rootNode = new FetchNode();
                 var signatures = this.TraverseAndGenerateMappersAndQueries(
@@ -143,11 +165,10 @@
                     rootNode,
                     map.Type,
                     map.Type,
-                    configuration,
+                    getMap,
                     0,
-                    generatorConfig.MapperGenerationMaxRecursion,
-                    generatorConfig,
-                    provider);
+                    this.generatorConfig.MapperGenerationMaxRecursion,
+                    this.generatorConfig);
 
                 // now add in the dictionary statement
                 var delegateField = new CodeMemberField(typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate)), map.Type.Name + "Delegates");
@@ -176,7 +197,7 @@
                         new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), map.Type.Name + "Delegates")));
             }
 
-            this.codeNamespace.Types.Add(dapperWrapperClass);
+            return dapperWrapperClass;
         }
 
         private IEnumerable<Tuple<string, string>> TraverseAndGenerateMappersAndQueries(
@@ -185,14 +206,13 @@
             FetchNode currentPath,
             Type rootType,
             Type currentType,
-            IConfiguration config,
+            Func<Type, IMap> getMap,
             int recursionLevel,
             int maxRecursion,
             CodeGeneratorConfig codeConfig,
-            CodeDomProvider provider,
             string signaturePrefix = "",
             string signatureSuffix = "") {
-            var map = config.GetMap(currentType);
+            var map = getMap(currentType);
             var manyToOneColumns = map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne);
             var signatures = new List<Tuple<string, string>>();
             foreach (var subset in manyToOneColumns.Subsets().Where(s => s.Any())) {
@@ -208,13 +228,9 @@
                 var dictionaryInitialiser = this.GenerateMappersAndQueries(
                     dapperWrapperClass,
                     rootNode,
-                    currentPath,
                     rootType,
                     signaturePrefix + thisSignature + signatureSuffix,
-                    config,
-                    orderedSubset,
-                    codeConfig,
-                    provider);
+                    codeConfig);
                 signatures.AddRange(dictionaryInitialiser);
 
                 // we have to limit recursion level otherwise possible to get stuck in infinite loop
@@ -229,11 +245,10 @@
                             currentPath.Children.First(c => c.Key == column.Key).Value,
                             rootType,
                             column.Value.Type,
-                            config,
+                            getMap,
                             recursionLevel + 1,
                             maxRecursion,
                             codeConfig,
-                            provider,
                             signaturePrefix + childSignaturePrefix,
                             childSignatureSuffix + signatureSuffix);
                         currentSplitPoint += column.Value.FetchId.ToString().Length + 2;
@@ -250,19 +265,15 @@
         private IEnumerable<Tuple<string, string>> GenerateMappersAndQueries(
             CodeTypeDeclaration dapperWrapperClass,
             FetchNode rootNode,
-            FetchNode path,
             Type rootType,
             string signature,
-            IConfiguration config,
-            IEnumerable<KeyValuePair<string, IColumn>> columns,
-            CodeGeneratorConfig codeConfig,
-            CodeDomProvider provider) {
+            CodeGeneratorConfig codeConfig) {
             // generate the fk and tracked mappers
             var foreignKeyMapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature, codeConfig.ForeignKeyAccessClassSuffix);
             var trackingMapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature, codeConfig.TrackedClassSuffix);
 
             // Generate the query method
-            var query = this.GenerateQueryMethod(dapperWrapperClass, rootType, signature, provider, trackingMapper, foreignKeyMapper, codeConfig);
+            var query = this.GenerateQueryMethod(dapperWrapperClass, rootType, signature, trackingMapper, foreignKeyMapper, codeConfig);
 
             return new List<Tuple<string, string>> { new Tuple<string, string>(signature, query.Name) };
         }
@@ -272,7 +283,6 @@
             CodeTypeDeclaration dapperWrapperClass,
             Type rootType,
             string signature,
-            CodeDomProvider provider,
             CodeMemberMethod trackingMapper,
             CodeMemberMethod foreignKeyMapper,
             CodeGeneratorConfig codeConfig) {
@@ -281,7 +291,7 @@
             query.Name = rootType.Name + "_" + signature;
             query.ReturnType = new CodeTypeReference("IEnumerable<" + rootType.Name + ">");
             query.Attributes = MemberAttributes.Static;
-            query.Parameters.Add(new CodeParameterDeclarationExpression("SqlWriterResult", "result"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<" + rootType.Name + ">", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
 
@@ -372,26 +382,12 @@
             }
         }
 
-        private void Generate(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map) {
-            // add this assembly
-            this.referencedAssemblies.Add(map.Type.Assembly.GetName().Name + ".dll");
-
-            // add the namespace of this type as a using statement
-            this.codeNamespace.Imports.Add(new CodeNamespaceImport(map.Type.Namespace));
-
-            // create the FK access class
-            this.CreateFKClass(configuration, generatorConfig, map);
-
-            // create the tracking class
-            this.CreateTrackingClass(configuration, generatorConfig, map);
-        }
-
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private void CreateTrackingClass(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map) {
-            var trackingClass = new CodeTypeDeclaration(map.Type.Name + generatorConfig.TrackedClassSuffix);
+        private CodeTypeDeclaration CreateTrackingClass(IMap map) {
+            var trackingClass = new CodeTypeDeclaration(map.Type.Name + this.generatorConfig.TrackedClassSuffix);
             trackingClass.IsClass = true;
             trackingClass.TypeAttributes = TypeAttributes.Public;
-            trackingClass.BaseTypes.Add(map.Type.Name + generatorConfig.ForeignKeyAccessClassSuffix);
+            trackingClass.BaseTypes.Add(map.Type.Name + this.generatorConfig.ForeignKeyAccessClassSuffix);
             trackingClass.BaseTypes.Add(typeof(ITrackedEntity));
 
             // add in change tracking properties
@@ -526,13 +522,13 @@
 
             trackingClass.Members.Add(constructor);
 
-            this.codeNamespace.Types.Add(trackingClass);
+            return trackingClass;
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private void CreateFKClass(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map) {
+        private CodeTypeDeclaration CreateFkClass(IMap map, Func<Type, IMap> getMap) {
             // generate the foreign key access class based on the original class
-            var foreignKeyClass = new CodeTypeDeclaration(map.Type.Name + generatorConfig.ForeignKeyAccessClassSuffix);
+            var foreignKeyClass = new CodeTypeDeclaration(map.Type.Name + this.generatorConfig.ForeignKeyAccessClassSuffix);
             foreignKeyClass.IsClass = true;
             foreignKeyClass.TypeAttributes = TypeAttributes.Public;
             foreignKeyClass.BaseTypes.Add(map.Type);
@@ -547,7 +543,7 @@
                 var foreignKeyBackingProperty = this.GenerateGetSetProperty(foreignKeyClass, column.Value.DbName, backingType, MemberAttributes.Public | MemberAttributes.Final);
 
                 // create a backing field for storing the related entity
-                var backingField = new CodeMemberField(column.Value.Type, column.Value.Name + generatorConfig.ForeignKeyAccessEntityFieldSuffix);
+                var backingField = new CodeMemberField(column.Value.Type, column.Value.Name + this.generatorConfig.ForeignKeyAccessEntityFieldSuffix);
                 foreignKeyClass.Members.Add(backingField);
 
                 // override the property getter and setter to use the backingfield
@@ -557,7 +553,7 @@
                 property.Attributes = MemberAttributes.Public | MemberAttributes.Override;
                 property.GetStatements.Add(
                     new CodeConditionStatement(
-                        //// if backingField != null or Fk backing field is null return
+                    //// if backingField != null or Fk backing field is null return
                         new CodeBinaryOperatorExpression(
                             CodeHelpers.ThisFieldIsNotNull(backingField.Name),
                             CodeBinaryOperatorType.BooleanOr,
@@ -572,7 +568,7 @@
                                                 new CodeAssignStatement(
                                                     new CodeFieldReferenceExpression(
                                                     new CodeVariableReferenceExpression("val"),
-                                                    configuration.GetMap(column.Value.Type).PrimaryKey.Name),
+                                                    getMap(column.Value.Type).PrimaryKey.Name),
                                                     new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(foreignKeyBackingProperty.Name), "Value")),
                                                 new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")),
                                                 new CodeMethodReturnStatement(new CodeVariableReferenceExpression("val"))
@@ -581,7 +577,7 @@
                 foreignKeyClass.Members.Add(property);
             }
 
-            this.codeNamespace.Types.Add(foreignKeyClass);
+            return foreignKeyClass;
         }
 
         private CodeMemberProperty GenerateGetSetProperty(CodeTypeDeclaration owningClass, string name, Type type, MemberAttributes attributes, bool useBaseProperty = false) {
@@ -609,28 +605,6 @@
             owningClass.Members.Add(prop);
 
             return prop;
-        }
-
-        private void Init(IConfiguration configuration, CodeGeneratorConfig generatorConfig) {
-            this.referencedAssemblies = new HashSet<string>();
-            this.compileUnit = new CodeCompileUnit();
-            this.codeNamespace = new CodeNamespace(generatorConfig.Namespace);
-            this.compileUnit.Namespaces.Add(this.codeNamespace);
-
-            // add standard usings
-            this.codeNamespace.Imports.Add(new CodeNamespaceImport("System"));
-            this.codeNamespace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
-            this.codeNamespace.Imports.Add(new CodeNamespaceImport("System.Data"));
-            this.codeNamespace.Imports.Add(new CodeNamespaceImport("System.Diagnostics"));
-            this.codeNamespace.Imports.Add(new CodeNamespaceImport("Dapper"));
-            this.codeNamespace.Imports.Add(new CodeNamespaceImport("TopHat.Engine"));
-
-            // add standard dll references
-            this.referencedAssemblies.Add("System.dll");
-            this.referencedAssemblies.Add("System.Core.dll");
-            this.referencedAssemblies.Add("System.Data.dll");
-            this.referencedAssemblies.Add("TopHat.dll");
-            this.referencedAssemblies.Add("Dapper.dll");
         }
     }
 }

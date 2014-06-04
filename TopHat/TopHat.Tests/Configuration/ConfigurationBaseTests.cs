@@ -204,15 +204,16 @@
             return mock;
         }
 
-        private static Mock<IGeneratedCodeManager> SetupCodeManager() {
-            var mock = new Mock<IGeneratedCodeManager>(MockBehavior.Strict);
-            mock.Setup(c => c.LoadCode());
+        private static Mock<ICodeGenerator> SetupCodeGenerator() {
+            var mock = new Mock<ICodeGenerator>(MockBehavior.Strict);
+            var mock2 = new Mock<IGeneratedCodeManager>(MockBehavior.Strict);
+            mock.Setup(m => m.Generate(It.IsAny<IConfiguration>())).Returns(mock2.Object);
             return mock;
         }
 
         private class CustomConfiguration : ConfigurationBase {
             public CustomConfiguration(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory)
-                : base(engine, connectionString, mapper, sessionFactory, SetupCodeManager().Object) { }
+                : base(engine, connectionString, mapper, sessionFactory, SetupCodeGenerator().Object) { }
             
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IEngine engine, IMapper mapper, ISessionFactory sessionFactory)
@@ -220,7 +221,7 @@
 
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IMapper mapper)
-                : base(MakeMockEngine().Object, DummyConnectionString, mapper, MakeMockSf().Object, SetupCodeManager().Object) { }
+                : base(MakeMockEngine().Object, DummyConnectionString, mapper, MakeMockSf().Object, SetupCodeGenerator().Object) { }
         }
 
         private class CustomConfigurationWithIndividualAdds : CustomConfiguration {

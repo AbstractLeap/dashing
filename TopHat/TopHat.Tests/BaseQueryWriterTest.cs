@@ -26,7 +26,7 @@
             this.Connection.Setup(c => c.State).Returns(ConnectionState.Open);
             this.Transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
             this.CodeManager = new Mock<IGeneratedCodeManager>();
-            this.shimsContext = ShimsContext.Create();
+            ////this.shimsContext = ShimsContext.Create();
             this.config = new Mock<IConfiguration>();
         }
 
@@ -37,7 +37,7 @@
         }
 
         public void Dispose() {
-            this.shimsContext.Dispose();
+            ////this.shimsContext.Dispose();
         }
     }
 }
