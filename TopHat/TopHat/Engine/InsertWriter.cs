@@ -45,11 +45,18 @@ namespace TopHat.Engine
                             parameters.Add(paramName, map.GetColumnValue(entity, column.Value));
                         }
                         else {
-                            //parameters.Add(paramName, this.Configuration.GetMap(column.Value.Type).)
+                            parameters.Add(paramName, this.Configuration.GetMap(column.Value.Type).GetPrimaryKeyValue(map.GetColumnValue(entity, column.Value)));
                         }
+
+                        sql.Append(",");
                     }
                 }
+
+                sql.Remove(sql.Length - 1, 1);
+                sql.Append("),");
             }
+
+            sql.Remove(sql.Length - 1, 1);
         }
 
         private void GenerateColumnSpec<T>(StringBuilder sql, IMap<T> map) {

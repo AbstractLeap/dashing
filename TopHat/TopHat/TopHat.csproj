@@ -91,6 +91,7 @@
     <Compile Include="Engine\IDapperWrapper.cs" />
     <Compile Include="Engine\IEngine.cs" />
     <Compile Include="Engine\IEntitySqlWriter.cs" />
+    <Compile Include="Engine\InsertWriter.cs" />
     <Compile Include="Engine\ISelectWriter.cs" />
     <Compile Include="Engine\ISqlDialect.cs" />
     <Compile Include="Engine\IWhereClauseWriter.cs" />

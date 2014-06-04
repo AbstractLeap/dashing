@@ -1,7 +1,9 @@
 namespace TopHat.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
 
     /// <summary>
     ///     The map.
@@ -47,17 +49,33 @@ namespace TopHat.Configuration {
         /// </summary>
         public IDictionary<string, IColumn> Columns { get; set; }
 
+        private MethodInfo nonGenericPrimaryKeyGetter;
+
+        private object nonGenericPrimaryKeyGetterLock = new object();
+
+        public object GetPrimaryKeyValue(object entity) {
+            if (this.nonGenericPrimaryKeyGetter == null) {
+                lock (this.nonGenericPrimaryKeyGetterLock) {
+                    if (this.nonGenericPrimaryKeyGetter == null) {
+                        this.nonGenericPrimaryKeyGetter = typeof(Map<>).MakeGenericType(this.Type).GetMethods().First(m => m.Name == "GetPrimaryKeyValue" && m.GetParameters().Any(p => p.ParameterType == this.Type));
+                    }
+                }
+            }
+
+            return this.nonGenericPrimaryKeyGetter.Invoke(this, new[] { entity });
+        }
+
         public object GetPrimaryKeyValue(T entity) {
             if (this.primaryKeyGetter == null) {
                 lock (this.primaryKeyGetSetLock) {
                     if (this.primaryKeyGetter == null) {
-                        if (this.PrimaryKey == null)
-                        {
+                        if (this.PrimaryKey == null) {
                             throw new Exception("Primary Key is null on the Map");
                         }
 
                         var param = Expression.Parameter(typeof(T));
-                        this.primaryKeyGetter = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, this.PrimaryKey.Name), typeof(object)), param).Compile();
+                        this.primaryKeyGetter =
+                            Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, this.PrimaryKey.Name), typeof(object)), param).Compile();
                     }
                 }
             }
@@ -76,8 +94,9 @@ namespace TopHat.Configuration {
                         var param = Expression.Parameter(typeof(T));
                         var valueParam = Expression.Parameter(typeof(object));
                         this.primaryKeySetter =
-                            Expression.Lambda<Action<T, object>>(Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), Expression.Convert(valueParam, typeof(int))), new[] { param, valueParam })
-                                      .Compile();
+                            Expression.Lambda<Action<T, object>>(
+                                Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), Expression.Convert(valueParam, typeof(int))),
+                                new[] { param, valueParam }).Compile();
                     }
                 }
             }
@@ -85,7 +104,7 @@ namespace TopHat.Configuration {
             this.primaryKeySetter(entity, value);
         }
 
-        private object propertyGettersLock = new object();
+        private readonly object propertyGettersLock = new object();
 
         private IDictionary<IColumn, Func<T, object>> propertyGetters;
 

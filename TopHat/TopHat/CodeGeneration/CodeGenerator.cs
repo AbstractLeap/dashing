@@ -513,6 +513,9 @@
                                                 new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))),
                                                 new CodeAssignStatement(
                                                     new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)),
+                                                    CodeHelpers.BaseProperty(prop.Name)),
+                                                new CodeAssignStatement(
+                                                    new CodeIndexerExpression(CodeHelpers.ThisProperty("NewValues"), new CodePrimitiveExpression(prop.Name)),
                                                     new CodePropertySetValueReferenceExpression())
                                             },
                         new CodeStatement[] {

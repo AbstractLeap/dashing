@@ -65,5 +65,14 @@
             var post = new Post { PostId = 123 };
             Assert.Throws<Exception>(() => map.SetPrimaryKeyValue(post, 123));
         }
+
+        [Fact]
+        public void NonGenericPrimaryKeyGetterWorks() {
+            var map = new Map<Post>();
+            map.Columns.Add("PostId", new Column<int> { IsPrimaryKey = true, Map = map, Name = "PostId" });
+            map.PrimaryKey = map.Columns["PostId"];
+            var post = new Post { PostId = 123 };
+            Assert.Equal(post.PostId, map.GetPrimaryKeyValue((object)post));
+        }
     }
 }
