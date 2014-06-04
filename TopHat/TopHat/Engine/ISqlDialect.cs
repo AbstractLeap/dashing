@@ -9,5 +9,7 @@ namespace TopHat.Engine {
         void AppendQuotedName(StringBuilder sql, string name);
 
         void AppendColumnSpecification(StringBuilder sql, IColumn column);
+
+        void AppendEscaped(StringBuilder sql, string s);
     }
 }

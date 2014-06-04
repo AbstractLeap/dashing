@@ -18,8 +18,8 @@
         /// <returns>
         ///     The <see cref="DefaultConfiguration" />.
         /// </returns>
-        public static DefaultConfiguration Configure(IEngine engine, string connectionString) {
-            return new DefaultConfiguration(engine, connectionString);
+        public static MutableConfiguration Configure(IEngine engine, string connectionString) {
+            return new MutableConfiguration(engine, connectionString);
         }
     }
 }
