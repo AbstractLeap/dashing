@@ -2,6 +2,9 @@
     using System;
     using System.Collections.Generic;
 
+    using TopHat.CodeGeneration;
+    using TopHat.Engine;
+
     /// <summary>
     ///     The Configuration interface.
     /// </summary>
@@ -32,5 +35,17 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         ISession BeginSession();
+
+        /// <summary>
+        /// Returns the code manager for this configuration
+        /// </summary>
+        /// <returns></returns>
+        IGeneratedCodeManager GetCodeManager();
+
+        /// <summary>
+        /// Gets the engine for the current configuration
+        /// </summary>
+        /// <returns></returns>
+        IEngine GetEngine();
     }
 }

@@ -9,6 +9,11 @@
         Type Type { get; }
 
         /// <summary>
+        /// The map that this column belongs to
+        /// </summary>
+        IMap Map { get; set; }
+
+        /// <summary>
         ///     Gets or sets the name.
         /// </summary>
         string Name { get; set; }
@@ -62,6 +67,12 @@
         ///     Indicates whether the column will be excluded from select queries unless specifically requested
         /// </summary>
         bool IsExcludedByDefault { get; set; }
+
+        /// <summary>
+        /// Use for indexing in to Query multimapping queries
+        /// </summary>
+        /// <remarks>Must be consistent across app restarts as CodeGeneration is only updated if the assemblies change</remarks>
+        int FetchId { get; set; }
 
         /// <summary>
         ///     Gets or sets the relationship.

@@ -8,7 +8,7 @@ namespace TopHat {
     /// </summary>
     /// <typeparam name="T">
     /// </typeparam>
-    public abstract class QueryBase<T> {
+    public abstract class QueryBase<T> : IQuery<T> {
         /// <summary>
         ///     Initializes a new instance of the <see cref="QueryBase{T}" /> class.
         /// </summary>
@@ -19,7 +19,7 @@ namespace TopHat {
         /// <summary>
         ///     Gets or sets the where clauses.
         /// </summary>
-        public List<Expression<Func<T, bool>>> WhereClauses { get; set; }
+        public IList<Expression<Func<T, bool>>> WhereClauses { get; set; }
 
         /// <summary>
         ///     The where.

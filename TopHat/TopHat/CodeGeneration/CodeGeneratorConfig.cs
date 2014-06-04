@@ -5,6 +5,8 @@
             this.ForeignKeyAccessClassSuffix = "_FK";
             this.ForeignKeyAccessEntityFieldSuffix = "_FKEntity";
             this.TrackedClassSuffix = "_Tracked";
+            this.MapperGenerationMaxRecursion = 8;
+            this.SourceLocation = "generated.cs";
         }
 
         /// <summary>
@@ -28,6 +30,10 @@
 
         public bool GenerateSource { get; set; }
 
+        public string SourceLocation { get; set; }
+
         public bool GenerateAssembly { get; set; }
+
+        public int MapperGenerationMaxRecursion { get; set; }
     }
 }

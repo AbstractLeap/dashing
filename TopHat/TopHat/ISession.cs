@@ -30,7 +30,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        SelectQuery<T> Query<T>();
+        ISelectQuery<T> Query<T>();
 
         /// <summary>
         ///     The insert.

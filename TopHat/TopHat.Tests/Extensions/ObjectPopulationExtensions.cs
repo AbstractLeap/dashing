@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using TopHat.Configuration;
+
     public static class ObjectPopulationExtensions {
         public static T Populate<T>(this T obj, params object[] defaults) {
             var defaultsDict = defaults.ToDictionary(o => o.GetType(), o => o);
@@ -46,6 +48,9 @@
                         var t = typeof(Dictionary<,>).MakeGenericType(i.GenericTypeArguments[0], i.GenericTypeArguments[1]);
                         prop.SetValue(obj, Activator.CreateInstance(t));
                     }
+                }
+                else if (prop.PropertyType == typeof(IMap)) {
+                    prop.SetValue(obj, new Map<string>());
                 }
                 else {
                     throw new Exception(string.Format("Unexpected type {0} when trying to populate {1}.{2}", prop.PropertyType.Name, typeof(T).Name, prop.Name));

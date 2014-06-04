@@ -17,9 +17,10 @@
             var codeGenerator = new CodeGenerator();
             var codeConfig = new CodeGeneratorConfig();
             codeConfig.GenerateAssembly = true;
+            codeConfig.GenerateSource = true;
             codeGenerator.Generate(config, codeConfig);
-            this.CodeManager = new GeneratedCodeManager();
-            this.CodeManager.LoadCode(codeConfig);
+            this.CodeManager = new GeneratedCodeManager(codeConfig);
+            this.CodeManager.LoadCode();
         }
 
         private class CustomConfig : DefaultConfiguration {

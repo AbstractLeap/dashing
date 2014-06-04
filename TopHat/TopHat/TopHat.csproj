@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Dapper">
-      <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
+      <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="LinFu.Core">
       <HintPath>..\packages\LinFu.Core.2.3.0.41559\lib\net35\LinFu.Core.dll</HintPath>
@@ -80,22 +80,35 @@
     <Compile Include="DeleteEntityQuery.cs" />
     <Compile Include="DeleteQuery.cs" />
     <Compile Include="Engine\AnsiSqlDialect.cs" />
+    <Compile Include="Engine\BaseExpressionVisitor.cs" />
+    <Compile Include="Engine\BaseWriter.cs" />
     <Compile Include="Engine\DapperWrapper.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
     <Compile Include="Engine\EngineBase.cs" />
+    <Compile Include="Engine\FetchNode.cs" />
     <Compile Include="Engine\IDapperWrapper.cs" />
     <Compile Include="Engine\IEngine.cs" />
+    <Compile Include="Engine\ISelectWriter.cs" />
     <Compile Include="Engine\ISqlDialect.cs" />
+    <Compile Include="Engine\IWhereClauseWriter.cs" />
     <Compile Include="Engine\MySqlDialect.cs" />
+    <Compile Include="Engine\SelectWriter.cs" />
     <Compile Include="Engine\SqlDialectBase.cs" />
     <Compile Include="Engine\SqlServerDialect.cs" />
     <Compile Include="Engine\SqlServerEngine.cs" />
+    <Compile Include="Engine\WhereClauseExpressionVisitor.cs" />
+    <Compile Include="Engine\WhereClauseWriter.cs" />
+    <Compile Include="Engine\SqlWriterResult.cs" />
     <Compile Include="EntityQueryBase.cs" />
-    <Compile Include="ExecutableSelectQuery.cs" />
+    <Compile Include="Extensions\DapperExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="FetchMany.cs" />
+    <Compile Include="IFetchMany.cs" />
     <Compile Include="InsertEntityQuery.cs" />
+    <Compile Include="IQuery.cs" />
+    <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="OrderClause.cs" />
     <Compile Include="QueryBase.cs" />

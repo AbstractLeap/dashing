@@ -3,16 +3,28 @@ namespace TopHat.Engine {
     using System.Collections.Generic;
     using System.Data;
 
+    using Dapper;
+
     using TopHat.Configuration;
 
     /// <summary>
     ///     The engine base.
     /// </summary>
     public abstract class EngineBase : IEngine {
+        public IConfiguration Configuration { get; set; }
+
+        protected ISelectWriter SelectWriter { get; set; }
+
         /// <summary>
         ///     Gets or sets the maps.
         /// </summary>
         protected IDictionary<Type, IMap> Maps { get; set; }
+
+        protected ISqlDialect Dialect { get; set; }
+
+        public EngineBase(ISqlDialect dialect) {
+            this.Dialect = dialect;
+        }
 
         /// <summary>
         ///     The open.
@@ -37,6 +49,7 @@ namespace TopHat.Engine {
         /// </param>
         public void UseMaps(IDictionary<Type, IMap> maps) {
             this.Maps = maps;
+            this.SelectWriter = new SelectWriter(this.Dialect, this.Maps);
         }
 
         /// <summary>
@@ -64,7 +77,14 @@ namespace TopHat.Engine {
         /// <returns>
         ///     The <see cref="IEnumerable" />.
         /// </returns>
-        public abstract IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query);
+        public virtual IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query) {
+            if (this.SelectWriter == null) {
+                throw new Exception("The SelectWriter has not been initialised");
+            }
+
+            var sqlQuery = this.SelectWriter.GenerateSql(query);
+            return this.Configuration.GetCodeManager().Query<T>(sqlQuery, query, connection);
+        }
 
         /// <summary>
         ///     The execute.

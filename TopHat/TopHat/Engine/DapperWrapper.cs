@@ -1,4 +1,5 @@
 namespace TopHat.Engine {
+    using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Threading.Tasks;
@@ -24,7 +25,8 @@ namespace TopHat.Engine {
         }
 
         public Task<IEnumerable<T>> QueryAsync<T>(string sql, object param = null, int? commandTimeout = null, CommandType? commandType = null) {
-            return this.connection.QueryAsync<T>(sql, param, this.transaction, commandTimeout, commandType);
+            throw new NotImplementedException();
+            ////return this.connection.QueryAsync<T>(sql, param, this.transaction, commandTimeout, commandType);
         }
     }
 }

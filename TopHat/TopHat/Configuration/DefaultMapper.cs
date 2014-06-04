@@ -55,8 +55,21 @@
         private void Build(Type entity, IMap map) {
             map.Table = this.convention.TableFor(entity);
             map.Schema = this.convention.SchemaFor(entity);
-            map.Columns = entity.GetProperties().Select(property => this.BuildColumn(entity, property)).ToDictionary(c => c.Name, c => c);
+            map.Columns = entity.GetProperties().Select(property => this.BuildColumn(map, entity, property)).ToDictionary(c => c.Name, c => c);
             this.ResolvePrimaryKey(entity, map);
+            this.AssignFetchIds(map);
+        }
+
+        /// <summary>
+        /// Assigns fetch ids to the non local columns using a consistent strategy (namely column name)
+        /// </summary>
+        /// <param name="map"></param>
+        private void AssignFetchIds(IMap map) {
+            int i = 0;
+            var columns = map.Columns.Where(c => c.Value.Relationship != RelationshipType.None).OrderBy(c => c.Key);
+            foreach (var column in columns) {
+                column.Value.FetchId = ++i;
+            }
         }
 
         /// <summary>
@@ -65,6 +78,7 @@
         /// <param name="entity">
         ///     The entity.
         /// </param>
+        /// <param name="map"></param>
         /// <param name="property">
         ///     The property.
         /// </param>
@@ -72,9 +86,10 @@
         /// <returns>
         ///     The <see cref="Column" />.
         /// </returns>
-        private IColumn BuildColumn(Type entity, PropertyInfo property) {
+        private IColumn BuildColumn(IMap parentMap, Type entity, PropertyInfo property) {
             // TODO: this can be cached
             var column = (IColumn)Activator.CreateInstance(typeof(Column<>).MakeGenericType(property.PropertyType));
+            column.Map = parentMap;
             column.Name = property.Name;
             column.IsIgnored = !(property.CanRead && property.CanWrite);
 

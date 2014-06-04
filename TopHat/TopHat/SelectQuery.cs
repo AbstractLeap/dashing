@@ -1,19 +1,31 @@
 namespace TopHat {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Data;
+    using System.Linq;
     using System.Linq.Expressions;
+
+    using TopHat.Engine;
 
     /// <summary>
     ///     The select query.
     /// </summary>
     /// <typeparam name="T">
     /// </typeparam>
-    public class SelectQuery<T> : QueryBase<T> {
+    public class SelectQuery<T> : QueryBase<T>, ISelectQuery<T> {
+        private readonly IEngine engine;
+
+        private readonly IDbConnection connection;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="SelectQuery{T}" /> class.
         /// </summary>
-        public SelectQuery() {
+        public SelectQuery(IEngine engine, IDbConnection connection) {
+            this.engine = engine;
+
+            this.connection = connection;
             this.Includes = new List<Expression>();
             this.Excludes = new List<Expression>();
             this.Fetches = new List<Expression>();
@@ -28,17 +40,19 @@ namespace TopHat {
         /// <summary>
         ///     Gets or sets the includes.
         /// </summary>
-        public List<Expression> Includes { get; set; }
+        public IList<Expression> Includes { get; set; }
 
         /// <summary>
         ///     Gets or sets the excludes.
         /// </summary>
-        public List<Expression> Excludes { get; set; }
+        public IList<Expression> Excludes { get; set; }
 
         /// <summary>
         ///     Gets or sets the fetches.
         /// </summary>
-        public List<Expression> Fetches { get; set; }
+        public IList<Expression> Fetches { get; set; }
+
+        public Tuple<Expression, Expression> CollectionFetches { get; set; }
 
         /// <summary>
         ///     Gets or sets the order clauses.
@@ -70,21 +84,8 @@ namespace TopHat {
         /// </summary>
         public bool IsTracked { get; set; }
 
-        /// <summary>
-        ///     The where.
-        /// </summary>
-        /// <param name="predicate">
-        ///     The predicate.
-        /// </param>
-        /// <remarks>
-        ///     We override the base here to keep the upgraded interface offered by SelectQuery`T
-        /// </remarks>
-        /// <returns>
-        ///     The <see cref="SelectQuery" />.
-        /// </returns>
-        public new SelectQuery<T> Where(Expression<Func<T, bool>> predicate) {
-            this.WhereClauses.Add(predicate);
-            return this;
+        public bool HasFetches() {
+            return this.Fetches.Any() || this.CollectionFetches != null;
         }
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> Select(Expression<Func<T, dynamic>> projection) {
+        public ISelectQuery<T> Select(Expression<Func<T, dynamic>> projection) {
             this.Projection = projection;
             return this;
         }
@@ -107,7 +108,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> IncludeAll() {
+        public ISelectQuery<T> IncludeAll() {
             this.FetchAllProperties = true;
             return this;
         }
@@ -123,7 +124,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> Include<TResult>(Expression<Func<T, TResult>> includeExpression) {
+        public ISelectQuery<T> Include<TResult>(Expression<Func<T, TResult>> includeExpression) {
             this.Includes.Add(includeExpression);
             return this;
         }
@@ -139,7 +140,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> Exclude<TResult>(Expression<Func<T, TResult>> excludeExpression) {
+        public ISelectQuery<T> Exclude<TResult>(Expression<Func<T, TResult>> excludeExpression) {
             this.Excludes.Add(excludeExpression);
             return this;
         }
@@ -155,7 +156,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> Fetch<TFetch>(Expression<Func<T, TFetch>> selector) {
+        public ISelectQuery<T> Fetch<TFetch>(Expression<Func<T, TFetch>> selector) {
             this.Fetches.Add(selector);
             return this;
         }
@@ -166,7 +167,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> ForUpdate() {
+        public ISelectQuery<T> ForUpdate() {
             this.IsForUpdate = true;
             return this;
         }
@@ -177,7 +178,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> AsTracked() {
+        public ISelectQuery<T> AsTracked() {
             this.IsTracked = true;
             return this;
         }
@@ -191,7 +192,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> Skip(int skip) {
+        public ISelectQuery<T> Skip(int skip) {
             this.SkipN = skip;
             return this;
         }
@@ -205,7 +206,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> Take(int take) {
+        public ISelectQuery<T> Take(int take) {
             this.TakeN = take;
             return this;
         }
@@ -221,7 +222,7 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> OrderBy<TResult>(Expression<Func<T, TResult>> keySelector) {
+        public ISelectQuery<T> OrderBy<TResult>(Expression<Func<T, TResult>> keySelector) {
             this.OrderClauses.Enqueue(new OrderClause<T>(keySelector, ListSortDirection.Ascending));
             return this;
         }
@@ -237,9 +238,21 @@ namespace TopHat {
         /// <returns>
         ///     The <see cref="SelectQuery" />.
         /// </returns>
-        public SelectQuery<T> OrderByDescending<TResult>(Expression<Func<T, TResult>> keySelector) {
+        public ISelectQuery<T> OrderByDescending<TResult>(Expression<Func<T, TResult>> keySelector) {
             this.OrderClauses.Enqueue(new OrderClause<T>(keySelector, ListSortDirection.Descending));
             return this;
+        }
+
+        public IEnumerator<T> GetEnumerator() {
+            return this.engine.Query(this.connection, this).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return this.GetEnumerator();
+        }
+
+        public IFetchMany<T, TResult> FetchMany<TResult>(Expression<Func<T, IEnumerable<TResult>>> selector) {
+            return new FetchMany<T, TResult>(selector, this);
         }
     }
 }

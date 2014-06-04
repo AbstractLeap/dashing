@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Reflection;
 
+    using TopHat.CodeGeneration;
     using TopHat.Engine;
 
     /// <summary>
@@ -20,6 +21,8 @@
         ///     The _connection string.
         /// </summary>
         private readonly string connectionString;
+
+        private IGeneratedCodeManager codeManager;
 
         private IMapper mapper;
 
@@ -118,7 +121,7 @@
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory) {
+        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory, IGeneratedCodeManager codeManager) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -135,11 +138,20 @@
                 throw new ArgumentNullException("sessionFactory");
             }
 
+            if (codeManager == null) {
+                throw new ArgumentNullException("codeManager");
+            }
+
             this.engine = engine;
+            this.engine.Configuration = this;
             this.connectionString = connectionString;
             this.Mapper = mapper;
             this.SessionFactory = sessionFactory;
             this.MappedTypes = new Dictionary<Type, IMap>();
+            this.codeManager = codeManager;
+
+            // TODO: allow overriding of the CodeGeneratorConfig
+            this.codeManager.LoadCode();
         }
 
         /// <summary>
@@ -149,7 +161,15 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession() {
-            return this.SessionFactory.Create(this.Engine, this.Engine.Open(this.connectionString));
+            return this.SessionFactory.Create(this.Engine.Open(this.connectionString), this);
+        }
+
+        public IGeneratedCodeManager GetCodeManager() {
+            return this.codeManager;
+        }
+
+        public IEngine GetEngine() {
+            return this.engine;
         }
 
         /// <summary>
@@ -162,7 +182,7 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession(IDbConnection connection) {
-            return this.SessionFactory.Create(this.Engine, connection);
+            return this.SessionFactory.Create(connection, this);
         }
 
         /// <summary>
@@ -178,7 +198,7 @@
         ///     The <see cref="ISession" />.
         /// </returns>
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.SessionFactory.Create(this.Engine, connection, transaction);
+            return this.SessionFactory.Create(connection, transaction, this);
         }
 
         /// <summary>

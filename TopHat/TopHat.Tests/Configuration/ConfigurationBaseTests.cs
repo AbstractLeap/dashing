@@ -7,6 +7,7 @@
 
     using Moq;
 
+    using TopHat.CodeGeneration;
     using TopHat.Configuration;
     using TopHat.Engine;
     using TopHat.Tests.TestDomain;
@@ -61,9 +62,9 @@
             mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockSessionFactory = MakeMockSf();
-            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object)).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+            mockSessionFactory.Setup(m => m.Create(connection.Object, target)).Returns(session.Object).Verifiable();
 
             // act
             var actual = target.BeginSession();
@@ -84,9 +85,9 @@
             mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockSessionFactory = MakeMockSf();
-            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object)).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+            mockSessionFactory.Setup(m => m.Create(connection.Object, target)).Returns(session.Object).Verifiable();
 
             // act
             var actual = target.BeginSession(connection.Object);
@@ -107,9 +108,9 @@
             mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockSessionFactory = MakeMockSf();
-            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, transaction.Object)).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
+            mockSessionFactory.Setup(m => m.Create(connection.Object, transaction.Object, target)).Returns(session.Object).Verifiable();
 
             // act
             var actual = target.BeginSession(connection.Object, transaction.Object);
@@ -179,7 +180,9 @@
         }
 
         private static Mock<IEngine> MakeMockEngine() {
-            return new Mock<IEngine>(MockBehavior.Strict);
+            var engine = new Mock<IEngine>(MockBehavior.Strict);
+            engine.SetupProperty(p => p.Configuration);
+            return engine;
         }
 
         private static Mock<IMapper> SetupAllMaps() {
@@ -201,9 +204,15 @@
             return mock;
         }
 
+        private static Mock<IGeneratedCodeManager> SetupCodeManager() {
+            var mock = new Mock<IGeneratedCodeManager>(MockBehavior.Strict);
+            mock.Setup(c => c.LoadCode());
+            return mock;
+        }
+
         private class CustomConfiguration : ConfigurationBase {
             public CustomConfiguration(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory)
-                : base(engine, connectionString, mapper, sessionFactory) { }
+                : base(engine, connectionString, mapper, sessionFactory, SetupCodeManager().Object) { }
             
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IEngine engine, IMapper mapper, ISessionFactory sessionFactory)
@@ -211,7 +220,7 @@
 
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IMapper mapper)
-                : base(MakeMockEngine().Object, DummyConnectionString, mapper, MakeMockSf().Object) { }
+                : base(MakeMockEngine().Object, DummyConnectionString, mapper, MakeMockSf().Object, SetupCodeManager().Object) { }
         }
 
         private class CustomConfigurationWithIndividualAdds : CustomConfiguration {

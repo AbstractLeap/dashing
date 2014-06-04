@@ -38,7 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Dapper">
-      <HintPath>..\packages\Dapper.1.13\lib\net45\Dapper.dll</HintPath>
+      <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="Dapper.1.12.1.1.Fakes">
       <HintPath>FakesAssemblies\Dapper.1.12.1.1.Fakes.dll</HintPath>
@@ -70,6 +70,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="BaseQueryWriterTest.cs" />
     <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
     <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
     <Compile Include="CodeGeneration\TrackingTests.cs" />
@@ -92,14 +93,22 @@
     <Compile Include="Engine\DDL\DropTableWriterTests.cs" />
     <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />
     <Compile Include="Engine\EngineBaseTests.cs" />
+    <Compile Include="Engine\SelectWriterTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
+    <Compile Include="FetchTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuerySandbox.cs" />
+    <Compile Include="SelectTest.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\User.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TopHat.MySql\TopHat.MySql.csproj">
+      <Project>{fc3a4432-a5be-478b-a6d7-31e2fe2db8be}</Project>
+      <Name>TopHat.MySql</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TopHat\TopHat.csproj">
       <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
       <Name>TopHat</Name>

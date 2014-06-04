@@ -5,12 +5,16 @@ namespace TopHat.Engine {
     using System.Data.SqlClient;
 
     public class SqlServerEngine : EngineBase {
-        protected override IDbConnection NewConnection(string connectionString) {
-            return new SqlConnection(connectionString);
+        public SqlServerEngine()
+            : base(new SqlServerDialect()) {
         }
 
-        public override IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query) {
-            throw new NotImplementedException();
+        public SqlServerEngine(ISqlDialect dialect)
+            : base(dialect) {
+        }
+
+        protected override IDbConnection NewConnection(string connectionString) {
+            return new SqlConnection(connectionString);
         }
 
         public override int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query) {
