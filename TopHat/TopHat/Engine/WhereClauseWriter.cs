@@ -27,7 +27,7 @@
             var sql = new StringBuilder(" where ");
             var parameters = new DynamicParameters();
             foreach (var whereClause in whereClauses) {
-                var expressionVisitor = new WhereClauseExpressionVisitor(this.dialect, configuration, rootNode);
+                var expressionVisitor = new WhereClauseExpressionVisitor(this.dialect, this.configuration, rootNode);
                 expressionVisitor.VisitTree(whereClause);
                 sql.Append(expressionVisitor.Sql);
                 sql.Append(" and ");
