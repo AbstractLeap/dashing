@@ -57,8 +57,8 @@
         /// </summary>
         protected bool EngineHasLatestMaps { get; set; }
 
-        public IMap GetMap<T>() {
-            return this.GetMap(typeof(T));
+        public IMap<T> GetMap<T>() {
+            return this.GetMap(typeof(T)) as IMap<T>;
         }
 
         public IMap GetMap(Type type) {

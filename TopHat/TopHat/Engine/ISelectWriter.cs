@@ -6,6 +6,6 @@
         /// <typeparam name="T"></typeparam>
         /// <param name="selectQuery"></param>
         /// <returns></returns>
-        SqlWriterResult GenerateSql<T>(SelectQuery<T> selectQuery);
+        SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery);
     }
 }

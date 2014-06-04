@@ -28,4 +28,10 @@ namespace TopHat.Configuration {
         /// </summary>
         IDictionary<string, IColumn> Columns { get; set; }
     }
+
+    public interface IMap<T> : IMap {
+        object GetPrimaryKeyValue(T entity);
+
+        void SetPrimaryKeyValue(T entity, object value);
+    }
 }

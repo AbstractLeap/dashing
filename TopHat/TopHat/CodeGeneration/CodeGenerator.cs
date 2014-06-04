@@ -317,7 +317,8 @@
 
             var foreignKeyDeclaration =
                 new CodeVariableDeclarationStatement(
-                    "Func`" + (foreignKeyMapper.Parameters.Count + 1) + "[" + foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType).First() + ","
+                    "Func`" + (foreignKeyMapper.Parameters.Count + 1) + "["
+                    + foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType).First() + ","
                     + string.Join(
                         ", ",
                         foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType + codeConfig.ForeignKeyAccessClassSuffix).Skip(1)) + ", "
@@ -403,6 +404,11 @@
                 MemberAttributes.Public | MemberAttributes.Final);
             this.GenerateGetSetProperty(
                 trackingClass,
+                "NewValues",
+                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)),
+                MemberAttributes.Public | MemberAttributes.Final);
+            this.GenerateGetSetProperty(
+                trackingClass,
                 "AddedEntities",
                 typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))),
                 MemberAttributes.Public | MemberAttributes.Final);
@@ -419,6 +425,8 @@
                 new CodeAssignStatement(CodeHelpers.ThisField("DirtyProperties"), new CodeObjectCreateExpression(typeof(HashSet<>).MakeGenericType(typeof(string)))));
             constructor.Statements.Add(
                 new CodeAssignStatement(CodeHelpers.ThisField("OldValues"), new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(object)))));
+            constructor.Statements.Add(
+                new CodeAssignStatement(CodeHelpers.ThisField("NewValues"), new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(object)))));
             constructor.Statements.Add(
                 new CodeAssignStatement(
                     CodeHelpers.ThisField("AddedEntities"),
@@ -506,6 +514,13 @@
                                                 new CodeAssignStatement(
                                                     new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)),
                                                     new CodePropertySetValueReferenceExpression())
+                                            },
+                        new CodeStatement[] {
+                                                new CodeConditionStatement(
+                                                    CodeHelpers.ThisPropertyIsTrue("IsTracking"),
+                                                    new CodeAssignStatement(
+                                                    new CodeIndexerExpression(CodeHelpers.ThisProperty("NewValues"), new CodePrimitiveExpression(prop.Name)),
+                                                    new CodePropertySetValueReferenceExpression()))
                                             }));
             }
 

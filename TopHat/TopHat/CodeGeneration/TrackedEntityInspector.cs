@@ -39,6 +39,12 @@
             }
         }
 
+        public IDictionary<string, object> NewValues {
+            get {
+                return this.trackedEntity.NewValues;
+            }
+        }
+
         public IDictionary<string, IList<object>> AddedEntities {
             get {
                 return this.trackedEntity.AddedEntities;
@@ -92,6 +98,21 @@
             }
 
             return (TResult)this.OldValues[memberExpr.Member.Name];
+        }
+
+        public TResult NewValueFor<TResult>(Expression<Func<T, TResult>> propertyExpression) {
+            var memberExpr = propertyExpression.Body as MemberExpression;
+            if (memberExpr == null)
+            {
+                throw new ArgumentException("The propertyExpression must be a MemberExpression", "propertyExpression");
+            }
+
+            if (!this.IsDirtySimple(memberExpr.Member.Name))
+            {
+                throw new ArgumentException("This property is not dirty. Please check IsDirty before asking for new value");
+            }
+
+            return (TResult)this.NewValues[memberExpr.Member.Name];
         }
 
         public IEnumerable<TResult> AddedEntitiesFor<TResult>(Expression<Func<T, IEnumerable<TResult>>> propertyExpression) {

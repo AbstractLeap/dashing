@@ -19,7 +19,7 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IMap GetMap<T>();
+        IMap<T> GetMap<T>();
 
         /// <summary>
         ///     Returns the map for a particular type

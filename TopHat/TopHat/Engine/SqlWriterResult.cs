@@ -6,12 +6,9 @@
 
         public DynamicParameters Parameters { get; private set; }
 
-        public FetchNode FetchTree { get; private set; }
-
-        public SqlWriterResult(string sql, DynamicParameters parameters, FetchNode fetchTree) {
-            this.Sql = sql;
+        public SqlWriterResult(string sql, DynamicParameters parameters) {
             this.Parameters = parameters;
-            this.FetchTree = fetchTree;
+            this.Sql = sql;
         }
     }
 }

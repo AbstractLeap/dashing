@@ -8,15 +8,15 @@
     using TopHat.Configuration;
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
-        public SelectWriter(ISqlDialect dialect, IDictionary<Type, IMap> maps)
-            : this(dialect, new WhereClauseWriter(dialect, maps), maps) {
+        public SelectWriter(ISqlDialect dialect, IConfiguration config)
+            : this(dialect, new WhereClauseWriter(dialect, config), config) {
         }
 
-        public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IDictionary<Type, IMap> maps)
-            : base(dialect, whereClauseWriter, maps) {
+        public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
+            : base(dialect, whereClauseWriter, config) {
         }
 
-        public SqlWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
+        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
             var sql = new StringBuilder();
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
@@ -33,13 +33,13 @@
             // add order by
             this.AddOrderByClause(selectQuery.OrderClauses, sql);
 
-            return new SqlWriterResult(sql.ToString(), parameters, rootNode);
+            return new SelectWriterResult(sql.ToString(), parameters, rootNode);
         }
 
         private FetchNode AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql) {
             // separate string builder for the tables as we use the sql builder for fetch columns
             tableSql.Append(" from ");
-            this.Dialect.AppendQuotedTableName(tableSql, this.Maps[typeof(T)]);
+            this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap<T>());
 
             if (selectQuery.HasFetches()) {
                 tableSql.Append(" as t");
@@ -71,7 +71,7 @@
                                 // add to tree
                                 var node = new FetchNode {
                                                              Parent = currentNode,
-                                                             Column = this.Maps[currentNode == rootNode ? typeof(T) : currentNode.Column.Type].Columns[propName],
+                                                             Column = this.Configuration.GetMap(currentNode == rootNode ? typeof(T) : currentNode.Column.Type).Columns[propName],
                                                              Alias = "t_" + ++aliasCounter
                                                          };
                                 currentNode.Children.Add(propName, node);
@@ -108,14 +108,15 @@
             // add this node and then it's children
             // add table sql
             var splitOns = new List<string>();
-            splitOns.Add(this.Maps[node.Column.Type].PrimaryKey.Name);
+            splitOns.Add(this.Configuration.GetMap(node.Column.Type).PrimaryKey.Name);
             tableSql.Append(" left join ");
-            this.Dialect.AppendQuotedTableName(tableSql, this.Maps[node.Column.Type]);
+            this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap(node.Column.Type));
             tableSql.Append(" as " + node.Alias);
-            tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + this.Maps[node.Column.Type].PrimaryKey.DbName);
+            tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + this.Configuration.GetMap(node.Column.Type).PrimaryKey.DbName);
 
             // add the columns
-            foreach (var column in this.Maps[node.Column.Type].Columns) {
+            foreach (var column in this.Configuration.GetMap(node.Column.Type).Columns)
+            {
                 // only include the column if not excluded and not fetched subsequently
                 if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault && !node.Children.ContainsKey(column.Key)
                     && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)) {
@@ -144,7 +145,7 @@
             }
 
             if (selectQuery.Projection == null) {
-                foreach (var column in this.Maps[typeof(T)].Columns) {
+                foreach (var column in this.Configuration.GetMap<T>().Columns) {
                     if (!column.Value.IsIgnored && (selectQuery.FetchAllProperties || !column.Value.IsExcludedByDefault)
                         && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)
                         && (rootNode == null || !rootNode.Children.ContainsKey(column.Key))) {

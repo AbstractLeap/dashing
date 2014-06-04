@@ -15,12 +15,12 @@
 
         protected internal IWhereClauseWriter WhereClauseWriter { get; set; }
 
-        protected internal IDictionary<Type, IMap> Maps { get; set; }
+        protected internal IConfiguration Configuration { get; set; }
 
-        public BaseWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IDictionary<Type, IMap> maps) {
+        public BaseWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config) {
             this.Dialect = dialect;
             this.WhereClauseWriter = whereClauseWriter;
-            this.Maps = maps;
+            this.Configuration = config;
         }
 
         public DynamicParameters AddWhereClause<T>(IList<Expression<Func<T, bool>>> whereClauses, StringBuilder sql, FetchNode rootNode) {
@@ -41,7 +41,7 @@
             foreach (var orderClause in orderClauses) {
                 var lambdaExpr = orderClause.Expression as LambdaExpression;
                 var memberExpr = lambdaExpr.Body as MemberExpression;
-                this.Dialect.AppendQuotedName(sql, this.Maps[typeof(T)].Columns[memberExpr.Member.Name].DbName);
+                this.Dialect.AppendQuotedName(sql, this.Configuration.GetMap<T>().Columns[memberExpr.Member.Name].DbName);
                 sql.Append(orderClause.Direction == ListSortDirection.Ascending ? " asc, " : "desc, ");
             }
 

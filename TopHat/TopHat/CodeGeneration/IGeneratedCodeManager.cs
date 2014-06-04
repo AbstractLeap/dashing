@@ -65,6 +65,6 @@
         /// <param name="query"></param>
         /// <param name="conn"></param>
         /// <returns></returns>
-        IEnumerable<T> Query<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn);
+        IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
     }
 }
