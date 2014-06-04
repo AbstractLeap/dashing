@@ -29,7 +29,7 @@
                 Debug.WriteLine(sql);
             }
 
-            //// return;
+            return;
 
             using (var session = config.BeginSession()) {
                 foreach (var sql in sqls) {
