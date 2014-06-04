@@ -106,6 +106,7 @@
         }
 
         public IMap<T> GetMap<T>() {
+            // TODO: check that the Map is indeed an IMap<T> or lift if it isn't
             return this.GetMap(typeof(T)) as IMap<T>;
         }
 
