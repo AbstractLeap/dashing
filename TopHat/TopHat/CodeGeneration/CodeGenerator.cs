@@ -91,11 +91,11 @@
             dapperWrapperClass.Members.Add(staticConstructor);
 
             // generate the delegate function
-            // public delegate IEnumerable<T> DelegateQuery<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn);
+            // public delegate IEnumerable<T> DelegateQuery<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
             var del = new CodeTypeDelegate("DelegateQuery");
             del.TypeParameters.Add("T");
             del.ReturnType = new CodeTypeReference("IEnumerable<T>");
-            del.Parameters.Add(new CodeParameterDeclarationExpression("SqlWriterResult", "result"));
+            del.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             del.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
             del.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
             dapperWrapperClass.Members.Add(del);
@@ -119,7 +119,7 @@
             query.TypeParameters.Add("T");
             query.ReturnType = new CodeTypeReference("IEnumerable<T>");
             dapperWrapperClass.Members.Add(query);
-            query.Parameters.Add(new CodeParameterDeclarationExpression("SqlWriterResult", "result"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
 
@@ -292,7 +292,7 @@
             query.Name = rootType.Name + "_" + signature;
             query.ReturnType = new CodeTypeReference("IEnumerable<" + rootType.Name + ">");
             query.Attributes = MemberAttributes.Static;
-            query.Parameters.Add(new CodeParameterDeclarationExpression("SqlWriterResult", "result"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<" + rootType.Name + ">", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
 
