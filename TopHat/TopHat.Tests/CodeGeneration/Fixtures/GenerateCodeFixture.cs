@@ -13,14 +13,9 @@
 
         public GenerateCodeFixture() {
             // generate config and assembly
-            IConfiguration config = new CustomConfig(this.engine.Object);
-            var codeGenerator = new CodeGenerator();
-            var codeConfig = new CodeGeneratorConfig();
-            codeConfig.GenerateAssembly = true;
-            codeConfig.GenerateSource = true;
-            codeGenerator.Generate(config, codeConfig);
-            this.CodeManager = new GeneratedCodeManager(codeConfig);
-            this.CodeManager.LoadCode();
+            var config = new CustomConfig(this.engine.Object);
+            var codeGenerator = new CodeGenerator(new CodeGeneratorConfig { GenerateAssembly = true, GenerateSource = true });
+            this.CodeManager = codeGenerator.Generate(config);
         }
 
         private class CustomConfig : DefaultConfiguration {

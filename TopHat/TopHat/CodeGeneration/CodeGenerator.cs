@@ -22,16 +22,23 @@
 
         private HashSet<string> referencedAssemblies;
 
-        public void Generate(IConfiguration configuration, CodeGeneratorConfig generatorConfig) {
-            this.Init(configuration, generatorConfig);
+        private readonly CodeGeneratorConfig generatorConfig;
 
-            Parallel.ForEach(configuration.Maps, i => this.Generate(configuration, generatorConfig, i));
+        public CodeGenerator(CodeGeneratorConfig codeGeneratorConfiguration) {
+            this.generatorConfig = codeGeneratorConfiguration;
+        }
+
+        // TODO: sense if we can just reuse last times ?
+        public IGeneratedCodeManager Generate(IConfiguration configuration) {
+            this.Init();
+
+            Parallel.ForEach(configuration.Maps, i => this.Generate(configuration, i));
 
             // generate the code
-            CodeDomProvider provider = CodeDomProvider.CreateProvider("CSharp");
+            var provider = CodeDomProvider.CreateProvider("CSharp");
 
             // generate the GeneratedDapperWrapper
-            this.GenerateDapperWrapper(configuration, generatorConfig, provider);
+            this.GenerateDapperWrapper(configuration, provider);
 
             var options = new CodeGeneratorOptions { BracingStyle = "C" };
             var sourceCodeName = "source_" + Guid.NewGuid().ToString("N") + ".cs";
@@ -51,21 +58,25 @@
             }
 
             File.Delete(sourceCodeName);
-            if (generatorConfig.GenerateSource) {
-                using (var streamWriter = new StreamWriter(generatorConfig.SourceLocation)) {
+            if (this.generatorConfig.GenerateSource) {
+                using (var streamWriter = new StreamWriter(this.generatorConfig.SourceLocation)) {
                     streamWriter.Write(source);
                 }
             }
 
             var sources = new List<string> { source.ToString() };
 
-            if (generatorConfig.GenerateAssembly) {
-                var parameters = new CompilerParameters(this.referencedAssemblies.ToArray(), generatorConfig.Namespace + ".dll", true);
+            if (this.generatorConfig.GenerateAssembly) {
+                var parameters = new CompilerParameters(this.referencedAssemblies.ToArray(), this.generatorConfig.Namespace + ".dll", true);
                 var results = provider.CompileAssemblyFromSource(parameters, sources.ToArray());
             }
+
+            var generatedCodeManager = new GeneratedCodeManager(this.generatorConfig);
+            generatedCodeManager.LoadCode();
+            return generatedCodeManager;
         }
 
-        private void GenerateDapperWrapper(IConfiguration configuration, CodeGeneratorConfig generatorConfig, CodeDomProvider provider) {
+        private void GenerateDapperWrapper(IConfiguration configuration, CodeDomProvider provider) {
             // can't create a static class using CodeDom so create a Public Sealed class with private constructor
             var dapperWrapperClass = new CodeTypeDeclaration("DapperWrapper");
             dapperWrapperClass.IsClass = true;
@@ -145,8 +156,8 @@
                     map.Type,
                     configuration,
                     0,
-                    generatorConfig.MapperGenerationMaxRecursion,
-                    generatorConfig,
+                    this.generatorConfig.MapperGenerationMaxRecursion,
+                    this.generatorConfig,
                     provider);
 
                 // now add in the dictionary statement
@@ -372,7 +383,7 @@
             }
         }
 
-        private void Generate(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map) {
+        private void Generate(IConfiguration configuration, IMap map) {
             // add this assembly
             this.referencedAssemblies.Add(map.Type.Assembly.GetName().Name + ".dll");
 
@@ -380,18 +391,18 @@
             this.codeNamespace.Imports.Add(new CodeNamespaceImport(map.Type.Namespace));
 
             // create the FK access class
-            this.CreateFKClass(configuration, generatorConfig, map);
+            this.CreateFkClass(configuration, map);
 
             // create the tracking class
-            this.CreateTrackingClass(configuration, generatorConfig, map);
+            this.CreateTrackingClass(map);
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private void CreateTrackingClass(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map) {
-            var trackingClass = new CodeTypeDeclaration(map.Type.Name + generatorConfig.TrackedClassSuffix);
+        private void CreateTrackingClass(IMap map) {
+            var trackingClass = new CodeTypeDeclaration(map.Type.Name + this.generatorConfig.TrackedClassSuffix);
             trackingClass.IsClass = true;
             trackingClass.TypeAttributes = TypeAttributes.Public;
-            trackingClass.BaseTypes.Add(map.Type.Name + generatorConfig.ForeignKeyAccessClassSuffix);
+            trackingClass.BaseTypes.Add(map.Type.Name + this.generatorConfig.ForeignKeyAccessClassSuffix);
             trackingClass.BaseTypes.Add(typeof(ITrackedEntity));
 
             // add in change tracking properties
@@ -530,9 +541,9 @@
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private void CreateFKClass(IConfiguration configuration, CodeGeneratorConfig generatorConfig, IMap map) {
+        private void CreateFkClass(IConfiguration configuration, IMap map) {
             // generate the foreign key access class based on the original class
-            var foreignKeyClass = new CodeTypeDeclaration(map.Type.Name + generatorConfig.ForeignKeyAccessClassSuffix);
+            var foreignKeyClass = new CodeTypeDeclaration(map.Type.Name + this.generatorConfig.ForeignKeyAccessClassSuffix);
             foreignKeyClass.IsClass = true;
             foreignKeyClass.TypeAttributes = TypeAttributes.Public;
             foreignKeyClass.BaseTypes.Add(map.Type);
@@ -547,7 +558,7 @@
                 var foreignKeyBackingProperty = this.GenerateGetSetProperty(foreignKeyClass, column.Value.DbName, backingType, MemberAttributes.Public | MemberAttributes.Final);
 
                 // create a backing field for storing the related entity
-                var backingField = new CodeMemberField(column.Value.Type, column.Value.Name + generatorConfig.ForeignKeyAccessEntityFieldSuffix);
+                var backingField = new CodeMemberField(column.Value.Type, column.Value.Name + this.generatorConfig.ForeignKeyAccessEntityFieldSuffix);
                 foreignKeyClass.Members.Add(backingField);
 
                 // override the property getter and setter to use the backingfield
@@ -611,10 +622,10 @@
             return prop;
         }
 
-        private void Init(IConfiguration configuration, CodeGeneratorConfig generatorConfig) {
+        private void Init() {
             this.referencedAssemblies = new HashSet<string>();
             this.compileUnit = new CodeCompileUnit();
-            this.codeNamespace = new CodeNamespace(generatorConfig.Namespace);
+            this.codeNamespace = new CodeNamespace(this.generatorConfig.Namespace);
             this.compileUnit.Namespaces.Add(this.codeNamespace);
 
             // add standard usings
