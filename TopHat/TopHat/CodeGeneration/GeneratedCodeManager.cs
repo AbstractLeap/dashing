@@ -103,10 +103,22 @@
             }
 
             if (query.IsTracked) {
-                return ((NoFetchDelegate<T>)this.noFetchTrackingCalls[typeof(T)])(conn, result.Sql, result.Parameters);
+                return this.Tracked(((NoFetchDelegate<T>)this.noFetchTrackingCalls[typeof(T)])(conn, result.Sql, result.Parameters));
             }
 
             return ((NoFetchDelegate<T>)this.noFetchFkCalls[typeof(T)])(conn, result.Sql, result.Parameters);
+        }
+
+        private IEnumerable<T> Tracked<T>(IEnumerable<T> rows) {
+            foreach (var row in rows) {
+                var trackedEntity = row as ITrackedEntity;
+                trackedEntity.IsTracking = true;
+                yield return row;
+            }
+        }
+
+        public int Execute(string sql, IDbConnection conn, dynamic param = null) {
+            return conn.Execute(sql, (object)param);
         }
 
         public Type GetForeignKeyType<T>() {

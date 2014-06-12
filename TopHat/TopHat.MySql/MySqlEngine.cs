@@ -19,17 +19,5 @@
         protected override IDbConnection NewConnection(string connectionString) {
             return new MySqlConnection(connectionString);
         }
-
-        public override int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query) {
-            throw new NotImplementedException();
-        }
-
-        public override int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query) {
-            throw new NotImplementedException();
-        }
-
-        public override int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query) {
-            throw new NotImplementedException();
-        }
     }
 }

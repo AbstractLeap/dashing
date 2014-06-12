@@ -13,6 +13,12 @@ namespace TopHat.Engine {
 
         protected ISelectWriter SelectWriter { get; set; }
 
+        protected IEntitySqlWriter UpdateWriter { get; set; }
+
+        protected IEntitySqlWriter InsertWriter { get; set; }
+
+        protected IEntitySqlWriter DeleteWriter { get; set; }
+
         /// <summary>
         ///     Gets or sets the maps.
         /// </summary>
@@ -48,6 +54,9 @@ namespace TopHat.Engine {
         public void UseMaps(IDictionary<Type, IMap> maps) {
             this.Maps = maps;
             this.SelectWriter = new SelectWriter(this.Dialect, this.Configuration);
+            this.DeleteWriter = new DeleteWriter(this.Dialect, this.Configuration);
+            this.UpdateWriter = new UpdateWriter(this.Dialect, this.Configuration);
+            this.InsertWriter = new InsertWriter(this.Dialect, this.Configuration);
         }
 
         /// <summary>
@@ -98,7 +107,14 @@ namespace TopHat.Engine {
         /// <returns>
         ///     The <see cref="int" />.
         /// </returns>
-        public abstract int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query);
+        public virtual int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query) {
+            if (this.InsertWriter == null) {
+                throw new Exception("The InsertWriter has not been initialised");
+            }
+
+            var sqlQuery = this.InsertWriter.GenerateSql(query);
+            return this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
+        }
 
         /// <summary>
         ///     The execute.
@@ -114,7 +130,14 @@ namespace TopHat.Engine {
         /// <returns>
         ///     The <see cref="int" />.
         /// </returns>
-        public abstract int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query);
+        public virtual int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query) {
+            if (this.UpdateWriter == null) {
+                throw new Exception("The UpdateWriter has not been initialised");
+            }
+
+            var sqlQuery = this.UpdateWriter.GenerateSql(query);
+            return this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
+        }
 
         /// <summary>
         ///     The execute.
@@ -130,6 +153,13 @@ namespace TopHat.Engine {
         /// <returns>
         ///     The <see cref="int" />.
         /// </returns>
-        public abstract int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query);
+        public virtual int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query) {
+            if (this.DeleteWriter == null) {
+                throw new Exception("The DeleteWriter has not been initialised");
+            }
+
+            var sqlQuery = this.DeleteWriter.GenerateSql(query);
+            return this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
+        }
     }
 }
