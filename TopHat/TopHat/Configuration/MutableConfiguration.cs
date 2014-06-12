@@ -1,27 +1,26 @@
 namespace TopHat.Configuration {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
 
     using TopHat.Engine;
 
     public class MutableConfiguration : DefaultConfiguration {
-        public MutableConfiguration(IEngine engine, string connectionString) : base(engine, connectionString) { }
+        public MutableConfiguration(IEngine engine, string connectionString)
+            : base(engine, connectionString) { }
 
-        public IConfiguration Add<T>()
-        {
+        public new IConfiguration Add<T>() {
             return base.Add<T>();
         }
 
-        public IConfiguration Add(IEnumerable<Type> types) {
+        public new IConfiguration Add(IEnumerable<Type> types) {
             return base.Add(types);
         }
 
-        public IConfiguration AddNamespaceOf<T>() {
+        public new IConfiguration AddNamespaceOf<T>() {
             return base.AddNamespaceOf<T>();
         }
 
-        public Map<T> Setup<T>() {
+        public new Map<T> Setup<T>() {
             return base.Setup<T>();
         }
     }

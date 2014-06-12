@@ -102,13 +102,11 @@
 
         public TResult NewValueFor<TResult>(Expression<Func<T, TResult>> propertyExpression) {
             var memberExpr = propertyExpression.Body as MemberExpression;
-            if (memberExpr == null)
-            {
+            if (memberExpr == null) {
                 throw new ArgumentException("The propertyExpression must be a MemberExpression", "propertyExpression");
             }
 
-            if (!this.IsDirtySimple(memberExpr.Member.Name))
-            {
+            if (!this.IsDirtySimple(memberExpr.Member.Name)) {
                 throw new ArgumentException("This property is not dirty. Please check IsDirty before asking for new value");
             }
 

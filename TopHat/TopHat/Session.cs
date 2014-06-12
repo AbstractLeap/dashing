@@ -3,9 +3,7 @@
     using System.Collections.Generic;
     using System.Data;
 
-    using TopHat.CodeGeneration;
     using TopHat.Configuration;
-    using TopHat.Engine;
 
     /// <summary>
     ///     The session.
@@ -17,7 +15,7 @@
         private readonly IDbConnection connection;
 
         /// <summary>
-        /// The code manager
+        ///     The code manager
         /// </summary>
         private readonly IConfiguration config;
 
@@ -52,9 +50,8 @@
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public Session(IDbConnection connection, IConfiguration config) :
-        this(connection, config, null) {
-        }
+        public Session(IDbConnection connection, IConfiguration config)
+            : this(connection, config, null) { }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Session" /> class.
@@ -70,14 +67,12 @@
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// </exception>
-        public Session(IDbConnection connection, IConfiguration config, IDbTransaction transaction = null)
-        {
+        public Session(IDbConnection connection, IConfiguration config, IDbTransaction transaction = null) {
             if (connection == null) {
                 throw new ArgumentNullException("connection");
             }
 
-            if (config == null)
-            {
+            if (config == null) {
                 throw new ArgumentNullException("config");
             }
 

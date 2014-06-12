@@ -22,7 +22,7 @@
         IDictionary<string, object> OldValues { get; }
 
         /// <summary>
-        /// Returns the new values for dirty properties
+        ///     Returns the new values for dirty properties
         /// </summary>
         /// <remarks>Does not include dirty collection properties</remarks>
         IDictionary<string, object> NewValues { get; }
@@ -76,7 +76,7 @@
         TResult OldValueFor<TResult>(Expression<Func<T, TResult>> propertyExpression);
 
         /// <summary>
-        /// Fetches the new value for a dirty property
+        ///     Fetches the new value for a dirty property
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="propertyExpression"></param>

@@ -3,8 +3,6 @@ namespace TopHat.Engine {
     using System.Collections.Generic;
     using System.Data;
 
-    using Dapper;
-
     using TopHat.Configuration;
 
     /// <summary>
@@ -83,7 +81,7 @@ namespace TopHat.Engine {
             }
 
             var sqlQuery = this.SelectWriter.GenerateSql(query);
-            return this.Configuration.CodeManager.Query<T>(sqlQuery, query, connection);
+            return this.Configuration.CodeManager.Query(sqlQuery, query, connection);
         }
 
         /// <summary>

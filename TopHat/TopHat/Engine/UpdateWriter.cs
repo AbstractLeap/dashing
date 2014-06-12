@@ -1,24 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace TopHat.Engine {
+    using System.Text;
 
-namespace TopHat.Engine
-{
     using Dapper;
 
     using TopHat.CodeGeneration;
     using TopHat.Configuration;
 
-    internal class UpdateWriter : BaseWriter, IEntitySqlWriter
-    {
+    internal class UpdateWriter : BaseWriter, IEntitySqlWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) {
-        }
+            : this(dialect, new WhereClauseWriter(dialect, config), config) { }
 
         public UpdateWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {}
+            : base(dialect, whereClauseWriter, config) { }
 
         public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
             var sql = new StringBuilder();

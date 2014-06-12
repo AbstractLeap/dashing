@@ -25,7 +25,9 @@ namespace TopHat.Engine.DDL {
 
             this.dialect.AppendColumnSpecification(sql, map.PrimaryKey);
 
-            foreach (var column in map.Columns.Values.Where(c => !c.IsPrimaryKey && !c.IsIgnored && (c.Relationship == RelationshipType.None || c.Relationship == RelationshipType.ManyToOne))) {
+            foreach (
+                var column in
+                    map.Columns.Values.Where(c => !c.IsPrimaryKey && !c.IsIgnored && (c.Relationship == RelationshipType.None || c.Relationship == RelationshipType.ManyToOne))) {
                 sql.Append(", ");
                 this.dialect.AppendColumnSpecification(sql, column);
             }

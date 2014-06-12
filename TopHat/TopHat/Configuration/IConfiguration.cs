@@ -37,19 +37,19 @@
         ISession BeginSession();
 
         /// <summary>
-        /// The code manager for this configuration
+        ///     The code manager for this configuration
         /// </summary>
         /// <returns></returns>
         IGeneratedCodeManager CodeManager { get; }
 
         /// <summary>
-        /// The engine for this configuration
+        ///     The engine for this configuration
         /// </summary>
         /// <returns></returns>
         IEngine Engine { get; }
 
         /// <summary>
-        /// The mapper for this configuration
+        ///     The mapper for this configuration
         /// </summary>
         /// <returns></returns>
         IMapper Mapper { get; }

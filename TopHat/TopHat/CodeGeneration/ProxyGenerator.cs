@@ -10,8 +10,9 @@ namespace TopHat.CodeGeneration {
     using TopHat.Extensions;
 
     internal class ProxyGenerator : IProxyGenerator {
-        private const MemberAttributes MemberAttributesPublicOrFinal = (MemberAttributes)24578; // StyleCop doesn't like bitwise without [Flags] MemberAttributes.Public | MemberAttributes.Final;
-
+        // StyleCop doesn't like bitwise without [Flags] MemberAttributes.Public | MemberAttributes.Final;
+        private const MemberAttributes MemberAttributesPublicOrFinal = (MemberAttributes)24578;
+                                       
         public IEnumerable<CodeTypeDeclaration> GenerateProxies(CodeGeneratorConfig codeGeneratorConfig, IDictionary<Type, IMap> maps) {
             var parallelMaps = maps.Values.AsParallel();
             var trackingClasses = parallelMaps.Select(m => this.CreateTrackingClass(m, codeGeneratorConfig));
@@ -30,16 +31,8 @@ namespace TopHat.CodeGeneration {
             // add in change tracking properties
             this.GenerateGetSetProperty(trackingClass, "IsTracking", typeof(bool), MemberAttributesPublicOrFinal);
             this.GenerateGetSetProperty(trackingClass, "DirtyProperties", typeof(ISet<>).MakeGenericType(typeof(string)), MemberAttributesPublicOrFinal);
-            this.GenerateGetSetProperty(
-                trackingClass, 
-                "OldValues", 
-                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), 
-                MemberAttributesPublicOrFinal);
-            this.GenerateGetSetProperty(
-                trackingClass, 
-                "NewValues", 
-                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), 
-                MemberAttributesPublicOrFinal);
+            this.GenerateGetSetProperty(trackingClass, "OldValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), MemberAttributesPublicOrFinal);
+            this.GenerateGetSetProperty(trackingClass, "NewValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), MemberAttributesPublicOrFinal);
             this.GenerateGetSetProperty(
                 trackingClass, 
                 "AddedEntities", 

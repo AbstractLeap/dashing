@@ -88,8 +88,7 @@
                     this.chainedMemberAccessExpression = m;
 
                     // we want to check for a primary key here because in that case we can put the where clause on the referencing object
-                    if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name)
-                    {
+                    if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name) {
                         this.getForeignKeyName = true;
                     }
                     else {

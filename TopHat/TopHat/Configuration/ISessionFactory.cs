@@ -1,9 +1,6 @@
 ﻿namespace TopHat.Configuration {
     using System.Data;
 
-    using TopHat.CodeGeneration;
-    using TopHat.Engine;
-
     /// <summary>
     ///     The SessionFactory interface.
     /// </summary>

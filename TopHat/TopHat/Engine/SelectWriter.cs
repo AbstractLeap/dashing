@@ -1,5 +1,4 @@
 ﻿namespace TopHat.Engine {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
@@ -9,12 +8,10 @@
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
         public SelectWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) {
-        }
+            : this(dialect, new WhereClauseWriter(dialect, config), config) { }
 
         public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {
-        }
+            : base(dialect, whereClauseWriter, config) { }
 
         public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
             var sql = new StringBuilder();
@@ -70,8 +67,8 @@
                             if (!currentNode.Children.ContainsKey(propName)) {
                                 // add to tree
                                 var node = new FetchNode {
-                                                             Parent = currentNode,
-                                                             Column = this.Configuration.GetMap(currentNode == rootNode ? typeof(T) : currentNode.Column.Type).Columns[propName],
+                                                             Parent = currentNode, 
+                                                             Column = this.Configuration.GetMap(currentNode == rootNode ? typeof(T) : currentNode.Column.Type).Columns[propName], 
                                                              Alias = "t_" + ++aliasCounter
                                                          };
                                 currentNode.Children.Add(propName, node);
@@ -87,7 +84,7 @@
                 }
 
                 // now let's go through the tree and generate the sql
-                StringBuilder signatureBuilder = new StringBuilder();
+                var signatureBuilder = new StringBuilder();
                 var splitOns = new List<string>();
                 foreach (var node in rootNode.Children.OrderBy(c => c.Value.Column.FetchId)) {
                     var signature = this.AddNode(node.Value, tableSql, columnSql);
@@ -115,8 +112,7 @@
             tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + this.Configuration.GetMap(node.Column.Type).PrimaryKey.DbName);
 
             // add the columns
-            foreach (var column in this.Configuration.GetMap(node.Column.Type).Columns)
-            {
+            foreach (var column in this.Configuration.GetMap(node.Column.Type).Columns) {
                 // only include the column if not excluded and not fetched subsequently
                 if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault && !node.Children.ContainsKey(column.Key)
                     && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)) {
@@ -126,7 +122,7 @@
             }
 
             // add its children
-            StringBuilder signatureBuilder = new StringBuilder();
+            var signatureBuilder = new StringBuilder();
             foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
                 var signature = this.AddNode(child.Value, tableSql, columnSql);
                 signatureBuilder.Append(child.Value.Column.FetchId + "S" + signature.Signature + "E");
