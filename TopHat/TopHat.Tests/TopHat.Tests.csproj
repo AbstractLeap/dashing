@@ -71,6 +71,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BaseQueryWriterTest.cs" />
+    <Compile Include="CodeGeneration\Fixtures\GenerateAndOutputCodeFixture.cs" />
     <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
     <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
     <Compile Include="CodeGeneration\TrackingTests.cs" />

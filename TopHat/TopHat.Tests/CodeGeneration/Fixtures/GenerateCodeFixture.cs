@@ -11,11 +11,12 @@
 
         public IGeneratedCodeManager CodeManager { get; private set; }
 
-        public GenerateCodeFixture() {
-            // generate config and assembly
-            var config = new CustomConfig(this.engine.Object);
-            var codeGenerator = new CodeGenerator(new CodeGeneratorConfig { GenerateAssembly = true, GenerateSource = true }, new ProxyGenerator());
-            this.CodeManager = codeGenerator.Generate(config);
+        public GenerateCodeFixture() : this(null) { }
+
+        // ReSharper disable once MemberCanBeProtected.Global (instantiated by xUnit)
+        public GenerateCodeFixture(CodeGeneratorConfig generatorConfig) {
+            var codeGenerator = new CodeGenerator(generatorConfig ?? new CodeGeneratorConfig(), new ProxyGenerator());
+            this.CodeManager = codeGenerator.Generate(new CustomConfig(this.engine.Object));
         }
 
         private class CustomConfig : DefaultConfiguration {
