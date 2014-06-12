@@ -14,7 +14,7 @@
         public GenerateCodeFixture() {
             // generate config and assembly
             var config = new CustomConfig(this.engine.Object);
-            var codeGenerator = new CodeGenerator(new CodeGeneratorConfig { GenerateAssembly = true, GenerateSource = true });
+            var codeGenerator = new CodeGenerator(new CodeGeneratorConfig { GenerateAssembly = true, GenerateSource = true }, new ProxyGenerator());
             this.CodeManager = codeGenerator.Generate(config);
         }
 

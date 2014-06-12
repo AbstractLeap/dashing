@@ -56,8 +56,10 @@
     <Compile Include="CodeGeneration\GeneratedCodeManager.cs" />
     <Compile Include="CodeGeneration\ICodeGenerator.cs" />
     <Compile Include="CodeGeneration\IGeneratedCodeManager.cs" />
+    <Compile Include="CodeGeneration\IProxyGenerator.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
     <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
+    <Compile Include="CodeGeneration\ProxyGenerator.cs" />
     <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="Configuration\Column.cs" />
