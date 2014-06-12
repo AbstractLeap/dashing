@@ -7,12 +7,10 @@
 
     internal class DeleteWriter : BaseWriter, IEntitySqlWriter {
         public DeleteWriter(ISqlDialect dialect, IConfiguration config)
-            : base(dialect, new WhereClauseWriter(dialect, config), config) {
-        }
+            : base(dialect, new WhereClauseWriter(dialect, config), config) { }
 
         public DeleteWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {
-        }
+            : base(dialect, whereClauseWriter, config) { }
 
         public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
             var map = this.Configuration.GetMap<T>();

@@ -7,12 +7,10 @@
 
     internal class InsertWriter : BaseWriter, IEntitySqlWriter {
         public InsertWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) {
-        }
+            : this(dialect, new WhereClauseWriter(dialect, config), config) { }
 
         public InsertWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {
-        }
+            : base(dialect, whereClauseWriter, config) { }
 
         public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
             var map = this.Configuration.GetMap<T>();
