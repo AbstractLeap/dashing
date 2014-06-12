@@ -26,6 +26,7 @@ namespace TopHat.Engine {
 
         public Task<IEnumerable<T>> QueryAsync<T>(string sql, object param = null, int? commandTimeout = null, CommandType? commandType = null) {
             throw new NotImplementedException();
+
             ////return this.connection.QueryAsync<T>(sql, param, this.transaction, commandTimeout, commandType);
         }
     }

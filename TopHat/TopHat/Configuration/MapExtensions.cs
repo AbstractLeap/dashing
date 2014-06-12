@@ -62,8 +62,10 @@
         ///     The <see cref="Map" />.
         /// </returns>
         public static Map<T> PrimaryKey<T, TResult>(this Map<T> map, Expression<Func<T, TResult>> expression) {
-            foreach (var column in map.Columns.Values)
+            foreach (var column in map.Columns.Values) {
                 column.IsPrimaryKey = false;
+            }
+
             map.PrimaryKey = map.Columns[NameFromMemberExpression(expression)];
             map.PrimaryKey.IsPrimaryKey = true;
             return map;

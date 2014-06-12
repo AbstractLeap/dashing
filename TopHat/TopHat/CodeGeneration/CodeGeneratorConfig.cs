@@ -5,8 +5,9 @@
             this.ForeignKeyAccessClassSuffix = "_FK";
             this.ForeignKeyAccessEntityFieldSuffix = "_FKEntity";
             this.TrackedClassSuffix = "_Tracked";
+            this.AssemblyPath = "TopHat.Generated.dll";
+            this.SourceCodePath = "TopHat.Generated.cs";
             this.MapperGenerationMaxRecursion = 8;
-            this.SourceLocation = "generated.cs";
         }
 
         /// <summary>
@@ -28,11 +29,15 @@
 
         public string TrackedClassSuffix { get; set; }
 
-        public bool GenerateSource { get; set; }
+        public bool CompileInDebug { get; set; }
 
-        public string SourceLocation { get; set; }
+        public bool OutputAssembly { get; set; }
 
-        public bool GenerateAssembly { get; set; }
+        public string AssemblyPath { get; set; }
+
+        public bool OutputSourceCode { get; set; }
+
+        public string SourceCodePath { get; set; }
 
         public int MapperGenerationMaxRecursion { get; set; }
     }

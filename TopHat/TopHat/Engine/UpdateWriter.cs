@@ -8,12 +8,10 @@
 
     internal class UpdateWriter : BaseWriter, IEntitySqlWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) {
-        }
+            : this(dialect, new WhereClauseWriter(dialect, config), config) { }
 
         public UpdateWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {
-        }
+            : base(dialect, whereClauseWriter, config) { }
 
         public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
             var sql = new StringBuilder();

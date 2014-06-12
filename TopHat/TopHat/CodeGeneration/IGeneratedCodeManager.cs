@@ -8,7 +8,7 @@
 
     public interface IGeneratedCodeManager {
         /// <summary>
-        /// Gets the Code Generator Config
+        ///     Gets the Code Generator Config
         /// </summary>
         CodeGeneratorConfig Config { get; }
 
@@ -51,7 +51,7 @@
         void TrackInstance<T>(T entity);
 
         /// <summary>
-        /// Calls the correct static function within the generated code for a particular fetch tree
+        ///     Calls the correct static function within the generated code for a particular fetch tree
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="result"></param>

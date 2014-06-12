@@ -95,7 +95,7 @@ namespace TopHat.Configuration {
                         var valueParam = Expression.Parameter(typeof(object));
                         this.primaryKeySetter =
                             Expression.Lambda<Action<T, object>>(
-                                Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), Expression.Convert(valueParam, typeof(int))),
+                                Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), Expression.Convert(valueParam, typeof(int))), 
                                 new[] { param, valueParam }).Compile();
                     }
                 }
@@ -154,9 +154,9 @@ namespace TopHat.Configuration {
             }
 
             return new Map<T> {
-                                  Table = map.Table,
-                                  Schema = map.Schema,
-                                  PrimaryKey = map.PrimaryKey,
+                                  Table = map.Table, 
+                                  Schema = map.Schema, 
+                                  PrimaryKey = map.PrimaryKey, 
                                   Columns = map.Columns
                           
                                   //// Indexes = map.Indexes

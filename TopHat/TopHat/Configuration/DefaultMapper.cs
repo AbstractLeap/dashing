@@ -61,7 +61,7 @@
         }
 
         /// <summary>
-        /// Assigns fetch ids to the non local columns using a consistent strategy (namely column name)
+        ///     Assigns fetch ids to the non local columns using a consistent strategy (namely column name)
         /// </summary>
         /// <param name="map"></param>
         private void AssignFetchIds(IMap map) {

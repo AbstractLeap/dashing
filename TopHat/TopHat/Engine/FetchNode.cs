@@ -1,5 +1,4 @@
 ﻿namespace TopHat.Engine {
-    using System;
     using System.Collections.Generic;
 
     using TopHat.Configuration;
@@ -14,12 +13,12 @@
         public FetchNode Parent { get; set; }
 
         /// <summary>
-        /// This signature is used to select the correct mapper for dapper
+        ///     This signature is used to select the correct mapper for dapper
         /// </summary>
         public string FetchSignature { get; set; }
 
         /// <summary>
-        /// This specifies the string to pass to dapper in order to split on
+        ///     This specifies the string to pass to dapper in order to split on
         /// </summary>
         public string SplitOn { get; set; }
 

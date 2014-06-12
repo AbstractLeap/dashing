@@ -10,9 +10,9 @@
     using TopHat.Extensions;
 
     internal class WhereClauseWriter : IWhereClauseWriter {
-        private ISqlDialect dialect;
+        private readonly ISqlDialect dialect;
 
-        private IConfiguration configuration;
+        private readonly IConfiguration configuration;
 
         public WhereClauseWriter(ISqlDialect dialect, IConfiguration config) {
             this.dialect = dialect;

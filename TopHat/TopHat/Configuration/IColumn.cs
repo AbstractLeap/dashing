@@ -9,7 +9,7 @@
         Type Type { get; }
 
         /// <summary>
-        /// The map that this column belongs to
+        ///     The map that this column belongs to
         /// </summary>
         IMap Map { get; set; }
 
@@ -69,7 +69,7 @@
         bool IsExcludedByDefault { get; set; }
 
         /// <summary>
-        /// Use for indexing in to Query multimapping queries
+        ///     Use for indexing in to Query multimapping queries
         /// </summary>
         /// <remarks>Must be consistent across app restarts as CodeGeneration is only updated if the assemblies change</remarks>
         int FetchId { get; set; }
