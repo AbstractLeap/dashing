@@ -110,7 +110,6 @@
     <Compile Include="FetchMany.cs" />
     <Compile Include="IFetchMany.cs" />
     <Compile Include="InsertEntityQuery.cs" />
-    <Compile Include="IQuery.cs" />
     <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="OrderClause.cs" />
