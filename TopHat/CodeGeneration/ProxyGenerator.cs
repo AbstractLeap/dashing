@@ -12,7 +12,7 @@ namespace TopHat.CodeGeneration {
     internal class ProxyGenerator : IProxyGenerator {
         // StyleCop doesn't like bitwise without [Flags] MemberAttributes.Public | MemberAttributes.Final;
         private const MemberAttributes MemberAttributesPublicOrFinal = (MemberAttributes)24578;
-                                       
+
         public IEnumerable<CodeTypeDeclaration> GenerateProxies(CodeGeneratorConfig codeGeneratorConfig, IDictionary<Type, IMap> maps) {
             var parallelMaps = maps.Values.AsParallel();
             var trackingClasses = parallelMaps.Select(m => this.CreateTrackingClass(m, codeGeneratorConfig));
@@ -34,14 +34,14 @@ namespace TopHat.CodeGeneration {
             this.GenerateGetSetProperty(trackingClass, "OldValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), MemberAttributesPublicOrFinal);
             this.GenerateGetSetProperty(trackingClass, "NewValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), MemberAttributesPublicOrFinal);
             this.GenerateGetSetProperty(
-                trackingClass, 
-                "AddedEntities", 
-                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))), 
+                trackingClass,
+                "AddedEntities",
+                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))),
                 MemberAttributesPublicOrFinal);
             this.GenerateGetSetProperty(
-                trackingClass, 
-                "DeletedEntities", 
-                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))), 
+                trackingClass,
+                "DeletedEntities",
+                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))),
                 MemberAttributesPublicOrFinal);
 
             // add in a constructor to initialise collections
@@ -55,11 +55,11 @@ namespace TopHat.CodeGeneration {
                 new CodeAssignStatement(CodeHelpers.ThisField("NewValues"), new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(object)))));
             constructor.Statements.Add(
                 new CodeAssignStatement(
-                    CodeHelpers.ThisField("AddedEntities"), 
+                    CodeHelpers.ThisField("AddedEntities"),
                     new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))))));
             constructor.Statements.Add(
                 new CodeAssignStatement(
-                    CodeHelpers.ThisField("DeletedEntities"), 
+                    CodeHelpers.ThisField("DeletedEntities"),
                     new CodeObjectCreateExpression(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))))));
 
             // these constructor statements override the collection properties to use observable collections
@@ -67,9 +67,9 @@ namespace TopHat.CodeGeneration {
                 constructor.Statements.Add(
                     new CodeConditionStatement(
                         new CodeBinaryOperatorExpression(
-                            new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key), 
-                            CodeBinaryOperatorType.IdentityEquality, 
-                            new CodePrimitiveExpression(null)), 
+                            new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key),
+                            CodeBinaryOperatorType.IdentityEquality,
+                            new CodePrimitiveExpression(null)),
                         new CodeStatement[] {
                                                 new CodeAssignStatement(
                                                     new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key), 
@@ -77,7 +77,7 @@ namespace TopHat.CodeGeneration {
                                                     "TopHat.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">", 
                                                     new CodeThisReferenceExpression(), 
                                                     new CodePrimitiveExpression(collectionColumn.Key)))
-                                            }, 
+                                            },
                         new CodeStatement[] {
                                                 new CodeAssignStatement(
                                                     new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key), 
@@ -106,48 +106,45 @@ namespace TopHat.CodeGeneration {
                 else {
                     // can be null, need to be careful of null reference exceptions
                     changeCheck.Left = new CodeBinaryOperatorExpression(
-                        CodeHelpers.BasePropertyIsNull(valueTypeColumn.Key), 
-                        CodeBinaryOperatorType.BooleanAnd, 
+                        CodeHelpers.BasePropertyIsNull(valueTypeColumn.Key),
+                        CodeBinaryOperatorType.BooleanAnd,
                         new CodeBinaryOperatorExpression(
-                            new CodePropertySetValueReferenceExpression(), 
-                            CodeBinaryOperatorType.IdentityInequality, 
+                            new CodePropertySetValueReferenceExpression(),
+                            CodeBinaryOperatorType.IdentityInequality,
                             new CodePrimitiveExpression(null)));
                     changeCheck.Operator = CodeBinaryOperatorType.BooleanOr;
                     changeCheck.Right = new CodeBinaryOperatorExpression(
-                        CodeHelpers.BasePropertyIsNotNull(valueTypeColumn.Key), 
-                        CodeBinaryOperatorType.BooleanAnd, 
+                        CodeHelpers.BasePropertyIsNotNull(valueTypeColumn.Key),
+                        CodeBinaryOperatorType.BooleanAnd,
                         new CodeBinaryOperatorExpression(
-                            new CodeMethodInvokeExpression(CodeHelpers.BaseProperty(valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()), 
-                            CodeBinaryOperatorType.IdentityEquality, 
+                            new CodeMethodInvokeExpression(CodeHelpers.BaseProperty(valueTypeColumn.Key), "Equals", new CodePropertySetValueReferenceExpression()),
+                            CodeBinaryOperatorType.IdentityEquality,
                             new CodePrimitiveExpression(false)));
                 }
 
                 prop.SetStatements.Insert(
-                    0, 
+                    0,
                     new CodeConditionStatement(
-                        new CodeBinaryOperatorExpression(
-                            CodeHelpers.ThisPropertyIsTrue("IsTracking"), 
-                            CodeBinaryOperatorType.BooleanAnd, 
-                            new CodeBinaryOperatorExpression(
+                        CodeHelpers.ThisPropertyIsTrue("IsTracking"),
+                        new CodeStatement[] {
+                            new CodeConditionStatement(
                                 new CodeBinaryOperatorExpression(
-                                    new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)), 
-                                    CodeBinaryOperatorType.IdentityEquality, 
-                                    new CodePrimitiveExpression(false)), 
-                                CodeBinaryOperatorType.BooleanAnd, 
-                                changeCheck)), 
-                        new CodeStatement[] {
-                                                new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))), 
-                                                new CodeAssignStatement(
-                                                    new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)), 
-                                                    new CodePropertySetValueReferenceExpression())
-                                            }, 
-                        new CodeStatement[] {
-                                                new CodeConditionStatement(
-                                                    CodeHelpers.ThisPropertyIsTrue("IsTracking"), 
+                                    new CodeBinaryOperatorExpression(
+                                        new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)), 
+                                        CodeBinaryOperatorType.IdentityEquality, 
+                                        new CodePrimitiveExpression(false)), 
+                                    CodeBinaryOperatorType.BooleanAnd, 
+                                    changeCheck),
+                                    new CodeStatement[] {
+                                                    new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))), 
                                                     new CodeAssignStatement(
-                                                    new CodeIndexerExpression(CodeHelpers.ThisProperty("NewValues"), new CodePrimitiveExpression(prop.Name)), 
-                                                    new CodePropertySetValueReferenceExpression()))
-                                            }));
+                                                        new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)), 
+                                                        new CodePropertySetValueReferenceExpression())
+                                                }), 
+                            new CodeAssignStatement(
+                                new CodeIndexerExpression(CodeHelpers.ThisProperty("NewValues"), new CodePrimitiveExpression(prop.Name)), 
+                                new CodePropertySetValueReferenceExpression())
+                        }));
             }
 
             trackingClass.Members.Add(constructor);
@@ -183,15 +180,15 @@ namespace TopHat.CodeGeneration {
                 property.Attributes = MemberAttributes.Public | MemberAttributes.Override;
                 property.GetStatements.Add(
                     new CodeConditionStatement(
-                        //// if backingField != null or Fk backing field is null return
+                    //// if backingField != null or Fk backing field is null return
                         new CodeBinaryOperatorExpression(
-                            CodeHelpers.ThisFieldIsNotNull(backingField.Name), 
-                            CodeBinaryOperatorType.BooleanOr, 
-                            CodeHelpers.ThisPropertyIsNull(foreignKeyBackingProperty.Name)), 
+                            CodeHelpers.ThisFieldIsNotNull(backingField.Name),
+                            CodeBinaryOperatorType.BooleanOr,
+                            CodeHelpers.ThisPropertyIsNull(foreignKeyBackingProperty.Name)),
                         new CodeStatement[] {
                                                 // true
                                                 new CodeMethodReturnStatement(CodeHelpers.ThisField(backingField.Name))
-                                            }, 
+                                            },
                         new CodeStatement[] {
                                                 // false, return new object with foreign key set
                                                 new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)), 
