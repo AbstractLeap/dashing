@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>TopHat</id>
-        <version>0.0.1</version>
-        <title>TopHat Mini-ORM</title>
+        <version>0.0.3</version>
+        <title>TopHat Mighty-ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
         <projectUrl>http://polylytics.com/tophat</projectUrl>
