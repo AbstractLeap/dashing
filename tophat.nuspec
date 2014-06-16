@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>TopHat</id>
+        <version>0.0.1</version>
+        <title>TopHat Mini-ORM</title>
+        <authors>Polylytics</authors>
+        <owners>Polylytics</owners>
+        <projectUrl>http://polylytics.com/tophat</projectUrl>
+        <iconUrl>http://polylytics.com/tophat/tophat-icon.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>TopHat is a mini-ORM built on top of Dapper that aims to provide fantastic productivity while preventing abuse of the ORM pattern</description>
+        <summary>More features than Dapper, less heavy than NHibernate</summary>
+        <releaseNotes>* 0.0.1 - Our very first release. Be gentle.</releaseNotes>
+        <copyright>© Polylytics Limited, 2014</copyright>
+        <tags>orm sql mini-orm</tags>
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
+            <frameworkAssembly assemblyName="System" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Core" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Data" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Data.DataSetExtensions" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Data.Entity.Design" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Data.Linq" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Xml" targetFramework="" />
+        </frameworkAssemblies>
+    </metadata>
+    <files>
+        <file src="TopHat\bin\Release\Dapper.dll" target="lib\net45\Dapper.dll" />
+        <file src="TopHat\bin\Release\TopHat.dll" target="lib\net45\TopHat.dll" />
+        <file src="TopHat\bin\Release\TopHat.pdb" target="lib\net45\TopHat.pdb" />
+        <file src="TopHat\bin\Release\TopHat.xml" target="lib\net45\TopHat.xml" />
+    </files>
+</package>
