@@ -46,6 +46,29 @@
         }
 
         [Fact]
+        public void WhereClosureConstantAccess() {
+            var o = new Post { PostId = 1 };
+            var query = this.GetSelectQuery<Post>().Where(p => p.PostId == o.PostId);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", sql.Sql);
+        }
+
+        internal class Foo {
+            public int Id = 1;
+        }
+        [Fact]
+        public void WhereNonMappedClosureConstantAccess() {
+            var foo = new Foo();
+            var query = this.GetSelectQuery<Post>().Where(p => p.PostId == foo.Id);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", sql.Sql);
+        }
+
+        [Fact]
         public void WhereNonPKFetch() {
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author).Where(p => p.Author.Username == "bob");
             var selectQuery = query as SelectQuery<Post>;

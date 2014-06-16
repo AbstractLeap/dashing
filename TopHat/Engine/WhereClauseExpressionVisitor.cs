@@ -87,14 +87,16 @@
                     this.isChainedMemberAccess = true;
                     this.chainedMemberAccessExpression = m;
 
-                    // we want to check for a primary key here because in that case we can put the where clause on the referencing object
-                    if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name) {
-                        this.getForeignKeyName = true;
-                    }
-                    else {
-                        // we need this column name
-                        this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
-                        this.chainedColumnType = m.Member.DeclaringType;
+                    if (this.configuration.HasMap(m.Member.DeclaringType)) {
+                        // we want to check for a primary key here because in that case we can put the where clause on the referencing object
+                        if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name) {
+                            this.getForeignKeyName = true;
+                        }
+                        else {
+                            // we need this column name
+                            this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
+                            this.chainedColumnType = m.Member.DeclaringType;
+                        }
                     }
                 }
             }
@@ -247,12 +249,7 @@
         protected override Expression VisitConstant(ConstantExpression c) {
             object value;
             if (this.isClosureConstantAccess) {
-                if (this.isChainedMemberAccess) {
-                    value = Expression.Lambda(this.chainedMemberAccessExpression).Compile().DynamicInvoke(null);
-                }
-                else {
-                    throw new NotImplementedException();
-                }
+                value = Expression.Lambda(this.chainedMemberAccessExpression).Compile().DynamicInvoke(null);
             }
             else {
                 value = c.Value;

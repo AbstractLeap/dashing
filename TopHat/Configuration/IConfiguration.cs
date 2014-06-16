@@ -30,6 +30,13 @@
         IMap GetMap(Type type);
 
         /// <summary>
+        ///     Returns whether the configuration contains a map for a particular type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        bool HasMap(Type type);
+
+        /// <summary>
         ///     The begin session.
         /// </summary>
         /// <returns>
