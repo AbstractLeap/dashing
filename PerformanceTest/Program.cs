@@ -11,8 +11,8 @@
     using TopHat.Engine;
     using TopHat.Engine.DDL;
 
-    internal class Program {
-        public const string ConnectionString = "Data Source=.;Initial Catalog=tempdb;Integrated Security=True";
+    internal static class Program {
+        private const string ConnectionString = "Data Source=.;Initial Catalog=tempdb;Integrated Security=True";
 
         private static void Main(string[] args) {
             var config = new TopHatConfiguration(new SqlServerEngine(), ConnectionString);
@@ -25,7 +25,7 @@
                 Iteration(session, 1);
                 DapperIteration(session.Connection, 1);
 
-                for (var j = 1; j <= 10; ++j) {
+                for (var j = 1; j <= 3; ++j) {
                     for (var i = 1; i <= 500; i++) {
                         topHatWatch.Start();
                         Iteration(session, 1 + (i % 500));
@@ -40,8 +40,8 @@
                 }
             }
 
-            Console.WriteLine("TopHat took {0}ms", topHatWatch.ElapsedMilliseconds);
-            Console.WriteLine("Dapper took {0}ms", dapperWatch.ElapsedMilliseconds);
+            Console.WriteLine("TopHat took {0}ms for 3 iterations of 500", topHatWatch.ElapsedMilliseconds);
+            Console.WriteLine("Dapper took {0}ms for 3 iterations of 500", dapperWatch.ElapsedMilliseconds);
         }
 
         private static Post Iteration(ISession session, int i) {
