@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Text;
 
     using Dapper;
@@ -247,9 +248,31 @@
         }
 
         protected override Expression VisitConstant(ConstantExpression c) {
-            object value;
+            object value = null;
+
             if (this.isClosureConstantAccess) {
-                value = Expression.Lambda(this.chainedMemberAccessExpression).Compile().DynamicInvoke(null);
+                if (this.isChainedMemberAccess) {
+                    value = Expression.Lambda(this.chainedMemberAccessExpression).Compile().DynamicInvoke(null);
+                }
+                else {
+                    var currentType = c.Value.GetType();
+                    while (currentType != null) {
+                        var field = currentType.GetField(this.constantMemberAccessName, BindingFlags.Public | BindingFlags.Instance);
+
+                        // if the field exists, get its value and stop
+                        if (field != null) {
+                            value = field.GetValue(c.Value);
+                            break;
+                        }
+
+                        // else look in the base type
+                        if (currentType.BaseType == null) {
+                            throw new Exception("Couldn't find a value while visiting a constant expression");
+                        }
+
+                        currentType = currentType.BaseType;
+                    }
+                }
             }
             else {
                 value = c.Value;
