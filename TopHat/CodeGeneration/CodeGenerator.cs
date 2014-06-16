@@ -27,6 +27,11 @@
         }
 
         public IGeneratedCodeManager Generate(IConfiguration configuration) {
+            // Look for an assembly that was already loaded 
+            var generatedCodeAssembly = Assembly.GetEntryAssembly().GetReferencedAssemblies().FirstOrDefault(a => a.Name == this.generatorConfig.Namespace);
+            if (generatedCodeAssembly != null)
+                return new GeneratedCodeManager(this.generatorConfig, Assembly.Load(generatedCodeAssembly));
+
             var timer = new Stopwatch();
             timer.Start();
             var maps = configuration.Maps.ToArray();
