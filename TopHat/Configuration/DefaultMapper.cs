@@ -139,6 +139,7 @@
 
                 case DbType.String:
                     column.Length = this.convention.StringLengthFor(entity, propertyName);
+                    column.IsNullable = true;
                     break;
             }
         }

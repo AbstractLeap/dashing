@@ -14,7 +14,7 @@ namespace TopHat {
     /// </summary>
     /// <typeparam name="T">
     /// </typeparam>
-    public class SelectQuery<T> : QueryBase<T>, ISelectQuery<T> {
+    public class SelectQuery<T> : ISelectQuery<T> {
         private readonly IEngine engine;
 
         private readonly IDbConnection connection;
@@ -30,6 +30,7 @@ namespace TopHat {
             this.Excludes = new List<Expression>();
             this.Fetches = new List<Expression>();
             this.OrderClauses = new Queue<OrderClause<T>>();
+            this.WhereClauses = new List<Expression<Func<T, bool>>>();
         }
 
         /// <summary>
@@ -52,12 +53,20 @@ namespace TopHat {
         /// </summary>
         public IList<Expression> Fetches { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public Tuple<Expression, Expression> CollectionFetches { get; set; }
 
         /// <summary>
         ///     Gets or sets the order clauses.
         /// </summary>
         public Queue<OrderClause<T>> OrderClauses { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the where clauses.
+        /// </summary>
+        public IList<Expression<Func<T, bool>>> WhereClauses { get; set; }
 
         /// <summary>
         ///     Gets or sets the skip n.
@@ -208,6 +217,20 @@ namespace TopHat {
         /// </returns>
         public ISelectQuery<T> Take(int take) {
             this.TakeN = take;
+            return this;
+        }
+
+        /// <summary>
+        ///     The where.
+        /// </summary>
+        /// <param name="predicate">
+        ///     The predicate.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="QueryBase" />.
+        /// </returns>
+        public ISelectQuery<T> Where(Expression<Func<T, bool>> predicate) {
+            this.WhereClauses.Add(predicate);
             return this;
         }
 
