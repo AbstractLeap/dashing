@@ -16,7 +16,8 @@ build/
 [Oo]bj/
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
-!packages/*/build/
+packages/*/build/
+packages/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -154,3 +155,5 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+TopHat/TopHat.Tests/FakesAssemblies/Dapper.1.12.1.1.Fakes.dll
+TopHat/TopHat.Tests/FakesAssemblies/Dapper.1.12.1.1.Fakes.messages
