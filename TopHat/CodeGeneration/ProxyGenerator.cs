@@ -64,6 +64,11 @@ namespace TopHat.CodeGeneration {
 
             // these constructor statements override the collection properties to use observable collections
             foreach (var collectionColumn in map.Columns.Where(c => c.Value.Type.IsCollection())) {
+                if (!collectionColumn.Value.Map.Type.GetProperty(collectionColumn.Value.Name).GetGetMethod().IsVirtual) {
+                    // TODO: send a warning back to the programmer, did they mean to do this?
+                    continue;
+                }
+
                 constructor.Statements.Add(
                     new CodeConditionStatement(
                         new CodeBinaryOperatorExpression(
@@ -91,6 +96,11 @@ namespace TopHat.CodeGeneration {
 
             // override value type properties to perform dirty checking
             foreach (var valueTypeColumn in map.Columns.Where(c => !c.Value.Type.IsCollection() && !c.Value.IsIgnored)) {
+                if (!valueTypeColumn.Value.Map.Type.GetProperty(valueTypeColumn.Value.Name).GetGetMethod().IsVirtual) {
+                    // TODO: send a warning back to the programmer, did they mean to do this?
+                    continue;
+                }
+
                 var prop = this.GenerateGetSetProperty(trackingClass, valueTypeColumn.Key, valueTypeColumn.Value.Type, MemberAttributes.Public | MemberAttributes.Override, true);
 
                 // override the setter
@@ -161,6 +171,11 @@ namespace TopHat.CodeGeneration {
             foreignKeyClass.BaseTypes.Add(map.Type);
 
             foreach (var column in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne)) {
+                if (!column.Value.Map.Type.GetProperty(column.Value.Name).GetGetMethod().IsVirtual) {
+                    // TODO: send a warning back to the programmer, did they mean to do this?
+                    continue;
+                }
+                
                 // create a backing property for storing the FK
                 var backingType = column.Value.DbType.GetCLRType();
                 if (backingType.IsValueType) {
