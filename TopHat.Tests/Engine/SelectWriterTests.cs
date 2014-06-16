@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using Moq;
@@ -55,9 +56,11 @@
             Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", sql.Sql);
         }
 
-        internal class Foo {
+        private class Foo {
+            [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. We want to test all cases, not just best practice.")]
             public int Id = 1;
         }
+
         [Fact]
         public void WhereNonMappedClosureConstantAccess() {
             var foo = new Foo();
