@@ -117,11 +117,17 @@
         }
 
         public IMap GetMap(Type type) {
-            if (!this.mappedTypes.ContainsKey(type)) {
+            IMap map;
+
+            if (!this.mappedTypes.TryGetValue(type, out map)) {
                 throw new ArgumentException("That type is not mapped");
             }
 
-            return this.mappedTypes[type];
+            return map;
+        }
+
+        public bool HasMap(Type type) {
+            return this.mappedTypes.ContainsKey(type);
         }
 
         private void Dirty() {
