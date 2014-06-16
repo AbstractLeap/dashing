@@ -49,7 +49,7 @@
             var codeReferences =
                 mappedTypes.Select(type => type.Assembly)
                            .Distinct()
-                           .Select(a => a.GetName().Name + ".dll")
+                           .Select(a => a.Location)
                            .Union(new[] { "System.dll", "System.Core.dll", "System.Data.dll", "TopHat.dll", "Dapper.dll" });
 
             // construct the namespace
