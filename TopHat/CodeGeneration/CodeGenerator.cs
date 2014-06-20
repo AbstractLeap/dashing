@@ -28,9 +28,13 @@
 
         public IGeneratedCodeManager Generate(IConfiguration configuration) {
             // Look for an assembly that was already loaded 
-            var generatedCodeAssembly = Assembly.GetEntryAssembly().GetReferencedAssemblies().FirstOrDefault(a => a.Name == this.generatorConfig.Namespace);
-            if (generatedCodeAssembly != null)
-                return new GeneratedCodeManager(this.generatorConfig, Assembly.Load(generatedCodeAssembly));
+            var entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly != null) {
+                var generatedCodeAssembly = entryAssembly.GetReferencedAssemblies().FirstOrDefault(a => a.Name == this.generatorConfig.Namespace);
+                if (generatedCodeAssembly != null) {
+                    return new GeneratedCodeManager(this.generatorConfig, Assembly.Load(generatedCodeAssembly));
+                }
+            }
 
             var timer = new Stopwatch();
             timer.Start();
