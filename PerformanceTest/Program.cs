@@ -57,7 +57,7 @@
         }
 
         private static Post EfIteration(EfContext context, int i) {
-            return context.Posts.First(p => p.PostId == i);
+            return context.Posts.AsNoTracking().First(p => p.PostId == i);
         }
 
         private static Post Iteration(ISession session, int i) {
