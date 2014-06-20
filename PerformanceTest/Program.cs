@@ -20,14 +20,17 @@
             var topHatWatch = new Stopwatch();
             var dapperWatch = new Stopwatch();
             var efWatch = new Stopwatch();
+            var simpleDataWatch = new Stopwatch();
 
             var efDb = new EfContext();
+            var simpleDataDb = Simple.Data.Database.OpenConnection(Program.ConnectionString);
             using (var session = config.BeginSession()) {
                 SetupDatabase(config, session);
 
                 Iteration(session, 1);
                 DapperIteration(session.Connection, 1);
                 EfIteration(efDb, 1);
+                SimpleDataIteration(simpleDataDb, 1);
 
                 for (var j = 1; j <= 3; ++j) {
                     for (var i = 1; i <= 500; i++) {
@@ -47,6 +50,12 @@
                         EfIteration(efDb, i);
                         efWatch.Stop();
                     }
+
+                    for (var i = 1; i <= 500; i++) {
+                        simpleDataWatch.Start();
+                        SimpleDataIteration(simpleDataDb, i);
+                        simpleDataWatch.Stop();
+                    }
                 }
             }
             efDb.Dispose();
@@ -54,6 +63,11 @@
             Console.WriteLine("TopHat took {0}ms for 3 iterations of 500", topHatWatch.ElapsedMilliseconds);
             Console.WriteLine("Dapper took {0}ms for 3 iterations of 500", dapperWatch.ElapsedMilliseconds);
             Console.WriteLine("Entity Framework took {0}ms for 3 iterations of 500", efWatch.ElapsedMilliseconds);
+            Console.WriteLine("Simple Data took {0}ms for 3 iterations of 500", simpleDataWatch.ElapsedMilliseconds);
+        }
+
+        private static Post SimpleDataIteration(dynamic db, int i) {
+            return db.Posts.Get(i);
         }
 
         private static Post EfIteration(EfContext context, int i) {
