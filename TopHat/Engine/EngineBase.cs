@@ -136,7 +136,11 @@ namespace TopHat.Engine {
             }
 
             var sqlQuery = this.UpdateWriter.GenerateSql(query);
-            return this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
+            if (sqlQuery.Sql.Length > 0) {
+                return this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
+            }
+
+            return 0;
         }
 
         /// <summary>
