@@ -176,5 +176,9 @@ namespace TopHat.Engine {
                     return false;
             }
         }
+
+        public virtual string GetIdSql() {
+            return "select @@identity id";
+        }
     }
 }

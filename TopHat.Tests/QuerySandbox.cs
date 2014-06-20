@@ -45,6 +45,30 @@
         }
 
         [Fact(Skip = "connects to real database")]
+        public void TestInsertUpdatesId() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
+                session.Insert(user);
+                Assert.NotEqual(0, user.UserId);
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
+        public void TestMultipleInsertUpdatesIds() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession())
+            {
+                var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
+                var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
+                session.Insert(user, user2);
+                Assert.NotEqual(0, user.UserId);
+                Assert.NotEqual(0, user2.UserId);
+                Assert.NotEqual(user.UserId, user2.UserId);
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
         public void TestUpdate() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {

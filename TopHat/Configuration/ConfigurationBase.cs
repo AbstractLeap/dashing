@@ -59,7 +59,6 @@
             }
         }
 
-
         public bool GetIsTrackedByDefault { get; set; }
 
         /// <summary>

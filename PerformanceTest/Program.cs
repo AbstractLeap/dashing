@@ -64,7 +64,7 @@
                                 }
                             }
 
-                            Console.WriteLine(provider + (test.Method != null ? " (" + test.Method + ") " : "") + " : " + watch.ElapsedMilliseconds + "ms");
+                            Console.WriteLine(provider + (test.Method != null ? " (" + test.Method + ") " : string.Empty) + " : " + watch.ElapsedMilliseconds + "ms");
                         }
                     }
                 }
@@ -76,12 +76,12 @@
         }
 
         private static void FinishTests() {
-            efDb.Dispose();
+            EfDb.Dispose();
             ormliteConn.Dispose();
             session.Dispose();
         }
 
-        private static readonly EfContext efDb = new EfContext();
+        private static readonly EfContext EfDb = new EfContext();
 
         private static IDbConnection ormliteConn;
 
@@ -103,7 +103,8 @@
         private static void SetupFetchChangeTests(List<Test> tests) {
             var testName = "Get And Change";
             var r = new Random();
-            //dapper
+
+            // dapper
             tests.Add(
                 new Test(
                     Providers.Dapper,
@@ -160,10 +161,10 @@
                     Providers.EF,
                     testName,
                     i => {
-                        var post = efDb.Posts.Single(p => p.PostId == i);
+                        var post = EfDb.Posts.Single(p => p.PostId == i);
                         post.Title = Providers.EF + "_" + i + r.Next(100000);
-                        efDb.SaveChanges();
-                        var thatPost = efDb.Posts.Single(p => p.PostId == i);
+                        EfDb.SaveChanges();
+                        var thatPost = EfDb.Posts.Single(p => p.PostId == i);
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(testName + " failed for " + Providers.EF + " as the update did not work");
                         }
@@ -187,6 +188,7 @@
 
         private static void SetupFetchTest(List<Test> tests) {
             var testName = "Fetch";
+
             // add dapper
             tests.Add(
                 new Test(
@@ -206,11 +208,12 @@
             tests.Add(new Test(Providers.TopHat, testName, i => session.Query<Post>().Fetch(p => p.Author).Where(p => p.PostId == i).First()));
 
             // add ef
-            tests.Add(new Test(Providers.EF, testName, i => efDb.Posts.AsNoTracking().Include(p => p.Author).Where(p => p.PostId == i).First()));
+            tests.Add(new Test(Providers.EF, testName, i => EfDb.Posts.AsNoTracking().Include(p => p.Author).Where(p => p.PostId == i).First()));
         }
 
         private static void SetupSelectSingleTest(List<Test> tests, dynamic simpleDataDb) {
             var testName = "SelectSingle";
+
             // add dapper
             tests.Add(
                 new Test(
@@ -228,10 +231,10 @@
             tests.Add(new Test(Providers.TopHat, testName, i => session.Get<Post>(i)) { Method = "By Id" });
 
             // add ef
-            tests.Add(new Test(Providers.EF, testName, i => efDb.Posts.AsNoTracking().First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.EF, testName, i => EfDb.Posts.AsNoTracking().First(p => p.PostId == i)));
 
             // add ef2
-            tests.Add(new Test(Providers.EF, testName, i => efDb.Posts.Find(i)) { Method = "Using Find" });
+            tests.Add(new Test(Providers.EF, testName, i => EfDb.Posts.Find(i)) { Method = "Using Find" });
 
             // add ormlite
             tests.Add(new Test(Providers.ServiceStack, testName, i => ormliteConn.SingleById<Post>(i)));
@@ -271,7 +274,8 @@
 
         private class EfContext : DbContext {
             public EfContext()
-                : base(ConnectionString) {}
+                : base(Program.ConnectionString) {
+            }
 
             protected override void OnModelCreating(DbModelBuilder modelBuilder) {
                 modelBuilder.Entity<Post>().HasOptional(p => p.Author).WithMany().Map(e => e.MapKey("AuthorId"));

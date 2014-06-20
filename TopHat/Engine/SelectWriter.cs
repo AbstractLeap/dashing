@@ -20,24 +20,24 @@
         private static ConcurrentDictionary<Tuple<Type, string>, string> queryCache = new ConcurrentDictionary<Tuple<Type, string>, string>(); 
 
         public SqlWriterResult GenerateGetSql<T>(int id) {
-            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetSingle"), k => GenerateGetSql<T>(false));
+            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
             return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
         }
 
         public SqlWriterResult GenerateGetSql<T>(System.Guid id) {
-            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetSingle"), k => GenerateGetSql<T>(false));
+            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
             return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
         }
 
         public SqlWriterResult GenerateGetSql<T>(IEnumerable<int> ids)
         {
-            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetMultiple"), k => GenerateGetSql<T>(true));
+            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
             return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
         }
 
         public SqlWriterResult GenerateGetSql<T>(IEnumerable<System.Guid> ids)
         {
-            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetMultiple"), k => GenerateGetSql<T>(true));
+            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
             return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
         }
 

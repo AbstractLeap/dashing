@@ -150,5 +150,9 @@
                 return ((NoFetchDelegate<T>)this.noFetchFkCalls[typeof(T)])(conn, result.Sql, result.Parameters);
             }
         }
+
+        public IEnumerable<T> Query<T>(IDbConnection connection, string sql, dynamic parameters = null) {
+            return connection.Query<T>(sql, new DynamicParameters(parameters));
+        }
     }
 }
