@@ -147,7 +147,7 @@
                 return this.Tracked(((NoFetchDelegate<T>)this.noFetchTrackingCalls[typeof(T)])(conn, result.Sql, result.Parameters));
             }
             else {
-                return conn.Query<T>(result.Sql, result.Parameters);
+                return ((NoFetchDelegate<T>)this.noFetchFkCalls[typeof(T)])(conn, result.Sql, result.Parameters);
             }
         }
     }

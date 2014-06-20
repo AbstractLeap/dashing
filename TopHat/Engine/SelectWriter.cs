@@ -46,7 +46,7 @@
             var map = this.Configuration.GetMap<T>();
             foreach (var column in map.Columns) {
                 if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault
-                        && column.Value.Relationship == RelationshipType.None)
+                        && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne))
                 {
                     this.AddColumn(sql, column.Value, string.Empty);
                     sql.Append(", ");
