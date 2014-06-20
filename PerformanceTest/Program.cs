@@ -110,7 +110,7 @@
         }
 
         private static void SetupFetchChangeTests(List<Test> tests) {
-            var testName = "Fetch And Change";
+            var testName = "Get And Change";
             var r = new Random();
             //dapper
             tests.Add(
@@ -159,6 +159,21 @@
                         Console.WriteLine(testName + " failed for " + Providers.EF + " as the update did not work");
                     }
                 }));
+
+            // add servicestack
+            tests.Add(
+                new Test(
+                    Providers.ServiceStack,
+                    testName,
+                    i => {
+                        var post = ormliteConn.SingleById<Post>(i);
+                        post.Title = Providers.ServiceStack + "_" + i + r.Next(100000);
+                        ormliteConn.Update(post);
+                        var thatPost = ormliteConn.SingleById<Post>(i);
+                        if (thatPost.Title != post.Title) {
+                            Console.WriteLine(testName + " failed for " + Providers.ServiceStack + " as the update did not work");
+                        }
+                    }));
         }
 
         private static void SetupFetchTest(List<Test> tests) {

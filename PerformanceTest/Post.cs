@@ -6,6 +6,7 @@ namespace PerformanceTest {
 
     [Alias("Posts")]
     public class Post {
+        [AutoIncrement]
         public virtual int PostId { get; set; }
 
         public virtual string Title { get; set; }
@@ -14,10 +15,10 @@ namespace PerformanceTest {
 
         public virtual decimal Rating { get; set; }
 
-        [Alias("AuthorId")]
+        [Ignore]
         public virtual User Author { get; set; }
 
-        [Alias("BlogId")]
+        [Ignore]
         public virtual Blog Blog { get; set; }
 
         [Ignore]
