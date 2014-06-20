@@ -21,9 +21,12 @@
             var dapperWatch = new Stopwatch();
             var efWatch = new Stopwatch();
             var simpleDataWatch = new Stopwatch();
+            var serviceStackWatch = new Stopwatch();
 
             var efDb = new EfContext();
             var simpleDataDb = Simple.Data.Database.OpenConnection(Program.ConnectionString);
+            var dbFactory = new ServiceStack.OrmLite.OrmLiteConnectionFactory(ConnectionString, ServiceStack.OrmLite.SqlServerDialect.Provider);
+            var serviceConn = dbFactory.OpenDbConnection();
             using (var session = config.BeginSession()) {
                 SetupDatabase(config, session);
 
@@ -31,6 +34,7 @@
                 DapperIteration(session.Connection, 1);
                 EfIteration(efDb, 1);
                 SimpleDataIteration(simpleDataDb, 1);
+                ServiceStackIteration(serviceConn, 1);
 
                 for (var j = 1; j <= 3; ++j) {
                     for (var i = 1; i <= 500; i++) {
@@ -56,14 +60,26 @@
                         SimpleDataIteration(simpleDataDb, i);
                         simpleDataWatch.Stop();
                     }
+
+                    for (var i = 1; i <= 500; i++) {
+                        serviceStackWatch.Start();
+                        ServiceStackIteration(serviceConn, i);
+                        serviceStackWatch.Stop();
+                    }
                 }
             }
             efDb.Dispose();
+            serviceConn.Dispose();
 
             Console.WriteLine("TopHat took {0}ms for 3 iterations of 500", topHatWatch.ElapsedMilliseconds);
             Console.WriteLine("Dapper took {0}ms for 3 iterations of 500", dapperWatch.ElapsedMilliseconds);
             Console.WriteLine("Entity Framework took {0}ms for 3 iterations of 500", efWatch.ElapsedMilliseconds);
             Console.WriteLine("Simple Data took {0}ms for 3 iterations of 500", simpleDataWatch.ElapsedMilliseconds);
+            Console.WriteLine("ServiceStack OrmLite took {0}ms for 3 iterations of 500", serviceStackWatch.ElapsedMilliseconds);
+        }
+
+        private static Post ServiceStackIteration(IDbConnection conn, int i) {
+            return ServiceStack.OrmLite.OrmLiteReadConnectionExtensions.SingleById<Post>(conn, i);
         }
 
         private static Post SimpleDataIteration(dynamic db, int i) {
