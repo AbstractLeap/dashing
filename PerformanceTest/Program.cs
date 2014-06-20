@@ -1,6 +1,7 @@
 ﻿namespace PerformanceTest {
     using System;
     using System.Data;
+    using System.Data.Entity;
     using System.Diagnostics;
     using System.Linq;
 
@@ -18,12 +19,15 @@
             var config = new TopHatConfiguration(new SqlServerEngine(), ConnectionString);
             var topHatWatch = new Stopwatch();
             var dapperWatch = new Stopwatch();
+            var efWatch = new Stopwatch();
 
+            var efDb = new EfContext();
             using (var session = config.BeginSession()) {
                 SetupDatabase(config, session);
 
                 Iteration(session, 1);
                 DapperIteration(session.Connection, 1);
+                EfIteration(efDb, 1);
 
                 for (var j = 1; j <= 3; ++j) {
                     for (var i = 1; i <= 500; i++) {
@@ -37,11 +41,23 @@
                         DapperIteration(session.Connection, 1 + (i % 500));
                         dapperWatch.Stop();
                     }
+
+                    for (var i = 1; i <= 500; i++) {
+                        efWatch.Start();
+                        EfIteration(efDb, i);
+                        efWatch.Stop();
+                    }
                 }
             }
+            efDb.Dispose();
 
             Console.WriteLine("TopHat took {0}ms for 3 iterations of 500", topHatWatch.ElapsedMilliseconds);
             Console.WriteLine("Dapper took {0}ms for 3 iterations of 500", dapperWatch.ElapsedMilliseconds);
+            Console.WriteLine("Entity Framework took {0}ms for 3 iterations of 500", efWatch.ElapsedMilliseconds);
+        }
+
+        private static Post EfIteration(EfContext context, int i) {
+            return context.Posts.First(p => p.PostId == i);
         }
 
         private static Post Iteration(ISession session, int i) {
@@ -49,10 +65,12 @@
         }
 
         private static Post DapperIteration(IDbConnection connection, int i) {
-            return connection.Query<Post>("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", new { l_1 = i }).First();
+            return
+                connection.Query<Post>("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", new { l_1 = i })
+                          .First();
         }
 
-        private static void SetupDatabase(TopHatConfiguration config,  ISession session) {
+        private static void SetupDatabase(TopHatConfiguration config, ISession session) {
             var d = new SqlServerDialect();
             var dtw = new DropTableWriter(d);
             var ctw = new CreateTableWriter(d);
@@ -79,6 +97,23 @@
                 this.Add<Post>();
                 this.Add<User>();
             }
+        }
+
+        private class EfContext : DbContext {
+            public EfContext() : base(Program.ConnectionString) { }
+
+            protected override void OnModelCreating(DbModelBuilder modelBuilder) {
+                modelBuilder.Entity<Post>().HasOptional(p => p.Author).WithMany().Map(e => e.MapKey("AuthorId"));
+                modelBuilder.Entity<Post>().HasOptional(p => p.Blog).WithMany(b => b.Posts).Map(e => e.MapKey("BlogId"));
+            }
+
+            public DbSet<Post> Posts { get; set; }
+
+            public DbSet<User> Users { get; set; }
+
+            public DbSet<Blog> Blogs { get; set; }
+
+            public DbSet<Comment> Comments { get; set; }
         }
     }
 }
