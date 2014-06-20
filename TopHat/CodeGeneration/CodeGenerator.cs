@@ -9,6 +9,8 @@
     using System.Linq;
     using System.Reflection;
 
+    using Dapper;
+
     using TopHat.Configuration;
     using TopHat.Engine;
     using TopHat.Extensions;
@@ -28,12 +30,10 @@
 
         public IGeneratedCodeManager Generate(IConfiguration configuration) {
             // Look for an assembly that was already loaded 
-            var entryAssembly = Assembly.GetEntryAssembly();
-            if (entryAssembly != null) {
-                var generatedCodeAssembly = entryAssembly.GetReferencedAssemblies().FirstOrDefault(a => a.Name == this.generatorConfig.Namespace);
-                if (generatedCodeAssembly != null) {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+                var generatedCodeAssembly = assembly.GetReferencedAssemblies().FirstOrDefault(a => a.Name == this.generatorConfig.Namespace);
+                if (generatedCodeAssembly != null)
                     return new GeneratedCodeManager(this.generatorConfig, Assembly.Load(generatedCodeAssembly));
-                }
             }
 
             var timer = new Stopwatch();
@@ -59,7 +59,7 @@
                 mappedTypes.Select(type => type.Assembly)
                            .Distinct()
                            .Select(a => a.Location)
-                           .Union(new[] { "System.dll", "System.Core.dll", "System.Data.dll", "TopHat.dll", "Dapper.dll" });
+                           .Union(GetStandardCodeReferences());
 
             // construct the namespace
             var codeNamespace = new CodeNamespace(this.generatorConfig.Namespace);
@@ -89,6 +89,10 @@
                 };
                 var results = provider.CompileAssemblyFromSource(compilerParameters, source);
 
+                if (results.Errors.HasErrors) {
+                    throw new Exception(results.Errors[0].ErrorText);
+                }
+
                 timer.Stop();
                 this.ElapsedMilliseconds = timer.ElapsedMilliseconds;
 
@@ -101,6 +105,15 @@
                 // return the wrapper
                 return new GeneratedCodeManager(this.generatorConfig, results.CompiledAssembly);
             }
+        }
+
+        private static IEnumerable<string> GetStandardCodeReferences() {
+            yield return "System.dll";
+            yield return "System.Core.dll";
+            yield return "System.Data.dll";
+
+            yield return Assembly.GetExecutingAssembly().Location; // TopHat.dll
+            yield return Assembly.GetAssembly(typeof(SqlMapper)).Location; // Dapper.dll
         }
 
         private CodeTypeDeclaration GenerateDapperWrapper(IEnumerable<IMap> maps, Func<Type, IMap> getMap) {
