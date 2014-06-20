@@ -96,5 +96,13 @@ namespace TopHat.Engine {
         ///     The <see cref="int" />.
         /// </returns>
         int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query);
+
+        T Get<T>(IDbConnection connection, int id, bool? asTracked);
+
+        T Get<T>(IDbConnection connection, Guid id, bool? asTracked);
+
+        IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<int> ids, bool? asTracked);
+
+        IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<Guid> ids, bool? asTracked);
     }
 }

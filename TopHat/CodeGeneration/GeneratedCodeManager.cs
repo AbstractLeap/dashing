@@ -141,5 +141,14 @@
             ITrackedEntityInspector<T> inspector = new TrackedEntityInspector<T>(entity);
             inspector.ResumeTracking();
         }
+
+        public IEnumerable<T> Query<T>(SqlWriterResult result, IDbConnection conn, bool asTracked = false) {
+            if (asTracked) {
+                return this.Tracked(((NoFetchDelegate<T>)this.noFetchTrackingCalls[typeof(T)])(conn, result.Sql, result.Parameters));
+            }
+            else {
+                return conn.Query<T>(result.Sql, result.Parameters);
+            }
+        }
     }
 }

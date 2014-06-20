@@ -1,8 +1,12 @@
 ﻿namespace TopHat.Engine {
+    using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
+
+    using Dapper;
 
     using TopHat.Configuration;
 
@@ -12,6 +16,55 @@
 
         public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
             : base(dialect, whereClauseWriter, config) { }
+
+        private static ConcurrentDictionary<Tuple<Type, string>, string> queryCache = new ConcurrentDictionary<Tuple<Type, string>, string>(); 
+
+        public SqlWriterResult GenerateGetSql<T>(int id) {
+            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetSingle"), k => GenerateGetSql<T>(false));
+            return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
+        }
+
+        public SqlWriterResult GenerateGetSql<T>(System.Guid id) {
+            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetSingle"), k => GenerateGetSql<T>(false));
+            return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
+        }
+
+        public SqlWriterResult GenerateGetSql<T>(IEnumerable<int> ids)
+        {
+            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetMultiple"), k => GenerateGetSql<T>(true));
+            return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
+        }
+
+        public SqlWriterResult GenerateGetSql<T>(IEnumerable<System.Guid> ids)
+        {
+            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetMultiple"), k => GenerateGetSql<T>(true));
+            return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
+        }
+
+        private string GenerateGetSql<T>(bool isMultiple) {
+            var sql = new StringBuilder("select ");
+            var map = this.Configuration.GetMap<T>();
+            foreach (var column in map.Columns) {
+                if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault
+                        && column.Value.Relationship == RelationshipType.None)
+                {
+                    this.AddColumn(sql, column.Value, string.Empty);
+                    sql.Append(", ");
+                }
+            }
+
+            sql.Remove(sql.Length - 2, 2);
+            sql.Append(" from ");
+            this.Dialect.AppendQuotedTableName(sql, map);
+            if (isMultiple) {
+                sql.Append(" where " + map.PrimaryKey.Name + " in @Ids");
+            }
+            else {
+                sql.Append(" where " + map.PrimaryKey.Name + " = @Id");
+            }
+
+            return sql.ToString();
+        }
 
         public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
             var sql = new StringBuilder();

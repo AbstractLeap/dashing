@@ -2,6 +2,7 @@ namespace TopHat.Engine {
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
 
     using TopHat.Configuration;
 
@@ -164,6 +165,30 @@ namespace TopHat.Engine {
 
             var sqlQuery = this.DeleteWriter.GenerateSql(query);
             return this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
+        }
+
+
+        public T Get<T>(IDbConnection connection, int id, bool? asTracked) {
+            var sqlQuery = this.SelectWriter.GenerateGetSql<T>(id);
+            return this.Configuration.CodeManager.Query<T>(sqlQuery, connection, asTracked.HasValue ? asTracked.Value : this.Configuration.GetIsTrackedByDefault).SingleOrDefault();
+        }
+
+        public T Get<T>(IDbConnection connection, Guid id, bool? asTracked)
+        {
+            var sqlQuery = this.SelectWriter.GenerateGetSql<T>(id);
+            return this.Configuration.CodeManager.Query<T>(sqlQuery, connection, asTracked.HasValue ? asTracked.Value : this.Configuration.GetIsTrackedByDefault).SingleOrDefault();
+        }
+
+        public IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<int> ids, bool? asTracked)
+        {
+            var sqlQuery = this.SelectWriter.GenerateGetSql<T>(ids);
+            return this.Configuration.CodeManager.Query<T>(sqlQuery, connection, asTracked.HasValue ? asTracked.Value : this.Configuration.GetIsTrackedByDefault);
+        }
+
+        public IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<Guid> ids, bool? asTracked)
+        {
+            var sqlQuery = this.SelectWriter.GenerateGetSql<T>(ids);
+            return this.Configuration.CodeManager.Query<T>(sqlQuery, connection, asTracked.HasValue ? asTracked.Value : this.Configuration.GetIsTrackedByDefault);
         }
     }
 }
