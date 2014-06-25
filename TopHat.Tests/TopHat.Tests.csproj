@@ -40,6 +40,9 @@
     <Reference Include="Dapper">
       <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="DatabaseSchemaReader">
+      <HintPath>..\packages\Database.Schema.Reader.Core.1.2.4.17096\lib\net35\DatabaseSchemaReader.dll</HintPath>
+    </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
     </Reference>
@@ -74,6 +77,7 @@
     <Compile Include="Configuration\ConfigurationBaseTests.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Configuration\ReverseEngineer\Sandbox.cs" />
     <Compile Include="Engine\DeleteWriterTests.cs" />
     <Compile Include="Engine\InsertWriterTests.cs" />
     <Compile Include="Engine\MySqlDialectBaseTests.cs" />
@@ -107,6 +111,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

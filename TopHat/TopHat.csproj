@@ -36,6 +36,9 @@
     <Reference Include="Dapper">
       <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="DatabaseSchemaReader">
+      <HintPath>..\packages\Database.Schema.Reader.Core.1.2.4.17096\lib\net35\DatabaseSchemaReader.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity.Design" />
@@ -75,6 +78,8 @@
     <Compile Include="Configuration\Map.cs" />
     <Compile Include="Configuration\MutableConfiguration.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
+    <Compile Include="Configuration\ReverseEngineer\Engineer.cs" />
+    <Compile Include="Configuration\ReverseEngineer\IEngineer.cs" />
     <Compile Include="DeleteEntityQuery.cs" />
     <Compile Include="DeleteQuery.cs" />
     <Compile Include="Engine\AnsiSqlDialect.cs" />
@@ -124,6 +129,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Generator\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
