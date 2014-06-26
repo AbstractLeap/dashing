@@ -7,13 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopHat", "TopHat\TopHat.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopHat.Tests", "TopHat.Tests\TopHat.Tests.csproj", "{CA614821-7E80-4745-B513-64D11A394A34}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{87B7CC34-845B-4EBF-AB71-2CB99CA3D2EC}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopHat.MySql", "TopHat.MySql\TopHat.MySql.csproj", "{FC3A4432-A5BE-478B-A6D7-31E2FE2DB8BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{91CDA75F-D19C-48B2-B6CF-7C3ED4592B39}"
