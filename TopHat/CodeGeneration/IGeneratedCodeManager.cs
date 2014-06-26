@@ -60,6 +60,10 @@
         /// <returns></returns>
         IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
 
+        IEnumerable<T> Query<T>(SqlWriterResult result, IDbConnection conn, bool asTracked = false);
+
+        IEnumerable<T> Query<T>(IDbConnection connection, string sql, dynamic parameters = null);
+
         int Execute(string sql, IDbConnection conn, dynamic param = null);
     }
 }

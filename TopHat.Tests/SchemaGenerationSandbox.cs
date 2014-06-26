@@ -29,13 +29,11 @@
                 Debug.WriteLine(sql);
             }
 
-            return;
-
-            using (var session = config.BeginSession()) {
-                foreach (var sql in sqls) {
-                    session.Connection.Execute(sql);
-                }
-            }
+            ////using (var session = config.BeginSession()) {
+            ////    foreach (var sql in sqls) {
+            ////        session.Connection.Execute(sql);
+            ////    }
+            ////}
         }
     }
 }

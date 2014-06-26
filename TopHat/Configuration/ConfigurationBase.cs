@@ -59,6 +59,8 @@
             }
         }
 
+        public bool GetIsTrackedByDefault { get; set; }
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="ConfigurationBase" /> class.
         /// </summary>

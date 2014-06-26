@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30324.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopHat", "TopHat\TopHat.csproj", "{9F337C75-5BB7-4678-A761-BBC371E7FC86}"
 EndProject
@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{87B7CC
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TopHat.MySql", "TopHat.MySql\TopHat.MySql.csproj", "{FC3A4432-A5BE-478B-A6D7-31E2FE2DB8BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{91CDA75F-D19C-48B2-B6CF-7C3ED4592B39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +36,10 @@ Global
 		{FC3A4432-A5BE-478B-A6D7-31E2FE2DB8BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC3A4432-A5BE-478B-A6D7-31E2FE2DB8BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC3A4432-A5BE-478B-A6D7-31E2FE2DB8BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91CDA75F-D19C-48B2-B6CF-7C3ED4592B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91CDA75F-D19C-48B2-B6CF-7C3ED4592B39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91CDA75F-D19C-48B2-B6CF-7C3ED4592B39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91CDA75F-D19C-48B2-B6CF-7C3ED4592B39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

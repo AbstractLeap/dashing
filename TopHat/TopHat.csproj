@@ -89,6 +89,7 @@
     <Compile Include="Engine\IDapperWrapper.cs" />
     <Compile Include="Engine\IEngine.cs" />
     <Compile Include="Engine\IEntitySqlWriter.cs" />
+    <Compile Include="Engine\IInsertWriter.cs" />
     <Compile Include="Engine\InsertWriter.cs" />
     <Compile Include="Engine\ISelectWriter.cs" />
     <Compile Include="Engine\ISqlDialect.cs" />
@@ -110,7 +111,6 @@
     <Compile Include="FetchMany.cs" />
     <Compile Include="IFetchMany.cs" />
     <Compile Include="InsertEntityQuery.cs" />
-    <Compile Include="IQuery.cs" />
     <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="OrderClause.cs" />

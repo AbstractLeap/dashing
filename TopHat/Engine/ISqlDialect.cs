@@ -11,5 +11,7 @@ namespace TopHat.Engine {
         void AppendColumnSpecification(StringBuilder sql, IColumn column);
 
         void AppendEscaped(StringBuilder sql, string s);
+
+        string GetIdSql();
     }
 }

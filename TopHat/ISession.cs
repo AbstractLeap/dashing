@@ -22,6 +22,14 @@ namespace TopHat {
         /// </summary>
         void Complete();
 
+        T Get<T>(int id, bool? asTracked = null);
+
+        T Get<T>(Guid id, bool? asTracked = null);
+
+        IEnumerable<T> Get<T>(IEnumerable<int> ids, bool? asTracked = null);
+
+        IEnumerable<T> Get<T>(IEnumerable<Guid> ids, bool? asTracked = null);
+
         /// <summary>
         ///     The query.
         /// </summary>

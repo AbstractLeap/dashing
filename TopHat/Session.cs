@@ -161,6 +161,26 @@
             this.isDisposed = true;
         }
 
+        public T Get<T>(int id, bool? asTracked = null)
+        {
+            return this.config.Engine.Get<T>(this.connection, id, asTracked);
+        }
+
+        public T Get<T>(Guid id, bool? asTracked = null)
+        {
+            return this.config.Engine.Get<T>(this.connection, id, asTracked);
+        }
+
+        public IEnumerable<T> Get<T>(IEnumerable<int> ids, bool? asTracked = null)
+        {
+            return this.config.Engine.Get<T>(this.connection, ids, asTracked);
+        }
+
+        public IEnumerable<T> Get<T>(IEnumerable<Guid> ids, bool? asTracked = null)
+        {
+            return this.config.Engine.Get<T>(this.connection, ids, asTracked);
+        }
+
         /// <summary>
         ///     The query.
         /// </summary>

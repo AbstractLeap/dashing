@@ -86,5 +86,10 @@
         /// </summary>
         /// <returns></returns>
         IMapper Mapper { get; }
+
+        /// <summary>
+        /// Indicates whether Get method calls return tracked entities by default or not
+        /// </summary>
+        bool GetIsTrackedByDefault { get; set; }
     }
 }

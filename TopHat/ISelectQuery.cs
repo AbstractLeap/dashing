@@ -3,7 +3,11 @@ namespace TopHat {
     using System.Collections.Generic;
     using System.Linq.Expressions;
 
-    public interface ISelectQuery<T> : IQuery<T>, IEnumerable<T> {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface ISelectQuery<T> : IEnumerable<T> {
         /// <summary>
         ///     The select.
         /// </summary>
@@ -101,6 +105,17 @@ namespace TopHat {
         ///     The <see cref="SelectQuery{T}" />.
         /// </returns>
         ISelectQuery<T> Take(int take);
+
+        /// <summary>
+        ///     The where.
+        /// </summary>
+        /// <param name="predicate">
+        ///     The predicate.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="QueryBase{T}" />.
+        /// </returns>
+        ISelectQuery<T> Where(Expression<Func<T, bool>> predicate);
 
         /// <summary>
         ///     The order by.

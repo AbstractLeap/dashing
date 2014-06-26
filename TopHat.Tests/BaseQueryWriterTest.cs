@@ -1,5 +1,4 @@
 ﻿namespace TopHat.Tests {
-    using System;
     using System.Data;
 
     using Moq;
@@ -13,8 +12,6 @@
         protected readonly Mock<IDbTransaction> Transaction;
 
         protected readonly Mock<IGeneratedCodeManager> CodeManager;
-
-        private readonly IDisposable shimsContext;
 
         private readonly Mock<IConfiguration> config;
 

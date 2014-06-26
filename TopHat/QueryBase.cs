@@ -8,7 +8,7 @@ namespace TopHat {
     /// </summary>
     /// <typeparam name="T">
     /// </typeparam>
-    public abstract class QueryBase<T> : IQuery<T> {
+    public abstract class QueryBase<T> {
         /// <summary>
         ///     Initializes a new instance of the <see cref="QueryBase{T}" /> class.
         /// </summary>
