@@ -19,15 +19,15 @@ namespace TopHat.Tools.ModelGeneration
             this.convention = convention;
         }
 
-        public IEnumerable<string> GenerateFiles(IConfiguration configuration, DatabaseSchema schema, string domainNamespace)
+        public IDictionary<string, string> GenerateFiles(IEnumerable<IMap> maps, DatabaseSchema schema, string domainNamespace)
         {
             // note that we're just doing string building here
             // simple POCOs and CodeDom does not support auto-properties
             // and frankly I wouldn't want these things to have backing fields in the source code
-            var result = new List<string>();
+            var result = new Dictionary<string, string>();
 
             // iterate over the configuration generating classes
-            foreach (var map in configuration.Maps)
+            foreach (var map in maps)
             {
                 this.GenerateClass(result, map, schema, domainNamespace);
             }
@@ -35,19 +35,20 @@ namespace TopHat.Tools.ModelGeneration
             return result;
         }
 
-        private void GenerateClass(IList<string> result, IMap map, DatabaseSchema schema, string domainNamespace)
+        private void GenerateClass(IDictionary<string, string> result, IMap map, DatabaseSchema schema, string domainNamespace)
         {
             // set up the class and add it in
             var sourceFile = new StringBuilder();
             var constructorStatements = new StringBuilder();
+            var className = this.convention.ClassNameForTable(map.Table);
             sourceFile.AppendLine("namespace " + domainNamespace);
             sourceFile.AppendLine("{");
             sourceFile.AppendLine(FourSpaces() + "using System;");
             sourceFile.AppendLine(FourSpaces() + "using System.Collections.Generic;");
             sourceFile.AppendLine();
-            sourceFile.AppendLine(FourSpaces() + "public class " + this.convention.ClassNameForTable(map.Table));
+            sourceFile.AppendLine(FourSpaces() + "public class " + className);
             sourceFile.AppendLine(FourSpaces() + "{");
-            sourceFile.AppendLine(FourSpaces(2) + "public " + this.convention.ClassNameForTable(map.Table) + "()");
+            sourceFile.AppendLine(FourSpaces(2) + "public " + className + "()");
             sourceFile.AppendLine(FourSpaces(2) + "{");
             int constructorInsertionPoint = sourceFile.Length;
             sourceFile.AppendLine(FourSpaces(2) + "}");
@@ -67,7 +68,7 @@ namespace TopHat.Tools.ModelGeneration
             // insert constructor statements
             sourceFile.Insert(constructorInsertionPoint, constructorStatements.ToString());
 
-            result.Add(sourceFile.ToString());
+            result.Add(className, sourceFile.ToString());
         }
 
         private void AddColumn(IColumn column, StringBuilder sourceFile, StringBuilder constructorStatements, DatabaseSchema schema)

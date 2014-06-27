@@ -7,6 +7,6 @@ namespace TopHat.Tools.ModelGeneration
 {
     interface IModelGenerator
     {
-        IEnumerable<string> GenerateFiles(IConfiguration configuration, DatabaseSchema schema, string domainNamespace);
+        IDictionary<string, string> GenerateFiles(IEnumerable<IMap> maps, DatabaseSchema schema, string domainNamespace);
     }
 }

@@ -18,8 +18,8 @@ namespace TopHat.Tests.Tools.ModelGeneration
         {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config, MakeSchema(config), testNamespace);
-            Assert.Contains("namespace " + testNamespace, results.First());
+            var results = generator.GenerateFiles(config.Maps, MakeSchema(config), testNamespace);
+            Assert.Contains("namespace " + testNamespace, results.First().Value);
         }
 
         [Fact]
@@ -27,8 +27,8 @@ namespace TopHat.Tests.Tools.ModelGeneration
         {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config, MakeSchema(config), testNamespace);
-            Assert.Contains("public System.Int32 PostId { get; set; }", results.First(s => s.Contains("public class Post")));
+            var results = generator.GenerateFiles(config.Maps, MakeSchema(config), testNamespace);
+            Assert.Contains("public System.Int32 PostId { get; set; }", results["Post"]);
         }
 
         [Fact]
@@ -36,8 +36,8 @@ namespace TopHat.Tests.Tools.ModelGeneration
         {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config, MakeSchema(config), testNamespace);
-            Assert.Contains("public Blog Blog { get; set; }", results.First(s => s.Contains("public class Post")));
+            var results = generator.GenerateFiles(config.Maps, MakeSchema(config), testNamespace);
+            Assert.Contains("public Blog Blog { get; set; }", results["Post"]);
         }
 
         [Fact]
@@ -45,8 +45,8 @@ namespace TopHat.Tests.Tools.ModelGeneration
         {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config, MakeSchema(config), testNamespace);
-            Assert.Contains("public IList<Comment> Comments { get; set; }", results.First(s => s.Contains("public class Post")));
+            var results = generator.GenerateFiles(config.Maps, MakeSchema(config), testNamespace);
+            Assert.Contains("public IList<Comment> Comments { get; set; }", results["Post"]);
         }
 
         [Fact]
@@ -54,8 +54,8 @@ namespace TopHat.Tests.Tools.ModelGeneration
         {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config, MakeSchema(config), testNamespace);
-            Assert.Contains("this.Comments = new List<Comment>();", results.First(s => s.Contains("public class Post")));
+            var results = generator.GenerateFiles(config.Maps, MakeSchema(config), testNamespace);
+            Assert.Contains("this.Comments = new List<Comment>();", results["Post"]);
         }
 
         private DatabaseSchemaReader.DataSchema.DatabaseSchema MakeSchema(CustomConfig config)

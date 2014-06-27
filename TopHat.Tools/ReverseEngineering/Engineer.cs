@@ -51,7 +51,7 @@ namespace TopHat.Tools.ReverseEngineering
             mapColumn.IsExcludedByDefault = false;
             mapColumn.IsIgnored = false;
             mapColumn.IsNullable = column.Nullable;
-            mapColumn.IsPrimaryKey = column.IsPrimaryKey;
+            mapColumn.IsPrimaryKey = column.IsPrimaryKey || column.IsIdentity; // HACK - MySql issue with primary keys?
             if (mapColumn.IsPrimaryKey)
             {
                 map.PrimaryKey = mapColumn;
