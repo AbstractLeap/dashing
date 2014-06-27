@@ -100,6 +100,7 @@
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\User.cs" />
     <Compile Include="Tools\ModelGeneration\SourceTests.cs" />
+    <Compile Include="Tools\ReverseEngineering\EngineerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TopHat.MySql\TopHat.MySql.csproj">

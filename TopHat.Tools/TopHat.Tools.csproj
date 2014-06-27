@@ -55,7 +55,9 @@
     <Compile Include="ModelGeneration\IModelGenerator.cs" />
     <Compile Include="ModelGeneration\ModelGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReverseEngineering\DefaultConvention.cs" />
     <Compile Include="ReverseEngineering\Engineer.cs" />
+    <Compile Include="ReverseEngineering\IConvention.cs" />
     <Compile Include="ReverseEngineering\IEngineer.cs" />
   </ItemGroup>
   <ItemGroup />

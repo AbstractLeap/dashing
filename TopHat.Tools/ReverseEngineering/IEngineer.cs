@@ -10,6 +10,6 @@ namespace TopHat.Tools.ReverseEngineering
 {
     public interface IEngineer
     {
-        IEnumerable<IMap> ReverseEngineer(IDatabaseReader databaseReader);
+        IEnumerable<IMap> ReverseEngineer(DatabaseSchemaReader.DataSchema.DatabaseSchema schema);
     }
 }

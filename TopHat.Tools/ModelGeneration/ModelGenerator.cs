@@ -21,6 +21,9 @@ namespace TopHat.Tools.ModelGeneration
 
         public IEnumerable<string> GenerateFiles(IConfiguration configuration, DatabaseSchema schema, string domainNamespace)
         {
+            // note that we're just doing string building here
+            // simple POCOs and CodeDom does not support auto-properties
+            // and frankly I wouldn't want these things to have backing fields in the source code
             var result = new List<string>();
 
             // iterate over the configuration generating classes
