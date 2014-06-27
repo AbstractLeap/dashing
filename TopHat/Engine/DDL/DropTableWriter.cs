@@ -4,7 +4,7 @@ namespace TopHat.Engine.DDL {
 
     using TopHat.Configuration;
 
-    public class DropTableWriter {
+    public class DropTableWriter : IDropTableWriter {
         private readonly ISqlDialect dialect;
 
         public DropTableWriter(ISqlDialect dialect) {

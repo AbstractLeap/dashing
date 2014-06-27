@@ -99,11 +99,16 @@
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\User.cs" />
+    <Compile Include="Tools\ModelGeneration\SourceTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TopHat.MySql\TopHat.MySql.csproj">
       <Project>{fc3a4432-a5be-478b-a6d7-31e2fe2db8be}</Project>
       <Name>TopHat.MySql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TopHat.Tools\TopHat.Tools.csproj">
+      <Project>{414968d7-e94c-404b-8831-35aa54a656f1}</Project>
+      <Name>TopHat.Tools</Name>
     </ProjectReference>
     <ProjectReference Include="..\TopHat\TopHat.csproj">
       <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>

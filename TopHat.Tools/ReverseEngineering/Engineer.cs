@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using DatabaseSchemaReader;
 using DatabaseSchemaReader.DataSchema;
+using TopHat.Configuration;
 
-namespace TopHat.Configuration.ReverseEngineer
+namespace TopHat.Tools.ReverseEngineering
 {
     public class Engineer : IEngineer
     {
