@@ -75,13 +75,14 @@ namespace TopHat.Tests.Tools.ModelGeneration
 
             return result;
         }
+    }
 
-        private class CustomConfig : DefaultConfiguration
+    public class CustomConfig : DefaultConfiguration
+    {
+        public CustomConfig()
+            : base(new TopHat.Engine.SqlServerEngine(), string.Empty)
         {
-            public CustomConfig() : base(new TopHat.Engine.SqlServerEngine(), string.Empty)
-            {
-                this.AddNamespaceOf<TopHat.Tests.TestDomain.Post>();
-            }
+            this.AddNamespaceOf<TopHat.Tests.TestDomain.Post>();
         }
     }
 }

@@ -8,6 +8,8 @@ namespace TopHat.Tools.Migration
 {
     public interface IMigrator
     {
-        string GenerateSqlDiff(IConfiguration from, IConfiguration to, out IEnumerable<string> warnings, out IEnumerable<string> errors);
+        string GenerateSqlDiff(IEnumerable<IMap> from, IEnumerable<IMap> to, out IEnumerable<string> warnings, out IEnumerable<string> errors);
+
+        string GenerateNaiveSqlDiff(IEnumerable<IMap> from, IEnumerable<IMap> to, out IEnumerable<string> warnings, out IEnumerable<string> errors);
     }
 }

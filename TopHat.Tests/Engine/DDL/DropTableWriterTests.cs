@@ -34,15 +34,10 @@
 
         [Fact]
         public void IfExistsGeneratesExpectedSql() {
-            var target = this.MakeTarget();
-            this.mockDialect.Setup(m => m.AppendEscaped(It.IsAny<StringBuilder>(), It.IsAny<string>())).Callback<StringBuilder, string>((s, m) => s.Append("<tablename>"));
-            this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>())).Callback<StringBuilder, IMap>((s, m) => s.Append("<tablename>"));
+            var dialect = new SqlDialectBase('[', ']');
+            var sql = dialect.WriteDropTableIfExists("<tablename>");
 
-            var sql = target.DropTableIfExists(MakeMap(new Column<string> { Name = "Username" }));
-
-            Assert.Equal("if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '<tablename>') drop table <tablename>", sql);
-
-            this.mockDialect.Verify(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()), Times.Once());
+            Assert.Equal("if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '<tablename>') drop table [<tablename>]", sql);
         }
 
         private static IMap MakeMap(params IColumn[] columns) {

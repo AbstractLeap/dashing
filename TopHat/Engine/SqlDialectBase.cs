@@ -180,5 +180,15 @@ namespace TopHat.Engine {
         public virtual string GetIdSql() {
             return "select @@identity id";
         }
+
+        public virtual string WriteDropTableIfExists(string tableName)
+        {
+            var sql = new StringBuilder();
+            sql.Append("if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '");
+            this.AppendEscaped(sql, tableName);
+            sql.Append("') drop table ");
+            this.AppendQuotedName(sql, tableName);
+            return sql.ToString();
+        }
     }
 }

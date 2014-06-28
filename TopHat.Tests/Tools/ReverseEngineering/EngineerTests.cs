@@ -48,8 +48,8 @@ namespace TopHat.Tests.Tools.ReverseEngineering
                 Name = "Posts"
             };
 
-            postTable.Columns.Add(new DatabaseSchemaReader.DataSchema.DatabaseColumn { IsIdentity = true, IsPrimaryKey = true, Name = "PostId", DataType = new DatabaseSchemaReader.DataSchema.DataType("int", "int") { ProviderDbType = 3 } });
-            postTable.Columns.Add(new DatabaseSchemaReader.DataSchema.DatabaseColumn { Name = "BlogId", IsForeignKey = true, ForeignKeyTableName = "Blogs", DataType = new DatabaseSchemaReader.DataSchema.DataType("int", "int") { ProviderDbType = 3 } });
+            postTable.Columns.Add(new DatabaseSchemaReader.DataSchema.DatabaseColumn { IsIdentity = true, IsPrimaryKey = true, Name = "PostId", DataType = new DatabaseSchemaReader.DataSchema.DataType("int", "System.Int32") { ProviderDbType = 3 } });
+            postTable.Columns.Add(new DatabaseSchemaReader.DataSchema.DatabaseColumn { Name = "BlogId", IsForeignKey = true, ForeignKeyTableName = "Blogs", DataType = new DatabaseSchemaReader.DataSchema.DataType("int", "System.Int32") { ProviderDbType = 3 } });
 
             schema.Tables.Add(postTable);
             return schema;
