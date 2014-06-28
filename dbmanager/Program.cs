@@ -9,12 +9,6 @@ namespace dbmanager
     {
         static void Main(string[] args)
         {
-            if (args.Contains("?") || args.Contains("--help"))
-            {
-                Help();
-                return;
-            }
-
             if (args.Contains("-s"))
             {
                 string path = GetPath(args, "-s");
@@ -43,6 +37,8 @@ namespace dbmanager
 
                 return;
             }
+
+            Help();
         }
 
         private static void ReverseEngineer(string path, string generatedNamespace)

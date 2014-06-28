@@ -17,7 +17,10 @@ namespace TopHat.Tools.ModelGeneration
 
         public string ClassNameForTable(string tableName)
         {
-            return this.pluralizationService.Singularize(tableName);
+            var className = this.pluralizationService.Singularize(tableName);
+            
+            // capitalise - helps with case-insensitivity of MySql on Windows
+            return className[0].ToString().ToUpper() + className.Substring(1);
         }
     }
 }

@@ -8,7 +8,7 @@
     /// <summary>
     ///     The type extensions.
     /// </summary>
-    internal static class TypeExtensions {
+    public static class TypeExtensions {
         /// <summary>
         ///     The type map.
         /// </summary>
