@@ -1,4 +1,5 @@
-﻿namespace TopHat.Extensions {
+﻿namespace TopHat.Extensions
+{
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -8,7 +9,8 @@
     /// <summary>
     ///     The type extensions.
     /// </summary>
-    public static class TypeExtensions {
+    public static class TypeExtensions
+    {
         /// <summary>
         ///     The type map.
         /// </summary>
@@ -47,7 +49,8 @@
                                                                                                      { typeof(Guid?), DbType.Guid }, 
                                                                                                      { typeof(DateTime?), DbType.DateTime }, 
                                                                                                      { typeof(DateTimeOffset?), DbType.DateTimeOffset }, 
-                                                                                                     { typeof(Binary), DbType.Binary }
+                                                                                                     { typeof(Binary), DbType.Binary },
+                                                                                                     { typeof(TimeSpan), DbType.Time }
                                                                                                  };
 
         private static readonly IDictionary<DbType, Type> DbTypeMap = new Dictionary<DbType, Type> {
@@ -60,7 +63,8 @@
                                                                                                        { DbType.Byte, typeof(byte) }, 
                                                                                                        { DbType.SByte, typeof(sbyte) }, 
                                                                                                        { DbType.String, typeof(string) }, 
-                                                                                                       { DbType.Guid, typeof(Guid) }
+                                                                                                       { DbType.Guid, typeof(Guid) },
+                                                                                                       { DbType.Time, typeof(TimeSpan)}
                                                                                                    };
 
         /// <summary>
@@ -72,7 +76,8 @@
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public static bool IsEntityType(this Type type) {
+        public static bool IsEntityType(this Type type)
+        {
             return !type.IsValueType && type != typeof(string) && type != typeof(byte[]);
         }
 
@@ -85,7 +90,8 @@
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public static bool IsCollection(this Type type) {
+        public static bool IsCollection(this Type type)
+        {
             return type != typeof(byte[]) && type != typeof(string) && type.IsImplementationOf(typeof(IEnumerable));
         }
 
@@ -101,7 +107,8 @@
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public static bool IsImplementationOf(this Type thisType, Type type) {
+        public static bool IsImplementationOf(this Type thisType, Type type)
+        {
             return null != thisType.GetInterface(type.FullName);
         }
 
@@ -116,22 +123,27 @@
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
         /// </exception>
-        public static DbType GetDbType(this Type type) {
-            if (type.IsNullable()) {
+        public static DbType GetDbType(this Type type)
+        {
+            if (type.IsNullable())
+            {
                 type = type.GetGenericArguments()[0];
             }
 
-            if (TypeMap.ContainsKey(type)) {
+            if (TypeMap.ContainsKey(type))
+            {
                 return TypeMap[type];
             }
 
             // just use underlying type of enum
-            if (!type.IsEnum) {
+            if (!type.IsEnum)
+            {
                 throw new ArgumentOutOfRangeException("type", "Unable to determine the DBType for type: " + type.FullName);
             }
 
             var enumType = Enum.GetUnderlyingType(type);
-            if (TypeMap.ContainsKey(enumType)) {
+            if (TypeMap.ContainsKey(enumType))
+            {
                 return TypeMap[enumType];
             }
 
@@ -143,8 +155,10 @@
         /// </summary>
         /// <param name="dbType"></param>
         /// <returns></returns>
-        public static Type GetCLRType(this DbType dbType) {
-            if (!DbTypeMap.ContainsKey(dbType)) {
+        public static Type GetCLRType(this DbType dbType)
+        {
+            if (!DbTypeMap.ContainsKey(dbType))
+            {
                 throw new ArgumentOutOfRangeException("dbType", "Unable to determine the type for dbType: " + dbType);
             }
 
@@ -160,7 +174,8 @@
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public static bool IsNullable(this Type type) {
+        public static bool IsNullable(this Type type)
+        {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
     }
