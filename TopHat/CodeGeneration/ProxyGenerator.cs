@@ -10,14 +10,31 @@ namespace TopHat.CodeGeneration {
     using TopHat.Extensions;
 
     internal class ProxyGenerator : IProxyGenerator {
-        // StyleCop doesn't like bitwise without [Flags] MemberAttributes.Public | MemberAttributes.Final;
-        private const MemberAttributes MemberAttributesPublicOrFinal = (MemberAttributes)24578;
+        // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags (this usage is legal, see http://msdn.microsoft.com/en-us/library/system.codedom.memberattributes%28v=vs.110%29.aspx)
+        private const MemberAttributes FinalPublic = MemberAttributes.Final | MemberAttributes.Public;
 
-        public IEnumerable<CodeTypeDeclaration> GenerateProxies(CodeGeneratorConfig codeGeneratorConfig, IDictionary<Type, IMap> maps) {
-            var parallelMaps = maps.Values.AsParallel();
+        public ProxyGeneratorResult GenerateProxies(CodeGeneratorConfig codeGeneratorConfig, IDictionary<Type, IMap> mapDictionary) {
+            var maps = mapDictionary.Values;
+            var parallelMaps = maps.AsParallel();
+
+            // create code doms for the proxy classes
             var trackingClasses = parallelMaps.Select(m => this.CreateTrackingClass(m, codeGeneratorConfig));
-            var foreignKeyClasses = parallelMaps.Select(m => this.CreateFkClass(m, maps, codeGeneratorConfig));
-            return trackingClasses.Concat(foreignKeyClasses);
+            var foreignKeyClasses = parallelMaps.Select(m => this.CreateFkClass(m, mapDictionary, codeGeneratorConfig));
+
+            // extract metadata from maps
+            var namespaces = maps.Select(m => m.Type.Namespace)
+                                 .Distinct()
+                                 .Select(ns => new CodeNamespaceImport(ns));
+            var references = maps.Select(m => m.Type.Assembly)////.Union(mappedTypes.SelectMany(t => t.GetAncestorTypes()))
+                                 .Distinct()
+                                 .Select(a => a.Location);
+
+            return new ProxyGeneratorResult {
+                                                ProxyTypes = trackingClasses.Concat(foreignKeyClasses)
+                                                                            .ToArray(),
+                                                NamespaceImports = namespaces.ToArray(),
+                                                ReferencedAssemblyLocations = references.ToArray()
+                                            };
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
@@ -29,20 +46,20 @@ namespace TopHat.CodeGeneration {
             trackingClass.BaseTypes.Add(typeof(ITrackedEntity));
 
             // add in change tracking properties
-            this.GenerateGetSetProperty(trackingClass, "IsTracking", typeof(bool), MemberAttributesPublicOrFinal);
-            this.GenerateGetSetProperty(trackingClass, "DirtyProperties", typeof(ISet<>).MakeGenericType(typeof(string)), MemberAttributesPublicOrFinal);
-            this.GenerateGetSetProperty(trackingClass, "OldValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), MemberAttributesPublicOrFinal);
-            this.GenerateGetSetProperty(trackingClass, "NewValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), MemberAttributesPublicOrFinal);
+            this.GenerateGetSetProperty(trackingClass, "IsTracking", typeof(bool), FinalPublic);
+            this.GenerateGetSetProperty(trackingClass, "DirtyProperties", typeof(ISet<>).MakeGenericType(typeof(string)), FinalPublic);
+            this.GenerateGetSetProperty(trackingClass, "OldValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), FinalPublic);
+            this.GenerateGetSetProperty(trackingClass, "NewValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)), FinalPublic);
             this.GenerateGetSetProperty(
                 trackingClass,
                 "AddedEntities",
                 typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))),
-                MemberAttributesPublicOrFinal);
+                FinalPublic);
             this.GenerateGetSetProperty(
                 trackingClass,
                 "DeletedEntities",
                 typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))),
-                MemberAttributesPublicOrFinal);
+                FinalPublic);
 
             // add in a constructor to initialise collections
             var constructor = new CodeConstructor();
@@ -175,14 +192,14 @@ namespace TopHat.CodeGeneration {
                     // TODO: send a warning back to the programmer, did they mean to do this?
                     continue;
                 }
-                
+
                 // create a backing property for storing the FK
                 var backingType = column.Value.DbType.GetCLRType();
                 if (backingType.IsValueType) {
                     backingType = typeof(Nullable<>).MakeGenericType(backingType);
                 }
 
-                var foreignKeyBackingProperty = this.GenerateGetSetProperty(foreignKeyClass, column.Value.DbName, backingType, MemberAttributesPublicOrFinal);
+                var foreignKeyBackingProperty = this.GenerateGetSetProperty(foreignKeyClass, column.Value.DbName, backingType, FinalPublic);
 
                 // create a backing field for storing the related entity
                 var backingField = new CodeMemberField(column.Value.Type, column.Value.Name + codeGeneratorConfig.ForeignKeyAccessEntityFieldSuffix);

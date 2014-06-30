@@ -40,6 +40,9 @@
     <Reference Include="Dapper">
       <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.0.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
     </Reference>
@@ -62,6 +65,7 @@
     <Compile Include="CodeGeneration\Fixtures\GenerateAndOutputCodeFixture.cs" />
     <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
     <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
+    <Compile Include="CodeGeneration\ProxyGeneratorTests.cs" />
     <Compile Include="CodeGeneration\TrackingTests.cs" />
     <Compile Include="Configuration\ColumnExtensionTests.cs" />
     <Compile Include="Configuration\DefaultConventionTests.cs" />
