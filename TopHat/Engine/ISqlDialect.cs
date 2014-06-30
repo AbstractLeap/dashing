@@ -12,6 +12,8 @@ namespace TopHat.Engine {
 
         void AppendEscaped(StringBuilder sql, string s);
 
+        string WriteDropTableIfExists(string tableName);
+
         string GetIdSql();
     }
 }

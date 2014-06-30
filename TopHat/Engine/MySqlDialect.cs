@@ -9,6 +9,13 @@ namespace TopHat.Engine {
             sql.Append(" auto_increment");
         }
 
+        public override string WriteDropTableIfExists(string tableName)
+        {
+            var sql = new StringBuilder("drop table if exists ");
+            this.AppendQuotedName(sql, tableName);
+            return sql.ToString();
+        }
+
         public override string GetIdSql() {
             return "SELECT LAST_INSERT_ID() id";
         }
