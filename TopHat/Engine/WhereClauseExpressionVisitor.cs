@@ -46,6 +46,8 @@
 
         private bool insideSubQuery;
 
+        private bool isTopOfBinary;
+
         public StringBuilder Sql { get; private set; }
 
         public DynamicParameters Parameters { get; private set; }
@@ -62,15 +64,34 @@
         protected override Expression VisitBinary(BinaryExpression b) {
             // form binary expression
             this.Sql.Append("(");
+            isTopOfBinary = true;
             this.Visit(b.Left);
             this.Sql.Append(this.GetOperator(b.NodeType, b.Right.ToString() == "null"));
+            isTopOfBinary = true;
             this.Visit(b.Right);
             this.Sql.Append(")");
 
             return b;
         }
 
+        protected override Expression VisitParameter(ParameterExpression p)
+        {
+            // if this is the first thing on the lhs or rhs of a binary then we should chuck the primary key in the clause
+            if (isTopOfBinary)
+            {
+                if (this.rootNode != null && this.rootNode.Alias.Length > 0)
+                {
+                    this.Sql.Append(this.rootNode.Alias + ".");
+                }
+
+                this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(p.Type).PrimaryKey.DbName);
+            }
+
+            return base.VisitParameter(p);
+        }
+
         protected override Expression VisitMemberAccess(MemberExpression m) {
+            isTopOfBinary = false;
             if (m.Expression.NodeType == ExpressionType.MemberAccess) {
                 // in a chain of member access i.e. e.A.B.C == Z this is (e.A).B or (e.A.B).C
                 if (this.isChainedMemberAccess) {
@@ -98,6 +119,13 @@
                             this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                             this.chainedColumnType = m.Member.DeclaringType;
                         }
+                    }
+                    else if (this.configuration.HasMap(m.Member.ReflectedType))
+                    {
+                        // here we're doing a e.Entity == entity so get primary key underlying
+                        this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
+                        this.chainedColumnType = m.Member.ReflectedType;
+                        this.chainedEntityNames.Push(m.Member.Name);
                     }
                 }
             }
@@ -281,6 +309,12 @@
             if (value != null) {
                 if (value.GetType().IsCollection()) {
                     throw new NotImplementedException();
+                }
+
+                if (configuration.HasMap(value.GetType()))
+                {
+                    // fetch the primary key
+                    value = configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);
                 }
 
                 this.Sql.Append("@l_" + ++this.paramCounter);

@@ -56,6 +56,39 @@
             Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", sql.Sql);
         }
 
+        [Fact]
+        public void WhereEntityEquals()
+        {
+            var o = new Post { PostId = 1 };
+            var query = this.GetSelectQuery<Post>().Where(p => p == o);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", sql.Sql);
+        }
+
+        [Fact]
+        public void WhereAssociatedEntityEquals()
+        {
+            var blog = new Blog { BlogId = 1 };
+            var query = this.GetSelectQuery<Post>().Where(p => p.Blog == blog);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([BlogId] = @l_1)", sql.Sql);
+        }
+
+        [Fact]
+        public void WhereAssociatedEntityEqualsAssociatedEntity()
+        {
+            var o = new Post { PostId = 1, Blog = new Blog { BlogId = 1 } };
+            var query = this.GetSelectQuery<Post>().Where(p => p.Blog == o.Blog);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([BlogId] = @l_1)", sql.Sql);
+        }
+
         private class Foo {
             [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1401:FieldsMustBePrivate", Justification = "Reviewed. We want to test all cases, not just best practice.")]
             public int Id = 1;
