@@ -35,12 +35,4 @@ namespace TopHat.Configuration {
         /// <returns></returns>
         object GetPrimaryKeyValue(object entity);
     }
-
-    public interface IMap<T> : IMap {
-        object GetPrimaryKeyValue(T entity);
-
-        void SetPrimaryKeyValue(T entity, object value);
-
-        object GetColumnValue(T entity, IColumn column);
-    }
 }

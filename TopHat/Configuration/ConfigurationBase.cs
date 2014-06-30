@@ -106,7 +106,7 @@
             this.engine.Configuration = this;
             this.connectionString = connectionString;
             this.mapper = mapper;
-            this.mapperMapForMethodInfo = mapper.GetType().GetMethod("MapFor");
+            this.mapperMapForMethodInfo = mapper.GetType().GetMethod("MapFor", new[] { typeof(Type) });
             this.sessionFactory = sessionFactory;
             this.codeGenerator = codeGenerator;
 
@@ -115,7 +115,8 @@
 
         public IMap<T> GetMap<T>() {
             // TODO: check that the Map is indeed an IMap<T> or lift if it isn't
-            return this.GetMap(typeof(T)) as IMap<T>;
+            var map = this.GetMap(typeof(T)) as IMap<T>;
+            return map;
         }
 
         public IMap GetMap(Type type) {
@@ -204,7 +205,7 @@
                 types.Distinct()
                      .Where(t => !this.mappedTypes.ContainsKey(t))
                      .AsParallel()
-                     .Select(t => this.mapperMapForMethodInfo.MakeGenericMethod(t).Invoke(this.mapper, new object[] { }) as IMap);
+                     .Select(t => this.mapperMapForMethodInfo.Invoke(this.mapper, new object[] { t }) as IMap);
 
             foreach (var map in maps) {
                 // force into sequential
@@ -243,18 +244,18 @@
         /// <returns>
         ///     The <see cref="Map" />.
         /// </returns>
-        protected Map<T> Setup<T>() {
+        protected IMap<T> Setup<T>() {
             this.Dirty();
 
             IMap map;
-            Map<T> mapt;
+            IMap<T> mapt;
             var type = typeof(T);
 
             if (!this.mappedTypes.TryGetValue(type, out map)) {
                 this.mappedTypes[type] = mapt = this.Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
             }
             else {
-                mapt = map as Map<T>;
+                mapt = map as IMap<T>;
 
                 if (mapt == null) {
                     this.mappedTypes[type] = mapt = Map<T>.From(map); // lift the Map into a Map<T>

@@ -27,7 +27,7 @@
 
         [Fact]
         public void NonEmptyConfigurationReturnsNonEmptyMaps() {
-            var target = new CustomConfigurationWithIndividualAdds(SetupPostAndUserMaps().Object);
+            var target = new CustomConfigurationWithIndividualAdds(SetupGenericMaps().Object);
             Assert.NotEmpty(target.Maps);
         }
 
@@ -122,7 +122,7 @@
 
         [Fact]
         public void AddEntitiesByGenericAreMapped() {
-            var target = new CustomConfigurationWithIndividualAdds(SetupPostAndUserMaps().Object);
+            var target = new CustomConfigurationWithIndividualAdds(SetupGenericMaps().Object);
 
             Assert.NotNull(target);
             Assert.Equal(2, target.Maps.Count());
@@ -159,7 +159,7 @@
 
         [Fact]
         public void SetupEntityCreatesAndConfiguresMap() {
-            var target = new CustomConfigurationWithSetup(SetupUserMap().Object);
+            var target = new CustomConfigurationWithSetup(SetupGenericUserMap().Object);
             var actual = target.Maps.Single(m => m.Type == typeof(User));
             Assert.Equal(ExampleTableName, actual.Table);
         }
@@ -187,18 +187,30 @@
 
         private static Mock<IMapper> SetupAllMaps() {
             var mockMapper = SetupPostAndUserMaps();
-            mockMapper.Setup(m => m.MapFor<Blog>()).Returns(new Map<Blog>()).Verifiable();
-            mockMapper.Setup(m => m.MapFor<Comment>()).Returns(new Map<Comment>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Blog))).Returns(new Map<Blog>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Comment))).Returns(new Map<Comment>()).Verifiable();
             return mockMapper;
         }
 
         private static Mock<IMapper> SetupPostAndUserMaps() {
             var mock = SetupUserMap();
-            mock.Setup(m => m.MapFor<Post>()).Returns(new Map<Post>()).Verifiable();
+            mock.Setup(m => m.MapFor(typeof(Post))).Returns(new Map<Post>()).Verifiable();
             return mock;
         }
 
         private static Mock<IMapper> SetupUserMap() {
+            var mock = new Mock<IMapper>(MockBehavior.Strict);
+            mock.Setup(m => m.MapFor(typeof(User))).Returns(new Map<User>()).Verifiable();
+            return mock;
+        }
+
+        private static Mock<IMapper> SetupGenericMaps() {
+            var mock = SetupGenericUserMap();
+            mock.Setup(m => m.MapFor<Post>()).Returns(new Map<Post>()).Verifiable();
+            return mock;
+        }
+
+        private static Mock<IMapper> SetupGenericUserMap() {
             var mock = new Mock<IMapper>(MockBehavior.Strict);
             mock.Setup(m => m.MapFor<User>()).Returns(new Map<User>()).Verifiable();
             return mock;

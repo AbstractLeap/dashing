@@ -30,16 +30,29 @@
         }
 
         /// <summary>
-        ///     The map for.
+        /// Return a typed map for the typeparameter specified
         /// </summary>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="Map" />.
-        /// </returns>
-        public Map<T> MapFor<T>() {
+        /// <typeparam name="T">Type to be mapped</typeparam>
+        /// <returns>Map for the type</returns>
+        public IMap<T> MapFor<T>() {
             var map = new Map<T>();
             this.Build(typeof(T), map);
+            return map;
+        }
+
+        /// <summary>
+        /// Return a generic map for the type specified
+        /// </summary>
+        /// <param name="type">Type to be mapped</param>
+        /// <returns>Map for the type</returns>
+        public IMap MapFor(Type type) {
+            var gt = typeof(Map<>).MakeGenericType(type);
+            var ctor = gt.GetConstructor(new Type[] { });
+            if (ctor == null) {
+                throw new Exception("Could not locate constructor for the Map type?");
+            }
+            var map = (IMap) ctor.Invoke(new object[] { });
+            this.Build(type, map);
             return map;
         }
 
