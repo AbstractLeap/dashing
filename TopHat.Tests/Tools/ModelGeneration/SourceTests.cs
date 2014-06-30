@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Xunit;
 using TopHat.Tools.ModelGeneration;
 using TopHat.Configuration;
+using Moq;
 
 namespace TopHat.Tests.Tools.ModelGeneration
 {
@@ -80,7 +81,7 @@ namespace TopHat.Tests.Tools.ModelGeneration
     public class CustomConfig : DefaultConfiguration
     {
         public CustomConfig()
-            : base(new TopHat.Engine.SqlServerEngine(), string.Empty)
+            : base(new Mock<TopHat.Engine.IEngine>().Object, string.Empty)
         {
             this.AddNamespaceOf<TopHat.Tests.TestDomain.Post>();
         }

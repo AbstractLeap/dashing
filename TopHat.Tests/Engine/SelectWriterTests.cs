@@ -18,10 +18,11 @@
     public class SelectWriterTests {
         [Fact]
         public void SimpleQueryBuilds() {
-            var engine = new SqlServerEngine();
+            var dialect = new SqlServerDialect();
+            var engine = new EngineBase(dialect, new Mock<System.Data.Common.DbProviderFactory>().Object);
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
-            var selectWriter = new SelectWriter(new SqlServerDialect(), MakeConfig());
+            var selectWriter = new SelectWriter(dialect, MakeConfig());
             var sql = selectWriter.GenerateSql(new SelectQuery<User>(engine, connection.Object));
             Debug.Write(sql.Sql);
         }
@@ -146,7 +147,7 @@
         }
 
         private SelectQuery<T> GetSelectQuery<T>() {
-            var engine = new SqlServerEngine();
+            var engine = new Mock<IEngine>().Object;
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
             return new SelectQuery<T>(engine, connection.Object);
@@ -162,14 +163,16 @@
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new SqlServerEngine(), string.Empty) {
+                : base(new Mock<IEngine>().Object, string.Empty)
+            {
                 this.AddNamespaceOf<Post>();
             }
         }
 
         private class CustomConfigWithIgnore : DefaultConfiguration {
             public CustomConfigWithIgnore()
-                : base(new SqlServerEngine(), string.Empty) {
+                : base(new Mock<IEngine>().Object, string.Empty)
+            {
                 this.AddNamespaceOf<Post>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }

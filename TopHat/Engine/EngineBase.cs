@@ -2,6 +2,7 @@ namespace TopHat.Engine {
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Data.Common;
     using System.Linq;
 
     using TopHat.Configuration;
@@ -9,7 +10,7 @@ namespace TopHat.Engine {
     /// <summary>
     ///     The engine base.
     /// </summary>
-    public abstract class EngineBase : IEngine {
+    public class EngineBase : IEngine {
         public IConfiguration Configuration { get; set; }
 
         protected ISelectWriter SelectWriter { get; set; }
@@ -27,8 +28,12 @@ namespace TopHat.Engine {
 
         protected ISqlDialect Dialect { get; set; }
 
-        public EngineBase(ISqlDialect dialect) {
+        protected DbProviderFactory DbProviderFactory;
+
+        public EngineBase(ISqlDialect dialect, DbProviderFactory dbProviderFactory)
+        {
             this.Dialect = dialect;
+            this.DbProviderFactory = dbProviderFactory;
         }
 
         /// <summary>
@@ -41,7 +46,8 @@ namespace TopHat.Engine {
         ///     The <see cref="IDbConnection" />.
         /// </returns>
         public IDbConnection Open(string connectionString) {
-            var connection = this.NewConnection(connectionString);
+            var connection = this.DbProviderFactory.CreateConnection();
+            connection.ConnectionString = connectionString;
             connection.Open();
             return connection;
         }
@@ -59,17 +65,6 @@ namespace TopHat.Engine {
             this.UpdateWriter = new UpdateWriter(this.Dialect, this.Configuration);
             this.InsertWriter = new InsertWriter(this.Dialect, this.Configuration);
         }
-
-        /// <summary>
-        ///     The new connection.
-        /// </summary>
-        /// <param name="connectionString">
-        ///     The connection string.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="IDbConnection" />.
-        /// </returns>
-        protected abstract IDbConnection NewConnection(string connectionString);
 
         /// <summary>
         ///     The query.

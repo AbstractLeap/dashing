@@ -1,12 +1,18 @@
 namespace TopHat.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
 
     using TopHat.Engine;
 
     public class MutableConfiguration : DefaultConfiguration {
         public MutableConfiguration(IEngine engine, string connectionString)
             : base(engine, connectionString) { }
+
+        public MutableConfiguration(ConnectionStringSettings connectionString)
+            : base(connectionString)
+        {
+        }
 
         public new IConfiguration Add<T>() {
             return base.Add<T>();

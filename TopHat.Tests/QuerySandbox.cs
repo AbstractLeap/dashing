@@ -2,7 +2,6 @@
     using System.Linq;
 
     using TopHat.Configuration;
-    using TopHat.MySql;
     using TopHat.Tests.TestDomain;
 
     using Xunit;
@@ -89,7 +88,8 @@
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new MySqlEngine(), "Server=localhost;Database=tophattest;Uid=root;Pwd=treatme123;") {
+                : base(new System.Configuration.ConnectionStringSettings("Default", "Server=localhost;Database=tophattest;Uid=root;Pwd=treatme123;", "MySql.Data.MySqlClient"))
+            {
                 this.AddNamespaceOf<Post>();
             }
         }

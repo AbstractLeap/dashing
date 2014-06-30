@@ -1,7 +1,9 @@
 ﻿namespace TopHat.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
+    using System.Data.Common;
     using System.Linq;
     using System.Reflection;
 
@@ -111,6 +113,11 @@
             this.codeGenerator = codeGenerator;
 
             this.mappedTypes = new Dictionary<Type, IMap>();
+        }
+
+        public ConfigurationBase(ConnectionStringSettings connectionString, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator)
+            : this(new EngineBase(new DialectFactory().Create(connectionString.ProviderName), DbProviderFactories.GetFactory(connectionString.ProviderName)), connectionString.ConnectionString, mapper, sessionFactory, codeGenerator)
+        {
         }
 
         public IMap<T> GetMap<T>() {
