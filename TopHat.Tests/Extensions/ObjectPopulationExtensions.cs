@@ -3,6 +3,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
 
     using TopHat.Configuration;
 
@@ -15,7 +16,7 @@
                 }
             }
 
-            foreach (var prop in obj.GetType().GetProperties()) {
+            foreach (var prop in obj.GetType().GetProperties(BindingFlags.FlattenHierarchy)) {
                 if (defaultsDict.ContainsKey(prop.PropertyType)) {
                     prop.SetValue(obj, defaultsDict[prop.PropertyType]);
                 }

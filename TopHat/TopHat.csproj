@@ -57,6 +57,7 @@
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
     <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\ProxyGenerator.cs" />
+    <Compile Include="CodeGeneration\ProxyGeneratorResult.cs" />
     <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="Configuration\Column.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="Configuration\IColumn.cs" />
     <Compile Include="Configuration\IMap.cs" />
     <Compile Include="Configuration\IMapper.cs" />
+    <Compile Include="Configuration\IMapT.cs" />
     <Compile Include="Configuration\ISessionFactory.cs" />
     <Compile Include="Configuration\ColumnExtensions.cs" />
     <Compile Include="Configuration\DefaultConfiguration.cs" />
@@ -74,6 +76,7 @@
     <Compile Include="Configuration\MapExtensions.cs" />
     <Compile Include="Configuration\DefaultMapper.cs" />
     <Compile Include="Configuration\Map.cs" />
+    <Compile Include="Configuration\MapT.cs" />
     <Compile Include="Configuration\MutableConfiguration.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DeleteEntityQuery.cs" />
