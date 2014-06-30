@@ -5,7 +5,7 @@ namespace TopHat.Engine.DDL {
 
     using TopHat.Configuration;
 
-    public class CreateTableWriter {
+    public class CreateTableWriter : ICreateTableWriter {
         private readonly ISqlDialect dialect;
 
         public CreateTableWriter(ISqlDialect dialect) {

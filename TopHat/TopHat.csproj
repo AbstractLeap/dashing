@@ -86,7 +86,11 @@
     <Compile Include="Engine\DapperWrapper.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
+    <Compile Include="Engine\DDL\IAlterTableWriter.cs" />
+    <Compile Include="Engine\DDL\ICreateTableWriter.cs" />
+    <Compile Include="Engine\DDL\IDropTableWriter.cs" />
     <Compile Include="Engine\DeleteWriter.cs" />
+    <Compile Include="Engine\DialectFactory.cs" />
     <Compile Include="Engine\EngineBase.cs" />
     <Compile Include="Engine\FetchNode.cs" />
     <Compile Include="Engine\IDapperWrapper.cs" />

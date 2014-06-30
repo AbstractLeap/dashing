@@ -4,7 +4,7 @@ namespace TopHat.Engine.DDL {
 
     using TopHat.Configuration;
 
-    public class DropTableWriter {
+    public class DropTableWriter : IDropTableWriter {
         private readonly ISqlDialect dialect;
 
         public DropTableWriter(ISqlDialect dialect) {
@@ -23,12 +23,7 @@ namespace TopHat.Engine.DDL {
         }
 
         public string DropTableIfExists(IMap map) {
-            var sql = new StringBuilder();
-            sql.Append("if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '");
-            this.dialect.AppendEscaped(sql, map.Table);
-            sql.Append("') drop table ");
-            this.dialect.AppendQuotedTableName(sql, map);
-            return sql.ToString();
+            return this.dialect.WriteDropTableIfExists(map.Table);
         }
     }
 }

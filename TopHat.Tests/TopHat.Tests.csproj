@@ -43,6 +43,9 @@
     <Reference Include="Microsoft.AspNet.Identity.Core">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.0.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
+    <Reference Include="DatabaseSchemaReader">
+      <HintPath>..\packages\Database.Schema.Reader.Core.1.2.4.17096\lib\net35\DatabaseSchemaReader.dll</HintPath>
+    </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
     </Reference>
@@ -78,6 +81,7 @@
     <Compile Include="Configuration\ConfigurationBaseTests.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Configuration\ReverseEngineer\Sandbox.cs" />
     <Compile Include="Engine\DeleteWriterTests.cs" />
     <Compile Include="Engine\InsertWriterTests.cs" />
     <Compile Include="Engine\MySqlDialectBaseTests.cs" />
@@ -99,11 +103,17 @@
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\User.cs" />
+    <Compile Include="Tools\ModelGeneration\SourceTests.cs" />
+    <Compile Include="Tools\ReverseEngineering\EngineerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TopHat.MySql\TopHat.MySql.csproj">
       <Project>{fc3a4432-a5be-478b-a6d7-31e2fe2db8be}</Project>
       <Name>TopHat.MySql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TopHat.Tools\TopHat.Tools.csproj">
+      <Project>{414968d7-e94c-404b-8831-35aa54a656f1}</Project>
+      <Name>TopHat.Tools</Name>
     </ProjectReference>
     <ProjectReference Include="..\TopHat\TopHat.csproj">
       <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
@@ -111,6 +121,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />

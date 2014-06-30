@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="dbmanager.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="ConfigurationDllPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">C:\Users\Mark\Documents\tophat\TopHat.Tests\bin\Debug\TopHat.Tests.dll</Value>
+    </Setting>
+    <Setting Name="ConfigurationTypeName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">TopHat.Tests.Tools.ModelGeneration.CustomConfig</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
