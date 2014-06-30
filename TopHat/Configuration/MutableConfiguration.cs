@@ -20,7 +20,7 @@ namespace TopHat.Configuration {
             return base.AddNamespaceOf<T>();
         }
 
-        public new Map<T> Setup<T>() {
+        public new IMap<T> Setup<T>() {
             return base.Setup<T>();
         }
     }
