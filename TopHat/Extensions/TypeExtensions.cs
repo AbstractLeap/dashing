@@ -165,5 +165,28 @@
         public static bool IsNullable(this Type type) {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
+
+        /// <summary>
+        /// Return all the implemented or inherited interfaces and the full hierarchy of base types
+        /// </summary>
+        /// <param name="type">The type to inspect</param>
+        /// <returns>The ancestor types</returns>
+        public static IEnumerable<Type> GetAncestorTypes(this Type type) {
+            if (type == null) {
+                throw new ArgumentNullException("type");
+            }
+
+            // return all implemented or inherited interfaces
+            foreach (var i in type.GetInterfaces()) {
+                yield return i;
+            }
+
+            // return all inherited types
+            var currentBaseType = type.BaseType;
+            while (currentBaseType != null) {
+                yield return currentBaseType;
+                currentBaseType = currentBaseType.BaseType;
+            }
+        }
     }
 }

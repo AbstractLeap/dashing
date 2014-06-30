@@ -22,19 +22,24 @@ namespace TopHat.CodeGeneration {
             var foreignKeyClasses = parallelMaps.Select(m => this.CreateFkClass(m, mapDictionary, codeGeneratorConfig));
 
             // extract metadata from maps
-            var namespaces = maps.Select(m => m.Type.Namespace)
-                                 .Distinct()
-                                 .Select(ns => new CodeNamespaceImport(ns));
-            var references = maps.Select(m => m.Type.Assembly)////.Union(mappedTypes.SelectMany(t => t.GetAncestorTypes()))
-                                 .Distinct()
-                                 .Select(a => a.Location);
+            var typeHierarchy = maps.Select(m => m.Type)
+                                    .Union(maps.SelectMany(m => m.Type.GetAncestorTypes()))
+                                    .ToArray();
+
+            var namespaces = typeHierarchy.Select(m => m.Namespace)
+                                          .Distinct()
+                                          .Select(ns => new CodeNamespaceImport(ns));
+
+            var references = typeHierarchy.Select(t => t.Assembly)
+                                          .Distinct()
+                                          .Select(a => a.Location);
 
             return new ProxyGeneratorResult {
-                                                ProxyTypes = trackingClasses.Concat(foreignKeyClasses)
-                                                                            .ToArray(),
-                                                NamespaceImports = namespaces.ToArray(),
-                                                ReferencedAssemblyLocations = references.ToArray()
-                                            };
+                ProxyTypes = trackingClasses.Concat(foreignKeyClasses)
+                                            .ToArray(),
+                NamespaceImports = namespaces.ToArray(),
+                ReferencedAssemblyLocations = references.ToArray()
+            };
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
