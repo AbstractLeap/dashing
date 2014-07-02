@@ -107,5 +107,7 @@ namespace Dashing.Engine {
         IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<Guid> ids, bool? asTracked);
 
         void Execute<T>(IDbConnection dbConnection, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
+
+        void ExecuteBulkDelete<T>(IDbConnection connection, IEnumerable<Expression<Func<T, bool>>> predicates);
     }
 }

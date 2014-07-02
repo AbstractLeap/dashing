@@ -126,5 +126,13 @@ using System.Linq.Expressions;
         void Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 
         void Update<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates);
+
+        void DeleteAll<T>();
+
+        void Delete<T>(Expression<Func<T, bool>> predicate);
+
+        void Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates);
+
+        void Delete<T>(params Expression<Func<T, bool>>[] predicates);
     }
 }

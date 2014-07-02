@@ -21,7 +21,7 @@ namespace Dashing.Engine {
 
         protected IInsertWriter InsertWriter { get; set; }
 
-        protected IEntitySqlWriter DeleteWriter { get; set; }
+        protected IDeleteWriter DeleteWriter { get; set; }
 
         /// <summary>
         ///     Gets or sets the maps.
@@ -204,6 +204,12 @@ namespace Dashing.Engine {
             if (sqlQuery.Sql.Length > 0) {
                 this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
             }
+        }
+
+
+        public void ExecuteBulkDelete<T>(IDbConnection connection, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            var sqlQuery = this.DeleteWriter.GenerateBulkSql(predicates);
+            this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
         }
     }
 }

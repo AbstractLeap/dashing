@@ -4,8 +4,12 @@
     using Dapper;
 
     using Dashing.Configuration;
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
+    using System;
+    using System.Linq;
 
-    internal class DeleteWriter : BaseWriter, IEntitySqlWriter {
+    internal class DeleteWriter : BaseWriter, IDeleteWriter {
         public DeleteWriter(ISqlDialect dialect, IConfiguration config)
             : base(dialect, new WhereClauseWriter(dialect, config), config) { }
 
@@ -30,6 +34,26 @@
 
             sql.Remove(sql.Length - 2, 2); // remove trailing ,
             sql.Append(")");
+            return new SqlWriterResult(sql.ToString(), parameters);
+        }
+
+        public SqlWriterResult GenerateBulkSql<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
+            var map = this.Configuration.GetMap<T>();
+            var sql = new StringBuilder();
+            var parameters = new DynamicParameters();
+
+            sql.Append("delete from ");
+            this.Dialect.AppendQuotedTableName(sql, map);
+            if (predicates != null && predicates.Any()) {
+                var whereResult = this.WhereClauseWriter.GenerateSql(predicates, null);
+                if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
+                    throw new NotImplementedException("Dashing does not currently support where clause across tables in a delete");
+                }
+
+                sql.Append(whereResult.Sql);
+                parameters.AddDynamicParams(whereResult.Parameters);
+            }
+
             return new SqlWriterResult(sql.ToString(), parameters);
         }
     }

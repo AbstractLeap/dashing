@@ -75,6 +75,16 @@
             }
         }
 
+
+
+        [Fact(Skip = "connects to real database")]
+        public void DeleteBulk() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                session.Delete<User>(u => u.Username == "Bob2");
+            }
+        }
+
         [Fact(Skip = "connects to real database")]
         public void TestSingleAndFirst() {
             var config = new CustomConfig();

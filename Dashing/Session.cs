@@ -299,5 +299,22 @@
         public void Update<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates) {
             this.config.Engine.Execute(this.Connection, update, predicates);
         }
+
+
+        public void DeleteAll<T>() {
+            this.config.Engine.ExecuteBulkDelete<T>(this.Connection, null);
+        }
+
+        public void Delete<T>(Expression<Func<T, bool>> predicate) {
+            this.config.Engine.ExecuteBulkDelete(this.Connection, new[] { predicate });
+        }
+
+        public void Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
+            this.config.Engine.ExecuteBulkDelete(this.Connection, predicates);
+        }
+
+        public void Delete<T>(params Expression<Func<T, bool>>[] predicates) {
+            this.config.Engine.ExecuteBulkDelete(this.Connection, predicates);
+        }
     }
 }

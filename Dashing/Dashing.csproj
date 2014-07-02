@@ -95,6 +95,7 @@
     <Compile Include="Engine\DialectFactory.cs" />
     <Compile Include="Engine\EngineBase.cs" />
     <Compile Include="Engine\FetchNode.cs" />
+    <Compile Include="Engine\IDeleteWriter.cs" />
     <Compile Include="Engine\IUpdateWriter.cs" />
     <Compile Include="Engine\IDapperWrapper.cs" />
     <Compile Include="Engine\IEngine.cs" />
