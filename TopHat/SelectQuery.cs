@@ -282,7 +282,7 @@ namespace TopHat {
         public T First() {
             var result = this.FirstOrDefault();
             if (result == null) {
-                throw new NullReferenceException("The query returned no results");
+                throw new InvalidOperationException("The query returned no results");
             }
 
             return result;
@@ -306,7 +306,7 @@ namespace TopHat {
         public T Single() {
             var result = this.SingleOrDefault();
             if (result == null) {
-                throw new NullReferenceException("The query returned no results");
+                throw new InvalidOperationException("The query returned no results");
             }
 
             return result;
@@ -325,6 +325,40 @@ namespace TopHat {
         public T SingleOrDefault(Expression<Func<T, bool>> predicate) {
             this.Where(predicate);
             return this.SingleOrDefault();
+        }
+
+
+        public T Last() {
+            var result = this.LastOrDefault();
+            if (result == null) {
+                throw new InvalidOperationException("The query returned no results");
+            }
+
+            return result;
+        }
+
+        public T Last(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return this.Last();
+        }
+
+        public T LastOrDefault() {
+            if (this.OrderClauses.IsEmpty()) {
+                throw new InvalidOperationException("You can not request the last item without specifying an order clause");
+            }
+
+            // switch order clause direction
+            foreach (var clause in this.OrderClauses) {
+                clause.Direction = clause.Direction == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+            }
+
+            this.Take(1);
+            return this.ToList().FirstOrDefault();
+        }
+
+        public T LastOrDefault(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return this.LastOrDefault();
         }
     }
 }

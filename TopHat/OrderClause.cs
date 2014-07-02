@@ -16,7 +16,7 @@ namespace TopHat {
         /// <summary>
         ///     Gets the direction.
         /// </summary>
-        public ListSortDirection Direction { get; private set; }
+        public ListSortDirection Direction { get; internal set; }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="OrderClause{T}" /> class.

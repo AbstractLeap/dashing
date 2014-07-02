@@ -158,5 +158,13 @@ namespace TopHat {
         T SingleOrDefault();
 
         T SingleOrDefault(Expression<Func<T, bool>> predicate);
+
+        T Last();
+
+        T Last(Expression<Func<T, bool>> predicate);
+
+        T LastOrDefault();
+
+        T LastOrDefault(Expression<Func<T, bool>> predicate);
     }
 }
