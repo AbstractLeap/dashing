@@ -107,7 +107,6 @@
     <Compile Include="Engine\SqlDialectBase.cs" />
     <Compile Include="Engine\SqlServer2012Dialect.cs" />
     <Compile Include="Engine\SqlServerDialect.cs" />
-    <Compile Include="Engine\SqlServerEngine.cs" />
     <Compile Include="Engine\SqlWriterResult.cs" />
     <Compile Include="Engine\UpdateWriter.cs" />
     <Compile Include="Engine\WhereClauseExpressionVisitor.cs" />

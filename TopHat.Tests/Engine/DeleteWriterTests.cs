@@ -1,10 +1,9 @@
 ﻿namespace TopHat.Tests.Engine {
+    using Moq;
     using System.Diagnostics;
-
     using TopHat.Configuration;
     using TopHat.Engine;
     using TopHat.Tests.TestDomain;
-
     using Xunit;
 
     public class DeleteWriterTests {
@@ -37,14 +36,16 @@
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new SqlServerEngine(), string.Empty) {
+                : base(new Mock<IEngine>().Object, string.Empty)
+            {
                 this.AddNamespaceOf<Post>();
             }
         }
 
         private class CustomConfigWithIgnore : DefaultConfiguration {
             public CustomConfigWithIgnore()
-                : base(new SqlServerEngine(), string.Empty) {
+                : base(new Mock<IEngine>().Object, string.Empty)
+            {
                 this.AddNamespaceOf<Post>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }

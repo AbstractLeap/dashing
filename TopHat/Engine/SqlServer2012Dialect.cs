@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TopHat.Configuration;
 
 namespace TopHat.Engine {
     public class SqlServer2012Dialect : SqlServerDialect {

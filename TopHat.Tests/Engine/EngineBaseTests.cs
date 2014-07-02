@@ -49,10 +49,6 @@
         }
 
         private class TestEngine : EngineBase {
-            protected override IDbConnection NewConnection(string connectionString) {
-                throw new NotImplementedException();
-            }
-
             public override IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query) {
                 throw new NotImplementedException();
             }
@@ -69,7 +65,7 @@
                 throw new NotImplementedException();
             }
 
-            public TestEngine(ISqlDialect dialect) : base(dialect) {
+            public TestEngine(ISqlDialect dialect) : base(dialect, new Mock<System.Data.Common.DbProviderFactory>().Object) {
                 this.Dialect = dialect;
             }
 

@@ -18,10 +18,11 @@
     public class SelectWriterTests {
         [Fact]
         public void SimpleQueryBuilds() {
-            var engine = new SqlServerEngine();
+            var dialect = new SqlServerDialect();
+            var engine = new EngineBase(dialect, new Mock<System.Data.Common.DbProviderFactory>().Object);
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
-            var selectWriter = new SelectWriter(new SqlServerDialect(), MakeConfig());
+            var selectWriter = new SelectWriter(dialect, MakeConfig());
             var sql = selectWriter.GenerateSql(new SelectQuery<User>(engine, connection.Object));
             Debug.Write(sql.Sql);
         }
@@ -219,7 +220,25 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("", sql.Sql);
+            Assert.Equal("select top (@take) [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts]", sql.Sql);
+        }
+
+        [Fact]
+        public void TakeWorksSql2012WithoutOrder() {
+            var query = this.GetSelectQuery<Post>().Take(1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select top (@take) [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts]", sql.Sql);
+        }
+
+        [Fact]
+        public void TakeWorksSql2012WithOrder() {
+            var query = this.GetSelectQuery<Post>().OrderBy(p => p.Title).Take(1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset 0 fetch next @take rows", sql.Sql);
         }
 
         [Fact]
@@ -228,7 +247,79 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetMySqlWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("", sql.Sql);
+            Assert.Equal("select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` limit @take", sql.Sql);
+        }
+
+        [Fact]
+        public void SkipWorksSql() {
+            var query = this.GetSelectQuery<Post>().Skip(1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select * from (select ROW_NUMBER() OVER ( order by [PostId]) as RowNum, [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]) as pagetable where pagetable.RowNum between @skip + 1 and 18446744073709551615 order by pagetable.RowNum", sql.Sql);
+        }
+
+        [Fact]
+        public void SkipWorksSql2012WithoutOrder() {
+            var query = this.GetSelectQuery<Post>().Skip(1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip", sql.Sql);
+        }
+
+        [Fact]
+        public void SkipWorksSql2012WithOrder() {
+            var query = this.GetSelectQuery<Post>().OrderBy(p => p.Title).Skip(1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip", sql.Sql);
+        }
+
+        [Fact]
+        public void SkipWorksMySql() {
+            var query = this.GetSelectQuery<Post>().Skip(1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetMySqlWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @skip, 18446744073709551615", sql.Sql);
+        }
+
+        [Fact]
+        public void SkipAndTakeWorksSql() {
+            var query = this.GetSelectQuery<Post>().Skip(1).Take(10);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select * from (select ROW_NUMBER() OVER ( order by [PostId]) as RowNum, [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]) as pagetable where pagetable.RowNum between @skip + 1 and @skip + @take order by pagetable.RowNum", sql.Sql);
+        }
+
+        [Fact]
+        public void SkipAndTakeWorksSql2012WithoutOrder() {
+            var query = this.GetSelectQuery<Post>().Skip(1).Take(10);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip fetch next @take rows", sql.Sql);
+        }
+
+        [Fact]
+        public void SkipAndTakeWorksSql2012WithOrder() {
+            var query = this.GetSelectQuery<Post>().OrderBy(p => p.Title).Skip(1).Take(10);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip fetch next @take rows", sql.Sql);
+        }
+
+        [Fact]
+        public void SkipAndTakeWorksMySql() {
+            var query = this.GetSelectQuery<Post>().Skip(1).Take(10);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetMySqlWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @skip, @take", sql.Sql);
         }
 
         private SelectWriter GetWriter(bool withIgnore = false) {
@@ -239,8 +330,12 @@
             return new SelectWriter(new MySqlDialect(), MakeConfig(withIgnore));
         }
 
+        private SelectWriter GetSql2012Writer(bool withIgnore = false) {
+            return new SelectWriter(new SqlServer2012Dialect(), MakeConfig(withIgnore));
+        }
+
         private SelectQuery<T> GetSelectQuery<T>() {
-            var engine = new SqlServerEngine();
+            var engine = new Mock<IEngine>().Object;
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
             return new SelectQuery<T>(engine, connection.Object);
@@ -256,14 +351,16 @@
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new SqlServerEngine(), string.Empty) {
+                : base(new Mock<IEngine>().Object, string.Empty)
+            {
                 this.AddNamespaceOf<Post>();
             }
         }
 
         private class CustomConfigWithIgnore : DefaultConfiguration {
             public CustomConfigWithIgnore()
-                : base(new SqlServerEngine(), string.Empty) {
+                : base(new Mock<IEngine>().Object, string.Empty)
+            {
                 this.AddNamespaceOf<Post>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }

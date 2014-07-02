@@ -22,7 +22,7 @@ namespace TopHat.Engine {
         /// <param name="sql"></param>
         /// <param name="take"></param>
         /// <param name="skip"></param>
-        /// <remarks>The sql command will be past the parameters @take and @skip so those names should be used</remarks>
+        /// <remarks>The sql command will be past the parameters @take and @skip so those names should be used. It is assumed that either take or skip are > 0</remarks>
         void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip);
     }
 }

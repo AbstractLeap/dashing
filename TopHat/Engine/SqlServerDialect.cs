@@ -57,10 +57,6 @@ namespace TopHat.Engine {
         }
 
         public override void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
-            if (take == 0) {
-                return;
-            }
-
             if (skip == 0) {
                 // query starts with SELECT so insert top (X) there
                 sql.Insert(6, " top (@take)");
@@ -70,7 +66,9 @@ namespace TopHat.Engine {
             // now we have take and skip - we'll do the recursive CTE thingy
             sql.Insert(6, " ROW_NUMBER() OVER (" + orderClause.ToString() + ") as RowNum,");
             sql.Insert(0, "select * from (");
-            sql.Append(") as pagetable where pagetable.RowNum between @skip + 1 and @skip + @take order by pagetable.RowNum");
+
+            // see MySqlDialect for explanation of the crazy number 18446744073709551615
+            sql.Append(") as pagetable where pagetable.RowNum between @skip + 1 and " + (take > 0 ? "@skip + @take" : "18446744073709551615") + " order by pagetable.RowNum");
         }
     }
 }

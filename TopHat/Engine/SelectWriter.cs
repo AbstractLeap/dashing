@@ -9,6 +9,7 @@
     using Dapper;
 
     using TopHat.Configuration;
+    using TopHat.Extensions;
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
         public SelectWriter(ISqlDialect dialect, IConfiguration config)
@@ -85,6 +86,11 @@
 
             // add order by
             this.AddOrderByClause(selectQuery.OrderClauses, orderSql);
+            if (selectQuery.SkipN > 0 && orderSql.Length == 0) {
+                // add an order on the sort clause
+                orderSql.Append(" order by " + (rootNode != null ? rootNode.Alias + "." : ""));
+                this.Dialect.AppendQuotedName(orderSql, this.Configuration.GetMap<T>().PrimaryKey.DbName);
+            }
 
             // construct the query
             sql.Append("select ");
@@ -96,6 +102,10 @@
 
             // apply paging
             if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
+                if (parameters == null) {
+                    parameters = new DynamicParameters();
+                }
+
                 this.Dialect.ApplyPaging(sql, orderSql, selectQuery.TakeN, selectQuery.SkipN);
                 if (selectQuery.TakeN > 0) {
                     parameters.Add("@take", selectQuery.TakeN);

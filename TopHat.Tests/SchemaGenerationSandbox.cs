@@ -1,4 +1,5 @@
 ﻿namespace TopHat.Tests {
+    using System.Configuration;
     using System.Diagnostics;
     using System.Linq;
 
@@ -11,15 +12,14 @@
     using Xunit;
 
     public class SchemaGenerationSandbox {
-        private const string PolyTestConnectionString =
-            "Server=tcp:dzarexnyar.database.windows.net;Database=poly-test;User ID=polyadmin@dzarexnyar;Password=Fgg7aEy1bzX8qvs2;Trusted_Connection=False;Encrypt=True;";
+        private static ConnectionStringSettings PolyTestConnectionString = new ConnectionStringSettings("Default", "Server=tcp:dzarexnyar.database.windows.net;Database=poly-test;User ID=polyadmin@dzarexnyar;Password=Fgg7aEy1bzX8qvs2;Trusted_Connection=False;Encrypt=True;", "System.Data.SqlClient");
 
         [Fact]
         public void MakeDatSchema() {
             var dialect = new SqlServerDialect();
             var ctw = new CreateTableWriter(dialect);
             var dtw = new DropTableWriter(dialect);
-            var config = TH.Configure(new SqlServerEngine(), PolyTestConnectionString).AddNamespaceOf<Post>();
+            var config = TH.Configure(PolyTestConnectionString).AddNamespaceOf<Post>();
 
             var dropTables = config.Maps.Select(dtw.DropTableIfExists);
             var createTables = config.Maps.Select(ctw.CreateTable);

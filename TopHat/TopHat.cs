@@ -1,4 +1,5 @@
 ﻿namespace TopHat {
+    using System.Configuration;
     using TopHat.Configuration;
     using TopHat.Engine;
 
@@ -20,6 +21,11 @@
         /// </returns>
         public static MutableConfiguration Configure(IEngine engine, string connectionString) {
             return new MutableConfiguration(engine, connectionString);
+        }
+
+        public static MutableConfiguration Configure(ConnectionStringSettings connectionString)
+        {
+            return new MutableConfiguration(connectionString);
         }
     }
 }

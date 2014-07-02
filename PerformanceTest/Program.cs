@@ -1,6 +1,7 @@
 ﻿namespace PerformanceTest {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
     using System.Data.Entity;
     using System.Diagnostics;
@@ -19,7 +20,7 @@
     using SqlServerDialect = ServiceStack.OrmLite.SqlServerDialect;
 
     internal static class Program {
-        private const string ConnectionString = "Data Source=.;Initial Catalog=tempdb;Integrated Security=True";
+        private static ConnectionStringSettings ConnectionString = new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=tempdb;Integrated Security=True", "System.Data.SqlClient");
 
         private class Test {
             public Test(string provider, string name, Action<int> func) {
@@ -88,9 +89,9 @@
         private static ISession session;
 
         private static void SetupTests(List<Test> tests) {
-            var config = new TopHatConfiguration(new SqlServerEngine(), ConnectionString);
-            var simpleDataDb = Database.OpenConnection(ConnectionString);
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServerDialect.Provider);
+            var config = new TopHatConfiguration(ConnectionString);
+            var simpleDataDb = Database.OpenConnection(ConnectionString.ConnectionString);
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
             ormliteConn = dbFactory.OpenDbConnection();
             session = config.BeginSession();
             SetupDatabase(config, session);
@@ -263,8 +264,8 @@
         }
 
         private class TopHatConfiguration : DefaultConfiguration {
-            public TopHatConfiguration(IEngine engine, string connectionString)
-                : base(engine, connectionString) {
+            public TopHatConfiguration(System.Configuration.ConnectionStringSettings connectionString)
+                : base(connectionString) {
                 this.Add<Blog>();
                 this.Add<Comment>();
                 this.Add<Post>();
@@ -274,7 +275,7 @@
 
         private class EfContext : DbContext {
             public EfContext()
-                : base(Program.ConnectionString) {
+                : base(Program.ConnectionString.ConnectionString) {
             }
 
             protected override void OnModelCreating(DbModelBuilder modelBuilder) {

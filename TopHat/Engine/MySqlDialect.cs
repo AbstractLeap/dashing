@@ -1,5 +1,6 @@
 namespace TopHat.Engine {
     using System.Text;
+    using TopHat.Configuration;
 
     public class MySqlDialect : SqlDialectBase {
         public MySqlDialect()

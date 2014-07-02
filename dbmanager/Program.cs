@@ -112,7 +112,7 @@ namespace dbmanager
             // TODO add in a factory way of generating the config for cases where constructor not empty
             var config = Activator.CreateInstance(configType) as TopHat.Configuration.IConfiguration;
             var dialectFactory = new TopHat.Engine.DialectFactory();
-            var dialect = dialectFactory.Create(connectionString.ProviderName);
+            var dialect = dialectFactory.Create(connectionString);
             var migrator = new TopHat.Tools.Migration.Migrator(new TopHat.Engine.DDL.CreateTableWriter(dialect), new TopHat.Engine.DDL.DropTableWriter(dialect), null);
             IEnumerable<string> warnings, errors;
             var script = migrator.GenerateNaiveSqlDiff(maps, config.Maps, out warnings, out errors);
