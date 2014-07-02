@@ -16,7 +16,7 @@
 
         private readonly IConfiguration configuration;
 
-        private readonly FetchNode rootNode;
+        private FetchNode rootNode;
 
         private bool isChainedMemberAccess;
 
@@ -48,6 +48,8 @@
 
         private bool isTopOfBinary;
 
+        private int aliasCounter;
+
         public StringBuilder Sql { get; private set; }
 
         public DynamicParameters Parameters { get; private set; }
@@ -59,6 +61,12 @@
             this.dialect = dialect;
             this.configuration = config;
             this.rootNode = rootNode;
+            this.aliasCounter = 99; // what's the chance of fetching 99 tables??
+        }
+
+        internal FetchNode VisitWhereClause(Expression whereClause) {
+            this.VisitTree(whereClause);
+            return this.rootNode;
         }
 
         protected override Expression VisitBinary(BinaryExpression b) {
@@ -66,6 +74,7 @@
             this.Sql.Append("(");
             isTopOfBinary = true;
             this.Visit(b.Left);
+            // TODO What about == entity where entity is null??
             this.Sql.Append(this.GetOperator(b.NodeType, b.Right.ToString() == "null"));
             isTopOfBinary = true;
             this.Visit(b.Right);
@@ -74,13 +83,10 @@
             return b;
         }
 
-        protected override Expression VisitParameter(ParameterExpression p)
-        {
+        protected override Expression VisitParameter(ParameterExpression p) {
             // if this is the first thing on the lhs or rhs of a binary then we should chuck the primary key in the clause
-            if (isTopOfBinary)
-            {
-                if (this.rootNode != null && this.rootNode.Alias.Length > 0)
-                {
+            if (isTopOfBinary) {
+                if (this.rootNode != null && this.rootNode.Alias.Length > 0) {
                     this.Sql.Append(this.rootNode.Alias + ".");
                 }
 
@@ -108,8 +114,15 @@
                 else {
                     this.isChainedMemberAccess = true;
                     this.chainedMemberAccessExpression = m;
+                    var propInfo = m.Member as PropertyInfo;
 
-                    if (this.configuration.HasMap(m.Member.DeclaringType)) {
+                    if (propInfo != null && !propInfo.PropertyType.IsValueType && this.configuration.HasMap(propInfo.PropertyType)) {
+                        // here we're doing a e.Entity == entity so get primary key underlying
+                        this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
+                        this.chainedColumnType = m.Member.ReflectedType;
+                        this.chainedEntityNames.Push(m.Member.Name);
+                    }
+                    else if (this.configuration.HasMap(m.Member.DeclaringType)) {
                         // we want to check for a primary key here because in that case we can put the where clause on the referencing object
                         if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name) {
                             this.getForeignKeyName = true;
@@ -119,13 +132,6 @@
                             this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                             this.chainedColumnType = m.Member.DeclaringType;
                         }
-                    }
-                    else if (this.configuration.HasMap(m.Member.ReflectedType))
-                    {
-                        // here we're doing a e.Entity == entity so get primary key underlying
-                        this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
-                        this.chainedColumnType = m.Member.ReflectedType;
-                        this.chainedEntityNames.Push(m.Member.Name);
                     }
                 }
             }
@@ -148,23 +154,31 @@
                     else {
                         // we need to find the alias
                         // we've got chained entity names and the root node
+                        if (this.rootNode == null) {
+                            this.rootNode = new FetchNode { Alias = "t" };
+                        }
+
                         this.chainedEntityNames.Push(m.Member.Name);
                         var currentNode = this.rootNode;
+                        var declaringType = m.Member.DeclaringType;
                         var numNames = this.chainedEntityNames.Count;
                         for (int i = 0; i < numNames; ++i) {
                             var propName = this.chainedEntityNames.Pop();
                             if (!currentNode.Children.ContainsKey(propName)) {
-                                throw new Exception("You have to fetch a relationship in order to perform a where clause on it");
+                                // create the new node with isFetched = false
+                                var newNode = new FetchNode { Alias = "t_" + ++aliasCounter, IsFetched = false, Parent = currentNode, Column = this.configuration.GetMap(declaringType).Columns[propName] };
+                                currentNode.Children.Add(propName, newNode);
                             }
 
                             currentNode = currentNode.Children[propName];
+                            declaringType = currentNode.Column.Type;
                         }
 
                         if (!this.insideSubQuery) {
                             this.Sql.Append(currentNode.Alias + ".");
                         }
 
-                        this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(this.chainedColumnType).Columns[this.chainedColumnName].DbName);
+                        this.dialect.AppendQuotedName(this.Sql, this.chainedColumnName);
                     }
                 }
                 else {
@@ -311,8 +325,7 @@
                     throw new NotImplementedException();
                 }
 
-                if (configuration.HasMap(value.GetType()))
-                {
+                if (configuration.HasMap(value.GetType())) {
                     // fetch the primary key
                     value = configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);
                 }

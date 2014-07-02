@@ -28,7 +28,7 @@
             var parameters = new DynamicParameters();
             foreach (var whereClause in whereClauses) {
                 var expressionVisitor = new WhereClauseExpressionVisitor(this.dialect, this.configuration, rootNode);
-                expressionVisitor.VisitTree(whereClause);
+                rootNode = expressionVisitor.VisitWhereClause(whereClause);
                 sql.Append(expressionVisitor.Sql);
                 sql.Append(" and ");
                 parameters.AddDynamicParams(expressionVisitor.Parameters);

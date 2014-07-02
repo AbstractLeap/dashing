@@ -23,12 +23,13 @@
             this.Configuration = config;
         }
 
-        public DynamicParameters AddWhereClause<T>(IList<Expression<Func<T, bool>>> whereClauses, StringBuilder sql, FetchNode rootNode) {
+        public DynamicParameters AddWhereClause<T>(IList<Expression<Func<T, bool>>> whereClauses, StringBuilder sql, ref FetchNode rootNode) {
             var result = this.WhereClauseWriter.GenerateSql(whereClauses, rootNode);
             if (result.Sql.Length > 0) {
                 sql.Append(result.Sql);
             }
 
+            rootNode = result.FetchTree;
             return result.Parameters;
         }
 
