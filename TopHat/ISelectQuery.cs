@@ -142,5 +142,21 @@ namespace TopHat {
         ///     The <see cref="SelectQuery{T}" />.
         /// </returns>
         ISelectQuery<T> OrderByDescending<TResult>(Expression<Func<T, TResult>> keySelector);
+
+        T First();
+
+        T First(Expression<Func<T, bool>> predicate);
+
+        T FirstOrDefault();
+
+        T FirstOrDefault(Expression<Func<T, bool>> predicate);
+
+        T Single();
+
+        T Single(Expression<Func<T, bool>> predicate);
+
+        T SingleOrDefault();
+
+        T SingleOrDefault(Expression<Func<T, bool>> predicate);
     }
 }

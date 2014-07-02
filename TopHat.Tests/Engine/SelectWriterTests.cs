@@ -213,8 +213,30 @@
                 sql.Sql);
         }
 
+        [Fact]
+        public void TakeWorksSql() {
+            var query = this.GetSelectQuery<Post>().Take(1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("", sql.Sql);
+        }
+
+        [Fact]
+        public void TakeWorksMySql() {
+            var query = this.GetSelectQuery<Post>().Take(1);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetMySqlWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("", sql.Sql);
+        }
+
         private SelectWriter GetWriter(bool withIgnore = false) {
             return new SelectWriter(new SqlServerDialect(), MakeConfig(withIgnore));
+        }
+
+        private SelectWriter GetMySqlWriter(bool withIgnore = false) {
+            return new SelectWriter(new MySqlDialect(), MakeConfig(withIgnore));
         }
 
         private SelectQuery<T> GetSelectQuery<T>() {

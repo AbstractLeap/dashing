@@ -190,5 +190,10 @@ namespace TopHat.Engine {
             this.AppendQuotedName(sql, tableName);
             return sql.ToString();
         }
+
+
+        public virtual void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
+            throw new InvalidProgramException("ApplyPaging must be overridden in a deriving class");
+        }
     }
 }

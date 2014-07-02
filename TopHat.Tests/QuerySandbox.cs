@@ -69,6 +69,37 @@
         }
 
         [Fact(Skip = "connects to real database")]
+        public void TestSingleAndFirst() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
+                var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
+                session.Insert(user, user2);
+                
+                // now fetch them
+                var t1 = session.Query<User>().First();
+                Assert.Equal("Bob", t1.Username);
+
+                var t2 = session.Query<User>().First(u => u.Username == "Bob2");
+                Assert.Equal("Bob2", t2.Username);
+
+                Assert.Throws<System.InvalidOperationException>(() => session.Query<User>().Single());
+
+                var t3 = session.Query<User>().Single(u => u.Username == "Bob2");
+                Assert.Equal("Bob2", t3.Username);
+
+                var t4 = session.Query<User>().FirstOrDefault();
+                Assert.Equal("Bob", t1.Username);
+
+                var t5 = session.Query<User>().FirstOrDefault(u => u.Username == "james");
+                Assert.Null(t5);
+
+                var t6 = session.Query<User>().SingleOrDefault(u => u.Username == "james");
+                Assert.Null(t6);
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
         public void TestUpdate() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {

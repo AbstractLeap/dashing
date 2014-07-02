@@ -8,6 +8,7 @@ namespace TopHat {
     using System.Linq.Expressions;
 
     using TopHat.Engine;
+    using TopHat.Extensions;
 
     /// <summary>
     ///     The select query.
@@ -276,6 +277,54 @@ namespace TopHat {
 
         public IFetchMany<T, TResult> FetchMany<TResult>(Expression<Func<T, IEnumerable<TResult>>> selector) {
             return new FetchMany<T, TResult>(selector, this);
+        }
+
+        public T First() {
+            var result = this.FirstOrDefault();
+            if (result == null) {
+                throw new NullReferenceException("The query returned no results");
+            }
+
+            return result;
+        }
+
+        public T First(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return this.First();
+        }
+
+        public T FirstOrDefault() {
+            this.Take(1);
+            return this.ToList().FirstOrDefault();
+        }
+
+        public T FirstOrDefault(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return this.FirstOrDefault();
+        }
+
+        public T Single() {
+            var result = this.SingleOrDefault();
+            if (result == null) {
+                throw new NullReferenceException("The query returned no results");
+            }
+
+            return result;
+        }
+
+        public T Single(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return this.Single();
+        }
+
+        public T SingleOrDefault() {
+            this.Take(2); // we need to fetch a least two rows in order for the SingleOrDefault to work
+            return Enumerable.SingleOrDefault(this);
+        }
+
+        public T SingleOrDefault(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return this.SingleOrDefault();
         }
     }
 }

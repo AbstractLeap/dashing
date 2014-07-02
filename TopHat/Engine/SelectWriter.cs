@@ -92,6 +92,19 @@
             sql.Append(tableSql);
             sql.Append(whereSql);
             sql.Append(orderSql);
+            //// if anything is added after orderSql then the paging will probably need changing
+
+            // apply paging
+            if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
+                this.Dialect.ApplyPaging(sql, orderSql, selectQuery.TakeN, selectQuery.SkipN);
+                if (selectQuery.TakeN > 0) {
+                    parameters.Add("@take", selectQuery.TakeN);
+                }
+
+                if (selectQuery.SkipN > 0) {
+                    parameters.Add("@skip", selectQuery.SkipN);
+                }
+            }
 
             return new SelectWriterResult(sql.ToString(), parameters, rootNode);
         }

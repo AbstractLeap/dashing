@@ -37,6 +37,7 @@
       <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Data.Linq" />
@@ -104,6 +105,7 @@
     <Compile Include="Engine\MySqlDialect.cs" />
     <Compile Include="Engine\SelectWriter.cs" />
     <Compile Include="Engine\SqlDialectBase.cs" />
+    <Compile Include="Engine\SqlServer2012Dialect.cs" />
     <Compile Include="Engine\SqlServerDialect.cs" />
     <Compile Include="Engine\SqlServerEngine.cs" />
     <Compile Include="Engine\SqlWriterResult.cs" />
