@@ -195,7 +195,7 @@
             return property;
         }
 
-        private Map<T> Map<T>() {
+        private IMap<T> Map<T>() {
             var target = this.MakeTarget();
             var map = target.MapFor<T>();
             Assert.NotNull(map);

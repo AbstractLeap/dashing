@@ -21,7 +21,7 @@
         /// <returns>
         ///     The <see cref="Map" />.
         /// </returns>
-        public static Map<T> Table<T>(this Map<T> map, string tableName) {
+        public static IMap<T> Table<T>(this IMap<T> map, string tableName) {
             map.Table = tableName;
             return map;
         }
@@ -40,7 +40,7 @@
         /// <returns>
         ///     The <see cref="Map" />.
         /// </returns>
-        public static Map<T> Schema<T>(this Map<T> map, string schema) {
+        public static IMap<T> Schema<T>(this IMap<T> map, string schema) {
             map.Schema = schema;
             return map;
         }
@@ -61,7 +61,7 @@
         /// <returns>
         ///     The <see cref="Map" />.
         /// </returns>
-        public static Map<T> PrimaryKey<T, TResult>(this Map<T> map, Expression<Func<T, TResult>> expression) {
+        public static IMap<T> PrimaryKey<T, TResult>(this IMap<T> map, Expression<Func<T, TResult>> expression) {
             foreach (var column in map.Columns.Values) {
                 column.IsPrimaryKey = false;
             }
@@ -89,7 +89,7 @@
         /////// </returns>
         /////// <exception cref="NotImplementedException">
         /////// </exception>
-        ////public static Map<T> Index<T, TProperty>(this Map<T> map, Expression<Func<T, TProperty>> newExpression) {
+        ////public static IMap<T> Index<T, TProperty>(this IMap<T> map, Expression<Func<T, TProperty>> newExpression) {
         ////  throw new NotImplementedException();
         ////}
 
@@ -111,7 +111,7 @@
         /// </returns>
         /// <exception cref="KeyNotFoundException">
         /// </exception>
-        public static Column<TProperty> Property<T, TProperty>(this Map<T> map, Expression<Func<T, TProperty>> expression) {
+        public static Column<TProperty> Property<T, TProperty>(this IMap<T> map, Expression<Func<T, TProperty>> expression) {
             var columnName = NameFromMemberExpression(expression);
 
             IColumn column;
