@@ -5,8 +5,13 @@
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
+    using Dashing.Extensions;
+    using System.Linq.Expressions;
+    using System;
+    using System.Linq;
+    using System.Collections.Generic;
 
-    internal class UpdateWriter : BaseWriter, IEntitySqlWriter {
+    internal class UpdateWriter : BaseWriter, IUpdateWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
             : this(dialect, new WhereClauseWriter(dialect, config), config) { }
 
@@ -54,6 +59,45 @@
             sql.Append(";");
 
             // TODO Should we update collections here or is that the users job? Guess we should do ManyToMany tho
+        }
+
+        public SqlWriterResult GenerateBulkSql<T>(T updateClass, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            var sql = new StringBuilder();
+            var parameters = new DynamicParameters();
+            var map = this.Configuration.GetMap<T>();
+
+            var iUpdateClass = updateClass as IUpdateClass;
+            if (iUpdateClass.UpdatedProperties.IsEmpty()) {
+                return new SqlWriterResult("", parameters);
+            }
+
+            sql.Append("update ");
+            this.Dialect.AppendQuotedTableName(sql, map);
+            sql.Append(" set ");
+
+            foreach (var updatedProp in iUpdateClass.UpdatedProperties) {
+                var column = map.Columns[updatedProp];
+                this.Dialect.AppendQuotedName(sql, column.DbName);
+                var paramName ="@" + updatedProp; 
+                parameters.Add(paramName, map.GetColumnValue(updateClass, column));
+                sql.Append(" = ");
+                sql.Append(paramName);
+                sql.Append(", ");
+            }
+
+            sql.Remove(sql.Length - 2, 2);
+
+            if (predicates != null && predicates.Any()) {
+                var whereResult = this.WhereClauseWriter.GenerateSql(predicates, null);
+                if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
+                    throw new NotImplementedException("Dashing does not currently support where clause across tables in an update");
+                }
+
+                parameters.AddDynamicParams(whereResult.Parameters);
+                sql.Append(whereResult.Sql);
+            }
+
+            return new SqlWriterResult(sql.ToString(), parameters);
         }
     }
 }

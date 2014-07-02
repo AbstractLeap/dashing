@@ -8,6 +8,7 @@
             this.AssemblyPath = "Dashing.Generated.dll";
             this.SourceCodePath = "Dashing.Generated.cs";
             this.MapperGenerationMaxRecursion = 8;
+            this.UpdateClassSuffix = "_Update";
         }
 
         /// <summary>
@@ -40,5 +41,7 @@
         public string SourceCodePath { get; set; }
 
         public int MapperGenerationMaxRecursion { get; set; }
+
+        public string UpdateClassSuffix { get; set; }
     }
 }

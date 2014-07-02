@@ -32,6 +32,13 @@
         Type GetTrackingType<T>();
 
         /// <summary>
+        /// Returns a type for the Update class
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Type GetUpdateType<T>();
+
+        /// <summary>
         ///     Returns an instance of a Foreign Key class for the type T
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -44,6 +51,13 @@
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         T CreateTrackingInstance<T>();
+
+        /// <summary>
+        /// Returns an instance of an update class for the type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        T CreateUpdateInstance<T>();
 
         /// <summary>
         ///     Convenience method for enabling tracking on a tracking instance

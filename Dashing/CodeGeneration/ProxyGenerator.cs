@@ -20,6 +20,7 @@ namespace Dashing.CodeGeneration {
             // create code doms for the proxy classes
             var trackingClasses = parallelMaps.Select(m => this.CreateTrackingClass(m, codeGeneratorConfig));
             var foreignKeyClasses = parallelMaps.Select(m => this.CreateFkClass(m, mapDictionary, codeGeneratorConfig));
+            var updateClasses = parallelMaps.Select(m => this.CreateUpdateClass(m, mapDictionary, codeGeneratorConfig));
 
             // extract metadata from maps
             var typeHierarchy = maps.Select(m => m.Type)
@@ -35,11 +36,37 @@ namespace Dashing.CodeGeneration {
                                           .Select(a => a.Location);
 
             return new ProxyGeneratorResult {
-                ProxyTypes = trackingClasses.Concat(foreignKeyClasses)
+                ProxyTypes = trackingClasses.Concat(foreignKeyClasses).Concat(updateClasses)
                                             .ToArray(),
                 NamespaceImports = namespaces.ToArray(),
                 ReferencedAssemblyLocations = references.ToArray()
             };
+        }
+
+        private CodeTypeDeclaration CreateUpdateClass(IMap map, IDictionary<Type, IMap> maps, CodeGeneratorConfig codeGeneratorConfig) {
+            var updateClass = new CodeTypeDeclaration(map.Type.Name + codeGeneratorConfig.UpdateClassSuffix);
+            updateClass.IsClass = true;
+            updateClass.TypeAttributes = TypeAttributes.Public;
+            updateClass.BaseTypes.Add(map.Type);
+            updateClass.BaseTypes.Add(typeof(IUpdateClass));
+
+            // add property for storing updated properties
+            this.GenerateGetSetProperty(updateClass, "UpdatedProperties", typeof(IList<>).MakeGenericType(typeof(string)), FinalPublic);
+
+            // add in constructor to initialise updatedproperties
+            var constructor = new CodeConstructor();
+            constructor.Attributes = MemberAttributes.Public;
+            constructor.Statements.Add(
+                new CodeAssignStatement(CodeHelpers.ThisField("UpdatedProperties"), new CodeObjectCreateExpression(typeof(List<>).MakeGenericType(typeof(string)))));
+            updateClass.Members.Add(constructor);
+
+            // now override the getters/setters of all the properties and add to updated properties
+            foreach (var column in map.Columns) {
+                var prop = this.GenerateGetSetProperty(updateClass, column.Key, column.Value.Type, MemberAttributes.Public | MemberAttributes.Override, true);
+                prop.SetStatements.Insert(0, new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("UpdatedProperties"), "Add", new CodePrimitiveExpression(column.Key))));
+            }
+
+            return updateClass;
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]

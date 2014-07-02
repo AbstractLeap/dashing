@@ -19,7 +19,7 @@
             this.configuration = config;
         }
 
-        public SelectWriterResult GenerateSql<T>(IList<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode) {
+        public SelectWriterResult GenerateSql<T>(IEnumerable<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode) {
             if (whereClauses.IsEmpty()) {
                 return new SelectWriterResult(string.Empty, null, rootNode);
             }

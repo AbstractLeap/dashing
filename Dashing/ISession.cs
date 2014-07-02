@@ -2,6 +2,7 @@ namespace Dashing {
     using System;
     using System.Collections.Generic;
     using System.Data;
+using System.Linq.Expressions;
 
     /// <summary>
     ///     The Session interface.
@@ -117,5 +118,13 @@ namespace Dashing {
         ///     The <see cref="int" />.
         /// </returns>
         int Delete<T>(IEnumerable<T> entities);
+
+        void UpdateAll<T>(Action<T> update);
+
+        void Update<T>(Action<T> update, Expression<Func<T, bool>> predicate);
+
+        void Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
+
+        void Update<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates);
     }
 }

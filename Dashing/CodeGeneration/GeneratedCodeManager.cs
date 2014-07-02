@@ -19,6 +19,8 @@
 
         private readonly IDictionary<Type, Type> trackingTypes;
 
+        private readonly IDictionary<Type, Type> updateTypes;
+
         private readonly IDictionary<Type, Delegate> queryCalls;
 
         private readonly IDictionary<Type, Delegate> noFetchFkCalls;
@@ -26,6 +28,10 @@
         private readonly IDictionary<Type, Delegate> noFetchTrackingCalls;
 
         private delegate IEnumerable<T> DelegateQuery<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
+
+        private delegate T CreateUpdateClass<T>(Type type);
+
+        private readonly IDictionary<Type, Delegate> updateCreators;
 
         private delegate IEnumerable<T> NoFetchDelegate<out T>(
             IDbConnection conn, 
@@ -43,9 +49,11 @@
             // go through the defined types and add them
             this.foreignKeyTypes = new Dictionary<Type, Type>();
             this.trackingTypes = new Dictionary<Type, Type>();
+            this.updateTypes = new Dictionary<Type, Type>();
             this.queryCalls = new Dictionary<Type, Delegate>();
             this.noFetchFkCalls = new Dictionary<Type, Delegate>();
             this.noFetchTrackingCalls = new Dictionary<Type, Delegate>();
+            this.updateCreators = new Dictionary<Type, Delegate>();
 
             foreach (var type in this.GeneratedCodeAssembly.DefinedTypes) {
                 // find the base type from the users code
@@ -77,7 +85,19 @@
                     this.trackingTypes.Add(type.BaseType.BaseType, type); // tracking classes extend fkClasses
                     this.MakeNoFetchCall(type, type.BaseType.BaseType, this.noFetchTrackingCalls);
                 }
+                else if (type.Name.EndsWith(this.Config.UpdateClassSuffix)) {
+                    this.updateTypes.Add(type.BaseType, type);
+                    this.updateCreators.Add(type.BaseType, this.MakeUpdateCreator(type));
+                }
             }
+        }
+
+        private Delegate MakeUpdateCreator(TypeInfo type) {
+            var ctor = Expression.New(type);
+            var returnType = typeof(CreateUpdateClass<>).MakeGenericType(type.BaseType);
+            var parameters = Expression.Parameter(typeof(Type));
+            var lambda = Expression.Lambda(returnType, ctor, parameters);
+            return lambda.Compile();
         }
 
         private void MakeNoFetchCall(TypeInfo type, Type baseType, IDictionary<Type, Delegate> fetchCalls) {
@@ -129,12 +149,20 @@
             return this.trackingTypes[typeof(T)];
         }
 
+        public Type GetUpdateType<T>() {
+            return this.updateTypes[typeof(T)];
+        }
+
         public T CreateForeignKeyInstance<T>() {
             return (T)Activator.CreateInstance(this.GetForeignKeyType<T>());
         }
 
         public T CreateTrackingInstance<T>() {
             return (T)Activator.CreateInstance(this.GetTrackingType<T>());
+        }
+
+        public T CreateUpdateInstance<T>() {
+            return ((CreateUpdateClass<T>)this.updateCreators[typeof(T)])(typeof(T));
         }
 
         public void TrackInstance<T>(T entity) {

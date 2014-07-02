@@ -4,6 +4,6 @@
     using System.Linq.Expressions;
 
     internal interface IWhereClauseWriter {
-        SelectWriterResult GenerateSql<T>(IList<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode);
+        SelectWriterResult GenerateSql<T>(IEnumerable<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode);
     }
 }

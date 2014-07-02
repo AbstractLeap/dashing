@@ -56,6 +56,7 @@
     <Compile Include="CodeGeneration\IProxyGenerator.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
     <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
+    <Compile Include="CodeGeneration\IUpdateClass.cs" />
     <Compile Include="CodeGeneration\ProxyGenerator.cs" />
     <Compile Include="CodeGeneration\ProxyGeneratorResult.cs" />
     <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Engine\DialectFactory.cs" />
     <Compile Include="Engine\EngineBase.cs" />
     <Compile Include="Engine\FetchNode.cs" />
+    <Compile Include="Engine\IUpdateWriter.cs" />
     <Compile Include="Engine\IDapperWrapper.cs" />
     <Compile Include="Engine\IEngine.cs" />
     <Compile Include="Engine\IEntitySqlWriter.cs" />

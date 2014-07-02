@@ -68,6 +68,14 @@
         }
 
         [Fact(Skip = "connects to real database")]
+        public void UpdateBulk() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                session.Update<User>(u => u.Password = "boo", u => u.Username == "Bob2");
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
         public void TestSingleAndFirst() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {

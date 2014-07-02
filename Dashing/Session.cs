@@ -4,6 +4,7 @@
     using System.Data;
 
     using Dashing.Configuration;
+    using System.Linq.Expressions;
 
     /// <summary>
     ///     The session.
@@ -281,6 +282,22 @@
         /// </returns>
         public int Delete<T>(IEnumerable<T> entities) {
             return this.config.Engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+        }
+
+        public void UpdateAll<T>(Action<T> update) {
+            this.config.Engine.Execute(this.Connection, update, null);
+        }
+
+        public void Update<T>(Action<T> update, Expression<Func<T, bool>> predicate) {
+            this.config.Engine.Execute(this.Connection, update, new[] { predicate });
+        }
+
+        public void Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            this.config.Engine.Execute(this.Connection, update, predicates);
+        }
+
+        public void Update<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates) {
+            this.config.Engine.Execute(this.Connection, update, predicates);
         }
     }
 }

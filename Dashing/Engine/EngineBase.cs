@@ -6,6 +6,8 @@ namespace Dashing.Engine {
     using System.Linq;
 
     using Dashing.Configuration;
+    using Dashing.CodeGeneration;
+    using System.Linq.Expressions;
 
     /// <summary>
     ///     The engine base.
@@ -15,7 +17,7 @@ namespace Dashing.Engine {
 
         protected ISelectWriter SelectWriter { get; set; }
 
-        protected IEntitySqlWriter UpdateWriter { get; set; }
+        protected IUpdateWriter UpdateWriter { get; set; }
 
         protected IInsertWriter InsertWriter { get; set; }
 
@@ -191,6 +193,17 @@ namespace Dashing.Engine {
         public IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<Guid> ids, bool? asTracked) {
             var sqlQuery = this.SelectWriter.GenerateGetSql<T>(ids);
             return this.Configuration.CodeManager.Query<T>(sqlQuery, connection, asTracked.HasValue ? asTracked.Value : this.Configuration.GetIsTrackedByDefault);
+        }
+
+        public void Execute<T>(IDbConnection connection, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            // generate a tracking class, apply the update, read out the updates
+            var updateClass = this.Configuration.CodeManager.CreateUpdateInstance<T>();
+            update(updateClass);
+            var sqlQuery = this.UpdateWriter.GenerateBulkSql(updateClass, predicates);
+
+            if (sqlQuery.Sql.Length > 0) {
+                this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
+            }
         }
     }
 }
