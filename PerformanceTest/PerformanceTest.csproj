@@ -91,13 +91,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TopHat\TopHat.csproj">
-      <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
-      <Name>TopHat</Name>
-    </ProjectReference>
+    <Folder Include="TestDomain\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="TestDomain\" />
+    <ProjectReference Include="..\Dashing\Dashing.csproj">
+      <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
+      <Name>Dashing</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

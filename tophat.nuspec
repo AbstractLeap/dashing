@@ -26,9 +26,9 @@
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="TopHat\bin\Release\Dapper.dll" target="lib\net45\Dapper.dll" />
-        <file src="TopHat\bin\Release\TopHat.dll" target="lib\net45\TopHat.dll" />
-        <file src="TopHat\bin\Release\TopHat.pdb" target="lib\net45\TopHat.pdb" />
-        <file src="TopHat\bin\Release\TopHat.xml" target="lib\net45\TopHat.xml" />
+        <file src="Dashing\bin\Release\Dapper.dll" target="lib\net45\Dapper.dll" />
+        <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
+        <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
+        <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
     </files>
 </package>

@@ -11,10 +11,10 @@
 
     using ServiceStack.OrmLite;
 
-    using TopHat;
-    using TopHat.Configuration;
-    using TopHat.Engine;
-    using TopHat.Engine.DDL;
+    using Dashing;
+    using Dashing.Configuration;
+    using Dashing.Engine;
+    using Dashing.Engine.DDL;
 
     using Database = Simple.Data.Database;
     using SqlServerDialect = ServiceStack.OrmLite.SqlServerDialect;
@@ -89,7 +89,7 @@
         private static ISession session;
 
         private static void SetupTests(List<Test> tests) {
-            var config = new TopHatConfiguration(ConnectionString);
+            var config = new DashingConfiguration(ConnectionString);
             var simpleDataDb = Database.OpenConnection(ConnectionString.ConnectionString);
             var dbFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
             ormliteConn = dbFactory.OpenDbConnection();
@@ -126,33 +126,33 @@
                         }
                     }));
 
-            // add tophat
+            // add Dashing
             tests.Add(
                 new Test(
-                    Providers.TopHat,
+                    Providers.Dashing,
                     testName,
                     i => {
                         var post = session.Query<Post>().AsTracked().Where(p => p.PostId == i).First();
-                        post.Title = Providers.TopHat + "_" + i + r.Next(100000);
+                        post.Title = Providers.Dashing + "_" + i + r.Next(100000);
                         session.Update(post);
                         var thatPost = session.Query<Post>().Where(p => p.PostId == i).First();
                         if (thatPost.Title != post.Title) {
-                            Console.WriteLine(testName + " failed for " + Providers.TopHat + " as the update did not work");
+                            Console.WriteLine(testName + " failed for " + Providers.Dashing + " as the update did not work");
                         }
                     }));
 
-            // add tophat by id method
+            // add Dashing by id method
             tests.Add(
                 new Test(
-                    Providers.TopHat,
+                    Providers.Dashing,
                     testName,
                     i => {
                         var post = session.Get<Post>(i, true);
-                        post.Title = Providers.TopHat + "_" + i + r.Next(100000);
+                        post.Title = Providers.Dashing + "_" + i + r.Next(100000);
                         session.Update(post);
                         var thatPost = session.Get<Post>(i);
                         if (thatPost.Title != post.Title) {
-                            Console.WriteLine(testName + " failed for " + Providers.TopHat + " as the update did not work");
+                            Console.WriteLine(testName + " failed for " + Providers.Dashing + " as the update did not work");
                         }
                     }) { Method = "By Id" });
 
@@ -205,8 +205,8 @@
                         new { l_1 = i },
                         splitOn: "UserId").First()));
 
-            // add tophat
-            tests.Add(new Test(Providers.TopHat, testName, i => session.Query<Post>().Fetch(p => p.Author).Where(p => p.PostId == i).First()));
+            // add Dashing
+            tests.Add(new Test(Providers.Dashing, testName, i => session.Query<Post>().Fetch(p => p.Author).Where(p => p.PostId == i).First()));
 
             // add ef
             tests.Add(new Test(Providers.EF, testName, i => EfDb.Posts.AsNoTracking().Include(p => p.Author).Where(p => p.PostId == i).First()));
@@ -225,11 +225,11 @@
                         "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
                         new { l_1 = i }).First()));
 
-            // add tophat
-            tests.Add(new Test(Providers.TopHat, testName, i => session.Query<Post>().Where(p => p.PostId == i).First()));
+            // add Dashing
+            tests.Add(new Test(Providers.Dashing, testName, i => session.Query<Post>().Where(p => p.PostId == i).First()));
 
             // add tophaqt by id
-            tests.Add(new Test(Providers.TopHat, testName, i => session.Get<Post>(i)) { Method = "By Id" });
+            tests.Add(new Test(Providers.Dashing, testName, i => session.Get<Post>(i)) { Method = "By Id" });
 
             // add ef
             tests.Add(new Test(Providers.EF, testName, i => EfDb.Posts.AsNoTracking().First(p => p.PostId == i)));
@@ -244,8 +244,8 @@
             tests.Add(new Test(Providers.SimpleData, testName, i => simpleDataDb.Posts.Get(i)));
         }
 
-        private static void SetupDatabase(TopHatConfiguration config, ISession session) {
-            var d = new TopHat.Engine.SqlServerDialect();
+        private static void SetupDatabase(DashingConfiguration config, ISession session) {
+            var d = new Dashing.Engine.SqlServerDialect();
             var dtw = new DropTableWriter(d);
             var ctw = new CreateTableWriter(d);
             var dropTables = config.Maps.Select(dtw.DropTableIfExists);
@@ -263,8 +263,8 @@
             }
         }
 
-        private class TopHatConfiguration : DefaultConfiguration {
-            public TopHatConfiguration(System.Configuration.ConnectionStringSettings connectionString)
+        private class DashingConfiguration : DefaultConfiguration {
+            public DashingConfiguration(System.Configuration.ConnectionStringSettings connectionString)
                 : base(connectionString) {
                 this.Add<Blog>();
                 this.Add<Comment>();
@@ -299,9 +299,9 @@
                 }
             }
 
-            public static string TopHat {
+            public static string Dashing {
                 get {
-                    return "TopHat";
+                    return "Dashing";
                 }
             }
 

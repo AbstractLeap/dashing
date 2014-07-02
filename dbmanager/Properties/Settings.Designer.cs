@@ -25,19 +25,19 @@ namespace dbmanager.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Users\\Mark\\Documents\\tophat\\TopHat.Tests\\bin\\Debug\\TopHat.Tests.dll")]
-        public string ConfigurationDllPath {
+        [global::System.Configuration.DefaultSettingValueAttribute("Dashing.Tests.Tools.ModelGeneration.CustomConfig")]
+        public string ConfigurationTypeName {
             get {
-                return ((string)(this["ConfigurationDllPath"]));
+                return ((string)(this["ConfigurationTypeName"]));
             }
         }
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("TopHat.Tests.Tools.ModelGeneration.CustomConfig")]
-        public string ConfigurationTypeName {
+        [global::System.Configuration.DefaultSettingValueAttribute("D:\\Projects\\Dashing\\Dashing.Tests\\bin\\Debug\\Dashing.Tests.dll")]
+        public string ConfigurationDllPath {
             get {
-                return ((string)(this["ConfigurationTypeName"]));
+                return ((string)(this["ConfigurationDllPath"]));
             }
         }
     }

@@ -67,13 +67,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TopHat.Tools\TopHat.Tools.csproj">
+    <ProjectReference Include="..\Dashing.Tools\Dashing.Tools.csproj">
       <Project>{414968d7-e94c-404b-8831-35aa54a656f1}</Project>
-      <Name>TopHat.Tools</Name>
+      <Name>Dashing.Tools</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TopHat\TopHat.csproj">
+    <ProjectReference Include="..\Dashing\Dashing.csproj">
       <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
-      <Name>TopHat</Name>
+      <Name>Dashing</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

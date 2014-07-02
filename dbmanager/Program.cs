@@ -47,7 +47,7 @@ namespace dbmanager
             DatabaseSchemaReader.DataSchema.DatabaseSchema schema;
             System.Configuration.ConnectionStringSettings connectionString;
             var maps = ReverseEngineerMaps(out schema, out connectionString);
-            var reverseEngineer = new TopHat.Tools.ModelGeneration.ModelGenerator();
+            var reverseEngineer = new Dashing.Tools.ModelGeneration.ModelGenerator();
             var sources = reverseEngineer.GenerateFiles(maps, schema, generatedNamespace);
 
             foreach (var source in sources)
@@ -56,9 +56,9 @@ namespace dbmanager
             }
         }
 
-        private static IEnumerable<TopHat.Configuration.IMap> ReverseEngineerMaps(out DatabaseSchemaReader.DataSchema.DatabaseSchema schema, out System.Configuration.ConnectionStringSettings connectionString)
+        private static IEnumerable<Dashing.Configuration.IMap> ReverseEngineerMaps(out DatabaseSchemaReader.DataSchema.DatabaseSchema schema, out System.Configuration.ConnectionStringSettings connectionString)
         {
-            var engineer = new TopHat.Tools.ReverseEngineering.Engineer();
+            var engineer = new Dashing.Tools.ReverseEngineering.Engineer();
             connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["Default"];
             var databaseReader = new DatabaseSchemaReader.DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
             schema = databaseReader.ReadAll();
@@ -110,10 +110,10 @@ namespace dbmanager
             var configType = configAssembly.DefinedTypes.First(t => t.FullName == Properties.Settings.Default.ConfigurationTypeName);
 
             // TODO add in a factory way of generating the config for cases where constructor not empty
-            var config = Activator.CreateInstance(configType) as TopHat.Configuration.IConfiguration;
-            var dialectFactory = new TopHat.Engine.DialectFactory();
+            var config = Activator.CreateInstance(configType) as Dashing.Configuration.IConfiguration;
+            var dialectFactory = new Dashing.Engine.DialectFactory();
             var dialect = dialectFactory.Create(connectionString);
-            var migrator = new TopHat.Tools.Migration.Migrator(new TopHat.Engine.DDL.CreateTableWriter(dialect), new TopHat.Engine.DDL.DropTableWriter(dialect), null);
+            var migrator = new Dashing.Tools.Migration.Migrator(new Dashing.Engine.DDL.CreateTableWriter(dialect), new Dashing.Engine.DDL.DropTableWriter(dialect), null);
             IEnumerable<string> warnings, errors;
             var script = migrator.GenerateNaiveSqlDiff(maps, config.Maps, out warnings, out errors);
             return script;
