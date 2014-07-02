@@ -93,7 +93,7 @@
                 this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(p.Type).PrimaryKey.DbName);
             }
 
-            return base.VisitParameter(p);
+            return p;
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m) {

@@ -159,6 +159,24 @@
         }
 
         [Fact]
+        public void FetchWithNonFetchPKWhereClause() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post).Where(c => c.User.UserId == 2);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId where (t.[UserId] = @l_1)", sql.Sql);
+        }
+
+        [Fact]
+        public void FetchWithNonFetchWhereClause() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post).Where(c => c.User.EmailAddress == "blah");
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Users] as t_100 on t.UserId = t_100.UserId where (t_100.[EmailAddress] = @l_1)", sql.Sql);
+        }
+
+        [Fact]
         public void SimpleOrder() {
             var query = this.GetSelectQuery<Post>().OrderBy(p => p.Rating);
             var selectQuery = query as SelectQuery<Post>;
