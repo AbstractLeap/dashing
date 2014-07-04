@@ -1,66 +1,23 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
 
     /// <summary>
     ///     The map extensions.
     /// </summary>
     public static class MapExtensions {
-        /// <summary>
-        ///     The table.
-        /// </summary>
-        /// <param name="map">
-        ///     The map.
-        /// </param>
-        /// <param name="tableName">
-        ///     The table name.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="Map" />.
-        /// </returns>
-        public static IMap<T> Table<T>(this IMap<T> map, string tableName) {
+        public static IMap Table(this IMap map, string tableName) {
             map.Table = tableName;
             return map;
         }
 
-        /// <summary>
-        ///     The schema.
-        /// </summary>
-        /// <param name="map">
-        ///     The map.
-        /// </param>
-        /// <param name="schema">
-        ///     The schema.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="Map" />.
-        /// </returns>
-        public static IMap<T> Schema<T>(this IMap<T> map, string schema) {
+        public static IMap Schema(this IMap map, string schema) {
             map.Schema = schema;
             return map;
         }
 
-        /// <summary>
-        ///     The primary key.
-        /// </summary>
-        /// <param name="map">
-        ///     The map.
-        /// </param>
-        /// <param name="expression">
-        ///     The expression.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <typeparam name="TResult">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="Map" />.
-        /// </returns>
         public static IMap<T> PrimaryKey<T, TResult>(this IMap<T> map, Expression<Func<T, TResult>> expression) {
             foreach (var column in map.Columns.Values) {
                 column.IsPrimaryKey = false;
@@ -93,24 +50,6 @@
         ////  throw new NotImplementedException();
         ////}
 
-        /// <summary>
-        ///     The property.
-        /// </summary>
-        /// <param name="map">
-        ///     The map.
-        /// </param>
-        /// <param name="expression">
-        ///     The expression.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <typeparam name="TProperty">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="Column" />.
-        /// </returns>
-        /// <exception cref="KeyNotFoundException">
-        /// </exception>
         public static Column<TProperty> Property<T, TProperty>(this IMap<T> map, Expression<Func<T, TProperty>> expression) {
             var columnName = NameFromMemberExpression(expression);
 
@@ -128,21 +67,6 @@
             return columnT;
         }
 
-        /// <summary>
-        ///     The name from member expression.
-        /// </summary>
-        /// <param name="expression">
-        ///     The expression.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <typeparam name="TResult">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="string" />.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// </exception>
         private static string NameFromMemberExpression<T, TResult>(Expression<Func<T, TResult>> expression) {
             var memberExpression = expression.Body as MemberExpression;
             if (memberExpression == null) {
@@ -150,6 +74,13 @@
             }
 
             return memberExpression.Member.Name;
+        }
+
+        public static IEnumerable<IColumn> OwnedColumns(this IMap map, bool includeExcludedByDefault = false) {
+            return map.Columns.Values.Where(
+                c => !c.IsIgnored
+                    && (includeExcludedByDefault || !c.IsExcludedByDefault)
+                    && (c.Relationship == RelationshipType.None || c.Relationship == RelationshipType.ManyToOne));
         }
     }
 }

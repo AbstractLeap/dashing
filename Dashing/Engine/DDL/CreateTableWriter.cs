@@ -4,6 +4,7 @@ namespace Dashing.Engine.DDL {
     using System.Text;
 
     using Dashing.Configuration;
+    using Dashing.Engine.Dialects;
 
     public class CreateTableWriter : ICreateTableWriter {
         private readonly ISqlDialect dialect;
@@ -25,8 +26,7 @@ namespace Dashing.Engine.DDL {
 
             this.dialect.AppendColumnSpecification(sql, map.PrimaryKey);
 
-            foreach (var column in
-                map.Columns.Values.Where(c => !c.IsPrimaryKey && !c.IsIgnored && (c.Relationship == RelationshipType.None || c.Relationship == RelationshipType.ManyToOne))) {
+            foreach (var column in map.OwnedColumns(true).Where(c => !c.IsPrimaryKey)) {
                 sql.Append(", ");
                 this.dialect.AppendColumnSpecification(sql, column);
             }

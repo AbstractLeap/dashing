@@ -3,6 +3,8 @@
     using System.Linq;
     using System.Text;
 
+    using Dashing.Engine.Dialects;
+
     using Moq;
 
     using Dashing.Configuration;

@@ -20,6 +20,7 @@
     using ServiceStack.OrmLite;
 
     using Database = Simple.Data.Database;
+    using SqlServerDialect = Dashing.Engine.Dialects.SqlServerDialect;
 
     internal static class Program {
         internal static readonly ConnectionStringSettings ConnectionString = new ConnectionStringSettings(
@@ -84,7 +85,7 @@
         private static void SetupTests(List<Test> tests) {
             var config = new DashingConfiguration(ConnectionString);
             var simpleDataDb = Database.OpenConnection(ConnectionString.ConnectionString);
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, ServiceStack.OrmLite.SqlServerDialect.Provider);
             ormliteConn = dbFactory.OpenDbConnection();
             session = config.BeginSession();
             SetupDatabase(config);
@@ -267,7 +268,7 @@
         }
 
         private static void SetupDatabase(IConfiguration dashingConfig) {
-            var d = new Dashing.Engine.SqlServerDialect();
+            var d = new SqlServerDialect();
             var dtw = new DropTableWriter(d);
             var ctw = new CreateTableWriter(d);
             var dropTables = dashingConfig.Maps.Select(dtw.DropTableIfExists);

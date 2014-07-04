@@ -1,6 +1,5 @@
-namespace Dashing.Engine {
+namespace Dashing.Engine.Dialects {
     using System.Text;
-    using Dashing.Configuration;
 
     public class MySqlDialect : SqlDialectBase {
         public MySqlDialect()

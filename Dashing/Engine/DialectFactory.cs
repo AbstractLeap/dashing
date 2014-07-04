@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace Dashing.Engine
 {
+    using Dashing.Engine.Dialects;
+
     public class DialectFactory
     {
         public ISqlDialect Create(ConnectionStringSettings connectionString)

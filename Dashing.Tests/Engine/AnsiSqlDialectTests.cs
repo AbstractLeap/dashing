@@ -4,6 +4,7 @@
 
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Engine.Dialects;
 
     using Xunit;
 

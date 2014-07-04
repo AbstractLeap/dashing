@@ -5,6 +5,7 @@
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
+    using Dashing.Engine.Dialects;
     using Dashing.Extensions;
     using System.Linq.Expressions;
     using System;
