@@ -9,6 +9,8 @@ namespace Dashing.Engine {
     using Dashing.CodeGeneration;
     using System.Linq.Expressions;
 
+    using Dashing.Engine.Dialects;
+
     /// <summary>
     ///     The engine base.
     /// </summary>

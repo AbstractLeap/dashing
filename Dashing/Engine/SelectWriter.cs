@@ -9,6 +9,7 @@
     using Dapper;
 
     using Dashing.Configuration;
+    using Dashing.Engine.Dialects;
     using Dashing.Extensions;
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
@@ -41,30 +42,27 @@
         }
 
         private string GenerateGetSql<T>(bool isMultiple) {
-            var sql = new StringBuilder("select ");
             var map = this.Configuration.GetMap<T>();
-            foreach (var column in map.Columns) {
-                if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault
-                        && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)) {
-                    this.AddColumn(sql, column.Value, string.Empty);
-                    sql.Append(", ");
-                }
+            var sql = new StringBuilder("select ");
+
+            foreach (var column in map.OwnedColumns()) {
+                this.AddColumn(sql, column);
+                sql.Append(", ");
             }
 
             sql.Remove(sql.Length - 2, 2);
             sql.Append(" from ");
             this.Dialect.AppendQuotedTableName(sql, map);
-            if (isMultiple) {
-                sql.Append(" where " + map.PrimaryKey.Name + " in @Ids");
-            }
-            else {
-                sql.Append(" where " + map.PrimaryKey.Name + " = @Id");
-            }
+
+            sql.Append(" where ");
+            sql.Append(map.PrimaryKey.Name);
+            sql.Append(isMultiple ? " in @Ids" : " = @Id");
 
             return sql.ToString();
         }
 
         public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
+            // TODO: one StringBuilder to rule them all
             var sql = new StringBuilder();
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
@@ -85,10 +83,16 @@
             this.AddTables(selectQuery, tableSql, columnSql, rootNode);
 
             // add order by
-            this.AddOrderByClause(selectQuery.OrderClauses, orderSql);
-            if (selectQuery.SkipN > 0 && orderSql.Length == 0) {
-                // add an order on the sort clause
-                orderSql.Append(" order by " + (rootNode != null ? rootNode.Alias + "." : ""));
+            if (selectQuery.OrderClauses.Any()) {
+                this.AddOrderByClause(selectQuery.OrderClauses, orderSql);
+            }
+            else if (selectQuery.SkipN > 0) { // need to add a default order on the sort clause
+                orderSql.Append(" order by ");
+                if (rootNode != null) {
+                    orderSql.Append(rootNode.Alias);
+                    orderSql.Append('.');
+                }
+
                 this.Dialect.AppendQuotedName(orderSql, this.Configuration.GetMap<T>().PrimaryKey.DbName);
             }
 
@@ -209,13 +213,9 @@
 
             // add the columns
             if (node.IsFetched) {
-                foreach (var column in this.Configuration.GetMap(node.Column.Type).Columns) {
-                    // only include the column if not excluded and not fetched subsequently
-                    if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault && !node.Children.ContainsKey(column.Key)
-                        && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)) {
-                        columnSql.Append(", ");
-                        this.AddColumn(columnSql, column.Value, node.Alias);
-                    }
+                foreach (var column in this.Configuration.GetMap(node.Column.Type).OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name))) {
+                    columnSql.Append(", ");
+                    this.AddColumn(columnSql, column, node.Alias);
                 }
             }
 
@@ -233,31 +233,28 @@
         }
 
         private void AddColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode) {
-            string alias = string.Empty;
-            if (selectQuery.Fetches.Any()) {
-                alias = "t";
-            }
-
+            var alias = selectQuery.Fetches.Any() ? "t" : null;
+            
             if (selectQuery.Projection == null) {
-                foreach (var column in this.Configuration.GetMap<T>().Columns) {
-                    if (!column.Value.IsIgnored && (selectQuery.FetchAllProperties || !column.Value.IsExcludedByDefault)
-                        && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)
-                        && (rootNode == null || !rootNode.Children.ContainsKey(column.Key))) {
-                        this.AddColumn(columnSql, column.Value, alias);
-                        columnSql.Append(", ");
-                    }
+                foreach (var column in this.Configuration.GetMap<T>().OwnedColumns(selectQuery.FetchAllProperties).Where(c => rootNode == null || !rootNode.Children.ContainsKey(c.Name))) {
+                    this.AddColumn(columnSql, column, alias);
+                    columnSql.Append(", ");
                 }
             }
 
             columnSql.Remove(columnSql.Length - 2, 2);
         }
 
-        private void AddColumn(StringBuilder sql, IColumn column, string alias = "") {
-            if (alias.Length > 0) {
-                sql.Append(alias + ".");
+        private void AddColumn(StringBuilder sql, IColumn column, string tableAlias = null) {
+            // add the table alias
+            if (tableAlias != null) {
+                sql.Append(tableAlias + ".");
             }
 
+            // add the column name
             this.Dialect.AppendQuotedName(sql, column.DbName);
+
+            // add a column alias if required
             if (column.DbName != column.Name && column.Relationship == RelationshipType.None) {
                 sql.Append(" as " + column.Name);
             }

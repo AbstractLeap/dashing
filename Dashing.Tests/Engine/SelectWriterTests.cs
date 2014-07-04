@@ -6,6 +6,8 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
+    using Dashing.Engine.Dialects;
+
     using Moq;
 
     using Dashing.Configuration;

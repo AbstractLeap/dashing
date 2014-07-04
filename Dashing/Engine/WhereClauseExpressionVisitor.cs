@@ -9,6 +9,7 @@
     using Dapper;
 
     using Dashing.Configuration;
+    using Dashing.Engine.Dialects;
     using Dashing.Extensions;
 
     internal class WhereClauseExpressionVisitor : BaseExpressionVisitor {

@@ -6,6 +6,8 @@
     using System.Linq;
     using System.Text;
 
+    using Dashing.Engine.Dialects;
+
     using Moq;
 
     using Dashing.Configuration;
@@ -17,23 +19,20 @@
     public class EngineBaseTests {
         [Fact]
         public void CreateTableGeneratesExpectedSql() {
-            var sql = string.Empty;
-            var wrapper = new Mock<IDapperWrapper>(MockBehavior.Strict);
-            wrapper.Setup(m => m.Execute(It.IsAny<string>(), null, null, null)).Returns(1).Callback<string, object, int?, CommandType?>((s, a, b, c) => sql = s);
 
             var target = this.MakeTarget(new AnsiSqlDialect());
             target.UseMaps(MakeMaps());
-            target.CreateTable<User>(wrapper.Object);
+            var sql = target.CreateTable<User>();
             Debug.WriteLine(sql);
 
             target = this.MakeTarget(new SqlServerDialect());
             target.UseMaps(MakeMaps());
-            target.CreateTable<User>(wrapper.Object);
+            sql = target.CreateTable<User>();
             Debug.WriteLine(sql);
 
             target = this.MakeTarget(new MySqlDialect());
             target.UseMaps(MakeMaps());
-            target.CreateTable<User>(wrapper.Object);
+            sql = target.CreateTable<User>();
             Debug.WriteLine(sql);
         }
 
@@ -69,7 +68,7 @@
                 this.Dialect = dialect;
             }
 
-            public void CreateTable<T>(IDapperWrapper wrapper) {
+            public string CreateTable<T>() {
                 var map = this.MapFor<T>();
                 var sql = new StringBuilder();
 
@@ -86,7 +85,7 @@
 
                 sql.Append(" )");
 
-                wrapper.Execute(sql.ToString());
+                return sql.ToString();
             }
 
             public IMap MapFor<T>() {

@@ -3,6 +3,7 @@ namespace Dashing.Engine.DDL {
     using System.Text;
 
     using Dashing.Configuration;
+    using Dashing.Engine.Dialects;
 
     public class DropTableWriter : IDropTableWriter {
         private readonly ISqlDialect dialect;

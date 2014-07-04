@@ -1,6 +1,9 @@
 ﻿namespace Dashing.Tests.Engine {
     using Dashing.Engine;
     using System.Configuration;
+
+    using Dashing.Engine.Dialects;
+
     using Xunit;
 
     public class DialectFactoryTests {

@@ -1,13 +1,14 @@
 ﻿namespace Dashing.Engine {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
     using System.Text;
 
     using Dapper;
 
     using Dashing.Configuration;
-    using System.Collections.Generic;
-    using System.Linq.Expressions;
-    using System;
-    using System.Linq;
+    using Dashing.Engine.Dialects;
 
     internal class DeleteWriter : BaseWriter, IDeleteWriter {
         public DeleteWriter(ISqlDialect dialect, IConfiguration config)
@@ -19,21 +20,25 @@
         public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
             var map = this.Configuration.GetMap<T>();
             var sql = new StringBuilder();
+            var paramIdx = 0;
             var parameters = new DynamicParameters();
+
             sql.Append("delete from ");
             this.Dialect.AppendQuotedTableName(sql, map);
             sql.Append(" where ");
             this.Dialect.AppendQuotedName(sql, map.PrimaryKey.DbName);
             sql.Append(" in (");
-            var paramIdx = 0;
+
             foreach (var entity in query.Entities) {
-                string paramName = "@p_" + ++paramIdx;
-                sql.Append(paramName + ", ");
+                var paramName = "@p_" + ++paramIdx;
+                sql.Append(paramName);
+                sql.Append(", ");
                 parameters.Add(paramName, map.GetPrimaryKeyValue(entity));
             }
 
             sql.Remove(sql.Length - 2, 2); // remove trailing ,
             sql.Append(")");
+
             return new SqlWriterResult(sql.ToString(), parameters);
         }
 
@@ -44,17 +49,27 @@
 
             sql.Append("delete from ");
             this.Dialect.AppendQuotedTableName(sql, map);
-            if (predicates != null && predicates.Any()) {
-                var whereResult = this.WhereClauseWriter.GenerateSql(predicates, null);
-                if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
-                    throw new NotImplementedException("Dashing does not currently support where clause across tables in a delete");
-                }
-
-                sql.Append(whereResult.Sql);
-                parameters.AddDynamicParams(whereResult.Parameters);
+            if (predicates != null) {
+                this.AppendPredicates(predicates, sql, parameters);
             }
 
             return new SqlWriterResult(sql.ToString(), parameters);
+        }
+
+        private void AppendPredicates<T>(IEnumerable<Expression<Func<T, bool>>> predicates, StringBuilder sql, DynamicParameters parameters) {
+            var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates.ToArray();
+
+            if (!predicateArray.Any()) {
+                return;
+            }
+
+            var whereResult = this.WhereClauseWriter.GenerateSql(predicateArray, null);
+            if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
+                throw new NotImplementedException("Dashing does not currently support where clause across tables in a delete");
+            }
+
+            sql.Append(whereResult.Sql);
+            parameters.AddDynamicParams(whereResult.Parameters);
         }
     }
 }
