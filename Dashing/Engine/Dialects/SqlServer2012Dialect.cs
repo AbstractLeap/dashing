@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dashing.Configuration;
+﻿namespace Dashing.Engine.Dialects {
+    using System.Text;
 
-namespace Dashing.Engine {
     public class SqlServer2012Dialect : SqlServerDialect {
         public override void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             if (orderClause.Length == 0) {

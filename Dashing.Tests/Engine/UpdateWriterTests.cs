@@ -1,4 +1,6 @@
 ﻿namespace Dashing.Tests.Engine {
+    using Dashing.Engine.Dialects;
+
     using Moq;
     using System.Diagnostics;
     using Dashing.CodeGeneration;

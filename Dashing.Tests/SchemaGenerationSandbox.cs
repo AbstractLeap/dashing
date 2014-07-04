@@ -7,6 +7,7 @@
 
     using Dashing.Engine;
     using Dashing.Engine.DDL;
+    using Dashing.Engine.Dialects;
     using Dashing.Tests.TestDomain;
 
     using Xunit;

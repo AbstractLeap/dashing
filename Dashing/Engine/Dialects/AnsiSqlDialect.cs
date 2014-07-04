@@ -1,4 +1,4 @@
-namespace Dashing.Engine {
+namespace Dashing.Engine.Dialects {
     using System.Data;
 
     public class AnsiSqlDialect : SqlDialectBase {

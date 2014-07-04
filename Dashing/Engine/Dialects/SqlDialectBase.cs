@@ -1,4 +1,4 @@
-namespace Dashing.Engine {
+namespace Dashing.Engine.Dialects {
     using System;
     using System.Data;
     using System.Text;
