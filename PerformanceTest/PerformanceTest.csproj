@@ -79,20 +79,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Post.cs" />
+    <Compile Include="Domain\Blog.cs" />
+    <Compile Include="Domain\Comment.cs" />
+    <Compile Include="Domain\Post.cs" />
+    <Compile Include="Domain\User.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Blog.cs" />
-    <Compile Include="Comment.cs" />
-    <Compile Include="User.cs" />
+    <Compile Include="Providers.cs" />
+    <Compile Include="Test.cs" />
+    <Compile Include="Tests\Dashing\DashingConfiguration.cs" />
+    <Compile Include="Tests\EntityFramework\EfContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TestDomain\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\Dashing\Dashing.csproj">
       <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>

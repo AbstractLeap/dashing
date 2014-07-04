@@ -1,4 +1,4 @@
-﻿namespace PerformanceTest {
+﻿namespace PerformanceTest.Domain {
     using System;
 
     public class Comment {

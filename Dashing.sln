@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "Performa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Tools", "Dashing.Tools\Dashing.Tools.csproj", "{414968D7-E94C-404B-8831-35AA54A656F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dbmanager", "dbmanager\dbmanager.csproj", "{EC074CCB-0934-46C4-BBCC-B306459FC95E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Console", "Dashing.Console\Dashing.Console.csproj", "{EC074CCB-0934-46C4-BBCC-B306459FC95E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

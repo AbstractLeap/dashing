@@ -1,4 +1,4 @@
-﻿namespace PerformanceTest {
+﻿namespace PerformanceTest.Domain {
     public class User {
         public virtual int UserId { get; set; }
 
