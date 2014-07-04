@@ -7,7 +7,7 @@
     <ProjectGuid>{EC074CCB-0934-46C4-BBCC-B306459FC95E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>dbmanager</RootNamespace>
+    <RootNamespace>Dashing.Console</RootNamespace>
     <AssemblyName>dbmanager</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
