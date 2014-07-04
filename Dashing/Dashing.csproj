@@ -85,6 +85,7 @@
     <Compile Include="Engine\AnsiSqlDialect.cs" />
     <Compile Include="Engine\BaseExpressionVisitor.cs" />
     <Compile Include="Engine\BaseWriter.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
     <Compile Include="Engine\DapperWrapper.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="Engine\SelectWriterResult.cs" />
     <Compile Include="EntityQueryBase.cs" />
     <Compile Include="Extensions\DapperExtensions.cs" />
+    <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />

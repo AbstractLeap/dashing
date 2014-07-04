@@ -2,6 +2,10 @@
     using System.Collections.Generic;
 
     public class Post {
+        public Post() {
+            this.Comments = new List<Comment>();
+        }
+
         public virtual int PostId { get; set; }
 
         public virtual string Title { get; set; }

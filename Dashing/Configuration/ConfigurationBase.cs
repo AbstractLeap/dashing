@@ -190,7 +190,9 @@
             var type = typeof(T);
             if (!this.mappedTypes.ContainsKey(type)) {
                 this.Dirty();
-                this.mappedTypes[type] = this.Mapper.MapFor<T>();
+                var map = this.Mapper.MapFor<T>();
+                map.Configuration = this;
+                this.mappedTypes[type] = map;
             }
 
             return this;
@@ -216,6 +218,7 @@
 
             foreach (var map in maps) {
                 // force into sequential
+                map.Configuration = this;
                 this.mappedTypes[map.Type] = map;
             }
 
@@ -259,7 +262,9 @@
             var type = typeof(T);
 
             if (!this.mappedTypes.TryGetValue(type, out map)) {
-                this.mappedTypes[type] = mapt = this.Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
+                mapt = this.Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
+                mapt.Configuration = this;
+                this.mappedTypes[type] = mapt;
             }
             else {
                 mapt = map as IMap<T>;

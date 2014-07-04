@@ -198,18 +198,35 @@
             // add this node and then it's children
             // add table sql
             var splitOns = new List<string>();
+            IMap map;
+            if (node.Column.Relationship == RelationshipType.OneToMany) {
+                map = this.Configuration.GetMap(node.Column.Type.GetGenericArguments()[0]);
+            }
+            else if (node.Column.Relationship == RelationshipType.ManyToOne) {
+                map = this.Configuration.GetMap(node.Column.Type);
+            }
+            else {
+                throw new NotSupportedException();
+            }
+
             if (node.IsFetched) {
-                splitOns.Add(this.Configuration.GetMap(node.Column.Type).PrimaryKey.Name);
+                splitOns.Add(map.PrimaryKey.Name);
             }
 
             tableSql.Append(" left join ");
-            this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap(node.Column.Type));
+            this.Dialect.AppendQuotedTableName(tableSql, map);
             tableSql.Append(" as " + node.Alias);
-            tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + this.Configuration.GetMap(node.Column.Type).PrimaryKey.DbName);
+
+            if (node.Column.Relationship == RelationshipType.ManyToOne) {
+                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + map.PrimaryKey.DbName);
+            }
+            else if (node.Column.Relationship == RelationshipType.OneToMany) {
+                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.Map.PrimaryKey.DbName + " = " + node.Alias + "." + node.Column.ChildColumn.DbName);
+            }
 
             // add the columns
             if (node.IsFetched) {
-                foreach (var column in this.Configuration.GetMap(node.Column.Type).Columns) {
+                foreach (var column in map.Columns) {
                     // only include the column if not excluded and not fetched subsequently
                     if (!column.Value.IsIgnored && !column.Value.IsExcludedByDefault && !node.Children.ContainsKey(column.Key)
                         && (column.Value.Relationship == RelationshipType.None || column.Value.Relationship == RelationshipType.ManyToOne)) {

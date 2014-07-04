@@ -169,8 +169,8 @@
             // assume to be OneToMany
             column.Relationship = RelationshipType.OneToMany;
 
-            // what is the DbName?
-            // what is the DbType?
+            // need to find the ParentReference
+
         }
 
         /// <summary>

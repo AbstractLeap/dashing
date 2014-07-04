@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Data;
+    using System.Linq;
 
     /// <summary>
     ///     The column.
@@ -80,6 +81,61 @@
         ///     Gets or sets the relationship.
         /// </summary>
         public RelationshipType Relationship { get; set; }
+
+        private IColumn childColumn;
+
+        private object childColumnLock = new object();
+
+        public IColumn ChildColumn {
+            get {
+                if (this.Relationship != RelationshipType.OneToMany) {
+                    throw new InvalidOperationException("You should only access the ChildColumn on a OneToMany property");
+                }
+
+                if (this.childColumn == null) {
+                    lock (childColumnLock) {
+                        if (this.childColumn == null) {
+                            // if we have a parent reference key use that
+                            var childType = this.Type.GetGenericArguments()[0];
+                            var parentType = this.Map.Type;
+                            if (this.ChildColumnName != null) {
+                                this.childColumn = this.Map.Configuration.GetMap(childType).Columns[this.ChildColumnName];
+                                if (this.childColumn == null || this.childColumn.Type != parentType) {
+                                    throw new InvalidOperationException("You must map collections to a property of the correct type");
+                                }
+                            }
+                            else {
+                                // map by convention
+                                var possibleColumns = this.Map.Configuration.GetMap(childType).Columns.Where(c => c.Value.Type == parentType).ToList();
+                                if (possibleColumns.Count == 1) {
+                                    this.childColumn = possibleColumns.First().Value;
+                                }
+                                else {
+                                    if (possibleColumns.Count == 0) {
+                                        throw new InvalidOperationException(
+                                            "All OneToMany collections must be directional. You should add a property of type " + parentType.Name + " to the child type "
+                                            + childType.Name);
+                                    }
+                                    else {
+                                        throw new InvalidOperationException(
+                                            "The child type \"" + childType.Name + "\" has more than one property of type " + parentType.Name
+                                            + ". Please specify which property this column maps to using IConfiguration.Setup().Property().MapsTo()");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return this.childColumn;
+            }
+
+            set {
+                this.childColumn = value;
+            }
+        }
+
+        public string ChildColumnName { get; set; }
 
         /// <summary>
         ///     The from.
