@@ -61,7 +61,7 @@ namespace Dashing.CodeGeneration {
             updateClass.Members.Add(constructor);
 
             // now override the getters/setters of all the properties and add to updated properties
-            foreach (var column in map.Columns) {
+            foreach (var column in map.Columns.Where(c => !c.Value.IsIgnored)) {
                 var prop = this.GenerateGetSetProperty(updateClass, column.Key, column.Value.Type, MemberAttributes.Public | MemberAttributes.Override, true);
                 prop.SetStatements.Insert(0, new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("UpdatedProperties"), "Add", new CodePrimitiveExpression(column.Key))));
             }
