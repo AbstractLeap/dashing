@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.7</version>
+        <version>0.0.8</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.7 - Fixed a bug in code generation of read-only properties
+        <releaseNotes>* 0.0.8 - Fixed a bug where columns ere not being ignored
+* 0.0.7 - Fixed a bug in code generation of read-only properties
 * 0.0.6 - Now called Dashing. Added bulk update methods
 * 0.0.5 - Added support for TimeSpan
 * 0.0.4 - Added GetById methods
@@ -36,6 +37,5 @@
         <file src="Dashing\bin\Release\Dapper.dll" target="lib\net45\Dapper.dll" />
         <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
         <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
-        <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
     </files>
 </package>
