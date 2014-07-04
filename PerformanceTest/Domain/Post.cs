@@ -1,8 +1,7 @@
-namespace PerformanceTest {
+namespace PerformanceTest.Domain {
     using System.Collections.Generic;
 
     using ServiceStack.DataAnnotations;
-    using ServiceStack.OrmLite.SqlServer;
 
     [Alias("Posts")]
     public class Post {
