@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CA614821-7E80-4745-B513-64D11A394A34}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Dashing.Tests</RootNamespace>
+    <AssemblyName>Dashing.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Dapper">
+      <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.Identity.Core">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.0.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="DatabaseSchemaReader">
+      <HintPath>..\packages\Database.Schema.Reader.Core.1.2.4.17096\lib\net35\DatabaseSchemaReader.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="xunit">
+      <HintPath>..\packages\xunit.1.9.2\lib\net20\xunit.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+      </ItemGroup>
+    </When>
+    <Otherwise />
+  </Choose>
+  <ItemGroup>
+    <Compile Include="BaseQueryWriterTest.cs" />
+    <Compile Include="CodeGeneration\Fixtures\GenerateAndOutputCodeFixture.cs" />
+    <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
+    <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
+    <Compile Include="CodeGeneration\ProxyGeneratorTests.cs" />
+    <Compile Include="CodeGeneration\TrackingTests.cs" />
+    <Compile Include="Configuration\ColumnExtensionTests.cs" />
+    <Compile Include="Configuration\DefaultConventionTests.cs" />
+    <Compile Include="Configuration\DefaultSessionFactoryTests.cs" />
+    <Compile Include="Configuration\MapExtensionsTests.cs" />
+    <Compile Include="Configuration\MapTests.cs" />
+    <Compile Include="Configuration\DefaultMapperTests.cs" />
+    <Compile Include="Configuration\ColumnTests.cs" />
+    <Compile Include="Configuration\DefaultConfigurationTests.cs" />
+    <Compile Include="Configuration\ConfigurationBaseTests.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Configuration\ReverseEngineer\Sandbox.cs" />
+    <Compile Include="Engine\DeleteWriterTests.cs" />
+    <Compile Include="Engine\DialectFactoryTests.cs" />
+    <Compile Include="Engine\InsertWriterTests.cs" />
+    <Compile Include="Engine\MySqlDialectBaseTests.cs" />
+    <Compile Include="Engine\SqlServerDialectBaseTests.cs" />
+    <Compile Include="Engine\AnsiSqlDialectTests.cs" />
+    <Compile Include="Engine\SqlDialectBaseTests.cs" />
+    <Compile Include="Engine\UpdateWriterTests.cs" />
+    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="SchemaGenerationSandbox.cs" />
+    <Compile Include="Engine\DDL\DropTableWriterTests.cs" />
+    <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />
+    <Compile Include="Engine\EngineBaseTests.cs" />
+    <Compile Include="Engine\SelectWriterTests.cs" />
+    <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
+    <Compile Include="FetchTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuerySandbox.cs" />
+    <Compile Include="SelectTest.cs" />
+    <Compile Include="TestDomain\Blog.cs" />
+    <Compile Include="TestDomain\Comment.cs" />
+    <Compile Include="TestDomain\Post.cs" />
+    <Compile Include="TestDomain\User.cs" />
+    <Compile Include="Tools\ModelGeneration\SourceTests.cs" />
+    <Compile Include="Tools\ReverseEngineering\EngineerTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dashing.Tools\Dashing.Tools.csproj">
+      <Project>{414968d7-e94c-404b-8831-35aa54a656f1}</Project>
+      <Name>Dashing.Tools</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dashing\Dashing.csproj">
+      <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
+      <Name>Dashing</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.CodedUITestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Extension, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITesting, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(ProgramFiles)\MSBuild\StyleCop\v4.7\StyleCop.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -155,5 +155,3 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
-TopHat/TopHat.Tests/FakesAssemblies/Dapper.1.12.1.1.Fakes.dll
-TopHat/TopHat.Tests/FakesAssemblies/Dapper.1.12.1.1.Fakes.messages

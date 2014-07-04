@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Dashing</id>
+        <version>0.0.7</version>
+        <title>Dashing ORM</title>
+        <authors>Polylytics</authors>
+        <owners>Polylytics</owners>
+        <projectUrl>http://polylytics.com/dashing</projectUrl>
+        <iconUrl>http://polylytics.com/dashing/dashing-icon.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
+        <summary>More features than Dapper, less heavy than NHibernate</summary>
+        <releaseNotes>* 0.0.7 - Fixed a bug in code generation of read-only properties
+* 0.0.6 - Now called Dashing. Added bulk update methods
+* 0.0.5 - Added support for TimeSpan
+* 0.0.4 - Added GetById methods
+* 0.0.3 - Don't try to proxy things that aren't proxiable
+* 0.0.2 - Improved where clause handling for constant expressions
+* 0.0.1 - Our very first release. Be gentle.</releaseNotes>
+        <copyright>© Polylytics Limited, 2014</copyright>
+        <language>en-GB</language>
+        <tags>dashing dapper orm sql mini-orm</tags>
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
+            <frameworkAssembly assemblyName="System" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Core" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Data" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Data.DataSetExtensions" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Data.Entity.Design" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Data.Linq" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Xml" targetFramework="" />
+        </frameworkAssemblies>
+    </metadata>
+    <files>
+        <file src="Dashing\bin\Release\Dapper.dll" target="lib\net45\Dapper.dll" />
+        <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
+        <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
+        <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
+    </files>
+</package>
