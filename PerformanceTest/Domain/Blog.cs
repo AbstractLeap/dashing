@@ -3,6 +3,10 @@
     using System.Collections.Generic;
 
     public class Blog {
+        public Blog() {
+            this.CreateDate = DateTime.Now;
+        }
+
         public virtual int BlogId { get; set; }
 
         public virtual string Title { get; set; }

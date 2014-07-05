@@ -2,6 +2,10 @@
     using System;
 
     public class Comment {
+        public Comment() {
+            this.CommentDate = DateTime.Now;
+        }
+
         public virtual int CommentId { get; set; }
 
         public virtual string Content { get; set; }

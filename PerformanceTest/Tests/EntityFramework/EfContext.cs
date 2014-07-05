@@ -16,6 +16,9 @@ namespace PerformanceTest.Tests.EF {
                         .HasOptional(p => p.Blog)
                         .WithMany(b => b.Posts)
                         .Map(e => e.MapKey("BlogId"));
+            modelBuilder.Entity<Comment>().HasOptional(c => c.Post).WithMany().Map(e => e.MapKey("PostId"));
+            modelBuilder.Entity<Comment>().HasOptional(c => c.User).WithMany().Map(e => e.MapKey("UserId"));
+            modelBuilder.Entity<Post>().HasMany(p => p.Comments).WithOptional(c => c.Post);
         }
 
         public DbSet<Post> Posts { get; set; }

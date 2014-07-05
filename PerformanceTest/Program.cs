@@ -93,6 +93,48 @@
             SetupSelectSingleTest(tests, simpleDataDb);
             SetupFetchTest(tests);
             SetupFetchChangeTests(tests);
+            SetupFetchCollectionTests(tests);
+        }
+
+        private static void SetupFetchCollectionTests(List<Test> tests) {
+            const string TestName = "Fetch Collection";
+
+            // add dapper
+            tests.Add(
+                new Test(
+                    Providers.Dapper,
+                    TestName,
+                    i => {
+                        var post =
+                            session.Connection.Query<Post>(
+                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                                new { l_1 = i }).First();
+                        var comments = session.Connection.Query<Comment>("select * from [Comments] where [PostId] = @postId", new { postId = post.PostId }).ToList();
+                        post.Comments = comments;
+                    }, "Naive"));
+
+            tests.Add(
+                new Test(
+                    Providers.Dapper,
+                    TestName,
+                    i => {
+                        var sql = @"
+select * from Posts where PostId = @id
+select * from Comments where PostId = @id";
+
+                        var multi = session.Connection.QueryMultiple(sql, new { id = i });
+                        var post = multi.Read<Post>().Single();
+                        post.Comments = multi.Read<Comment>().ToList();
+                        multi.Dispose();
+                    },
+                    "Multiple Result Method"));
+
+            // add Dashing
+            tests.Add(new Test(Providers.Dashing, TestName,
+                i => { var post = session.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); }));
+
+            // add EF
+            tests.Add(new Test(Providers.EntityFramework, TestName, i => { var post = EfDb.Posts.Include(p => p.Comments).First(p => p.PostId == i); }));
         }
 
         private static void SetupFetchChangeTests(List<Test> tests) {
@@ -280,10 +322,33 @@
                 session.Connection.Execute(sql);
             }
 
-            var a = new User { UserId = 0 };
-            var b = new Blog { BlogId = 0 };
+            Random r = new Random();
+            var users = new List<User>();
+            for (var i = 0; i < 100; i++) {
+                var user = new User();
+                users.Add(user);
+                session.Insert(user);
+            }
+
+            var blogs = new List<Blog>();
+            for (var i = 0; i < 100; i++) {
+                var blog = new Blog();
+                blogs.Add(blog);
+                session.Insert(blog);
+            }
+            
+            var posts = new List<Post>();
             for (var i = 0; i <= 500; i++) {
-                session.Insert(new Post { PostId = i, Author = a, Blog = b });
+                var userId = r.Next(100);
+                var blogId = r.Next(100);
+                var post = new Post { Author = users[userId], Blog = blogs[blogId] };
+                session.Insert(post);
+                posts.Add(post);
+            }
+
+            for (var i = 0; i < 5000; i++) {
+                var comment = new Comment { Post = posts[r.Next(500)], User = users[r.Next(100)] };
+                session.Insert(comment);
             }
         }
     }

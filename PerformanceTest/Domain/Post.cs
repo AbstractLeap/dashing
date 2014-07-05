@@ -5,6 +5,10 @@ namespace PerformanceTest.Domain {
 
     [Alias("Posts")]
     public class Post {
+        public Post() {
+            this.Comments = new List<Comment>();
+        }
+
         [AutoIncrement]
         public virtual int PostId { get; set; }
 
