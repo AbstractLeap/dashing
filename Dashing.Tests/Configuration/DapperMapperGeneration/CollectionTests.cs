@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace Dashing.Tests.Configuration.DapperMapperGeneration {
     using System.Data;
 
+    using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
     using Dashing.Engine.DapperMapperGeneration;
@@ -41,8 +42,8 @@ namespace Dashing.Tests.Configuration.DapperMapperGeneration {
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator();
-            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
+            var mapper = new DapperMapperGenerator(new Mock<IGeneratedCodeManager>().Object);
+            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
             return func;
         }
 

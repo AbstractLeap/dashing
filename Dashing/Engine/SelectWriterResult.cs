@@ -4,6 +4,8 @@
     public class SelectWriterResult : SqlWriterResult {
         public FetchNode FetchTree { get; private set; }
 
+        public bool HasCollectionFetches { get; set; }
+
         public SelectWriterResult(string sql, DynamicParameters parameters, FetchNode fetchTree)
             : base(sql, parameters) {
             this.FetchTree = fetchTree;

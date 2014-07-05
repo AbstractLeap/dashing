@@ -59,10 +59,12 @@
 
             // construct the compiler parameters
             var referencedAssemblyLocations = proxyGeneratorResult.ReferencedAssemblyLocations.Union(GetStandardCodeReferences());
+            this.generatorConfig.OutputAssembly = true;
             var compilerParameters = new CompilerParameters(referencedAssemblyLocations.ToArray()) {
                 GenerateInMemory = true, 
                 IncludeDebugInformation = this.generatorConfig.CompileInDebug, 
-                OutputAssembly = this.generatorConfig.OutputAssembly ? this.generatorConfig.AssemblyPath : null
+                OutputAssembly = this.generatorConfig.OutputAssembly ? this.generatorConfig.AssemblyPath : null,
+                CompilerOptions = this.generatorConfig.CompileInDebug ?  "" : "/optimize"
             };
 
             // ok, so far so abstract
@@ -149,7 +151,7 @@
             var delegatesField = new CodeMemberField(
                 typeof(IDictionary<,>).MakeGenericType(typeof(Type), typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate))), 
                 "TypeDelegates");
-            delegatesField.Attributes = MemberAttributes.Static;
+            delegatesField.Attributes = MemberAttributes.Static | MemberAttributes.Public;
             dapperWrapperClass.Members.Add(delegatesField);
             staticConstructor.Statements.Add(
                 new CodeAssignStatement(

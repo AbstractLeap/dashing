@@ -62,6 +62,17 @@ namespace Dashing.Tests.Configuration.DapperMapperGeneration {
             mapper(new Foo { FooId = 3 });
         }
 
+        [Fact]
+        public void DictionaryCasting() {
+            IDictionary<string, Foo2> d1 = new Dictionary<string, Foo2>();
+            IDictionary<string, Foo> d2 = (IDictionary<string, Foo>)d1;
+
+        }
+
+        class Foo2 : Foo {
+            
+        }
+
         class Foo {
             public int FooId { get; set; }
         }

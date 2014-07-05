@@ -24,6 +24,8 @@
         /// <returns></returns>
         Type GetForeignKeyType<T>();
 
+        Type GetForeignKeyType(Type type);
+
         /// <summary>
         ///     Returns a type for a Tracked class
         /// </summary>
@@ -31,12 +33,16 @@
         /// <returns></returns>
         Type GetTrackingType<T>();
 
+        Type GetTrackingType(Type type);
+
         /// <summary>
         /// Returns a type for the Update class
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         Type GetUpdateType<T>();
+
+        Type GetUpdateType(Type type);
 
         /// <summary>
         ///     Returns an instance of a Foreign Key class for the type T
