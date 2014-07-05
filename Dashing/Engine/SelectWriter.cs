@@ -14,30 +14,30 @@
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
         public SelectWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) { }
+            : this(dialect, new WhereClauseWriter(dialect, config), config) {}
 
         public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) { }
+            : base(dialect, whereClauseWriter, config) {}
 
-        private static ConcurrentDictionary<Tuple<Type, string>, string> queryCache = new ConcurrentDictionary<Tuple<Type, string>, string>();
+        private static readonly ConcurrentDictionary<Tuple<Type, string>, string> queryCache = new ConcurrentDictionary<Tuple<Type, string>, string>();
 
         public SqlWriterResult GenerateGetSql<T>(int id) {
-            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
+            var sql = queryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
             return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
         }
 
-        public SqlWriterResult GenerateGetSql<T>(System.Guid id) {
-            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
+        public SqlWriterResult GenerateGetSql<T>(Guid id) {
+            var sql = queryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
             return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
         }
 
         public SqlWriterResult GenerateGetSql<T>(IEnumerable<int> ids) {
-            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
+            var sql = queryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
             return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
         }
 
-        public SqlWriterResult GenerateGetSql<T>(IEnumerable<System.Guid> ids) {
-            var sql = queryCache.GetOrAdd(Tuple.Create<Type, string>(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
+        public SqlWriterResult GenerateGetSql<T>(IEnumerable<Guid> ids) {
+            var sql = queryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
             return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
         }
 
@@ -71,7 +71,8 @@
 
             // get fetch tree structure
             int aliasCounter;
-            var rootNode = this.GetFetchTree(selectQuery, out aliasCounter);
+            bool hasCollectionFetches;
+            var rootNode = this.GetFetchTree(selectQuery, out aliasCounter, out hasCollectionFetches);
 
             // add select columns
             this.AddColumns(selectQuery, columnSql, rootNode);
@@ -120,11 +121,12 @@
                 }
             }
 
-            return new SelectWriterResult(sql.ToString(), parameters, rootNode);
+            return new SelectWriterResult(sql.ToString(), parameters, rootNode) { HasCollectionFetches = hasCollectionFetches };
         }
 
-        private FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter) {
+        private FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out bool hasCollectionFetches) {
             FetchNode rootNode = null;
+            hasCollectionFetches = false;
             aliasCounter = 0;
 
             if (selectQuery.HasFetches()) {
@@ -151,13 +153,13 @@
 
                             // don't add duplicates
                             if (!currentNode.Children.ContainsKey(propName)) {
+                                var column = this.Configuration.GetMap(currentNode == rootNode ? typeof(T) : currentNode.Column.Type).Columns[propName];
+                                if (column.Relationship == RelationshipType.OneToMany) {
+                                    hasCollectionFetches = true;
+                                }
+
                                 // add to tree
-                                var node = new FetchNode {
-                                    Parent = currentNode,
-                                    Column = this.Configuration.GetMap(currentNode == rootNode ? typeof(T) : currentNode.Column.Type).Columns[propName],
-                                    Alias = "t_" + ++aliasCounter,
-                                    IsFetched = true
-                                };
+                                var node = new FetchNode { Parent = currentNode, Column = column, Alias = "t_" + ++aliasCounter, IsFetched = true };
                                 currentNode.Children.Add(propName, node);
                                 currentNode = node;
                             }
@@ -202,18 +204,35 @@
             // add this node and then it's children
             // add table sql
             var splitOns = new List<string>();
+            IMap map;
+            if (node.Column.Relationship == RelationshipType.OneToMany) {
+                map = this.Configuration.GetMap(node.Column.Type.GetGenericArguments()[0]);
+            }
+            else if (node.Column.Relationship == RelationshipType.ManyToOne) {
+                map = this.Configuration.GetMap(node.Column.Type);
+            }
+            else {
+                throw new NotSupportedException();
+            }
+
             if (node.IsFetched) {
-                splitOns.Add(this.Configuration.GetMap(node.Column.Type).PrimaryKey.Name);
+                splitOns.Add(map.PrimaryKey.Name);
             }
 
             tableSql.Append(" left join ");
-            this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap(node.Column.Type));
+            this.Dialect.AppendQuotedTableName(tableSql, map);
             tableSql.Append(" as " + node.Alias);
-            tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + this.Configuration.GetMap(node.Column.Type).PrimaryKey.DbName);
+
+            if (node.Column.Relationship == RelationshipType.ManyToOne) {
+                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + map.PrimaryKey.DbName);
+            }
+            else if (node.Column.Relationship == RelationshipType.OneToMany) {
+                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.Map.PrimaryKey.DbName + " = " + node.Alias + "." + node.Column.ChildColumn.DbName);
+            }
 
             // add the columns
             if (node.IsFetched) {
-                foreach (var column in this.Configuration.GetMap(node.Column.Type).OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name))) {
+                foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name))) {
                     columnSql.Append(", ");
                     this.AddColumn(columnSql, column, node.Alias);
                 }

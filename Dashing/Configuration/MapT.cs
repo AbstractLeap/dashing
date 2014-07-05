@@ -106,7 +106,8 @@ namespace Dashing.Configuration {
                 Table = map.Table,
                 Schema = map.Schema,
                 PrimaryKey = map.PrimaryKey,
-                Columns = map.Columns
+                Columns = map.Columns,
+                Configuration = map.Configuration
 
                 //// Indexes = map.Indexes
             };

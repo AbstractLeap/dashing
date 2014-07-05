@@ -16,6 +16,8 @@ namespace Dashing.Configuration {
             //// this.Indexes = new List<IEnumerable<string>>();
         }
 
+        public IConfiguration Configuration { get; set; }
+
         /// <summary>
         ///     Gets the type.
         /// </summary>

@@ -9,6 +9,11 @@ namespace Dashing.Configuration {
         Type Type { get; }
 
         /// <summary>
+        /// Gets the Configuration
+        /// </summary>
+        IConfiguration Configuration { get; set; }
+
+        /// <summary>
         ///     Gets or sets the table.
         /// </summary>
         string Table { get; set; }

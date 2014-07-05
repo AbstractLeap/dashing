@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Tests {
+    using System;
     using System.Linq;
 
     using Dashing.Configuration;
@@ -132,6 +133,14 @@
             using (var session = config.BeginSession()) {
                 var user = session.Query<User>().AsTracked().First();
                 session.Delete(user);
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
+        public void TestCollectionFetch() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                var posts = session.Query<Post>().Fetch(p => p.Comments).ToList();
             }
         }
 

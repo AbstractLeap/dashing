@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System;
+    using System.Linq;
 
     using Dashing.Configuration;
     using Dashing.Tests.Extensions;
@@ -29,7 +30,7 @@
             // assert all properties are equal
             var columnType = column.GetType();
             var genericColumnType = genericColumn.GetType();
-            foreach (var prop in columnType.GetProperties()) {
+            foreach (var prop in columnType.GetProperties().Where(p => p.Name != "ChildColumn")) {
                 Assert.Equal(prop.GetValue(column, null), genericColumnType.GetProperty(prop.Name).GetValue(genericColumn, null));
             }
         }

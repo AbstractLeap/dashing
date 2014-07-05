@@ -50,6 +50,7 @@
     <Compile Include="CodeGeneration\CodeGenerator.cs" />
     <Compile Include="CodeGeneration\CodeGeneratorConfig.cs" />
     <Compile Include="CodeGeneration\CodeHelpers.cs" />
+    <Compile Include="CodeGeneration\DelegateQueryCreator.cs" />
     <Compile Include="CodeGeneration\GeneratedCodeManager.cs" />
     <Compile Include="CodeGeneration\ICodeGenerator.cs" />
     <Compile Include="CodeGeneration\IGeneratedCodeManager.cs" />
@@ -86,6 +87,8 @@
     <Compile Include="DeleteQuery.cs" />
     <Compile Include="Engine\BaseExpressionVisitor.cs" />
     <Compile Include="Engine\BaseWriter.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\IDapperMapperGenerator.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
     <Compile Include="Engine\DDL\IAlterTableWriter.cs" />
@@ -117,6 +120,7 @@
     <Compile Include="Engine\SelectWriterResult.cs" />
     <Compile Include="EntityQueryBase.cs" />
     <Compile Include="Extensions\DapperExtensions.cs" />
+    <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />
