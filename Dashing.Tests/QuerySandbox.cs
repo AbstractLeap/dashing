@@ -136,7 +136,7 @@
             }
         }
 
-        [Fact]
+        [Fact(Skip = "connects to real database")]
         public void TestCollectionFetch() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {

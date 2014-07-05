@@ -21,7 +21,7 @@
         /// <typeparam name="T">The base type of the tree</typeparam>
         /// <param name="fetchTree">The fetch tree to generate the mapper for</param>
         /// <returns>A factory for generating mappers</returns>
-        public Func<IDictionary<object, T>, Delegate> GenerateCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
+        public Delegate GenerateCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
             // note that we can only fetch one collection at a time
             // so, if there's more than one in the SelectQuery they should be split out prior to calling this
             bool visitedCollection = false;
@@ -34,7 +34,7 @@
 
             // add in the return statement and parameter
             statements.Add(parameters.First());
-            return (Func<IDictionary<object, T>, Delegate>)Expression.Lambda(Expression.Lambda(Expression.Block(statements), parameters), dictionaryParam).Compile();
+            return Expression.Lambda(Expression.Lambda(Expression.Block(statements), parameters), dictionaryParam).Compile();
         }
 
         private void AddDictionaryFetch<T>(ParameterExpression dictionaryParam, FetchNode fetchTree, IList<Expression> statements, IList<ParameterExpression> parameters, bool isTracked) {
