@@ -29,5 +29,11 @@ namespace PerformanceTest {
                 return "Simple.Data";
             }
         }
+
+        public static string NHibernate {
+            get {
+                return "NHibernate";
+            }
+        }
     }
 }

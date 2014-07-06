@@ -10,6 +10,7 @@ namespace PerformanceTest.Domain {
         }
 
         [AutoIncrement]
+        [PrimaryKey]
         public virtual int PostId { get; set; }
 
         public virtual string Title { get; set; }

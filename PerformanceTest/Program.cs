@@ -9,35 +9,34 @@
 
     using Dapper;
 
-    using Dashing;
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
+
+    using NHibernate;
+    using NHibernate.Linq;
 
     using PerformanceTest.Domain;
     using PerformanceTest.Tests.Dashing;
     using PerformanceTest.Tests.EF;
+    using PerformanceTest.Tests.NHibernate;
 
     using ServiceStack.OrmLite;
 
     using Database = Simple.Data.Database;
-    using SqlServerDialect = Dashing.Engine.Dialects.SqlServerDialect;
+    using ISession = Dashing.ISession;
 
     internal static class Program {
         internal static readonly ConnectionStringSettings ConnectionString = new ConnectionStringSettings(
-            "Default", 
-            "Data Source=.;Initial Catalog=tempdb;Integrated Security=True", 
+            "Default",
+            "Data Source=.;Initial Catalog=tempdb;Integrated Security=True",
             "System.Data.SqlClient");
 
         private static void Main(string[] args) {
             var tests = new List<Test>();
             SetupTests(tests);
 
-            var providers = tests.Select(t => t.Provider)
-                                 .Distinct()
-                                 .ToList();
-            var testNames = tests.Select(t => t.TestName)
-                                 .Distinct()
-                                 .ToList();
+            var providers = tests.Select(t => t.Provider).Distinct().ToList();
+            var testNames = tests.Select(t => t.TestName).Distinct().ToList();
 
             foreach (var name in testNames) {
                 Console.WriteLine("Running " + name);
@@ -74,6 +73,8 @@
             EfDb.Dispose();
             ormliteConn.Dispose();
             session.Dispose();
+            nhStatelessSession.Dispose();
+            nhSession.Dispose();
         }
 
         private static readonly EfContext EfDb = new EfContext();
@@ -82,12 +83,18 @@
 
         private static ISession session;
 
+        private static IStatelessSession nhStatelessSession;
+
+        private static NHibernate.ISession nhSession;
+
         private static void SetupTests(List<Test> tests) {
             var config = new DashingConfiguration(ConnectionString);
             var simpleDataDb = Database.OpenConnection(ConnectionString.ConnectionString);
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, ServiceStack.OrmLite.SqlServerDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
             ormliteConn = dbFactory.OpenDbConnection();
             session = config.BeginSession();
+            nhStatelessSession = Nh.SessionFactory.OpenStatelessSession();
+            nhSession = Nh.SessionFactory.OpenSession();
             SetupDatabase(config);
 
             SetupSelectSingleTest(tests, simpleDataDb);
@@ -111,7 +118,8 @@
                                 new { l_1 = i }).First();
                         var comments = session.Connection.Query<Comment>("select * from [Comments] where [PostId] = @postId", new { postId = post.PostId }).ToList();
                         post.Comments = comments;
-                    }, "Naive"));
+                    },
+                    "Naive"));
 
             tests.Add(
                 new Test(
@@ -130,11 +138,26 @@ select * from Comments where PostId = @id";
                     "Multiple Result Method"));
 
             // add Dashing
-            tests.Add(new Test(Providers.Dashing, TestName,
-                i => { var post = session.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); }));
+            tests.Add(new Test(Providers.Dashing, TestName, i => { var post = session.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); }));
 
             // add EF
-            tests.Add(new Test(Providers.EntityFramework, TestName, i => { var post = EfDb.Posts.Include(p => p.Comments).First(p => p.PostId == i); }));
+            tests.Add(new Test(Providers.EntityFramework, TestName, i => { var post = QueryableExtensions.Include(EfDb.Posts, p => p.Comments).First(p => p.PostId == i); }));
+
+            // add nh stateful
+            tests.Add(
+                new Test(
+                    Providers.NHibernate,
+                    TestName,
+                    i => { var post = QueryableExtensions.Include(nhSession.Query<Post>(), p => p.Comments).First(p => p.PostId == i); },
+                    "Stateful"));
+
+            // add nh stateless
+            tests.Add(
+                new Test(
+                    Providers.NHibernate,
+                    TestName,
+                    i => { var post = QueryableExtensions.Include(nhStatelessSession.Query<Post>(), p => p.Comments).First(p => p.PostId == i); },
+                    "Stateless"));
         }
 
         private static void SetupFetchChangeTests(List<Test> tests) {
@@ -144,21 +167,19 @@ select * from Comments where PostId = @id";
             // dapper
             tests.Add(
                 new Test(
-                    Providers.Dapper, 
-                    TestName, 
+                    Providers.Dapper,
+                    TestName,
                     i => {
                         var post =
                             session.Connection.Query<Post>(
-                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", 
-                                new { l_1 = i })
-                                   .First();
+                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                                new { l_1 = i }).First();
                         post.Title = Providers.Dapper + "_" + i + r.Next(100000);
                         session.Connection.Execute("Update [Posts] set [Title] = @Title where [PostId] = @PostId", new { post.Title, post.PostId });
                         var thatPost =
                             session.Connection.Query<Post>(
-                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", 
-                                new { l_1 = i })
-                                   .First();
+                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                                new { l_1 = i }).First();
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(TestName + " failed for " + Providers.Dapper + " as the update did not work");
                         }
@@ -167,16 +188,13 @@ select * from Comments where PostId = @id";
             // add Dashing
             tests.Add(
                 new Test(
-                    Providers.Dashing, 
-                    TestName, 
+                    Providers.Dashing,
+                    TestName,
                     i => {
-                        var post = session.Query<Post>()
-                                          .AsTracked()
-                                          .First(p => p.PostId == i);
+                        var post = session.Query<Post>().AsTracked().First(p => p.PostId == i);
                         post.Title = Providers.Dashing + "_" + i + r.Next(100000);
                         session.Update(post);
-                        var thatPost = session.Query<Post>()
-                                              .First(p => p.PostId == i);
+                        var thatPost = session.Query<Post>().First(p => p.PostId == i);
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(TestName + " failed for " + Providers.Dashing + " as the update did not work");
                         }
@@ -185,8 +203,8 @@ select * from Comments where PostId = @id";
             // add Dashing by id method
             tests.Add(
                 new Test(
-                    Providers.Dashing, 
-                    TestName, 
+                    Providers.Dashing,
+                    TestName,
                     i => {
                         var post = session.Get<Post>(i, true);
                         post.Title = Providers.Dashing + "_" + i + r.Next(100000);
@@ -195,14 +213,14 @@ select * from Comments where PostId = @id";
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(TestName + " failed for " + Providers.Dashing + " as the update did not work");
                         }
-                    }, 
+                    },
                     "By Id"));
 
             // add ef
             tests.Add(
                 new Test(
-                    Providers.EntityFramework, 
-                    TestName, 
+                    Providers.EntityFramework,
+                    TestName,
                     i => {
                         var post = EfDb.Posts.Single(p => p.PostId == i);
                         post.Title = Providers.EntityFramework + "_" + i + r.Next(100000);
@@ -216,8 +234,8 @@ select * from Comments where PostId = @id";
             // add servicestack
             tests.Add(
                 new Test(
-                    Providers.ServiceStack, 
-                    TestName, 
+                    Providers.ServiceStack,
+                    TestName,
                     i => {
                         var post = ormliteConn.SingleById<Post>(i);
                         post.Title = Providers.ServiceStack + "_" + i + r.Next(100000);
@@ -225,6 +243,22 @@ select * from Comments where PostId = @id";
                         var thatPost = ormliteConn.SingleById<Post>(i);
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(TestName + " failed for " + Providers.ServiceStack + " as the update did not work");
+                        }
+                    }));
+
+            // add nhibernate
+            tests.Add(
+                new Test(
+                    Providers.NHibernate,
+                    TestName,
+                    i => {
+                        var post = nhSession.Get<Post>(i);
+                        post.Title = Providers.NHibernate + "_" + i + r.Next(100000);
+                        nhSession.Update(post);
+                        nhSession.Flush();
+                        var thatPost = nhSession.Get<Post>(i);
+                        if (thatPost.Title != post.Title) {
+                            Console.WriteLine(TestName + " failed for " + Providers.NHibernate + " as the update did not work");
                         }
                     }));
         }
@@ -235,36 +269,30 @@ select * from Comments where PostId = @id";
             // add dapper
             tests.Add(
                 new Test(
-                    Providers.Dapper, 
-                    TestName, 
+                    Providers.Dapper,
+                    TestName,
                     i =>
                     session.Connection.Query<Post, User, Post>(
-                        "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[BlogId], t.[DoNotMap], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where ([PostId] = @l_1)", 
+                        "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[BlogId], t.[DoNotMap], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where ([PostId] = @l_1)",
                         (p, u) => {
                             p.Author = u;
                             return p;
-                        }, 
-                        new { l_1 = i }, 
-                        splitOn: "UserId")
-                           .First()));
+                        },
+                        new { l_1 = i },
+                        splitOn: "UserId").First()));
 
             // add Dashing
-            tests.Add(
-                new Test(
-                    Providers.Dashing, 
-                    TestName, 
-                    i => session.Query<Post>()
-                                .Fetch(p => p.Author)
-                                .First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.Dashing, TestName, i => session.Query<Post>().Fetch(p => p.Author).First(p => p.PostId == i)));
 
             // add ef
+            tests.Add(new Test(Providers.EntityFramework, TestName, i => QueryableExtensions.Include(EfDb.Posts.AsNoTracking(), p => p.Author).First(p => p.PostId == i)));
+
+            // add nh stateful
+            tests.Add(new Test(Providers.NHibernate, TestName, i => QueryableExtensions.Include(nhSession.Query<Post>(), p => p.Author).First(p => p.PostId == i), "Stateful"));
+
+            // add nh stateless
             tests.Add(
-                new Test(
-                    Providers.EntityFramework, 
-                    TestName, 
-                    i => EfDb.Posts.AsNoTracking()
-                             .Include(p => p.Author)
-                             .First(p => p.PostId == i)));
+                new Test(Providers.NHibernate, TestName, i => QueryableExtensions.Include(nhStatelessSession.Query<Post>(), p => p.Author).First(p => p.PostId == i), "Stateless"));
         }
 
         private static void SetupSelectSingleTest(List<Test> tests, dynamic simpleDataDb) {
@@ -273,56 +301,60 @@ select * from Comments where PostId = @id";
             // add dapper
             tests.Add(
                 new Test(
-                    Providers.Dapper, 
-                    TestName, 
+                    Providers.Dapper,
+                    TestName,
                     i =>
                     session.Connection.Query<Post>(
-                        "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)", 
-                        new { l_1 = i })
-                           .First()));
+                        "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                        new { l_1 = i }).First()));
 
             // add Dashing
-            tests.Add(
-                new Test(
-                    Providers.Dashing, 
-                    TestName, 
-                    i => session.Query<Post>().First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.Dashing, TestName, i => session.Query<Post>().First(p => p.PostId == i)));
 
             // add Dashing by id
             tests.Add(new Test(Providers.Dashing, TestName, i => session.Get<Post>(i), "By Id"));
 
             // add ef
-            tests.Add(
-                new Test(
-                    Providers.EntityFramework, 
-                    TestName, 
-                    i => EfDb.Posts.AsNoTracking()
-                             .First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.EntityFramework, TestName, i => EfDb.Posts.AsNoTracking().First(p => p.PostId == i)));
 
             // add ef2
-            tests.Add(new Test(Providers.EntityFramework, TestName, i => EfDb.Posts.Find(i), "Using Find"));
+            tests.Add(
+                new Test(
+                    Providers.EntityFramework,
+                    TestName,
+                    i => {
+                        EfDb.Configuration.AutoDetectChangesEnabled = false;
+                        var post = EfDb.Posts.Find(i);
+                        EfDb.Configuration.AutoDetectChangesEnabled = true;
+                    },
+                    "Using Find with AutoDetechChangesEnabled = false"));
 
             // add ormlite
             tests.Add(new Test(Providers.ServiceStack, TestName, i => ormliteConn.SingleById<Post>(i)));
 
             // add simple data
             tests.Add(new Test(Providers.SimpleData, TestName, i => simpleDataDb.Posts.Get(i)));
+
+            // add nh stateless
+            tests.Add(new Test(Providers.NHibernate, TestName, i => nhStatelessSession.Get<Post>(i), "Stateless"));
+
+            // add nh stateful
+            tests.Add(new Test(Providers.NHibernate, TestName, i => nhSession.Get<Post>(i), "Stateful"));
         }
 
         private static void SetupDatabase(IConfiguration dashingConfig) {
-            var d = new SqlServerDialect();
+            var d = new Dashing.Engine.Dialects.SqlServerDialect();
             var dtw = new DropTableWriter(d);
             var ctw = new CreateTableWriter(d);
             var dropTables = dashingConfig.Maps.Select(dtw.DropTableIfExists);
             var createTables = dashingConfig.Maps.Select(ctw.CreateTable);
-            var sqls = dropTables.Concat(createTables)
-                                 .ToArray();
+            var sqls = dropTables.Concat(createTables).ToArray();
 
             foreach (var sql in sqls) {
                 session.Connection.Execute(sql);
             }
 
-            Random r = new Random();
+            var r = new Random();
             var users = new List<User>();
             for (var i = 0; i < 100; i++) {
                 var user = new User();
@@ -336,7 +368,7 @@ select * from Comments where PostId = @id";
                 blogs.Add(blog);
                 session.Insert(blog);
             }
-            
+
             var posts = new List<Post>();
             for (var i = 0; i <= 500; i++) {
                 var userId = r.Next(100);
