@@ -77,9 +77,10 @@
         }
 
         public static IEnumerable<IColumn> OwnedColumns(this IMap map, bool includeExcludedByDefault = false) {
-            return map.Columns.Values.Where(
-                c => !c.IsIgnored
-                    && (includeExcludedByDefault || !c.IsExcludedByDefault)
+            return
+                map.Columns.Values.Where(
+                    c =>
+                    !c.IsIgnored && (includeExcludedByDefault || !c.IsExcludedByDefault)
                     && (c.Relationship == RelationshipType.None || c.Relationship == RelationshipType.ManyToOne));
         }
     }

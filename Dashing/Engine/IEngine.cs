@@ -2,9 +2,9 @@ namespace Dashing.Engine {
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq.Expressions;
 
     using Dashing.Configuration;
-    using System.Linq.Expressions;
 
     /// <summary>
     ///     The Engine interface.

@@ -1,5 +1,4 @@
-﻿namespace Dashing.Extensions
-{
+﻿namespace Dashing.Extensions {
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -9,63 +8,62 @@
     /// <summary>
     ///     The type extensions.
     /// </summary>
-    public static class TypeExtensions
-    {
+    public static class TypeExtensions {
         /// <summary>
         ///     The type map.
         /// </summary>
         private static readonly IDictionary<Type, DbType> TypeMap = new Dictionary<Type, DbType> {
-                                                                                                     { typeof(byte), DbType.Byte }, 
-                                                                                                     { typeof(sbyte), DbType.SByte }, 
-                                                                                                     { typeof(short), DbType.Int16 }, 
-                                                                                                     { typeof(ushort), DbType.UInt16 }, 
-                                                                                                     { typeof(int), DbType.Int32 }, 
-                                                                                                     { typeof(uint), DbType.UInt32 }, 
-                                                                                                     { typeof(long), DbType.Int64 }, 
-                                                                                                     { typeof(ulong), DbType.UInt64 }, 
-                                                                                                     { typeof(float), DbType.Single }, 
-                                                                                                     { typeof(double), DbType.Double }, 
-                                                                                                     { typeof(decimal), DbType.Decimal }, 
-                                                                                                     { typeof(bool), DbType.Boolean }, 
-                                                                                                     { typeof(string), DbType.String }, 
-                                                                                                     { typeof(char), DbType.StringFixedLength }, 
-                                                                                                     { typeof(Guid), DbType.Guid }, 
-                                                                                                     { typeof(DateTime), DbType.DateTime }, 
-                                                                                                     { typeof(DateTimeOffset), DbType.DateTimeOffset }, 
-                                                                                                     { typeof(byte[]), DbType.Binary }, 
-                                                                                                     { typeof(byte?), DbType.Byte }, 
-                                                                                                     { typeof(sbyte?), DbType.SByte }, 
-                                                                                                     { typeof(short?), DbType.Int16 }, 
-                                                                                                     { typeof(ushort?), DbType.UInt16 }, 
-                                                                                                     { typeof(int?), DbType.Int32 }, 
-                                                                                                     { typeof(uint?), DbType.UInt32 }, 
-                                                                                                     { typeof(long?), DbType.Int64 }, 
-                                                                                                     { typeof(ulong?), DbType.UInt64 }, 
-                                                                                                     { typeof(float?), DbType.Single }, 
-                                                                                                     { typeof(double?), DbType.Double }, 
-                                                                                                     { typeof(decimal?), DbType.Decimal }, 
-                                                                                                     { typeof(bool?), DbType.Boolean }, 
-                                                                                                     { typeof(char?), DbType.StringFixedLength }, 
-                                                                                                     { typeof(Guid?), DbType.Guid }, 
-                                                                                                     { typeof(DateTime?), DbType.DateTime }, 
-                                                                                                     { typeof(DateTimeOffset?), DbType.DateTimeOffset }, 
+                                                                                                     { typeof(byte), DbType.Byte },
+                                                                                                     { typeof(sbyte), DbType.SByte },
+                                                                                                     { typeof(short), DbType.Int16 },
+                                                                                                     { typeof(ushort), DbType.UInt16 },
+                                                                                                     { typeof(int), DbType.Int32 },
+                                                                                                     { typeof(uint), DbType.UInt32 },
+                                                                                                     { typeof(long), DbType.Int64 },
+                                                                                                     { typeof(ulong), DbType.UInt64 },
+                                                                                                     { typeof(float), DbType.Single },
+                                                                                                     { typeof(double), DbType.Double },
+                                                                                                     { typeof(decimal), DbType.Decimal },
+                                                                                                     { typeof(bool), DbType.Boolean },
+                                                                                                     { typeof(string), DbType.String },
+                                                                                                     { typeof(char), DbType.StringFixedLength },
+                                                                                                     { typeof(Guid), DbType.Guid },
+                                                                                                     { typeof(DateTime), DbType.DateTime },
+                                                                                                     { typeof(DateTimeOffset), DbType.DateTimeOffset },
+                                                                                                     { typeof(byte[]), DbType.Binary },
+                                                                                                     { typeof(byte?), DbType.Byte },
+                                                                                                     { typeof(sbyte?), DbType.SByte },
+                                                                                                     { typeof(short?), DbType.Int16 },
+                                                                                                     { typeof(ushort?), DbType.UInt16 },
+                                                                                                     { typeof(int?), DbType.Int32 },
+                                                                                                     { typeof(uint?), DbType.UInt32 },
+                                                                                                     { typeof(long?), DbType.Int64 },
+                                                                                                     { typeof(ulong?), DbType.UInt64 },
+                                                                                                     { typeof(float?), DbType.Single },
+                                                                                                     { typeof(double?), DbType.Double },
+                                                                                                     { typeof(decimal?), DbType.Decimal },
+                                                                                                     { typeof(bool?), DbType.Boolean },
+                                                                                                     { typeof(char?), DbType.StringFixedLength },
+                                                                                                     { typeof(Guid?), DbType.Guid },
+                                                                                                     { typeof(DateTime?), DbType.DateTime },
+                                                                                                     { typeof(DateTimeOffset?), DbType.DateTimeOffset },
                                                                                                      { typeof(Binary), DbType.Binary },
                                                                                                      { typeof(TimeSpan), DbType.Time },
                                                                                                      { typeof(TimeSpan?), DbType.Time }
                                                                                                  };
 
         private static readonly IDictionary<DbType, Type> DbTypeMap = new Dictionary<DbType, Type> {
-                                                                                                       { DbType.Int32, typeof(int) }, 
-                                                                                                       { DbType.Int16, typeof(short) }, 
-                                                                                                       { DbType.Int64, typeof(long) }, 
-                                                                                                       { DbType.UInt16, typeof(ushort) }, 
-                                                                                                       { DbType.UInt32, typeof(uint) }, 
-                                                                                                       { DbType.UInt64, typeof(ulong) }, 
-                                                                                                       { DbType.Byte, typeof(byte) }, 
-                                                                                                       { DbType.SByte, typeof(sbyte) }, 
-                                                                                                       { DbType.String, typeof(string) }, 
+                                                                                                       { DbType.Int32, typeof(int) },
+                                                                                                       { DbType.Int16, typeof(short) },
+                                                                                                       { DbType.Int64, typeof(long) },
+                                                                                                       { DbType.UInt16, typeof(ushort) },
+                                                                                                       { DbType.UInt32, typeof(uint) },
+                                                                                                       { DbType.UInt64, typeof(ulong) },
+                                                                                                       { DbType.Byte, typeof(byte) },
+                                                                                                       { DbType.SByte, typeof(sbyte) },
+                                                                                                       { DbType.String, typeof(string) },
                                                                                                        { DbType.Guid, typeof(Guid) },
-                                                                                                       { DbType.Time, typeof(TimeSpan)}
+                                                                                                       { DbType.Time, typeof(TimeSpan) }
                                                                                                    };
 
         /// <summary>
@@ -77,8 +75,7 @@
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public static bool IsEntityType(this Type type)
-        {
+        public static bool IsEntityType(this Type type) {
             return !type.IsValueType && type != typeof(string) && type != typeof(byte[]);
         }
 
@@ -91,8 +88,7 @@
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public static bool IsCollection(this Type type)
-        {
+        public static bool IsCollection(this Type type) {
             return type != typeof(byte[]) && type != typeof(string) && type.IsImplementationOf(typeof(IEnumerable));
         }
 
@@ -108,8 +104,7 @@
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public static bool IsImplementationOf(this Type thisType, Type type)
-        {
+        public static bool IsImplementationOf(this Type thisType, Type type) {
             return null != thisType.GetInterface(type.FullName);
         }
 
@@ -124,27 +119,22 @@
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
         /// </exception>
-        public static DbType GetDbType(this Type type)
-        {
-            if (type.IsNullable())
-            {
+        public static DbType GetDbType(this Type type) {
+            if (type.IsNullable()) {
                 type = type.GetGenericArguments()[0];
             }
 
-            if (TypeMap.ContainsKey(type))
-            {
+            if (TypeMap.ContainsKey(type)) {
                 return TypeMap[type];
             }
 
             // just use underlying type of enum
-            if (!type.IsEnum)
-            {
+            if (!type.IsEnum) {
                 throw new ArgumentOutOfRangeException("type", "Unable to determine the DBType for type: " + type.FullName);
             }
 
             var enumType = Enum.GetUnderlyingType(type);
-            if (TypeMap.ContainsKey(enumType))
-            {
+            if (TypeMap.ContainsKey(enumType)) {
                 return TypeMap[enumType];
             }
 
@@ -156,10 +146,8 @@
         /// </summary>
         /// <param name="dbType"></param>
         /// <returns></returns>
-        public static Type GetCLRType(this DbType dbType)
-        {
-            if (!DbTypeMap.ContainsKey(dbType))
-            {
+        public static Type GetCLRType(this DbType dbType) {
+            if (!DbTypeMap.ContainsKey(dbType)) {
                 throw new ArgumentOutOfRangeException("dbType", "Unable to determine the type for dbType: " + dbType);
             }
 
@@ -175,13 +163,12 @@
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public static bool IsNullable(this Type type)
-        {
+        public static bool IsNullable(this Type type) {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
         /// <summary>
-        /// Return all the implemented or inherited interfaces and the full hierarchy of base types
+        ///     Return all the implemented or inherited interfaces and the full hierarchy of base types
         /// </summary>
         /// <param name="type">The type to inspect</param>
         /// <returns>The ancestor types</returns>

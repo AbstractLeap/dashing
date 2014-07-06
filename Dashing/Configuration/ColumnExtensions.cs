@@ -203,7 +203,8 @@
             return column;
         }
 
-        public static Column<T> MapsTo<T, TCollection, TProperty>(this Column<T> column, Expression<Func<TCollection, TProperty>> mapToExpression) where T : IEnumerable<TCollection> {
+        public static Column<T> MapsTo<T, TCollection, TProperty>(this Column<T> column, Expression<Func<TCollection, TProperty>> mapToExpression)
+            where T : IEnumerable<TCollection> {
             var memberExpression = mapToExpression.Body as MemberExpression;
             if (memberExpression == null) {
                 throw new ArgumentException("mapToExpression must be a MemberExpression");

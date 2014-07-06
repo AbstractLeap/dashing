@@ -1,11 +1,13 @@
 ﻿namespace Dashing.Tests.Engine {
-    using Dashing.Engine.Dialects;
-
-    using Moq;
     using System.Diagnostics;
+
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Engine.Dialects;
     using Dashing.Tests.TestDomain;
+
+    using Moq;
+
     using Xunit;
 
     public class InsertWriterTests {
@@ -35,8 +37,7 @@
 
         private class CustomConfigWithIgnore : DefaultConfiguration {
             public CustomConfigWithIgnore()
-                : base(new Mock<IEngine>().Object, string.Empty)
-            {
+                : base(new Mock<IEngine>().Object, string.Empty) {
                 this.AddNamespaceOf<Post>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }

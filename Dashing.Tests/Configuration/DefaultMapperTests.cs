@@ -4,10 +4,10 @@
     using System.Data;
     using System.Linq.Expressions;
 
-    using Moq;
-
     using Dashing.Configuration;
     using Dashing.Tests.TestDomain;
+
+    using Moq;
 
     using Xunit;
 

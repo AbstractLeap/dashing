@@ -3,6 +3,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -26,11 +27,11 @@
 
         private ConcurrentDictionary<Tuple<Type, string>, Delegate> foreignKeyNoCollectionQueries;
 
-        private readonly IGeneratedCodeManager GeneratedCodeManager;
+        private readonly IGeneratedCodeManager generatedCodeManager;
 
         public DelegateQueryCreator(IGeneratedCodeManager codeManager) {
             this.dapperMapperGenerator = new DapperMapperGenerator(codeManager);
-            this.GeneratedCodeManager = codeManager;
+            this.generatedCodeManager = codeManager;
             this.trackingMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.foreignKeyMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.trackingCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
@@ -52,11 +53,12 @@
             return this.GenerateCollectionFactory<T>(mapperParams, isTracked);
         }
 
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private Delegate GenerateCollectionFactory<T>(Type[] mapperParams, bool isTracked) {
             var resultParam = Expression.Parameter(typeof(SelectWriterResult));
             var queryParam = Expression.Parameter(typeof(SelectQuery<>).MakeGenericType(typeof(T)));
             var connectionParam = Expression.Parameter(typeof(IDbConnection));
-            var returnType = isTracked ? this.GeneratedCodeManager.GetTrackingType<T>() : this.GeneratedCodeManager.GetForeignKeyType<T>();
+            var returnType = isTracked ? this.generatedCodeManager.GetTrackingType<T>() : this.generatedCodeManager.GetForeignKeyType<T>();
             var funcFactoryParam = Expression.Parameter(typeof(Func<,>).MakeGenericType(typeof(IDictionary<,>).MakeGenericType(typeof(object), returnType), typeof(Delegate)));
             var dictionaryVariable = Expression.Variable(typeof(Dictionary<,>).MakeGenericType(typeof(object), returnType));
             var dictionaryInit = Expression.New(typeof(Dictionary<,>).MakeGenericType(typeof(object), returnType));

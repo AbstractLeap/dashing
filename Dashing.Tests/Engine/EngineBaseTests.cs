@@ -2,24 +2,23 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Data.Common;
     using System.Diagnostics;
     using System.Linq;
     using System.Text;
 
-    using Dashing.Engine.Dialects;
-
-    using Moq;
-
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Engine.Dialects;
     using Dashing.Tests.TestDomain;
+
+    using Moq;
 
     using Xunit;
 
     public class EngineBaseTests {
         [Fact]
         public void CreateTableGeneratesExpectedSql() {
-
             var target = this.MakeTarget(new AnsiSqlDialect());
             target.UseMaps(MakeMaps());
             var sql = target.CreateTable<User>();
@@ -64,7 +63,8 @@
                 throw new NotImplementedException();
             }
 
-            public TestEngine(ISqlDialect dialect) : base(dialect, new Mock<System.Data.Common.DbProviderFactory>().Object) {
+            public TestEngine(ISqlDialect dialect)
+                : base(dialect, new Mock<DbProviderFactory>().Object) {
                 this.Dialect = dialect;
             }
 

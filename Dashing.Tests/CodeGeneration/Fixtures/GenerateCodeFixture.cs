@@ -1,17 +1,19 @@
 ﻿namespace Dashing.Tests.CodeGeneration.Fixtures {
-    using Moq;
-
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
     using Dashing.Tests.TestDomain;
+
+    using Moq;
 
     public class GenerateCodeFixture {
         private readonly Mock<IEngine> engine = new Mock<IEngine>();
 
         public IGeneratedCodeManager CodeManager { get; private set; }
 
-        public GenerateCodeFixture() : this(null) { }
+        public GenerateCodeFixture()
+            : this(null) {
+        }
 
         // ReSharper disable once MemberCanBeProtected.Global (instantiated by xUnit)
         public GenerateCodeFixture(CodeGeneratorConfig generatorConfig) {

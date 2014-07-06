@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Tests {
     using System;
+    using System.Configuration;
     using System.Linq;
 
     using Dashing.Configuration;
@@ -57,8 +58,7 @@
         [Fact(Skip = "connects to real database")]
         public void TestMultipleInsertUpdatesIds() {
             var config = new CustomConfig();
-            using (var session = config.BeginSession())
-            {
+            using (var session = config.BeginSession()) {
                 var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
                 var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
                 session.Insert(user, user2);
@@ -76,8 +76,6 @@
             }
         }
 
-
-
         [Fact(Skip = "connects to real database")]
         public void DeleteBulk() {
             var config = new CustomConfig();
@@ -93,7 +91,7 @@
                 var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
                 var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
                 session.Insert(user, user2);
-                
+
                 // now fetch them
                 var t1 = session.Query<User>().First();
                 Assert.Equal("Bob", t1.Username);
@@ -101,7 +99,7 @@
                 var t2 = session.Query<User>().First(u => u.Username == "Bob2");
                 Assert.Equal("Bob2", t2.Username);
 
-                Assert.Throws<System.InvalidOperationException>(() => session.Query<User>().Single());
+                Assert.Throws<InvalidOperationException>(() => session.Query<User>().Single());
 
                 var t3 = session.Query<User>().Single(u => u.Username == "Bob2");
                 Assert.Equal("Bob2", t3.Username);
@@ -146,8 +144,7 @@
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new System.Configuration.ConnectionStringSettings("Default", "Server=localhost;Database=Dashingtest;Uid=root;Pwd=treatme123;", "MySql.Data.MySqlClient"))
-            {
+                : base(new ConnectionStringSettings("Default", "Server=localhost;Database=Dashingtest;Uid=root;Pwd=treatme123;", "MySql.Data.MySqlClient")) {
                 this.AddNamespaceOf<Post>();
             }
         }

@@ -2,9 +2,9 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq.Expressions;
 
     using Dashing.Configuration;
-    using System.Linq.Expressions;
 
     /// <summary>
     ///     The session.
@@ -52,7 +52,8 @@
         /// <exception cref="ArgumentNullException">
         /// </exception>
         public Session(IDbConnection connection, IConfiguration config)
-            : this(connection, config, null) { }
+            : this(connection, config, null) {
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Session" /> class.
@@ -162,23 +163,19 @@
             this.isDisposed = true;
         }
 
-        public T Get<T>(int id, bool? asTracked = null)
-        {
+        public T Get<T>(int id, bool? asTracked = null) {
             return this.config.Engine.Get<T>(this.connection, id, asTracked);
         }
 
-        public T Get<T>(Guid id, bool? asTracked = null)
-        {
+        public T Get<T>(Guid id, bool? asTracked = null) {
             return this.config.Engine.Get<T>(this.connection, id, asTracked);
         }
 
-        public IEnumerable<T> Get<T>(IEnumerable<int> ids, bool? asTracked = null)
-        {
+        public IEnumerable<T> Get<T>(IEnumerable<int> ids, bool? asTracked = null) {
             return this.config.Engine.Get<T>(this.connection, ids, asTracked);
         }
 
-        public IEnumerable<T> Get<T>(IEnumerable<Guid> ids, bool? asTracked = null)
-        {
+        public IEnumerable<T> Get<T>(IEnumerable<Guid> ids, bool? asTracked = null) {
             return this.config.Engine.Get<T>(this.connection, ids, asTracked);
         }
 
@@ -299,7 +296,6 @@
         public void Update<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates) {
             this.config.Engine.Execute(this.Connection, update, predicates);
         }
-
 
         public void DeleteAll<T>() {
             this.config.Engine.ExecuteBulkDelete<T>(this.Connection, null);

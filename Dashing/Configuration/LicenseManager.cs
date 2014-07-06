@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Specialized;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Security.Cryptography;
@@ -47,6 +48,7 @@ ___________.__                   __
             return generator(companyName, version, hash);
         }
 
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private Func<string, Version, string, string> CreateGenerator() {
             var parameters = new[] { Expression.Parameter(typeof(string)), Expression.Parameter(typeof(Version)), Expression.Parameter(typeof(string)) };
             var expr = Expression.Call(
@@ -65,7 +67,7 @@ ___________.__                   __
                                                        typeof(Encoding).GetMethods().First(m => m.Name == "GetBytes" && m.GetParameters().Count(p => p.ParameterType == typeof(string)) == 1),
                                                        new[] {
                                                                  Expression.Call(
-                                                                     typeof(String).GetMethods().First(m => m.Name == "Concat" && m.GetParameters().Count(p => p.ParameterType == typeof(object)) == 3),
+                                                                     typeof(string).GetMethods().First(m => m.Name == "Concat" && m.GetParameters().Count(p => p.ParameterType == typeof(object)) == 3),
                                                                      new Expression[] {
                                                                                           parameters[0],
                                                                                           Expression.Call(

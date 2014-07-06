@@ -36,7 +36,7 @@
         Type GetTrackingType(Type type);
 
         /// <summary>
-        /// Returns a type for the Update class
+        ///     Returns a type for the Update class
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -59,7 +59,7 @@
         T CreateTrackingInstance<T>();
 
         /// <summary>
-        /// Returns an instance of an update class for the type T
+        ///     Returns an instance of an update class for the type T
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>

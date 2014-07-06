@@ -116,8 +116,12 @@
         }
 
         public ConfigurationBase(ConnectionStringSettings connectionString, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator)
-            : this(new EngineBase(new DialectFactory().Create(connectionString), DbProviderFactories.GetFactory(connectionString.ProviderName)), connectionString.ConnectionString, mapper, sessionFactory, codeGenerator)
-        {
+            : this(
+                new EngineBase(new DialectFactory().Create(connectionString), DbProviderFactories.GetFactory(connectionString.ProviderName)),
+                connectionString.ConnectionString,
+                mapper,
+                sessionFactory,
+                codeGenerator) {
         }
 
         public IMap<T> GetMap<T>() {
@@ -211,10 +215,7 @@
             this.Dirty();
 
             var maps =
-                types.Distinct()
-                     .Where(t => !this.mappedTypes.ContainsKey(t))
-                     .AsParallel()
-                     .Select(t => this.mapperMapForMethodInfo.Invoke(this.mapper, new object[] { t }) as IMap);
+                types.Distinct().Where(t => !this.mappedTypes.ContainsKey(t)).AsParallel().Select(t => this.mapperMapForMethodInfo.Invoke(this.mapper, new object[] { t }) as IMap);
 
             foreach (var map in maps) {
                 // force into sequential

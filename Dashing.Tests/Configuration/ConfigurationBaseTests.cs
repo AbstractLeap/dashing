@@ -5,12 +5,12 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
-    using Moq;
-
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
     using Dashing.Tests.TestDomain;
+
+    using Moq;
 
     using Xunit;
 
@@ -225,15 +225,18 @@
 
         private class CustomConfiguration : ConfigurationBase {
             public CustomConfiguration(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory)
-                : base(engine, connectionString, mapper, sessionFactory, SetupCodeGenerator().Object) { }
-            
+                : base(engine, connectionString, mapper, sessionFactory, SetupCodeGenerator().Object) {
+            }
+
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IEngine engine, IMapper mapper, ISessionFactory sessionFactory)
-                : this(engine, DummyConnectionString, mapper, sessionFactory) { }
+                : this(engine, DummyConnectionString, mapper, sessionFactory) {
+            }
 
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IMapper mapper)
-                : base(MakeMockEngine().Object, DummyConnectionString, mapper, MakeMockSf().Object, SetupCodeGenerator().Object) { }
+                : base(MakeMockEngine().Object, DummyConnectionString, mapper, MakeMockSf().Object, SetupCodeGenerator().Object) {
+            }
         }
 
         private class CustomConfigurationWithIndividualAdds : CustomConfiguration {

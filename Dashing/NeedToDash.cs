@@ -1,5 +1,6 @@
 ﻿namespace Dashing {
     using System.Configuration;
+
     using Dashing.Configuration;
     using Dashing.Engine;
 
@@ -23,8 +24,7 @@
             return new MutableConfiguration(engine, connectionString);
         }
 
-        public static MutableConfiguration Configure(ConnectionStringSettings connectionString)
-        {
+        public static MutableConfiguration Configure(ConnectionStringSettings connectionString) {
             return new MutableConfiguration(connectionString);
         }
     }

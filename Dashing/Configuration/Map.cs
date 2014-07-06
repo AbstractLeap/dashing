@@ -47,11 +47,10 @@ namespace Dashing.Configuration {
             if (this.nonGenericPrimaryKeyGetter == null) {
                 lock (this.nonGenericPrimaryKeyGetterLock) {
                     if (this.nonGenericPrimaryKeyGetter == null) {
-                        this.nonGenericPrimaryKeyGetter = typeof(Map<>).MakeGenericType(this.Type)
-                                                                       .GetMethods()
-                                                                       .First(
-                                                                           m => m.Name == "GetPrimaryKeyValue" && m.GetParameters()
-                                                                                                                   .Any(p => p.ParameterType == this.Type));
+                        this.nonGenericPrimaryKeyGetter =
+                            typeof(Map<>).MakeGenericType(this.Type)
+                                         .GetMethods()
+                                         .First(m => m.Name == "GetPrimaryKeyValue" && m.GetParameters().Any(p => p.ParameterType == this.Type));
                     }
                 }
             }

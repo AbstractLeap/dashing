@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Configuration {
     using System.Configuration;
+
     using Dashing.CodeGeneration;
     using Dashing.Engine;
 
@@ -7,7 +8,7 @@
     ///     The default configuration.
     /// </summary>
     public class DefaultConfiguration : ConfigurationBase {
-        private System.Configuration.ConnectionStringSettings connectionString;
+        private ConnectionStringSettings connectionString;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="DefaultConfiguration" /> class.
@@ -20,20 +21,15 @@
         /// </param>
         public DefaultConfiguration(IEngine engine, string connectionString)
             : base(
-                engine, 
-                connectionString, 
-                new DefaultMapper(new DefaultConvention()), 
-                new DefaultSessionFactory(), 
-                new CodeGenerator(new CodeGeneratorConfig(), new ProxyGenerator())) { }
-
-        public DefaultConfiguration(ConnectionStringSettings connectionString)
-            : base(
-            connectionString,
+                engine,
+                connectionString,
                 new DefaultMapper(new DefaultConvention()),
                 new DefaultSessionFactory(),
-                new CodeGenerator(new CodeGeneratorConfig(), new ProxyGenerator()))
-        {
-            
+                new CodeGenerator(new CodeGeneratorConfig(), new ProxyGenerator())) {
+        }
+
+        public DefaultConfiguration(ConnectionStringSettings connectionString)
+            : base(connectionString, new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory(), new CodeGenerator(new CodeGeneratorConfig(), new ProxyGenerator())) {
         }
     }
 }

@@ -23,24 +23,17 @@ namespace Dashing.CodeGeneration {
             var updateClasses = parallelMaps.Select(m => this.CreateUpdateClass(m, mapDictionary, codeGeneratorConfig));
 
             // extract metadata from maps
-            var typeHierarchy = maps.Select(m => m.Type)
-                                    .Union(maps.SelectMany(m => m.Type.GetAncestorTypes()))
-                                    .ToArray();
+            var typeHierarchy = maps.Select(m => m.Type).Union(maps.SelectMany(m => m.Type.GetAncestorTypes())).ToArray();
 
-            var namespaces = typeHierarchy.Select(m => m.Namespace)
-                                          .Distinct()
-                                          .Select(ns => new CodeNamespaceImport(ns));
+            var namespaces = typeHierarchy.Select(m => m.Namespace).Distinct().Select(ns => new CodeNamespaceImport(ns));
 
-            var references = typeHierarchy.Select(t => t.Assembly)
-                                          .Distinct()
-                                          .Select(a => a.Location);
+            var references = typeHierarchy.Select(t => t.Assembly).Distinct().Select(a => a.Location);
 
             return new ProxyGeneratorResult {
-                ProxyTypes = trackingClasses.Concat(foreignKeyClasses).Concat(updateClasses)
-                                            .ToArray(),
-                NamespaceImports = namespaces.ToArray(),
-                ReferencedAssemblyLocations = references.ToArray()
-            };
+                                                ProxyTypes = trackingClasses.Concat(foreignKeyClasses).Concat(updateClasses).ToArray(),
+                                                NamespaceImports = namespaces.ToArray(),
+                                                ReferencedAssemblyLocations = references.ToArray()
+                                            };
         }
 
         private CodeTypeDeclaration CreateUpdateClass(IMap map, IDictionary<Type, IMap> maps, CodeGeneratorConfig codeGeneratorConfig) {
@@ -63,7 +56,9 @@ namespace Dashing.CodeGeneration {
             // now override the getters/setters of all the properties and add to updated properties
             foreach (var column in map.Columns.Where(c => !c.Value.IsIgnored)) {
                 var prop = this.GenerateGetSetProperty(updateClass, column.Key, column.Value.Type, MemberAttributes.Public | MemberAttributes.Override, true);
-                prop.SetStatements.Insert(0, new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("UpdatedProperties"), "Add", new CodePrimitiveExpression(column.Key))));
+                prop.SetStatements.Insert(
+                    0,
+                    new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("UpdatedProperties"), "Add", new CodePrimitiveExpression(column.Key))));
             }
 
             return updateClass;
@@ -126,19 +121,19 @@ namespace Dashing.CodeGeneration {
                             new CodePrimitiveExpression(null)),
                         new CodeStatement[] {
                                                 new CodeAssignStatement(
-                                                    new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key), 
+                                                    new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key),
                                                     new CodeObjectCreateExpression(
-                                                    "Dashing.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">", 
-                                                    new CodeThisReferenceExpression(), 
+                                                    "Dashing.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">",
+                                                    new CodeThisReferenceExpression(),
                                                     new CodePrimitiveExpression(collectionColumn.Key)))
                                             },
                         new CodeStatement[] {
                                                 new CodeAssignStatement(
-                                                    new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key), 
+                                                    new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key),
                                                     new CodeObjectCreateExpression(
-                                                    "Dashing.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">", 
-                                                    new CodeThisReferenceExpression(), 
-                                                    new CodePrimitiveExpression(collectionColumn.Key), 
+                                                    "Dashing.CodeGeneration.TrackingCollection<" + trackingClass.Name + "," + collectionColumn.Value.Type.GenericTypeArguments.First() + ">",
+                                                    new CodeThisReferenceExpression(),
+                                                    new CodePrimitiveExpression(collectionColumn.Key),
                                                     new CodePropertyReferenceExpression(new CodeThisReferenceExpression(), collectionColumn.Key)))
                                             }));
             }
@@ -186,24 +181,25 @@ namespace Dashing.CodeGeneration {
                     new CodeConditionStatement(
                         CodeHelpers.ThisPropertyIsTrue("IsTracking"),
                         new CodeStatement[] {
-                            new CodeConditionStatement(
-                                new CodeBinaryOperatorExpression(
-                                    new CodeBinaryOperatorExpression(
-                                        new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)), 
-                                        CodeBinaryOperatorType.IdentityEquality, 
-                                        new CodePrimitiveExpression(false)), 
-                                    CodeBinaryOperatorType.BooleanAnd, 
-                                    changeCheck),
-                                    new CodeStatement[] {
-                                                    new CodeExpressionStatement(new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))), 
-                                                    new CodeAssignStatement(
-                                                        new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)), 
-                                                        new CodePropertySetValueReferenceExpression())
-                                                }), 
-                            new CodeAssignStatement(
-                                new CodeIndexerExpression(CodeHelpers.ThisProperty("NewValues"), new CodePrimitiveExpression(prop.Name)), 
-                                new CodePropertySetValueReferenceExpression())
-                        }));
+                                                new CodeConditionStatement(
+                                                    new CodeBinaryOperatorExpression(
+                                                    new CodeBinaryOperatorExpression(
+                                                    new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Contains", new CodePrimitiveExpression(prop.Name)),
+                                                    CodeBinaryOperatorType.IdentityEquality,
+                                                    new CodePrimitiveExpression(false)),
+                                                    CodeBinaryOperatorType.BooleanAnd,
+                                                    changeCheck),
+                                                    new CodeStatement[] {
+                                                                            new CodeExpressionStatement(
+                                                                                new CodeMethodInvokeExpression(CodeHelpers.ThisProperty("DirtyProperties"), "Add", new CodePrimitiveExpression(prop.Name))),
+                                                                            new CodeAssignStatement(
+                                                                                new CodeIndexerExpression(CodeHelpers.ThisProperty("OldValues"), new CodePrimitiveExpression(prop.Name)),
+                                                                                new CodePropertySetValueReferenceExpression())
+                                                                        }),
+                                                new CodeAssignStatement(
+                                                    new CodeIndexerExpression(CodeHelpers.ThisProperty("NewValues"), new CodePrimitiveExpression(prop.Name)),
+                                                    new CodePropertySetValueReferenceExpression())
+                                            }));
             }
 
             trackingClass.Members.Add(constructor);
@@ -244,7 +240,7 @@ namespace Dashing.CodeGeneration {
                 property.Attributes = MemberAttributes.Public | MemberAttributes.Override;
                 property.GetStatements.Add(
                     new CodeConditionStatement(
-                    //// if backingField != null or Fk backing field is null return
+                        //// if backingField != null or Fk backing field is null return
                         new CodeBinaryOperatorExpression(
                             CodeHelpers.ThisFieldIsNotNull(backingField.Name),
                             CodeBinaryOperatorType.BooleanOr,
@@ -255,11 +251,11 @@ namespace Dashing.CodeGeneration {
                                             },
                         new CodeStatement[] {
                                                 // false, return new object with foreign key set
-                                                new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)), 
+                                                new CodeVariableDeclarationStatement(column.Value.Type, "val", new CodeObjectCreateExpression(column.Value.Type)),
                                                 new CodeAssignStatement(
-                                                    new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), maps[column.Value.Type].PrimaryKey.Name), 
-                                                    new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(foreignKeyBackingProperty.Name), "Value")), 
-                                                new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")), 
+                                                    new CodeFieldReferenceExpression(new CodeVariableReferenceExpression("val"), maps[column.Value.Type].PrimaryKey.Name),
+                                                    new CodePropertyReferenceExpression(CodeHelpers.ThisProperty(foreignKeyBackingProperty.Name), "Value")),
+                                                new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodeVariableReferenceExpression("val")),
                                                 new CodeMethodReturnStatement(new CodeVariableReferenceExpression("val"))
                                             }));
                 property.SetStatements.Add(new CodeAssignStatement(CodeHelpers.ThisField(backingField.Name), new CodePropertySetValueReferenceExpression()));

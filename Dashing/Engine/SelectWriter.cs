@@ -10,34 +10,35 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
-    using Dashing.Extensions;
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
         public SelectWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) {}
+            : this(dialect, new WhereClauseWriter(dialect, config), config) {
+        }
 
         public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {}
+            : base(dialect, whereClauseWriter, config) {
+        }
 
-        private static readonly ConcurrentDictionary<Tuple<Type, string>, string> queryCache = new ConcurrentDictionary<Tuple<Type, string>, string>();
+        private static readonly ConcurrentDictionary<Tuple<Type, string>, string> QueryCache = new ConcurrentDictionary<Tuple<Type, string>, string>();
 
         public SqlWriterResult GenerateGetSql<T>(int id) {
-            var sql = queryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
+            var sql = QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
             return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
         }
 
         public SqlWriterResult GenerateGetSql<T>(Guid id) {
-            var sql = queryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
+            var sql = QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
             return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
         }
 
         public SqlWriterResult GenerateGetSql<T>(IEnumerable<int> ids) {
-            var sql = queryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
+            var sql = QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
             return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
         }
 
         public SqlWriterResult GenerateGetSql<T>(IEnumerable<Guid> ids) {
-            var sql = queryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
+            var sql = QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
             return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
         }
 
@@ -87,7 +88,8 @@
             if (selectQuery.OrderClauses.Any()) {
                 this.AddOrderByClause(selectQuery.OrderClauses, orderSql);
             }
-            else if (selectQuery.SkipN > 0) { // need to add a default order on the sort clause
+            else if (selectQuery.SkipN > 0) {
+                // need to add a default order on the sort clause
                 orderSql.Append(" order by ");
                 if (rootNode != null) {
                     orderSql.Append(rootNode.Alias);
@@ -253,7 +255,7 @@
 
         private void AddColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode) {
             var alias = selectQuery.Fetches.Any() ? "t" : null;
-            
+
             if (selectQuery.Projection == null) {
                 foreach (var column in this.Configuration.GetMap<T>().OwnedColumns(selectQuery.FetchAllProperties).Where(c => rootNode == null || !rootNode.Children.ContainsKey(c.Name))) {
                     this.AddColumn(columnSql, column, alias);

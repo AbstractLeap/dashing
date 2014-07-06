@@ -1,11 +1,10 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System.Data;
 
-    using Moq;
-
-    using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
+
+    using Moq;
 
     using Xunit;
 

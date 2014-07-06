@@ -1,6 +1,5 @@
 ﻿namespace Dashing.CodeGeneration {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
@@ -10,7 +9,6 @@
     using Dapper;
 
     using Dashing.Engine;
-    using Dashing.Engine.DapperMapperGeneration;
 
     public class GeneratedCodeManager : IGeneratedCodeManager {
         public CodeGeneratorConfig Config { get; private set; }
@@ -37,15 +35,15 @@
 
         private readonly Func<Type, string, bool> compileTimeFunctionExistsFunction;
 
-        private DelegateQueryCreator delegateQueryCreator;
+        private readonly DelegateQueryCreator delegateQueryCreator;
 
         private delegate IEnumerable<T> NoFetchDelegate<out T>(
-            IDbConnection conn, 
-            string sql, 
-            dynamic parameters, 
-            IDbTransaction transaction = null, 
-            bool buffered = true, 
-            int? commandTimeout = null, 
+            IDbConnection conn,
+            string sql,
+            dynamic parameters,
+            IDbTransaction transaction = null,
+            bool buffered = true,
+            int? commandTimeout = null,
             CommandType? commandType = null);
 
         public GeneratedCodeManager(CodeGeneratorConfig config, Assembly generatedCodeAssembly) {
@@ -74,8 +72,8 @@
                     // compile dynamic expression for calling Query<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn)
                     // on the generated DapperWrapper
                     var parameters = new List<ParameterExpression> {
-                                                                       Expression.Parameter(typeof(SelectWriterResult), "result"), 
-                                                                       Expression.Parameter(typeof(SelectQuery<>).MakeGenericType(type.BaseType), "query"), 
+                                                                       Expression.Parameter(typeof(SelectWriterResult), "result"),
+                                                                       Expression.Parameter(typeof(SelectQuery<>).MakeGenericType(type.BaseType), "query"),
                                                                        Expression.Parameter(typeof(IDbConnection), "conn")
                                                                    };
                     var methodCallExpr =
@@ -83,7 +81,7 @@
                             this.GeneratedCodeAssembly.DefinedTypes.First(t => t.Name == "DapperWrapper")
                                 .GetMethods()
                                 .First(m => m.Name == "Query")
-                                .MakeGenericMethod(type.BaseType), 
+                                .MakeGenericMethod(type.BaseType),
                             parameters);
                     var queryCall = Expression.Lambda(typeof(DelegateQuery<>).MakeGenericType(type.BaseType), methodCallExpr, parameters).Compile();
                     this.queryCalls.Add(type.BaseType, queryCall);
@@ -104,12 +102,15 @@
 
         private Func<Type, string, bool> GenerateExistsFunction() {
             var typeParam = Expression.Parameter(typeof(Type));
-            var stringParam = Expression.Parameter(typeof(String));
+            var stringParam = Expression.Parameter(typeof(string));
             var typeDelegatesPropExpr = Expression.Field(
                 null,
                 this.GeneratedCodeAssembly.DefinedTypes.First(t => t.Name == "DapperWrapper").GetFields().First(p => p.Name == "TypeDelegates"));
             var indexExpr = Expression.Property(typeDelegatesPropExpr, typeDelegatesPropExpr.Type.GetProperty("Item"), new Expression[] { typeParam });
-            var containsExpr = Expression.Call(indexExpr, typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate)).GetMethod("ContainsKey"), new Expression[] { stringParam });
+            var containsExpr = Expression.Call(
+                indexExpr,
+                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate)).GetMethod("ContainsKey"),
+                new Expression[] { stringParam });
             return (Func<Type, string, bool>)Expression.Lambda(containsExpr, typeParam, stringParam).Compile();
         }
 
@@ -123,16 +124,16 @@
 
         private void MakeNoFetchCall(TypeInfo type, Type baseType, IDictionary<Type, Delegate> fetchCalls) {
             var noFetchParameters = new List<ParameterExpression> {
-                                                                      Expression.Parameter(typeof(IDbConnection), "conn"), 
-                                                                      Expression.Parameter(typeof(string), "sql"), 
-                                                                      Expression.Parameter(typeof(object), "parameters"), 
-                                                                      Expression.Parameter(typeof(IDbTransaction), "tran"), 
-                                                                      Expression.Parameter(typeof(bool), "buffered"), 
-                                                                      Expression.Parameter(typeof(Nullable<>).MakeGenericType(typeof(int)), "commandTimeout"), 
+                                                                      Expression.Parameter(typeof(IDbConnection), "conn"),
+                                                                      Expression.Parameter(typeof(string), "sql"),
+                                                                      Expression.Parameter(typeof(object), "parameters"),
+                                                                      Expression.Parameter(typeof(IDbTransaction), "tran"),
+                                                                      Expression.Parameter(typeof(bool), "buffered"),
+                                                                      Expression.Parameter(typeof(Nullable<>).MakeGenericType(typeof(int)), "commandTimeout"),
                                                                       Expression.Parameter(typeof(Nullable<>).MakeGenericType(typeof(CommandType)), "commandType")
                                                                   };
             var noFetchMethodCallExpr = Expression.Call(
-                typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.IsGenericMethod).MakeGenericMethod(type), 
+                typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.IsGenericMethod).MakeGenericMethod(type),
                 noFetchParameters);
             var noFetchQueryCall = Expression.Lambda(typeof(NoFetchDelegate<>).MakeGenericType(baseType), noFetchMethodCallExpr, noFetchParameters).Compile();
             fetchCalls.Add(baseType, noFetchQueryCall);
@@ -145,30 +146,25 @@
                     if (query.IsTracked) {
                         return this.Tracked(((DelegateQuery<T>)this.queryCalls[typeof(T)])(result, query, conn));
                     }
-                    else {
-                        return ((DelegateQuery<T>)this.queryCalls[typeof(T)])(result, query, conn);
-                    }
+
+                    return ((DelegateQuery<T>)this.queryCalls[typeof(T)])(result, query, conn);
                 }
-                else {
-                    // otherwise, let's have a look in our local runtime cache
-                    // TODO support multiple collection fetches
-                    if (result.HasCollectionFetches) {
-                        if (query.IsTracked) {
-                            return this.Tracked(this.delegateQueryCreator.GetTrackingCollectionFunction<T>(result, true)(result, query, conn));
-                        }
-                        else {
-                            return this.delegateQueryCreator.GetFKCollectionFunction<T>(result, false)(result, query, conn);
-                        }
+
+                // otherwise, let's have a look in our local runtime cache
+                // TODO support multiple collection fetches
+                if (result.HasCollectionFetches) {
+                    if (query.IsTracked) {
+                        return this.Tracked(this.delegateQueryCreator.GetTrackingCollectionFunction<T>(result, true)(result, query, conn));
                     }
-                    else {
-                        if (query.IsTracked) {
-                            return this.Tracked(this.delegateQueryCreator.GetTrackingNoCollectionFunction<T>(result, true)(result, query, conn));
-                        }
-                        else {
-                            return this.delegateQueryCreator.GetFKNoCollectionFunction<T>(result, false)(result, query, conn);
-                        }
-                    }
+
+                    return this.delegateQueryCreator.GetFKCollectionFunction<T>(result, false)(result, query, conn);
                 }
+
+                if (query.IsTracked) {
+                    return this.Tracked(this.delegateQueryCreator.GetTrackingNoCollectionFunction<T>(result, true)(result, query, conn));
+                }
+
+                return this.delegateQueryCreator.GetFKNoCollectionFunction<T>(result, false)(result, query, conn);
             }
 
             if (query.IsTracked) {
@@ -235,9 +231,8 @@
             if (asTracked) {
                 return this.Tracked(((NoFetchDelegate<T>)this.noFetchTrackingCalls[typeof(T)])(conn, result.Sql, result.Parameters));
             }
-            else {
-                return ((NoFetchDelegate<T>)this.noFetchFkCalls[typeof(T)])(conn, result.Sql, result.Parameters);
-            }
+
+            return ((NoFetchDelegate<T>)this.noFetchFkCalls[typeof(T)])(conn, result.Sql, result.Parameters);
         }
 
         public IEnumerable<T> Query<T>(IDbConnection connection, string sql, dynamic parameters = null) {

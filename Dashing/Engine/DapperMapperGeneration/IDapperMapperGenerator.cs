@@ -1,6 +1,5 @@
 ﻿namespace Dashing.Engine.DapperMapperGeneration {
     using System;
-    using System.Collections.Generic;
 
     internal interface IDapperMapperGenerator {
         /// <summary>

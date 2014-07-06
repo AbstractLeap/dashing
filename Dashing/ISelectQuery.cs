@@ -4,7 +4,6 @@ namespace Dashing {
     using System.Linq.Expressions;
 
     /// <summary>
-    /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public interface ISelectQuery<T> : IEnumerable<T> {

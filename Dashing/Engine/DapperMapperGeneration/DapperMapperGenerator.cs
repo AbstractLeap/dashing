@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Engine.DapperMapperGeneration {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -9,7 +10,7 @@
     using Dashing.Extensions;
 
     internal class DapperMapperGenerator : IDapperMapperGenerator {
-        private IGeneratedCodeManager generatedCodeManager;
+        private readonly IGeneratedCodeManager generatedCodeManager;
 
         public DapperMapperGenerator(IGeneratedCodeManager generatedCodeManager) {
             this.generatedCodeManager = generatedCodeManager;
@@ -37,7 +38,13 @@
             return Expression.Lambda(Expression.Lambda(Expression.Block(statements), parameters), dictionaryParam).Compile();
         }
 
-        private void AddDictionaryFetch<T>(ParameterExpression dictionaryParam, FetchNode fetchTree, IList<Expression> statements, IList<ParameterExpression> parameters, bool isTracked) {
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
+        private void AddDictionaryFetch<T>(
+            ParameterExpression dictionaryParam,
+            FetchNode fetchTree,
+            IList<Expression> statements,
+            IList<ParameterExpression> parameters,
+            bool isTracked) {
             // primary key get expression
             var primaryKeyExpr = Expression.Convert(Expression.Property(parameters.First(), fetchTree.Children.First().Value.Column.Map.PrimaryKey.Name), typeof(object));
 
@@ -48,11 +55,14 @@
                     null,
                     typeof(DictionaryExtensions).GetMethods()
                                                 .First(m => m.Name == "GetOrAdd" && m.GetParameters().Count() == 3 && m.GetParameters().Count(p => p.Name == "valueCreator") == 0)
-                                                .MakeGenericMethod(typeof(object), isTracked ? this.generatedCodeManager.GetTrackingType<T>() : this.generatedCodeManager.GetForeignKeyType<T>()),
+                                                .MakeGenericMethod(
+                                                    typeof(object),
+                                                    isTracked ? this.generatedCodeManager.GetTrackingType<T>() : this.generatedCodeManager.GetForeignKeyType<T>()),
                     new Expression[] { dictionaryParam, primaryKeyExpr, parameters.First() }));
             statements.Add(expr);
         }
 
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private void VisitTree(FetchNode node, IList<Expression> statements, IList<ParameterExpression> parameters, bool visitedCollection) {
             var parentParam = parameters.Last();
             foreach (var child in node.Children) {

@@ -1,8 +1,8 @@
 ﻿namespace Dashing.Tests.Configuration {
-    using Moq;
-
     using Dashing.Configuration;
     using Dashing.Engine;
+
+    using Moq;
 
     using Xunit;
 

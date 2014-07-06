@@ -13,7 +13,7 @@
         public FetchNode Parent { get; set; }
 
         /// <summary>
-        /// Indicates whether the property here is being fetch or simply used in a where clause
+        ///     Indicates whether the property here is being fetch or simply used in a where clause
         /// </summary>
         public bool IsFetched { get; set; }
 

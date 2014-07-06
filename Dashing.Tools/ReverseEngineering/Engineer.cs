@@ -1,59 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DatabaseSchemaReader;
-using DatabaseSchemaReader.DataSchema;
-using Dashing.Configuration;
-using Dashing.Extensions;
+﻿namespace Dashing.Tools.ReverseEngineering {
+    using System;
+    using System.Collections.Generic;
 
-namespace Dashing.Tools.ReverseEngineering
-{
-    public class Engineer : IEngineer
-    {
-        private IConvention convention;
-        public Engineer() : this(new DefaultConvention()) { }
+    using Dashing.Configuration;
+    using Dashing.Extensions;
 
-        public Engineer(IConvention convention)
-        {
+    using DatabaseSchemaReader.DataSchema;
+
+    public class Engineer : IEngineer {
+        private readonly IConvention convention;
+
+        public Engineer()
+            : this(new DefaultConvention()) {
+        }
+
+        public Engineer(IConvention convention) {
             this.convention = convention;
         }
 
-        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema)
-        {
+        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema) {
             var maps = new List<IMap>();
-            foreach (var table in schema.Tables)
-            {
+            foreach (var table in schema.Tables) {
                 maps.Add(this.MapTable(table));
             }
 
             return maps;
         }
 
-        private IMap MapTable(DatabaseTable table)
-        {
+        private IMap MapTable(DatabaseTable table) {
             var map = new Map<object>();
             map.Table = table.Name;
-            foreach (var column in table.Columns)
-            {
+            foreach (var column in table.Columns) {
                 map.Columns.Add(this.MapColumn(map, column));
             }
 
             return map;
         }
 
-        private KeyValuePair<string, IColumn> MapColumn(IMap map, DatabaseColumn column)
-        {
+        private KeyValuePair<string, IColumn> MapColumn(IMap map, DatabaseColumn column) {
             // figure out the type
             Type type;
-            if (column.DataType == null)
-            {
+            if (column.DataType == null) {
                 // HACK throw an exception? log out as a warning??
                 type = typeof(string);
             }
-            else
-            {
+            else {
                 type = Type.GetType(column.DataType.NetDataType);
             }
 
@@ -67,36 +58,30 @@ namespace Dashing.Tools.ReverseEngineering
             mapColumn.IsIgnored = false;
             mapColumn.IsNullable = column.Nullable;
             mapColumn.IsPrimaryKey = column.IsPrimaryKey || column.IsIdentity; // HACK - MySql issue with primary keys?
-            if (mapColumn.IsPrimaryKey)
-            {
+            if (mapColumn.IsPrimaryKey) {
                 map.PrimaryKey = mapColumn;
             }
 
-            if (column.Length.HasValue)
-            {
+            if (column.Length.HasValue) {
                 mapColumn.Length = (ushort)column.Length.Value;
             }
 
-            if (column.Precision.HasValue)
-            {
+            if (column.Precision.HasValue) {
                 mapColumn.Precision = (byte)column.Precision.Value;
             }
 
-            if (column.Scale.HasValue)
-            {
+            if (column.Scale.HasValue) {
                 mapColumn.Scale = (byte)column.Scale.Value;
             }
 
             mapColumn.Map = map;
 
             // figure out the relationship
-            if (column.IsForeignKey)
-            {
+            if (column.IsForeignKey) {
                 mapColumn.Relationship = RelationshipType.ManyToOne;
                 mapColumn.Name = this.convention.PropertyNameForManyToOneColumnName(column.Name);
             }
-            else
-            {
+            else {
                 mapColumn.Relationship = RelationshipType.None;
                 mapColumn.Name = column.Name;
             }

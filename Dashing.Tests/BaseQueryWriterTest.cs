@@ -1,10 +1,10 @@
 ﻿namespace Dashing.Tests {
     using System.Data;
 
-    using Moq;
-
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
+
+    using Moq;
 
     public class BaseQueryWriterTest {
         protected readonly Mock<IDbConnection> Connection;

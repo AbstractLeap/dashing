@@ -8,7 +8,8 @@ namespace Dashing.Engine.Dialects {
         private const char DotCharacter = '.';
 
         public SqlServerDialect()
-            : base('[', ']') { }
+            : base('[', ']') {
+        }
 
         public override void AppendQuotedTableName(StringBuilder sql, IMap map) {
             if (map.Schema != null) {
@@ -64,7 +65,7 @@ namespace Dashing.Engine.Dialects {
             }
 
             // now we have take and skip - we'll do the recursive CTE thingy
-            sql.Insert(6, " ROW_NUMBER() OVER (" + orderClause.ToString() + ") as RowNum,");
+            sql.Insert(6, " ROW_NUMBER() OVER (" + orderClause + ") as RowNum,");
             sql.Insert(0, "select * from (");
 
             // see MySqlDialect for explanation of the crazy number 18446744073709551615

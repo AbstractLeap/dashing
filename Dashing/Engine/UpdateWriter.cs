@@ -1,4 +1,8 @@
 ﻿namespace Dashing.Engine {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
     using System.Text;
 
     using Dapper;
@@ -7,17 +11,15 @@
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;
-    using System.Linq.Expressions;
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
 
     internal class UpdateWriter : BaseWriter, IUpdateWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) { }
+            : this(dialect, new WhereClauseWriter(dialect, config), config) {
+        }
 
         public UpdateWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) { }
+            : base(dialect, whereClauseWriter, config) {
+        }
 
         public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
             var sql = new StringBuilder();
@@ -59,7 +61,7 @@
 
             sql.Append(";");
 
-            // TODO Should we update collections here or is that the users job? Guess we should do ManyToMany tho
+            //// TODO Should we update collections here or is that the users job? Guess we should do ManyToMany tho
         }
 
         public SqlWriterResult GenerateBulkSql<T>(T updateClass, IEnumerable<Expression<Func<T, bool>>> predicates) {
@@ -67,19 +69,19 @@
             var parameters = new DynamicParameters();
             var map = this.Configuration.GetMap<T>();
 
-            var iUpdateClass = updateClass as IUpdateClass;
-            if (iUpdateClass.UpdatedProperties.IsEmpty()) {
-                return new SqlWriterResult("", parameters);
+            var interfaceUpdateClass = updateClass as IUpdateClass;
+            if (interfaceUpdateClass.UpdatedProperties.IsEmpty()) {
+                return new SqlWriterResult(string.Empty, parameters);
             }
 
             sql.Append("update ");
             this.Dialect.AppendQuotedTableName(sql, map);
             sql.Append(" set ");
 
-            foreach (var updatedProp in iUpdateClass.UpdatedProperties) {
+            foreach (var updatedProp in interfaceUpdateClass.UpdatedProperties) {
                 var column = map.Columns[updatedProp];
                 this.Dialect.AppendQuotedName(sql, column.DbName);
-                var paramName ="@" + updatedProp; 
+                var paramName = "@" + updatedProp;
                 parameters.Add(paramName, map.GetColumnValue(updateClass, column));
                 sql.Append(" = ");
                 sql.Append(paramName);

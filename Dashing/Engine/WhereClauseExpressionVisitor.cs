@@ -73,11 +73,12 @@
         protected override Expression VisitBinary(BinaryExpression b) {
             // form binary expression
             this.Sql.Append("(");
-            isTopOfBinary = true;
+            this.isTopOfBinary = true;
             this.Visit(b.Left);
+
             // TODO What about == entity where entity is null??
             this.Sql.Append(this.GetOperator(b.NodeType, b.Right.ToString() == "null"));
-            isTopOfBinary = true;
+            this.isTopOfBinary = true;
             this.Visit(b.Right);
             this.Sql.Append(")");
 
@@ -86,7 +87,7 @@
 
         protected override Expression VisitParameter(ParameterExpression p) {
             // if this is the first thing on the lhs or rhs of a binary then we should chuck the primary key in the clause
-            if (isTopOfBinary) {
+            if (this.isTopOfBinary) {
                 if (this.rootNode != null && this.rootNode.Alias.Length > 0) {
                     this.Sql.Append(this.rootNode.Alias + ".");
                 }
@@ -98,7 +99,7 @@
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m) {
-            isTopOfBinary = false;
+            this.isTopOfBinary = false;
             if (m.Expression.NodeType == ExpressionType.MemberAccess) {
                 // in a chain of member access i.e. e.A.B.C == Z this is (e.A).B or (e.A.B).C
                 if (this.isChainedMemberAccess) {
@@ -167,7 +168,12 @@
                             var propName = this.chainedEntityNames.Pop();
                             if (!currentNode.Children.ContainsKey(propName)) {
                                 // create the new node with isFetched = false
-                                var newNode = new FetchNode { Alias = "t_" + ++aliasCounter, IsFetched = false, Parent = currentNode, Column = this.configuration.GetMap(declaringType).Columns[propName] };
+                                var newNode = new FetchNode {
+                                                                Alias = "t_" + ++this.aliasCounter,
+                                                                IsFetched = false,
+                                                                Parent = currentNode,
+                                                                Column = this.configuration.GetMap(declaringType).Columns[propName]
+                                                            };
                                 currentNode.Children.Add(propName, newNode);
                             }
 
@@ -326,9 +332,9 @@
                     throw new NotImplementedException();
                 }
 
-                if (configuration.HasMap(value.GetType())) {
+                if (this.configuration.HasMap(value.GetType())) {
                     // fetch the primary key
-                    value = configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);
+                    value = this.configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);
                 }
 
                 this.Sql.Append("@l_" + ++this.paramCounter);

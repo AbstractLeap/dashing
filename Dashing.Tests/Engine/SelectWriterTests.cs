@@ -1,19 +1,16 @@
 ﻿namespace Dashing.Tests.Engine {
-    using System;
-    using System.Collections.Generic;
     using System.Data;
+    using System.Data.Common;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
-
-    using Dashing.Engine.Dialects;
-
-    using Moq;
 
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Engine.Dialects;
     using Dashing.Extensions;
     using Dashing.Tests.TestDomain;
+
+    using Moq;
 
     using Xunit;
 
@@ -21,7 +18,7 @@
         [Fact]
         public void SimpleQueryBuilds() {
             var dialect = new SqlServerDialect();
-            var engine = new EngineBase(dialect, new Mock<System.Data.Common.DbProviderFactory>().Object);
+            var engine = new EngineBase(dialect, new Mock<DbProviderFactory>().Object);
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
             var selectWriter = new SelectWriter(dialect, MakeConfig());
@@ -60,8 +57,7 @@
         }
 
         [Fact]
-        public void WhereEntityEquals()
-        {
+        public void WhereEntityEquals() {
             var o = new Post { PostId = 1 };
             var query = this.GetSelectQuery<Post>().Where(p => p == o);
             var selectQuery = query as SelectQuery<Post>;
@@ -71,8 +67,7 @@
         }
 
         [Fact]
-        public void WhereAssociatedEntityEquals()
-        {
+        public void WhereAssociatedEntityEquals() {
             var blog = new Blog { BlogId = 1 };
             var query = this.GetSelectQuery<Post>().Where(p => p.Blog == blog);
             var selectQuery = query as SelectQuery<Post>;
@@ -82,8 +77,7 @@
         }
 
         [Fact]
-        public void WhereAssociatedEntityEqualsAssociatedEntity()
-        {
+        public void WhereAssociatedEntityEqualsAssociatedEntity() {
             var o = new Post { PostId = 1, Blog = new Blog { BlogId = 1 } };
             var query = this.GetSelectQuery<Post>().Where(p => p.Blog == o.Blog);
             var selectQuery = query as SelectQuery<Post>;
@@ -93,13 +87,14 @@
         }
 
         [Fact]
-        public void NonFetchedRelationship()
-        {
+        public void NonFetchedRelationship() {
             var query = this.GetSelectQuery<Post>().Where(p => p.Blog.Title == "Boo");
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[Title] = @l_1)", sql.Sql);
+            Assert.Equal(
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[Title] = @l_1)",
+                sql.Sql);
         }
 
         private class Foo {
@@ -167,7 +162,9 @@
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId where (t.[UserId] = @l_1)", sql.Sql);
+            Assert.Equal(
+                "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId where (t.[UserId] = @l_1)",
+                sql.Sql);
         }
 
         [Fact]
@@ -176,7 +173,9 @@
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Users] as t_100 on t.UserId = t_100.UserId where (t_100.[EmailAddress] = @l_1)", sql.Sql);
+            Assert.Equal(
+                "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Users] as t_100 on t.UserId = t_100.UserId where (t_100.[EmailAddress] = @l_1)",
+                sql.Sql);
         }
 
         [Fact]
@@ -240,7 +239,9 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset 0 fetch next @take rows", sql.Sql);
+            Assert.Equal(
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset 0 fetch next @take rows",
+                sql.Sql);
         }
 
         [Fact]
@@ -258,7 +259,9 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select * from (select ROW_NUMBER() OVER ( order by [PostId]) as RowNum, [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]) as pagetable where pagetable.RowNum between @skip + 1 and 18446744073709551615 order by pagetable.RowNum", sql.Sql);
+            Assert.Equal(
+                "select * from (select ROW_NUMBER() OVER ( order by [PostId]) as RowNum, [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]) as pagetable where pagetable.RowNum between @skip + 1 and 18446744073709551615 order by pagetable.RowNum",
+                sql.Sql);
         }
 
         [Fact]
@@ -285,7 +288,9 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetMySqlWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @skip, 18446744073709551615", sql.Sql);
+            Assert.Equal(
+                "select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @skip, 18446744073709551615",
+                sql.Sql);
         }
 
         [Fact]
@@ -294,7 +299,9 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select * from (select ROW_NUMBER() OVER ( order by [PostId]) as RowNum, [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]) as pagetable where pagetable.RowNum between @skip + 1 and @skip + @take order by pagetable.RowNum", sql.Sql);
+            Assert.Equal(
+                "select * from (select ROW_NUMBER() OVER ( order by [PostId]) as RowNum, [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]) as pagetable where pagetable.RowNum between @skip + 1 and @skip + @take order by pagetable.RowNum",
+                sql.Sql);
         }
 
         [Fact]
@@ -303,7 +310,9 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip fetch next @take rows", sql.Sql);
+            Assert.Equal(
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip fetch next @take rows",
+                sql.Sql);
         }
 
         [Fact]
@@ -312,7 +321,9 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip fetch next @take rows", sql.Sql);
+            Assert.Equal(
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip fetch next @take rows",
+                sql.Sql);
         }
 
         [Fact]
@@ -353,16 +364,14 @@
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new Mock<IEngine>().Object, string.Empty)
-            {
+                : base(new Mock<IEngine>().Object, string.Empty) {
                 this.AddNamespaceOf<Post>();
             }
         }
 
         private class CustomConfigWithIgnore : DefaultConfiguration {
             public CustomConfigWithIgnore()
-                : base(new Mock<IEngine>().Object, string.Empty)
-            {
+                : base(new Mock<IEngine>().Object, string.Empty) {
                 this.AddNamespaceOf<Post>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }

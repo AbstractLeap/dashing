@@ -80,7 +80,7 @@
         RelationshipType Relationship { get; set; }
 
         /// <summary>
-        /// References the property on the parent class that this property refers to
+        ///     References the property on the parent class that this property refers to
         /// </summary>
         /// <remarks>Only applies to OneToMany Relationship</remarks>
         IColumn ChildColumn { get; set; }

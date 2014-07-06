@@ -2,14 +2,12 @@
     using System;
     using System.Data.Entity.Design.PluralizationServices;
     using System.Globalization;
-    using System.Reflection;
 
     using FluentNHibernate;
     using FluentNHibernate.Automapping;
     using FluentNHibernate.Cfg;
     using FluentNHibernate.Cfg.Db;
     using FluentNHibernate.Conventions;
-    using FluentNHibernate.Conventions.Helpers;
     using FluentNHibernate.Conventions.Instances;
 
     using global::NHibernate;
@@ -19,7 +17,7 @@
     using PerformanceTest.Domain;
 
     public class Nh {
-        public static ISessionFactory SessionFactory;
+        public static ISessionFactory SessionFactory { get; set; }
 
         static Nh() {
             SessionFactory = BuildSessionFactory();
@@ -46,28 +44,28 @@
                         .BuildSessionFactory();
         }
 
-        class Config : DefaultAutomappingConfiguration {
+        private class Config : DefaultAutomappingConfiguration {
             public override bool ShouldMap(Type type) {
                 return type.Namespace == "PerformanceTest.Domain";
             }
 
-            public override bool IsId(FluentNHibernate.Member member) {
+            public override bool IsId(Member member) {
                 return member.Name == member.DeclaringType.Name + "Id";
             }
         }
 
-        class TableNameConvention : IClassConvention {
+        private class TableNameConvention : IClassConvention {
             public void Apply(IClassInstance instance) {
                 string typeName = instance.EntityType.Name;
                 instance.Table(PluralizationService.CreateService(CultureInfo.CurrentCulture).Pluralize(typeName));
-
             }
         }
 
-        class FKConvention : ForeignKeyConvention {
+        private class FKConvention : ForeignKeyConvention {
             protected override string GetKeyName(Member property, Type type) {
-                if (property == null)
+                if (property == null) {
                     return type.Name + "Id";
+                }
 
                 return property.Name + "Id";
             }

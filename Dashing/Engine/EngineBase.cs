@@ -4,11 +4,9 @@ namespace Dashing.Engine {
     using System.Data;
     using System.Data.Common;
     using System.Linq;
-
-    using Dashing.Configuration;
-    using Dashing.CodeGeneration;
     using System.Linq.Expressions;
 
+    using Dashing.Configuration;
     using Dashing.Engine.Dialects;
 
     /// <summary>
@@ -32,10 +30,9 @@ namespace Dashing.Engine {
 
         protected ISqlDialect Dialect { get; set; }
 
-        protected DbProviderFactory DbProviderFactory;
+        protected DbProviderFactory DbProviderFactory { get; set; }
 
-        public EngineBase(ISqlDialect dialect, DbProviderFactory dbProviderFactory)
-        {
+        public EngineBase(ISqlDialect dialect, DbProviderFactory dbProviderFactory) {
             this.Dialect = dialect;
             this.DbProviderFactory = dbProviderFactory;
         }
@@ -207,7 +204,6 @@ namespace Dashing.Engine {
                 this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, sqlQuery.Parameters);
             }
         }
-
 
         public void ExecuteBulkDelete<T>(IDbConnection connection, IEnumerable<Expression<Func<T, bool>>> predicates) {
             var sqlQuery = this.DeleteWriter.GenerateBulkSql(predicates);

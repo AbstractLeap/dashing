@@ -14,7 +14,8 @@ namespace Dashing {
         ///     The entities.
         /// </param>
         public DeleteEntityQuery(params T[] entities)
-            : base(entities) { }
+            : base(entities) {
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="DeleteEntityQuery{T}" /> class.
@@ -23,6 +24,7 @@ namespace Dashing {
         ///     The entities.
         /// </param>
         public DeleteEntityQuery(IEnumerable<T> entities)
-            : base(entities) { }
+            : base(entities) {
+        }
     }
 }

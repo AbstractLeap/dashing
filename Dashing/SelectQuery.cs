@@ -55,7 +55,6 @@ namespace Dashing {
         public IList<Expression> Fetches { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
         public Tuple<Expression, Expression> CollectionFetches { get; set; }
 
@@ -326,7 +325,6 @@ namespace Dashing {
             this.Where(predicate);
             return this.SingleOrDefault();
         }
-
 
         public T Last() {
             var result = this.LastOrDefault();

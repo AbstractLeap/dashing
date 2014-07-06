@@ -7,11 +7,11 @@ namespace Dashing.Configuration {
 
     public class MutableConfiguration : DefaultConfiguration {
         public MutableConfiguration(IEngine engine, string connectionString)
-            : base(engine, connectionString) { }
+            : base(engine, connectionString) {
+        }
 
         public MutableConfiguration(ConnectionStringSettings connectionString)
-            : base(connectionString)
-        {
+            : base(connectionString) {
         }
 
         public new IConfiguration Add<T>() {

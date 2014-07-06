@@ -4,5 +4,6 @@ namespace Dashing {
     /// </summary>
     /// <typeparam name="T">
     /// </typeparam>
-    public class DeleteQuery<T> : QueryBase<T> { }
+    public class DeleteQuery<T> : QueryBase<T> {
+    }
 }

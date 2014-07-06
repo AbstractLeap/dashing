@@ -3,8 +3,8 @@
     using System.Collections.Generic;
     using System.Configuration;
     using System.Data;
-    using System.Data.Entity;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using Dapper;
@@ -22,8 +22,10 @@
 
     using ServiceStack.OrmLite;
 
-    using Database = Simple.Data.Database;
+    using Simple.Data;
+
     using ISession = Dashing.ISession;
+    using QueryableExtensions = System.Data.Entity.QueryableExtensions;
 
     internal static class Program {
         internal static readonly ConnectionStringSettings ConnectionString = new ConnectionStringSettings(
@@ -288,11 +290,16 @@ select * from Comments where PostId = @id";
             tests.Add(new Test(Providers.EntityFramework, TestName, i => QueryableExtensions.Include(EfDb.Posts.AsNoTracking(), p => p.Author).First(p => p.PostId == i)));
 
             // add nh stateful
-            tests.Add(new Test(Providers.NHibernate, TestName, i => QueryableExtensions.Include(nhSession.Query<Post>(), p => p.Author).First(p => p.PostId == i), "Stateful"));
+            tests.Add(
+                new Test(Providers.NHibernate, TestName, i => QueryableExtensions.Include(nhSession.Query<Post>(), p => p.Author).First(p => p.PostId == i), "Stateful"));
 
             // add nh stateless
             tests.Add(
-                new Test(Providers.NHibernate, TestName, i => QueryableExtensions.Include(nhStatelessSession.Query<Post>(), p => p.Author).First(p => p.PostId == i), "Stateless"));
+                new Test(
+                    Providers.NHibernate,
+                    TestName,
+                    i => QueryableExtensions.Include(nhStatelessSession.Query<Post>(), p => p.Author).First(p => p.PostId == i),
+                    "Stateless"));
         }
 
         private static void SetupSelectSingleTest(List<Test> tests, dynamic simpleDataDb) {

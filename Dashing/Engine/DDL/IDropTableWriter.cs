@@ -1,10 +1,9 @@
-﻿using System;
-using Dashing.Configuration;
-namespace Dashing.Engine.DDL
-{
-    public interface IDropTableWriter
-    {
+﻿namespace Dashing.Engine.DDL {
+    using Dashing.Configuration;
+
+    public interface IDropTableWriter {
         string DropTable(IMap map);
+
         string DropTableIfExists(IMap map);
     }
 }

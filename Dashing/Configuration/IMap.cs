@@ -9,7 +9,7 @@ namespace Dashing.Configuration {
         Type Type { get; }
 
         /// <summary>
-        /// Gets the Configuration
+        ///     Gets the Configuration
         /// </summary>
         IConfiguration Configuration { get; set; }
 
@@ -34,7 +34,7 @@ namespace Dashing.Configuration {
         IDictionary<string, IColumn> Columns { get; set; }
 
         /// <summary>
-        /// Gets the primary key for the object
+        ///     Gets the primary key for the object
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
