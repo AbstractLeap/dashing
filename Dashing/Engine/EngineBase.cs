@@ -32,6 +32,10 @@ namespace Dashing.Engine {
         public EngineBase(ISqlDialect dialect, DbProviderFactory dbProviderFactory) {
             this.Dialect = dialect;
             this.DbProviderFactory = dbProviderFactory;
+            this.SelectWriter = new SelectWriter(this.Dialect, this.Configuration);
+            this.DeleteWriter = new DeleteWriter(this.Dialect, this.Configuration);
+            this.UpdateWriter = new UpdateWriter(this.Dialect, this.Configuration);
+            this.InsertWriter = new InsertWriter(this.Dialect, this.Configuration);
         }
 
         public IDbConnection Open(string connectionString) {
@@ -43,10 +47,6 @@ namespace Dashing.Engine {
 
         public void UseMaps(IDictionary<Type, IMap> maps) {
             this.Maps = maps;
-            this.SelectWriter = new SelectWriter(this.Dialect, this.Configuration);
-            this.DeleteWriter = new DeleteWriter(this.Dialect, this.Configuration);
-            this.UpdateWriter = new UpdateWriter(this.Dialect, this.Configuration);
-            this.InsertWriter = new InsertWriter(this.Dialect, this.Configuration);
         }
 
         public virtual IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query) {
