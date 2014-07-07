@@ -8,6 +8,7 @@
     using Dashing.Engine;
     using Dashing.Engine.DapperMapperGeneration;
     using Dashing.Engine.Dialects;
+    using Dashing.Engine.DML;
     using Dashing.Tests.TestDomain;
 
     using Moq;

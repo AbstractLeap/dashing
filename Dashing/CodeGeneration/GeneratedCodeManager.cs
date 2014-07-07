@@ -9,6 +9,7 @@
     using Dapper;
 
     using Dashing.Engine;
+    using Dashing.Engine.DML;
 
     public class GeneratedCodeManager : IGeneratedCodeManager {
         public CodeGeneratorConfig Config { get; private set; }

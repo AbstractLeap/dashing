@@ -5,6 +5,7 @@
     using System.Reflection;
 
     using Dashing.Engine;
+    using Dashing.Engine.DML;
 
     public interface IGeneratedCodeManager {
         /// <summary>

@@ -4,6 +4,7 @@
 
     using Dashing.CodeGeneration;
     using Dashing.Engine;
+    using Dashing.Engine.Dialects;
 
     public class DefaultConfiguration : ConfigurationBase {
         public DefaultConfiguration(ConnectionStringSettings connectionStringSettings)

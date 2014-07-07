@@ -7,6 +7,7 @@
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
+    using Dashing.Engine.DML;
     using Dashing.Extensions;
 
     internal class DapperMapperGenerator : IDapperMapperGenerator {

@@ -11,6 +11,7 @@
 
     using Dashing.Engine;
     using Dashing.Engine.DapperMapperGeneration;
+    using Dashing.Engine.DML;
 
     internal class DelegateQueryCreator {
         private readonly DapperMapperGenerator dapperMapperGenerator;

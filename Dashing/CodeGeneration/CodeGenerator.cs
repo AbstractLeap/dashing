@@ -14,6 +14,7 @@
 
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Engine.DML;
     using Dashing.Extensions;
 
     // TODO: Use Refly instead of CodeDom - http://www.codeproject.com/Articles/6283/Refly-makes-the-CodeDom-er-life-easier
@@ -113,6 +114,7 @@
             yield return "System.Diagnostics";
             yield return "Dapper";
             yield return "Dashing.Engine";
+            yield return "Dashing.Engine.DML";
         }
 
         private static IEnumerable<string> GetStandardCodeReferences() {

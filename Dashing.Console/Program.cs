@@ -11,6 +11,7 @@
     using Dashing.Console.Properties;
     using Dashing.Engine;
     using Dashing.Engine.DDL;
+    using Dashing.Engine.Dialects;
     using Dashing.Tools.Migration;
     using Dashing.Tools.ModelGeneration;
     using Dashing.Tools.ReverseEngineering;
