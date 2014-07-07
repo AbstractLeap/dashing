@@ -162,6 +162,7 @@
             column.Relationship = RelationshipType.ManyToOne;
             column.DbName = propertyName + "Id";
             column.DbType = DbType.Int32;
+            column.IsNullable = true;
 
             // TODO resolve column type of related primary key - be careful with infinite loops!
         }

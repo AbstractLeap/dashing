@@ -143,6 +143,24 @@
         }
 
         [Fact]
+        public void NullableColumnIsNullable() {
+            var property = this.MapAndGetProperty<Post, Blog>(u => u.Blog);
+            Assert.True(property.IsNullable);
+        }
+
+        [Fact]
+        public void StringColumnIsNullable() {
+            var property = this.MapAndGetProperty<Post, string>(u => u.Content);
+            Assert.True(property.IsNullable);
+        }
+
+        [Fact]
+        public void NotNullableColumnIsNotNullable() {
+            var property = this.MapAndGetProperty<Post, decimal>(u => u.Rating);
+            Assert.False(property.IsNullable);
+        }
+
+        [Fact]
         public void NonEntityColumnDbTypeIsSet() {
             var property = this.MapAndGetProperty<Post, string>(u => u.Content);
             Assert.Equal(DbType.String, property.DbType);
@@ -159,7 +177,7 @@
             var property = this.MapAndGetProperty<Post, string>(u => u.Content);
             Assert.Equal(RelationshipType.None, property.Relationship);
         }
-
+        
         [Fact]
         public void EntityColumnDbTypeIsSet() {
             var property = this.MapAndGetProperty<Post, User>(p => p.Author);
