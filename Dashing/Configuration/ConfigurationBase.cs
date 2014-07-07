@@ -65,13 +65,17 @@
 
         public bool GetIsTrackedByDefault { get; set; }
 
-        protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
+        protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
 
             if (connectionStringSettings == null) {
                 throw new ArgumentNullException("connectionStringSettings");
+            }
+
+            if (dbProviderFactory == null) {
+                throw new ArgumentNullException("dbProviderFactory");
             }
 
             if (mapper == null) {
@@ -89,12 +93,12 @@
             this.engine = engine;
             this.engine.Configuration = this;
             this.connectionStringSettings = connectionStringSettings;
-            this.dbProviderFactory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
+            this.dbProviderFactory = dbProviderFactory;
             this.mapper = mapper;
-            this.mapperMapForMethodInfo = mapper.GetType().GetMethod("MapFor", new[] { typeof(Type) });
             this.sessionFactory = sessionFactory;
             this.codeGenerator = codeGenerator;
 
+            this.mapperMapForMethodInfo = this.mapper.GetType().GetMethod("MapFor", new[] { typeof(Type) });
             this.mappedTypes = new Dictionary<Type, IMap>();
         }
 
