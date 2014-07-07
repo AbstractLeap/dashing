@@ -10,7 +10,7 @@
     using Xunit;
 
     public class SchemaGenerationSandbox {
-        private static readonly ConnectionStringSettings PolyTestConnectionString = new ConnectionStringSettings(
+        public static readonly ConnectionStringSettings PolyTestConnectionString = new ConnectionStringSettings(
             "Default",
             "Server=tcp:dzarexnyar.database.windows.net;Database=poly-test;User ID=polyadmin@dzarexnyar;Password=Fgg7aEy1bzX8qvs2;Trusted_Connection=False;Encrypt=True;",
             "System.Data.SqlClient");

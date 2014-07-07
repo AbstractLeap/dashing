@@ -9,31 +9,20 @@ namespace Dashing.Engine {
     public interface IEngine {
         IConfiguration Configuration { get; set; }
 
-        void UseMaps(IDictionary<Type, IMap> maps);
+        IEnumerable<T> Query<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
-        IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query);
+        IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
-        int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query);
+        IEnumerable<T> Query<T>(IDbTransaction transaction, SelectQuery<T> query);
 
-        int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query);
+        int Execute<T>(IDbTransaction transaction, InsertEntityQuery<T> query);
 
-        int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query);
+        int Execute<T>(IDbTransaction transaction, UpdateEntityQuery<T> query);
 
-        T Get<T>(IDbConnection connection, int id, bool? asTracked);
+        int Execute<T>(IDbTransaction transaction, DeleteEntityQuery<T> query);
 
-        T Get<T>(IDbConnection connection, Guid id, bool? asTracked);
+        int Execute<T>(IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 
-        IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<int> ids, bool? asTracked);
-
-        IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<Guid> ids, bool? asTracked);
-
-        void Execute<T>(
-            IDbConnection dbConnection, 
-            Action<T> update, 
-            IEnumerable<Expression<Func<T, bool>>> predicates);
-
-        void ExecuteBulkDelete<T>(
-            IDbConnection connection, 
-            IEnumerable<Expression<Func<T, bool>>> predicates);
+        int ExecuteBulkDelete<T>(IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates);
     }
 }

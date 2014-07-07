@@ -1,6 +1,8 @@
 ﻿namespace Dashing.Engine.DapperMapperGeneration {
     using System;
 
+    using Dashing.Engine.DML;
+
     internal interface IDapperMapperGenerator {
         /// <summary>
         ///     Generates a Func for the passed in fetchTree

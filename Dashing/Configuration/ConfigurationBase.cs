@@ -10,12 +10,7 @@
     using Dashing.CodeGeneration;
     using Dashing.Engine;
 
-    /// <summary>
-    ///     The configuration base.
-    /// </summary>
     public abstract class ConfigurationBase : IConfiguration {
-        private readonly IEngine engine;
-
         private readonly ConnectionStringSettings connectionStringSettings;
 
         private readonly IMapper mapper;
@@ -29,8 +24,6 @@
         private readonly ICodeGenerator codeGenerator;
 
         private readonly DbProviderFactory dbProviderFactory;
-
-        private bool engineHasLatestMaps;
 
         private IGeneratedCodeManager codeManager;
 
@@ -46,16 +39,7 @@
             }
         }
 
-        public IEngine Engine {
-            get {
-                if (!this.engineHasLatestMaps) {
-                    this.engine.UseMaps(this.mappedTypes);
-                    this.engineHasLatestMaps = true;
-                }
-
-                return this.engine;
-            }
-        }
+        public IEngine Engine { get; set; }
 
         public IGeneratedCodeManager CodeManager {
             get {
@@ -90,8 +74,8 @@
                 throw new ArgumentNullException("codeGenerator");
             }
 
-            this.engine = engine;
-            this.engine.Configuration = this;
+            this.Engine = engine;
+            this.Engine.Configuration = this;
             this.connectionStringSettings = connectionStringSettings;
             this.dbProviderFactory = dbProviderFactory;
             this.mapper = mapper;
@@ -123,7 +107,6 @@
         }
 
         private void Dirty() {
-            this.engineHasLatestMaps = false;
             this.codeManager = null;
         }
 
@@ -135,15 +118,15 @@
 
             connection.ConnectionString = this.connectionStringSettings.ConnectionString;
 
-            return this.sessionFactory.Create(this, connection);
+            return this.sessionFactory.Create(this.Engine, connection);
         }
 
         public ISession BeginSession(IDbConnection connection) {
-            return this.sessionFactory.Create(this, connection, disposeConnection: false);
+            return this.sessionFactory.Create(this.Engine, connection, disposeConnection: false);
         }
 
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.sessionFactory.Create(this, connection, transaction, false);
+            return this.sessionFactory.Create(this.Engine, connection, transaction, false);
         }
 
         protected IConfiguration Add<T>() {

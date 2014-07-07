@@ -9,6 +9,7 @@
 
     using Dapper;
 
+    using Dashing;
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
 
@@ -24,7 +25,6 @@
 
     using Simple.Data;
 
-    using ISession = Dashing.ISession;
     using QueryableExtensions = System.Data.Entity.QueryableExtensions;
 
     internal static class Program {
@@ -34,6 +34,8 @@
             "System.Data.SqlClient");
 
         private static void Main(string[] args) {
+            SetupDatabase();
+
             var tests = new List<Test>();
             SetupTests(tests);
 
@@ -43,10 +45,18 @@
             foreach (var name in testNames) {
                 Console.WriteLine("Running " + name);
                 Console.WriteLine("------------------------");
+
                 foreach (var provider in providers) {
-                    var providerTests = tests.Where(t => t.Provider == provider && t.TestName == name);
-                    foreach (var test in providerTests) {
-                        if (test != null) {
+                    var closeOverProvider = provider;
+                    var closeOverName = name;
+
+                    foreach (var test in tests.Where(t => t.Provider == closeOverProvider && t.TestName == closeOverName).Where(test => test != null)) {
+                        simpleDataDb = Database.OpenConnection(ConnectionString.ConnectionString);
+                        using (dashingSession = dashingConfig.BeginSession())
+                        using (dapperConn = connectionFactory.OpenDbConnection())
+                        using (ormliteConn = connectionFactory.OpenDbConnection())
+                        using (nhStatelessSession = Nh.SessionFactory.OpenStatelessSession())
+                        using (nhSession = Nh.SessionFactory.OpenSession()) {
                             // warm up
                             test.TestFunc(1);
                             var watch = new Stopwatch();
@@ -67,39 +77,28 @@
 
                 Console.WriteLine();
             }
-
-            FinishTests();
-        }
-
-        private static void FinishTests() {
-            EfDb.Dispose();
-            ormliteConn.Dispose();
-            session.Dispose();
-            nhStatelessSession.Dispose();
-            nhSession.Dispose();
         }
 
         private static readonly EfContext EfDb = new EfContext();
 
+        private static readonly IConfiguration dashingConfig = new DashingConfiguration(ConnectionString);
+
+        private static readonly OrmLiteConnectionFactory connectionFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
+
+        private static IDbConnection dapperConn;
+
         private static IDbConnection ormliteConn;
 
-        private static ISession session;
-
-        private static IStatelessSession nhStatelessSession;
+        private static Dashing.ISession dashingSession;
 
         private static NHibernate.ISession nhSession;
 
-        private static void SetupTests(List<Test> tests) {
-            var config = new DashingConfiguration(ConnectionString);
-            var simpleDataDb = Database.OpenConnection(ConnectionString.ConnectionString);
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
-            ormliteConn = dbFactory.OpenDbConnection();
-            session = config.BeginSession();
-            nhStatelessSession = Nh.SessionFactory.OpenStatelessSession();
-            nhSession = Nh.SessionFactory.OpenSession();
-            SetupDatabase(config);
+        private static IStatelessSession nhStatelessSession;
 
-            SetupSelectSingleTest(tests, simpleDataDb);
+        private static dynamic simpleDataDb;
+
+        private static void SetupTests(List<Test> tests) {
+            SetupSelectSingleTest(tests);
             SetupFetchTest(tests);
             SetupFetchChangeTests(tests);
             SetupFetchCollectionTests(tests);
@@ -115,10 +114,10 @@
                     TestName,
                     i => {
                         var post =
-                            session.Connection.Query<Post>(
+                            dapperConn.Query<Post>(
                                 "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
                                 new { l_1 = i }).First();
-                        var comments = session.Connection.Query<Comment>("select * from [Comments] where [PostId] = @postId", new { postId = post.PostId }).ToList();
+                        var comments = dapperConn.Query<Comment>("select * from [Comments] where [PostId] = @postId", new { postId = post.PostId }).ToList();
                         post.Comments = comments;
                     },
                     "Naive"));
@@ -132,7 +131,7 @@
 select * from Posts where PostId = @id
 select * from Comments where PostId = @id";
 
-                        var multi = session.Connection.QueryMultiple(sql, new { id = i });
+                        var multi = dapperConn.QueryMultiple(sql, new { id = i });
                         var post = multi.Read<Post>().Single();
                         post.Comments = multi.Read<Comment>().ToList();
                         multi.Dispose();
@@ -140,7 +139,7 @@ select * from Comments where PostId = @id";
                     "Multiple Result Method"));
 
             // add Dashing
-            tests.Add(new Test(Providers.Dashing, TestName, i => { var post = session.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); }));
+            tests.Add(new Test(Providers.Dashing, TestName, i => { var post = dashingSession.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); }));
 
             // add EF
             tests.Add(new Test(Providers.EntityFramework, TestName, i => { var post = QueryableExtensions.Include(EfDb.Posts, p => p.Comments).First(p => p.PostId == i); }));
@@ -173,13 +172,13 @@ select * from Comments where PostId = @id";
                     TestName,
                     i => {
                         var post =
-                            session.Connection.Query<Post>(
+                            dapperConn.Query<Post>(
                                 "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
                                 new { l_1 = i }).First();
                         post.Title = Providers.Dapper + "_" + i + r.Next(100000);
-                        session.Connection.Execute("Update [Posts] set [Title] = @Title where [PostId] = @PostId", new { post.Title, post.PostId });
+                        dapperConn.Execute("Update [Posts] set [Title] = @Title where [PostId] = @PostId", new { post.Title, post.PostId });
                         var thatPost =
-                            session.Connection.Query<Post>(
+                            dapperConn.Query<Post>(
                                 "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
                                 new { l_1 = i }).First();
                         if (thatPost.Title != post.Title) {
@@ -193,10 +192,10 @@ select * from Comments where PostId = @id";
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var post = session.Query<Post>().AsTracked().First(p => p.PostId == i);
+                        var post = dashingSession.Query<Post>().AsTracked().First(p => p.PostId == i);
                         post.Title = Providers.Dashing + "_" + i + r.Next(100000);
-                        session.Update(post);
-                        var thatPost = session.Query<Post>().First(p => p.PostId == i);
+                        dashingSession.Update(post);
+                        var thatPost = dashingSession.Query<Post>().First(p => p.PostId == i);
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(TestName + " failed for " + Providers.Dashing + " as the update did not work");
                         }
@@ -208,10 +207,10 @@ select * from Comments where PostId = @id";
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var post = session.Get<Post>(i, true);
+                        var post = dashingSession.GetTracked<Post>(i);
                         post.Title = Providers.Dashing + "_" + i + r.Next(100000);
-                        session.Update(post);
-                        var thatPost = session.Get<Post>(i);
+                        dashingSession.Update(post);
+                        var thatPost = dashingSession.Get<Post>(i);
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(TestName + " failed for " + Providers.Dashing + " as the update did not work");
                         }
@@ -274,7 +273,7 @@ select * from Comments where PostId = @id";
                     Providers.Dapper,
                     TestName,
                     i =>
-                    session.Connection.Query<Post, User, Post>(
+                    dapperConn.Query<Post, User, Post>(
                         "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[BlogId], t.[DoNotMap], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where ([PostId] = @l_1)",
                         (p, u) => {
                             p.Author = u;
@@ -284,7 +283,7 @@ select * from Comments where PostId = @id";
                         splitOn: "UserId").First()));
 
             // add Dashing
-            tests.Add(new Test(Providers.Dashing, TestName, i => session.Query<Post>().Fetch(p => p.Author).First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.Dashing, TestName, i => dashingSession.Query<Post>().Fetch(p => p.Author).First(p => p.PostId == i)));
 
             // add ef
             tests.Add(new Test(Providers.EntityFramework, TestName, i => QueryableExtensions.Include(EfDb.Posts.AsNoTracking(), p => p.Author).First(p => p.PostId == i)));
@@ -302,7 +301,7 @@ select * from Comments where PostId = @id";
                     "Stateless"));
         }
 
-        private static void SetupSelectSingleTest(List<Test> tests, dynamic simpleDataDb) {
+        private static void SetupSelectSingleTest(List<Test> tests) {
             const string TestName = "SelectSingle";
 
             // add dapper
@@ -311,15 +310,15 @@ select * from Comments where PostId = @id";
                     Providers.Dapper,
                     TestName,
                     i =>
-                    session.Connection.Query<Post>(
+                    dapperConn.Query<Post>(
                         "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
                         new { l_1 = i }).First()));
 
             // add Dashing
-            tests.Add(new Test(Providers.Dashing, TestName, i => session.Query<Post>().First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.Dashing, TestName, i => dashingSession.Query<Post>().First(p => p.PostId == i)));
 
             // add Dashing by id
-            tests.Add(new Test(Providers.Dashing, TestName, i => session.Get<Post>(i), "By Id"));
+            tests.Add(new Test(Providers.Dashing, TestName, i => dashingSession.Get<Post>(i), "By Id"));
 
             // add ef
             tests.Add(new Test(Providers.EntityFramework, TestName, i => EfDb.Posts.AsNoTracking().First(p => p.PostId == i)));
@@ -349,7 +348,7 @@ select * from Comments where PostId = @id";
             tests.Add(new Test(Providers.NHibernate, TestName, i => nhSession.Get<Post>(i), "Stateful"));
         }
 
-        private static void SetupDatabase(IConfiguration dashingConfig) {
+        private static void SetupDatabase() {
             var d = new Dashing.Engine.Dialects.SqlServerDialect();
             var dtw = new DropTableWriter(d);
             var ctw = new CreateTableWriter(d);
@@ -357,37 +356,41 @@ select * from Comments where PostId = @id";
             var createTables = dashingConfig.Maps.Select(ctw.CreateTable);
             var sqls = dropTables.Concat(createTables).ToArray();
 
-            foreach (var sql in sqls) {
-                session.Connection.Execute(sql);
-            }
+            using (var setupSession = dashingConfig.BeginSession()) {
+                foreach (var sql in sqls) {
+                    setupSession.Connection.Execute(sql);
+                }
 
-            var r = new Random();
-            var users = new List<User>();
-            for (var i = 0; i < 100; i++) {
-                var user = new User();
-                users.Add(user);
-                session.Insert(user);
-            }
+                var r = new Random();
+                var users = new List<User>();
+                for (var i = 0; i < 100; i++) {
+                    var user = new User();
+                    users.Add(user);
+                    setupSession.Insert(user);
+                }
 
-            var blogs = new List<Blog>();
-            for (var i = 0; i < 100; i++) {
-                var blog = new Blog();
-                blogs.Add(blog);
-                session.Insert(blog);
-            }
+                var blogs = new List<Blog>();
+                for (var i = 0; i < 100; i++) {
+                    var blog = new Blog();
+                    blogs.Add(blog);
+                    setupSession.Insert(blog);
+                }
 
-            var posts = new List<Post>();
-            for (var i = 0; i <= 500; i++) {
-                var userId = r.Next(100);
-                var blogId = r.Next(100);
-                var post = new Post { Author = users[userId], Blog = blogs[blogId] };
-                session.Insert(post);
-                posts.Add(post);
-            }
+                var posts = new List<Post>();
+                for (var i = 0; i <= 500; i++) {
+                    var userId = r.Next(100);
+                    var blogId = r.Next(100);
+                    var post = new Post { Author = users[userId], Blog = blogs[blogId] };
+                    setupSession.Insert(post);
+                    posts.Add(post);
+                }
 
-            for (var i = 0; i < 5000; i++) {
-                var comment = new Comment { Post = posts[r.Next(500)], User = users[r.Next(100)] };
-                session.Insert(comment);
+                for (var i = 0; i < 5000; i++) {
+                    var comment = new Comment { Post = posts[r.Next(500)], User = users[r.Next(100)] };
+                    setupSession.Insert(comment);
+                }
+
+                setupSession.Complete();
             }
         }
     }

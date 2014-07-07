@@ -1,9 +1,11 @@
 ﻿namespace Dashing.Configuration {
     using System.Data;
 
+    using Dashing.Engine;
+
     public class DefaultSessionFactory : ISessionFactory {
-        public ISession Create(IConfiguration config, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false) {
-            return new Session(config, connection, transaction, disposeConnection, commitAndDisposeTransaction);
+        public ISession Create(IEngine engine, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false) {
+            return new Session(engine, connection, transaction, disposeConnection, commitAndDisposeTransaction);
         }
     }
 }

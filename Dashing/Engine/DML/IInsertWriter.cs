@@ -1,4 +1,4 @@
-﻿namespace Dashing.Engine {
+﻿namespace Dashing.Engine.DML {
     public interface IInsertWriter {
         SqlWriterResult GenerateSql<T>(T entity);
 

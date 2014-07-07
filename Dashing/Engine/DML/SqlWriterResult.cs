@@ -1,4 +1,4 @@
-﻿namespace Dashing.Engine {
+namespace Dashing.Engine.DML {
     using Dapper;
 
     public class SqlWriterResult {

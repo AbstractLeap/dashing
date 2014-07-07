@@ -1,4 +1,4 @@
-﻿namespace Dashing.Engine {
+﻿namespace Dashing.Engine.DML {
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -22,24 +22,14 @@
 
         private static readonly ConcurrentDictionary<Tuple<Type, string>, string> QueryCache = new ConcurrentDictionary<Tuple<Type, string>, string>();
 
-        public SqlWriterResult GenerateGetSql<T>(int id) {
-            var sql = QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
-            return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
-        }
+        public SqlWriterResult GenerateGetSql<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            var primaryKeys = ids as TPrimaryKey[] ?? ids.ToArray();
 
-        public SqlWriterResult GenerateGetSql<T>(Guid id) {
-            var sql = QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false));
-            return new SqlWriterResult(sql, new DynamicParameters(new { Id = id }));
-        }
+            if (primaryKeys.Count() == 1) {
+                return new SqlWriterResult(QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false)), new DynamicParameters(new { Id = primaryKeys.Single() }));
+            }
 
-        public SqlWriterResult GenerateGetSql<T>(IEnumerable<int> ids) {
-            var sql = QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
-            return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
-        }
-
-        public SqlWriterResult GenerateGetSql<T>(IEnumerable<Guid> ids) {
-            var sql = QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true));
-            return new SqlWriterResult(sql, new DynamicParameters(new { Ids = ids }));
+            return new SqlWriterResult(QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true)), new DynamicParameters(new { Ids = primaryKeys }));
         }
 
         private string GenerateGetSql<T>(bool isMultiple) {

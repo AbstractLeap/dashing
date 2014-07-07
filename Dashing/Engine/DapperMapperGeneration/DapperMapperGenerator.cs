@@ -7,6 +7,7 @@
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
+    using Dashing.Engine.DML;
     using Dashing.Extensions;
 
     internal class DapperMapperGenerator : IDapperMapperGenerator {
@@ -26,7 +27,8 @@
             // note that we can only fetch one collection at a time
             // so, if there's more than one in the SelectQuery they should be split out prior to calling this
             bool visitedCollection = false;
-            var rootType = isTracked ? this.generatedCodeManager.GetTrackingType<T>() : this.generatedCodeManager.GetForeignKeyType<T>();
+            var tt = typeof(T);
+            var rootType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
             var dictionaryParam = Expression.Parameter(typeof(IDictionary<,>).MakeGenericType(typeof(object), rootType), "dict");
             var statements = new List<Expression>();
             var parameters = new List<ParameterExpression> { Expression.Parameter(rootType) };
@@ -49,6 +51,7 @@
             var primaryKeyExpr = Expression.Convert(Expression.Property(parameters.First(), fetchTree.Children.First().Value.Column.Map.PrimaryKey.Name), typeof(object));
 
             // check the dictionary for this value
+            var tt = typeof(T);
             var expr = Expression.Assign(
                 parameters.First(),
                 Expression.Call(
@@ -57,7 +60,7 @@
                                                 .First(m => m.Name == "GetOrAdd" && m.GetParameters().Count() == 3 && m.GetParameters().Count(p => p.Name == "valueCreator") == 0)
                                                 .MakeGenericMethod(
                                                     typeof(object),
-                                                    isTracked ? this.generatedCodeManager.GetTrackingType<T>() : this.generatedCodeManager.GetForeignKeyType<T>()),
+                                                    isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt)),
                     new Expression[] { dictionaryParam, primaryKeyExpr, parameters.First() }));
             statements.Add(expr);
         }
@@ -109,7 +112,8 @@
         public Delegate GenerateNonCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
             // this is simple, just take the arguments, map them
             // params go in order of fetch tree
-            var rootType = isTracked ? this.generatedCodeManager.GetTrackingType<T>() : this.generatedCodeManager.GetForeignKeyType<T>();
+            var tt = typeof(T);
+            var rootType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
             var rootParam = Expression.Parameter(rootType);
             var statements = new List<Expression>();
             var parameters = new List<ParameterExpression> { rootParam };

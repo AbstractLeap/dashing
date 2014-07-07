@@ -1,9 +1,7 @@
-﻿namespace Dashing.Engine {
+﻿namespace Dashing.Engine.Dialects {
     using System;
     using System.Configuration;
     using System.Data.SqlClient;
-
-    using Dashing.Engine.Dialects;
 
     public class DialectFactory {
         public ISqlDialect Create(ConnectionStringSettings connectionString) {

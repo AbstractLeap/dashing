@@ -1,4 +1,4 @@
-﻿namespace Dashing.Engine {
+﻿namespace Dashing.Engine.DML {
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;

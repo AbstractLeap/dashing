@@ -9,7 +9,7 @@
             : this(null) { }
 
         protected GenerateCodeFixture(CodeGeneratorConfig generatorConfig) {
-            var codeGenerator = new CodeGenerator(generatorConfig ?? new CodeGeneratorConfig(), new ProxyGenerator());
+            var codeGenerator = new CodeGenerator(generatorConfig ?? new CodeGeneratorConfig() { CompileInDebug = true, OutputAssembly = true, OutputSourceCode = true }, new ProxyGenerator());
             this.CodeManager = codeGenerator.Generate(new CustomConfig());
         }
 

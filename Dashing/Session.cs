@@ -2,12 +2,13 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
     using System.Linq.Expressions;
 
-    using Dashing.Configuration;
+    using Dashing.Engine;
 
     public sealed class Session : ISession {
-        private readonly IConfiguration config;
+        private readonly IEngine engine;
 
         private readonly IDbConnection connection;
 
@@ -21,16 +22,16 @@
 
         private bool isDisposed;
 
-        public Session(IConfiguration config, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false) {
-            if (config == null) {
-                throw new ArgumentNullException("config");
+        public Session(IEngine engine, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false) {
+            if (engine == null) {
+                throw new ArgumentNullException("engine");
             }
 
             if (connection == null) {
                 throw new ArgumentNullException("connection");
             }
 
-            this.config = config;
+            this.engine = engine;
             this.connection = connection;
             this.transaction = transaction;
             this.shouldDisposeConnection = disposeConnection;
@@ -47,15 +48,15 @@
                     this.connection.Open();
                 }
 
-                if (this.connection.State == ConnectionState.Open) {
-                    return this.connection;
+                if (this.connection.State != ConnectionState.Open) {
+                    throw new Exception("Connection in unknown state");
                 }
 
-                throw new Exception("Connection in unknown state");
+                return this.connection;
             }
         }
 
-        public IDbTransaction Transaction {
+        private IDbTransaction Transaction {
             get {
                 if (this.isDisposed) {
                     throw new ObjectDisposedException("Session");
@@ -73,19 +74,7 @@
                 return this.transaction;
             }
         }
-
-        public void Complete() {
-            if (this.isComplete) {
-                throw new InvalidOperationException("Transaction is already complete");
-            }
-
-            if (this.transaction != null && this.shouldCommitAndDisposeTransaction) {
-                this.transaction.Commit();
-            }
-
-            this.isComplete = true;
-        }
-
+        
         public void Dispose() {
             if (this.isDisposed) {
                 return;
@@ -106,80 +95,64 @@
             this.isDisposed = true;
         }
 
-        public T Get<T>(int id, bool? asTracked = null) {
-            return this.config.Engine.Get<T>(this.Connection, id, asTracked);
+        public void Complete() {
+            if (this.isComplete) {
+                throw new InvalidOperationException("Transaction is already complete");
+            }
+
+            if (this.transaction != null && this.shouldCommitAndDisposeTransaction) {
+                this.transaction.Commit();
+            }
+
+            this.isComplete = true;
         }
 
-        public T Get<T>(Guid id, bool? asTracked = null) {
-            return this.config.Engine.Get<T>(this.Connection, id, asTracked);
+        public T Get<T, TPrimaryKey>(TPrimaryKey id) {
+            return this.engine.Query<T, TPrimaryKey>(this.Transaction, new[] { id }).SingleOrDefault();
         }
 
-        public IEnumerable<T> Get<T>(IEnumerable<int> ids, bool? asTracked = null) {
-            return this.config.Engine.Get<T>(this.Connection, ids, asTracked);
+        public T GetTracked<T, TPrimaryKey>(TPrimaryKey id) {
+            return this.engine.QueryTracked<T, TPrimaryKey>(this.Transaction, new[] { id }).SingleOrDefault();
         }
 
-        public IEnumerable<T> Get<T>(IEnumerable<Guid> ids, bool? asTracked = null) {
-            return this.config.Engine.Get<T>(this.Connection, ids, asTracked);
+        public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            return this.engine.Query<T, TPrimaryKey>(this.Transaction, ids);
+        }
+
+        public IEnumerable<T> GetTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            return this.engine.QueryTracked<T, TPrimaryKey>(this.Transaction, ids);
         }
 
         public ISelectQuery<T> Query<T>() {
-            return new SelectQuery<T>(this.config.Engine, this.Connection);
-        }
-
-        public int Insert<T>(params T[] entities) {
-            return this.config.Engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
+            return new SelectQuery<T>(this.engine, this.Transaction);
         }
 
         public int Insert<T>(IEnumerable<T> entities) {
-            return this.config.Engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
-        }
-
-        public int Update<T>(params T[] entities) {
-            return this.config.Engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+            return this.engine.Execute(this.Transaction, new InsertEntityQuery<T>(entities));
         }
 
         public int Update<T>(IEnumerable<T> entities) {
-            return this.config.Engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+            return this.engine.Execute(this.Transaction, new UpdateEntityQuery<T>(entities));
         }
 
-        public int Delete<T>(params T[] entities) {
-            return this.config.Engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+        public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            return this.engine.Execute(this.Transaction, update, predicates);
         }
 
         public int Delete<T>(IEnumerable<T> entities) {
-            return this.config.Engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+            return this.engine.Execute(this.Transaction, new DeleteEntityQuery<T>(entities));
         }
 
-        public void UpdateAll<T>(Action<T> update) {
-            this.config.Engine.Execute(this.Connection, update, null);
+        public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
+            return this.engine.ExecuteBulkDelete(this.Transaction, predicates);
         }
 
-        public void Update<T>(Action<T> update, Expression<Func<T, bool>> predicate) {
-            this.config.Engine.Execute(this.Connection, update, new[] { predicate });
+        public int UpdateAll<T>(Action<T> update) {
+            return this.engine.Execute(this.Transaction, update, null);
         }
 
-        public void Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
-            this.config.Engine.Execute(this.Connection, update, predicates);
-        }
-
-        public void Update<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates) {
-            this.config.Engine.Execute(this.Connection, update, predicates);
-        }
-
-        public void DeleteAll<T>() {
-            this.config.Engine.ExecuteBulkDelete<T>(this.Connection, null);
-        }
-
-        public void Delete<T>(Expression<Func<T, bool>> predicate) {
-            this.config.Engine.ExecuteBulkDelete(this.Connection, new[] { predicate });
-        }
-
-        public void Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
-            this.config.Engine.ExecuteBulkDelete(this.Connection, predicates);
-        }
-
-        public void Delete<T>(params Expression<Func<T, bool>>[] predicates) {
-            this.config.Engine.ExecuteBulkDelete(this.Connection, predicates);
+        public int DeleteAll<T>() {
+            return this.engine.ExecuteBulkDelete<T>(this.Transaction, null);
         }
     }
 }

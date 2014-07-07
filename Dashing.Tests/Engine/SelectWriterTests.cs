@@ -7,6 +7,7 @@
     using Dashing.Configuration;
     using Dashing.Engine;
     using Dashing.Engine.Dialects;
+    using Dashing.Engine.DML;
     using Dashing.Extensions;
     using Dashing.Tests.TestDomain;
 
@@ -20,9 +21,11 @@
             var dialect = new SqlServerDialect();
             var engine = new SqlEngine(dialect);
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
+            var transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
+            transaction.Setup(m => m.Connection).Returns(connection.Object);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
             var selectWriter = new SelectWriter(dialect, MakeConfig());
-            var sql = selectWriter.GenerateSql(new SelectQuery<User>(engine, connection.Object));
+            var sql = selectWriter.GenerateSql(new SelectQuery<User>(engine, transaction.Object));
             Debug.Write(sql.Sql);
         }
 
@@ -351,7 +354,9 @@
             var engine = new Mock<IEngine>().Object;
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
-            return new SelectQuery<T>(engine, connection.Object);
+            var transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
+            transaction.Setup(m => m.Connection).Returns(connection.Object);
+            return new SelectQuery<T>(engine, transaction.Object);
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {

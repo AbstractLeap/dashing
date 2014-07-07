@@ -99,7 +99,6 @@
     <Compile Include="SchemaGenerationSandbox.cs" />
     <Compile Include="Engine\DDL\DropTableWriterTests.cs" />
     <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />
-    <Compile Include="Engine\EngineBaseTests.cs" />
     <Compile Include="Engine\SelectWriterTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="FetchTest.cs" />

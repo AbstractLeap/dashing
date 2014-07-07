@@ -8,6 +8,7 @@
     using Dashing.Engine;
     using Dashing.Engine.DapperMapperGeneration;
     using Dashing.Engine.Dialects;
+    using Dashing.Engine.DML;
     using Dashing.Tests.TestDomain;
 
     using Moq;
@@ -36,7 +37,7 @@
 
         private static Delegate GenerateSingleMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(config.Engine, new Mock<IDbConnection>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
+            var selectQuery = new SelectQuery<Post>(config.Engine, new Mock<IDbTransaction>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
             var mockCodeManager = GetMockCodeManager();
@@ -47,10 +48,10 @@
 
         private static Mock<IGeneratedCodeManager> GetMockCodeManager() {
             var mockCodeManager = new Mock<IGeneratedCodeManager>();
-            mockCodeManager.Setup(c => c.GetForeignKeyType<Post>()).Returns(typeof(Post));
-            mockCodeManager.Setup(c => c.GetForeignKeyType<Blog>()).Returns(typeof(Blog));
-            mockCodeManager.Setup(c => c.GetForeignKeyType<Comment>()).Returns(typeof(Comment));
-            mockCodeManager.Setup(c => c.GetForeignKeyType<User>()).Returns(typeof(User));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Post))).Returns(typeof(Post));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Blog))).Returns(typeof(Blog));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Comment))).Returns(typeof(Comment));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(User))).Returns(typeof(User));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Post)))).Returns(typeof(Post));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Blog)))).Returns(typeof(Blog));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Comment)))).Returns(typeof(Comment));
@@ -81,7 +82,7 @@
 
         private static Delegate GenerateMultipleNoCollectionMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Comment>(config.Engine, new Mock<IDbConnection>().Object).Fetch(c => c.Post.Author) as SelectQuery<Comment>;
+            var selectQuery = new SelectQuery<Comment>(config.Engine, new Mock<IDbTransaction>().Object).Fetch(c => c.Post.Author) as SelectQuery<Comment>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
             var mockCodeManager = GetMockCodeManager();
