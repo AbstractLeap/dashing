@@ -60,7 +60,7 @@
 
             // construct the compiler parameters
             var referencedAssemblyLocations = proxyGeneratorResult.ReferencedAssemblyLocations.Union(GetStandardCodeReferences());
-            this.generatorConfig.OutputAssembly = true;
+            
             var compilerParameters = new CompilerParameters(referencedAssemblyLocations.ToArray()) {
                                                                                                        GenerateInMemory = true,
                                                                                                        IncludeDebugInformation = this.generatorConfig.CompileInDebug,
