@@ -28,16 +28,14 @@
             return new CustomConfig();
         }
 
-        private class CustomConfig : DefaultConfiguration {
-            public CustomConfig()
-                : base(new Mock<IEngine>().Object, string.Empty) {
+        private class CustomConfig : MockConfiguration {
+            public CustomConfig() {
                 this.AddNamespaceOf<Post>();
             }
         }
 
-        private class CustomConfigWithIgnore : DefaultConfiguration {
-            public CustomConfigWithIgnore()
-                : base(new Mock<IEngine>().Object, string.Empty) {
+        private class CustomConfigWithIgnore : MockConfiguration {
+            public CustomConfigWithIgnore() {
                 this.AddNamespaceOf<Post>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }

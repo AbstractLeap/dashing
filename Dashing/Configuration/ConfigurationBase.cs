@@ -16,7 +16,7 @@
     public abstract class ConfigurationBase : IConfiguration {
         private readonly IEngine engine;
 
-        private readonly string connectionString;
+        private readonly ConnectionStringSettings connectionStringSettings;
 
         private readonly IMapper mapper;
 
@@ -27,6 +27,8 @@
         private readonly ISessionFactory sessionFactory;
 
         private readonly ICodeGenerator codeGenerator;
+
+        private readonly DbProviderFactory dbProviderFactory;
 
         private bool engineHasLatestMaps;
 
@@ -63,33 +65,13 @@
 
         public bool GetIsTrackedByDefault { get; set; }
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ConfigurationBase" /> class.
-        /// </summary>
-        /// <param name="engine">
-        ///     The engine.
-        /// </param>
-        /// <param name="connectionString">
-        ///     The connection string.
-        /// </param>
-        /// <param name="mapper">
-        ///     The mapper.
-        /// </param>
-        /// <param name="sessionFactory">
-        ///     The session factory.
-        /// </param>
-        /// <param name="codeGenerator">
-        ///     The code generator
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// </exception>
-        protected ConfigurationBase(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
+        protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
 
-            if (connectionString == null) {
-                throw new ArgumentNullException("connectionString");
+            if (connectionStringSettings == null) {
+                throw new ArgumentNullException("connectionStringSettings");
             }
 
             if (mapper == null) {
@@ -106,22 +88,14 @@
 
             this.engine = engine;
             this.engine.Configuration = this;
-            this.connectionString = connectionString;
+            this.connectionStringSettings = connectionStringSettings;
+            this.dbProviderFactory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
             this.mapper = mapper;
             this.mapperMapForMethodInfo = mapper.GetType().GetMethod("MapFor", new[] { typeof(Type) });
             this.sessionFactory = sessionFactory;
             this.codeGenerator = codeGenerator;
 
             this.mappedTypes = new Dictionary<Type, IMap>();
-        }
-
-        public ConfigurationBase(ConnectionStringSettings connectionString, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator)
-            : this(
-                new EngineBase(new DialectFactory().Create(connectionString), DbProviderFactories.GetFactory(connectionString.ProviderName)),
-                connectionString.ConnectionString,
-                mapper,
-                sessionFactory,
-                codeGenerator) {
         }
 
         public IMap<T> GetMap<T>() {
@@ -150,46 +124,24 @@
         }
 
         public ISession BeginSession() {
-            return this.sessionFactory.Create(this.Engine.Open(this.connectionString), this);
+            var connection = this.dbProviderFactory.CreateConnection();
+            if (connection == null) {
+                throw new InvalidOperationException("Could not create a connection using the supplied DbProviderFactory");
+            }
+
+            connection.ConnectionString = this.connectionStringSettings.ConnectionString;
+
+            return this.sessionFactory.Create(this, connection);
         }
 
-        /// <summary>
-        ///     The begin session.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="ISession" />.
-        /// </returns>
         public ISession BeginSession(IDbConnection connection) {
-            return this.sessionFactory.Create(connection, this);
+            return this.sessionFactory.Create(this, connection, disposeConnection: false);
         }
 
-        /// <summary>
-        ///     The begin session.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="transaction">
-        ///     The transaction.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="ISession" />.
-        /// </returns>
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.sessionFactory.Create(connection, transaction, this);
+            return this.sessionFactory.Create(this, connection, transaction, false);
         }
 
-        /// <summary>
-        ///     The add.
-        /// </summary>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="IConfiguration" />.
-        /// </returns>
         protected IConfiguration Add<T>() {
             var type = typeof(T);
             if (!this.mappedTypes.ContainsKey(type)) {
@@ -202,15 +154,6 @@
             return this;
         }
 
-        /// <summary>
-        ///     The add.
-        /// </summary>
-        /// <param name="types">
-        ///     The types.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="IConfiguration" />.
-        /// </returns>
         protected IConfiguration Add(IEnumerable<Type> types) {
             this.Dirty();
 
@@ -226,16 +169,6 @@
             return this;
         }
 
-        /// <summary>
-        ///     The add namespace of.
-        /// </summary>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="IConfiguration" />.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// </exception>
         protected IConfiguration AddNamespaceOf<T>() {
             var type = typeof(T);
             var ns = type.Namespace;
@@ -247,14 +180,6 @@
             return this.Add(type.Assembly.GetTypes().Where(t => t.Namespace != null && t.Namespace.StartsWith(ns)));
         }
 
-        /// <summary>
-        ///     The setup.
-        /// </summary>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="Map" />.
-        /// </returns>
         protected IMap<T> Setup<T>() {
             this.Dirty();
 

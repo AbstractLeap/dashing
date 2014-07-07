@@ -18,7 +18,7 @@
         [Fact]
         public void SimpleQueryBuilds() {
             var dialect = new SqlServerDialect();
-            var engine = new EngineBase(dialect, new Mock<DbProviderFactory>().Object);
+            var engine = new SqlEngine(dialect);
             var connection = new Mock<IDbConnection>(MockBehavior.Strict);
             connection.Setup(c => c.State).Returns(ConnectionState.Open);
             var selectWriter = new SelectWriter(dialect, MakeConfig());
@@ -362,16 +362,14 @@
             return new CustomConfig();
         }
 
-        private class CustomConfig : DefaultConfiguration {
-            public CustomConfig()
-                : base(new Mock<IEngine>().Object, string.Empty) {
+        private class CustomConfig : MockConfiguration {
+            public CustomConfig() {
                 this.AddNamespaceOf<Post>();
             }
         }
 
-        private class CustomConfigWithIgnore : DefaultConfiguration {
-            public CustomConfigWithIgnore()
-                : base(new Mock<IEngine>().Object, string.Empty) {
+        private class CustomConfigWithIgnore : MockConfiguration {
+            public CustomConfigWithIgnore() {
                 this.AddNamespaceOf<Post>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }
