@@ -6,6 +6,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
 
     using Dapper;
 
@@ -86,31 +87,50 @@
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private Delegate GenerateCollectionFactory<T>(Type[] mapperParams, bool isTracked) {
             var tt = typeof(T);
+
+            // Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>>
             var resultParam = Expression.Parameter(typeof(SelectWriterResult));
             var queryParam = Expression.Parameter(typeof(SelectQuery<>).MakeGenericType(tt));
-            var connectionParam = Expression.Parameter(typeof(IDbConnection));
+            var transactionParam = Expression.Parameter(typeof(IDbTransaction));
+
+            // huh?
             var returnType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
             var funcFactoryParam = Expression.Parameter(typeof(Func<,>).MakeGenericType(typeof(IDictionary<,>).MakeGenericType(typeof(object), returnType), typeof(Delegate)));
+            
+            // Dictionary<object,T> dict = new Dictionary<object, T>();
             var dictionaryVariable = Expression.Variable(typeof(Dictionary<,>).MakeGenericType(typeof(object), returnType));
             var dictionaryInit = Expression.New(typeof(Dictionary<,>).MakeGenericType(typeof(object), returnType));
             var dictionaryExpr = Expression.Assign(dictionaryVariable, dictionaryInit);
+
+            // Func<A,...,Z> mapper = (Func<A,...,Z>)funcFactory(dict)
             var mapperFuncType = typeof(Func<>).Assembly.DefinedTypes.First(m => m.Name == "Func`" + mapperParams.Count());
             var mapperType = mapperFuncType.MakeGenericType(mapperParams);
             var mapperVariable = Expression.Variable(mapperType, "mapper");
             var mapperExpr = Expression.Assign(mapperVariable, Expression.Convert(Expression.Invoke(funcFactoryParam, new Expression[] { dictionaryVariable }), mapperType));
+            
+            // var queryResult = SqlMapper.Query<...>(transaction.Connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
             var queryResultVariable = Expression.Variable(typeof(IEnumerable<>).MakeGenericType(tt), "queryResult");
+            var sqlMapperQuery = typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.GetGenericArguments().Count() == mapperParams.Count()).MakeGenericMethod(mapperParams);
             var queryExpr = Expression.Assign(
                 queryResultVariable,
                 Expression.Call(
-                    typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.GetGenericArguments().Count() == mapperParams.Count()).MakeGenericMethod(mapperParams),
+                    sqlMapperQuery,
                     new Expression[] {
-                        connectionParam, Expression.Property(resultParam, "Sql"), mapperVariable, Expression.Property(resultParam, "Parameters"),
-                        Expression.Convert(Expression.Constant(null), typeof(IDbTransaction)), Expression.Constant(true),
+                        Expression.Property(transactionParam, "Connection"), 
+                        Expression.Property(resultParam, "Sql"), 
+                        mapperVariable, 
+                        Expression.Property(resultParam, "Parameters"),
+                        transactionParam,
+                        Expression.Constant(true),
                         Expression.Property(Expression.Property(resultParam, "FetchTree"), "SplitOn"),
                         Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(int))),
                         Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(CommandType)))
                     }));
+
+            // return dict.Values;
             var returnDictValuesExpr = Expression.Property(dictionaryVariable, "Values");
+
+            // funcFactory => ((results, sql, transaction) => /* above */ )
             var lambdaExpression =
                 Expression.Lambda(
                     Expression.Lambda(
@@ -119,7 +139,7 @@
                             new Expression[] { dictionaryExpr, mapperExpr, queryExpr, returnDictValuesExpr }),
                         resultParam,
                         queryParam,
-                        connectionParam),
+                        transactionParam),
                     funcFactoryParam);
             return lambdaExpression.Compile();
         }
