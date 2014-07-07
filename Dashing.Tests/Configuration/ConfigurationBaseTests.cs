@@ -62,7 +62,6 @@
         public void BeginSessionCreatesConnectionAndDelegatesToSessionFactory() {
             // assemble
             var mockEngine = MakeMockEngine();
-            mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockProvider = MakeMockDbProviderFactory();
             var connection = new Mock<DbConnection>();
@@ -90,8 +89,7 @@
             var session = new Mock<ISession>();
 
             var mockEngine = MakeMockEngine();
-            mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
-
+            
             var mockSessionFactory = MakeMockSf();
             mockSessionFactory.Setup<ISession>(m => m.Create(mockEngine.Object, connection.Object, null, false, false)).Returns(session.Object).Verifiable();
 
@@ -113,7 +111,6 @@
             var session = new Mock<ISession>();
 
             var mockEngine = MakeMockEngine();
-            mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockSessionFactory = MakeMockSf();
             mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, transaction.Object, false, false)).Returns(session.Object).Verifiable();

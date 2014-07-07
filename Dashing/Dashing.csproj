@@ -134,6 +134,7 @@
     <Compile Include="SelectQuery.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="NeedToDash.cs" />
+    <Compile Include="SessionExtensions.cs" />
     <Compile Include="UpdateEntityQuery.cs" />
     <Compile Include="UpdateQuery.cs" />
   </ItemGroup>

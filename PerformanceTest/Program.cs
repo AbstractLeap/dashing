@@ -9,6 +9,7 @@
 
     using Dapper;
 
+    using Dashing;
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
 
@@ -24,7 +25,6 @@
 
     using Simple.Data;
 
-    using ISession = Dashing.ISession;
     using QueryableExtensions = System.Data.Entity.QueryableExtensions;
 
     internal static class Program {
@@ -83,7 +83,7 @@
 
         private static IDbConnection ormliteConn;
 
-        private static ISession session;
+        private static Dashing.ISession session;
 
         private static IStatelessSession nhStatelessSession;
 
@@ -208,7 +208,7 @@ select * from Comments where PostId = @id";
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var post = session.Get<Post>(i, true);
+                        var post = session.GetTracked<Post>(i);
                         post.Title = Providers.Dashing + "_" + i + r.Next(100000);
                         session.Update(post);
                         var thatPost = session.Get<Post>(i);

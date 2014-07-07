@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
     using System.Linq.Expressions;
 
     using Dashing.Engine;
@@ -74,18 +75,6 @@
             }
         }
 
-        public void Complete() {
-            if (this.isComplete) {
-                throw new InvalidOperationException("Transaction is already complete");
-            }
-
-            if (this.transaction != null && this.shouldCommitAndDisposeTransaction) {
-                this.transaction.Commit();
-            }
-
-            this.isComplete = true;
-        }
-
         public void Dispose() {
             if (this.isDisposed) {
                 return;
@@ -106,80 +95,64 @@
             this.isDisposed = true;
         }
 
-        public T Get<T>(int id, bool? asTracked = null) {
-            return this.engine.Get<T>(this.Connection, id, asTracked);
+        public void Complete() {
+            if (this.isComplete) {
+                throw new InvalidOperationException("Transaction is already complete");
+            }
+
+            if (this.transaction != null && this.shouldCommitAndDisposeTransaction) {
+                this.transaction.Commit();
+            }
+
+            this.isComplete = true;
         }
 
-        public T Get<T>(Guid id, bool? asTracked = null) {
-            return this.engine.Get<T>(this.Connection, id, asTracked);
+        public T Get<T, TPrimaryKey>(TPrimaryKey id) {
+            return this.engine.Query<T, TPrimaryKey>(this.Connection, new[] { id }).SingleOrDefault();
         }
 
-        public IEnumerable<T> Get<T>(IEnumerable<int> ids, bool? asTracked = null) {
-            return this.engine.Get<T>(this.Connection, ids, asTracked);
+        public T GetTracked<T, TPrimaryKey>(TPrimaryKey id) {
+            return this.engine.QueryTracked<T, TPrimaryKey>(this.Connection, new[] { id }).SingleOrDefault();
         }
 
-        public IEnumerable<T> Get<T>(IEnumerable<Guid> ids, bool? asTracked = null) {
-            return this.engine.Get<T>(this.Connection, ids, asTracked);
+        public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            return this.engine.Query<T, TPrimaryKey>(this.Connection, ids);
+        }
+
+        public IEnumerable<T> GetTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            return this.engine.QueryTracked<T, TPrimaryKey>(this.Connection, ids);
         }
 
         public ISelectQuery<T> Query<T>() {
             return new SelectQuery<T>(this.engine, this.Connection);
         }
 
-        public int Insert<T>(params T[] entities) {
-            return this.engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
-        }
-
         public int Insert<T>(IEnumerable<T> entities) {
             return this.engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
-        }
-
-        public int Update<T>(params T[] entities) {
-            return this.engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
         }
 
         public int Update<T>(IEnumerable<T> entities) {
             return this.engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
         }
 
-        public int Delete<T>(params T[] entities) {
-            return this.engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+        public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            return this.engine.Execute(this.Connection, update, predicates);
         }
 
         public int Delete<T>(IEnumerable<T> entities) {
             return this.engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
         }
 
-        public void UpdateAll<T>(Action<T> update) {
-            this.engine.Execute(this.Connection, update, null);
+        public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
+            return this.engine.ExecuteBulkDelete(this.Connection, predicates);
         }
 
-        public void Update<T>(Action<T> update, Expression<Func<T, bool>> predicate) {
-            this.engine.Execute(this.Connection, update, new[] { predicate });
+        public int UpdateAll<T>(Action<T> update) {
+            return this.engine.Execute(this.Connection, update, null);
         }
 
-        public void Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
-            this.engine.Execute(this.Connection, update, predicates);
-        }
-
-        public void Update<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates) {
-            this.engine.Execute(this.Connection, update, predicates);
-        }
-
-        public void DeleteAll<T>() {
-            this.engine.ExecuteBulkDelete<T>(this.Connection, null);
-        }
-
-        public void Delete<T>(Expression<Func<T, bool>> predicate) {
-            this.engine.ExecuteBulkDelete(this.Connection, new[] { predicate });
-        }
-
-        public void Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
-            this.engine.ExecuteBulkDelete(this.Connection, predicates);
-        }
-
-        public void Delete<T>(params Expression<Func<T, bool>>[] predicates) {
-            this.engine.ExecuteBulkDelete(this.Connection, predicates);
+        public int DeleteAll<T>() {
+            return this.engine.ExecuteBulkDelete<T>(this.Connection, null);
         }
     }
 }

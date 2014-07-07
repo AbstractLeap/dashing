@@ -11,8 +11,6 @@
     using Dashing.Engine;
 
     public abstract class ConfigurationBase : IConfiguration {
-        private readonly IEngine engine;
-
         private readonly ConnectionStringSettings connectionStringSettings;
 
         private readonly IMapper mapper;
@@ -26,8 +24,6 @@
         private readonly ICodeGenerator codeGenerator;
 
         private readonly DbProviderFactory dbProviderFactory;
-
-        private bool engineHasLatestMaps;
 
         private IGeneratedCodeManager codeManager;
 
@@ -43,16 +39,7 @@
             }
         }
 
-        public IEngine Engine {
-            get {
-                if (!this.engineHasLatestMaps) {
-                    this.engine.UseMaps(this.mappedTypes);
-                    this.engineHasLatestMaps = true;
-                }
-
-                return this.engine;
-            }
-        }
+        public IEngine Engine { get; set; }
 
         public IGeneratedCodeManager CodeManager {
             get {
@@ -87,8 +74,8 @@
                 throw new ArgumentNullException("codeGenerator");
             }
 
-            this.engine = engine;
-            this.engine.Configuration = this;
+            this.Engine = engine;
+            this.Engine.Configuration = this;
             this.connectionStringSettings = connectionStringSettings;
             this.dbProviderFactory = dbProviderFactory;
             this.mapper = mapper;
@@ -120,7 +107,6 @@
         }
 
         private void Dirty() {
-            this.engineHasLatestMaps = false;
             this.codeManager = null;
         }
 

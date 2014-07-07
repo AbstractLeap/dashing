@@ -9,7 +9,9 @@ namespace Dashing.Engine {
     public interface IEngine {
         IConfiguration Configuration { get; set; }
 
-        void UseMaps(IDictionary<Type, IMap> maps);
+        IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IEnumerable<TPrimaryKey> ids);
+
+        IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbConnection connection, IEnumerable<TPrimaryKey> ids);
 
         IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query);
 
@@ -19,21 +21,8 @@ namespace Dashing.Engine {
 
         int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query);
 
-        T Get<T>(IDbConnection connection, int id, bool? asTracked);
+        int Execute<T>(IDbConnection dbConnection, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 
-        T Get<T>(IDbConnection connection, Guid id, bool? asTracked);
-
-        IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<int> ids, bool? asTracked);
-
-        IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<Guid> ids, bool? asTracked);
-
-        void Execute<T>(
-            IDbConnection dbConnection, 
-            Action<T> update, 
-            IEnumerable<Expression<Func<T, bool>>> predicates);
-
-        void ExecuteBulkDelete<T>(
-            IDbConnection connection, 
-            IEnumerable<Expression<Func<T, bool>>> predicates);
+        int ExecuteBulkDelete<T>(IDbConnection connection, IEnumerable<Expression<Func<T, bool>>> predicates);
     }
 }
