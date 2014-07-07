@@ -46,7 +46,7 @@
             return new TestEngine(dialect ?? new SqlDialectBase());
         }
 
-        private class TestEngine : EngineBase {
+        private class TestEngine : SqlEngine {
             public override IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query) {
                 throw new NotImplementedException();
             }
@@ -64,7 +64,7 @@
             }
 
             public TestEngine(ISqlDialect dialect)
-                : base(dialect, new Mock<DbProviderFactory>().Object) {
+                : base(dialect) {
                 this.Dialect = dialect;
             }
 

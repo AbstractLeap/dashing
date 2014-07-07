@@ -6,9 +6,6 @@
     using Dashing.CodeGeneration;
     using Dashing.Engine;
 
-    /// <summary>
-    ///     The Configuration interface.
-    /// </summary>
     public interface IConfiguration {
         /// <summary>
         ///     Gets the maps.
@@ -36,37 +33,10 @@
         /// <returns></returns>
         bool HasMap(Type type);
 
-        /// <summary>
-        ///     The begin session.
-        /// </summary>
-        /// <returns>
-        ///     The <see cref="ISession" />.
-        /// </returns>
         ISession BeginSession();
 
-        /// <summary>
-        ///     The begin session.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="ISession" />.
-        /// </returns>
         ISession BeginSession(IDbConnection connection);
 
-        /// <summary>
-        ///     The begin session.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="transaction">
-        ///     The transaction.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="ISession" />.
-        /// </returns>
         ISession BeginSession(IDbConnection connection, IDbTransaction transaction);
 
         /// <summary>

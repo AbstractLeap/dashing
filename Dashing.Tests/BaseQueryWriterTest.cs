@@ -25,7 +25,7 @@
 
         protected ISession GetDashing() {
             // Dapper.Fakes.ShimSqlMapper.ExecuteIDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType = (connection, SqlWriter, parameters, transaction, timeout, type) => 1;
-            var session = new Session(this.Connection.Object, this.config.Object, this.Transaction.Object);
+            var session = new Session(this.config.Object, this.Connection.Object, this.Transaction.Object);
             return session;
         }
     }

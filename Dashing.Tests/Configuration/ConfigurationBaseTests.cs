@@ -1,7 +1,9 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
+    using System.Data.Common;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
@@ -15,7 +17,7 @@
     using Xunit;
 
     public class ConfigurationBaseTests {
-        private const string DummyConnectionString = "Host=dummy.local";
+        private static readonly ConnectionStringSettings DummyConnectionString = new ConnectionStringSettings { ConnectionString = "Data Source=dummy.local", ProviderName = "System.Data.SqlClient" };
 
         private const string ExampleTableName = "foo";
 
@@ -33,38 +35,44 @@
 
         [Fact]
         public void ConstructorThrowsOnNullEngine() {
-            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(null, DummyConnectionString, MakeMockMapper().Object, MakeMockSf().Object));
+            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(null, DummyConnectionString, MakeMockDbProviderFactory().Object, MakeMockMapper().Object, MakeMockSf().Object));
         }
 
         [Fact]
         public void ConstructorThrowsOnNullConnectionString() {
-            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, null, MakeMockMapper().Object, MakeMockSf().Object));
+            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, null, MakeMockDbProviderFactory().Object, MakeMockMapper().Object, MakeMockSf().Object));
+        }
+
+        [Fact]
+        public void ConstructorThrowsOnNullDbProviderFactory() {
+            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, DummyConnectionString, null, MakeMockMapper().Object, MakeMockSf().Object));
         }
 
         [Fact]
         public void ConstructorThrowsOnNullMapper() {
-            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, DummyConnectionString, null, MakeMockSf().Object));
+            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, DummyConnectionString, MakeMockDbProviderFactory().Object, null, MakeMockSf().Object));
         }
 
         [Fact]
         public void ConstructorThrowsOnNullSessionFactory() {
-            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, DummyConnectionString, MakeMockMapper().Object, null));
+            Assert.Throws<ArgumentNullException>(() => new CustomConfiguration(MakeMockEngine().Object, DummyConnectionString, MakeMockDbProviderFactory().Object, MakeMockMapper().Object, null));
         }
 
         [Fact]
         public void BeginSessionCreatesConnectionAndDelegatesToSessionFactory() {
             // assemble
-            var connection = new Mock<IDbConnection>();
-            var session = new Mock<ISession>();
-
             var mockEngine = MakeMockEngine();
-            mockEngine.Setup(m => m.Open(DummyConnectionString)).Returns(connection.Object).Verifiable();
             mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
-            var mockSessionFactory = MakeMockSf();
+            var mockProvider = MakeMockDbProviderFactory();
+            var connection = new Mock<DbConnection>();
+            mockProvider.Setup(m => m.CreateConnection()).Returns(connection.Object);
 
-            var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
-            mockSessionFactory.Setup(m => m.Create(connection.Object, target)).Returns(session.Object).Verifiable();
+            var mockSessionFactory = MakeMockSf();
+            var session = new Mock<ISession>();
+            mockSessionFactory.Setup(m => m.Create(It.IsAny<IConfiguration>(), connection.Object, null, true, false)).Returns(session.Object).Verifiable();
+
+            var target = new CustomConfiguration(mockEngine.Object, mockProvider.Object, MakeMockMapper().Object, mockSessionFactory.Object);
 
             // act
             var actual = target.BeginSession();
@@ -85,9 +93,9 @@
             mockEngine.Setup(m => m.UseMaps(It.IsAny<Dictionary<Type, IMap>>()));
 
             var mockSessionFactory = MakeMockSf();
+            mockSessionFactory.Setup<ISession>(m => m.Create(It.IsAny<IConfiguration>(), connection.Object, null, false, false)).Returns(session.Object).Verifiable();
 
-            var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
-            mockSessionFactory.Setup(m => m.Create(connection.Object, target)).Returns(session.Object).Verifiable();
+            var target = new CustomConfiguration(mockEngine.Object, MakeMockDbProviderFactory().Object, MakeMockMapper().Object, mockSessionFactory.Object);
 
             // act
             var actual = target.BeginSession(connection.Object);
@@ -109,8 +117,8 @@
 
             var mockSessionFactory = MakeMockSf();
 
-            var target = new CustomConfiguration(mockEngine.Object, MakeMockMapper().Object, mockSessionFactory.Object);
-            mockSessionFactory.Setup(m => m.Create(connection.Object, transaction.Object, target)).Returns(session.Object).Verifiable();
+            var target = new CustomConfiguration(mockEngine.Object, MakeMockDbProviderFactory().Object, MakeMockMapper().Object, mockSessionFactory.Object);
+            mockSessionFactory.Setup(m => m.Create(target, connection.Object, transaction.Object, false, false)).Returns(session.Object).Verifiable();
 
             // act
             var actual = target.BeginSession(connection.Object, transaction.Object);
@@ -185,6 +193,10 @@
             return engine;
         }
 
+        private static Mock<DbProviderFactory> MakeMockDbProviderFactory() {
+            return new Mock<DbProviderFactory>();
+        }
+        
         private static Mock<IMapper> SetupAllMaps() {
             var mockMapper = SetupPostAndUserMaps();
             mockMapper.Setup(m => m.MapFor(typeof(Blog))).Returns(new Map<Blog>()).Verifiable();
@@ -224,18 +236,18 @@
         }
 
         private class CustomConfiguration : ConfigurationBase {
-            public CustomConfiguration(IEngine engine, string connectionString, IMapper mapper, ISessionFactory sessionFactory)
-                : base(engine, connectionString, mapper, sessionFactory, SetupCodeGenerator().Object) {
+            public CustomConfiguration(IEngine engine, ConnectionStringSettings connectionString, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory)
+                : base(engine, connectionString, dbProviderFactory, mapper, sessionFactory, SetupCodeGenerator().Object) {
             }
 
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
-            public CustomConfiguration(IEngine engine, IMapper mapper, ISessionFactory sessionFactory)
-                : this(engine, DummyConnectionString, mapper, sessionFactory) {
+            public CustomConfiguration(IEngine engine, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory)
+                : this(engine, DummyConnectionString, dbProviderFactory, mapper, sessionFactory) {
             }
 
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IMapper mapper)
-                : base(MakeMockEngine().Object, DummyConnectionString, mapper, MakeMockSf().Object, SetupCodeGenerator().Object) {
+                : base(MakeMockEngine().Object, DummyConnectionString, MakeMockDbProviderFactory().Object, mapper, MakeMockSf().Object, SetupCodeGenerator().Object) {
             }
         }
 

@@ -3,16 +3,9 @@ namespace Dashing.Configuration {
     using System.Collections.Generic;
     using System.Configuration;
 
-    using Dashing.Engine;
-
     public class MutableConfiguration : DefaultConfiguration {
-        public MutableConfiguration(IEngine engine, string connectionString)
-            : base(engine, connectionString) {
-        }
-
-        public MutableConfiguration(ConnectionStringSettings connectionString)
-            : base(connectionString) {
-        }
+        public MutableConfiguration(ConnectionStringSettings connectionStringSettings)
+            : base(connectionStringSettings) { }
 
         public new IConfiguration Add<T>() {
             return base.Add<T>();
