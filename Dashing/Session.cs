@@ -44,37 +44,27 @@
                     throw new ObjectDisposedException("Session");
                 }
 
-                if (this.connection.State == ConnectionState.Closed) {
-                    this.connection.Open();
-                }
-
-                if (this.connection.State == ConnectionState.Open) {
-                    return this.connection;
-                }
-
-                throw new Exception("Connection in unknown state");
-            }
-        }
-
-        public IDbTransaction Transaction {
-            get {
-                if (this.isDisposed) {
-                    throw new ObjectDisposedException("Session");
-                }
-
                 if (this.isComplete) {
                     throw new InvalidOperationException("Transaction was marked as completed, no further operations are permitted");
                 }
 
+                if (this.connection.State == ConnectionState.Closed) {
+                    this.connection.Open();
+                }
+
+                if (this.connection.State != ConnectionState.Open) {
+                    throw new Exception("Connection in unknown state");
+                }
+
                 if (this.transaction == null) {
-                    this.transaction = this.Connection.BeginTransaction();
+                    this.transaction = this.connection.BeginTransaction();
                     this.shouldCommitAndDisposeTransaction = true;
                 }
 
-                return this.transaction;
+                return this.connection;
             }
         }
-
+        
         public void Dispose() {
             if (this.isDisposed) {
                 return;

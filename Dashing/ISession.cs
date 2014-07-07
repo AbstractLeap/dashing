@@ -6,9 +6,7 @@ namespace Dashing {
 
     public interface ISession : IDisposable {
         IDbConnection Connection { get; }
-
-        IDbTransaction Transaction { get; }
-
+        
         void Complete();
 
         T Get<T, TPrimaryKey>(TPrimaryKey id);

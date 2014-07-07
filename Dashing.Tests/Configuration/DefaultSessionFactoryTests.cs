@@ -33,7 +33,6 @@
 
             Assert.NotNull(session);
             Assert.IsType<Session>(session);
-            Assert.Same(this.mockTransaction.Object, session.Transaction);
         }
 
         private DefaultSessionFactory MakeTarget() {
