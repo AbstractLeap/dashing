@@ -2,13 +2,14 @@
     using System.Data;
 
     using Dashing.Configuration;
+    using Dashing.Engine;
 
     using Moq;
 
     using Xunit;
 
     public class DefaultSessionFactoryTests {
-        private readonly Mock<IConfiguration> mockConfig = new Mock<IConfiguration>();
+        private readonly Mock<IEngine> mockEngine = new Mock<IEngine>();
 
         private readonly Mock<IDbConnection> mockConnection = new Mock<IDbConnection>();
 
@@ -18,7 +19,7 @@
         public void CreateReturnsASession() {
             var target = this.MakeTarget();
 
-            var session = target.Create(this.mockConfig.Object, this.mockConnection.Object);
+            var session = target.Create(this.mockEngine.Object, this.mockConnection.Object);
 
             Assert.NotNull(session);
             Assert.IsType<Session>(session);
@@ -28,7 +29,7 @@
         public void CreateWithTransactionReturnsASession() {
             var target = this.MakeTarget();
 
-            var session = target.Create(this.mockConfig.Object, this.mockConnection.Object, this.mockTransaction.Object);
+            var session = target.Create(this.mockEngine.Object, this.mockConnection.Object, this.mockTransaction.Object);
 
             Assert.NotNull(session);
             Assert.IsType<Session>(session);

@@ -10,9 +10,6 @@
     using Dashing.CodeGeneration;
     using Dashing.Engine;
 
-    /// <summary>
-    ///     The configuration base.
-    /// </summary>
     public abstract class ConfigurationBase : IConfiguration {
         private readonly IEngine engine;
 
@@ -135,15 +132,15 @@
 
             connection.ConnectionString = this.connectionStringSettings.ConnectionString;
 
-            return this.sessionFactory.Create(this, connection);
+            return this.sessionFactory.Create(this.Engine, connection);
         }
 
         public ISession BeginSession(IDbConnection connection) {
-            return this.sessionFactory.Create(this, connection, disposeConnection: false);
+            return this.sessionFactory.Create(this.Engine, connection, disposeConnection: false);
         }
 
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.sessionFactory.Create(this, connection, transaction, false);
+            return this.sessionFactory.Create(this.Engine, connection, transaction, false);
         }
 
         protected IConfiguration Add<T>() {

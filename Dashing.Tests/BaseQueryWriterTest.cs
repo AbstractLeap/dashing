@@ -2,7 +2,7 @@
     using System.Data;
 
     using Dashing.CodeGeneration;
-    using Dashing.Configuration;
+    using Dashing.Engine;
 
     using Moq;
 
@@ -13,20 +13,18 @@
 
         protected readonly Mock<IGeneratedCodeManager> CodeManager;
 
-        private readonly Mock<IConfiguration> config;
+        protected readonly Mock<IEngine> MockEngine;
 
         public BaseQueryWriterTest() {
             this.Connection = new Mock<IDbConnection>(MockBehavior.Strict);
             this.Connection.Setup(c => c.State).Returns(ConnectionState.Open);
             this.Transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
             this.CodeManager = new Mock<IGeneratedCodeManager>();
-            this.config = new Mock<IConfiguration>();
+            this.MockEngine = new Mock<IEngine>();
         }
 
         protected ISession GetDashing() {
-            // Dapper.Fakes.ShimSqlMapper.ExecuteIDbConnectionStringObjectIDbTransactionNullableOfInt32NullableOfCommandType = (connection, SqlWriter, parameters, transaction, timeout, type) => 1;
-            var session = new Session(this.config.Object, this.Connection.Object, this.Transaction.Object);
-            return session;
+            return new Session(this.MockEngine.Object, this.Connection.Object, this.Transaction.Object);
         }
     }
 }

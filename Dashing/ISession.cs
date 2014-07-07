@@ -4,9 +4,6 @@ namespace Dashing {
     using System.Data;
     using System.Linq.Expressions;
 
-    /// <summary>
-    ///     The Session interface.
-    /// </summary>
     public interface ISession : IDisposable {
         IDbConnection Connection { get; }
 
