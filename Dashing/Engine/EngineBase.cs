@@ -9,9 +9,6 @@ namespace Dashing.Engine {
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
 
-    /// <summary>
-    ///     The engine base.
-    /// </summary>
     public class EngineBase : IEngine {
         public IConfiguration Configuration { get; set; }
 
@@ -37,15 +34,6 @@ namespace Dashing.Engine {
             this.DbProviderFactory = dbProviderFactory;
         }
 
-        /// <summary>
-        ///     The open.
-        /// </summary>
-        /// <param name="connectionString">
-        ///     The connection string.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="IDbConnection" />.
-        /// </returns>
         public IDbConnection Open(string connectionString) {
             var connection = this.DbProviderFactory.CreateConnection();
             connection.ConnectionString = connectionString;
@@ -53,12 +41,6 @@ namespace Dashing.Engine {
             return connection;
         }
 
-        /// <summary>
-        ///     The use maps.
-        /// </summary>
-        /// <param name="maps">
-        ///     The maps.
-        /// </param>
         public void UseMaps(IDictionary<Type, IMap> maps) {
             this.Maps = maps;
             this.SelectWriter = new SelectWriter(this.Dialect, this.Configuration);
@@ -67,20 +49,6 @@ namespace Dashing.Engine {
             this.InsertWriter = new InsertWriter(this.Dialect, this.Configuration);
         }
 
-        /// <summary>
-        ///     The query.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="query">
-        ///     The query.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="IEnumerable" />.
-        /// </returns>
         public virtual IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query) {
             if (this.SelectWriter == null) {
                 throw new Exception("The SelectWriter has not been initialised");
@@ -90,20 +58,6 @@ namespace Dashing.Engine {
             return this.Configuration.CodeManager.Query(sqlQuery, query, connection);
         }
 
-        /// <summary>
-        ///     The execute.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="query">
-        ///     The query.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="int" />.
-        /// </returns>
         public virtual int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query) {
             if (this.InsertWriter == null) {
                 throw new Exception("The InsertWriter has not been initialised");
@@ -124,20 +78,6 @@ namespace Dashing.Engine {
             return query.Entities.Count;
         }
 
-        /// <summary>
-        ///     The execute.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="query">
-        ///     The query.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="int" />.
-        /// </returns>
         public virtual int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query) {
             if (this.UpdateWriter == null) {
                 throw new Exception("The UpdateWriter has not been initialised");
@@ -151,20 +91,6 @@ namespace Dashing.Engine {
             return 0;
         }
 
-        /// <summary>
-        ///     The execute.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="query">
-        ///     The query.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="int" />.
-        /// </returns>
         public virtual int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query) {
             if (this.DeleteWriter == null) {
                 throw new Exception("The DeleteWriter has not been initialised");
