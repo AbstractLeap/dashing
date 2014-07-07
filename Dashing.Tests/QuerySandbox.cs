@@ -3,7 +3,11 @@
     using System.Configuration;
     using System.Linq;
 
+    using Dapper;
+
     using Dashing.Configuration;
+    using Dashing.Engine.DDL;
+    using Dashing.Engine.Dialects;
     using Dashing.Tests.TestDomain;
 
     using Xunit;
@@ -139,6 +143,34 @@
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {
                 var posts = session.Query<Post>().Fetch(p => p.Comments).ToList();
+            }
+        }
+
+        [Fact]
+        public void TestTransactioning() {
+            var dialect = new SqlServerDialect();
+            var dropTableWriter = new DropTableWriter(dialect);
+            var createTableWriter = new CreateTableWriter(dialect);
+            var config = NeedToDash.Configure(SchemaGenerationSandbox.PolyTestConnectionString).AddNamespaceOf<Post>();
+
+            using (var session = config.BeginSession()) {
+                foreach (var map in config.Maps) {
+                    session.Connection.Execute(dropTableWriter.DropTableIfExists(map));
+                    session.Connection.Execute(createTableWriter.CreateTable(map));
+                }
+
+                session.Insert(new User { Username = "james", EmailAddress = "james@polylytics.com" });
+                session.Complete();
+            }
+
+            using (var session = config.BeginSession()) {
+                Assert.NotNull(session.Query<User>().SingleOrDefault(u => u.Username == "james"));
+                session.Delete<User>(u => u.Username == "james");
+                Assert.Null(session.Query<User>().SingleOrDefault(u => u.Username == "james"));
+            }
+
+            using (var session = config.BeginSession()) {
+                Assert.NotNull(session.Query<User>().SingleOrDefault(u => u.Username == "james"));
             }
         }
 

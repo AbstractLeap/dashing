@@ -67,14 +67,14 @@
         }
 
         private Post GetPostFKWithAuthorId(int authorId) {
-            var postFkType = this.codeManager.GetForeignKeyType<Post>();
+            var postFkType = this.codeManager.GetForeignKeyType(typeof(Post));
             var postFk = this.codeManager.CreateForeignKeyInstance<Post>();
             postFkType.GetProperty("AuthorId").SetValue(postFk, authorId);
             return postFk;
         }
 
         private Post GetPostTrackingWithAuthorId(int authorId) {
-            var postTrackingType = this.codeManager.GetTrackingType<Post>();
+            var postTrackingType = this.codeManager.GetTrackingType(typeof(Post));
             var postTracking = this.codeManager.CreateTrackingInstance<Post>();
             postTrackingType.GetProperty("AuthorId").SetValue(postTracking, authorId);
             return postTracking;

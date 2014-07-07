@@ -9,20 +9,20 @@ namespace Dashing.Engine {
     public interface IEngine {
         IConfiguration Configuration { get; set; }
 
-        IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IEnumerable<TPrimaryKey> ids);
+        IEnumerable<T> Query<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
-        IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbConnection connection, IEnumerable<TPrimaryKey> ids);
+        IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
-        IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query);
+        IEnumerable<T> Query<T>(IDbTransaction transaction, SelectQuery<T> query);
 
-        int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query);
+        int Execute<T>(IDbTransaction transaction, InsertEntityQuery<T> query);
 
-        int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query);
+        int Execute<T>(IDbTransaction transaction, UpdateEntityQuery<T> query);
 
-        int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query);
+        int Execute<T>(IDbTransaction transaction, DeleteEntityQuery<T> query);
 
-        int Execute<T>(IDbConnection dbConnection, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
+        int Execute<T>(IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 
-        int ExecuteBulkDelete<T>(IDbConnection connection, IEnumerable<Expression<Func<T, bool>>> predicates);
+        int ExecuteBulkDelete<T>(IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates);
     }
 }

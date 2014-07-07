@@ -85,10 +85,6 @@
 
                 var results = provider.CompileAssemblyFromSource(compilerParameters, source);
 
-                if (results.Errors.HasErrors) {
-                    throw new Exception(results.Errors[0].ErrorText);
-                }
-
                 timer.Stop();
                 this.ElapsedMilliseconds = timer.ElapsedMilliseconds;
 
@@ -96,6 +92,10 @@
                 if (this.generatorConfig.OutputSourceCode) {
                     var annotatedsource = string.Format("// Generated on {0} in {1}ms {2}", DateTime.Now, this.ElapsedMilliseconds, Environment.NewLine) + source;
                     File.WriteAllText(this.generatorConfig.SourceCodePath, annotatedsource);
+                }
+
+                if (results.Errors.HasErrors) {
+                    throw new Exception(results.Errors[0].ErrorText);
                 }
 
                 // return the wrapper
@@ -147,7 +147,8 @@
             del.ReturnType = new CodeTypeReference("IEnumerable<T>");
             del.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             del.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
-            del.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
+            del.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "connection"));
+            del.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
             dapperWrapperClass.Members.Add(del);
 
             // generate the type delegates dictionary
@@ -171,7 +172,8 @@
             dapperWrapperClass.Members.Add(query);
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
-            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "connection"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
 
             //// var meth = (DelegateQuery<T>)TypeDelegates[typeof(T)][result.FetchTree.FetchSignature];
             //// return meth(result, query, conn);
@@ -192,7 +194,8 @@
                         new CodeVariableReferenceExpression("meth"),
                         new CodeVariableReferenceExpression("result"),
                         new CodeVariableReferenceExpression("query"),
-                        new CodeVariableReferenceExpression("conn"))));
+                        new CodeVariableReferenceExpression("connection"),
+                        new CodeVariableReferenceExpression("transaction"))));
 
             // now foreach type we wish to find all possible fetch trees (up to a certain depth) and generate mappers and query functions
             foreach (var map in maps) {
@@ -328,6 +331,7 @@
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<" + rootType.Name + ">", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
 
 #if DEBUG
             query.Statements.Add(
@@ -342,9 +346,12 @@
                     new CodeMethodInvokeExpression(
                         new CodeMethodReferenceExpression(new CodeTypeReferenceExpression("SqlMapper"), "Query"),
                         new CodeExpression[] {
-                                                 new CodeVariableReferenceExpression("conn"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Sql"),
-                                                 new CodeVariableReferenceExpression("mapper"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Parameters"),
-                                                 new CodePrimitiveExpression(null), new CodePrimitiveExpression(true),
+                                                 new CodeVariableReferenceExpression("conn"), 
+                                                 new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Sql"),
+                                                 new CodeVariableReferenceExpression("mapper"), 
+                                                 new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Parameters"),
+                                                 new CodeVariableReferenceExpression("transaction"), 
+                                                 new CodePrimitiveExpression(true),
                                                  new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn")
                                              }));
 

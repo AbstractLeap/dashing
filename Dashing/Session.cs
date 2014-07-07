@@ -44,10 +44,6 @@
                     throw new ObjectDisposedException("Session");
                 }
 
-                if (this.isComplete) {
-                    throw new InvalidOperationException("Transaction was marked as completed, no further operations are permitted");
-                }
-
                 if (this.connection.State == ConnectionState.Closed) {
                     this.connection.Open();
                 }
@@ -56,12 +52,26 @@
                     throw new Exception("Connection in unknown state");
                 }
 
+                return this.connection;
+            }
+        }
+
+        private IDbTransaction Transaction {
+            get {
+                if (this.isDisposed) {
+                    throw new ObjectDisposedException("Session");
+                }
+
+                if (this.isComplete) {
+                    throw new InvalidOperationException("Transaction was marked as completed, no further operations are permitted");
+                }
+
                 if (this.transaction == null) {
-                    this.transaction = this.connection.BeginTransaction();
+                    this.transaction = this.Connection.BeginTransaction();
                     this.shouldCommitAndDisposeTransaction = true;
                 }
 
-                return this.connection;
+                return this.transaction;
             }
         }
         
@@ -98,51 +108,51 @@
         }
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id) {
-            return this.engine.Query<T, TPrimaryKey>(this.Connection, new[] { id }).SingleOrDefault();
+            return this.engine.Query<T, TPrimaryKey>(this.Transaction, new[] { id }).SingleOrDefault();
         }
 
         public T GetTracked<T, TPrimaryKey>(TPrimaryKey id) {
-            return this.engine.QueryTracked<T, TPrimaryKey>(this.Connection, new[] { id }).SingleOrDefault();
+            return this.engine.QueryTracked<T, TPrimaryKey>(this.Transaction, new[] { id }).SingleOrDefault();
         }
 
         public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.engine.Query<T, TPrimaryKey>(this.Connection, ids);
+            return this.engine.Query<T, TPrimaryKey>(this.Transaction, ids);
         }
 
         public IEnumerable<T> GetTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.engine.QueryTracked<T, TPrimaryKey>(this.Connection, ids);
+            return this.engine.QueryTracked<T, TPrimaryKey>(this.Transaction, ids);
         }
 
         public ISelectQuery<T> Query<T>() {
-            return new SelectQuery<T>(this.engine, this.Connection);
+            return new SelectQuery<T>(this.engine, this.Transaction);
         }
 
         public int Insert<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Connection, new InsertEntityQuery<T>(entities));
+            return this.engine.Execute(this.Transaction, new InsertEntityQuery<T>(entities));
         }
 
         public int Update<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Connection, new UpdateEntityQuery<T>(entities));
+            return this.engine.Execute(this.Transaction, new UpdateEntityQuery<T>(entities));
         }
 
         public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
-            return this.engine.Execute(this.Connection, update, predicates);
+            return this.engine.Execute(this.Transaction, update, predicates);
         }
 
         public int Delete<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Connection, new DeleteEntityQuery<T>(entities));
+            return this.engine.Execute(this.Transaction, new DeleteEntityQuery<T>(entities));
         }
 
         public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
-            return this.engine.ExecuteBulkDelete(this.Connection, predicates);
+            return this.engine.ExecuteBulkDelete(this.Transaction, predicates);
         }
 
         public int UpdateAll<T>(Action<T> update) {
-            return this.engine.Execute(this.Connection, update, null);
+            return this.engine.Execute(this.Transaction, update, null);
         }
 
         public int DeleteAll<T>() {
-            return this.engine.ExecuteBulkDelete<T>(this.Connection, null);
+            return this.engine.ExecuteBulkDelete<T>(this.Transaction, null);
         }
     }
 }
