@@ -146,7 +146,7 @@
             }
         }
 
-        [Fact]
+        [Fact(Skip = "connects to real database")]
         public void TestTransactioning() {
             var dialect = new SqlServerDialect();
             var dropTableWriter = new DropTableWriter(dialect);
