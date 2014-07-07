@@ -89,6 +89,7 @@ namespace Dashing.Engine {
 
         public int Execute<T>(IDbConnection connection, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
             this.EnsureConfigurationLoaded();
+
             // generate a tracking class, apply the update, read out the updates
             var updateClass = this.Configuration.CodeManager.CreateUpdateInstance<T>();
             update(updateClass);
