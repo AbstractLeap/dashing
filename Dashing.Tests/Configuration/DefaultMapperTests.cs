@@ -177,12 +177,6 @@
             var property = this.MapAndGetProperty<Post, string>(u => u.Content);
             Assert.Equal(RelationshipType.None, property.Relationship);
         }
-        
-        [Fact]
-        public void EntityColumnDbTypeIsSet() {
-            var property = this.MapAndGetProperty<Post, User>(p => p.Author);
-            Assert.Equal(DbType.Int32, property.DbType);
-        }
 
         [Fact]
         public void EntityColumnDbNameIsSet() {

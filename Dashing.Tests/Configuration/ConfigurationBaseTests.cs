@@ -59,6 +59,12 @@
         }
 
         [Fact]
+        public void ManyToOneDbTypeSetCorrectly() {
+            var config = new CustomConfigurationWithIndividualAdds(new DefaultMapper(new DefaultConvention()));
+            Assert.Equal(DbType.Int32, config.GetMap<Post>().Columns["Author"].DbType);
+        }
+
+        [Fact]
         public void BeginSessionCreatesConnectionAndDelegatesToSessionFactory() {
             // assemble
             var mockEngine = MakeMockEngine();

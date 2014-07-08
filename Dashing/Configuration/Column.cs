@@ -25,10 +25,25 @@
         /// </summary>
         public string Name { get; set; }
 
+        private DbType dbType;
+
         /// <summary>
         ///     Gets or sets the db type.
         /// </summary>
-        public DbType DbType { get; set; }
+        public DbType DbType
+        {
+            get {            
+                if (this.Relationship == RelationshipType.ManyToOne) {
+                    return this.Map.PrimaryKey.DbType;
+                } else {
+                    return this.dbType;
+                }
+            }
+
+            set {            
+                this.dbType = value;
+            }
+        }
 
         /// <summary>
         ///     Gets or sets the db name.

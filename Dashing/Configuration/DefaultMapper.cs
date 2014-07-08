@@ -161,17 +161,12 @@
         private void ResolveManyToOneColumn(IColumn column, string propertyName) {
             column.Relationship = RelationshipType.ManyToOne;
             column.DbName = propertyName + "Id";
-            column.DbType = DbType.Int32;
             column.IsNullable = true;
-
-            // TODO resolve column type of related primary key - be careful with infinite loops!
         }
 
         private void ResolveOneToManyColumn(IColumn column) {
             // assume to be OneToMany
             column.Relationship = RelationshipType.OneToMany;
-
-            // need to find the ParentReference
         }
 
         /// <summary>
