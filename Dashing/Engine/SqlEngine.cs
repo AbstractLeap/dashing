@@ -55,6 +55,22 @@ namespace Dashing.Engine {
         public virtual IEnumerable<T> Query<T>(IDbTransaction transaction, SelectQuery<T> query) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
+            if (sqlQuery.NumberCollectionsFetched > 0 && (query.TakeN > 0 || query.SkipN > 0)) {
+                IEnumerable<T> results = this.Configuration.CodeManager.Query(
+                    sqlQuery,
+                    query,
+                    transaction);
+                if (query.TakeN > 0) {
+                    results.Take(query.TakeN);
+                }
+
+                if (query.SkipN > 0) {
+                    results.Skip(query.SkipN);
+                }
+
+                return results;
+            }
+
             return this.Configuration.CodeManager.Query(sqlQuery, query, transaction);
         }
 

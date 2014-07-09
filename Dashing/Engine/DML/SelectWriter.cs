@@ -53,7 +53,7 @@
         }
 
         public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
-            // TODO: one StringBuilder to rule them all
+            // TODO: one StringBuilder to rule them all - Good luck with that ;-) (insertions are expensive)
             var sql = new StringBuilder();
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
@@ -98,7 +98,8 @@
             //// if anything is added after orderSql then the paging will probably need changing
 
             // apply paging
-            if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
+            // only add paging to the query if it doesn't have any collection fetches
+            if (numberCollectionFetches == 0 && (selectQuery.TakeN > 0 || selectQuery.SkipN > 0)) {
                 if (parameters == null) {
                     parameters = new DynamicParameters();
                 }

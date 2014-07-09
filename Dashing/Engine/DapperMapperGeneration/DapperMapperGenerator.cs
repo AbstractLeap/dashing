@@ -177,7 +177,7 @@
                                     Expression.Convert(pkPropertyExpr, typeof(object))),
                                 Expression.Assign(
                                     childParam,
-                                    Expression.Convert(Expression.Property(dictAccessExpr, "Item", Expression.Convert(pkPropertyExpr, typeof(object))), childType)),
+                                    Expression.Convert(Expression.Property(dictAccessExpr, "Item", Expression.Convert(pkPropertyExpr, typeof(object))), childParam.Type)),
                                 Expression.Block(
                                     Expression.Call(
                                         dictAccessExpr,
