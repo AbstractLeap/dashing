@@ -4,7 +4,7 @@
     public class SelectWriterResult : SqlWriterResult {
         public FetchNode FetchTree { get; private set; }
 
-        public bool HasCollectionFetches { get; set; }
+        public int NumberCollectionsFetched { get; set; }
 
         public SelectWriterResult(string sql, DynamicParameters parameters, FetchNode fetchTree)
             : base(sql, parameters) {

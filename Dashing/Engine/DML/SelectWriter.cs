@@ -62,8 +62,8 @@
 
             // get fetch tree structure
             int aliasCounter;
-            bool hasCollectionFetches;
-            var rootNode = this.GetFetchTree(selectQuery, out aliasCounter, out hasCollectionFetches);
+            int numberCollectionFetches;
+            var rootNode = this.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
 
             // add select columns
             this.AddColumns(selectQuery, columnSql, rootNode);
@@ -113,12 +113,12 @@
                 }
             }
 
-            return new SelectWriterResult(sql.ToString(), parameters, rootNode) { HasCollectionFetches = hasCollectionFetches };
+            return new SelectWriterResult(sql.ToString(), parameters, rootNode) { NumberCollectionsFetched = numberCollectionFetches };
         }
 
-        private FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out bool hasCollectionFetches) {
+        private FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out int numberCollectionFetches) {
             FetchNode rootNode = null;
-            hasCollectionFetches = false;
+            numberCollectionFetches = 0;
             aliasCounter = 0;
 
             if (selectQuery.HasFetches()) {
@@ -147,7 +147,7 @@
                             if (!currentNode.Children.ContainsKey(propName)) {
                                 var column = this.Configuration.GetMap(currentNode == rootNode ? typeof(T) : currentNode.Column.Type).Columns[propName];
                                 if (column.Relationship == RelationshipType.OneToMany) {
-                                    hasCollectionFetches = true;
+                                    ++numberCollectionFetches;
                                 }
 
                                 // add to tree

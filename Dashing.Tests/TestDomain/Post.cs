@@ -4,6 +4,7 @@
     public class Post {
         public Post() {
             this.Comments = new List<Comment>();
+            this.Tags = new List<PostTag>();
         }
 
         public virtual int PostId { get; set; }

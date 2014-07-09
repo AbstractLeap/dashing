@@ -44,8 +44,11 @@
             var postTag1 = new PostTag { PostTagId = 1 };
             var postTag2 = new PostTag { PostTagId = 2 };
             var postTag3 = new PostTag { PostTagId = 3 };
+            var otherDict = new Dictionary<string, IDictionary<object, object>>();
+            otherDict.Add("fetchParam_1", new Dictionary<object, object>());
+            otherDict.Add("fetchParam_2", new Dictionary<object, object>());
             var dict = new Dictionary<object, Post>();
-            var func = (Func<Post, Comment, PostTag, Post>)funcFac.DynamicInvoke(dict);
+            var func = (Func<Post, Comment, PostTag, Post>)funcFac.DynamicInvoke(dict, otherDict);
             func(post1, comment1, postTag1);
             func(post1, comment2, postTag1);
             func(post2, comment3, postTag2);
@@ -73,7 +76,7 @@
             var result = writer.GenerateSql(selectQuery);
 
             var mapper = new DapperMapperGenerator(GetMockCodeManager().Object);
-            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
+            var func = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree, false);
             return func;
         }
 
@@ -94,10 +97,15 @@
             mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Blog))).Returns(typeof(Blog));
             mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Comment))).Returns(typeof(Comment));
             mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(User))).Returns(typeof(User));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Tag))).Returns(typeof(Tag));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(PostTag))).Returns(typeof(PostTag));
+
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Post)))).Returns(typeof(Post));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Blog)))).Returns(typeof(Blog));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Comment)))).Returns(typeof(Comment));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(User)))).Returns(typeof(User));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Tag)))).Returns(typeof(Tag));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(PostTag)))).Returns(typeof(PostTag));
             return mockCodeManager;
         }
 

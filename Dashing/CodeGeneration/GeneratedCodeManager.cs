@@ -162,7 +162,7 @@
 
                 // otherwise, let's have a look in our local runtime cache
                 // TODO support multiple collection fetches
-                if (result.HasCollectionFetches) {
+                if (result.NumberCollectionsFetched > 0) {
                     if (query.IsTracked) {
                         return this.Tracked(this.delegateQueryCreator.GetTrackingCollectionFunction<T>(result, true)(result, query, transaction));
                     }

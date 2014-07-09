@@ -13,5 +13,7 @@
         Delegate GenerateCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
 
         Delegate GenerateNonCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
+
+        Delegate GenerateMultiCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
     }
 }
