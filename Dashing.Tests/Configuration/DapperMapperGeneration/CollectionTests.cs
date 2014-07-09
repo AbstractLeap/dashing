@@ -32,6 +32,51 @@
             Assert.Equal(3, dict[2].Comments.First().CommentId);
         }
 
+        [Fact]
+        public void MultiCollectionWorks() {
+            var funcFac = GenerateMultiMapper();
+
+            var post1 = new Post { PostId = 1 };
+            var post2 = new Post { PostId = 2 };
+            var comment1 = new Comment { CommentId = 1 };
+            var comment2 = new Comment { CommentId = 2 };
+            var comment3 = new Comment { CommentId = 3 };
+            var postTag1 = new PostTag { PostTagId = 1 };
+            var postTag2 = new PostTag { PostTagId = 2 };
+            var postTag3 = new PostTag { PostTagId = 3 };
+            var dict = new Dictionary<object, Post>();
+            var func = (Func<Post, Comment, PostTag, Post>)funcFac.DynamicInvoke(dict);
+            func(post1, comment1, postTag1);
+            func(post1, comment2, postTag1);
+            func(post2, comment3, postTag2);
+            func(post2, comment3, postTag3);
+
+            Assert.Equal(1, dict[1].Comments.First().CommentId);
+            Assert.Equal(2, dict[1].Comments.Last().CommentId);
+            Assert.Equal(2, dict[1].Comments.Count);
+
+            Assert.Equal(3, dict[2].Comments.First().CommentId);
+            Assert.Equal(1, dict[2].Comments.Count);
+
+            Assert.Equal(1, dict[1].Tags.First().PostTagId);
+            Assert.Equal(1, dict[1].Tags.Count);
+
+            Assert.Equal(2, dict[2].Tags.First().PostTagId);
+            Assert.Equal(3, dict[2].Tags.Last().PostTagId);
+            Assert.Equal(2, dict[2].Tags.Count);
+        }
+
+        private static Delegate GenerateMultiMapper() {
+            var config = new CustomConfig();
+            var selectQuery = new SelectQuery<Post>(config.Engine, new Mock<IDbTransaction>().Object).Fetch(p => p.Comments).Fetch(p => p.Tags) as SelectQuery<Post>;
+            var writer = new SelectWriter(new SqlServer2012Dialect(), config);
+            var result = writer.GenerateSql(selectQuery);
+
+            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object);
+            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
+            return func;
+        }
+
         private static Delegate GenerateSingleMapper() {
             var config = new CustomConfig();
             var selectQuery = new SelectQuery<Post>(config.Engine, new Mock<IDbTransaction>().Object).Fetch(p => p.Comments) as SelectQuery<Post>;
