@@ -34,7 +34,7 @@
         {
             get {            
                 if (this.Relationship == RelationshipType.ManyToOne) {
-                    return this.Map.PrimaryKey.DbType;
+                    return this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType;
                 } else {
                     return this.dbType;
                 }
