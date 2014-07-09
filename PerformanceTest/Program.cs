@@ -98,10 +98,10 @@
         private static dynamic simpleDataDb;
 
         private static void SetupTests(List<Test> tests) {
-            //SetupSelectSingleTest(tests);
-            //SetupFetchTest(tests);
-            //SetupFetchChangeTests(tests);
-            //SetupFetchCollectionTests(tests);
+            SetupSelectSingleTest(tests);
+            SetupFetchTest(tests);
+            SetupFetchChangeTests(tests);
+            SetupFetchCollectionTests(tests);
             SetupFetchMultiCollectionTests(tests);
         }
 
