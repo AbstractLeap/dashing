@@ -103,6 +103,54 @@
             SetupFetchChangeTests(tests);
             SetupFetchCollectionTests(tests);
             SetupFetchMultiCollectionTests(tests);
+            SetupFetchMultipleMultiCollection(tests);
+        }
+
+        private static void SetupFetchMultipleMultiCollection(List<Test> tests) {
+            const string TestName = "Fetch Multiple Multiple Collections";
+
+            // add dashing
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        var iPLus3 = i + 3;
+                        var post =
+                            dashingSession.Query<Post>()
+                                          .Fetch(p => p.Comments)
+                                          .Fetch(p => p.Tags)
+                                          .First(p => p.PostId > i && p.PostId < iPLus3);
+                    }));
+
+            // add EF
+            tests.Add(
+                new Test(
+                    Providers.EntityFramework,
+                    TestName,
+                    i => {
+                        var post =
+                            QueryableExtensions.Include(QueryableExtensions.Include(EfDb.Posts, p => p.Tags), p => p.Comments)
+                                               .First(p => p.PostId > i && p.PostId < i + 3);
+                    }));
+
+            // add nh stateful
+            tests.Add(
+                new Test(
+                    Providers.NHibernate,
+                    TestName,
+                    i => {
+                        // First(p => p.PostId == i) doesn't work?
+                        // ok, nHIbernate linq broken (now I remember the pain!)
+                        var posts = nhSession.QueryOver<Post>().Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
+                        var comments =
+                            nhSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
+                        var tags =
+                            nhSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
+                        var post = posts.First();
+
+                    },
+                    "Stateful"));
         }
 
         private static void SetupFetchMultiCollectionTests(List<Test> tests) {
