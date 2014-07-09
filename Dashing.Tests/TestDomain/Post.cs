@@ -20,6 +20,8 @@
 
         public virtual IList<Comment> Comments { get; set; }
 
+        public virtual IList<PostTag> Tags { get; set; }
+
         public virtual bool DoNotMap { get; set; }
     }
 }
