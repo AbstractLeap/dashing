@@ -140,12 +140,12 @@
                     i => {
                         // First(p => p.PostId == i) doesn't work?
                         // ok, nHIbernate linq broken (now I remember the pain!)
-                        var posts = nhSession.QueryOver<Post>().Future<Post>();
+                        var posts = nhSession.QueryOver<Post>().Where(p => p.PostId == i).Future<Post>();
                         var comments =
-                            nhSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Future<Post>();
+                            nhSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Where(p => p.PostId == i).Future<Post>();
                         var tags =
-                            nhSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Future<Post>();
-                        var post = posts.Where(p => p.PostId == i).First();
+                            nhSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Where(p => p.PostId == i).Future<Post>();
+                        var post = posts.First();
 
                     },
                     "Stateful"));
