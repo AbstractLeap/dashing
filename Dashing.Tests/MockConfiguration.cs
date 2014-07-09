@@ -78,6 +78,7 @@ namespace Dashing.Tests {
         public IConfiguration Add(IEnumerable<Type> types) {
             foreach (var type in types.Where(t => !this.MappedTypes.ContainsKey(t))) {
                 this.MappedTypes[type] = this.Mapper.MapFor(type);
+                this.MappedTypes[type].Configuration = this;
             }
 
             return this;
@@ -96,6 +97,7 @@ namespace Dashing.Tests {
 
         public IMap<T> Setup<T>() {
             this.Add<T>();
+            this.GetMap<T>().Configuration = this;
             return this.GetMap<T>();
         }
     }
