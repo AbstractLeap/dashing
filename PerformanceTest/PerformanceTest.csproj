@@ -92,6 +92,8 @@
     <Compile Include="Domain\Blog.cs" />
     <Compile Include="Domain\Comment.cs" />
     <Compile Include="Domain\Post.cs" />
+    <Compile Include="Domain\PostTag.cs" />
+    <Compile Include="Domain\Tag.cs" />
     <Compile Include="Domain\User.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

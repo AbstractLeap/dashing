@@ -7,6 +7,7 @@ namespace PerformanceTest.Domain {
     public class Post {
         public Post() {
             this.Comments = new List<Comment>();
+            this.Tags = new List<PostTag>();
         }
 
         [AutoIncrement]
@@ -27,6 +28,9 @@ namespace PerformanceTest.Domain {
 
         [Ignore]
         public virtual IList<Comment> Comments { get; set; }
+
+        [Ignore]
+        public virtual IList<PostTag> Tags { get; set; }
 
         public virtual bool DoNotMap { get; set; }
     }
