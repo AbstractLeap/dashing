@@ -84,5 +84,10 @@
         /// </summary>
         /// <remarks>Only applies to OneToMany Relationship</remarks>
         IColumn ChildColumn { get; set; }
+
+        /// <summary>
+        /// References the parent map in a ManyToOne relationship
+        /// </summary>
+        IMap ParentMap { get; }
     }
 }

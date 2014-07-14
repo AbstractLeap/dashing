@@ -12,6 +12,7 @@ namespace Dashing.Configuration {
         public Map(Type type) {
             this.Type = type;
             this.Columns = new Dictionary<string, IColumn>();
+            this.Indexes = new List<Index>();
 
             //// this.Indexes = new List<IEnumerable<string>>();
         }
@@ -42,6 +43,8 @@ namespace Dashing.Configuration {
         ///     Gets or sets the columns.
         /// </summary>
         public IDictionary<string, IColumn> Columns { get; set; }
+
+        public ICollection<Index> Indexes { get; set; }
 
         public object GetPrimaryKeyValue(object entity) {
             if (this.nonGenericPrimaryKeyGetter == null) {

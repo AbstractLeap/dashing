@@ -188,5 +188,17 @@
                                      Relationship = column.Relationship,
                                  };
         }
+
+
+        public IMap ParentMap {
+            get {
+                if (this.Relationship != RelationshipType.ManyToOne) {
+                    throw new InvalidOperationException(
+                        "A ParentMap only exists on a ManyToOne relationship");
+                }
+
+                return this.Map.Configuration.GetMap(this.Type);
+            }
+        }
     }
 }
