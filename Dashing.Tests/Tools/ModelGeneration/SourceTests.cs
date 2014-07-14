@@ -69,11 +69,11 @@
 
             return result;
         }
+    }
 
-        private class CustomConfig : MockConfiguration {
-            public CustomConfig() {
-                this.AddNamespaceOf<Post>();
-            }
+    public class CustomConfig : MockConfiguration {
+        public CustomConfig() {
+            this.AddNamespaceOf<Post>();
         }
     }
 }

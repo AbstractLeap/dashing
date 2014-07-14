@@ -9,12 +9,14 @@ namespace Dashing.Configuration {
 
         private readonly object nonGenericPrimaryKeyGetterLock = new object();
 
+        private ICollection<Index> indexes;
+
+        private bool hasAddedForeignKeyIndexes;
+
         public Map(Type type) {
             this.Type = type;
             this.Columns = new Dictionary<string, IColumn>();
-            this.Indexes = new List<Index>();
-
-            //// this.Indexes = new List<IEnumerable<string>>();
+            this.indexes = new List<Index>();
         }
 
         public IConfiguration Configuration { get; set; }
@@ -44,7 +46,29 @@ namespace Dashing.Configuration {
         /// </summary>
         public IDictionary<string, IColumn> Columns { get; set; }
 
-        public ICollection<Index> Indexes { get; set; }
+        public ICollection<Index> Indexes {
+            get {
+                if (!this.hasAddedForeignKeyIndexes) {
+                    // add in any indexes for the foreign keys in this map
+                    foreach (
+                        var column in
+                            this.Columns.Where(
+                                c =>
+                                !c.Value.IsIgnored
+                                && c.Value.Relationship == RelationshipType.ManyToOne)) {
+                        this.indexes.Add(new Index { Map = this, IsUnique = false, Columns = new List<IColumn> { column.Value } });
+                    }
+
+                    this.hasAddedForeignKeyIndexes = true;
+                }
+
+                return this.indexes;
+            }
+
+            set {
+                this.indexes = value;
+            }
+        }
 
         public object GetPrimaryKeyValue(object entity) {
             if (this.nonGenericPrimaryKeyGetter == null) {
@@ -60,11 +84,5 @@ namespace Dashing.Configuration {
 
             return this.nonGenericPrimaryKeyGetter.Invoke(this, new[] { entity });
         }
-
-        //// commented out until we get basic stuff working
-        ///// <summary>
-        /////   Gets or sets the indexes.
-        ///// </summary>
-        //// public IEnumerable<IEnumerable<string>> Indexes { get; set; }
     }
 }

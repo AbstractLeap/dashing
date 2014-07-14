@@ -20,8 +20,8 @@ namespace Dashing.Tests.Configuration {
                           .Index(p => new { p.Rating, p.Title });
             Assert.Equal(
                 1,
-                config.GetMap<Post>().Indexes.First().Columns.Count(c => c.Name == "Rating"));
-            Assert.Equal(1, config.GetMap<Post>().Indexes.First().Columns.Count(c => c.Name == "Title"));
+                config.GetMap<Post>().Indexes.First(i => i.Columns.Count == 2).Columns.Count(c => c.Name == "Rating"));
+            Assert.Equal(1, config.GetMap<Post>().Indexes.First(i => i.Columns.Count == 2).Columns.Count(c => c.Name == "Title"));
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace Dashing.Tests.Configuration {
             config
                           .Setup<Post>()
                           .Index(p => new { p.Rating, p.Title }, true);
-            Assert.True(config.GetMap<Post>().Indexes.First().IsUnique);
+            Assert.True(config.GetMap<Post>().Indexes.First(i => i.Columns.Count == 2).IsUnique);
         }
     }
 }

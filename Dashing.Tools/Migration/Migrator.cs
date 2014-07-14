@@ -42,6 +42,26 @@
                 sql.AppendLine();
             }
 
+            // add in foreign keys
+            foreach (var map in to) {
+                var statements = this.createTableWriter.CreateForeignKeys(map);
+                foreach (var statement in statements) {
+                    sql.Append(statement);
+                    this.AppendSemiColonIfNecesssary(sql);
+                    sql.AppendLine();
+                }
+            }
+
+            // add in indexes
+            foreach (var map in to) {
+                var statements = this.createTableWriter.CreateIndexes(map);
+                foreach (var statement in statements) {
+                    sql.Append(statement);
+                    this.AppendSemiColonIfNecesssary(sql);
+                    sql.AppendLine();
+                }
+            }
+
             return sql.ToString();
         }
 
