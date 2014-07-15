@@ -95,6 +95,7 @@
     <Compile Include="Engine\AnsiSqlDialectTests.cs" />
     <Compile Include="Engine\SqlDialectBaseTests.cs" />
     <Compile Include="Engine\UpdateWriterTests.cs" />
+    <Compile Include="Engine\WhereClauseWriterTests.cs" />
     <Compile Include="MockConfiguration.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="SchemaGenerationSandbox.cs" />
