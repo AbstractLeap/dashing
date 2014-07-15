@@ -66,6 +66,7 @@
         }
 
         internal FetchNode VisitWhereClause(Expression whereClause) {
+            this.Sql.Clear();
             this.VisitTree(whereClause);
             return this.rootNode;
         }
