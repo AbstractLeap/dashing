@@ -45,6 +45,7 @@
             foreach (var name in testNames) {
                 Console.WriteLine("Running " + name);
                 Console.WriteLine("------------------------");
+                var results = new List<System.Tuple<string, long>>();
 
                 foreach (var provider in providers) {
                     var closeOverProvider = provider;
@@ -70,9 +71,13 @@
                                 }
                             }
 
-                            Console.WriteLine(provider + (test.Method != null ? " (" + test.Method + ") " : string.Empty) + " : " + watch.ElapsedMilliseconds + "ms");
+                            results.Add(Tuple.Create(provider + (test.Method != null ? " (" + test.Method + ") " : string.Empty), watch.ElapsedMilliseconds));
                         }
                     }
+                }
+
+                foreach (var result in results.OrderBy(s => s.Item2)) {
+                    Console.WriteLine("{0,7:N0} {1}", result.Item2, result.Item1);
                 }
 
                 Console.WriteLine();
@@ -115,12 +120,11 @@
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var iPLus3 = i + 3;
                         var posts =
                             dashingSession.Query<Post>()
                                           .Fetch(p => p.Comments)
                                           .Fetch(p => p.Tags)
-                                          .Where(p => p.PostId > i && p.PostId < iPLus3)
+                                          .Where(p => p.PostId > i && p.PostId < i + 3)
                                           .ToList();
                     }));
 
