@@ -125,7 +125,7 @@
             using (var session = config.BeginSession()) {
                 var user = session.Query<User>().AsTracked().First();
                 user.HeightInMeters = 1.7m;
-                session.Update(user);
+                session.Save(user);
             }
         }
 

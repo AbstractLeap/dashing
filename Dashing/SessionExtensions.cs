@@ -56,8 +56,8 @@ namespace Dashing {
             return session.Insert(entities);
         }
 
-        public static int Update<T>(this ISession session, params T[] entities) {
-            return session.Update(entities);
+        public static int Save<T>(this ISession session, params T[] entities) {
+            return session.Save(entities);
         }
 
         public static int Delete<T>(this ISession session, params T[] entities) {

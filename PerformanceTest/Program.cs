@@ -316,7 +316,7 @@ select * from Comments where PostId = @id";
                     i => {
                         var post = dashingSession.Query<Post>().AsTracked().First(p => p.PostId == i);
                         post.Title = Providers.Dashing + "_" + i + r.Next(100000);
-                        dashingSession.Update(post);
+                        dashingSession.Save(post);
                         var thatPost = dashingSession.Query<Post>().First(p => p.PostId == i);
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(TestName + " failed for " + Providers.Dashing + " as the update did not work");
@@ -331,7 +331,7 @@ select * from Comments where PostId = @id";
                     i => {
                         var post = dashingSession.GetTracked<Post>(i);
                         post.Title = Providers.Dashing + "_" + i + r.Next(100000);
-                        dashingSession.Update(post);
+                        dashingSession.Save(post);
                         var thatPost = dashingSession.Get<Post>(i);
                         if (thatPost.Title != post.Title) {
                             Console.WriteLine(TestName + " failed for " + Providers.Dashing + " as the update did not work");

@@ -21,7 +21,7 @@ namespace Dashing {
 
         int Insert<T>(IEnumerable<T> entities);
 
-        int Update<T>(IEnumerable<T> entities);
+        int Save<T>(IEnumerable<T> entities);
 
         int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 
