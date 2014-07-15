@@ -30,7 +30,7 @@
             // assert all properties are equal
             var columnType = column.GetType();
             var genericColumnType = genericColumn.GetType();
-            foreach (var prop in columnType.GetProperties().Where(p => p.Name != "ChildColumn")) {
+            foreach (var prop in columnType.GetProperties().Where(p => p.Name != "ChildColumn" && p.Name != "ParentMap")) {
                 Assert.Equal(prop.GetValue(column, null), genericColumnType.GetProperty(prop.Name).GetValue(genericColumn, null));
             }
         }
