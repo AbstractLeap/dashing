@@ -102,6 +102,7 @@
     <Compile Include="Engine\Dialects\SqlServerDialect.cs" />
     <Compile Include="Engine\DML\BaseExpressionVisitor.cs" />
     <Compile Include="Engine\DML\BaseWriter.cs" />
+    <Compile Include="Engine\DML\ConstantChecker.cs" />
     <Compile Include="Engine\DML\DeleteWriter.cs" />
     <Compile Include="Engine\DML\FetchNode.cs" />
     <Compile Include="Engine\DML\IDeleteWriter.cs" />
