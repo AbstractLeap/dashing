@@ -41,6 +41,16 @@
         }
 
         [Fact]
+        public void WhereIdPlus1() {
+            var post = new Post { PostId = 1 };
+            var query = this.GetSelectQuery<Post>().Where(p => p.PostId == post.PostId + 2);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql);
+            Assert.Equal(3, sql.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
         public void WhereId() {
             var query = this.GetSelectQuery<Post>().Where(p => p.PostId == 1);
             var selectQuery = query as SelectQuery<Post>;

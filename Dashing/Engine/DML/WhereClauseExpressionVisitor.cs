@@ -55,6 +55,8 @@
 
         public DynamicParameters Parameters { get; private set; }
 
+        private ConstantChecker constantChecker;
+
         public WhereClauseExpressionVisitor(ISqlDialect dialect, IConfiguration config, FetchNode rootNode) {
             this.Sql = new StringBuilder();
             this.Parameters = new DynamicParameters();
@@ -63,6 +65,7 @@
             this.configuration = config;
             this.rootNode = rootNode;
             this.aliasCounter = 99; // what's the chance of fetching 99 tables??
+            this.constantChecker = new ConstantChecker();
         }
 
         internal FetchNode VisitWhereClause(Expression whereClause) {
@@ -71,16 +74,25 @@
         }
 
         protected override Expression VisitBinary(BinaryExpression b) {
-            // form binary expression
-            this.Sql.Append("(");
-            this.isTopOfBinary = true;
-            this.Visit(b.Left);
+            // if this bianry expression does not contain any parameters it's constant so just invoke the thing
+            this.constantChecker.Reset();
+            this.constantChecker.VisitTree(b);
+            if (!this.constantChecker.HasParams) {
+                var value = Expression.Lambda(b).Compile().DynamicInvoke(null);
+                this.AddParameter(value);
+            } else {
 
-            // TODO What about == entity where entity is null??
-            this.Sql.Append(this.GetOperator(b.NodeType, b.Right.ToString() == "null"));
-            this.isTopOfBinary = true;
-            this.Visit(b.Right);
-            this.Sql.Append(")");
+                // form binary expression
+                this.Sql.Append("(");
+                this.isTopOfBinary = true;
+                this.Visit(b.Left);
+
+                // TODO What about == entity where entity is null??
+                this.Sql.Append(this.GetOperator(b.NodeType, b.Right.ToString() == "null"));
+                this.isTopOfBinary = true;
+                this.Visit(b.Right);
+                this.Sql.Append(")");
+            }
 
             return b;
         }
@@ -108,12 +120,10 @@
                         this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                         this.chainedColumnType = m.Member.DeclaringType;
                         this.getForeignKeyName = false;
-                    }
-                    else {
+                    } else {
                         this.chainedEntityNames.Push(m.Member.Name);
                     }
-                }
-                else {
+                } else {
                     this.isChainedMemberAccess = true;
                     this.chainedMemberAccessExpression = m;
                     var propInfo = m.Member as PropertyInfo;
@@ -123,26 +133,22 @@
                         this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                         this.chainedColumnType = m.Member.ReflectedType;
                         this.chainedEntityNames.Push(m.Member.Name);
-                    }
-                    else if (this.configuration.HasMap(m.Member.DeclaringType)) {
+                    } else if (this.configuration.HasMap(m.Member.DeclaringType)) {
                         // we want to check for a primary key here because in that case we can put the where clause on the referencing object
                         if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name) {
                             this.getForeignKeyName = true;
-                        }
-                        else {
+                        } else {
                             // we need this column name
                             this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                             this.chainedColumnType = m.Member.DeclaringType;
                         }
                     }
                 }
-            }
-            else if (m.Expression.NodeType == ExpressionType.Constant) {
+            } else if (m.Expression.NodeType == ExpressionType.Constant) {
                 // we're getting a constant value out of an expression i.e. e.A == z.Prop we're doing z.Prop
                 this.isClosureConstantAccess = true;
                 this.constantMemberAccessName = m.Member.Name;
-            }
-            else if (m.Expression.NodeType == ExpressionType.Parameter) {
+            } else if (m.Expression.NodeType == ExpressionType.Parameter) {
                 // at the bottom of expression i.e. e.A.B.C == Z we're at e.A
                 if (this.isChainedMemberAccess) {
                     if (this.getForeignKeyName) {
@@ -152,8 +158,7 @@
                         }
 
                         this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName);
-                    }
-                    else {
+                    } else {
                         // we need to find the alias
                         // we've got chained entity names and the root node
                         if (this.rootNode == null) {
@@ -169,11 +174,11 @@
                             if (!currentNode.Children.ContainsKey(propName)) {
                                 // create the new node with isFetched = false
                                 var newNode = new FetchNode {
-                                                                Alias = "t_" + ++this.aliasCounter,
-                                                                IsFetched = false,
-                                                                Parent = currentNode,
-                                                                Column = this.configuration.GetMap(declaringType).Columns[propName]
-                                                            };
+                                    Alias = "t_" + ++this.aliasCounter,
+                                    IsFetched = false,
+                                    Parent = currentNode,
+                                    Column = this.configuration.GetMap(declaringType).Columns[propName]
+                                };
                                 currentNode.Children.Add(propName, newNode);
                             }
 
@@ -187,8 +192,7 @@
 
                         this.dialect.AppendQuotedName(this.Sql, this.chainedColumnName);
                     }
-                }
-                else {
+                } else {
                     if (this.rootNode != null && this.rootNode.Alias.Length > 0) {
                         this.Sql.Append(this.rootNode.Alias + ".");
                     }
@@ -241,8 +245,7 @@
                         // static method
                         memberExpr = m.Arguments[1] as MemberExpression;
                         valuesExpr = m.Arguments[0];
-                    }
-                    else {
+                    } else {
                         // contains on IList
                         memberExpr = m.Arguments[0] as MemberExpression;
                         valuesExpr = m.Object;
@@ -302,8 +305,7 @@
             if (this.isClosureConstantAccess) {
                 if (this.isChainedMemberAccess) {
                     value = Expression.Lambda(this.chainedMemberAccessExpression).Compile().DynamicInvoke(null);
-                }
-                else {
+                } else {
                     var currentType = c.Value.GetType();
                     while (currentType != null) {
                         var field = currentType.GetField(this.constantMemberAccessName, BindingFlags.Public | BindingFlags.Instance);
@@ -322,8 +324,7 @@
                         currentType = currentType.BaseType;
                     }
                 }
-            }
-            else {
+            } else {
                 value = c.Value;
             }
 
@@ -337,11 +338,15 @@
                     value = this.configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);
                 }
 
-                this.Sql.Append("@l_" + ++this.paramCounter);
-                this.Parameters.Add("@l_" + this.paramCounter, this.doAppendValue || this.doPrependValue ? this.WrapValue(value) : value);
+                AddParameter(value);
             }
 
-            return base.VisitConstant(c);
+            return c;
+        }
+
+        private void AddParameter(object value) {
+            this.Sql.Append("@l_" + ++this.paramCounter);
+            this.Parameters.Add("@l_" + this.paramCounter, this.doAppendValue || this.doPrependValue ? this.WrapValue(value) : value);
         }
 
         private object WrapValue(object value) {
