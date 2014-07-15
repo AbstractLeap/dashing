@@ -8,10 +8,7 @@ namespace PerformanceTest.Tests.Dashing {
     internal class DashingConfiguration : DefaultConfiguration {
         public DashingConfiguration(ConnectionStringSettings connectionStringSettings)
             : base(connectionStringSettings) {
-            this.Add<Blog>();
-            this.Add<Comment>();
-            this.Add<Post>();
-            this.Add<User>();
+            this.AddNamespaceOf<Post>();
         }
     }
 }

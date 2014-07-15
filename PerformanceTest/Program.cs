@@ -102,6 +102,119 @@
             SetupFetchTest(tests);
             SetupFetchChangeTests(tests);
             SetupFetchCollectionTests(tests);
+            SetupFetchMultiCollectionTests(tests);
+            SetupFetchMultipleMultiCollection(tests);
+        }
+
+        private static void SetupFetchMultipleMultiCollection(List<Test> tests) {
+            const string TestName = "Fetch Multiple Multiple Collections";
+
+            // add dashing
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        var iPLus3 = i + 3;
+                        var post =
+                            dashingSession.Query<Post>()
+                                          .Fetch(p => p.Comments)
+                                          .Fetch(p => p.Tags)
+                                          .First(p => p.PostId > i && p.PostId < iPLus3);
+                    }));
+
+            // add EF
+            tests.Add(
+                new Test(
+                    Providers.EntityFramework,
+                    TestName,
+                    i => {
+                        var post =
+                            QueryableExtensions.Include(QueryableExtensions.Include(EfDb.Posts, p => p.Tags), p => p.Comments)
+                                               .First(p => p.PostId > i && p.PostId < i + 3);
+                    }));
+
+            // add nh stateful
+            tests.Add(
+                new Test(
+                    Providers.NHibernate,
+                    TestName,
+                    i => {
+                        // First(p => p.PostId == i) doesn't work?
+                        // ok, nHIbernate linq broken (now I remember the pain!)
+                        var posts = nhSession.QueryOver<Post>().Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
+                        var comments =
+                            nhSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
+                        var tags =
+                            nhSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
+                        var post = posts.First();
+
+                    },
+                    "Stateful"));
+        }
+
+        private static void SetupFetchMultiCollectionTests(List<Test> tests) {
+            const string TestName = "Fetch Multiple Collections";
+
+            // add dashing
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        var post =
+                            dashingSession.Query<Post>()
+                                          .Fetch(p => p.Comments)
+                                          .Fetch(p => p.Tags)
+                                          .First(p => p.PostId == i);
+                    }));
+
+            // add EF
+            tests.Add(
+                new Test(
+                    Providers.EntityFramework,
+                    TestName,
+                    i => {
+                        var post =
+                            QueryableExtensions.Include(QueryableExtensions.Include(EfDb.Posts, p => p.Tags), p => p.Comments)
+                                               .First(p => p.PostId == i);
+                    }));
+
+            // add nh stateful
+            tests.Add(
+                new Test(
+                    Providers.NHibernate,
+                    TestName,
+                    i => {
+                        // First(p => p.PostId == i) doesn't work?
+                        // ok, nHIbernate linq broken (now I remember the pain!)
+                        var posts = nhSession.QueryOver<Post>().Where(p => p.PostId == i).Future<Post>();
+                        var comments =
+                            nhSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Where(p => p.PostId == i).Future<Post>();
+                        var tags =
+                            nhSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Where(p => p.PostId == i).Future<Post>();
+                        var post = posts.First();
+
+                    },
+                    "Stateful"));
+
+            // add nh stateless
+            // No can do, get NotSupportedException on first line here.
+            //tests.Add(
+            //    new Test(
+            //        Providers.NHibernate,
+            //        TestName,
+            //        i => {
+            //            // First(p => p.PostId == i) doesn't work?
+            //            // ok, nHIbernate linq broken (now I remember the pain!)
+            //            var posts = nhStatelessSession.QueryOver<Post>().Future<Post>();
+            //            var comments =
+            //                nhStatelessSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Future<Post>();
+            //            var tags =
+            //                nhStatelessSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Future<Post>();
+            //            var post = posts.Where(p => p.PostId == i).First();
+            //        },
+            //        "Stateless"));
         }
 
         private static void SetupFetchCollectionTests(List<Test> tests) {
@@ -139,7 +252,16 @@ select * from Comments where PostId = @id";
                     "Multiple Result Method"));
 
             // add Dashing
-            tests.Add(new Test(Providers.Dashing, TestName, i => { var post = dashingSession.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); }));
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        var post =
+                            dashingSession.Query<Post>()
+                                          .Fetch(p => p.Comments)
+                                          .First(p => p.PostId == i);
+                    }));
 
             // add EF
             tests.Add(new Test(Providers.EntityFramework, TestName, i => { var post = QueryableExtensions.Include(EfDb.Posts, p => p.Comments).First(p => p.PostId == i); }));
@@ -149,7 +271,7 @@ select * from Comments where PostId = @id";
                 new Test(
                     Providers.NHibernate,
                     TestName,
-                    i => { var post = QueryableExtensions.Include(nhSession.Query<Post>(), p => p.Comments).First(p => p.PostId == i); },
+                    i => { var post = nhSession.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); },
                     "Stateful"));
 
             // add nh stateless
@@ -157,7 +279,7 @@ select * from Comments where PostId = @id";
                 new Test(
                     Providers.NHibernate,
                     TestName,
-                    i => { var post = QueryableExtensions.Include(nhStatelessSession.Query<Post>(), p => p.Comments).First(p => p.PostId == i); },
+                    i => { var post = nhStatelessSession.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); },
                     "Stateless"));
         }
 
@@ -375,7 +497,7 @@ select * from Comments where PostId = @id";
                     blogs.Add(blog);
                     setupSession.Insert(blog);
                 }
-
+                
                 var posts = new List<Post>();
                 for (var i = 0; i <= 500; i++) {
                     var userId = r.Next(100);
@@ -389,6 +511,19 @@ select * from Comments where PostId = @id";
                     var comment = new Comment { Post = posts[r.Next(500)], User = users[r.Next(100)] };
                     setupSession.Insert(comment);
                 }
+
+                var tags = new List<Tag>();
+                for (var i = 0; i < 100; i++) {
+                    var tag = new Tag { Content = "Tag" + i };
+                    tags.Add(tag);
+                    setupSession.Insert(tag);
+                }
+
+                for (var i = 0; i < 5000; i++) {
+                    var postTag = new PostTag { Post = posts[r.Next(500)], Tag = tags[r.Next(100)] };
+                    setupSession.Insert(postTag);
+                }
+
 
                 setupSession.Complete();
             }

@@ -109,6 +109,8 @@
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Post.cs" />
+    <Compile Include="TestDomain\PostTag.cs" />
+    <Compile Include="TestDomain\Tag.cs" />
     <Compile Include="TestDomain\User.cs" />
     <Compile Include="Tools\ModelGeneration\SourceTests.cs" />
     <Compile Include="Tools\ReverseEngineering\EngineerTests.cs" />

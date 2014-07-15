@@ -53,7 +53,7 @@
         }
 
         public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
-            // TODO: one StringBuilder to rule them all
+            // TODO: one StringBuilder to rule them all - Good luck with that ;-) (insertions are expensive)
             var sql = new StringBuilder();
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
@@ -62,8 +62,8 @@
 
             // get fetch tree structure
             int aliasCounter;
-            bool hasCollectionFetches;
-            var rootNode = this.GetFetchTree(selectQuery, out aliasCounter, out hasCollectionFetches);
+            int numberCollectionFetches;
+            var rootNode = this.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
 
             // add select columns
             this.AddColumns(selectQuery, columnSql, rootNode);
@@ -98,7 +98,8 @@
             //// if anything is added after orderSql then the paging will probably need changing
 
             // apply paging
-            if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
+            // only add paging to the query if it doesn't have any collection fetches
+            if (numberCollectionFetches == 0 && (selectQuery.TakeN > 0 || selectQuery.SkipN > 0)) {
                 if (parameters == null) {
                     parameters = new DynamicParameters();
                 }
@@ -113,12 +114,12 @@
                 }
             }
 
-            return new SelectWriterResult(sql.ToString(), parameters, rootNode) { HasCollectionFetches = hasCollectionFetches };
+            return new SelectWriterResult(sql.ToString(), parameters, rootNode) { NumberCollectionsFetched = numberCollectionFetches };
         }
 
-        private FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out bool hasCollectionFetches) {
+        private FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out int numberCollectionFetches) {
             FetchNode rootNode = null;
-            hasCollectionFetches = false;
+            numberCollectionFetches = 0;
             aliasCounter = 0;
 
             if (selectQuery.HasFetches()) {
@@ -147,7 +148,7 @@
                             if (!currentNode.Children.ContainsKey(propName)) {
                                 var column = this.Configuration.GetMap(currentNode == rootNode ? typeof(T) : currentNode.Column.Type).Columns[propName];
                                 if (column.Relationship == RelationshipType.OneToMany) {
-                                    hasCollectionFetches = true;
+                                    ++numberCollectionFetches;
                                 }
 
                                 // add to tree
