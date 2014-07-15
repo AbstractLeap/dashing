@@ -26,18 +26,16 @@
             }
 
             var sql = new StringBuilder(" where ");
-            var parameters = new DynamicParameters();
             var expressionVisitor = new WhereClauseExpressionVisitor(this.dialect, this.configuration, rootNode);
             foreach (var whereClause in whereClauses) {
                 rootNode = expressionVisitor.VisitWhereClause(whereClause);
                 sql.Append(expressionVisitor.Sql);
                 sql.Append(" and ");
             }
-            parameters.AddDynamicParams(expressionVisitor.Parameters);
 
             // remove the last and
             sql.Remove(sql.Length - 5, 5);
-            return new SelectWriterResult(sql.ToString(), parameters, rootNode);
+            return new SelectWriterResult(sql.ToString(), expressionVisitor.Parameters, rootNode);
         }
     }
 }
