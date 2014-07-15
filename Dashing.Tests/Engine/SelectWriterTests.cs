@@ -348,6 +348,14 @@
             Assert.Equal("select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @skip, @take", sql.Sql);
         }
 
+        [Fact]
+        public void MultipleCollectionAtRoot() {
+            var query = this.GetSelectQuery<Post>().Fetch(p => p.Tags).Fetch(p => p.Comments);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+        }
+
         private SelectWriter GetWriter(bool withIgnore = false) {
             return new SelectWriter(new SqlServerDialect(), MakeConfig(withIgnore));
         }

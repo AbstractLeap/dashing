@@ -27,6 +27,8 @@
         /// </summary>
         public string SplitOn { get; set; }
 
+        public int ContainedCollectionfetchesCount { get; set; }
+
         public FetchNode() {
             this.Children = new Dictionary<string, FetchNode>();
         }

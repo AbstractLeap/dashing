@@ -147,6 +147,14 @@
         }
 
         [Fact(Skip = "connects to real database")]
+        public void TestMultiCollectionFetch() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                var posts = session.Query<Post>().Fetch(p => p.Comments).Fetch(p => p.Tags).Where(p => p.PostId == 1).ToList();
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
         public void TestTransactioning() {
             var dialect = new SqlServerDialect();
             var dropTableWriter = new DropTableWriter(dialect);
@@ -176,7 +184,7 @@
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new ConnectionStringSettings("Default", "Server=localhost;Database=Dashingtest;Uid=root;Pwd=treatme123;", "MySql.Data.MySqlClient")) {
+                : base(new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=tempdb;Integrated Security=True;", "System.Data.SqlClient")) {
                 this.AddNamespaceOf<Post>();
             }
         }

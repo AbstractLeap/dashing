@@ -116,11 +116,12 @@
                     TestName,
                     i => {
                         var iPLus3 = i + 3;
-                        var post =
+                        var posts =
                             dashingSession.Query<Post>()
                                           .Fetch(p => p.Comments)
                                           .Fetch(p => p.Tags)
-                                          .First(p => p.PostId > i && p.PostId < iPLus3);
+                                          .Where(p => p.PostId > i && p.PostId < iPLus3)
+                                          .ToList();
                     }));
 
             // add EF
@@ -129,9 +130,9 @@
                     Providers.EntityFramework,
                     TestName,
                     i => {
-                        var post =
+                        var posts =
                             QueryableExtensions.Include(QueryableExtensions.Include(EfDb.Posts, p => p.Tags), p => p.Comments)
-                                               .First(p => p.PostId > i && p.PostId < i + 3);
+                                               .Where(p => p.PostId > i && p.PostId < i + 3).ToList();
                     }));
 
             // add nh stateful
@@ -147,7 +148,7 @@
                             nhSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
                         var tags =
                             nhSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
-                        var post = posts.First();
+                        var post = posts.ToList();
 
                     },
                     "Stateful"));
