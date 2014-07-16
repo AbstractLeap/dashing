@@ -86,7 +86,6 @@
     <Compile Include="Configuration\MutableConfiguration.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DeleteEntityQuery.cs" />
-    <Compile Include="DeleteQuery.cs" />
     <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
     <Compile Include="Engine\DapperMapperGeneration\IDapperMapperGenerator.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
@@ -139,7 +138,6 @@
     <Compile Include="NeedToDash.cs" />
     <Compile Include="SessionExtensions.cs" />
     <Compile Include="UpdateEntityQuery.cs" />
-    <Compile Include="UpdateQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Generator\" />
