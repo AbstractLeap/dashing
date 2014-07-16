@@ -12,13 +12,21 @@
         private readonly ITrackedEntity trackedEntity;
 
         public TrackedEntityInspector(T entity) {
-            var trackedEntity = entity as ITrackedEntity;
-            if (trackedEntity == null) {
+            if (!TryGetAsTracked(entity, out this.trackedEntity)) {
                 throw new ArgumentException("This entity is not an ITrackedEntity");
             }
 
             this.entity = entity;
-            this.trackedEntity = trackedEntity;
+        }
+
+        public static bool IsTracked(T entity) {
+            ITrackedEntity dontcare;
+            return TryGetAsTracked(entity, out dontcare);
+        }
+
+        public static bool TryGetAsTracked(T entity, out ITrackedEntity trackedEntity) {
+            trackedEntity = entity as ITrackedEntity;
+            return trackedEntity != null;
         }
 
         public bool IsTracking {
