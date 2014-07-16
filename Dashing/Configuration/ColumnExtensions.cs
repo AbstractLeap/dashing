@@ -1,6 +1,8 @@
 ﻿namespace Dashing.Configuration {
     using System;
+    using System.Collections.Generic;
     using System.Data;
+    using System.Linq.Expressions;
 
     /// <summary>
     ///     The column extensions.
@@ -198,6 +200,17 @@
             }
 
             column.IsIgnored = false;
+            return column;
+        }
+
+        public static Column<T> MapsTo<T, TCollection, TProperty>(this Column<T> column, Expression<Func<TCollection, TProperty>> mapToExpression)
+            where T : IEnumerable<TCollection> {
+            var memberExpression = mapToExpression.Body as MemberExpression;
+            if (memberExpression == null) {
+                throw new ArgumentException("mapToExpression must be a MemberExpression");
+            }
+
+            column.ChildColumnName = memberExpression.Member.Name;
             return column;
         }
     }

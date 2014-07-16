@@ -2,112 +2,27 @@ namespace Dashing.Engine {
     using System;
     using System.Collections.Generic;
     using System.Data;
-
-    using Dashing.Configuration;
     using System.Linq.Expressions;
 
-    /// <summary>
-    ///     The Engine interface.
-    /// </summary>
-    public interface IEngine {
-        /// <summary>
-        ///     The open.
-        /// </summary>
-        /// <param name="connectionString">
-        ///     The connection string.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="IDbConnection" />.
-        /// </returns>
-        IDbConnection Open(string connectionString);
+    using Dashing.Configuration;
 
-        /// <summary>
-        ///     Get set the current configuration for this engine
-        /// </summary>
+    public interface IEngine {
         IConfiguration Configuration { get; set; }
 
-        /// <summary>
-        ///     The use maps.
-        /// </summary>
-        /// <param name="maps">
-        ///     The maps.
-        /// </param>
-        void UseMaps(IDictionary<Type, IMap> maps);
+        IEnumerable<T> Query<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
-        /// <summary>
-        ///     The query.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="query">
-        ///     The query.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="IEnumerable" />.
-        /// </returns>
-        IEnumerable<T> Query<T>(IDbConnection connection, SelectQuery<T> query);
+        IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
-        /// <summary>
-        ///     The execute.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="query">
-        ///     The query.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="int" />.
-        /// </returns>
-        int Execute<T>(IDbConnection connection, InsertEntityQuery<T> query);
+        IEnumerable<T> Query<T>(IDbTransaction transaction, SelectQuery<T> query);
 
-        /// <summary>
-        ///     The execute.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="query">
-        ///     The query.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="int" />.
-        /// </returns>
-        int Execute<T>(IDbConnection connection, UpdateEntityQuery<T> query);
+        int Insert<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
-        /// <summary>
-        ///     The execute.
-        /// </summary>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="query">
-        ///     The query.
-        /// </param>
-        /// <typeparam name="T">
-        /// </typeparam>
-        /// <returns>
-        ///     The <see cref="int" />.
-        /// </returns>
-        int Execute<T>(IDbConnection connection, DeleteEntityQuery<T> query);
+        int Save<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
-        T Get<T>(IDbConnection connection, int id, bool? asTracked);
+        int Delete<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
-        T Get<T>(IDbConnection connection, Guid id, bool? asTracked);
+        int Execute<T>(IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 
-        IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<int> ids, bool? asTracked);
-
-        IEnumerable<T> Get<T>(IDbConnection connection, IEnumerable<Guid> ids, bool? asTracked);
-
-        void Execute<T>(IDbConnection dbConnection, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
-
-        void ExecuteBulkDelete<T>(IDbConnection connection, IEnumerable<Expression<Func<T, bool>>> predicates);
+        int ExecuteBulkDelete<T>(IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates);
     }
 }

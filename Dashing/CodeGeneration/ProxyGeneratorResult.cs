@@ -1,7 +1,7 @@
 ﻿namespace Dashing.CodeGeneration {
     using System.CodeDom;
 
-    internal class ProxyGeneratorResult {
+    public class ProxyGeneratorResult {
         public CodeTypeDeclaration[] ProxyTypes { get; set; }
 
         public CodeNamespaceImport[] NamespaceImports { get; set; }

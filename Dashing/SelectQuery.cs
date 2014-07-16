@@ -18,15 +18,14 @@ namespace Dashing {
     public class SelectQuery<T> : ISelectQuery<T> {
         private readonly IEngine engine;
 
-        private readonly IDbConnection connection;
+        private readonly IDbTransaction transaction;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SelectQuery{T}" /> class.
         /// </summary>
-        public SelectQuery(IEngine engine, IDbConnection connection) {
+        public SelectQuery(IEngine engine, IDbTransaction transaction) {
             this.engine = engine;
-
-            this.connection = connection;
+            this.transaction = transaction;
             this.Includes = new List<Expression>();
             this.Excludes = new List<Expression>();
             this.Fetches = new List<Expression>();
@@ -55,7 +54,6 @@ namespace Dashing {
         public IList<Expression> Fetches { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
         public Tuple<Expression, Expression> CollectionFetches { get; set; }
 
@@ -268,7 +266,7 @@ namespace Dashing {
         }
 
         public IEnumerator<T> GetEnumerator() {
-            return this.engine.Query(this.connection, this).GetEnumerator();
+            return this.engine.Query(this.transaction, this).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
@@ -326,7 +324,6 @@ namespace Dashing {
             this.Where(predicate);
             return this.SingleOrDefault();
         }
-
 
         public T Last() {
             var result = this.LastOrDefault();

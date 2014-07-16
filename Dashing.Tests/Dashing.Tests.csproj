@@ -37,8 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper">
-      <HintPath>..\references\Dapper\net45\Dapper.dll</HintPath>
+    <Reference Include="Dapper, Version=1.27.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Dapper.1.27\lib\net45\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.0.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
@@ -46,6 +47,7 @@
     <Reference Include="DatabaseSchemaReader">
       <HintPath>..\packages\Database.Schema.Reader.Core.1.2.4.17096\lib\net35\DatabaseSchemaReader.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.2.1402.2112\lib\net40\Moq.dll</HintPath>
     </Reference>
@@ -72,8 +74,12 @@
     <Compile Include="CodeGeneration\ProxyGeneratorTests.cs" />
     <Compile Include="CodeGeneration\TrackingTests.cs" />
     <Compile Include="Configuration\ColumnExtensionTests.cs" />
+    <Compile Include="Configuration\DapperMapperGeneration\CollectionTests.cs" />
+    <Compile Include="Configuration\DapperMapperGeneration\NonCollectionTests.cs" />
     <Compile Include="Configuration\DefaultConventionTests.cs" />
     <Compile Include="Configuration\DefaultSessionFactoryTests.cs" />
+    <Compile Include="Configuration\IndexTests.cs" />
+    <Compile Include="Configuration\LicenseManagerTests.cs" />
     <Compile Include="Configuration\MapExtensionsTests.cs" />
     <Compile Include="Configuration\MapTests.cs" />
     <Compile Include="Configuration\DefaultMapperTests.cs" />
@@ -91,11 +97,12 @@
     <Compile Include="Engine\AnsiSqlDialectTests.cs" />
     <Compile Include="Engine\SqlDialectBaseTests.cs" />
     <Compile Include="Engine\UpdateWriterTests.cs" />
+    <Compile Include="Engine\WhereClauseWriterTests.cs" />
+    <Compile Include="MockConfiguration.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="SchemaGenerationSandbox.cs" />
     <Compile Include="Engine\DDL\DropTableWriterTests.cs" />
     <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />
-    <Compile Include="Engine\EngineBaseTests.cs" />
     <Compile Include="Engine\SelectWriterTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="FetchTest.cs" />
@@ -105,6 +112,8 @@
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Post.cs" />
+    <Compile Include="TestDomain\PostTag.cs" />
+    <Compile Include="TestDomain\Tag.cs" />
     <Compile Include="TestDomain\User.cs" />
     <Compile Include="Tools\ModelGeneration\SourceTests.cs" />
     <Compile Include="Tools\ReverseEngineering\EngineerTests.cs" />

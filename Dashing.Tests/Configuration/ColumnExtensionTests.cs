@@ -1,8 +1,10 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System;
+    using System.Collections.Generic;
     using System.Data;
 
     using Dashing.Configuration;
+    using Dashing.Tests.TestDomain;
 
     using Xunit;
 
@@ -130,6 +132,17 @@
             var column = MakeTarget();
             column.DontIgnore();
             Assert.Equal(false, column.IsIgnored);
+        }
+
+        [Fact]
+        public void MapsToWorks() {
+            var column = MakeCollectionTarget();
+            column.MapsTo<IList<Comment>, Comment, Post>(c => c.Post);
+            Assert.Equal("Post", column.ChildColumnName);
+        }
+
+        private static Column<IList<Comment>> MakeCollectionTarget() {
+            return new Column<IList<Comment>>();
         }
 
         private static Column<string> MakeNullTarget() {

@@ -4,12 +4,11 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Dashing.CodeGeneration;
+    using Dashing.Configuration;
     using Dashing.Tests.Annotations;
 
     using Microsoft.AspNet.Identity;
-
-    using Dashing.CodeGeneration;
-    using Dashing.Configuration;
 
     using Xunit;
 

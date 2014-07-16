@@ -6,17 +6,17 @@
         /// <summary>
         ///     The none.
         /// </summary>
-        None, 
+        None,
 
         /// <summary>
         ///     The one to many.
         /// </summary>
-        OneToMany, 
+        OneToMany,
 
         /// <summary>
         ///     The many to one.
         /// </summary>
-        ManyToOne, 
+        ManyToOne,
 
         /// <summary>
         ///     The many to many.

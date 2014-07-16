@@ -1,39 +1,9 @@
 ﻿namespace Dashing.Configuration {
     using System.Data;
 
-    /// <summary>
-    ///     The SessionFactory interface.
-    /// </summary>
-    public interface ISessionFactory {
-        /// <summary>
-        ///     The create.
-        /// </summary>
-        /// <param name="engine">
-        ///     The engine.
-        /// </param>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="ISession" />.
-        /// </returns>
-        ISession Create(IDbConnection connection, IConfiguration config);
+    using Dashing.Engine;
 
-        /// <summary>
-        ///     The create.
-        /// </summary>
-        /// <param name="engine">
-        ///     The engine.
-        /// </param>
-        /// <param name="connection">
-        ///     The connection.
-        /// </param>
-        /// <param name="transaction">
-        ///     The transaction.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="ISession" />.
-        /// </returns>
-        ISession Create(IDbConnection connection, IDbTransaction transaction, IConfiguration config);
+    public interface ISessionFactory {
+        ISession Create(IEngine engine, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false);
     }
 }

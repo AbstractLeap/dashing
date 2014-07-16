@@ -3,7 +3,6 @@
     using System.Text;
 
     using Dashing.Configuration;
-    using Dashing.Engine;
     using Dashing.Engine.Dialects;
 
     using Xunit;
@@ -90,7 +89,8 @@
 
         private class TestDialect : SqlDialectBase {
             public TestDialect()
-                : base('<', '>') { }
+                : base('<', '>') {
+            }
         }
     }
 }

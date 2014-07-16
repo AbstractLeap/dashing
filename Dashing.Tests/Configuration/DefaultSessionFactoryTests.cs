@@ -1,11 +1,10 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System.Data;
 
-    using Moq;
-
-    using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
+
+    using Moq;
 
     using Xunit;
 
@@ -16,18 +15,24 @@
 
         private readonly Mock<IDbTransaction> mockTransaction = new Mock<IDbTransaction>();
 
-        private readonly Mock<IConfiguration> mockConfig = new Mock<IConfiguration>();
-
         [Fact]
         public void CreateReturnsASession() {
             var target = this.MakeTarget();
-            Assert.IsType<Session>(target.Create(this.mockConnection.Object, this.mockConfig.Object));
+
+            var session = target.Create(this.mockEngine.Object, this.mockConnection.Object);
+
+            Assert.NotNull(session);
+            Assert.IsType<Session>(session);
         }
 
         [Fact]
         public void CreateWithTransactionReturnsASession() {
             var target = this.MakeTarget();
-            Assert.IsType<Session>(target.Create(this.mockConnection.Object, this.mockTransaction.Object, this.mockConfig.Object));
+
+            var session = target.Create(this.mockEngine.Object, this.mockConnection.Object, this.mockTransaction.Object);
+
+            Assert.NotNull(session);
+            Assert.IsType<Session>(session);
         }
 
         private DefaultSessionFactory MakeTarget() {

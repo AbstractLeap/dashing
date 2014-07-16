@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using Dashing.Configuration;
-using DatabaseSchemaReader.DataSchema;
+﻿namespace Dashing.Tools.ModelGeneration {
+    using System.Collections.Generic;
 
-namespace Dashing.Tools.ModelGeneration
-{
-    interface IModelGenerator
-    {
+    using Dashing.Configuration;
+
+    using DatabaseSchemaReader.DataSchema;
+
+    internal interface IModelGenerator {
         IDictionary<string, string> GenerateFiles(IEnumerable<IMap> maps, DatabaseSchema schema, string domainNamespace);
     }
 }

@@ -2,41 +2,30 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Reflection;
 
-    using Dashing.Engine;
+    using Dashing.Engine.DML;
 
     public interface IGeneratedCodeManager {
-        /// <summary>
-        ///     Gets the Code Generator Config
-        /// </summary>
-        CodeGeneratorConfig Config { get; }
-
-        /// <summary>
-        ///     Returns a reference to the generated code assembly
-        /// </summary>
-        Assembly GeneratedCodeAssembly { get; }
-
         /// <summary>
         ///     Returns a type for a Foreign Key class
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        Type GetForeignKeyType<T>();
+        Type GetForeignKeyType(Type type);
 
         /// <summary>
         ///     Returns a type for a Tracked class
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        Type GetTrackingType<T>();
+        Type GetTrackingType(Type type);
 
         /// <summary>
-        /// Returns a type for the Update class
+        ///     Returns a type for the Update class
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        Type GetUpdateType<T>();
+        Type GetUpdateType(Type type);
 
         /// <summary>
         ///     Returns an instance of a Foreign Key class for the type T
@@ -53,7 +42,7 @@
         T CreateTrackingInstance<T>();
 
         /// <summary>
-        /// Returns an instance of an update class for the type T
+        ///     Returns an instance of an update class for the type T
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -67,17 +56,21 @@
         /// <summary>
         ///     Calls the correct static function within the generated code for a particular fetch tree
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="result"></param>
-        /// <param name="query"></param>
-        /// <param name="conn"></param>
-        /// <returns></returns>
-        IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
+        IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbTransaction transaction);
 
-        IEnumerable<T> Query<T>(SqlWriterResult result, IDbConnection conn, bool asTracked = false);
+        /// <summary>
+        ///     Calls the correct static function within the generated code for a particular fetch tree
+        /// </summary>
+        IEnumerable<T> Query<T>(SqlWriterResult result, IDbTransaction transaction, bool asTracked = false);
 
-        IEnumerable<T> Query<T>(IDbConnection connection, string sql, dynamic parameters = null);
+        /// <summary>
+        ///     Calls the correct static function within the generated code for a particular fetch tree
+        /// </summary>
+        IEnumerable<T> Query<T>(IDbTransaction transaction, string sql, dynamic parameters = null);
 
-        int Execute(string sql, IDbConnection conn, dynamic param = null);
+        /// <summary>
+        ///     Executes some sql against the connection (wraps Dapper method)
+        /// </summary>
+        int Execute(string sql, IDbTransaction transaction, dynamic param = null);
     }
 }

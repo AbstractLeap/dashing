@@ -30,7 +30,7 @@
         }
 
         /// <summary>
-        /// Return a typed map for the typeparameter specified
+        ///     Return a typed map for the typeparameter specified
         /// </summary>
         /// <typeparam name="T">Type to be mapped</typeparam>
         /// <returns>Map for the type</returns>
@@ -41,7 +41,7 @@
         }
 
         /// <summary>
-        /// Return a generic map for the type specified
+        ///     Return a generic map for the type specified
         /// </summary>
         /// <param name="type">Type to be mapped</param>
         /// <returns>Map for the type</returns>
@@ -51,7 +51,8 @@
             if (ctor == null) {
                 throw new Exception("Could not locate constructor for the Map type?");
             }
-            var map = (IMap) ctor.Invoke(new object[] { });
+
+            var map = (IMap)ctor.Invoke(new object[] { });
             this.Build(type, map);
             return map;
         }
@@ -160,17 +161,12 @@
         private void ResolveManyToOneColumn(IColumn column, string propertyName) {
             column.Relationship = RelationshipType.ManyToOne;
             column.DbName = propertyName + "Id";
-            column.DbType = DbType.Int32;
-
-            // TODO resolve column type of related primary key - be careful with infinite loops!
+            column.IsNullable = true;
         }
 
         private void ResolveOneToManyColumn(IColumn column) {
             // assume to be OneToMany
             column.Relationship = RelationshipType.OneToMany;
-
-            // what is the DbName?
-            // what is the DbType?
         }
 
         /// <summary>

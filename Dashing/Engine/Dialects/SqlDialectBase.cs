@@ -181,8 +181,7 @@ namespace Dashing.Engine.Dialects {
             return "select @@identity id";
         }
 
-        public virtual string WriteDropTableIfExists(string tableName)
-        {
+        public virtual string WriteDropTableIfExists(string tableName) {
             var sql = new StringBuilder();
             sql.Append("if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '");
             this.AppendEscaped(sql, tableName);
@@ -190,7 +189,6 @@ namespace Dashing.Engine.Dialects {
             this.AppendQuotedName(sql, tableName);
             return sql.ToString();
         }
-
 
         public virtual void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             throw new InvalidProgramException("ApplyPaging must be overridden in a deriving class");

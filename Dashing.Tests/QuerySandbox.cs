@@ -1,7 +1,13 @@
 ﻿namespace Dashing.Tests {
+    using System;
+    using System.Configuration;
     using System.Linq;
 
+    using Dapper;
+
     using Dashing.Configuration;
+    using Dashing.Engine.DDL;
+    using Dashing.Engine.Dialects;
     using Dashing.Tests.TestDomain;
 
     using Xunit;
@@ -56,8 +62,7 @@
         [Fact(Skip = "connects to real database")]
         public void TestMultipleInsertUpdatesIds() {
             var config = new CustomConfig();
-            using (var session = config.BeginSession())
-            {
+            using (var session = config.BeginSession()) {
                 var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
                 var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
                 session.Insert(user, user2);
@@ -75,8 +80,6 @@
             }
         }
 
-
-
         [Fact(Skip = "connects to real database")]
         public void DeleteBulk() {
             var config = new CustomConfig();
@@ -92,7 +95,7 @@
                 var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
                 var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
                 session.Insert(user, user2);
-                
+
                 // now fetch them
                 var t1 = session.Query<User>().First();
                 Assert.Equal("Bob", t1.Username);
@@ -100,7 +103,7 @@
                 var t2 = session.Query<User>().First(u => u.Username == "Bob2");
                 Assert.Equal("Bob2", t2.Username);
 
-                Assert.Throws<System.InvalidOperationException>(() => session.Query<User>().Single());
+                Assert.Throws<InvalidOperationException>(() => session.Query<User>().Single());
 
                 var t3 = session.Query<User>().Single(u => u.Username == "Bob2");
                 Assert.Equal("Bob2", t3.Username);
@@ -122,7 +125,7 @@
             using (var session = config.BeginSession()) {
                 var user = session.Query<User>().AsTracked().First();
                 user.HeightInMeters = 1.7m;
-                session.Update(user);
+                session.Save(user);
             }
         }
 
@@ -135,10 +138,53 @@
             }
         }
 
+        [Fact(Skip = "connects to real database")]
+        public void TestCollectionFetch() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                var posts = session.Query<Post>().Fetch(p => p.Comments).ToList();
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
+        public void TestMultiCollectionFetch() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                var posts = session.Query<Post>().Fetch(p => p.Comments).Fetch(p => p.Tags).Where(p => p.PostId == 1).ToList();
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
+        public void TestTransactioning() {
+            var dialect = new SqlServerDialect();
+            var dropTableWriter = new DropTableWriter(dialect);
+            var createTableWriter = new CreateTableWriter(dialect);
+            var config = NeedToDash.Configure(SchemaGenerationSandbox.PolyTestConnectionString).AddNamespaceOf<Post>();
+
+            using (var session = config.BeginSession()) {
+                foreach (var map in config.Maps) {
+                    session.Dapper.Execute(dropTableWriter.DropTableIfExists(map));
+                    session.Dapper.Execute(createTableWriter.CreateTable(map));
+                }
+
+                session.Insert(new User { Username = "james", EmailAddress = "james@polylytics.com" });
+                session.Complete();
+            }
+
+            using (var session = config.BeginSession()) {
+                Assert.NotNull(session.Query<User>().SingleOrDefault(u => u.Username == "james"));
+                session.Delete<User>(u => u.Username == "james");
+                Assert.Null(session.Query<User>().SingleOrDefault(u => u.Username == "james"));
+            }
+
+            using (var session = config.BeginSession()) {
+                Assert.NotNull(session.Query<User>().SingleOrDefault(u => u.Username == "james"));
+            }
+        }
+
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new System.Configuration.ConnectionStringSettings("Default", "Server=localhost;Database=Dashingtest;Uid=root;Pwd=treatme123;", "MySql.Data.MySqlClient"))
-            {
+                : base(new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=tempdb;Integrated Security=True;", "System.Data.SqlClient")) {
                 this.AddNamespaceOf<Post>();
             }
         }

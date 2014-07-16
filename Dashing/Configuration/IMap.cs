@@ -9,6 +9,11 @@ namespace Dashing.Configuration {
         Type Type { get; }
 
         /// <summary>
+        ///     Gets the Configuration
+        /// </summary>
+        IConfiguration Configuration { get; set; }
+
+        /// <summary>
         ///     Gets or sets the table.
         /// </summary>
         string Table { get; set; }
@@ -29,7 +34,12 @@ namespace Dashing.Configuration {
         IDictionary<string, IColumn> Columns { get; set; }
 
         /// <summary>
-        /// Gets the primary key for the object
+        /// Gets or sets the indexes specified for this map
+        /// </summary>
+        ICollection<Index> Indexes { get; set; }
+
+        /// <summary>
+        ///     Gets the primary key for the object
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>

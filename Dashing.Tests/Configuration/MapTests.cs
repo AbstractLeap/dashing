@@ -58,8 +58,7 @@
         }
 
         [Fact]
-        public void UsePrimaryKeySetterWithoutPrimaryKeyColumnThrow()
-        {
+        public void UsePrimaryKeySetterWithoutPrimaryKeyColumnThrow() {
             var map = new Map<Post>();
             map.Columns.Add("PostId", new Column<int> { IsPrimaryKey = true, Map = map, Name = "PostId" });
             var post = new Post { PostId = 123 };

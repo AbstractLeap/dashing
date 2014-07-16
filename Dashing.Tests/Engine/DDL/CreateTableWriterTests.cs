@@ -3,14 +3,12 @@
     using System.Linq;
     using System.Text;
 
+    using Dashing.Configuration;
+    using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
+    using Dashing.Tests.TestDomain;
 
     using Moq;
-
-    using Dashing.Configuration;
-    using Dashing.Engine;
-    using Dashing.Engine.DDL;
-    using Dashing.Tests.TestDomain;
 
     using Xunit;
 

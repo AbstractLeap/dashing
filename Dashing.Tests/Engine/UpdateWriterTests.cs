@@ -1,13 +1,16 @@
 ﻿namespace Dashing.Tests.Engine {
-    using Dashing.Engine.Dialects;
-
-    using Moq;
     using System.Diagnostics;
+
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Engine.Dialects;
+    using Dashing.Engine.DML;
     using Dashing.Tests.CodeGeneration.Fixtures;
     using Dashing.Tests.TestDomain;
+
+    using Moq;
+
     using Xunit;
 
     public class UpdateWriterTests : IUseFixture<GenerateCodeFixture> {
@@ -25,8 +28,7 @@
             this.codeManager.TrackInstance(post);
             post.Title = "New Boo";
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
-            var query = new UpdateEntityQuery<Post>(post);
-            var result = updateWriter.GenerateSql(query);
+            var result = updateWriter.GenerateSql(new[] { post });
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [Title] = @p_1 where [PostId] = @p_2;", result.Sql);
         }
@@ -46,8 +48,7 @@
             postTwo.Title = "New Boo";
 
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
-            var query = new UpdateEntityQuery<Post>(postOne, postTwo);
-            var result = updateWriter.GenerateSql(query);
+            var result = updateWriter.GenerateSql(new[] { postOne, postTwo });
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [Title] = @p_1 where [PostId] = @p_2;update [Posts] set [Title] = @p_3 where [PostId] = @p_4;", result.Sql);
         }
@@ -60,18 +61,14 @@
             return new CustomConfig();
         }
 
-        private class CustomConfig : DefaultConfiguration {
-            public CustomConfig()
-                : base(new Mock<IEngine>().Object, string.Empty)
-            {
+        private class CustomConfig : MockConfiguration {
+            public CustomConfig() {
                 this.AddNamespaceOf<Post>();
             }
         }
 
-        private class CustomConfigWithIgnore : DefaultConfiguration {
-            public CustomConfigWithIgnore()
-                : base(new Mock<IEngine>().Object, string.Empty)
-            {
+        private class CustomConfigWithIgnore : MockConfiguration {
+            public CustomConfigWithIgnore() {
                 this.AddNamespaceOf<Post>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }
