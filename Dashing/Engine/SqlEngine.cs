@@ -97,9 +97,9 @@ namespace Dashing.Engine {
             return sqlQuery.Sql.Length == 0 ? 0 : this.Configuration.CodeManager.Execute(sqlQuery.Sql, transaction, sqlQuery.Parameters);
         }
 
-        public virtual int Execute<T>(IDbTransaction transaction, DeleteEntityQuery<T> query) {
+        public virtual int Delete<T>(IDbTransaction transaction, IEnumerable<T> entities) {
             this.EnsureConfigurationLoaded();
-            var sqlQuery = this.deleteWriter.GenerateSql(query);
+            var sqlQuery = this.deleteWriter.GenerateSql(entities);
             return this.Configuration.CodeManager.Execute(sqlQuery.Sql, transaction, sqlQuery.Parameters);
         }
 

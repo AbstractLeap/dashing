@@ -19,7 +19,7 @@ namespace Dashing.Engine {
 
         int Save<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
-        int Execute<T>(IDbTransaction transaction, DeleteEntityQuery<T> query);
+        int Delete<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
         int Execute<T>(IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 

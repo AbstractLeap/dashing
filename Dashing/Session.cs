@@ -140,7 +140,7 @@
         }
 
         public int Delete<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Transaction, new DeleteEntityQuery<T>(entities));
+            return this.engine.Delete(this.Transaction, entities);
         }
 
         public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {

@@ -19,7 +19,7 @@
             : base(dialect, whereClauseWriter, config) {
         }
 
-        public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
+        public SqlWriterResult GenerateSql<T>(IEnumerable<T> entities) {
             var map = this.Configuration.GetMap<T>();
             var sql = new StringBuilder();
             var paramIdx = 0;
@@ -31,7 +31,7 @@
             this.Dialect.AppendQuotedName(sql, map.PrimaryKey.DbName);
             sql.Append(" in (");
 
-            foreach (var entity in query.Entities) {
+            foreach (var entity in entities) {
                 var paramName = "@p_" + ++paramIdx;
                 sql.Append(paramName);
                 sql.Append(", ");

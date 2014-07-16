@@ -137,7 +137,6 @@
     <Compile Include="Session.cs" />
     <Compile Include="NeedToDash.cs" />
     <Compile Include="SessionExtensions.cs" />
-    <Compile Include="UpdateEntityQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Generator\" />
