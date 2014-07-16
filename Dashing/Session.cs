@@ -132,7 +132,7 @@
         }
 
         public int Save<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Transaction, new UpdateEntityQuery<T>(entities));
+            return this.engine.Save(this.Transaction, entities);
         }
 
         public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {

@@ -91,9 +91,9 @@ namespace Dashing.Engine {
             return query.Entities.Count;
         }
 
-        public virtual int Execute<T>(IDbTransaction transaction, UpdateEntityQuery<T> query) {
+        public virtual int Save<T>(IDbTransaction transaction, IEnumerable<T> entities) {
             this.EnsureConfigurationLoaded();
-            var sqlQuery = this.updateWriter.GenerateSql(query);
+            var sqlQuery = this.updateWriter.GenerateSql(entities);
             return sqlQuery.Sql.Length == 0 ? 0 : this.Configuration.CodeManager.Execute(sqlQuery.Sql, transaction, sqlQuery.Parameters);
         }
 

@@ -17,7 +17,7 @@ namespace Dashing.Engine {
 
         int Execute<T>(IDbTransaction transaction, InsertEntityQuery<T> query);
 
-        int Execute<T>(IDbTransaction transaction, UpdateEntityQuery<T> query);
+        int Save<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
         int Execute<T>(IDbTransaction transaction, DeleteEntityQuery<T> query);
 

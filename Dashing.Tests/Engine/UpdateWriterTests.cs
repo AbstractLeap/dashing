@@ -28,8 +28,7 @@
             this.codeManager.TrackInstance(post);
             post.Title = "New Boo";
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
-            var query = new UpdateEntityQuery<Post>(post);
-            var result = updateWriter.GenerateSql(query);
+            var result = updateWriter.GenerateSql(new[] { post });
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [Title] = @p_1 where [PostId] = @p_2;", result.Sql);
         }
@@ -49,8 +48,7 @@
             postTwo.Title = "New Boo";
 
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
-            var query = new UpdateEntityQuery<Post>(postOne, postTwo);
-            var result = updateWriter.GenerateSql(query);
+            var result = updateWriter.GenerateSql(new[] { postOne, postTwo });
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [Title] = @p_1 where [PostId] = @p_2;update [Posts] set [Title] = @p_3 where [PostId] = @p_4;", result.Sql);
         }
