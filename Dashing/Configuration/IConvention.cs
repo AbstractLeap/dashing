@@ -34,7 +34,7 @@
         ///     The entity.
         /// </param>
         /// <returns>
-        ///     The <see cref="string" />.
+        ///     The property name of the primary key.
         /// </returns>
         string PrimaryKeyFor(Type entity);
 
