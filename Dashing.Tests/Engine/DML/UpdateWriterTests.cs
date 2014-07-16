@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tests.Engine {
+﻿namespace Dashing.Tests.Engine.DML {
     using System.Diagnostics;
 
     using Dashing.CodeGeneration;
