@@ -4,7 +4,7 @@
 
     using Dashing.Configuration;
 
-    internal interface IProxyGenerator {
+    public interface IProxyGenerator {
         ProxyGeneratorResult GenerateProxies(CodeGeneratorConfig codeGeneratorConfig, IDictionary<Type, IMap> maps);
     }
 }
