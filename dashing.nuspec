@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.8</version>
+        <version>0.0.9</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.8 - Fixed a bug where columns ere not being ignored
+        <releaseNotes>* 0.0.9 - Performance improvements, collections support, bugfixes and switched back to using Dapper from NuGet 
+* 0.0.8 - Fixed a bug where columns ere not being ignored
 * 0.0.7 - Fixed a bug in code generation of read-only properties
 * 0.0.6 - Now called Dashing. Added bulk update methods
 * 0.0.5 - Added support for TimeSpan
@@ -22,6 +23,9 @@
         <copyright>© Polylytics Limited, 2014</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>
+        <dependencies>
+            <dependency id="Dapper" version="1.27" />
+        </dependencies>
         <frameworkAssemblies>
             <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
             <frameworkAssembly assemblyName="System" targetFramework="" />
