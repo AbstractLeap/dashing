@@ -8,6 +8,8 @@
     using Dashing.Engine;
 
     public sealed class Session : ISession {
+        public IDapper Dapper { get; private set; }
+
         private readonly IEngine engine;
 
         private readonly IDbConnection connection;
@@ -36,9 +38,10 @@
             this.transaction = transaction;
             this.shouldDisposeConnection = disposeConnection;
             this.shouldCommitAndDisposeTransaction = commitAndDisposeTransaction;
+            this.Dapper = new DapperWrapper(new Lazy<IDbConnection>(() => this.Connection), new Lazy<IDbTransaction>(() => this.Transaction));
         }
 
-        public IDbConnection Connection {
+        private IDbConnection Connection {
             get {
                 if (this.isDisposed) {
                     throw new ObjectDisposedException("Session");

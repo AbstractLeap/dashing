@@ -5,8 +5,8 @@ namespace Dashing {
     using System.Linq.Expressions;
 
     public interface ISession : IDisposable {
-        IDbConnection Connection { get; }
-        
+        IDapper Dapper { get; }
+
         void Complete();
 
         T Get<T, TPrimaryKey>(TPrimaryKey id);

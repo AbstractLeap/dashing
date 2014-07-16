@@ -85,6 +85,7 @@
     <Compile Include="Configuration\MapT.cs" />
     <Compile Include="Configuration\MutableConfiguration.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
+    <Compile Include="DapperWrapper.cs" />
     <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
     <Compile Include="Engine\DapperMapperGeneration\IDapperMapperGenerator.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
@@ -123,6 +124,7 @@
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />
+    <Compile Include="IDapper.cs" />
     <Compile Include="IFetchMany.cs" />
     <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
