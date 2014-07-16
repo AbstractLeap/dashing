@@ -128,7 +128,7 @@
         }
 
         public int Insert<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Transaction, new InsertEntityQuery<T>(entities));
+            return this.engine.Insert(this.Transaction, entities);
         }
 
         public int Save<T>(IEnumerable<T> entities) {
