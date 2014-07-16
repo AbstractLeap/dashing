@@ -53,6 +53,27 @@
             Assert.Equal("update [Posts] set [Title] = @p_1 where [PostId] = @p_2;update [Posts] set [Title] = @p_3 where [PostId] = @p_4;", result.Sql);
         }
 
+        [Fact]
+        public void UpdateDetachedEntityWorks() {
+            // assemble
+            var post = new Post();
+            post.PostId = 1;
+            post.Title = "Boo";
+            var updateWriter = MakeTarget();
+
+            // act
+            var result = updateWriter.GenerateSql(new[] { post });
+
+            // assert
+            Debug.Write(result.Sql);
+            Assert.Equal("update [Posts] set [Title] = @p_1, [Content] = @p_2, [Rating] = @p_3, [Author] = @p_4, [Blog] = @p_5 where [PostId] = @p_6;", result.Sql);
+        }
+
+        private static UpdateWriter MakeTarget() {
+            var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
+            return updateWriter;
+        }
+
         private static IConfiguration MakeConfig(bool withIgnore = false) {
             if (withIgnore) {
                 return new CustomConfigWithIgnore();
