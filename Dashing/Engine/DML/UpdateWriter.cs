@@ -21,13 +21,13 @@
             : base(dialect, whereClauseWriter, config) {
         }
 
-        public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
+        public SqlWriterResult GenerateSql<T>(IEnumerable<T> entities) {
             var sql = new StringBuilder();
             var parameters = new DynamicParameters();
             var paramIdx = 0;
 
             // we'll chuck these all in one query
-            foreach (var entity in query.Entities) {
+            foreach (var entity in entities) {
                 this.GenerateUpdateSql(entity, sql, parameters, ref paramIdx);
             }
 

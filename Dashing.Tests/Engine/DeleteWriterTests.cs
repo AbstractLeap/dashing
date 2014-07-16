@@ -16,7 +16,7 @@
         public void SingleDeleteWorks() {
             var deleteWriter = new DeleteWriter(new SqlServerDialect(), MakeConfig());
             var post = new Post { PostId = 1 };
-            var result = deleteWriter.GenerateSql(new DeleteEntityQuery<Post>(post));
+            var result = deleteWriter.GenerateSql(new[] { post });
             Debug.Write(result.Sql);
             Assert.Equal("delete from [Posts] where [PostId] in (@p_1)", result.Sql);
         }
@@ -26,7 +26,7 @@
             var deleteWriter = new DeleteWriter(new SqlServerDialect(), MakeConfig());
             var post = new Post { PostId = 1 };
             var post2 = new Post { PostId = 2 };
-            var result = deleteWriter.GenerateSql(new DeleteEntityQuery<Post>(post, post2));
+            var result = deleteWriter.GenerateSql(new[] { post, post2 });
             Debug.Write(result.Sql);
             Assert.Equal("delete from [Posts] where [PostId] in (@p_1, @p_2)", result.Sql);
         }
