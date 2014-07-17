@@ -163,8 +163,8 @@
 
             using (var session = config.BeginSession()) {
                 foreach (var map in config.Maps) {
-                    session.Connection.Execute(dropTableWriter.DropTableIfExists(map));
-                    session.Connection.Execute(createTableWriter.CreateTable(map));
+                    session.Dapper.Execute(dropTableWriter.DropTableIfExists(map));
+                    session.Dapper.Execute(createTableWriter.CreateTable(map));
                 }
 
                 session.Insert(new User { Username = "james", EmailAddress = "james@polylytics.com" });

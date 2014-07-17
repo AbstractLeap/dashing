@@ -9,7 +9,7 @@ namespace Dashing.CodeGeneration {
     using Dashing.Configuration;
     using Dashing.Extensions;
 
-    internal class ProxyGenerator : IProxyGenerator {
+    public class ProxyGenerator : IProxyGenerator {
         // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags (this usage is legal, see http://msdn.microsoft.com/en-us/library/system.codedom.memberattributes%28v=vs.110%29.aspx)
         private const MemberAttributes FinalPublic = MemberAttributes.Final | MemberAttributes.Public;
 

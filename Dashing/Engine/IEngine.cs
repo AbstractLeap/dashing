@@ -15,11 +15,11 @@ namespace Dashing.Engine {
 
         IEnumerable<T> Query<T>(IDbTransaction transaction, SelectQuery<T> query);
 
-        int Execute<T>(IDbTransaction transaction, InsertEntityQuery<T> query);
+        int Insert<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
-        int Execute<T>(IDbTransaction transaction, UpdateEntityQuery<T> query);
+        int Save<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
-        int Execute<T>(IDbTransaction transaction, DeleteEntityQuery<T> query);
+        int Delete<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
         int Execute<T>(IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 

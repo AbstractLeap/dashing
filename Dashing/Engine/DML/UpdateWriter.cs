@@ -21,13 +21,13 @@
             : base(dialect, whereClauseWriter, config) {
         }
 
-        public SqlWriterResult GenerateSql<T>(EntityQueryBase<T> query) {
+        public SqlWriterResult GenerateSql<T>(IEnumerable<T> entities) {
             var sql = new StringBuilder();
             var parameters = new DynamicParameters();
             var paramIdx = 0;
 
             // we'll chuck these all in one query
-            foreach (var entity in query.Entities) {
+            foreach (var entity in entities) {
                 this.GenerateUpdateSql(entity, sql, parameters, ref paramIdx);
             }
 
@@ -35,30 +35,54 @@
         }
 
         private void GenerateUpdateSql<T>(T entity, StringBuilder sql, DynamicParameters parameters, ref int paramIdx) {
-            ITrackedEntityInspector<T> inspector = new TrackedEntityInspector<T>(entity);
+            var map = this.Configuration.GetMap<T>();
+            Dictionary<string, object> dirtyProperties;
 
-            if (!inspector.IsDirty() || inspector.HasOnlyDirtyCollections()) {
-                return;
+            // establish the dirty properties, either using a TrackedEntityInspector, or just assume everything is dirty
+            if (TrackedEntityInspector<T>.IsTracked(entity)) {
+                var inspector = new TrackedEntityInspector<T>(entity);
+                if (!inspector.IsDirty() || inspector.HasOnlyDirtyCollections()) {
+                    return;
+                }
+
+                dirtyProperties = inspector.DirtyProperties.ToDictionary(p => p, p => inspector.NewValues[p]);
+            }
+            else {
+                dirtyProperties =
+                    map.OwnedColumns(true)
+                       .Where(c => !c.IsPrimaryKey)
+                       .ToDictionary(
+                            c => c.Name,
+                            c => typeof(T).GetProperty(c.Name).GetValue(entity) // TODO: map does this for you?
+                       );
             }
 
             sql.Append("update ");
             this.Dialect.AppendQuotedTableName(sql, this.Configuration.GetMap<T>());
-            sql.Append(" set ");
 
-            foreach (var property in inspector.DirtyProperties) {
-                string paramName = "@p_" + ++paramIdx;
-                parameters.Add(paramName, inspector.NewValues[property]);
-                this.Dialect.AppendQuotedName(sql, this.Configuration.GetMap<T>().Columns[property].DbName);
-                sql.Append(" = " + paramName);
+            // set each of the fields to the new value
+            sql.Append(" set ");
+            foreach (var property in dirtyProperties) {
+                var paramName = "@p_" + ++paramIdx;
+                parameters.Add(paramName, property.Value);
+                this.Dialect.AppendQuotedName(sql, map.Columns[property.Key].DbName);
+                sql.Append(" = ");
+                sql.Append(paramName);
+                sql.Append(", ");
             }
 
+            sql.Remove(sql.Length - 2, 2);
+
+            // limit the update to the primary key = the entity id
             sql.Append(" where ");
             this.Dialect.AppendQuotedName(sql, this.Configuration.GetMap<T>().PrimaryKey.DbName);
             sql.Append(" = ");
-            string idParamName = "@p_" + ++paramIdx;
+            var idParamName = "@p_" + ++paramIdx;
             parameters.Add(idParamName, this.Configuration.GetMap<T>().GetPrimaryKeyValue(entity));
             sql.Append(idParamName);
 
+
+            // FIN
             sql.Append(";");
 
             //// TODO Should we update collections here or is that the users job? Guess we should do ManyToMany tho

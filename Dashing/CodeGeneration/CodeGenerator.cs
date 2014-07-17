@@ -18,7 +18,7 @@
     using Dashing.Extensions;
 
     // TODO: Use Refly instead of CodeDom - http://www.codeproject.com/Articles/6283/Refly-makes-the-CodeDom-er-life-easier
-    internal class CodeGenerator : ICodeGenerator {
+    public class CodeGenerator : ICodeGenerator {
         private readonly CodeGeneratorConfig generatorConfig;
 
         private readonly IProxyGenerator proxyGenerator;

@@ -632,7 +632,7 @@ select * from Comments where PostId = @id";
 
             using (var setupSession = dashingConfig.BeginSession()) {
                 foreach (var sql in sqls) {
-                    setupSession.Connection.Execute(sql);
+                    setupSession.Dapper.Execute(sql);
                 }
 
                 var r = new Random();

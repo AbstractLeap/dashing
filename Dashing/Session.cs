@@ -8,6 +8,8 @@
     using Dashing.Engine;
 
     public sealed class Session : ISession {
+        public IDapper Dapper { get; private set; }
+
         private readonly IEngine engine;
 
         private readonly IDbConnection connection;
@@ -36,9 +38,10 @@
             this.transaction = transaction;
             this.shouldDisposeConnection = disposeConnection;
             this.shouldCommitAndDisposeTransaction = commitAndDisposeTransaction;
+            this.Dapper = new DapperWrapper(new Lazy<IDbConnection>(() => this.Connection), new Lazy<IDbTransaction>(() => this.Transaction));
         }
 
-        public IDbConnection Connection {
+        private IDbConnection Connection {
             get {
                 if (this.isDisposed) {
                     throw new ObjectDisposedException("Session");
@@ -128,11 +131,11 @@
         }
 
         public int Insert<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Transaction, new InsertEntityQuery<T>(entities));
+            return this.engine.Insert(this.Transaction, entities);
         }
 
         public int Save<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Transaction, new UpdateEntityQuery<T>(entities));
+            return this.engine.Save(this.Transaction, entities);
         }
 
         public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
@@ -140,7 +143,7 @@
         }
 
         public int Delete<T>(IEnumerable<T> entities) {
-            return this.engine.Execute(this.Transaction, new DeleteEntityQuery<T>(entities));
+            return this.engine.Delete(this.Transaction, entities);
         }
 
         public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
