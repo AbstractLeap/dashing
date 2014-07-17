@@ -52,14 +52,8 @@
                     var closeOverName = name;
 
                     foreach (var test in tests.Where(t => t.Provider == closeOverProvider && t.TestName == closeOverName).Where(test => test != null)) {
-                        simpleDataDb = Database.OpenConnection(ConnectionString.ConnectionString);
-                        using (dashingSession = dashingConfig.BeginSession())
-                        using (dapperConn = connectionFactory.OpenDbConnection())
-                        using (ormliteConn = connectionFactory.OpenDbConnection())
-                        using (nhStatelessSession = Nh.SessionFactory.OpenStatelessSession())
-                        using (nhSession = Nh.SessionFactory.OpenSession()) {
+                         {
                             // warm up
-                            test.TestFunc(1);
                             var watch = new Stopwatch();
 
                             // iterate 
@@ -84,24 +78,10 @@
             }
         }
 
-        private static readonly EfContext EfDb = new EfContext();
-
         private static readonly IConfiguration dashingConfig = new DashingConfiguration(ConnectionString);
 
         private static readonly OrmLiteConnectionFactory connectionFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
-
-        private static IDbConnection dapperConn;
-
-        private static IDbConnection ormliteConn;
-
-        private static Dashing.ISession dashingSession;
-
-        private static NHibernate.ISession nhSession;
-
-        private static IStatelessSession nhStatelessSession;
-
-        private static dynamic simpleDataDb;
-
+        
         private static void SetupTests(List<Test> tests) {
             SetupSelectSingleTest(tests);
             SetupFetchTest(tests);
@@ -120,12 +100,15 @@
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var posts =
-                            dashingSession.Query<Post>()
-                                          .Fetch(p => p.Comments)
-                                          .Fetch(p => p.Tags)
-                                          .Where(p => p.PostId > i && p.PostId < i + 3)
-                                          .ToList();
+                        using (var dashingSession = dashingConfig.BeginSession()) {
+                            return
+                                dashingSession.Query<Post>()
+                                              .Fetch(p => p.Comments)
+                                              .Fetch(p => p.Tags)
+                                              .Where(p => p.PostId > i && p.PostId < i + 3)
+                                              .ToList();
+
+                        }
                     }));
 
             // add EF
@@ -134,9 +117,14 @@
                     Providers.EntityFramework,
                     TestName,
                     i => {
-                        var posts =
-                            QueryableExtensions.Include(QueryableExtensions.Include(EfDb.Posts, p => p.Tags), p => p.Comments)
-                                               .Where(p => p.PostId > i && p.PostId < i + 3).ToList();
+                        using (var EfDb = new EfContext()) {
+                            return
+                                QueryableExtensions.Include(
+                                    QueryableExtensions.Include(EfDb.Posts, p => p.Tags),
+                                    p => p.Comments)
+                                                   .Where(p => p.PostId > i && p.PostId < i + 3)
+                                                   .ToList();
+                        }
                     }));
 
             // add nh stateful
@@ -145,14 +133,25 @@
                     Providers.NHibernate,
                     TestName,
                     i => {
-                        // First(p => p.PostId == i) doesn't work?
-                        // ok, nHIbernate linq broken (now I remember the pain!)
-                        var posts = nhSession.QueryOver<Post>().Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
-                        var comments =
-                            nhSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
-                        var tags =
-                            nhSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Where(p => p.PostId > i && p.PostId < i + 3).Future<Post>();
-                        var post = posts.ToList();
+                        using (var nhSession = Nh.SessionFactory.OpenSession()) {
+                            // First(p => p.PostId == i) doesn't work?
+                            // ok, nHIbernate linq broken (now I remember the pain!)
+                            var posts =
+                                nhSession.QueryOver<Post>()
+                                         .Where(p => p.PostId > i && p.PostId < i + 3)
+                                         .Future<Post>();
+                            var comments =
+                                nhSession.QueryOver<Post>()
+                                         .Fetch(p => p.Comments)
+                                         .Eager.Where(p => p.PostId > i && p.PostId < i + 3)
+                                         .Future<Post>();
+                            var tags =
+                                nhSession.QueryOver<Post>()
+                                         .Fetch(p => p.Tags)
+                                         .Eager.Where(p => p.PostId > i && p.PostId < i + 3)
+                                         .Future<Post>();
+                            return posts.ToList();
+                        }
 
                     },
                     "Stateful"));
@@ -167,11 +166,13 @@
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var post =
-                            dashingSession.Query<Post>()
-                                          .Fetch(p => p.Comments)
-                                          .Fetch(p => p.Tags)
-                                          .First(p => p.PostId == i);
+                        using (var dashingSession = dashingConfig.BeginSession()) {
+                            return
+                                dashingSession.Query<Post>()
+                                              .Fetch(p => p.Comments)
+                                              .Fetch(p => p.Tags)
+                                              .First(p => p.PostId == i);
+                        }
                     }));
 
             // add EF
@@ -180,9 +181,12 @@
                     Providers.EntityFramework,
                     TestName,
                     i => {
-                        var post =
-                            QueryableExtensions.Include(QueryableExtensions.Include(EfDb.Posts, p => p.Tags), p => p.Comments)
-                                               .First(p => p.PostId == i);
+                        using (var EfDb = new EfContext()) {
+                            return
+                                QueryableExtensions.Include(
+                                    QueryableExtensions.Include(EfDb.Posts, p => p.Tags),
+                                    p => p.Comments).First(p => p.PostId == i);
+                        }
                     }));
 
             // add nh stateful
@@ -191,15 +195,23 @@
                     Providers.NHibernate,
                     TestName,
                     i => {
-                        // First(p => p.PostId == i) doesn't work?
-                        // ok, nHIbernate linq broken (now I remember the pain!)
-                        var posts = nhSession.QueryOver<Post>().Where(p => p.PostId == i).Future<Post>();
-                        var comments =
-                            nhSession.QueryOver<Post>().Fetch(p => p.Comments).Eager.Where(p => p.PostId == i).Future<Post>();
-                        var tags =
-                            nhSession.QueryOver<Post>().Fetch(p => p.Tags).Eager.Where(p => p.PostId == i).Future<Post>();
-                        var post = posts.First();
-
+                        using (var nhSession = Nh.SessionFactory.OpenSession()) {
+                            // First(p => p.PostId == i) doesn't work?
+                            // ok, nHIbernate linq broken (now I remember the pain!)
+                            var posts =
+                                nhSession.QueryOver<Post>().Where(p => p.PostId == i).Future<Post>();
+                            var comments =
+                                nhSession.QueryOver<Post>()
+                                         .Fetch(p => p.Comments)
+                                         .Eager.Where(p => p.PostId == i)
+                                         .Future<Post>();
+                            var tags =
+                                nhSession.QueryOver<Post>()
+                                         .Fetch(p => p.Tags)
+                                         .Eager.Where(p => p.PostId == i)
+                                         .Future<Post>();
+                            return posts.First();
+                        }
                     },
                     "Stateful"));
 
@@ -231,12 +243,18 @@
                     Providers.Dapper,
                     TestName,
                     i => {
-                        var post =
-                            dapperConn.Query<Post>(
-                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
-                                new { l_1 = i }).First();
-                        var comments = dapperConn.Query<Comment>("select * from [Comments] where [PostId] = @postId", new { postId = post.PostId }).ToList();
-                        post.Comments = comments;
+                        using (var dapperConn = connectionFactory.OpenDbConnection()) {
+                            var post =
+                                dapperConn.Query<Post>(
+                                    "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                                    new { l_1 = i }).First();
+                            var comments =
+                                dapperConn.Query<Comment>(
+                                    "select * from [Comments] where [PostId] = @postId",
+                                    new { postId = post.PostId }).ToList();
+                            post.Comments = comments;
+                            return post;
+                        }
                     },
                     "Naive"));
 
@@ -245,14 +263,17 @@
                     Providers.Dapper,
                     TestName,
                     i => {
-                        var sql = @"
+                        using (var dapperConn = connectionFactory.OpenDbConnection()) {
+                            var sql = @"
 select * from Posts where PostId = @id
 select * from Comments where PostId = @id";
 
-                        var multi = dapperConn.QueryMultiple(sql, new { id = i });
-                        var post = multi.Read<Post>().Single();
-                        post.Comments = multi.Read<Comment>().ToList();
-                        multi.Dispose();
+                            var multi = dapperConn.QueryMultiple(sql, new { id = i });
+                            var post = multi.Read<Post>().Single();
+                            post.Comments = multi.Read<Comment>().ToList();
+                            multi.Dispose();
+                            return post;
+                        }
                     },
                     "Multiple Result Method"));
 
@@ -262,21 +283,34 @@ select * from Comments where PostId = @id";
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var post =
-                            dashingSession.Query<Post>()
-                                          .Fetch(p => p.Comments)
-                                          .First(p => p.PostId == i);
+                        using (var dashingSession = dashingConfig.BeginSession()) {
+                            return
+                                dashingSession.Query<Post>()
+                                              .Fetch(p => p.Comments)
+                                              .First(p => p.PostId == i);
+                        }
                     }));
 
             // add EF
-            tests.Add(new Test(Providers.EntityFramework, TestName, i => { var post = QueryableExtensions.Include(EfDb.Posts, p => p.Comments).First(p => p.PostId == i); }));
+            tests.Add(new Test(Providers.EntityFramework, TestName,
+                i => {
+                    using (var EfDb = new EfContext()) {
+                      return
+                            QueryableExtensions.Include(EfDb.Posts, p => p.Comments)
+                                               .First(p => p.PostId == i);
+                    }
+                }));
 
             // add nh stateful
             tests.Add(
                 new Test(
                     Providers.NHibernate,
                     TestName,
-                    i => { var post = nhSession.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); },
+                    i => {
+                        using (var nhSession = Nh.SessionFactory.OpenSession()) {
+                            return nhSession.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i);
+                        }
+                    },
                     "Stateful"));
 
             // add nh stateless
@@ -284,7 +318,14 @@ select * from Comments where PostId = @id";
                 new Test(
                     Providers.NHibernate,
                     TestName,
-                    i => { var post = nhStatelessSession.Query<Post>().Fetch(p => p.Comments).First(p => p.PostId == i); },
+                    i => {
+                        using (var nhStatelessSession = Nh.SessionFactory.OpenStatelessSession()) {
+                            return
+                                nhStatelessSession.Query<Post>()
+                                                  .Fetch(p => p.Comments)
+                                                  .First(p => p.PostId == i);
+                        }
+                    },
                     "Stateless"));
         }
 
@@ -298,18 +339,26 @@ select * from Comments where PostId = @id";
                     Providers.Dapper,
                     TestName,
                     i => {
-                        var post =
-                            dapperConn.Query<Post>(
-                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
-                                new { l_1 = i }).First();
-                        post.Title = Providers.Dapper + "_" + i + r.Next(100000);
-                        dapperConn.Execute("Update [Posts] set [Title] = @Title where [PostId] = @PostId", new { post.Title, post.PostId });
-                        var thatPost =
-                            dapperConn.Query<Post>(
-                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
-                                new { l_1 = i }).First();
-                        if (thatPost.Title != post.Title) {
-                            Console.WriteLine(TestName + " failed for " + Providers.Dapper + " as the update did not work");
+                        using (var dapperConn = connectionFactory.OpenDbConnection()) {
+                            var post =
+                                dapperConn.Query<Post>(
+                                    "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                                    new { l_1 = i }).First();
+                            post.Title = Providers.Dapper + "_" + i + r.Next(100000);
+                            dapperConn.Execute(
+                                "Update [Posts] set [Title] = @Title where [PostId] = @PostId",
+                                new { post.Title, post.PostId });
+                            var thatPost =
+                                dapperConn.Query<Post>(
+                                    "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                                    new { l_1 = i }).First();
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.Dapper
+                                    + " as the update did not work");
+                            }
+
+                            return post;
                         }
                     }));
 
@@ -319,12 +368,19 @@ select * from Comments where PostId = @id";
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var post = dashingSession.Query<Post>().AsTracked().First(p => p.PostId == i);
-                        post.Title = Providers.Dashing + "_" + i + r.Next(100000);
-                        dashingSession.Save(post);
-                        var thatPost = dashingSession.Query<Post>().First(p => p.PostId == i);
-                        if (thatPost.Title != post.Title) {
-                            Console.WriteLine(TestName + " failed for " + Providers.Dashing + " as the update did not work");
+                        using (var dashingSession = dashingConfig.BeginSession()) {
+                            var post =
+                                dashingSession.Query<Post>().AsTracked().First(p => p.PostId == i);
+                            post.Title = Providers.Dashing + "_" + i + r.Next(100000);
+                            dashingSession.Save(post);
+                            var thatPost = dashingSession.Query<Post>().First(p => p.PostId == i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.Dashing
+                                    + " as the update did not work");
+                            }
+
+                            return post;
                         }
                     }));
 
@@ -334,12 +390,18 @@ select * from Comments where PostId = @id";
                     Providers.Dashing,
                     TestName,
                     i => {
-                        var post = dashingSession.GetTracked<Post>(i);
-                        post.Title = Providers.Dashing + "_" + i + r.Next(100000);
-                        dashingSession.Save(post);
-                        var thatPost = dashingSession.Get<Post>(i);
-                        if (thatPost.Title != post.Title) {
-                            Console.WriteLine(TestName + " failed for " + Providers.Dashing + " as the update did not work");
+                        using (var dashingSession = dashingConfig.BeginSession()) {
+                            var post = dashingSession.GetTracked<Post>(i);
+                            post.Title = Providers.Dashing + "_" + i + r.Next(100000);
+                            dashingSession.Save(post);
+                            var thatPost = dashingSession.Get<Post>(i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.Dashing
+                                    + " as the update did not work");
+                            }
+
+                            return post;
                         }
                     },
                     "By Id"));
@@ -350,12 +412,18 @@ select * from Comments where PostId = @id";
                     Providers.EntityFramework,
                     TestName,
                     i => {
-                        var post = EfDb.Posts.Single(p => p.PostId == i);
-                        post.Title = Providers.EntityFramework + "_" + i + r.Next(100000);
-                        EfDb.SaveChanges();
-                        var thatPost = EfDb.Posts.Single(p => p.PostId == i);
-                        if (thatPost.Title != post.Title) {
-                            Console.WriteLine(TestName + " failed for " + Providers.EntityFramework + " as the update did not work");
+                        using (var EfDb = new EfContext()) {
+                            var post = EfDb.Posts.Single(p => p.PostId == i);
+                            post.Title = Providers.EntityFramework + "_" + i + r.Next(100000);
+                            EfDb.SaveChanges();
+                            var thatPost = EfDb.Posts.Single(p => p.PostId == i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.EntityFramework
+                                    + " as the update did not work");
+                            }
+
+                            return post;
                         }
                     }));
 
@@ -365,12 +433,18 @@ select * from Comments where PostId = @id";
                     Providers.ServiceStack,
                     TestName,
                     i => {
-                        var post = ormliteConn.SingleById<Post>(i);
-                        post.Title = Providers.ServiceStack + "_" + i + r.Next(100000);
-                        ormliteConn.Update(post);
-                        var thatPost = ormliteConn.SingleById<Post>(i);
-                        if (thatPost.Title != post.Title) {
-                            Console.WriteLine(TestName + " failed for " + Providers.ServiceStack + " as the update did not work");
+                        using (var ormliteConn = connectionFactory.OpenDbConnection()) {
+                            var post = ormliteConn.SingleById<Post>(i);
+                            post.Title = Providers.ServiceStack + "_" + i + r.Next(100000);
+                            ormliteConn.Update(post);
+                            var thatPost = ormliteConn.SingleById<Post>(i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.ServiceStack
+                                    + " as the update did not work");
+                            }
+
+                            return post;
                         }
                     }));
 
@@ -380,13 +454,19 @@ select * from Comments where PostId = @id";
                     Providers.NHibernate,
                     TestName,
                     i => {
-                        var post = nhSession.Get<Post>(i);
-                        post.Title = Providers.NHibernate + "_" + i + r.Next(100000);
-                        nhSession.Update(post);
-                        nhSession.Flush();
-                        var thatPost = nhSession.Get<Post>(i);
-                        if (thatPost.Title != post.Title) {
-                            Console.WriteLine(TestName + " failed for " + Providers.NHibernate + " as the update did not work");
+                        using (var nhSession = Nh.SessionFactory.OpenSession()) {
+                            var post = nhSession.Get<Post>(i);
+                            post.Title = Providers.NHibernate + "_" + i + r.Next(100000);
+                            nhSession.Update(post);
+                            nhSession.Flush();
+                            var thatPost = nhSession.Get<Post>(i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.NHibernate
+                                    + " as the update did not work");
+                            }
+
+                            return post;
                         }
                     }));
         }
@@ -399,32 +479,59 @@ select * from Comments where PostId = @id";
                 new Test(
                     Providers.Dapper,
                     TestName,
-                    i =>
-                    dapperConn.Query<Post, User, Post>(
-                        "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[BlogId], t.[DoNotMap], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where ([PostId] = @l_1)",
-                        (p, u) => {
-                            p.Author = u;
-                            return p;
-                        },
-                        new { l_1 = i },
-                        splitOn: "UserId").First()));
+                    i => {
+                        using (var dapperConn = connectionFactory.OpenDbConnection()) {
+                            return dapperConn.Query<Post, User, Post>(
+                                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[BlogId], t.[DoNotMap], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where ([PostId] = @l_1)",
+                                (p, u) => {
+                                    p.Author = u;
+                                    return p;
+                                },
+                                new { l_1 = i },
+                                splitOn: "UserId").First();
+                        }
+                    }));
 
             // add Dashing
-            tests.Add(new Test(Providers.Dashing, TestName, i => dashingSession.Query<Post>().Fetch(p => p.Author).First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.Dashing, TestName,
+                i => {
+                    using (var dashingSession = dashingConfig.BeginSession()) {
+                        return dashingSession.Query<Post>().Fetch(p => p.Author).First(p => p.PostId == i);
+                    }
+                }));
 
             // add ef
-            tests.Add(new Test(Providers.EntityFramework, TestName, i => QueryableExtensions.Include(EfDb.Posts.AsNoTracking(), p => p.Author).First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.EntityFramework, TestName,
+                i => {
+                    using (var EfDb = new EfContext()) {
+                        return
+                            QueryableExtensions.Include(EfDb.Posts.AsNoTracking(), p => p.Author)
+                                               .First(p => p.PostId == i);
+                    }
+                }));
 
             // add nh stateful
             tests.Add(
-                new Test(Providers.NHibernate, TestName, i => QueryableExtensions.Include(nhSession.Query<Post>(), p => p.Author).First(p => p.PostId == i), "Stateful"));
+                new Test(Providers.NHibernate, TestName,
+                    i => {
+                        using (var nhSession = Nh.SessionFactory.OpenSession()) {
+                            return nhSession.Query<Post>().Fetch(p => p.Author)
+                                               .First(p => p.PostId == i);
+                        }
+                    }, "Stateful"));
 
             // add nh stateless
             tests.Add(
                 new Test(
                     Providers.NHibernate,
                     TestName,
-                    i => QueryableExtensions.Include(nhStatelessSession.Query<Post>(), p => p.Author).First(p => p.PostId == i),
+                    i => {
+                        using (var nhStatelessSession = Nh.SessionFactory.OpenStatelessSession()) {
+                            return
+                                nhStatelessSession.Query<Post>().Fetch(p => p.Author)
+                                               .First(p => p.PostId == i); ;
+                        }
+                    },
                     "Stateless"));
         }
 
@@ -436,19 +543,37 @@ select * from Comments where PostId = @id";
                 new Test(
                     Providers.Dapper,
                     TestName,
-                    i =>
-                    dapperConn.Query<Post>(
-                        "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
-                        new { l_1 = i }).First()));
+                    i => {
+                        using (var dapperConn = connectionFactory.OpenDbConnection()) {
+                            return dapperConn.Query<Post>(
+                                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                                new { l_1 = i }).First();
+                        }
+                    }));
 
             // add Dashing
-            tests.Add(new Test(Providers.Dashing, TestName, i => dashingSession.Query<Post>().First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.Dashing, TestName,
+                i => {
+                    using (var dashingSession = dashingConfig.BeginSession()) {
+                        return dashingSession.Query<Post>().First(p => p.PostId == i);
+                    }
+                }));
 
             // add Dashing by id
-            tests.Add(new Test(Providers.Dashing, TestName, i => dashingSession.Get<Post>(i), "By Id"));
+            tests.Add(new Test(Providers.Dashing, TestName,
+                i => {
+                    using (var dashingSession = dashingConfig.BeginSession()) {
+                        return dashingSession.Get<Post>(i);
+                    }
+                }, "By Id"));
 
             // add ef
-            tests.Add(new Test(Providers.EntityFramework, TestName, i => EfDb.Posts.AsNoTracking().First(p => p.PostId == i)));
+            tests.Add(new Test(Providers.EntityFramework, TestName,
+                i => {
+                    using (var EfDb = new EfContext()) {
+                        return EfDb.Posts.AsNoTracking().First(p => p.PostId == i);
+                    }
+                }));
 
             // add ef2
             tests.Add(
@@ -456,23 +581,45 @@ select * from Comments where PostId = @id";
                     Providers.EntityFramework,
                     TestName,
                     i => {
-                        EfDb.Configuration.AutoDetectChangesEnabled = false;
-                        var post = EfDb.Posts.Find(i);
-                        EfDb.Configuration.AutoDetectChangesEnabled = true;
+                        using (var EfDb = new EfContext()) {
+                            EfDb.Configuration.AutoDetectChangesEnabled = false;
+                            var post = EfDb.Posts.Find(i);
+                            EfDb.Configuration.AutoDetectChangesEnabled = true;
+                            return post;
+                        }
                     },
                     "Using Find with AutoDetechChangesEnabled = false"));
 
             // add ormlite
-            tests.Add(new Test(Providers.ServiceStack, TestName, i => ormliteConn.SingleById<Post>(i)));
+            tests.Add(new Test(Providers.ServiceStack, TestName,
+                i => {
+                    using (var ormliteConn = connectionFactory.OpenDbConnection()) {
+                        return ormliteConn.SingleById<Post>(i);
+                    }
+                }));
 
             // add simple data
-            tests.Add(new Test(Providers.SimpleData, TestName, i => simpleDataDb.Posts.Get(i)));
+            tests.Add(new Test(Providers.SimpleData, TestName,
+                i => {
+                    var simpleDataDb = Database.OpenConnection(ConnectionString.ConnectionString);
+                        return simpleDataDb.Posts.Get(i);
+                }));
 
             // add nh stateless
-            tests.Add(new Test(Providers.NHibernate, TestName, i => nhStatelessSession.Get<Post>(i), "Stateless"));
+            tests.Add(new Test(Providers.NHibernate, TestName,
+                i => {
+                    using (var nhStatelessSession = Nh.SessionFactory.OpenStatelessSession()) {
+                        return nhStatelessSession.Get<Post>(i);
+                    }
+                }, "Stateless"));
 
             // add nh stateful
-            tests.Add(new Test(Providers.NHibernate, TestName, i => nhSession.Get<Post>(i), "Stateful"));
+            tests.Add(new Test(Providers.NHibernate, TestName,
+                i => {
+                    using (var nhSession = Nh.SessionFactory.OpenSession()) {
+                        return nhSession.Get<Post>(i);
+                    }
+                }, "Stateful"));
         }
 
         private static void SetupDatabase() {
@@ -502,7 +649,7 @@ select * from Comments where PostId = @id";
                     blogs.Add(blog);
                     setupSession.Insert(blog);
                 }
-                
+
                 var posts = new List<Post>();
                 for (var i = 0; i <= 500; i++) {
                     var userId = r.Next(100);
