@@ -12,6 +12,9 @@
     using Moq;
 
     using Xunit;
+    using System;
+using Dapper;
+    using System.Collections.Generic;
 
     public class UpdateWriterTests : IUseFixture<GenerateCodeFixture> {
         private IGeneratedCodeManager codeManager;
@@ -31,6 +34,48 @@
             var result = updateWriter.GenerateSql(new[] { post });
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [Title] = @p_1 where [PostId] = @p_2;", result.Sql);
+        }
+
+        [Fact]
+        public void UpdateManyToOneProperty() {
+            // assemble
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+            post.PostId = 1;
+            post.Blog = new Blog() { BlogId = 1 };
+            this.codeManager.TrackInstance(post);
+            post.Blog = new Blog() { BlogId = 2 };
+            var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
+
+            // act
+            var result = updateWriter.GenerateSql(new[] { post });
+
+            // assert
+            Debug.Write(result.Sql);
+            Assert.Equal("update [Posts] set [BlogId] = @p_1 where [PostId] = @p_2;", result.Sql); // Is this the correct result?
+
+            var typeOfP1 = GetValueOfParameter(result.Parameters, "@p_1");
+            var typeOfP2 = GetValueOfParameter(result.Parameters, "@p_2");
+
+            Assert.IsType(typeof(int), typeOfP1);
+            Assert.IsType(typeof(int), typeOfP2);
+        }
+
+        private object GetValueOfParameter(DynamicParameters p, string parameterName) {
+
+            var parametersField = typeof(DynamicParameters).GetField("parameters", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            dynamic parameters = parametersField.GetValue(p);
+
+            foreach (var paramInfoPair in parameters) {
+                var paramInfo = paramInfoPair.GetType().GetProperty("Value").GetValue(paramInfoPair);
+                var paramName = paramInfo.GetType().GetProperty("Name").GetValue(paramInfo);
+                var paramValue = paramInfo.GetType().GetProperty("Value").GetValue(paramInfo);
+
+                if (paramName == parameterName) {
+                    return paramValue;
+                }
+            }
+
+            return null;
         }
 
         [Fact]
