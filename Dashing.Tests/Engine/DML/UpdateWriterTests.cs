@@ -56,8 +56,8 @@ using Dapper;
             var param1 = GetValueOfParameter(result.Parameters, "@p_1");
             var param2 = GetValueOfParameter(result.Parameters, "@p_2");
 
-            Assert.IsType(typeof(int), param1.GetType());
-            Assert.IsType(typeof(int), param2.GetType());
+            Assert.IsType(typeof(int), param1);
+            Assert.IsType(typeof(int), param2);
         }
 
         private object GetValueOfParameter(DynamicParameters p, string parameterName) {
