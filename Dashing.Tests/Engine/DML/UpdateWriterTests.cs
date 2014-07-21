@@ -13,7 +13,7 @@
 
     using Xunit;
     using System;
-using Dapper;
+    using Dapper;
     using System.Collections.Generic;
 
     public class UpdateWriterTests : IUseFixture<GenerateCodeFixture> {
