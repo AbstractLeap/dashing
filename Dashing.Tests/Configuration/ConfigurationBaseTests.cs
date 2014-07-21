@@ -262,7 +262,7 @@
         [Fact]
         public void GetMapThrowsForUnmappedEntity() {
             // assemble
-            var target = new BasicConfiguration();
+            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
 
             // assert
             Assert.Throws(typeof(ArgumentException), () => { target.GetMap(typeof(Blog)); });
