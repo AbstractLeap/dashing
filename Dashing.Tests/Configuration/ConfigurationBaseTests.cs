@@ -184,6 +184,52 @@
             Assert.Equal(ExampleTableName, actual.Table);
         }
 
+        [Fact]
+        public void HasMapReturnsTrueForMappedEntity() {
+            // assemble
+            var target = new BasicConfiguration();
+
+            // act
+            var actual = target.HasMap(typeof(Post));
+
+            // assert
+            Assert.True(actual);
+        }
+
+        [Fact]
+        public void HasMapReturnsFalseForUnmappedEntity() {
+            // assemble
+            var target = new BasicConfiguration();
+
+            // act
+            var actual = target.HasMap(typeof(Blog));
+
+            // assert
+            Assert.False(actual);
+        }
+
+        [Fact]
+        public void GetMapReturnsMapForMappedEntity() {
+            // assemble
+            var target = new BasicConfiguration();
+
+            // act
+            var actual = target.GetMap(typeof(Post));
+
+            // assert
+            Assert.NotNull(actual);
+            Assert.Equal(typeof(Post), actual.Type);
+        }
+
+        [Fact]
+        public void GetMapThrowsForUnmappedEntity() {
+            // assemble
+            var target = new BasicConfiguration();
+
+            // assert
+            Assert.Throws(typeof(ArgumentException), () => { target.GetMap(typeof(Blog)); });
+        }
+
         private static Mock<ISessionFactory> MakeMockSf() {
             return new Mock<ISessionFactory>(MockBehavior.Strict);
         }
@@ -294,6 +340,12 @@
             public CustomConfigurationWithSetup(IMapper mapper)
                 : base(mapper) {
                 this.Setup<User>().Table = ExampleTableName;
+            }
+        }
+
+        private class BasicConfiguration : CustomConfiguration {
+            public BasicConfiguration() : base(new DefaultMapper(new DefaultConvention())) {
+                this.Add<Post>();
             }
         }
     }
