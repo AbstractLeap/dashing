@@ -95,11 +95,23 @@
         public IMap GetMap(Type type) {
             IMap map;
 
-            if (!this.mappedTypes.TryGetValue(type, out map)) {
-                throw new ArgumentException("That type is not mapped");
+            // shortcut for simplest case
+            if (this.mappedTypes.TryGetValue(type, out map)) {
+                return map;
             }
 
-            return map;
+            // if the type is a generated type
+            var config = this.codeGenerator.Configuration;
+            if (type.Namespace == config.Namespace) {
+                if (type.BaseType == null) {
+                    throw new ArgumentException("That type is generated but does not have a BaseType");
+                }
+
+                return GetMap(type.BaseType);
+            }
+
+            // definitely not mapped
+            throw new ArgumentException("That type is not mapped");
         }
 
         public bool HasMap(Type type) {
@@ -110,7 +122,7 @@
             // if the type is a generated type
             var config = this.codeGenerator.Configuration;
             if (type.Namespace == config.Namespace) {
-                return type.BaseType == null ? false : HasMap(type.BaseType);
+                return type.BaseType != null && this.HasMap(type.BaseType);
             }
 
             return false;
