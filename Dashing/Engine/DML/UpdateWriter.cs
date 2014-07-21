@@ -64,8 +64,32 @@
             sql.Append(" set ");
             foreach (var property in dirtyProperties) {
                 var paramName = "@p_" + ++paramIdx;
-                parameters.Add(paramName, property.Value);
-                this.Dialect.AppendQuotedName(sql, map.Columns[property.Key].DbName);
+                object paramValue;
+                var mappedColumn = map.Columns[property.Key];
+
+                if (property.Value == null) {
+                    paramValue = DBNull.Value;
+                }
+                else {
+                    // look up the column type and decide where to get the value from
+                    switch (mappedColumn.Relationship) {
+                        case RelationshipType.None:
+                            paramValue = property.Value;
+                            break;
+                        case RelationshipType.ManyToOne:
+                            var foreignKeyMap = this.Configuration.GetMap(mappedColumn.Type);
+                            paramValue = foreignKeyMap.GetPrimaryKeyValue(property.Value);
+                            break;
+                        default:
+                            throw new NotImplementedException(String.Format("Unexpected column relationship {0} on entity {1}.{2} in UpdateWriter", mappedColumn.Relationship, entity.GetType().Name, property.Key));
+                    } 
+                }
+
+                // add the parameter
+                parameters.Add(paramName, paramValue);
+
+                // finish up the set claus
+                this.Dialect.AppendQuotedName(sql, mappedColumn.DbName);
                 sql.Append(" = ");
                 sql.Append(paramName);
                 sql.Append(", ");

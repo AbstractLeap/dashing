@@ -53,11 +53,11 @@ using Dapper;
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [BlogId] = @p_1 where [PostId] = @p_2;", result.Sql); // Is this the correct result?
 
-            var typeOfP1 = GetValueOfParameter(result.Parameters, "@p_1");
-            var typeOfP2 = GetValueOfParameter(result.Parameters, "@p_2");
+            var param1 = GetValueOfParameter(result.Parameters, "@p_1");
+            var param2 = GetValueOfParameter(result.Parameters, "@p_2");
 
-            Assert.IsType(typeof(int), typeOfP1);
-            Assert.IsType(typeof(int), typeOfP2);
+            Assert.IsType(typeof(int), param1);
+            Assert.IsType(typeof(int), param2);
         }
 
         private object GetValueOfParameter(DynamicParameters p, string parameterName) {
