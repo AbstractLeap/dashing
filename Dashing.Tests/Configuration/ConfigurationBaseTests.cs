@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System;
     using System.Collections.Generic;
+
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
@@ -15,11 +16,21 @@
     using Moq;
 
     using Xunit;
+    using Dashing.Tests.CodeGeneration.Fixtures;
 
-    public class ConfigurationBaseTests {
+    public class ConfigurationBaseTests : IUseFixture<GenerateCodeFixture> {
         private static readonly ConnectionStringSettings DummyConnectionString = new ConnectionStringSettings { ConnectionString = "Data Source=dummy.local", ProviderName = "System.Data.SqlClient" };
 
         private const string ExampleTableName = "foo";
+
+        private ICodeGenerator codeGenerator;
+
+        private IGeneratedCodeManager codeManager;
+        
+        public void SetFixture(GenerateCodeFixture data) {
+            this.codeGenerator = data.CodeGenerator;
+            this.codeManager = data.CodeManager;
+        }
 
         [Fact]
         public void EmptyConfigurationReturnsEmptyMaps() {
@@ -199,13 +210,26 @@
         [Fact]
         public void HasMapReturnsFalseForUnmappedEntity() {
             // assemble
-            var target = new BasicConfiguration();
+            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
 
             // act
             var actual = target.HasMap(typeof(Blog));
 
             // assert
             Assert.False(actual);
+        }
+        
+        [Fact]
+        public void HasMapReturnsTrueForMappedTrackedEntity() {
+            // assemble
+            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+
+            // act
+            var actual = target.HasMap(post.GetType());      
+
+            // assert
+            Assert.True(actual);
         }
 
         [Fact]
@@ -345,6 +369,13 @@
 
         private class BasicConfiguration : CustomConfiguration {
             public BasicConfiguration() : base(new DefaultMapper(new DefaultConvention())) {
+                this.Add<Post>();
+            }
+        }
+
+        private class BasicConfigurationWithCodeManager : ConfigurationBase {
+            public BasicConfigurationWithCodeManager(ICodeGenerator codeGenerator)
+                : base(MakeMockEngine().Object, DummyConnectionString, MakeMockDbProviderFactory().Object, new DefaultMapper(new DefaultConvention()), MakeMockSf().Object, codeGenerator) {
                 this.Add<Post>();
             }
         }

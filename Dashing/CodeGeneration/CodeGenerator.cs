@@ -25,6 +25,12 @@
 
         public long ElapsedMilliseconds { get; private set; }
 
+        public CodeGeneratorConfig Configuration { 
+            get { 
+                return this.generatorConfig; 
+            } 
+        }
+
         public CodeGenerator(CodeGeneratorConfig codeGeneratorConfiguration, IProxyGenerator proxyGenerator) {
             this.generatorConfig = codeGeneratorConfiguration;
             this.proxyGenerator = proxyGenerator;
