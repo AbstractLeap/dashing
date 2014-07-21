@@ -246,6 +246,20 @@
         }
 
         [Fact]
+        public void GetMapReturnsMapForMappedTrackedEntity() {
+            // assemble
+            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+
+            // act
+            var actual = target.GetMap(post.GetType());
+
+            // assert
+            Assert.NotNull(actual);
+            Assert.Equal(typeof(Post), actual.Type);
+        }
+
+        [Fact]
         public void GetMapThrowsForUnmappedEntity() {
             // assemble
             var target = new BasicConfiguration();
