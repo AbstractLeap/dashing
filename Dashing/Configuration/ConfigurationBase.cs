@@ -103,7 +103,17 @@
         }
 
         public bool HasMap(Type type) {
-            return this.mappedTypes.ContainsKey(type);
+            if (this.mappedTypes.ContainsKey(type)) {
+                return true;
+            }
+
+            // if the type is a generated type
+            var config = this.codeGenerator.Configuration;
+            if (type.Namespace == config.Namespace) {
+                return type.BaseType == null ? false : HasMap(type.BaseType);
+            }
+
+            return false;
         }
 
         private void Dirty() {
