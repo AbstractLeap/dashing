@@ -82,14 +82,16 @@
                 var value = Expression.Lambda(b).Compile().DynamicInvoke(null);
                 this.AddParameter(value);
             } else {
-
-                // form binary expression
+                // left hand side of expression
                 this.Sql.Append("(");
                 this.isTopOfBinary = true;
                 this.Visit(b.Left);
 
+                // equality operator
                 // TODO What about == entity where entity is null??
                 this.Sql.Append(this.GetOperator(b.NodeType, b.Right.ToString() == "null"));
+
+                // right hand side of expression
                 this.isTopOfBinary = true;
                 this.Visit(b.Right);
                 this.Sql.Append(")");
@@ -331,7 +333,7 @@
 
             if (value != null) {
                 if (value.GetType().IsCollection()) {
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("Queries of the type foo.BarId in (@barIds) are not supported yet");
                 }
 
                 if (this.configuration.HasMap(value.GetType())) {

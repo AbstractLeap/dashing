@@ -5,12 +5,14 @@
     public class GenerateCodeFixture {
         public IGeneratedCodeManager CodeManager { get; private set; }
 
+        public ICodeGenerator CodeGenerator { get; set; }
+
         public GenerateCodeFixture()
             : this(null) { }
 
         protected GenerateCodeFixture(CodeGeneratorConfig generatorConfig) {
-            var codeGenerator = new CodeGenerator(generatorConfig ?? new CodeGeneratorConfig() { CompileInDebug = true, OutputAssembly = true, OutputSourceCode = true }, new ProxyGenerator());
-            this.CodeManager = codeGenerator.Generate(new CustomConfig());
+            this.CodeGenerator = new CodeGenerator(generatorConfig ?? new CodeGeneratorConfig() { CompileInDebug = true, OutputAssembly = true, OutputSourceCode = true }, new ProxyGenerator());
+            this.CodeManager = this.CodeGenerator.Generate(new CustomConfig());
         }
 
         private class CustomConfig : MockConfiguration {
