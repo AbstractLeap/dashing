@@ -1,6 +1,8 @@
 ﻿namespace Dashing.Tests.Engine {
     using System.Data;
     using System.Diagnostics;
+    using System.Collections.Generic;
+    using System.Linq.Expressions;
 
     using Dashing.Configuration;
     using Dashing.Engine;
@@ -19,12 +21,13 @@
         public void TwoWhereClausesStack() {
             var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
 
-            System.Linq.Expressions.Expression<System.Func<Post, bool>> whereClause1 = p => p.PostId > 0;
-            System.Linq.Expressions.Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
+            Expression<System.Func<Post, bool>> whereClause1 = p => p.PostId > 0;
+            Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
-            System.Collections.Generic.List<System.Linq.Expressions.Expression<System.Func<Post, bool>>> foo = new System.Collections.Generic.List<System.Linq.Expressions.Expression<System.Func<Post, bool>>>();
-            foo.Add(whereClause1);
-            foo.Add(whereClause2);
+            var foo = new List<Expression<System.Func<Post, bool>>> {
+                                                                        whereClause1,
+                                                                        whereClause2
+                                                                    };
 
             var result = whereClauseWriter.GenerateSql(foo, null);
             Debug.Write(result.Sql);
@@ -35,10 +38,10 @@
         public void TwoWhereClausesParametersOkay() {
             var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
 
-            System.Linq.Expressions.Expression<System.Func<Post, bool>> whereClause1 = p => p.PostId > 0;
-            System.Linq.Expressions.Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
+            Expression<System.Func<Post, bool>> whereClause1 = p => p.PostId > 0;
+            Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
-            System.Collections.Generic.List<System.Linq.Expressions.Expression<System.Func<Post, bool>>> foo = new System.Collections.Generic.List<System.Linq.Expressions.Expression<System.Func<Post, bool>>>();
+            var foo = new List<Expression<System.Func<Post, bool>>>();
             foo.Add(whereClause1);
             foo.Add(whereClause2);
 
