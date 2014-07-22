@@ -51,6 +51,20 @@
             Assert.Equal(2, result.Parameters.GetValue("l_2"));
         }
 
+        [Fact]
+        public void UsesPrimaryKeyWhereEntityEqualsEntity() {
+            // assemble
+            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+            var user = new User() { UserId = 1 };
+            Expression<System.Func<User, bool>> whereClause = u => u == user;
+
+            // act
+            var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
+
+            // assert
+            Assert.Equal(" where ([UserId] = @l_1)", actual.Sql);
+        }
+
         private static IConfiguration MakeConfig(bool withIgnore = false) {
             if (withIgnore) {
                 return new CustomConfigWithIgnore();
