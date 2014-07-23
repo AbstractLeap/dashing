@@ -89,6 +89,22 @@
             Assert.Equal(typeof(int), actual.Parameters.GetValue("l_1").GetType());
         }
 
+        [Fact]
+        public void WhereEntityEqualsGeneratedEntity() {
+            // assemble
+            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+            var post = this.codeManager.CreateForeignKeyInstance<Post>();
+            post.PostId = 1;
+            Expression<System.Func<Post, bool>> whereClause = p => p == post;
+
+            // act
+            var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
+
+            // assert
+            Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
+            Assert.Equal(typeof(int), actual.Parameters.GetValue("l_1").GetType());
+        }
+
         private static IConfiguration MakeConfig(bool withIgnore = false) {
             if (withIgnore) {
                 return new CustomConfigWithIgnore();
