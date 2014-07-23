@@ -29,7 +29,7 @@ namespace Dashing.Tests {
                 return this.MappedTypes.Values;
             }
         }
-
+        
         public Mock<ISession> MockSession { get; set; }
         
         public MockConfiguration() {
@@ -47,16 +47,11 @@ namespace Dashing.Tests {
 
         public IMap GetMap(Type type) {
             IMap map;
-
-            if (!this.MappedTypes.TryGetValue(type, out map)) {
-                throw new ArgumentException("That type is not mapped");
-            }
-
-            return map;
+            return ConfigurationHelper.GetMap(type, this.MappedTypes);
         }
 
         public bool HasMap(Type type) {
-            return this.MappedTypes.ContainsKey(type);
+            return ConfigurationHelper.HasMap(type, this.MappedTypes);
         }
 
         public ISession BeginSession() {

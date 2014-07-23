@@ -93,39 +93,11 @@
         }
 
         public IMap GetMap(Type type) {
-            IMap map;
-
-            // shortcut for simplest case
-            if (this.mappedTypes.TryGetValue(type, out map)) {
-                return map;
-            }
-
-            // if the type is a generated type
-            var config = this.codeGenerator.Configuration;
-            if (type.Namespace == config.Namespace) {
-                if (type.BaseType == null) {
-                    throw new ArgumentException("That type is generated but does not have a BaseType");
-                }
-
-                return GetMap(type.BaseType);
-            }
-
-            // definitely not mapped
-            throw new ArgumentException("That type is not mapped");
+            return ConfigurationHelper.GetMap(type, mappedTypes);
         }
 
         public bool HasMap(Type type) {
-            if (this.mappedTypes.ContainsKey(type)) {
-                return true;
-            }
-
-            // if the type is a generated type
-            var config = this.codeGenerator.Configuration;
-            if (type.Namespace == config.Namespace) {
-                return type.BaseType != null && this.HasMap(type.BaseType);
-            }
-
-            return false;
+            return ConfigurationHelper.HasMap(type, mappedTypes);
         }
 
         private void Dirty() {
