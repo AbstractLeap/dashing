@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System;
     using System.Collections.Generic;
+
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
@@ -15,11 +16,21 @@
     using Moq;
 
     using Xunit;
+    using Dashing.Tests.CodeGeneration.Fixtures;
 
-    public class ConfigurationBaseTests {
+    public class ConfigurationBaseTests : IUseFixture<GenerateCodeFixture> {
         private static readonly ConnectionStringSettings DummyConnectionString = new ConnectionStringSettings { ConnectionString = "Data Source=dummy.local", ProviderName = "System.Data.SqlClient" };
 
         private const string ExampleTableName = "foo";
+
+        private ICodeGenerator codeGenerator;
+
+        private IGeneratedCodeManager codeManager;
+        
+        public void SetFixture(GenerateCodeFixture data) {
+            this.codeGenerator = data.CodeGenerator;
+            this.codeManager = data.CodeManager;
+        }
 
         [Fact]
         public void EmptyConfigurationReturnsEmptyMaps() {
@@ -160,13 +171,14 @@
             var target = new CustomConfigurationWithAddNamespace(mockMapper.Object);
 
             Assert.NotNull(target);
-            Assert.Equal(6, target.Maps.Count());
+            Assert.Equal(7, target.Maps.Count());
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Blog)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Comment)));
-            Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
+            Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Like)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(PostTag)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Tag)));
+            Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(User)));
             mockMapper.Verify();
         }
 
@@ -182,6 +194,79 @@
             var target = new CustomConfigurationWithAddAndSetup(SetupAllMaps().Object);
             var actual = target.Maps.Single(m => m.Type == typeof(User));
             Assert.Equal(ExampleTableName, actual.Table);
+        }
+
+        [Fact]
+        public void HasMapReturnsTrueForMappedEntity() {
+            // assemble
+            var target = new BasicConfiguration();
+
+            // act
+            var actual = target.HasMap(typeof(Post));
+
+            // assert
+            Assert.True(actual);
+        }
+
+        [Fact]
+        public void HasMapReturnsFalseForUnmappedEntity() {
+            // assemble
+            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
+
+            // act
+            var actual = target.HasMap(typeof(Blog));
+
+            // assert
+            Assert.False(actual);
+        }
+        
+        [Fact]
+        public void HasMapReturnsTrueForMappedTrackedEntity() {
+            // assemble
+            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+
+            // act
+            var actual = target.HasMap(post.GetType());      
+
+            // assert
+            Assert.True(actual);
+        }
+
+        [Fact]
+        public void GetMapReturnsMapForMappedEntity() {
+            // assemble
+            var target = new BasicConfiguration();
+
+            // act
+            var actual = target.GetMap(typeof(Post));
+
+            // assert
+            Assert.NotNull(actual);
+            Assert.Equal(typeof(Post), actual.Type);
+        }
+
+        [Fact]
+        public void GetMapReturnsMapForMappedTrackedEntity() {
+            // assemble
+            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+
+            // act
+            var actual = target.GetMap(post.GetType());
+
+            // assert
+            Assert.NotNull(actual);
+            Assert.Equal(typeof(Post), actual.Type);
+        }
+
+        [Fact]
+        public void GetMapThrowsForUnmappedEntity() {
+            // assemble
+            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
+
+            // assert
+            Assert.Throws(typeof(ArgumentException), () => { target.GetMap(typeof(Blog)); });
         }
 
         private static Mock<ISessionFactory> MakeMockSf() {
@@ -208,6 +293,7 @@
             mockMapper.Setup(m => m.MapFor(typeof(Comment))).Returns(new Map<Comment>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(Tag))).Returns(new Map<Tag>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(PostTag))).Returns(new Map<PostTag>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Like))).Returns(new Map<Like>()).Verifiable();
             return mockMapper;
         }
 
@@ -239,6 +325,8 @@
             var mock = new Mock<ICodeGenerator>(MockBehavior.Strict);
             var mock2 = new Mock<IGeneratedCodeManager>(MockBehavior.Strict);
             mock.Setup(m => m.Generate(It.IsAny<IConfiguration>())).Returns(mock2.Object);
+            var config = new CodeGeneratorConfig();
+            mock.Setup(m => m.Configuration).Returns(config);
             return mock;
         }
 
@@ -294,6 +382,19 @@
             public CustomConfigurationWithSetup(IMapper mapper)
                 : base(mapper) {
                 this.Setup<User>().Table = ExampleTableName;
+            }
+        }
+
+        private class BasicConfiguration : CustomConfiguration {
+            public BasicConfiguration() : base(new DefaultMapper(new DefaultConvention())) {
+                this.Add<Post>();
+            }
+        }
+
+        private class BasicConfigurationWithCodeManager : ConfigurationBase {
+            public BasicConfigurationWithCodeManager(ICodeGenerator codeGenerator)
+                : base(MakeMockEngine().Object, DummyConnectionString, MakeMockDbProviderFactory().Object, new DefaultMapper(new DefaultConvention()), MakeMockSf().Object, codeGenerator) {
+                this.Add<Post>();
             }
         }
     }

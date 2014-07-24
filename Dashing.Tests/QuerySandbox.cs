@@ -155,6 +155,18 @@
         }
 
         [Fact(Skip = "connects to real database")]
+        public void TestChainedCollectionFetch() {
+            var config = new CustomConfig();
+            using (var session = config.BeginSession()) {
+                var blog =
+                    session.Query<Blog>()
+                           .FetchMany(p => p.Posts)
+                           .ThenFetch(p => p.Comments)
+                           .First();
+            }
+        }
+
+        [Fact(Skip = "connects to real database")]
         public void TestTransactioning() {
             var dialect = new SqlServerDialect();
             var dropTableWriter = new DropTableWriter(dialect);
@@ -184,7 +196,7 @@
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=tempdb;Integrated Security=True;", "System.Data.SqlClient")) {
+                : base(new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=dashingtest;Integrated Security=True;", "System.Data.SqlClient")) {
                 this.AddNamespaceOf<Post>();
             }
         }

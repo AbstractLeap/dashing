@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.10</version>
+        <version>0.0.11</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.10 - Access all of Dapper from within Dashing
+        <releaseNotes>* 0.0.11 - Infinite collection fetching, save detached objects, and bugfixes with automatic entity id resolution
+* 0.0.10 - Access all of Dapper from within Dashing
 * 0.0.9 - Performance improvements, collections support, bugfixes and switched back to using Dapper from NuGet 
 * 0.0.8 - Fixed a bug where columns ere not being ignored
 * 0.0.7 - Fixed a bug in code generation of read-only properties
@@ -36,6 +37,7 @@
             <frameworkAssembly assemblyName="System.Data.Entity.Design" targetFramework="" />
             <frameworkAssembly assemblyName="System.Data.Linq" targetFramework="" />
             <frameworkAssembly assemblyName="System.Xml" targetFramework="" />
+            <frameworkAssembly assemblyName="System.Configuration" targetFramework="" />
         </frameworkAssemblies>
     </metadata>
     <files>
