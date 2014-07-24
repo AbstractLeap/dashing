@@ -44,14 +44,32 @@ namespace Dashing.CodeGeneration {
             updateClass.BaseTypes.Add(typeof(IUpdateClass));
 
             // add property for storing updated properties
-            this.GenerateGetSetProperty(updateClass, "UpdatedProperties", typeof(IList<>).MakeGenericType(typeof(string)), FinalPublic);
+            // i.e. public UpdatedProperties { get; set; }
+            var updatedProperties = this.GenerateGetSetProperty(updateClass, "UpdatedProperties", typeof(IList<>).MakeGenericType(typeof(string)), FinalPublic);
 
-            // add in constructor to initialise updatedproperties
-            var constructor = new CodeConstructor();
-            constructor.Attributes = MemberAttributes.Public;
-            constructor.Statements.Add(
-                new CodeAssignStatement(CodeHelpers.ThisField("UpdatedProperties"), new CodeObjectCreateExpression(typeof(List<>).MakeGenericType(typeof(string)))));
-            updateClass.Members.Add(constructor);
+            // now make that property check the backing field is initialized
+            // i.e. 
+            // UpdatedProperties { 
+            //   get {
+            //     if (this.updatedProperties == null) {
+            //       this.updatedProperties = new List<string>();
+            //     }
+            //     return this.updatedProperties;
+            //   }
+            // }
+            var backingFieldIsNull =
+                new CodeBinaryOperatorExpression(
+                    CodeHelpers.ThisField("backingUpdatedProperties"),
+                    CodeBinaryOperatorType.ValueEquality,
+                    new CodePrimitiveExpression(null));
+            var initializePropertyToNewList =
+                new CodeAssignStatement(
+                    CodeHelpers.ThisField("backingUpdatedProperties"),
+                    new CodeObjectCreateExpression(typeof(List<>).MakeGenericType(typeof(string))));
+            var ifBackingFieldIsNullInitializePropertyToNewList = new CodeConditionStatement(
+                backingFieldIsNull,
+                initializePropertyToNewList);
+            updatedProperties.GetStatements.Insert(0, ifBackingFieldIsNullInitializePropertyToNewList);
 
             // now override the getters/setters of all the properties and add to updated properties
             foreach (var column in map.Columns.Where(c => !c.Value.IsIgnored)) {

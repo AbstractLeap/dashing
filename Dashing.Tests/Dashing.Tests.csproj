@@ -72,6 +72,7 @@
     <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
     <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
     <Compile Include="CodeGeneration\ProxyGeneratorTests.cs" />
+    <Compile Include="CodeGeneration\UpdateTests.cs" />
     <Compile Include="CodeGeneration\TrackingTests.cs" />
     <Compile Include="Configuration\ColumnExtensionTests.cs" />
     <Compile Include="Configuration\DapperMapperGeneration\CollectionTests.cs" />
