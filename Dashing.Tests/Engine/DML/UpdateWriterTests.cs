@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Tests.Engine.DML {
     using System.Diagnostics;
+    using System.Linq.Expressions;
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
@@ -60,8 +61,8 @@
             Assert.IsType(typeof(int), param2);
         }
 
+        // TODO: Put this in an extension method
         private object GetValueOfParameter(DynamicParameters p, string parameterName) {
-
             var parametersField = typeof(DynamicParameters).GetField("parameters", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             dynamic parameters = parametersField.GetValue(p);
 
@@ -128,6 +129,28 @@
             // assert
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [Title] = @p_1, [Content] = @p_2, [Rating] = @p_3, [AuthorId] = @p_4, [BlogId] = @p_5 where [PostId] = @p_6;", result.Sql);
+        }
+
+        [Fact]
+        public void BulkUpdateManyToOnePropertyResolvesForeignKeyId() {
+            // assemble
+            var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
+            var updateClass = this.codeManager.CreateUpdateInstance<Post>();
+            updateClass.Blog = new Blog() { BlogId = 1 };
+
+            // act
+            Expression<Func<Post,bool>> predicate = p => p.PostId == 1;
+            var result = updateWriter.GenerateBulkSql(updateClass, new[] {predicate});
+
+            // assert
+            Debug.Write(result.Sql);
+            Assert.Equal("update [Posts] set [BlogId] = @Blog where ([PostId] = @l_1)", result.Sql); // Is this the correct result?
+
+            var param1 = GetValueOfParameter(result.Parameters, "@Blog");
+            var param2 = GetValueOfParameter(result.Parameters, "@l_1");
+
+            Assert.IsType(typeof(int), param1);
+            Assert.IsType(typeof(int), param2);
         }
 
         private static UpdateWriter MakeTarget() {

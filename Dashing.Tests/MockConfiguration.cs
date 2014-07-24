@@ -31,12 +31,15 @@ namespace Dashing.Tests {
         }
 
         public Mock<ISession> MockSession { get; set; }
-        
+
+        private CodeGeneratorConfig CodeGeneratorConfig { get; set; }
+
         public MockConfiguration() {
             this.ConnectionString = new ConnectionStringSettings { ConnectionString = "Data Source=dummy.local", ProviderName = "System.Data.SqlClient" };
             this.MappedTypes = new Dictionary<Type, IMap>();
             this.MockSession = new Mock<ISession>(MockBehavior.Loose);
             this.Mapper = new DefaultMapper(new DefaultConvention());
+            this.CodeGeneratorConfig = new CodeGeneratorConfig();
         }
 
         public IMap<T> GetMap<T>() {
@@ -47,16 +50,11 @@ namespace Dashing.Tests {
 
         public IMap GetMap(Type type) {
             IMap map;
-
-            if (!this.MappedTypes.TryGetValue(type, out map)) {
-                throw new ArgumentException("That type is not mapped");
-            }
-
-            return map;
+            return ConfigurationHelper.GetMap(type, this.MappedTypes, this.CodeGeneratorConfig);
         }
 
         public bool HasMap(Type type) {
-            return this.MappedTypes.ContainsKey(type);
+            return ConfigurationHelper.HasMap(type, this.MappedTypes, this.CodeGeneratorConfig);
         }
 
         public ISession BeginSession() {

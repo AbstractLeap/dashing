@@ -65,6 +65,7 @@
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
+    <Compile Include="Configuration\ConfigurationHelper.cs" />
     <Compile Include="Configuration\DefaultSessionFactory.cs" />
     <Compile Include="Configuration\IColumn.cs" />
     <Compile Include="Configuration\ILicenseManager.cs" />
