@@ -5,9 +5,9 @@ namespace Dashing.Configuration {
     using Dashing.CodeGeneration;
 
     public static class ConfigurationHelper {
-        public static IMap GetMap(Type type, IDictionary<Type, IMap> mappedTypes) {
+        public static IMap GetMap(Type type, IDictionary<Type, IMap> mappedTypes, CodeGeneratorConfig config) {
             IMap map;
-            var config = new CodeGeneratorConfig();
+
             // shortcut for simplest case
             if (mappedTypes.TryGetValue(type, out map)) {
                 return map;
@@ -19,22 +19,21 @@ namespace Dashing.Configuration {
                     throw new ArgumentException("That type is generated but does not have a BaseType");
                 }
 
-                return GetMap(type.BaseType, mappedTypes);
+                return GetMap(type.BaseType, mappedTypes, config);
             }
 
             // definitely not mapped
             throw new ArgumentException("That type is not mapped");
         }
 
-        public static bool HasMap(Type type, IDictionary<Type, IMap> mappedTypes) {
-            var config = new CodeGeneratorConfig();
+        public static bool HasMap(Type type, IDictionary<Type, IMap> mappedTypes, CodeGeneratorConfig config) {
             if (mappedTypes.ContainsKey(type)) {
                 return true;
             }
 
             // if the type is a generated type
             if (type.Namespace == config.Namespace) {
-                return type.BaseType != null && HasMap(type.BaseType, mappedTypes);
+                return type.BaseType != null && HasMap(type.BaseType, mappedTypes, config);
             }
 
             return false;

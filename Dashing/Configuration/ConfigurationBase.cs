@@ -93,11 +93,11 @@
         }
 
         public IMap GetMap(Type type) {
-            return ConfigurationHelper.GetMap(type, mappedTypes);
+            return ConfigurationHelper.GetMap(type, this.mappedTypes, this.codeGenerator.Configuration);
         }
 
         public bool HasMap(Type type) {
-            return ConfigurationHelper.HasMap(type, mappedTypes);
+            return ConfigurationHelper.HasMap(type, this.mappedTypes, this.codeGenerator.Configuration);
         }
 
         private void Dirty() {

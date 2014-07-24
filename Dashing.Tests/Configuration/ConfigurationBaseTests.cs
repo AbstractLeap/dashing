@@ -323,6 +323,8 @@
             var mock = new Mock<ICodeGenerator>(MockBehavior.Strict);
             var mock2 = new Mock<IGeneratedCodeManager>(MockBehavior.Strict);
             mock.Setup(m => m.Generate(It.IsAny<IConfiguration>())).Returns(mock2.Object);
+            var config = new CodeGeneratorConfig();
+            mock.Setup(m => m.Configuration).Returns(config);
             return mock;
         }
 
