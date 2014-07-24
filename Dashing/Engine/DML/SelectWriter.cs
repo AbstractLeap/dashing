@@ -92,7 +92,8 @@
                 }
                 sql.Remove(sql.Length - 11, 11);
                 sql.Append(") as u");
-            } else {
+            }
+            else {
                 var columnSql = new StringBuilder();
                 var tableSql = new StringBuilder();
                 var whereSql = new StringBuilder();
@@ -110,7 +111,8 @@
                 // add order by
                 if (selectQuery.OrderClauses.Any()) {
                     this.AddOrderByClause(selectQuery.OrderClauses, orderSql);
-                } else if (selectQuery.SkipN > 0) {
+                }
+                else if (selectQuery.SkipN > 0) {
                     // need to add a default order on the sort clause
                     orderSql.Append(" order by ");
                     if (rootNode != null) {
@@ -174,7 +176,8 @@
                         if (splitProcessed) {
                             innerColumnSqls.Add(new StringBuilder(innerColumnCopy));
                             innerTableSqls.Add(new StringBuilder(innerTableCopy));
-                        } else {
+                        }
+                        else {
                             splitProcessed = true;
                         }
                     }
@@ -207,8 +210,7 @@
             foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
                 var childNode = child.Value;
                 AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, innerTableSqls.Count - 1, splitOns, childNode);
-                splitOns.Add(childNode.Column.Relationship == RelationshipType.OneToMany ? childNode.Column.ChildColumn.Map.PrimaryKey.DbName : childNode.Column.ParentMap.PrimaryKey.DbName);
-
+                
                 var childResult = this.VisitMultiCollectionTree(childNode, outerColumns, innerColumnSqls, innerTableSqls);
                 if (childNode.IsFetched) {
                     signatureBuilder.Append(childNode.Column.FetchId + "S" + childResult.Signature + "E");
@@ -225,7 +227,8 @@
             var innerColumnSqlBuilder = innerColumnSqls.ElementAt(currentInnerSqlBuilderIndex);
             if (childNode.Column.Relationship == RelationshipType.OneToMany) {
                 map = childNode.Column.ChildColumn.Map;
-            } else {
+            }
+            else {
                 map = childNode.Column.ParentMap;
             }
 
@@ -239,7 +242,8 @@
 
             if (childNode.Column.Relationship == RelationshipType.OneToMany) {
                 innerTableSqlBuilder.Append(" on " + childNode.Parent.Alias + "." + childNode.Column.Map.PrimaryKey.DbName + " = " + childNode.Alias + "." + childNode.Column.ChildColumn.DbName);
-            } else {
+            }
+            else {
                 innerTableSqlBuilder.Append(" on " + childNode.Parent.Alias + "." + childNode.Column.DbName + " = " + childNode.Alias + "." + map.PrimaryKey.DbName);
             }
 
@@ -253,16 +257,19 @@
                             this.Dialect.AppendQuotedName(sqlBuilder, column.DbName);
                             if (column.Relationship == RelationshipType.ManyToOne) {
                                 sqlBuilder.Append(" as ").Append(childNode.Alias).Append("_").Append(column.DbName);
-                            } else {
+                            }
+                            else {
                                 sqlBuilder.Append(" as ").Append(childNode.Alias).Append("_").Append(column.Name);
                             }
 
                             sqlBuilder.Append(", ");
-                        } else {
+                        }
+                        else {
                             // add nulls to other queries
                             if (column.Relationship == RelationshipType.ManyToOne) {
                                 sqlBuilder.Append("null as " + childNode.Alias + "_" + column.DbName + ", ");
-                            } else {
+                            }
+                            else {
                                 sqlBuilder.Append("null as " + childNode.Alias + "_" + column.Name + ", ");
                             }
                         }
@@ -271,7 +278,8 @@
                     // add columns to outer query
                     if (column.Relationship == RelationshipType.ManyToOne) {
                         outerColumns.Append("u." + childNode.Alias + "_" + column.DbName).Append(" as ").Append(column.DbName).Append(", ");
-                    } else {
+                    }
+                    else {
                         outerColumns.Append("u." + childNode.Alias + "_" + column.Name).Append(" as ").Append(column.Name).Append(", ");
                     }
                 }
@@ -301,41 +309,89 @@
                         }
 
                         // Now go through the expression forwards adding in nodes where needed
-                        int numNames = entityNames.Count;
-                        while (numNames > 0) {
-                            var propName = entityNames.Pop();
+                        this.AddPropertiesToFetchTree<T>(ref aliasCounter, ref numberCollectionFetches, entityNames, currentNode, rootNode);
+                    }
+                }
 
-                            // don't add duplicates
-                            if (!currentNode.Children.ContainsKey(propName)) {
-                                var column = this.Configuration.GetMap(currentNode == rootNode ? typeof(T) : currentNode.Column.Type).Columns[propName];
-                                if (column.Relationship == RelationshipType.OneToMany) {
-                                    ++numberCollectionFetches;
-                                }
-
-                                // add to tree
-                                var node = new FetchNode { Parent = currentNode, Column = column, Alias = "t_" + ++aliasCounter, IsFetched = true };
-                                if (column.Relationship == RelationshipType.OneToMany) {
-                                    // go through and increase the number of contained collections in each parent node
-                                    var parent = node.Parent;
-                                    while (parent != null) {
-                                        ++parent.ContainedCollectionfetchesCount;
-                                        parent = parent.Parent;
-                                    }
-                                }
-
-                                currentNode.Children.Add(propName, node);
-                                currentNode = node;
-                            } else {
-                                currentNode = currentNode.Children[propName];
+                // now iterate through the collection fetches
+                foreach (var collectionFetch in selectQuery.CollectionFetches) {
+                    var entityNames = new Stack<string>();
+                    var currentNode = rootNode;
+                    // start at the top of the stack, pop the expression off and do as above
+                    while (collectionFetch.Value.Count > 0) {
+                        var lambdaExpr = collectionFetch.Value.Pop() as LambdaExpression;
+                        if (lambdaExpr != null) {
+                            var expr = lambdaExpr.Body as MemberExpression;
+                            while (expr != null) {
+                                entityNames.Push(expr.Member.Name);
+                                expr = expr.Expression as MemberExpression;
                             }
-
-                            numNames--;
                         }
                     }
+
+                    // add in the initial fetch many
+                    var fetchManyLambda = collectionFetch.Key as LambdaExpression;
+                    if (fetchManyLambda != null) {
+                        var expr = fetchManyLambda.Body as MemberExpression;
+                        while (expr != null) {
+                            entityNames.Push(expr.Member.Name);
+                            expr = expr.Expression as MemberExpression;
+                        }
+                    }
+
+                    this.AddPropertiesToFetchTree<T>(
+                        ref aliasCounter,
+                        ref numberCollectionFetches,
+                        entityNames,
+                        currentNode,
+                        rootNode);
                 }
             }
 
             return rootNode;
+        }
+
+        private void AddPropertiesToFetchTree<T>(
+            ref int aliasCounter,
+            ref int numberCollectionFetches,
+            Stack<string> entityNames,
+            FetchNode currentNode,
+            FetchNode rootNode) {
+            while (entityNames.Count > 0) {
+                var propName = entityNames.Pop();
+
+                // don't add duplicates
+                if (!currentNode.Children.ContainsKey(propName)) {
+                    var column =
+                        this.Configuration.GetMap(
+                        currentNode == rootNode ? typeof(T) : (currentNode.Column.Relationship == RelationshipType.OneToMany ? currentNode.Column.Type.GetGenericArguments().First() : currentNode.Column.Type)).Columns[propName];
+                    if (column.Relationship == RelationshipType.OneToMany) {
+                        ++numberCollectionFetches;
+                    }
+
+                    // add to tree
+                    var node = new FetchNode {
+                        Parent = currentNode,
+                        Column = column,
+                        Alias = "t_" + ++aliasCounter,
+                        IsFetched = true
+                    };
+                    if (column.Relationship == RelationshipType.OneToMany) {
+                        // go through and increase the number of contained collections in each parent node
+                        var parent = node.Parent;
+                        while (parent != null) {
+                            ++parent.ContainedCollectionfetchesCount;
+                            parent = parent.Parent;
+                        }
+                    }
+
+                    currentNode.Children.Add(propName, node);
+                    currentNode = node;
+                }
+                else {
+                    currentNode = currentNode.Children[propName];
+                }
+            }
         }
 
         private void AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) {
@@ -369,9 +425,11 @@
             IMap map;
             if (node.Column.Relationship == RelationshipType.OneToMany) {
                 map = this.Configuration.GetMap(node.Column.Type.GetGenericArguments()[0]);
-            } else if (node.Column.Relationship == RelationshipType.ManyToOne) {
+            }
+            else if (node.Column.Relationship == RelationshipType.ManyToOne) {
                 map = this.Configuration.GetMap(node.Column.Type);
-            } else {
+            }
+            else {
                 throw new NotSupportedException();
             }
 
@@ -385,7 +443,8 @@
 
             if (node.Column.Relationship == RelationshipType.ManyToOne) {
                 tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + map.PrimaryKey.DbName);
-            } else if (node.Column.Relationship == RelationshipType.OneToMany) {
+            }
+            else if (node.Column.Relationship == RelationshipType.OneToMany) {
                 tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.Map.PrimaryKey.DbName + " = " + node.Alias + "." + node.Column.ChildColumn.DbName);
             }
 
@@ -411,7 +470,7 @@
         }
 
         private void AddColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode, bool removeTrailingComma = true) {
-            var alias = selectQuery.Fetches.Any() ? "t" : null;
+            var alias = selectQuery.HasFetches() ? "t" : null;
 
             if (selectQuery.Projection == null) {
                 foreach (var column in this.Configuration.GetMap<T>().OwnedColumns(selectQuery.FetchAllProperties).Where(c => rootNode == null || !rootNode.Children.ContainsKey(c.Name))) {

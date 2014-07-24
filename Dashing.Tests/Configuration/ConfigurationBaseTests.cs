@@ -171,13 +171,14 @@
             var target = new CustomConfigurationWithAddNamespace(mockMapper.Object);
 
             Assert.NotNull(target);
-            Assert.Equal(6, target.Maps.Count());
+            Assert.Equal(7, target.Maps.Count());
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Blog)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Comment)));
-            Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
+            Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Like)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Post)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(PostTag)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Tag)));
+            Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(User)));
             mockMapper.Verify();
         }
 
@@ -292,6 +293,7 @@
             mockMapper.Setup(m => m.MapFor(typeof(Comment))).Returns(new Map<Comment>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(Tag))).Returns(new Map<Tag>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(PostTag))).Returns(new Map<PostTag>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Like))).Returns(new Map<Like>()).Verifiable();
             return mockMapper;
         }
 

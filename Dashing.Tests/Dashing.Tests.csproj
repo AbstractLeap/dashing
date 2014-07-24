@@ -111,6 +111,7 @@
     <Compile Include="SelectTest.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
+    <Compile Include="TestDomain\Like.cs" />
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />

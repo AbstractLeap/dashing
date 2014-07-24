@@ -31,6 +31,7 @@ namespace Dashing {
             this.Fetches = new List<Expression>();
             this.OrderClauses = new Queue<OrderClause<T>>();
             this.WhereClauses = new List<Expression<Func<T, bool>>>();
+            this.CollectionFetches = new List<KeyValuePair<Expression, Stack<Expression>>>();
         }
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace Dashing {
 
         /// <summary>
         /// </summary>
-        public Tuple<Expression, Expression> CollectionFetches { get; set; }
+        public IList<KeyValuePair<Expression, Stack<Expression>>> CollectionFetches { get; set; }
 
         /// <summary>
         ///     Gets or sets the order clauses.
@@ -93,7 +94,7 @@ namespace Dashing {
         public bool IsTracked { get; set; }
 
         public bool HasFetches() {
-            return this.Fetches.Any() || this.CollectionFetches != null;
+            return this.Fetches.Any() || this.CollectionFetches.Any();
         }
 
         /// <summary>
