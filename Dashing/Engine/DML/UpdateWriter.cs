@@ -67,22 +67,12 @@
                 object paramValue;
                 var mappedColumn = map.Columns[property.Key];
 
-                if (property.Value == null) {
+                var propertyValue = property.Value;
+                if (propertyValue == null) {
                     paramValue = DBNull.Value;
                 }
                 else {
-                    // look up the column type and decide where to get the value from
-                    switch (mappedColumn.Relationship) {
-                        case RelationshipType.None:
-                            paramValue = property.Value;
-                            break;
-                        case RelationshipType.ManyToOne:
-                            var foreignKeyMap = this.Configuration.GetMap(mappedColumn.Type);
-                            paramValue = foreignKeyMap.GetPrimaryKeyValue(property.Value);
-                            break;
-                        default:
-                            throw new NotImplementedException(String.Format("Unexpected column relationship {0} on entity {1}.{2} in UpdateWriter", mappedColumn.Relationship, entity.GetType().Name, property.Key));
-                    } 
+                    paramValue = this.GetValueOrPrimaryKey(mappedColumn, propertyValue);
                 }
 
                 // add the parameter
@@ -112,6 +102,29 @@
             //// TODO Should we update collections here or is that the users job? Guess we should do ManyToMany tho
         }
 
+        private object GetValueOrPrimaryKey(IColumn mappedColumn, object propertyValue) {
+            object paramValue;
+
+            // look up the column type and decide where to get the value from
+            switch (mappedColumn.Relationship) {
+                case RelationshipType.None:
+                    paramValue = propertyValue;
+                    break;
+                case RelationshipType.ManyToOne:
+                    var foreignKeyMap = this.Configuration.GetMap(mappedColumn.Type);
+                    paramValue = foreignKeyMap.GetPrimaryKeyValue(propertyValue);
+                    break;
+                default:
+                    throw new NotImplementedException(
+                        string.Format(
+                            "Unexpected column relationship {0} on entity {1}.{2} in UpdateWriter",
+                            mappedColumn.Relationship,
+                            mappedColumn.Type.Name,
+                            mappedColumn.Name));
+            }
+            return paramValue;
+        }
+
         public SqlWriterResult GenerateBulkSql<T>(T updateClass, IEnumerable<Expression<Func<T, bool>>> predicates) {
             var sql = new StringBuilder();
             var parameters = new DynamicParameters();
@@ -130,7 +143,8 @@
                 var column = map.Columns[updatedProp];
                 this.Dialect.AppendQuotedName(sql, column.DbName);
                 var paramName = "@" + updatedProp;
-                parameters.Add(paramName, map.GetColumnValue(updateClass, column));
+                var propertyValue = map.GetColumnValue(updateClass, column);
+                parameters.Add(paramName, this.GetValueOrPrimaryKey(column, propertyValue));
                 sql.Append(" = ");
                 sql.Append(paramName);
                 sql.Append(", ");
