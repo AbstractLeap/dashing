@@ -1,57 +1,82 @@
 ﻿namespace Dashing.Console {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Data.Common;
     using System.IO;
     using System.Linq;
     using System.Reflection;
-
+    using CommandLine.Text;
     using Dashing.Configuration;
     using Dashing.Console.Properties;
+    using Dashing.Console.Settings;
     using Dashing.Engine;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
     using Dashing.Tools.Migration;
     using Dashing.Tools.ModelGeneration;
     using Dashing.Tools.ReverseEngineering;
-
     using DatabaseSchemaReader;
     using DatabaseSchemaReader.DataSchema;
+    using SharpConfig;
 
     internal class Program {
         private static void Main(string[] args) {
-            if (args.Contains("-s")) {
-                string path = GetPath(args, "-s");
-                if (path != string.Empty) {
-                    GenerateMigrationScript(path, args.Contains("-n"));
+            var options = new CommandLineOptions();
+            bool showHelp = false;
+            if (CommandLine.Parser.Default.ParseArguments(args, options)) {
+                // find the project and read the file
+                if (!File.Exists(options.ProjectName + ".ini")) {
+                    Console.WriteLine("Ensure the project name matches the ini file name");
+                    showHelp = true;
+                } else {
+                    var connectionString = new Dashing.Console.Settings.ConnectionStringSettings();
+                    var dashingSettings = new DashingSettings();
+                    var reverseEngineerSettings = new ReverseEngineerSettings();
+                    var config = SharpConfig.Configuration.Load(options.ProjectName + ".ini");
+                    connectionString = config["Database"].AssignTo(connectionString);
+                    dashingSettings = config["Dashing"].AssignTo(dashingSettings);
+                    reverseEngineerSettings = config["ReverseEngineer"].AssignTo(reverseEngineerSettings);
+
+                    // overwrite the path with the default if necessary
+                    if (string.IsNullOrEmpty(options.Location)) {
+                        options.Location = dashingSettings.DefaultSavePath;
+                        if (string.IsNullOrEmpty(options.Location) && (options.Script || options.ReverseEngineer)) {
+                            Console.WriteLine("You must specify a location for generated files to be saved");
+                            showHelp = true;
+                        }
+                    }
+
+                    if (!showHelp) {
+                        if (options.Script) {
+                            GenerateMigrationScript(options.Location, options.Naive, connectionString, dashingSettings);
+                        } else if (options.Migration) {
+                            PerformMigration(options.Naive, connectionString, dashingSettings);
+                        } else if (options.ReverseEngineer) {
+                            if (string.IsNullOrEmpty(reverseEngineerSettings.GeneratedNamespace)) {
+                                Console.WriteLine("You must specify a GeneratedNamespace in the Project ini file");
+                                showHelp = true;
+                            }
+
+                            if (!showHelp) {
+                                ReverseEngineer(options.Location, reverseEngineerSettings.GeneratedNamespace, connectionString);
+                            }
+                        } else {
+                            showHelp = true;
+                        }
+                    }
                 }
-
-                return;
+            } else {
+                showHelp = true;
             }
 
-            if (args.Contains("-m")) {
-                PerformMigration(args.Contains("-n"));
-                return;
+            if (showHelp) {
+                Console.Write(HelpText.AutoBuild(options));
             }
-
-            if (args.Contains("-r")) {
-                string path = GetPath(args, "-r");
-                string generatedNamespace = GetNamespace(args, "-r");
-                if (path != string.Empty && generatedNamespace != string.Empty) {
-                    ReverseEngineer(path, generatedNamespace);
-                }
-
-                return;
-            }
-
-            Help();
         }
 
-        private static void ReverseEngineer(string path, string generatedNamespace) {
+        private static void ReverseEngineer(string path, string generatedNamespace, ConnectionStringSettings connectionStringSettings) {
             DatabaseSchema schema;
-            ConnectionStringSettings connectionString;
-            var maps = ReverseEngineerMaps(out schema, out connectionString);
+            var maps = ReverseEngineerMaps(out schema, connectionStringSettings);
             var reverseEngineer = new ModelGenerator();
             var sources = reverseEngineer.GenerateFiles(maps, schema, generatedNamespace);
 
@@ -60,26 +85,24 @@
             }
         }
 
-        private static IEnumerable<IMap> ReverseEngineerMaps(out DatabaseSchema schema, out ConnectionStringSettings connectionString) {
+        private static IEnumerable<IMap> ReverseEngineerMaps(out DatabaseSchema schema, ConnectionStringSettings connectionStringSettings) {
             var engineer = new Engineer();
-            connectionString = ConfigurationManager.ConnectionStrings["Default"];
-            var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
+            var databaseReader = new DatabaseReader(connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName);
             schema = databaseReader.ReadAll();
             return engineer.ReverseEngineer(schema);
         }
 
-        private static void PerformMigration(bool naive) {
+        private static void PerformMigration(bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings) {
             if (naive) {
-                ConnectionStringSettings connectionString;
-                var script = GenerateNaiveMigrationScript(out connectionString);
-                var factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
+                var script = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings);
+                var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
 
                 using (var connection = factory.CreateConnection()) {
                     if (connection == null) {
                         throw new Exception("Could not connect to database");
                     }
 
-                    connection.ConnectionString = connectionString.ConnectionString;
+                    connection.ConnectionString = connectionStringSettings.ConnectionString;
                     connection.Open();
 
                     using (var command = connection.CreateCommand()) {
@@ -94,10 +117,9 @@
             NotImplemented();
         }
 
-        private static void GenerateMigrationScript(string path, bool naive) {
+        private static void GenerateMigrationScript(string path, bool naive, ConnectionStringSettings conenctionStringSettings, DashingSettings dashingSettings) {
             if (naive) {
-                ConnectionStringSettings connectionString;
-                var script = GenerateNaiveMigrationScript(out connectionString);
+                var script = GenerateNaiveMigrationScript(conenctionStringSettings, dashingSettings);
                 File.WriteAllText(path, script);
                 return;
             }
@@ -105,19 +127,19 @@
             NotImplemented();
         }
 
-        private static string GenerateNaiveMigrationScript(out ConnectionStringSettings connectionString) {
+        private static string GenerateNaiveMigrationScript(ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings) {
             // fetch the from state
             DatabaseSchema schema;
-            var maps = ReverseEngineerMaps(out schema, out connectionString);
+            var maps = ReverseEngineerMaps(out schema, connectionStringSettings);
 
             // fetch the to state
-            var configAssembly = Assembly.LoadFrom(Settings.Default.ConfigurationDllPath);
-            var configType = configAssembly.DefinedTypes.First(t => t.FullName == Settings.Default.ConfigurationTypeName);
+            var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
+            var configType = configAssembly.DefinedTypes.First(t => t.FullName == dashingSettings.ConfigurationName);
 
             // TODO add in a factory way of generating the config for cases where constructor not empty
             var config = (IConfiguration)Activator.CreateInstance(configType);
             var dialectFactory = new DialectFactory();
-            var dialect = dialectFactory.Create(connectionString);
+            var dialect = dialectFactory.Create(new System.Configuration.ConnectionStringSettings("Default", connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName));
             var migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), null);
             IEnumerable<string> warnings, errors;
             var script = migrator.GenerateNaiveSqlDiff(maps, config.Maps, out warnings, out errors);
