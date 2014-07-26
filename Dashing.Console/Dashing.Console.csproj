@@ -64,11 +64,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Properties\Test.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <DependentUpon>Test.settings</DependentUpon>
-    </Compile>
     <Compile Include="Settings\ConnectionStringSettings.cs" />
     <Compile Include="Settings\DashingSettings.cs" />
     <Compile Include="Settings\ReverseEngineerSettings.cs" />
@@ -81,10 +76,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Test.ini" />
-    <None Include="Properties\Test.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Test.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dashing.Tools\Dashing.Tools.csproj">
