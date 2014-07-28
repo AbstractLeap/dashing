@@ -69,7 +69,7 @@
 
                 var propertyValue = property.Value;
                 if (propertyValue == null) {
-                    paramValue = DBNull.Value;
+                    paramValue = null;
                 }
                 else {
                     paramValue = this.GetValueOrPrimaryKey(mappedColumn, propertyValue);

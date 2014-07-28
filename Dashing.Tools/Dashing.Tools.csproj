@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IniParser.cs" />
     <Compile Include="Migration\IMigrator.cs" />
     <Compile Include="Migration\Migrator.cs" />
     <Compile Include="ModelGeneration\DefaultConvention.cs" />

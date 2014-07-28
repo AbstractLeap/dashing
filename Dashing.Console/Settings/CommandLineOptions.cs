@@ -16,7 +16,7 @@ namespace Dashing.Console.Settings {
         [Option('m', HelpText = "Perform the database migration", Required = false, MutuallyExclusiveSet = "ReverseEngineer")]
         public bool Migration { get; set; }
 
-        [Option('r', HelpText = "Reverse Enginner a Database", Required = false, MutuallyExclusiveSet = "Script,Migration")]
+        [Option('r', HelpText = "Reverse Engineer a Database", Required = false, MutuallyExclusiveSet = "Script,Migration")]
         public bool ReverseEngineer { get; set; }
 
         [Option('f', HelpText = "This will force a migration, preventing a prompt to override", Required = false)]

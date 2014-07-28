@@ -73,6 +73,7 @@
     <Compile Include="Configuration\IMapper.cs" />
     <Compile Include="Configuration\IMapT.cs" />
     <Compile Include="Configuration\Index.cs" />
+    <Compile Include="Configuration\ISeeder.cs" />
     <Compile Include="Configuration\ISessionFactory.cs" />
     <Compile Include="Configuration\ColumnExtensions.cs" />
     <Compile Include="Configuration\DefaultConfiguration.cs" />
