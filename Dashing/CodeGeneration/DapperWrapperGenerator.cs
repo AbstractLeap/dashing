@@ -100,9 +100,10 @@ namespace Dashing.CodeGeneration {
                 // first generate mappers at this level then go down
                 string thisSignature = string.Join("SE", orderedSubset.Select(c => c.Value.FetchId)) + "SE";
                 foreach (var column in orderedSubset) {
-                    currentPath.Children.Add(column.Key, new FetchNode {
+                    var fetchNode = new FetchNode {
                         Column = column.Value
-                    });
+                    };
+                    currentPath.Children.Add(column.Key, fetchNode);
                 }
 
                 var dictionaryInitialiser = this.GenerateMappersAndQueries(dapperWrapperClass, rootNode, rootType, signaturePrefix + thisSignature + signatureSuffix, codeConfig);
