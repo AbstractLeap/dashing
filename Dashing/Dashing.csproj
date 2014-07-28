@@ -51,9 +51,11 @@
     <Compile Include="CodeGeneration\CodeGenerator.cs" />
     <Compile Include="CodeGeneration\CodeGeneratorConfig.cs" />
     <Compile Include="CodeGeneration\CodeHelpers.cs" />
+    <Compile Include="CodeGeneration\DapperWrapperGenerator.cs" />
     <Compile Include="CodeGeneration\DelegateQueryCreator.cs" />
     <Compile Include="CodeGeneration\GeneratedCodeManager.cs" />
     <Compile Include="CodeGeneration\ICodeGenerator.cs" />
+    <Compile Include="CodeGeneration\IDapperWrapperGenerator.cs" />
     <Compile Include="CodeGeneration\IGeneratedCodeManager.cs" />
     <Compile Include="CodeGeneration\IProxyGenerator.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
