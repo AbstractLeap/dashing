@@ -101,7 +101,9 @@
                 }
 
                 if (results.Errors.HasErrors) {
-                    throw new Exception(results.Errors[0].ErrorText);
+                    var firstError = results.Errors[0];
+                    var context = string.Join(Environment.NewLine, source.Split('\n').Select((l,i) => string.Format("{0,-4}: {1}", i, l).Trim()).Skip(firstError.Line - 5).Take(10));
+                    throw new Exception(string.Format("Error while compiling generated code: {0} on line {1}\n\n{2}", firstError.ErrorText, firstError.Line, context));
                 }
 
                 // return the wrapper
