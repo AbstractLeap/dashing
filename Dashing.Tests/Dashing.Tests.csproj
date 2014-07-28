@@ -71,6 +71,7 @@
     <Compile Include="CodeGeneration\Fixtures\GenerateAndOutputCodeFixture.cs" />
     <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
     <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
+    <Compile Include="CodeGeneration\CodeGeneratorTests.cs" />
     <Compile Include="CodeGeneration\ProxyGeneratorTests.cs" />
     <Compile Include="CodeGeneration\UpdateTests.cs" />
     <Compile Include="CodeGeneration\TrackingTests.cs" />
