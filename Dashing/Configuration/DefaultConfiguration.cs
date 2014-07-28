@@ -8,6 +8,6 @@
 
     public class DefaultConfiguration : ConfigurationBase {
         public DefaultConfiguration(ConnectionStringSettings connectionStringSettings)
-            : base(new SqlEngine(new DialectFactory().Create(connectionStringSettings)), connectionStringSettings, DbProviderFactories.GetFactory(connectionStringSettings.ProviderName), new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory(), new CodeGenerator(new CodeGeneratorConfig(), new ProxyGenerator())) { }
+            : base(new SqlEngine(new DialectFactory().Create(connectionStringSettings)), connectionStringSettings, DbProviderFactories.GetFactory(connectionStringSettings.ProviderName), new DefaultMapper(new DefaultConvention()), new DefaultSessionFactory(), new CodeGenerator(new CodeGeneratorConfig(), new ProxyGenerator(), new DapperWrapperGenerator())) { }
     }
 }
