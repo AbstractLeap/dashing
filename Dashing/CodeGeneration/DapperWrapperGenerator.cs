@@ -128,63 +128,100 @@ namespace Dashing.CodeGeneration {
         }
 
         private IEnumerable<Tuple<string, string>> GenerateMappersAndQueries(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature, CodeGeneratorConfig codeConfig) {
-            // generate the fk and tracked mappers
-            var foreignKeyMapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature, codeConfig.ForeignKeyAccessClassSuffix);
-            var trackingMapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature, codeConfig.TrackedClassSuffix);
+            // generate the mapper
+            var mapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature);
 
-            // Generate the query method
-            var query = this.GenerateQueryMethod(dapperWrapperClass, rootType, signature, trackingMapper, foreignKeyMapper, codeConfig);
+            // generate the query method
+            var query = this.GenerateQueryMethod(dapperWrapperClass, rootNode, rootType, signature, mapper, codeConfig);
 
             return new List<Tuple<string, string>> {
                 new Tuple<string, string>(signature, query.Name)
             };
         }
 
+        // TODO: Add in mapped on <-- what's this?
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private CodeMemberMethod GenerateQueryMethod(CodeTypeDeclaration dapperWrapperClass, Type rootType, string signature, CodeMemberMethod trackingMapper, CodeMemberMethod foreignKeyMapper, CodeGeneratorConfig codeConfig) {
-            // TODO: Add in mapped on
-            var query = new CodeMemberMethod();
-            query.Name = rootType.Name + "_" + signature;
-            query.ReturnType = new CodeTypeReference("IEnumerable<" + rootType.Name + ">");
-            query.Attributes = MemberAttributes.Static;
+        private CodeMemberMethod GenerateQueryMethod(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature, CodeMemberMethod mapper, CodeGeneratorConfig codeConfig) {
+            var foreignKeyTypes = new List<string>();
+            foreignKeyTypes.Add(rootType.Name + codeConfig.ForeignKeyAccessClassSuffix);
+            foreignKeyTypes.AddRange(rootNode.Children.Select(c => c.Value.Column.Type.Name + codeConfig.ForeignKeyAccessClassSuffix));
+
+            var trackingTypes = new List<string>();
+            trackingTypes.Add(rootType.Name + codeConfig.TrackedClassSuffix);
+            trackingTypes.AddRange(rootNode.Children.Select(c => c.Value.Column.Type.Name + codeConfig.TrackedClassSuffix));
+
+            // public static IEnumerable<T> EntityName_FetchSignature(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction)
+            var query = new CodeMemberMethod {
+                Name = rootType.Name + "_" + signature,
+                ReturnType = new CodeTypeReference("IEnumerable<" + rootType.Name + ">"),
+                Attributes = MemberAttributes.Static
+            };
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<" + rootType.Name + ">", "query"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
 
-#if DEBUG
-            query.Statements.Add(new CodeMethodInvokeExpression(new CodeTypeReferenceExpression("Debug"), "Write", new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn")));
-#endif
+            // Type[] Types; = new[] { typeof(Entity), ... }
+            var typesDeclaration = new CodeVariableDeclarationStatement(typeof(Type[]), "types");
+            query.Statements.Add(typesDeclaration);
 
-            var returnStatement = new CodeMethodReturnStatement(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeTypeReferenceExpression("SqlMapper"), "Query"), new CodeExpression[] { new CodeVariableReferenceExpression("conn"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Sql"), new CodeVariableReferenceExpression("mapper"), new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Parameters"), new CodeVariableReferenceExpression("transaction"), new CodePrimitiveExpression(true), new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn") }));
+            // if (query.IsTracked) { types = ... } else { types = ... }
+            var isTracking = new CodeBinaryOperatorExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("query"), "IsTracked"), CodeBinaryOperatorType.IdentityEquality, new CodePrimitiveExpression(true));
+            var assignForeignKeyMaps = new CodeAssignStatement(new CodeVariableReferenceExpression("types"), new CodeArrayCreateExpression(typeof(Type[]), foreignKeyTypes.Select(t => new CodeTypeOfExpression(t)).Cast<CodeExpression>().ToArray()));
+            var assignTrackingMaps = new CodeAssignStatement(new CodeVariableReferenceExpression("types"), new CodeArrayCreateExpression(typeof(Type[]), trackingTypes.Select(t => new CodeTypeOfExpression(t)).Cast<CodeExpression>().ToArray()));
+            var typesAssignment = new CodeConditionStatement(isTracking, new CodeStatement[] { assignTrackingMaps }, new CodeStatement[] { assignForeignKeyMaps });
+            query.Statements.Add(typesAssignment);
 
-            var trackingDeclaration = new CodeVariableDeclarationStatement("Func`" + (trackingMapper.Parameters.Count + 1) + "[" + trackingMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType).First() + "," + string.Join(", ", trackingMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType + codeConfig.ForeignKeyAccessClassSuffix).Skip(1)) + ", " + trackingMapper.Parameters.Cast<CodeParameterDeclarationExpression>().First().Type.BaseType + "]", "mapper", new CodeMethodReferenceExpression(null, trackingMapper.Name));
+            // return SqlMapper.Query<TReturn>(conn, result.Sql, types, TheNameOfTheMapperStaticMethod, results.Parameters, transaction, buffered: true, result.FetchTree.SplitOn);
+            var returnStatement = new CodeMethodReturnStatement(
+                new CodeMethodInvokeExpression(
+                    new CodeMethodReferenceExpression(
+                        new CodeTypeReferenceExpression("SqlMapper"), "Query", new CodeTypeReference(rootType.Name)), 
+                        new CodeExpression[] {
+                            new CodeVariableReferenceExpression("conn"), 
+                            new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Sql"), 
+                            new CodeVariableReferenceExpression("types"),
+                            new CodeMethodReferenceExpression(null, mapper.Name), 
+                            new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Parameters"), 
+                            new CodeVariableReferenceExpression("transaction"), 
+                            new CodePrimitiveExpression(true), 
+                            new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "SplitOn")
+                        }));
+            query.Statements.Add(returnStatement);
 
-            var foreignKeyDeclaration = new CodeVariableDeclarationStatement("Func`" + (foreignKeyMapper.Parameters.Count + 1) + "[" + foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType).First() + "," + string.Join(", ", foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().Select(p => p.Type.BaseType + codeConfig.ForeignKeyAccessClassSuffix).Skip(1)) + ", " + foreignKeyMapper.Parameters.Cast<CodeParameterDeclarationExpression>().First().Type.BaseType + "]", "mapper", new CodeMethodReferenceExpression(null, foreignKeyMapper.Name));
-
-            query.Statements.Add(new CodeConditionStatement(new CodeBinaryOperatorExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("query"), "IsTracked"), CodeBinaryOperatorType.IdentityEquality, new CodePrimitiveExpression(true)), new CodeStatement[] { trackingDeclaration, returnStatement }, new CodeStatement[] { foreignKeyDeclaration, returnStatement }));
-
+            // add and return
             dapperWrapperClass.Members.Add(query);
             return query;
         }
 
-        private CodeMemberMethod GenerateMapper(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature, string suffix) {
-            var mapper = new CodeMemberMethod();
-            mapper.Name = rootType.Name + "_" + signature + suffix;
-            mapper.ReturnType = new CodeTypeReference(rootType.Name + suffix);
-            mapper.Attributes = MemberAttributes.Static;
+        private CodeMemberMethod GenerateMapper(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature) {
+            // static RootType RootType_Signature(object[] objects)
+            var mapper = new CodeMemberMethod {
+                Name = rootType.Name + "_" + signature,
+                ReturnType = new CodeTypeReference(rootType.Name),
+                Attributes = MemberAttributes.Static
+            };
+            mapper.Parameters.Add(new CodeParameterDeclarationExpression(typeof(object[]), "objects"));
+            
+            // dry, innit
+            var objects = new CodeVariableReferenceExpression("objects");
 
-            const string RootName = "root";
-            mapper.Parameters.Add(new CodeParameterDeclarationExpression(rootType.Name + suffix, RootName));
+            // var root = (RootType)objects[0];
+            mapper.Statements.Add(new CodeVariableDeclarationStatement(rootType, "root", new CodeCastExpression(rootType, new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(0)))));
+            var root = new CodeVariableReferenceExpression("root");
+
+            // root.Post = (Post)objects[i];
+            var i = 0;
             foreach (var node in rootNode.Children) {
-                this.AddParameterAndAssignment(mapper, RootName, node);
+                mapper.Statements.Add(
+                    new CodeAssignStatement(
+                        new CodePropertyReferenceExpression(root, node.Key), 
+                        new CodeCastExpression(node.Value.Column.Type,  new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(++i)))));
             }
 
             // add a return statement
-            mapper.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression(RootName)));
-
+            mapper.Statements.Add(new CodeMethodReturnStatement(root));
             dapperWrapperClass.Members.Add(mapper);
-
             return mapper;
         }
 
