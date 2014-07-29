@@ -170,6 +170,11 @@
             }
 
             var path = args[indexOf + 1];
+
+            if (path.StartsWith("-")) { // it is another switch
+                path = string.Empty;
+            }
+
             return path;
         }
 
