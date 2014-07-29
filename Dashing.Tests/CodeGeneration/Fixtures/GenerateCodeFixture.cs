@@ -11,7 +11,7 @@
             : this(null) { }
 
         protected GenerateCodeFixture(CodeGeneratorConfig generatorConfig) {
-            this.CodeGenerator = new CodeGenerator(generatorConfig ?? new CodeGeneratorConfig() { CompileInDebug = true, OutputAssembly = true, OutputSourceCode = true }, new ProxyGenerator());
+            this.CodeGenerator = new CodeGenerator(generatorConfig ?? new CodeGeneratorConfig() { CompileInDebug = true, OutputAssembly = true, OutputSourceCode = true }, new ProxyGenerator(), new DapperWrapperGenerator());
             this.CodeManager = this.CodeGenerator.Generate(new CustomConfig());
         }
 

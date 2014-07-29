@@ -27,5 +27,9 @@ namespace Dashing.Console.Settings {
 
         [Option('l', HelpText = "The location/path where you'd like any generated scripts created", Required = false)]
         public string Location { get; set; }
+
+        public string IniPath { get {
+            return this.ProjectName + ".ini";
+        } }
     }
 }
