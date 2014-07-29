@@ -25,7 +25,7 @@ namespace Dashing.Console.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Dashing.Tests.Tools.ModelGeneration.CustomConfig")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string ConfigurationTypeName {
             get {
                 return ((string)(this["ConfigurationTypeName"]));
@@ -34,7 +34,7 @@ namespace Dashing.Console.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("D:\\Projects\\Dashing\\Dashing.Tests\\bin\\Debug\\Dashing.Tests.dll")]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string ConfigurationDllPath {
             get {
                 return ((string)(this["ConfigurationDllPath"]));

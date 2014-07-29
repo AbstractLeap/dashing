@@ -41,11 +41,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\references\Dapper\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="DatabaseSchemaReader, Version=1.3.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\DatabaseSchemaReader-polyfork.1.3.4.3\lib\net40\DatabaseSchemaReader.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.0.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DatabaseSchemaReader">
-      <HintPath>..\packages\Database.Schema.Reader.Core.1.2.4.17096\lib\net35\DatabaseSchemaReader.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq">
