@@ -21,11 +21,29 @@
 
     internal class Program {
         private static void Main(string[] args) {
-            if (args.Contains("-s")) {
-                string path = GetPath(args, "-s");
-                if (path != string.Empty) {
-                    GenerateMigrationScript(path, args.Contains("-n"));
+            if (!File.Exists(Settings.Default.ConfigurationDllPath)) {
+                using (Color(ConsoleColor.Red)) {
+                    Console.WriteLine("Path {0} not found!", new FileInfo(Settings.Default.ConfigurationDllPath).FullName);
+                    return;
                 }
+            }
+
+            Console.WriteLine();
+            using (Color(ConsoleColor.Yellow))
+                Console.WriteLine("-- Dashing DbManager");
+            Console.WriteLine("-- -----------------");
+            Console.WriteLine("-- Assembly: {0}", Settings.Default.ConfigurationDllPath);
+            Console.WriteLine("-- Class:    {0}", Settings.Default.ConfigurationTypeName);
+            Console.WriteLine();
+
+            if (args.Contains("-s")) {
+                var path = GetPath(args, "-s");
+                if (Directory.Exists(path)) {
+                    path = string.Format("Migration-{0}-{1:yyyy-MM-dd-HH-mm-ss}.sql", Settings.Default.ConfigurationTypeName.Replace('.', '_'), DateTime.Now);
+                }
+
+                using (var writer = string.IsNullOrEmpty(path) ? Console.Out : new StreamWriter(File.OpenWrite(path)))
+                    GenerateMigrationScript(writer, args.Contains("-n"));
 
                 return;
             }
@@ -82,6 +100,7 @@
                     connection.ConnectionString = connectionString.ConnectionString;
                     connection.Open();
 
+                    using (new TimedOperation("Executing migration script"))
                     using (var command = connection.CreateCommand()) {
                         command.CommandText = script;
                         command.ExecuteNonQuery();
@@ -94,11 +113,10 @@
             NotImplemented();
         }
 
-        private static void GenerateMigrationScript(string path, bool naive) {
+        private static void GenerateMigrationScript(TextWriter writer, bool naive) {
             if (naive) {
                 ConnectionStringSettings connectionString;
-                var script = GenerateNaiveMigrationScript(out connectionString);
-                File.WriteAllText(path, script);
+                writer.WriteLine(GenerateNaiveMigrationScript(out connectionString));
                 return;
             }
 
@@ -107,12 +125,32 @@
 
         private static string GenerateNaiveMigrationScript(out ConnectionStringSettings connectionString) {
             // fetch the from state
-            DatabaseSchema schema;
-            var maps = ReverseEngineerMaps(out schema, out connectionString);
+            IEnumerable<IMap> maps;
+            using (new TimedOperation("--  Reading database contents...")) {
+                DatabaseSchema schema;
+                maps = ReverseEngineerMaps(out schema, out connectionString);
+            }
 
             // fetch the to state
-            var configAssembly = Assembly.LoadFrom(Settings.Default.ConfigurationDllPath);
-            var configType = configAssembly.DefinedTypes.First(t => t.FullName == Settings.Default.ConfigurationTypeName);
+            TypeInfo configType;
+            using (new TimedOperation("--- Fetching configuration contents...")) {
+                var configAssembly = Assembly.LoadFrom(Settings.Default.ConfigurationDllPath);
+                configType = configAssembly.DefinedTypes.SingleOrDefault(t => t.FullName == Settings.Default.ConfigurationTypeName);
+
+                if (configType == null) {
+                    using (Color(ConsoleColor.Red)) {
+                        var candidates = configAssembly.DefinedTypes.Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null).ToArray();
+                        if (candidates.Any()) {
+                            Console.WriteLine("Could not locate {0}, but found candidates: {1}", Settings.Default.ConfigurationTypeName, string.Join(", ", candidates.Select(c => c.FullName)));
+                            return string.Empty;
+                        }
+
+                        Console.WriteLine("Could not locate {0}, and found no candidate configurations", Settings.Default.ConfigurationTypeName);
+                        return string.Empty;
+                    }
+                }
+            }
+
 
             // TODO add in a factory way of generating the config for cases where constructor not empty
             var config = (IConfiguration)Activator.CreateInstance(configType);
@@ -160,6 +198,10 @@
         private static void NotImplemented() {
             Console.WriteLine("Sorry, that's not implemented yet.");
             Environment.Exit(1);
+        }
+
+        private static ColorContext Color(ConsoleColor color) {
+            return new ColorContext(color);
         }
     }
 }
