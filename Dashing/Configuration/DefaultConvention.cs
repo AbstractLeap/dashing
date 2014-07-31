@@ -84,8 +84,8 @@
         /// <returns>
         ///     The <see cref="string" />.
         /// </returns>
-        public virtual string PrimaryKeyFor(Type entity) {
-            return entity.Name + "Id";
+        public virtual bool IsPrimaryKeyFor(Type entity, string propertyName) {
+            return propertyName == entity.Name + "Id" || propertyName.Equals("id", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

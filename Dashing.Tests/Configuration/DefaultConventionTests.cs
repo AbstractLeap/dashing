@@ -18,9 +18,27 @@
         }
 
         [Fact]
-        public void DefaultPrimaryKeyIsTheEntityNamePlusId() {
+        public void IdIsPK() {
             var target = this.MakeTarget();
-            Assert.Equal("PostId", target.PrimaryKeyFor(typeof(Post)));
+            Assert.True(target.IsPrimaryKeyFor(typeof(Post), "id"));
+        }
+
+        [Fact]
+        public void CaseInsensitiveIdIsPK() {
+            var target = this.MakeTarget();
+            Assert.True(target.IsPrimaryKeyFor(typeof(Post), "ID") && target.IsPrimaryKeyFor(typeof(Post), "id"));
+        }
+
+        [Fact]
+        public void EntityNamePlusIdIsPK() {
+            var target = this.MakeTarget();
+            Assert.True(target.IsPrimaryKeyFor(typeof(Post), "PostId"));
+        }
+
+        [Fact]
+        public void EntityNamePlusIdIsPKNotCaseinsensitive() {
+            var target = this.MakeTarget();
+            Assert.False(target.IsPrimaryKeyFor(typeof(Post), "postid"));
         }
 
         [Fact]
