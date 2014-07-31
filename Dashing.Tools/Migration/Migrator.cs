@@ -4,6 +4,7 @@
     using System.Text;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
     using Dashing.Engine.DDL;
 
     public class Migrator : IMigrator {
@@ -26,11 +27,10 @@
         public string GenerateNaiveSqlDiff(IEnumerable<IMap> from, IEnumerable<IMap> to, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             warnings = new List<string>();
             errors = new List<string>();
-
             // naive is simple, drop all tables, recreate
             // TODO Add Warnings
             var sql = new StringBuilder();
-            foreach (var map in from) {
+            foreach (var map in from.OrderTopologically()) {
                 sql.Append(this.dropTableWriter.DropTableIfExists(map));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
