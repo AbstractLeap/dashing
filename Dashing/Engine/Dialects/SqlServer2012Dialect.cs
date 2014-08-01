@@ -9,10 +9,10 @@
                 return;
             }
 
-            sql.Append(" offset " + (skip > 0 ? "@skip" : "0"));
+            sql.Append(" offset " + (skip > 0 ? "@skip" : "0") + " rows");
 
             if (take > 0) {
-                sql.Append(" fetch next @take rows");
+                sql.Append(" fetch next @take rows only");
             }
         }
     }

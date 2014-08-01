@@ -253,7 +253,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset 0 fetch next @take rows",
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset 0 rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -283,7 +283,7 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip", sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip rows", sql.Sql);
         }
 
         [Fact]
@@ -292,7 +292,7 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip", sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip rows", sql.Sql);
         }
 
         [Fact]
@@ -319,12 +319,17 @@
 
         [Fact]
         public void SkipAndTakeWorksSql2012WithoutOrder() {
+            // assemble
             var query = this.GetSelectQuery<Post>().Skip(1).Take(10);
             var selectQuery = query as SelectQuery<Post>;
+
+            // act
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+
+            // assert
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip fetch next @take rows",
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -335,7 +340,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip fetch next @take rows",
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip rows fetch next @take rows only",
                 sql.Sql);
         }
 

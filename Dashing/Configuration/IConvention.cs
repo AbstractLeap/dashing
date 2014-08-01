@@ -36,7 +36,7 @@
         /// <returns>
         ///     The property name of the primary key.
         /// </returns>
-        string PrimaryKeyFor(Type entity);
+        bool IsPrimaryKeyFor(Type entity, string propertyName);
 
         /// <summary>
         ///     Identifies whether the primary key is auto-generated for a given entity
