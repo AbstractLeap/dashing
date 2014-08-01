@@ -1,7 +1,9 @@
 ﻿namespace Dashing.Configuration {
     using System;
+    using System.Collections.Generic;
     using System.Data.Entity.Design.PluralizationServices;
     using System.Globalization;
+    using System.Linq;
 
     /// <summary>
     ///     The default convention.
@@ -81,11 +83,39 @@
         /// <param name="entity">
         ///     The entity.
         /// </param>
+        /// <param name="propertyNames">
+        ///     The array of property names to choose from.
+        /// </param>
         /// <returns>
         ///     The <see cref="string" />.
         /// </returns>
-        public virtual bool IsPrimaryKeyFor(Type entity, string propertyName) {
-            return propertyName == entity.Name + "Id" || propertyName.Equals("id", StringComparison.OrdinalIgnoreCase);
+        public virtual string PrimaryKeyFor(Type entity, IEnumerable<string> propertyNames) {
+            return propertyNames.Select(pn => this.ScorePrimaryKeyCandidate(pn, entity.Name + "Id", "Id"))
+                                .Where(c => c.Score > 0)
+                                .OrderBy(c => c.Score)
+                                .FirstOrDefault().PropertyName;
+        }
+
+        private PrimaryKeyCandidate ScorePrimaryKeyCandidate(string propertyName, params string[] orderedMatches) {
+            for (int i = 0, c = orderedMatches.Length; i < c; ++i) {
+                if (propertyName.Equals(orderedMatches[i], StringComparison.OrdinalIgnoreCase)) {
+                    return new PrimaryKeyCandidate(propertyName, 1 + i);
+                }
+            }
+
+            return new PrimaryKeyCandidate(propertyName, 0);
+        }
+
+        private struct PrimaryKeyCandidate {
+            public readonly string PropertyName;
+
+            public readonly int Score;
+
+            public PrimaryKeyCandidate(string propertyName, int score)
+                : this() {
+                this.PropertyName = propertyName;
+                this.Score = score;
+            }
         }
 
         /// <summary>
