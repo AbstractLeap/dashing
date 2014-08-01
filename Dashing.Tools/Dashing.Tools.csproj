@@ -57,10 +57,14 @@
     <Compile Include="ModelGeneration\IModelGenerator.cs" />
     <Compile Include="ModelGeneration\ModelGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReverseEngineering\Column.cs" />
+    <Compile Include="ReverseEngineering\Configuration.cs" />
     <Compile Include="ReverseEngineering\DefaultConvention.cs" />
     <Compile Include="ReverseEngineering\Engineer.cs" />
     <Compile Include="ReverseEngineering\IConvention.cs" />
     <Compile Include="ReverseEngineering\IEngineer.cs" />
+    <Compile Include="ReverseEngineering\IReverseEngineeringColumn.cs" />
+    <Compile Include="ReverseEngineering\IReverseEngineeringConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dashing\Dashing.csproj">
