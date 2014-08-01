@@ -18,27 +18,40 @@
         }
 
         [Fact]
-        public void IdIsPK() {
+        public void IdIsPickedAsPrimaryKey() {
             var target = this.MakeTarget();
-            Assert.True(target.IsPrimaryKeyFor(typeof(Post), "id"));
+            var primaryKey = target.PrimaryKeyFor(typeof(Post), new[] { "Id", "SomeOtherProperty" });
+            Assert.Equal("Id", primaryKey);
         }
 
         [Fact]
-        public void CaseInsensitiveIdIsPK() {
+        public void IdIsPickedAsPrimaryKeyCaseInsensitively() {
             var target = this.MakeTarget();
-            Assert.True(target.IsPrimaryKeyFor(typeof(Post), "ID") && target.IsPrimaryKeyFor(typeof(Post), "id"));
+            var primaryKey1 = target.PrimaryKeyFor(typeof(Post), new[] { "ID", "SomeOtherProperty" });
+            Assert.Equal("ID", primaryKey1);
+            var primaryKey2 = target.PrimaryKeyFor(typeof(Post), new[] { "id", "SomeOtherProperty" });
+            Assert.Equal("id", primaryKey2);
         }
 
         [Fact]
-        public void EntityNamePlusIdIsPK() {
+        public void EntityNamePlusIdIsPickedAsPrimaryKey() {
             var target = this.MakeTarget();
-            Assert.True(target.IsPrimaryKeyFor(typeof(Post), "PostId"));
+            var primaryKey = target.PrimaryKeyFor(typeof(Post), new[] { "PostId", "SomeOtherProperty" });
+            Assert.Equal("PostId", primaryKey);
         }
 
         [Fact]
-        public void EntityNamePlusIdIsPKNotCaseinsensitive() {
+        public void EntityNamePlusIdIsPickedAsPrimaryKeyCaseInsensitively() {
             var target = this.MakeTarget();
-            Assert.False(target.IsPrimaryKeyFor(typeof(Post), "postid"));
+            var primaryKey = target.PrimaryKeyFor(typeof(Post), new[] { "PoStiD", "SomeOtherProperty" });
+            Assert.Equal("PoStiD", primaryKey);
+        }
+
+        [Fact]
+        public void EntityNamePlusIdHasPrecedenceOverJustIdAsPrimaryKey() {
+            var target = this.MakeTarget();
+            var primaryKey = target.PrimaryKeyFor(typeof(Post), new[] { "Id", "PostId", "SomeOtherProperty" });
+            Assert.Equal("PostId", primaryKey);
         }
 
         [Fact]
