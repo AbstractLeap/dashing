@@ -186,7 +186,7 @@
 
         private void ResolvePrimaryKey(Type entity, IMap map) {
             // get the name from the convention
-            var primaryKeyName = this.convention.PrimaryKeyFor(entity, map.Columns.Select(c => c.Value.Name));
+            var primaryKeyName = this.convention.PrimaryKeyFor(entity, map.OwnedColumns(true).Select(c => c.Name));
             if (primaryKeyName == null) {
                 return;
             }
