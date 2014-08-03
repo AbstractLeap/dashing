@@ -101,6 +101,7 @@
     <Compile Include="Engine\SqlDialectBaseTests.cs" />
     <Compile Include="Engine\DML\UpdateWriterTests.cs" />
     <Compile Include="Engine\WhereClauseWriterTests.cs" />
+    <Compile Include="Extensions\EnumerableExtensionsTests.cs" />
     <Compile Include="MockConfiguration.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="SchemaGenerationSandbox.cs" />

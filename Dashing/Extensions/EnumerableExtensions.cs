@@ -56,6 +56,7 @@
             foreach (var relatedMap in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne).Select(c => c.Value.ParentMap)) {
                 // if already mapped ignore
                 if (result.Contains(relatedMap)) {
+                    // this should come after this map so let's move it
                     continue;
                 }
 

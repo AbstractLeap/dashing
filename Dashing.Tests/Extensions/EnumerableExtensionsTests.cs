@@ -27,6 +27,25 @@ namespace Dashing.Tests.Extensions {
             Assert.True(mapIndexes[typeof(PostTag)] < mapIndexes[typeof(Post)]);
         }
 
+        [Fact]
+        public void TopologicalSortWorksWithoutOneToMany() {
+            var maps = new CustomConfig().Maps;
+            var blogMap = maps.First(m => m.Type == typeof(Blog));
+            blogMap.Columns.Remove("Posts");
+            var sortedMaps = maps.OrderTopologically();
+            var mapIndexes = new Dictionary<Type, int>();
+            int i = 0;
+            foreach (var map in sortedMaps) {
+                mapIndexes.Add(map.Type, i++);
+            }
+
+            Assert.True(mapIndexes[typeof(Post)] < mapIndexes[typeof(Blog)]);
+            Assert.True(mapIndexes[typeof(Comment)] < mapIndexes[typeof(Post)]);
+            Assert.True(mapIndexes[typeof(Tag)] < mapIndexes[typeof(PostTag)]);
+            Assert.True(mapIndexes[typeof(Like)] < mapIndexes[typeof(Comment)]);
+            Assert.True(mapIndexes[typeof(PostTag)] < mapIndexes[typeof(Post)]);
+        }
+
         class CustomConfig : DefaultConfiguration {
             public CustomConfig()
                 : base(new System.Configuration.ConnectionStringSettings("Default", "", "System.Data.SqlClient")) {
