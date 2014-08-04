@@ -20,7 +20,7 @@
         public void SimpleQueryBuilds() {
             var dialect = new SqlServerDialect();
             var selectWriter = new SelectWriter(dialect, MakeConfig());
-            var sql = selectWriter.GenerateSql(new SelectQuery<User>(new Mock<IExecuteQueries>().Object));
+            var sql = selectWriter.GenerateSql(new SelectQuery<User>(new Mock<IExecuteSelectQueries>().Object));
         }
 
         [Fact]
@@ -392,7 +392,7 @@
         }
 
         private SelectQuery<T> GetSelectQuery<T>() {
-            return new SelectQuery<T>(new Mock<IExecuteQueries>().Object);
+            return new SelectQuery<T>(new Mock<IExecuteSelectQueries>().Object);
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {

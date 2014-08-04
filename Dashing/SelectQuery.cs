@@ -16,13 +16,13 @@ namespace Dashing {
     /// <typeparam name="T">
     /// </typeparam>
     public class SelectQuery<T> : ISelectQuery<T> {
-        private readonly IExecuteQueries queryExecutor;
+        private readonly IExecuteSelectQueries selectQueryExecutor;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SelectQuery{T}" /> class.
         /// </summary>
-        public SelectQuery(IExecuteQueries queryExecutor) {
-            this.queryExecutor = queryExecutor;
+        public SelectQuery(IExecuteSelectQueries selectQueryExecutor) {
+            this.selectQueryExecutor = selectQueryExecutor;
             this.Includes = new List<Expression>();
             this.Excludes = new List<Expression>();
             this.Fetches = new List<Expression>();
@@ -264,7 +264,7 @@ namespace Dashing {
         }
 
         public IEnumerator<T> GetEnumerator() {
-            return this.queryExecutor.Query(this).GetEnumerator();
+            return this.selectQueryExecutor.Query(this).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {

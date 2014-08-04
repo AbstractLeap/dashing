@@ -7,7 +7,7 @@
 
     using Dashing.Engine;
 
-    public sealed class Session : ISession, IExecuteQueries {
+    public sealed class Session : ISession, IExecuteSelectQueries {
         public IDapper Dapper { get; private set; }
 
         private readonly IEngine engine;

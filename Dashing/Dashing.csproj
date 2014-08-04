@@ -128,7 +128,7 @@
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />
     <Compile Include="IDapper.cs" />
-    <Compile Include="IExecuteQueries.cs" />
+    <Compile Include="IExecuteSelectQueries.cs" />
     <Compile Include="IFetchMany.cs" />
     <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
