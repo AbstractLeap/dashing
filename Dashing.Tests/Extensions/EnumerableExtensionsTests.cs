@@ -22,7 +22,7 @@ namespace Dashing.Tests.Extensions {
 
             Assert.True(mapIndexes[typeof(Post)] < mapIndexes[typeof(Blog)]);
             Assert.True(mapIndexes[typeof(Comment)] < mapIndexes[typeof(Post)]);
-            Assert.True(mapIndexes[typeof(Tag)] < mapIndexes[typeof(PostTag)]);
+            Assert.True(mapIndexes[typeof(PostTag)] < mapIndexes[typeof(Tag)]);
             Assert.True(mapIndexes[typeof(Like)] < mapIndexes[typeof(Comment)]);
             Assert.True(mapIndexes[typeof(PostTag)] < mapIndexes[typeof(Post)]);
         }
@@ -41,7 +41,7 @@ namespace Dashing.Tests.Extensions {
 
             Assert.True(mapIndexes[typeof(Post)] < mapIndexes[typeof(Blog)]);
             Assert.True(mapIndexes[typeof(Comment)] < mapIndexes[typeof(Post)]);
-            Assert.True(mapIndexes[typeof(Tag)] < mapIndexes[typeof(PostTag)]);
+            Assert.True(mapIndexes[typeof(PostTag)] < mapIndexes[typeof(Tag)]);
             Assert.True(mapIndexes[typeof(Like)] < mapIndexes[typeof(Comment)]);
             Assert.True(mapIndexes[typeof(PostTag)] < mapIndexes[typeof(Post)]);
         }
