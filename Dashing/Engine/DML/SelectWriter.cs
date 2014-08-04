@@ -286,7 +286,7 @@
             }
         }
 
-        private FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out int numberCollectionFetches) {
+        protected FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out int numberCollectionFetches) {
             FetchNode rootNode = null;
             numberCollectionFetches = 0;
             aliasCounter = 0;
@@ -394,7 +394,7 @@
             }
         }
 
-        private void AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) {
+        protected void AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) {
             // separate string builder for the tables as we use the sql builder for fetch columns
             tableSql.Append(" from ");
             this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap<T>());

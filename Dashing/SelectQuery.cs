@@ -355,5 +355,10 @@ namespace Dashing {
             this.Where(predicate);
             return this.LastOrDefault();
         }
+
+        public Page<T> AsPaged(int skip, int take) {
+            this.Skip(skip).Take(take);
+            return this.selectQueryExecutor.QueryPaged(this);
+        }
     }
 }

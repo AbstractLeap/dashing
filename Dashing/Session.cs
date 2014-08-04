@@ -134,6 +134,10 @@
             return this.engine.Query(this.Transaction, query);
         }
 
+        public Page<T> QueryPaged<T>(SelectQuery<T> query) {
+            return this.engine.QueryPaged(this.Transaction, query);
+        }
+
         public int Insert<T>(IEnumerable<T> entities) {
             return this.engine.Insert(this.Transaction, entities);
         }

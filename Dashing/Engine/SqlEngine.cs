@@ -16,6 +16,8 @@ namespace Dashing.Engine {
 
         private ISelectWriter selectWriter;
 
+        private ICountWriter countWriter;
+
         private IUpdateWriter updateWriter;
 
         private IInsertWriter insertWriter;
@@ -30,6 +32,7 @@ namespace Dashing.Engine {
             set {
                 this.configuration = value;
                 this.selectWriter = new SelectWriter(this.dialect, this.Configuration);
+                this.countWriter = new CountWriter(this.dialect, this.Configuration);
                 this.deleteWriter = new DeleteWriter(this.dialect, this.Configuration);
                 this.updateWriter = new UpdateWriter(this.dialect, this.Configuration);
                 this.insertWriter = new InsertWriter(this.dialect, this.Configuration);
@@ -72,6 +75,19 @@ namespace Dashing.Engine {
             }
 
             return this.Configuration.CodeManager.Query(sqlQuery, query, transaction);
+        }
+
+        public Page<T> QueryPaged<T>(IDbTransaction transaction, SelectQuery<T> query) {
+            this.EnsureConfigurationLoaded();
+            var countQuery = this.countWriter.GenerateCountSql(query);
+            var totalResults = this.Configuration.CodeManager.QueryScalar<int>(countQuery.Sql, transaction, countQuery.Parameters);
+
+            return new Page<T> {
+                TotalResults = totalResults,
+                Items = this.Query(transaction, query).ToArray(),
+                Skipped = query.SkipN,
+                Taken = query.TakeN,
+            };
         }
 
         public virtual int Insert<T>(IDbTransaction transaction, IEnumerable<T> entities) {
