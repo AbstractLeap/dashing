@@ -190,6 +190,6 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
-        public abstract void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip);
+        public abstract void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip);
     }
 }

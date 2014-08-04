@@ -57,7 +57,7 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
-        public override void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
+        public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             if (skip == 0) {
                 // query starts with SELECT so insert top (X) there
                 sql.Insert(6, " top (@take)");

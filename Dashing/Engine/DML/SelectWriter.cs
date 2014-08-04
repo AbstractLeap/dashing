@@ -138,7 +138,7 @@
                         parameters = new DynamicParameters();
                     }
 
-                    this.Dialect.ApplyPaging(sql, orderSql, selectQuery.TakeN, selectQuery.SkipN);
+                    this.Dialect.ApplySkipTake(sql, orderSql, selectQuery.TakeN, selectQuery.SkipN);
                     if (selectQuery.TakeN > 0) {
                         parameters.Add("@take", selectQuery.TakeN);
                     }

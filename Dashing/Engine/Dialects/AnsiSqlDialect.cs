@@ -30,7 +30,7 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
-        public override void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
+        public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             throw new InvalidOperationException("There is no Ansi-SQL way of expressing an offset-limit / skip-take clause.");
         }
     }

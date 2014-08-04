@@ -92,7 +92,7 @@
                 : base('<', '>') {
             }
 
-            public override void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
+            public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
                 throw new System.NotImplementedException();
             }
         }
