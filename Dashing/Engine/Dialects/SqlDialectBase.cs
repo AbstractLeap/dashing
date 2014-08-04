@@ -5,7 +5,7 @@ namespace Dashing.Engine.Dialects {
 
     using Dashing.Configuration;
 
-    public class SqlDialectBase : ISqlDialect {
+    public abstract class SqlDialectBase : ISqlDialect {
         protected char BeginQuoteCharacter { get; set; }
 
         protected char EndQuoteCharacter { get; set; }
@@ -190,8 +190,6 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
-        public virtual void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
-            throw new InvalidProgramException("ApplyPaging must be overridden in a deriving class");
-        }
+        public abstract void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip);
     }
 }
