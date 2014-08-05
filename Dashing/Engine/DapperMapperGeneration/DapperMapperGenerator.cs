@@ -65,7 +65,7 @@
             statements.Add(expr);
         }
 
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
+        [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private void VisitTree(FetchNode node, IList<Expression> statements, IList<ParameterExpression> parameters, bool visitedCollection) {
             var parentParam = parameters.Last();
             foreach (var child in node.Children) {
@@ -85,14 +85,31 @@
 
                 var childParam = Expression.Parameter(this.generatedCodeManager.GetForeignKeyType(childType));
 
-                // add the member assign expression, check for null first
+
                 if (child.Value.Column.Relationship == RelationshipType.OneToMany) {
+                    // potentially initialize and then add the member assign expression, check for null first
                     var ex = Expression.IfThen(
+                        // if (parent != null) {
                         Expression.NotEqual(parentParam, Expression.Constant(null)),
-                        Expression.Call(
-                            Expression.Property(parentParam, child.Value.Column.Name),
-                            typeof(ICollection<>).MakeGenericType(child.Value.Column.Type.GetGenericArguments().First()).GetMethod("Add"),
-                            new Expression[] { childParam }));
+                        Expression.Block(
+                            Expression.IfThen(
+                                // if (parent.Property == null) {
+                                Expression.Equal(
+                                    Expression.Property(parentParam, child.Value.Column.Name),
+                                    Expression.Constant(null)),
+                                Expression.Assign(
+                                    // parent.Property = new List<T>();
+                                    Expression.Property(parentParam, child.Value.Column.Name),
+                                    Expression.New(
+                                        typeof(List<>).MakeGenericType(
+                                            child.Value.Column.Type.GetGenericArguments().First())))),
+                            Expression.Call(
+                                // parent.Property.Add(child);
+                                Expression.Property(parentParam, child.Value.Column.Name),
+                                typeof(ICollection<>).MakeGenericType(
+                                    child.Value.Column.Type.GetGenericArguments().First())
+                                                     .GetMethod("Add"),
+                                new Expression[] { childParam })));
                     statements.Add(ex);
                 }
                 else {
