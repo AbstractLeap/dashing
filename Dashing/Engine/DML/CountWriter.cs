@@ -1,4 +1,5 @@
 namespace Dashing.Engine.DML {
+    using System;
     using System.Text;
 
     using Dashing.Configuration;
@@ -24,7 +25,17 @@ namespace Dashing.Engine.DML {
             this.AddTables(selectQuery, tableSql, columnSql, rootNode);
 
             var sql = new StringBuilder(15 + tableSql.Length + whereSql.Length);
-            sql.Append("select count(1)");
+            sql.Append("select count(");
+
+            if (numberCollectionFetches == 0) {
+                sql.Append("1");
+            }
+            else {
+                sql.Append("distinct ");
+                this.Dialect.AppendQuotedName(sql, this.Configuration.GetMap<T>().PrimaryKey.DbName);
+            }
+
+            sql.Append(")");
             sql.Append(tableSql);
             sql.Append(whereSql);
 

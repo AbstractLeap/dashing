@@ -31,7 +31,7 @@
         }
 
         [Fact]
-        public void FetchingWheredQueryReturnsCorrectSql() {
+        public void FetchingManyToOneWheredQueryReturnsCorrectSql() {
             var target = MakeTarget();
             var query = MakePostQuery();
 
@@ -39,6 +39,17 @@
             var sql = target.GenerateCountSql(query);
 
             Assert.Equal("select count(1) from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where (t_1.[HeightInMeters] < @l_1)", sql.Sql);
+        }
+
+        [Fact]
+        public void FetchingOneToManyWheredQueryReturnsCorrectSql() {
+            var target = MakeTarget();
+            var query = MakePostQuery();
+
+            query.Fetch(p => p.Comments);
+            var sql = target.GenerateCountSql(query);
+
+            Assert.Equal("select count(distinct [PostId]) from [Posts] as t left join [Comments] as t_1 on t.PostId = t_1.PostId", sql.Sql);
         }
 
         private static SelectQuery<User> MakeUserQuery() {
