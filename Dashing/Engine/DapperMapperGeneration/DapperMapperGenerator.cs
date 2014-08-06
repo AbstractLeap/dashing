@@ -51,6 +51,7 @@
             var primaryKeyExpr = Expression.Convert(Expression.Property(parameters.First(), fetchTree.Children.First().Value.Column.Map.PrimaryKey.Name), typeof(object));
 
             // check the dictionary for this value
+            // p => dict.GetOrAdd((object)p.PostId, p);
             var tt = typeof(T);
             var expr = Expression.Assign(
                 parameters.First(),
@@ -68,61 +69,87 @@
         [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private void VisitTree(FetchNode node, IList<Expression> statements, IList<ParameterExpression> parameters, bool visitedCollection) {
             var parentParam = parameters.Last();
-            foreach (var child in node.Children) {
+            foreach (var childNode in node.Children.Values) {
                 // create a param
                 Type childType;
-                if (child.Value.Column.Relationship == RelationshipType.OneToMany) {
+                if (childNode.Column.Relationship == RelationshipType.OneToMany) {
                     if (visitedCollection) {
                         throw new InvalidOperationException("You can only generate a mapper for one collection at a time");
                     }
 
-                    childType = child.Value.Column.Type.GetGenericArguments().First();
+                    childType = childNode.Column.Type.GetGenericArguments().First();
                     visitedCollection = true;
                 }
                 else {
-                    childType = child.Value.Column.Type;
+                    childType = childNode.Column.Type;
                 }
 
                 var childParam = Expression.Parameter(this.generatedCodeManager.GetForeignKeyType(childType));
 
-
-                if (child.Value.Column.Relationship == RelationshipType.OneToMany) {
-                    // potentially initialize and then add the member assign expression, check for null first
-                    var ex = Expression.IfThen(
-                        // if (parent != null) {
-                        Expression.NotEqual(parentParam, Expression.Constant(null)),
-                        Expression.Block(
-                            Expression.IfThen(
-                                // if (parent.Property == null) {
-                                Expression.Equal(
-                                    Expression.Property(parentParam, child.Value.Column.Name),
-                                    Expression.Constant(null)),
-                                Expression.Assign(
-                                    // parent.Property = new List<T>();
-                                    Expression.Property(parentParam, child.Value.Column.Name),
-                                    Expression.New(
-                                        typeof(List<>).MakeGenericType(
-                                            child.Value.Column.Type.GetGenericArguments().First())))),
-                            Expression.Call(
-                                // parent.Property.Add(child);
-                                Expression.Property(parentParam, child.Value.Column.Name),
-                                typeof(ICollection<>).MakeGenericType(
-                                    child.Value.Column.Type.GetGenericArguments().First())
-                                                     .GetMethod("Add"),
-                                new Expression[] { childParam })));
-                    statements.Add(ex);
-                }
-                else {
-                    var ex = Expression.IfThen(
-                        Expression.NotEqual(parentParam, Expression.Constant(null)),
-                        Expression.Assign(Expression.Property(parentParam, child.Value.Column.Name), childParam));
-                    statements.Add(ex);
+                ConditionalExpression ex;
+                switch (childNode.Column.Relationship) {
+                    case RelationshipType.OneToMany:
+                        ex = InitialiseCollectionAndAddChild(parentParam, childNode, childParam);
+                        break;
+                    case RelationshipType.ManyToOne:
+                        ex = SetPropertyToValueOfChild(parentParam, childNode, childParam);
+                        break;
+                    default:
+                        throw new InvalidOperationException(string.Format("Unexpected RelationshipType: {0}", childNode.Column.Relationship));
                 }
 
-                // add each child node
+                // add the above statement to the current mapper method
+                statements.Add(ex);
                 parameters.Add(childParam);
-                this.VisitTree(child.Value, statements, parameters, visitedCollection);
+
+                // now visit the next fetch
+                this.VisitTree(childNode, statements, parameters, visitedCollection);
             }
+        }
+
+        private static ConditionalExpression SetPropertyToValueOfChild(
+            ParameterExpression parentParam,
+            FetchNode childNode,
+            ParameterExpression childParam) {
+            ConditionalExpression ex;
+            ex = Expression.IfThen(
+                Expression.NotEqual(parentParam, Expression.Constant(null)),
+                Expression.Assign(Expression.Property(parentParam, childNode.Column.Name), childParam));
+            return ex;
+        }
+
+        [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."),SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "Reviewed. Suppression is OK here.")]
+        private static ConditionalExpression InitialiseCollectionAndAddChild(
+            ParameterExpression parentParam,
+            FetchNode childNode,
+            ParameterExpression childParam) {
+            // potentially initialize and then add the member assign expression, check for null first
+            return Expression.IfThen(
+                // if (parent != null) {
+                Expression.NotEqual(parentParam, Expression.Constant(null)),
+                Expression.Block(
+                    // if the collection property is null, initialise it to a list
+                    Expression.IfThen(
+                        // if (parent.Property == null) {
+                        Expression.Equal(
+                            Expression.Property(parentParam, childNode.Column.Name),
+                            Expression.Constant(null)),
+                        Expression.Assign(
+                            // parent.Property = new List<T>();
+                            Expression.Property(parentParam, childNode.Column.Name),
+                            Expression.New(
+                                typeof(List<>).MakeGenericType(
+                                    childNode.Column.Type.GetGenericArguments().First())))),
+                    // if the child is not null, add it to the list
+                    Expression.IfThen(
+                        // if (child != null)
+                        Expression.NotEqual(childParam, Expression.Constant(null)),
+                        Expression.Call(
+                            // parent.Property.Add(child);
+                            Expression.Property(parentParam, childNode.Column.Name),
+                            typeof(ICollection<>).MakeGenericType(
+                                childNode.Column.Type.GetGenericArguments().First()).GetMethod("Add"),
+                            new Expression[] { childParam }))));
         }
 
         public Delegate GenerateMultiCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
