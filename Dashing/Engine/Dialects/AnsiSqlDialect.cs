@@ -1,5 +1,7 @@
 namespace Dashing.Engine.Dialects {
+    using System;
     using System.Data;
+    using System.Text;
 
     public class AnsiSqlDialect : SqlDialectBase {
         protected override string TypeName(DbType type) {
@@ -26,6 +28,10 @@ namespace Dashing.Engine.Dialects {
                 default:
                     return base.TypeName(type);
             }
+        }
+
+        public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
+            throw new InvalidOperationException("There is no Ansi-SQL way of expressing an offset-limit / skip-take clause.");
         }
     }
 }

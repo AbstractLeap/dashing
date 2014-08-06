@@ -34,7 +34,7 @@
 
         [Fact]
         public void IfExistsGeneratesExpectedSql() {
-            var dialect = new SqlDialectBase('[', ']');
+            var dialect = new SqlServerDialect();
             var sql = dialect.WriteDropTableIfExists("<tablename>");
 
             Assert.Equal("if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '<tablename>') drop table [<tablename>]", sql);

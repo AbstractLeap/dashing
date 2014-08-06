@@ -72,5 +72,10 @@
         ///     Executes some sql against the connection (wraps Dapper method)
         /// </summary>
         int Execute(string sql, IDbTransaction transaction, dynamic param = null);
+
+        /// <summary>
+        ///     Executes some sql against the connection (wraps Dapper method)
+        /// </summary>
+        T QueryScalar<T>(string sql, IDbTransaction transaction, dynamic param = null);
     }
 }

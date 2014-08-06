@@ -19,14 +19,8 @@
         [Fact]
         public void SimpleQueryBuilds() {
             var dialect = new SqlServerDialect();
-            var engine = new SqlEngine(dialect);
-            var connection = new Mock<IDbConnection>(MockBehavior.Strict);
-            var transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
-            transaction.Setup(m => m.Connection).Returns(connection.Object);
-            connection.Setup(c => c.State).Returns(ConnectionState.Open);
             var selectWriter = new SelectWriter(dialect, MakeConfig());
-            var sql = selectWriter.GenerateSql(new SelectQuery<User>(engine, transaction.Object));
-            Debug.Write(sql.Sql);
+            var sql = selectWriter.GenerateSql(new SelectQuery<User>(new Mock<IExecuteSelectQueries>().Object));
         }
 
         [Fact]
@@ -398,12 +392,7 @@
         }
 
         private SelectQuery<T> GetSelectQuery<T>() {
-            var engine = new Mock<IEngine>().Object;
-            var connection = new Mock<IDbConnection>(MockBehavior.Strict);
-            connection.Setup(c => c.State).Returns(ConnectionState.Open);
-            var transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
-            transaction.Setup(m => m.Connection).Returns(connection.Object);
-            return new SelectQuery<T>(engine, transaction.Object);
+            return new SelectQuery<T>(new Mock<IExecuteSelectQueries>().Object);
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {
