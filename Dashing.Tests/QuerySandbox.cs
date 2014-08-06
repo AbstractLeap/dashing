@@ -1,6 +1,8 @@
 ﻿namespace Dashing.Tests {
     using System;
+    using System.Collections.Generic;
     using System.Configuration;
+    using System.Diagnostics;
     using System.Linq;
 
     using Dapper;
@@ -152,6 +154,39 @@
             using (var session = config.BeginSession()) {
                 var posts = session.Query<Post>().Fetch(p => p.Comments).Fetch(p => p.Tags).Where(p => p.PostId == 1).ToList();
             }
+        }
+
+
+        [Fact(Skip = "connects to real database")]
+        public void TestFetchingEmptyCollection() { // aka FetchingEmptyCollectionReturnsEmptyCollection
+            // assemble
+            var dialect = new SqlServerDialect();
+            var createTableWriter = new CreateTableWriter(dialect);
+            var dropTableWriter = new DropTableWriter(dialect);
+            var config = NeedToDash.Configure(SchemaGenerationSandbox.PolyTestConnectionString).AddNamespaceOf<Post>();
+            var post = new Post { PostId = 1 };
+
+            using (var session = config.BeginSession()) {
+                foreach (var map in config.Maps) {
+                    session.Dapper.Execute(dropTableWriter.DropTableIfExists(map));
+                    session.Dapper.Execute(createTableWriter.CreateTable(map));
+                }
+
+                session.Insert(post);
+                session.Complete();
+            }
+
+            // act
+            Post result;
+            using (var session = config.BeginSession()) {
+                var query = session.Query<Post>()
+                    .Where(p => p.PostId == 1).Fetch(p => p.Comments);
+                result = query.SingleOrDefault();
+            }
+               
+            // assert
+            Assert.NotNull(result);
+            Assert.Empty(result.Comments);
         }
 
         [Fact(Skip = "connects to real database")]
