@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.14</version>
+        <version>0.0.16</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,9 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.14 - Fixed a bug with primary key resolution precedence
+        <releaseNotes>* 0.0.16 - Fixed bug when fetching empty collection
+* 0.0.15 - Fixed bug with uninitialised collections
+* 0.0.14 - Fixed a bug with primary key resolution precedence
 * 0.0.13 - Fixed up skip and take on SQL Azure
 * 0.0.12 - Added support for fetching beyond Dapper's seven type limit
 * 0.0.11 - Infinite collection fetching, save detached objects, and bugfixes with automatic entity id resolution
