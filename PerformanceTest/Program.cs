@@ -13,10 +13,11 @@
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
 
+    using LightSpeed.Domain;
+
     using NHibernate;
     using NHibernate.Linq;
 
-    using PerformanceTest.Domain;
     using PerformanceTest.Tests.Dashing;
     using PerformanceTest.Tests.EF;
     using PerformanceTest.Tests.NHibernate;
@@ -25,7 +26,13 @@
 
     using Simple.Data;
 
+    using Blog = PerformanceTest.Domain.Blog;
+    using Comment = PerformanceTest.Domain.Comment;
+    using Post = PerformanceTest.Domain.Post;
+    using PostTag = PerformanceTest.Domain.PostTag;
     using QueryableExtensions = System.Data.Entity.QueryableExtensions;
+    using Tag = PerformanceTest.Domain.Tag;
+    using User = PerformanceTest.Domain.User;
 
     internal static class Program {
         internal static readonly ConnectionStringSettings ConnectionString = new ConnectionStringSettings(
@@ -81,7 +88,10 @@
         private static readonly IConfiguration dashingConfig = new DashingConfiguration(ConnectionString);
 
         private static readonly OrmLiteConnectionFactory connectionFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
-        
+
+        private static readonly Mindscape.LightSpeed.LightSpeedContext<TestUnitOfWork> lsContext =
+            new Mindscape.LightSpeed.LightSpeedContext<TestUnitOfWork> { PluralizeTableNames = true, ConnectionString = Program.ConnectionString.ConnectionString, DataProvider = Mindscape.LightSpeed.DataProvider.SqlServer2012};
+
         private static void SetupTests(List<Test> tests) {
             SetupSelectSingleTest(tests);
             SetupFetchTest(tests);
@@ -469,6 +479,27 @@ select * from Comments where PostId = @id";
                             return post;
                         }
                     }));
+
+            // lightspeed
+            tests.Add(
+                new Test(
+                    Providers.LightSpeed,
+                    TestName,
+                    i => {
+                        using (var uow = lsContext.CreateUnitOfWork()) {
+                            var post = uow.FindById<LightSpeed.Domain.Post>(i);
+                            post.Title = Providers.LightSpeed + "_" + i + r.Next(100000);
+                            uow.SaveChanges();
+                            var thatPost = uow.FindById<LightSpeed.Domain.Post>(i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.LightSpeed
+                                    + " as the update did not work");
+                            }
+
+                            return post;
+                        }
+                    }));
         }
 
         private static void SetupFetchTest(List<Test> tests) {
@@ -620,6 +651,29 @@ select * from Comments where PostId = @id";
                         return nhSession.Get<Post>(i);
                     }
                 }, "Stateful"));
+
+            // add lightspeed
+            tests.Add(
+                new Test(
+                    Providers.LightSpeed,
+                    TestName,
+                    i => {
+                        using (var uow = lsContext.CreateUnitOfWork()) {
+                            return uow.Posts.Single(p => p.Id == i);
+                        }
+                    }, "Linq"));
+
+            // lightspeed find by id
+            tests.Add(
+                new Test(
+                    Providers.LightSpeed,
+                    TestName,
+                    i => {
+                        using (var uow = lsContext.CreateUnitOfWork()) {
+                            return uow.FindById<LightSpeed.Domain.Post>(i);
+                        }
+                    },
+                    "FindById"));
         }
 
         private static void SetupDatabase() {
