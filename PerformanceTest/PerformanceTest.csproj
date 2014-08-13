@@ -51,10 +51,10 @@
       <HintPath>..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="Mindscape.LightSpeed">
-      <HintPath>C:\Program Files (x86)\Mindscape\LightSpeed\Bin\Mindscape.LightSpeed.dll</HintPath>
+      <HintPath>..\references\LightSpeed\Mindscape.LightSpeed.dll</HintPath>
     </Reference>
     <Reference Include="Mindscape.LightSpeed.Linq">
-      <HintPath>C:\Program Files (x86)\Mindscape\LightSpeed\Bin\Mindscape.LightSpeed.Linq.dll</HintPath>
+      <HintPath>..\references\LightSpeed\Mindscape.LightSpeed.Linq.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate">
       <HintPath>..\packages\NHibernate.3.3.1.4000\lib\Net35\NHibernate.dll</HintPath>
