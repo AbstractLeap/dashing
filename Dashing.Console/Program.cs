@@ -114,8 +114,14 @@
             Console.WriteLine("-- Class:    {0}", dashingSettings.ConfigurationName);
             Console.WriteLine();
 
+            // fetch the to state
+            IConfiguration config;
+            using (new TimedOperation("-- Fetching configuration contents...")) {
+                config = LoadConfiguration(dashingSettings);
+            }
+
             IEnumerable<string> warnings, errors;
-            var migrationScript = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, out warnings, out errors);
+            var migrationScript = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, config, out warnings, out errors);
 
             // report errors
             DisplayMigrationWarningsAndErrors(errors, warnings);
@@ -142,16 +148,27 @@
             }
         }
 
-        private static void DoMigrate(
-            bool naive,
-            ConnectionStringSettings connectionStringSettings,
-            DashingSettings dashingSettings) {
+        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings) {
+            // fetch the to state
+            IConfiguration config;
+            using (new TimedOperation("-- Fetching configuration contents...")) {
+                config = LoadConfiguration(dashingSettings);
+            }
+
             if (naive) {
                 IEnumerable<string> warnings, errors;
-                var script = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, out warnings, out errors);
+                var script = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, config, out warnings, out errors);
 
                 // report errors
                 DisplayMigrationWarningsAndErrors(errors, warnings);
+
+                if (string.IsNullOrWhiteSpace(script)) {
+                    using (Color(ConsoleColor.Green)) {
+                        Console.WriteLine("Nothing to do!");
+                    }
+
+                    return;
+                }
 
                 // migrate it
                 var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
@@ -169,8 +186,10 @@
                         command.ExecuteNonQuery();
                     }
 
+                    // magical crazy time! see http://stackoverflow.com/a/2658326/1255065
+                    AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainAssemblyResolve;
+                    
                     // now let's call Seed
-                    var config = LoadConfiguration(dashingSettings);
                     var seederConfig = config as ISeeder;
                     if (seederConfig != null) {
                         using (new TimedOperation("-- Executing seeds"))
@@ -185,6 +204,11 @@
             }
 
             NotImplemented();
+        }
+
+
+        private static Assembly CurrentDomainAssemblyResolve(object sender, ResolveEventArgs args) {
+            return ((AppDomain)sender).GetAssemblies().FirstOrDefault(assembly => assembly.FullName == args.Name);
         }
 
         private static void DoReverseEngineer(CommandLineOptions options, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings, ConnectionStringSettings connectionString) {
@@ -222,19 +246,9 @@
             Console.Write(HelpText.AutoBuild(options));
         }
 
-        private static string GenerateNaiveMigrationScript(
-            ConnectionStringSettings connectionStringSettings,
-            DashingSettings dashingSettings,
-            out IEnumerable<string> warnings,
-            out IEnumerable<string> errors) {
-            // fetch the to state
-            IConfiguration config;
-            using (new TimedOperation("-- Fetching configuration contents...")) {
-                config = LoadConfiguration(dashingSettings);
-            }
-
+        private static string GenerateNaiveMigrationScript(ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, IConfiguration configuration, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             // fetch the from state
-            IEnumerable<IMap> maps;
+            IEnumerable<IMap> fromMaps;
             using (new TimedOperation("-- Reading database contents...")) {
                 DatabaseSchema schema;
                 var engineer = new Engineer();
@@ -242,7 +256,7 @@
                     connectionStringSettings.ConnectionString,
                     connectionStringSettings.ProviderName);
                 schema = databaseReader.ReadAll();
-                maps = engineer.ReverseEngineer(schema);
+                fromMaps = engineer.ReverseEngineer(schema);
             }
 
             // set up migrator
@@ -251,7 +265,7 @@
             var migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), null);
             
             // run the migrator
-            var script = migrator.GenerateNaiveSqlDiff(maps, config.Maps, out warnings, out errors);
+            var script = migrator.GenerateNaiveSqlDiff(fromMaps, configuration.Maps, out warnings, out errors);
 
             // TODO: do things with warnings and errors
             return script;
@@ -260,6 +274,7 @@
         private static IConfiguration LoadConfiguration(DashingSettings dashingSettings) {
             // fetch the to state
             var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
+            GC.KeepAlive(configAssembly);
             var configType = configAssembly.DefinedTypes.SingleOrDefault(t => t.FullName == dashingSettings.ConfigurationName);
 
             if (configType == null) {
