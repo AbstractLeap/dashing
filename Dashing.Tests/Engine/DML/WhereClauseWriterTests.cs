@@ -104,24 +104,13 @@
             return whereClauseWriter;
         }
 
-        private static IConfiguration MakeConfig(bool withIgnore = false) {
-            if (withIgnore) {
-                return new CustomConfigWithIgnore();
-            }
-
+        private static IConfiguration MakeConfig() {
             return new CustomConfig();
         }
 
         private class CustomConfig : MockConfiguration {
             public CustomConfig() {
                 this.AddNamespaceOf<Post>();
-            }
-        }
-
-        private class CustomConfigWithIgnore : MockConfiguration {
-            public CustomConfigWithIgnore() {
-                this.AddNamespaceOf<Post>();
-                this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }
         }
     }
