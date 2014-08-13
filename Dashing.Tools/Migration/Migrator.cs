@@ -35,7 +35,7 @@
         /// <returns></returns>
         public string GenerateNaiveSqlDiff(IEnumerable<IMap> fromMaps, IEnumerable<IMap> toMaps, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             var sql = new StringBuilder();
-            var from = fromMaps as List<IMap> ?? fromMaps.ToList();
+            var from = fromMaps as List<IMap> ?? fromMaps.OrderTopologically().ToList();
             var to = toMaps as List<IMap> ?? toMaps.ToList();
             var warningList = new List<string>();
             warnings = warningList;
@@ -49,8 +49,8 @@
                 warningList.AddRange(pairs.Select(p => string.Format("Ignoring {0} as no change was detected", p.From.Table)));
             }
 
-            // drop tables
-            foreach (var map in from.OrderTopologically()) {
+            // drop tables (ordered topologically, might work if we haven't broken things above)
+            foreach (var map in from) {
                 sql.Append(this.dropTableWriter.DropTableIfExists(map));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
