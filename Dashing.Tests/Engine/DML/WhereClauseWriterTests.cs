@@ -99,6 +99,19 @@
             Assert.Equal(typeof(int), actual.Parameters.GetValue("l_1").GetType());
         }
 
+        [Fact]
+        public void WherePropertyIsDefinedOnInterface() {
+            // assemble
+            var target = MakeTarget();
+            Expression<Func<User, bool>> whereClause = u => u.IsEnabled;
+
+            // act
+            var actual = target.GenerateSql(new[] { whereClause }, null);
+
+            // assert
+            Assert.Equal(" where [IsEnabled]", actual.Sql);
+        }
+
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }

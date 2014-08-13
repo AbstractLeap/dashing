@@ -1,5 +1,5 @@
 ﻿namespace Dashing.Tests.TestDomain {
-    public class User {
+    public class User : IEnableable {
         public virtual int UserId { get; set; }
 
         public virtual string Username { get; set; }
