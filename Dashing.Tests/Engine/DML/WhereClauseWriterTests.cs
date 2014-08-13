@@ -26,12 +26,12 @@
             var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
 
             Expression<Func<Post, bool>> whereClause1 = p => p.PostId > 0;
-            Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
+            Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
-            var foo = new List<Expression<System.Func<Post, bool>>> {
-                                                                        whereClause1,
-                                                                        whereClause2
-                                                                    };
+            var foo = new List<Expression<Func<Post, bool>>> {
+                whereClause1, 
+                whereClause2
+            };
 
             var result = whereClauseWriter.GenerateSql(foo, null);
             Debug.Write(result.Sql);
@@ -42,12 +42,13 @@
         public void TwoWhereClausesParametersOkay() {
             var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
 
-            Expression<System.Func<Post, bool>> whereClause1 = p => p.PostId > 0;
-            Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
+            Expression<Func<Post, bool>> whereClause1 = p => p.PostId > 0;
+            Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
-            var foo = new List<Expression<System.Func<Post, bool>>>();
-            foo.Add(whereClause1);
-            foo.Add(whereClause2);
+            var foo = new List<Expression<Func<Post, bool>>> {
+                whereClause1,
+                whereClause2
+            };
 
             var result = whereClauseWriter.GenerateSql(foo, null);
             Debug.Write(result.Sql);
@@ -59,8 +60,10 @@
         public void UsesPrimaryKeyWhereEntityEqualsEntity() {
             // assemble
             var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
-            var user = new User() { UserId = 1 };
-            Expression<System.Func<User, bool>> whereClause = u => u == user;
+            var user = new User {
+                UserId = 1
+            };
+            Expression<Func<User, bool>> whereClause = u => u == user;
 
             // act
             var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
@@ -76,7 +79,7 @@
             var post = this.codeManager.CreateTrackingInstance<Post>();
             post.PostId = 1;
             this.codeManager.TrackInstance(post);
-            Expression<System.Func<Post, bool>> whereClause = p => p == post;
+            Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
             var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
@@ -92,7 +95,7 @@
             var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
             var post = this.codeManager.CreateForeignKeyInstance<Post>();
             post.PostId = 1;
-            Expression<System.Func<Post, bool>> whereClause = p => p == post;
+            Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
             var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
