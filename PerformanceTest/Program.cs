@@ -2,9 +2,8 @@
     using System;
     using System.Collections.Generic;
     using System.Configuration;
-    using System.Data;
+    using System.Data.Entity;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using Dapper;
@@ -15,7 +14,8 @@
 
     using LightSpeed.Domain;
 
-    using NHibernate;
+    using Mindscape.LightSpeed;
+
     using NHibernate.Linq;
 
     using PerformanceTest.Tests.Dashing;
@@ -24,64 +24,54 @@
 
     using ServiceStack.OrmLite;
 
-    using Simple.Data;
-
     using Blog = PerformanceTest.Domain.Blog;
     using Comment = PerformanceTest.Domain.Comment;
+    using Database = Simple.Data.Database;
+    using EagerFetchingExtensionMethods = NHibernate.Linq.EagerFetchingExtensionMethods;
+    using LinqExtensionMethods = NHibernate.Linq.LinqExtensionMethods;
     using Post = PerformanceTest.Domain.Post;
     using PostTag = PerformanceTest.Domain.PostTag;
-    using QueryableExtensions = System.Data.Entity.QueryableExtensions;
     using Tag = PerformanceTest.Domain.Tag;
     using User = PerformanceTest.Domain.User;
 
     internal static class Program {
-        internal static readonly ConnectionStringSettings ConnectionString = new ConnectionStringSettings(
-            "Default",
-            "Data Source=.;Initial Catalog=tempdb;Integrated Security=True",
-            "System.Data.SqlClient");
+        internal static readonly ConnectionStringSettings ConnectionString = new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=tempdb;Integrated Security=True", "System.Data.SqlClient");
 
         private static void Main(string[] args) {
             SetupDatabase();
-
-            var tests = new List<Test>();
-            SetupTests(tests);
-
-            var providers = tests.Select(t => t.Provider).Distinct().ToList();
-            var testNames = tests.Select(t => t.TestName).Distinct().ToList();
-
-            foreach (var name in testNames) {
-                Console.WriteLine("Running " + name);
+            var tests = SetupTests();
+            foreach (var testGroup in tests.GroupBy(t => t.TestName)) {
+                Console.WriteLine("Running " + testGroup.Key);
                 Console.WriteLine("------------------------");
-                var results = new List<System.Tuple<string, long>>();
 
-                foreach (var provider in providers) {
-                    var closeOverProvider = provider;
-                    var closeOverName = name;
-
-                    foreach (var test in tests.Where(t => t.Provider == closeOverProvider && t.TestName == closeOverName).Where(test => test != null)) {
-                         {
-                            // warm up
-                            var watch = new Stopwatch();
-
-                            // iterate 
-                            for (var j = 0; j < 3; ++j) {
-                                for (var i = 1; i <= 500; ++i) {
-                                    watch.Start();
-                                    test.TestFunc(i);
-                                    watch.Stop();
-                                }
-                            }
-
-                            results.Add(Tuple.Create(provider + (test.Method != null ? " (" + test.Method + ") " : string.Empty), watch.ElapsedMilliseconds));
-                        }
-                    }
-                }
+                // do the stuff
+                var results = RunTestGroup(testGroup);
 
                 foreach (var result in results.OrderBy(s => s.Item2)) {
                     Console.WriteLine("{0,7:N0} {1}", result.Item2, result.Item1);
                 }
 
                 Console.WriteLine();
+            }
+        }
+
+        private static IEnumerable<System.Tuple<string, long>> RunTestGroup(IEnumerable<Test> tests) {
+            var random = new Random();
+
+            foreach (var test in tests.OrderBy(t => random.Next())) {
+                // warm up
+                test.TestFunc(1);
+
+                // iterate 
+                var watch = new Stopwatch();
+                watch.Start();
+                for (var i = 1; i <= 500; ++i) {
+                    test.TestFunc(random.Next(1, 500));
+                }
+
+                watch.Stop();
+
+                yield return Tuple.Create(test.FriendlyName, watch.ElapsedMilliseconds);
             }
         }
 
@@ -92,13 +82,15 @@
         private static readonly Mindscape.LightSpeed.LightSpeedContext<TestUnitOfWork> lsContext =
             new Mindscape.LightSpeed.LightSpeedContext<TestUnitOfWork> { PluralizeTableNames = true, ConnectionString = Program.ConnectionString.ConnectionString, DataProvider = Mindscape.LightSpeed.DataProvider.SqlServer2012};
 
-        private static void SetupTests(List<Test> tests) {
+        private static List<Test> SetupTests() {
+            var tests = new List<Test>();
             SetupSelectSingleTest(tests);
             SetupFetchTest(tests);
             SetupFetchChangeTests(tests);
             SetupFetchCollectionTests(tests);
             SetupFetchMultiCollectionTests(tests);
             SetupFetchMultipleMultiCollection(tests);
+            return tests;
         }
 
         private static void SetupFetchMultipleMultiCollection(List<Test> tests) {
