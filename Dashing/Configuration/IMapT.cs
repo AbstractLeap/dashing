@@ -5,5 +5,7 @@ namespace Dashing.Configuration {
         void SetPrimaryKeyValue(T entity, object value);
 
         object GetColumnValue(T entity, IColumn column);
+
+        void SetColumnValue(T entity, IColumn column, object value);
     }
 }

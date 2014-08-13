@@ -16,7 +16,7 @@
         /// <summary>
         ///     Gets the type.
         /// </summary>
-        public Type Type { get; private set; }
+        public virtual Type Type { get; private set; }
 
         public IMap Map { get; set; }
 

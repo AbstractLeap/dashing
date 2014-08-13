@@ -75,6 +75,7 @@
     <Compile Include="Configuration\IMapper.cs" />
     <Compile Include="Configuration\IMapT.cs" />
     <Compile Include="Configuration\Index.cs" />
+    <Compile Include="Configuration\ISeeder.cs" />
     <Compile Include="Configuration\ISessionFactory.cs" />
     <Compile Include="Configuration\ColumnExtensions.cs" />
     <Compile Include="Configuration\DefaultConfiguration.cs" />
@@ -106,8 +107,10 @@
     <Compile Include="Engine\DML\BaseExpressionVisitor.cs" />
     <Compile Include="Engine\DML\BaseWriter.cs" />
     <Compile Include="Engine\DML\ConstantChecker.cs" />
+    <Compile Include="Engine\DML\CountWriter.cs" />
     <Compile Include="Engine\DML\DeleteWriter.cs" />
     <Compile Include="Engine\DML\FetchNode.cs" />
+    <Compile Include="Engine\DML\ICountWriter.cs" />
     <Compile Include="Engine\DML\IDeleteWriter.cs" />
     <Compile Include="Engine\DML\IInsertWriter.cs" />
     <Compile Include="Engine\DML\InsertWriter.cs" />
@@ -128,10 +131,12 @@
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />
     <Compile Include="IDapper.cs" />
+    <Compile Include="IExecuteSelectQueries.cs" />
     <Compile Include="IFetchMany.cs" />
     <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="OrderClause.cs" />
+    <Compile Include="Page.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectQuery.cs" />
     <Compile Include="Session.cs" />

@@ -17,11 +17,15 @@ namespace Dashing.Configuration {
 
         private readonly object propertyGettersLock = new object();
 
+        private readonly object propertySettersLock = new object();
+
         private Func<T, object> primaryKeyGetter;
 
         private Action<T, object> primaryKeySetter;
 
         private IDictionary<IColumn, Func<T, object>> propertyGetters;
+
+        private IDictionary<IColumn, Action<T, object>> propertySetters;
 
         public object GetPrimaryKeyValue(T entity) {
             if (this.primaryKeyGetter == null) {
@@ -67,16 +71,39 @@ namespace Dashing.Configuration {
                 lock (this.propertyGettersLock) {
                     if (this.propertyGetters == null) {
                         this.propertyGetters = new Dictionary<IColumn, Func<T, object>>();
-                        foreach (var col in this.Columns) {
+                        foreach (var col in this.OwnedColumns(true)) {
                             var param = Expression.Parameter(typeof(T));
-                            var getter = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, col.Key), typeof(object)), param).Compile();
-                            this.propertyGetters.Add(col.Value, getter);
+                            var getter = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, col.Name), typeof(object)), param).Compile();
+                            this.propertyGetters.Add(col, getter);
                         }
                     }
                 }
             }
 
             return this.propertyGetters[column](entity);
+        }
+
+        public void SetColumnValue(T entity, IColumn column, object value) {
+            if (this.propertySetters == null) {
+                lock (this.propertySettersLock) {
+                    if (this.propertySetters == null) {
+                        this.propertySetters = new Dictionary<IColumn, Action<T, object>>();
+                        foreach (var col in this.OwnedColumns(true)) {
+                            var entityParam = Expression.Parameter(typeof(T));
+                            var valueParam = Expression.Parameter(value.GetType());
+                            var setter =
+                                Expression.Lambda<Action<T, object>>(
+                                    Expression.Assign(
+                                        Expression.Property(entityParam, col.Name),
+                                        Expression.Convert(valueParam, col.Type)),
+                                    new[] { entityParam, valueParam }).Compile();
+                            this.propertySetters.Add(col, setter);
+                        }
+                    }
+                }
+            }
+
+            this.propertySetters[column](entity, value);
         }
 
         /// <summary>

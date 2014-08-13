@@ -90,7 +90,7 @@
 
         private static Delegate GenerateMultiMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(config.Engine, new Mock<IDbTransaction>().Object).Fetch(p => p.Comments).Fetch(p => p.Tags) as SelectQuery<Post>;
+            var selectQuery = new SelectQuery<Post>(new Mock<IExecuteSelectQueries>().Object).Fetch(p => p.Comments).Fetch(p => p.Tags) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
@@ -101,7 +101,7 @@
 
         private static Delegate GenerateSingleMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(config.Engine, new Mock<IDbTransaction>().Object).Fetch(p => p.Comments) as SelectQuery<Post>;
+            var selectQuery = new SelectQuery<Post>(new Mock<IExecuteSelectQueries>().Object).Fetch(p => p.Comments) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
@@ -112,7 +112,7 @@
 
         private static Delegate GenerateSingleAwkwardMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<PostWithoutCollectionInitializerInConstructor>(config.Engine, new Mock<IDbTransaction>().Object).Fetch(p => p.Comments) as SelectQuery<PostWithoutCollectionInitializerInConstructor>;
+            var selectQuery = new SelectQuery<PostWithoutCollectionInitializerInConstructor>(new Mock<IExecuteSelectQueries>().Object).Fetch(p => p.Comments) as SelectQuery<PostWithoutCollectionInitializerInConstructor>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 

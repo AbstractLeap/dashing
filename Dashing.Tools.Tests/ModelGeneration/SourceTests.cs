@@ -1,14 +1,11 @@
-﻿namespace Dashing.Tests.Tools.ModelGeneration {
+namespace Dashing.Tools.Tests.ModelGeneration {
+    using System.Collections.Generic;
     using System.Linq;
 
     using Dashing.Configuration;
-    using Dashing.Engine;
-    using Dashing.Tests.TestDomain;
     using Dashing.Tools.ModelGeneration;
 
     using DatabaseSchemaReader.DataSchema;
-
-    using Moq;
 
     using Xunit;
 
@@ -20,7 +17,7 @@
             var generator = new ModelGenerator();
             var config = new CustomConfig();
             var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace);
-            Assert.Contains("namespace " + TestNamespace, results.First().Value);
+            Assert.Contains("namespace " + TestNamespace, Enumerable.First<KeyValuePair<string, string>>(results).Value);
         }
 
         [Fact]
@@ -68,12 +65,6 @@
             }
 
             return result;
-        }
-    }
-
-    public class CustomConfig : MockConfiguration {
-        public CustomConfig() {
-            this.AddNamespaceOf<Post>();
         }
     }
 }

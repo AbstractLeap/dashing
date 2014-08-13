@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tests.Tools.ReverseEngineering {
+namespace Dashing.Tools.Tests.ReverseEngineering {
     using System.Linq;
 
     using Dashing.Configuration;
@@ -37,11 +37,14 @@
         private DatabaseSchema MakeSchema() {
             var schema = new DatabaseSchema(string.Empty, SqlType.SqlServer);
             var postTable = new DatabaseTable { Name = "Posts" };
+            var blogsTable = new DatabaseTable { Name = "Blogs" };
 
-            postTable.Columns.Add(new DatabaseColumn { IsIdentity = true, IsPrimaryKey = true, Name = "PostId", DataType = new DataType("int", "System.Int32") });
+            postTable.Columns.Add(new DatabaseColumn { IsIdentity = true, IsAutoNumber = true, IsPrimaryKey = true, Name = "PostId", DataType = new DataType("int", "System.Int32") });
             postTable.Columns.Add(new DatabaseColumn { Name = "BlogId", IsForeignKey = true, ForeignKeyTableName = "Blogs", DataType = new DataType("int", "System.Int32") });
+            blogsTable.Columns.Add(new DatabaseColumn { IsIdentity = true, IsAutoNumber = true, IsPrimaryKey = true, Name = "BlogId", DataType = new DataType("int", "System.Int32") });
 
             schema.Tables.Add(postTable);
+            schema.Tables.Add(blogsTable);
             return schema;
         }
     }

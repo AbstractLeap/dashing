@@ -3,6 +3,8 @@ namespace Dashing {
     using System.Collections.Generic;
     using System.Linq.Expressions;
 
+    using Dashing.Configuration;
+
     public static class SessionExtensions {
         public static T Get<T>(this ISession session, int id) {
             return session.Get<T, int>(id);
@@ -70,6 +72,33 @@ namespace Dashing {
 
         public static int Delete<T>(this ISession session, params Expression<Func<T, bool>>[] predicates) {
             return session.Delete(predicates);
+        }
+
+        public static int InsertOrUpdate<T>(
+            this ISession session,
+            T entity,
+            Expression<Func<T, bool>> equalityComparer = null) {
+
+            if (equalityComparer == null) {
+                // if the equality comparer is null then they should be passing us a valid PK value in the entity so call update
+                var updated = session.Save(entity);
+                if (updated == 0) {
+                    return session.Insert(entity);
+                }
+
+                return updated;
+            }
+            else {
+                // for seeding the users identity is based on something else
+                var existingEntity = session.Query<T>().SingleOrDefault(equalityComparer);
+                var map = session.Configuration.GetMap<T>();
+                foreach (var col in map.OwnedColumns()) {
+                    // map over to existing entity
+                    map.SetColumnValue(existingEntity, col, map.GetColumnValue(entity, col));
+                }
+
+                return session.Save(existingEntity);
+            }
         }
     }
 }

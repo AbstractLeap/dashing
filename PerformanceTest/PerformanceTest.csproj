@@ -50,6 +50,12 @@
     <Reference Include="Iesi.Collections">
       <HintPath>..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll</HintPath>
     </Reference>
+    <Reference Include="Mindscape.LightSpeed">
+      <HintPath>..\references\LightSpeed\Mindscape.LightSpeed.dll</HintPath>
+    </Reference>
+    <Reference Include="Mindscape.LightSpeed.Linq">
+      <HintPath>..\references\LightSpeed\Mindscape.LightSpeed.Linq.dll</HintPath>
+    </Reference>
     <Reference Include="NHibernate">
       <HintPath>..\packages\NHibernate.3.3.1.4000\lib\Net35\NHibernate.dll</HintPath>
     </Reference>
@@ -95,6 +101,14 @@
     <Compile Include="Domain\PostTag.cs" />
     <Compile Include="Domain\Tag.cs" />
     <Compile Include="Domain\User.cs" />
+    <Compile Include="LightSpeedDomain\Blog.cs" />
+    <Compile Include="LightSpeedDomain\Comment.cs" />
+    <Compile Include="LightSpeedDomain\Like.cs" />
+    <Compile Include="LightSpeedDomain\Post.cs" />
+    <Compile Include="LightSpeedDomain\PostTag.cs" />
+    <Compile Include="LightSpeedDomain\Tag.cs" />
+    <Compile Include="LightSpeedDomain\Test.cs" />
+    <Compile Include="LightSpeedDomain\User.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers.cs" />
