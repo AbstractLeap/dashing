@@ -153,7 +153,7 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
-        protected virtual bool TypeTakesLength(DbType type) {
+        public virtual bool TypeTakesLength(DbType type) {
             switch (type) {
                 case DbType.AnsiString:
                 case DbType.AnsiStringFixedLength:
@@ -167,7 +167,7 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
-        protected virtual bool TypeTakesPrecisionAndScale(DbType type) {
+        public virtual bool TypeTakesPrecisionAndScale(DbType type) {
             switch (type) {
                 case DbType.Decimal:
                     return true;
