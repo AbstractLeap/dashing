@@ -50,8 +50,12 @@
             }
 
             // prevalidation
-            if (!File.Exists(options.IniPath)) {
-                throw new CatchyException("Could not locate configuration file {0}", options.IniPath);
+            if (string.IsNullOrWhiteSpace(options.ConfigPath)) {
+                throw new CatchyException("You must specify a configuration path or a project name");
+            }
+
+            if (!File.Exists(options.ConfigPath)) {
+                throw new CatchyException("Could not locate configuration file {0}", options.ConfigPath);
             }
 
             // parse all of the configuration stuffs
