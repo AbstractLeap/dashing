@@ -162,13 +162,6 @@
                 // report errors
                 DisplayMigrationWarningsAndErrors(errors, warnings);
 
-                if (string.IsNullOrWhiteSpace(script)) {
-                    using (Color(ConsoleColor.Green)) {
-                        Console.WriteLine("Nothing to do!");
-                    }
-
-                    return;
-                }
 
                 // migrate it
                 var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
@@ -180,12 +173,23 @@
                     connection.ConnectionString = connectionStringSettings.ConnectionString;
                     connection.Open();
 
-                    using (new TimedOperation("-- Executing migration script on {0}", connection.ConnectionString))
-                    using (var command = connection.CreateCommand()) {
-                        command.CommandText = script;
-                        command.ExecuteNonQuery();
+                    if (string.IsNullOrWhiteSpace(script)) {
+                        using (Color(ConsoleColor.Green)) {
+                            Console.WriteLine("-- No migration script to run");
+                        }
                     }
+                    else {
+                        using (new TimedOperation("-- Executing migration script on {0}", connection.ConnectionString))
+                        using (var command = connection.CreateCommand()) {
+                            using (Color(ConsoleColor.DarkGray)) {
+                                Console.WriteLine(script);
+                            }
 
+                            command.CommandText = script;
+                            command.ExecuteNonQuery();
+                        }    
+                    }
+                    
                     // magical crazy time! see http://stackoverflow.com/a/2658326/1255065
                     AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainAssemblyResolve;
                     
@@ -205,7 +209,6 @@
 
             NotImplemented();
         }
-
 
         private static Assembly CurrentDomainAssemblyResolve(object sender, ResolveEventArgs args) {
             return ((AppDomain)sender).GetAssemblies().FirstOrDefault(assembly => assembly.FullName == args.Name);
