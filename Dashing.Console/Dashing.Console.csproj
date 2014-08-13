@@ -126,6 +126,7 @@ del Dashing.Tools.dll
 del DatabaseSchemaReader.dll
 del *.pdb
 del *.xml
+del *.vshost.*
 ren dbmanager.exe.config dbm.exe.config
 )</PostBuildEvent>
   </PropertyGroup>
