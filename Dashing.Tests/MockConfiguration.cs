@@ -1,9 +1,7 @@
 namespace Dashing.Tests {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Data;
-    using System.Linq;
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
@@ -12,34 +10,45 @@ namespace Dashing.Tests {
     using Moq;
 
     public class MockConfiguration : IConfiguration {
-        public ConnectionStringSettings ConnectionString { get; set; }
-
-        public Dictionary<Type, IMap> MappedTypes { get; set; } 
-
-        public IGeneratedCodeManager CodeManager { get; set; }
-
-        public IEngine Engine { get; set; }
-
-        public IMapper Mapper { get; set; }
+        public IMapper Mapper { get; private set; }
 
         public bool GetIsTrackedByDefault { get; set; }
 
+        public IGeneratedCodeManager CodeManager {
+            get {
+                return this.MockCodeManager.Object;
+            }
+        }
+
+        public IEngine Engine {
+            get {
+                return this.MockEngine.Object;
+            }
+        }
+
         public IEnumerable<IMap> Maps {
             get {
-                return this.MappedTypes.Values;
+                return this.mappedTypes.Values;
             }
         }
 
         public Mock<ISession> MockSession { get; set; }
 
-        private CodeGeneratorConfig CodeGeneratorConfig { get; set; }
+        public Mock<IEngine> MockEngine { get; set; }
+
+        public Mock<IGeneratedCodeManager> MockCodeManager { get; set; }
+
+        private readonly Dictionary<Type, IMap> mappedTypes;
+
+        private readonly CodeGeneratorConfig codeGeneratorConfig;
 
         public MockConfiguration() {
-            this.ConnectionString = new ConnectionStringSettings { ConnectionString = "Data Source=dummy.local", ProviderName = "System.Data.SqlClient" };
-            this.MappedTypes = new Dictionary<Type, IMap>();
             this.MockSession = new Mock<ISession>(MockBehavior.Loose);
+            this.MockEngine = new Mock<IEngine>(MockBehavior.Loose);
+            this.MockCodeManager = new Mock<IGeneratedCodeManager>(MockBehavior.Loose);
             this.Mapper = new DefaultMapper(new DefaultConvention());
-            this.CodeGeneratorConfig = new CodeGeneratorConfig();
+            this.mappedTypes = new Dictionary<Type, IMap>();
+            this.codeGeneratorConfig = new CodeGeneratorConfig();
         }
 
         public IMap<T> GetMap<T>() {
@@ -49,12 +58,11 @@ namespace Dashing.Tests {
         }
 
         public IMap GetMap(Type type) {
-            IMap map;
-            return ConfigurationHelper.GetMap(type, this.MappedTypes, this.CodeGeneratorConfig);
+            return ConfigurationHelper.GetMap(type, this.mappedTypes, this.codeGeneratorConfig);
         }
 
         public bool HasMap(Type type) {
-            return ConfigurationHelper.HasMap(type, this.MappedTypes, this.CodeGeneratorConfig);
+            return ConfigurationHelper.HasMap(type, this.mappedTypes, this.codeGeneratorConfig);
         }
 
         public ISession BeginSession() {
@@ -69,34 +77,23 @@ namespace Dashing.Tests {
             return this.BeginSession();
         }
 
-        public IConfiguration Add<T>() {
-            return this.Add(new[] { typeof(T) });
-        }
-
-        public IConfiguration Add(IEnumerable<Type> types) {
-            foreach (var type in types.Where(t => !this.MappedTypes.ContainsKey(t))) {
-                this.MappedTypes[type] = this.Mapper.MapFor(type);
-                this.MappedTypes[type].Configuration = this;
-            }
-
+        protected MockConfiguration Add<T>() {
+            ConfigurationHelper.Add<T>(this, this.mappedTypes);
             return this;
         }
 
-        public IConfiguration AddNamespaceOf<T>() {
-            var type = typeof(T);
-            var ns = type.Namespace;
-
-            if (ns == null) {
-                throw new ArgumentException("Namespace of the indicator type is null");
-            }
-
-            return this.Add(type.Assembly.GetTypes().Where(t => t.Namespace != null && t.Namespace.StartsWith(ns)));
+        protected MockConfiguration Add(IEnumerable<Type> types) {
+            ConfigurationHelper.Add(this, this.mappedTypes, types);
+            return this;
         }
 
-        public IMap<T> Setup<T>() {
-            this.Add<T>();
-            this.GetMap<T>().Configuration = this;
-            return this.GetMap<T>();
+        protected MockConfiguration AddNamespaceOf<T>() {
+            ConfigurationHelper.AddNamespaceOf<T>(this, this.mappedTypes);
+            return this;
+        }
+
+        protected IMap<T> Setup<T>() {
+            return ConfigurationHelper.Setup<T>(this, this.mappedTypes);
         }
     }
 }

@@ -4,8 +4,6 @@
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
-    using System.Linq;
-    using System.Reflection;
 
     using Dashing.CodeGeneration;
     using Dashing.Engine;
@@ -14,8 +12,6 @@
         private readonly ConnectionStringSettings connectionStringSettings;
 
         private readonly IMapper mapper;
-
-        private readonly MethodInfo mapperMapForMethodInfo;
 
         private readonly IDictionary<Type, IMap> mappedTypes;
 
@@ -39,7 +35,7 @@
             }
         }
 
-        public IEngine Engine { get; set; }
+        public IEngine Engine { get; private set; }
 
         public IGeneratedCodeManager CodeManager {
             get {
@@ -81,8 +77,6 @@
             this.mapper = mapper;
             this.sessionFactory = sessionFactory;
             this.codeGenerator = codeGenerator;
-
-            this.mapperMapForMethodInfo = this.mapper.GetType().GetMethod("MapFor", new[] { typeof(Type) });
             this.mappedTypes = new Dictionary<Type, IMap>();
         }
 
@@ -124,64 +118,26 @@
         }
 
         protected IConfiguration Add<T>() {
-            var type = typeof(T);
-            if (!this.mappedTypes.ContainsKey(type)) {
-                this.Dirty();
-                var map = this.Mapper.MapFor<T>();
-                map.Configuration = this;
-                this.mappedTypes[type] = map;
-            }
-
+            this.Dirty();
+            ConfigurationHelper.Add<T>(this, this.mappedTypes);
             return this;
         }
 
         protected IConfiguration Add(IEnumerable<Type> types) {
             this.Dirty();
-
-            var maps =
-                types.Distinct().Where(t => !this.mappedTypes.ContainsKey(t)).AsParallel().Select(t => this.mapperMapForMethodInfo.Invoke(this.mapper, new object[] { t }) as IMap);
-
-            foreach (var map in maps) {
-                // force into sequential
-                map.Configuration = this;
-                this.mappedTypes[map.Type] = map;
-            }
-
+            ConfigurationHelper.Add(this, this.mappedTypes, types);
             return this;
         }
 
         protected IConfiguration AddNamespaceOf<T>() {
-            var type = typeof(T);
-            var ns = type.Namespace;
-
-            if (ns == null) {
-                throw new ArgumentException("Namespace of the indicator type is null");
-            }
-
-            return this.Add(type.Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsVisible && t.Namespace != null && t.Namespace.StartsWith(ns)));
+            this.Dirty();
+            ConfigurationHelper.AddNamespaceOf<T>(this, this.mappedTypes);
+            return this;
         }
 
         protected IMap<T> Setup<T>() {
             this.Dirty();
-
-            IMap map;
-            IMap<T> mapt;
-            var type = typeof(T);
-
-            if (!this.mappedTypes.TryGetValue(type, out map)) {
-                mapt = this.Mapper.MapFor<T>(); // just instantiate a Map<T> from scratch
-                mapt.Configuration = this;
-                this.mappedTypes[type] = mapt;
-            }
-            else {
-                mapt = map as IMap<T>;
-
-                if (mapt == null) {
-                    this.mappedTypes[type] = mapt = Map<T>.From(map); // lift the Map into a Map<T>
-                }
-            }
-
-            return mapt;
+            return ConfigurationHelper.Setup<T>(this, this.mappedTypes);
         }
     }
 }
