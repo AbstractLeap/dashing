@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Linq.Expressions;
 
+    using Dashing.Configuration;
     using Dashing.Engine;
 
     public sealed class Session : ISession, IExecuteSelectQueries {
@@ -24,7 +25,12 @@
 
         private bool isDisposed;
 
-        public Session(IEngine engine, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false) {
+        public Session(
+            IEngine engine,
+            IDbConnection connection,
+            IDbTransaction transaction = null,
+            bool disposeConnection = true,
+            bool commitAndDisposeTransaction = false) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -38,7 +44,15 @@
             this.transaction = transaction;
             this.shouldDisposeConnection = disposeConnection;
             this.shouldCommitAndDisposeTransaction = commitAndDisposeTransaction;
-            this.Dapper = new DapperWrapper(new Lazy<IDbConnection>(() => this.Connection), new Lazy<IDbTransaction>(() => this.Transaction));
+            this.Dapper = new DapperWrapper(
+                new Lazy<IDbConnection>(() => this.Connection),
+                new Lazy<IDbTransaction>(() => this.Transaction));
+        }
+
+        public IConfiguration Configuration {
+            get {
+                return this.engine.Configuration;
+            }
         }
 
         private IDbConnection Connection {
@@ -66,7 +80,8 @@
                 }
 
                 if (this.isComplete) {
-                    throw new InvalidOperationException("Transaction was marked as completed, no further operations are permitted");
+                    throw new InvalidOperationException(
+                        "Transaction was marked as completed, no further operations are permitted");
                 }
 
                 if (this.transaction == null) {
@@ -77,7 +92,7 @@
                 return this.transaction;
             }
         }
-        
+
         public void Dispose() {
             if (this.isDisposed) {
                 return;
@@ -111,11 +126,14 @@
         }
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id) {
-            return this.engine.Query<T, TPrimaryKey>(this.Transaction, new[] { id }).SingleOrDefault();
+            return
+                this.engine.Query<T, TPrimaryKey>(this.Transaction, new[] { id }).SingleOrDefault();
         }
 
         public T GetTracked<T, TPrimaryKey>(TPrimaryKey id) {
-            return this.engine.QueryTracked<T, TPrimaryKey>(this.Transaction, new[] { id }).SingleOrDefault();
+            return
+                this.engine.QueryTracked<T, TPrimaryKey>(this.Transaction, new[] { id })
+                    .SingleOrDefault();
         }
 
         public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {

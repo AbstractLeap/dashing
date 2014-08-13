@@ -1,17 +1,19 @@
 ﻿namespace Dashing.Console {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Data.Common;
     using System.IO;
     using System.Linq;
     using System.Reflection;
 
+    using CommandLine;
+    using CommandLine.Text;
+
     using Dashing.Configuration;
-    using Dashing.Console.Properties;
-    using Dashing.Engine;
+    using Dashing.Console.Settings;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
+    using Dashing.Tools;
     using Dashing.Tools.Migration;
     using Dashing.Tools.ModelGeneration;
     using Dashing.Tools.ReverseEngineering;
@@ -21,183 +23,277 @@
 
     internal class Program {
         private static void Main(string[] args) {
-            if (!File.Exists(Settings.Default.ConfigurationDllPath)) {
+            try {
+                InnerMain(args);
+            }
+            catch (CatchyException e) {
                 using (Color(ConsoleColor.Red)) {
-                    Console.WriteLine("Path {0} not found!", new FileInfo(Settings.Default.ConfigurationDllPath).FullName);
-                    return;
+                    Console.WriteLine(e.Message);
                 }
+            }
+        }
+
+        private class CatchyException : Exception {
+            public CatchyException(string message)
+                : base(message) { }
+
+            public CatchyException(string format, params object[] args)
+                : base(string.Format(format, args)) { }
+        }
+
+        private static void InnerMain(string[] args) {
+            var options = new CommandLineOptions();
+
+            if (!Parser.Default.ParseArguments(args, options)) {
+                ShowHelpText(options);
+                return;
+            }
+
+            // prevalidation
+            if (string.IsNullOrWhiteSpace(options.ConfigPath)) {
+                throw new CatchyException("You must specify a configuration path or a project name");
+            }
+
+            if (!File.Exists(options.ConfigPath)) {
+                throw new CatchyException("Could not locate configuration file {0}", options.ConfigPath);
+            }
+
+            // parse all of the configuration stuffs
+            ConnectionStringSettings connectionStringSettings;
+            DashingSettings dashingSettings;
+            ReverseEngineerSettings reverseEngineerSettings;
+            ParseConfiguration(options, out connectionStringSettings, out dashingSettings, out reverseEngineerSettings);
+
+            // postvalidation
+            if (!File.Exists(dashingSettings.PathToDll)) {
+                throw new CatchyException("Could not locate {0}", dashingSettings.PathToDll);
+            }
+
+            // now decide what to do
+            if (options.Script) {
+                DoScript(options.Location, options.Naive, connectionStringSettings, dashingSettings);
+            }
+            else if (options.Migration) {
+                DoMigrate(options.Naive, connectionStringSettings, dashingSettings);
+            } 
+            else if (options.ReverseEngineer) {
+                DoReverseEngineer(options, dashingSettings, reverseEngineerSettings, connectionStringSettings);
+            }
+            else {
+                ShowHelpText(options);
+            }
+        }
+
+        private static void ParseConfiguration(CommandLineOptions options, out ConnectionStringSettings connectionStringSettings, out DashingSettings dashingSettings, out ReverseEngineerSettings reverseEngineerSettings) {
+            var config = IniParser.Parse(options.ProjectName + ".ini");
+
+            connectionStringSettings = new ConnectionStringSettings();
+            connectionStringSettings = IniParser.AssignTo(config["Database"], connectionStringSettings);
+
+            dashingSettings = new DashingSettings();
+            dashingSettings = IniParser.AssignTo(config["Dashing"], dashingSettings);
+
+            reverseEngineerSettings = new ReverseEngineerSettings();
+            reverseEngineerSettings = IniParser.AssignTo(config["ReverseEngineer"], reverseEngineerSettings);
+        }
+
+        private static void DoScript(
+            string pathOrNull,
+            bool naive,
+            ConnectionStringSettings connectionStringSettings,
+            DashingSettings dashingSettings) {
+            if (!naive) {
+                NotImplemented();
             }
 
             Console.WriteLine();
             using (Color(ConsoleColor.Yellow))
-                Console.WriteLine("-- Dashing DbManager");
-            Console.WriteLine("-- -----------------");
-            Console.WriteLine("-- Assembly: {0}", Settings.Default.ConfigurationDllPath);
-            Console.WriteLine("-- Class:    {0}", Settings.Default.ConfigurationTypeName);
+                Console.WriteLine("-- Dashing: Naive Migration Script");
+            Console.WriteLine("-- -------------------------------");
+            Console.WriteLine("-- Assembly: {0}", dashingSettings.PathToDll);
+            Console.WriteLine("-- Class:    {0}", dashingSettings.ConfigurationName);
             Console.WriteLine();
 
-            if (args.Contains("-s")) {
-                var path = GetPath(args, "-s");
-                if (Directory.Exists(path)) {
-                    path = string.Format("Migration-{0}-{1:yyyy-MM-dd-HH-mm-ss}.sql", Settings.Default.ConfigurationTypeName.Replace('.', '_'), DateTime.Now);
+            // fetch the to state
+            IConfiguration config;
+            using (new TimedOperation("-- Fetching configuration contents...")) {
+                config = LoadConfiguration(dashingSettings);
+            }
+
+            IEnumerable<string> warnings, errors;
+            var migrationScript = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, config, out warnings, out errors);
+
+            // report errors
+            DisplayMigrationWarningsAndErrors(errors, warnings);
+
+            // write it
+            using (var writer = string.IsNullOrEmpty(pathOrNull) ? Console.Out : new StreamWriter(File.OpenWrite(pathOrNull))) {
+                writer.WriteLine(migrationScript);
+            }
+        }
+
+        private static void DisplayMigrationWarningsAndErrors(IEnumerable<string> errors, IEnumerable<string> warnings) {
+            using (Color(ConsoleColor.Red)) {
+                foreach (var error in errors) {
+                    Console.Write("-- ");
+                    Console.WriteLine(error);
                 }
-
-                using (var writer = string.IsNullOrEmpty(path) ? Console.Out : new StreamWriter(File.OpenWrite(path)))
-                    GenerateMigrationScript(writer, args.Contains("-n"));
-
-                return;
             }
 
-            if (args.Contains("-m")) {
-                PerformMigration(args.Contains("-n"));
-                return;
-            }
-
-            if (args.Contains("-r")) {
-                string path = GetPath(args, "-r");
-                string generatedNamespace = GetNamespace(args, "-r");
-                if (path != string.Empty && generatedNamespace != string.Empty) {
-                    ReverseEngineer(path, generatedNamespace);
+            using (Color(ConsoleColor.Yellow)) {
+                foreach (var warning in warnings) {
+                    Console.Write("-- ");
+                    Console.WriteLine(warning);
                 }
-
-                return;
-            }
-
-            Help();
-        }
-
-        private static void ReverseEngineer(string path, string generatedNamespace) {
-            DatabaseSchema schema;
-            ConnectionStringSettings connectionString;
-            var maps = ReverseEngineerMaps(out schema, out connectionString);
-            var reverseEngineer = new ModelGenerator();
-            var sources = reverseEngineer.GenerateFiles(maps, schema, generatedNamespace);
-
-            foreach (var source in sources) {
-                File.WriteAllText(path + "\\" + source.Key + ".cs", source.Value);
             }
         }
 
-        private static IEnumerable<IMap> ReverseEngineerMaps(out DatabaseSchema schema, out ConnectionStringSettings connectionString) {
-            var engineer = new Engineer();
-            connectionString = ConfigurationManager.ConnectionStrings["Default"];
-            var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
-            schema = databaseReader.ReadAll();
-            return engineer.ReverseEngineer(schema);
-        }
+        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings) {
+            // fetch the to state
+            IConfiguration config;
+            using (new TimedOperation("-- Fetching configuration contents...")) {
+                config = LoadConfiguration(dashingSettings);
+            }
 
-        private static void PerformMigration(bool naive) {
             if (naive) {
-                ConnectionStringSettings connectionString;
-                var script = GenerateNaiveMigrationScript(out connectionString);
-                var factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
+                IEnumerable<string> warnings, errors;
+                var script = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, config, out warnings, out errors);
 
+                // report errors
+                DisplayMigrationWarningsAndErrors(errors, warnings);
+
+
+                // migrate it
+                var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
                 using (var connection = factory.CreateConnection()) {
                     if (connection == null) {
                         throw new Exception("Could not connect to database");
                     }
 
-                    connection.ConnectionString = connectionString.ConnectionString;
+                    connection.ConnectionString = connectionStringSettings.ConnectionString;
                     connection.Open();
 
-                    using (new TimedOperation("Executing migration script"))
-                    using (var command = connection.CreateCommand()) {
-                        command.CommandText = script;
-                        command.ExecuteNonQuery();
-                    }
-                }
-
-                return;
-            }
-
-            NotImplemented();
-        }
-
-        private static void GenerateMigrationScript(TextWriter writer, bool naive) {
-            if (naive) {
-                ConnectionStringSettings connectionString;
-                writer.WriteLine(GenerateNaiveMigrationScript(out connectionString));
-                return;
-            }
-
-            NotImplemented();
-        }
-
-        private static string GenerateNaiveMigrationScript(out ConnectionStringSettings connectionString) {
-            // fetch the from state
-            IEnumerable<IMap> maps;
-            using (new TimedOperation("--  Reading database contents...")) {
-                DatabaseSchema schema;
-                maps = ReverseEngineerMaps(out schema, out connectionString);
-            }
-
-            // fetch the to state
-            TypeInfo configType;
-            using (new TimedOperation("--- Fetching configuration contents...")) {
-                var configAssembly = Assembly.LoadFrom(Settings.Default.ConfigurationDllPath);
-                configType = configAssembly.DefinedTypes.SingleOrDefault(t => t.FullName == Settings.Default.ConfigurationTypeName);
-
-                if (configType == null) {
-                    using (Color(ConsoleColor.Red)) {
-                        var candidates = configAssembly.DefinedTypes.Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null).ToArray();
-                        if (candidates.Any()) {
-                            Console.WriteLine("Could not locate {0}, but found candidates: {1}", Settings.Default.ConfigurationTypeName, string.Join(", ", candidates.Select(c => c.FullName)));
-                            return string.Empty;
+                    if (string.IsNullOrWhiteSpace(script)) {
+                        using (Color(ConsoleColor.Green)) {
+                            Console.WriteLine("-- No migration script to run");
                         }
+                    }
+                    else {
+                        using (new TimedOperation("-- Executing migration script on {0}", connection.ConnectionString))
+                        using (var command = connection.CreateCommand()) {
+                            using (Color(ConsoleColor.DarkGray)) {
+                                Console.WriteLine(script);
+                            }
 
-                        Console.WriteLine("Could not locate {0}, and found no candidate configurations", Settings.Default.ConfigurationTypeName);
-                        return string.Empty;
+                            command.CommandText = script;
+                            command.ExecuteNonQuery();
+                        }    
+                    }
+                    
+                    // magical crazy time! see http://stackoverflow.com/a/2658326/1255065
+                    AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainAssemblyResolve;
+                    
+                    // now let's call Seed
+                    var seederConfig = config as ISeeder;
+                    if (seederConfig != null) {
+                        using (new TimedOperation("-- Executing seeds"))
+                        using (var session = config.BeginSession(connection)) {
+                            seederConfig.Seed(session);
+                            session.Complete();
+                        }
                     }
                 }
+
+                return;
             }
 
+            NotImplemented();
+        }
 
-            // TODO add in a factory way of generating the config for cases where constructor not empty
-            var config = (IConfiguration)Activator.CreateInstance(configType);
+        private static Assembly CurrentDomainAssemblyResolve(object sender, ResolveEventArgs args) {
+            return ((AppDomain)sender).GetAssemblies().FirstOrDefault(assembly => assembly.FullName == args.Name);
+        }
+
+        private static void DoReverseEngineer(CommandLineOptions options, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings, ConnectionStringSettings connectionString) {
+            // overwrite the path with the default if necessary
+            if (string.IsNullOrEmpty(options.Location)) {
+                options.Location = dashingSettings.DefaultSavePath;
+            }
+
+            // if it is still empty, ...
+            if (string.IsNullOrEmpty(options.Location) && options.ReverseEngineer) {
+                throw new CatchyException("You must specify a location for generated files to be saved");
+            }
+
+            // require a generated namespace
+            if (string.IsNullOrEmpty(reverseEngineerSettings.GeneratedNamespace)) {
+                throw new CatchyException("You must specify a GeneratedNamespace in the Project ini file");
+            }
+
+            DatabaseSchema schema;
+            var engineer = new Engineer();
+            var databaseReader = new DatabaseReader(
+                connectionString.ConnectionString,
+                connectionString.ProviderName);
+            schema = databaseReader.ReadAll();
+            var maps = engineer.ReverseEngineer(schema);
+            var reverseEngineer = new ModelGenerator();
+            var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace);
+
+            foreach (var source in sources) {
+                File.WriteAllText(options.Location + "\\" + source.Key + ".cs", source.Value);
+            }
+        }
+
+        private static void ShowHelpText(CommandLineOptions options) {
+            Console.Write(HelpText.AutoBuild(options));
+        }
+
+        private static string GenerateNaiveMigrationScript(ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, IConfiguration configuration, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+            // fetch the from state
+            IEnumerable<IMap> fromMaps;
+            using (new TimedOperation("-- Reading database contents...")) {
+                DatabaseSchema schema;
+                var engineer = new Engineer();
+                var databaseReader = new DatabaseReader(
+                    connectionStringSettings.ConnectionString,
+                    connectionStringSettings.ProviderName);
+                schema = databaseReader.ReadAll();
+                fromMaps = engineer.ReverseEngineer(schema);
+            }
+
+            // set up migrator
             var dialectFactory = new DialectFactory();
-            var dialect = dialectFactory.Create(connectionString);
+            var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
             var migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), null);
-            IEnumerable<string> warnings, errors;
-            var script = migrator.GenerateNaiveSqlDiff(maps, config.Maps, out warnings, out errors);
+            
+            // run the migrator
+            var script = migrator.GenerateNaiveSqlDiff(fromMaps, configuration.Maps, out warnings, out errors);
+
+            // TODO: do things with warnings and errors
             return script;
         }
 
-        private static string GetPath(string[] args, string option) {
-            var indexOf = Array.IndexOf(args, option);
-            if (indexOf == args.Length - 1) {
-                Help();
-                return string.Empty;
+        private static IConfiguration LoadConfiguration(DashingSettings dashingSettings) {
+            // fetch the to state
+            var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
+            GC.KeepAlive(configAssembly);
+            var configType = configAssembly.DefinedTypes.SingleOrDefault(t => t.FullName == dashingSettings.ConfigurationName);
+
+            if (configType == null) {
+                using (Color(ConsoleColor.Red)) {
+                    var candidates = configAssembly.DefinedTypes.Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null).ToArray();
+                    if (candidates.Any()) {
+                        throw new CatchyException("Could not locate {0}, but found candidates: {1}", dashingSettings.ConfigurationName, string.Join(", ", candidates.Select(c => c.FullName)));
+                    }
+
+                    throw new CatchyException("Could not locate {0}, and found no candidate configurations", dashingSettings.ConfigurationName);
+                }
             }
 
-            var path = args[indexOf + 1];
-
-            if (path.StartsWith("-")) { // it is another switch
-                path = string.Empty;
-            }
-
-            return path;
-        }
-
-        private static string GetNamespace(string[] args, string option) {
-            var indexOf = Array.IndexOf(args, option);
-            if (indexOf == args.Length - 2) {
-                Help();
-                return string.Empty;
-            }
-
-            var nspace = args[indexOf + 2];
-            return nspace;
-        }
-
-        private static void Help() {
-            Console.WriteLine("DB Manager Help");
-            Console.WriteLine("------------------------");
-            Console.WriteLine("Usage: dbmanager [options]");
-            Console.WriteLine();
-            Console.WriteLine("Options: ");
-            Console.WriteLine("-s <path> [-n] : Generate a migration script and output to path. Optionally specify -n to generate a naive migration");
-            Console.WriteLine("-m [-n] : Run a migration on the db specified in the settings. Optionally specify -n to generate a naive migration");
-            Console.WriteLine("-r <path> <namespace> : Reverse engineer a db in to a map and save at the specified path");
+            // TODO add in a factory way of generating the config for cases where constructor not empty
+            var config = (IConfiguration)Activator.CreateInstance(configType);
+            return config;
         }
 
         private static void NotImplemented() {

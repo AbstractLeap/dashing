@@ -24,6 +24,12 @@ namespace Dashing.Engine {
 
         private IDeleteWriter deleteWriter;
 
+        public ISqlDialect SqlDialect {
+            get {
+                return this.dialect;
+            }
+        }
+
         public IConfiguration Configuration {
             get {
                 return this.configuration;

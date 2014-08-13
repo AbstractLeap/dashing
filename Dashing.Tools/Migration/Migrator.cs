@@ -1,9 +1,11 @@
 ﻿namespace Dashing.Tools.Migration {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
     using Dashing.Engine.DDL;
 
     public class Migrator : IMigrator {
@@ -23,19 +25,38 @@
             throw new NotImplementedException();
         }
 
-        public string GenerateNaiveSqlDiff(IEnumerable<IMap> from, IEnumerable<IMap> to, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
-            warnings = new List<string>();
+        /// <summary>
+        /// naive is simple, drop all tables, recreate
+        /// </summary>
+        /// <param name="fromMaps"></param>
+        /// <param name="toMaps"></param>
+        /// <param name="warnings"></param>
+        /// <param name="errors"></param>
+        /// <returns></returns>
+        public string GenerateNaiveSqlDiff(IEnumerable<IMap> fromMaps, IEnumerable<IMap> toMaps, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+            var sql = new StringBuilder();
+            var from = fromMaps as List<IMap> ?? fromMaps.ToList();
+            var to = toMaps as List<IMap> ?? toMaps.ToList();
+            var warningList = new List<string>();
+            warnings = warningList;
             errors = new List<string>();
 
-            // naive is simple, drop all tables, recreate
-            // TODO Add Warnings
-            var sql = new StringBuilder();
-            foreach (var map in from) {
+            // look for a shortcut
+            var pairs = @from.Join(to, f => f.Table, t => t.Table, MigrationPair.Of).ToArray();
+            if (!pairs.Any(p => p.RequiresUpdate())) {
+                from = from.Except(pairs.Select(p => p.From)).ToList();
+                to = to.Except(pairs.Select(p => p.To)).ToList();
+                warningList.AddRange(pairs.Select(p => string.Format("Ignoring {0} as no change was detected", p.From.Table)));
+            }
+
+            // drop tables
+            foreach (var map in from.OrderTopologically()) {
                 sql.Append(this.dropTableWriter.DropTableIfExists(map));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
             }
-
+            
+            // create tables
             foreach (var map in to) {
                 sql.Append(this.createTableWriter.CreateTable(map));
                 this.AppendSemiColonIfNecesssary(sql);

@@ -1,4 +1,5 @@
 namespace Dashing.Engine.Dialects {
+    using System.Data;
     using System.Text;
 
     using Dashing.Configuration;
@@ -27,5 +28,9 @@ namespace Dashing.Engine.Dialects {
         ///     either take or skip are > 0
         /// </remarks>
         void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip);
+
+        bool TypeTakesLength(DbType type);
+
+        bool TypeTakesPrecisionAndScale(DbType type);
     }
 }

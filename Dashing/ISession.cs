@@ -4,7 +4,11 @@ namespace Dashing {
     using System.Data;
     using System.Linq.Expressions;
 
+    using Dashing.Configuration;
+
     public interface ISession : IDisposable {
+        IConfiguration Configuration { get; }
+
         IDapper Dapper { get; }
 
         void Complete();

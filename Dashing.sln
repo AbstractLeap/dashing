@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Tools", "Dashing.To
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Console", "Dashing.Console\Dashing.Console.csproj", "{EC074CCB-0934-46C4-BBCC-B306459FC95E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Tools.Tests", "Dashing.Tools.Tests\Dashing.Tools.Tests.csproj", "{740AB264-1DBA-41F8-B39D-E7C989F3B42B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{EC074CCB-0934-46C4-BBCC-B306459FC95E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC074CCB-0934-46C4-BBCC-B306459FC95E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC074CCB-0934-46C4-BBCC-B306459FC95E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{740AB264-1DBA-41F8-B39D-E7C989F3B42B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{740AB264-1DBA-41F8-B39D-E7C989F3B42B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{740AB264-1DBA-41F8-B39D-E7C989F3B42B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{740AB264-1DBA-41F8-B39D-E7C989F3B42B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
