@@ -23,34 +23,30 @@
 
         [Fact]
         public void TwoWhereClausesStack() {
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
-
+            // assemble
+            var target = MakeTarget();
             Expression<Func<Post, bool>> whereClause1 = p => p.PostId > 0;
             Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
-            var foo = new List<Expression<Func<Post, bool>>> {
-                whereClause1, 
-                whereClause2
-            };
+            // act
+            var result = target.GenerateSql(new List<Expression<Func<Post, bool>>> { whereClause1,  whereClause2 }, null);
 
-            var result = whereClauseWriter.GenerateSql(foo, null);
+            // assert
             Debug.Write(result.Sql);
             Assert.Equal(" where ([PostId] > @l_1) and ([PostId] < @l_2)", result.Sql);
         }
 
         [Fact]
         public void TwoWhereClausesParametersOkay() {
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
-
+            // assemble
+            var target = MakeTarget();
             Expression<Func<Post, bool>> whereClause1 = p => p.PostId > 0;
             Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
-            var foo = new List<Expression<Func<Post, bool>>> {
-                whereClause1,
-                whereClause2
-            };
+            // act
+            var result = target.GenerateSql(new List<Expression<Func<Post, bool>>> { whereClause1, whereClause2 }, null);
 
-            var result = whereClauseWriter.GenerateSql(foo, null);
+            // assert
             Debug.Write(result.Sql);
             Assert.Equal(0, result.Parameters.GetValue("l_1"));
             Assert.Equal(2, result.Parameters.GetValue("l_2"));
@@ -59,14 +55,12 @@
         [Fact]
         public void UsesPrimaryKeyWhereEntityEqualsEntity() {
             // assemble
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
-            var user = new User {
-                UserId = 1
-            };
+            var target = MakeTarget();
+            var user = new User { UserId = 1 };
             Expression<Func<User, bool>> whereClause = u => u == user;
 
             // act
-            var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
+            var actual = target.GenerateSql(new[] { whereClause }, null);
 
             // assert
             Assert.Equal(" where ([UserId] = @l_1)", actual.Sql);
@@ -75,14 +69,14 @@
         [Fact]
         public void WhereEntityEqualsTrackedEntity() {
             // assemble
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+            var target = MakeTarget();
             var post = this.codeManager.CreateTrackingInstance<Post>();
             post.PostId = 1;
             this.codeManager.TrackInstance(post);
             Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
-            var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
+            var actual = target.GenerateSql(new[] { whereClause }, null);
 
             // assert
             Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
@@ -92,17 +86,22 @@
         [Fact]
         public void WhereEntityEqualsGeneratedEntity() {
             // assemble
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+            var target = MakeTarget();
             var post = this.codeManager.CreateForeignKeyInstance<Post>();
             post.PostId = 1;
             Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
-            var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
+            var actual = target.GenerateSql(new[] { whereClause }, null);
 
             // assert
             Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
             Assert.Equal(typeof(int), actual.Parameters.GetValue("l_1").GetType());
+        }
+
+        private static WhereClauseWriter MakeTarget() {
+            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+            return whereClauseWriter;
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {
