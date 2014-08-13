@@ -100,8 +100,7 @@
         }
 
         private static WhereClauseWriter MakeTarget() {
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
-            return whereClauseWriter;
+            return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }
 
         private static IConfiguration MakeConfig() {
