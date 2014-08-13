@@ -1,19 +1,16 @@
-﻿namespace Dashing.Tests.Engine {
-    using System.Data;
-    using System.Diagnostics;
+﻿namespace Dashing.Tests.Engine.DML {
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq.Expressions;
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
-    using Dashing.Engine;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
+    using Dashing.Extensions;
     using Dashing.Tests.CodeGeneration.Fixtures;
     using Dashing.Tests.TestDomain;
-    using Dashing.Extensions;
-
-    using Moq;
 
     using Xunit;
 
@@ -28,7 +25,7 @@
         public void TwoWhereClausesStack() {
             var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
 
-            Expression<System.Func<Post, bool>> whereClause1 = p => p.PostId > 0;
+            Expression<Func<Post, bool>> whereClause1 = p => p.PostId > 0;
             Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
             var foo = new List<Expression<System.Func<Post, bool>>> {
@@ -125,6 +122,5 @@
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }
         }
-
     }
 }

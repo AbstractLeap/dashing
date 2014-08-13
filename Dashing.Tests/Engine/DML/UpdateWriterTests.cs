@@ -1,21 +1,17 @@
 ﻿namespace Dashing.Tests.Engine.DML {
+    using System;
     using System.Diagnostics;
     using System.Linq.Expressions;
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
-    using Dashing.Engine;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Tests.CodeGeneration.Fixtures;
+    using Dashing.Tests.Extensions;
     using Dashing.Tests.TestDomain;
 
-    using Moq;
-
     using Xunit;
-    using System;
-    using Dapper;
-    using System.Collections.Generic;
 
     public class UpdateWriterTests : IUseFixture<GenerateCodeFixture> {
         private IGeneratedCodeManager codeManager;
@@ -42,9 +38,13 @@
             // assemble
             var post = this.codeManager.CreateTrackingInstance<Post>();
             post.PostId = 1;
-            post.Blog = new Blog() { BlogId = 1 };
+            post.Blog = new Blog {
+                BlogId = 1
+            };
             this.codeManager.TrackInstance(post);
-            post.Blog = new Blog() { BlogId = 2 };
+            post.Blog = new Blog {
+                BlogId = 2
+            };
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
 
             // act
@@ -54,29 +54,11 @@
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [BlogId] = @p_1 where [PostId] = @p_2;", result.Sql); // Is this the correct result?
 
-            var param1 = GetValueOfParameter(result.Parameters, "@p_1");
-            var param2 = GetValueOfParameter(result.Parameters, "@p_2");
+            var param1 = result.Parameters.GetValueOfParameter("@p_1");
+            var param2 = result.Parameters.GetValueOfParameter("@p_2");
 
             Assert.IsType(typeof(int), param1);
             Assert.IsType(typeof(int), param2);
-        }
-
-        // TODO: Put this in an extension method
-        private object GetValueOfParameter(DynamicParameters p, string parameterName) {
-            var parametersField = typeof(DynamicParameters).GetField("parameters", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            dynamic parameters = parametersField.GetValue(p);
-
-            foreach (var paramInfoPair in parameters) {
-                var paramInfo = paramInfoPair.GetType().GetProperty("Value").GetValue(paramInfoPair);
-                var paramName = paramInfo.GetType().GetProperty("Name").GetValue(paramInfo);
-                var paramValue = paramInfo.GetType().GetProperty("Value").GetValue(paramInfo);
-
-                if (paramName == parameterName) {
-                    return paramValue;
-                }
-            }
-
-            return null;
         }
 
         [Fact]
@@ -136,18 +118,20 @@
             // assemble
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
             var updateClass = this.codeManager.CreateUpdateInstance<Post>();
-            updateClass.Blog = new Blog() { BlogId = 1 };
+            updateClass.Blog = new Blog {
+                BlogId = 1
+            };
 
             // act
-            Expression<Func<Post,bool>> predicate = p => p.PostId == 1;
-            var result = updateWriter.GenerateBulkSql(updateClass, new[] {predicate});
+            Expression<Func<Post, bool>> predicate = p => p.PostId == 1;
+            var result = updateWriter.GenerateBulkSql(updateClass, new[] { predicate });
 
             // assert
             Debug.Write(result.Sql);
             Assert.Equal("update [Posts] set [BlogId] = @Blog where ([PostId] = @l_1)", result.Sql); // Is this the correct result?
 
-            var param1 = GetValueOfParameter(result.Parameters, "@Blog");
-            var param2 = GetValueOfParameter(result.Parameters, "@l_1");
+            var param1 = result.Parameters.GetValueOfParameter("@Blog");
+            var param2 = result.Parameters.GetValueOfParameter("@l_1");
 
             Assert.IsType(typeof(int), param1);
             Assert.IsType(typeof(int), param2);
