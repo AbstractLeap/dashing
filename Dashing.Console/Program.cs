@@ -114,9 +114,31 @@
             Console.WriteLine("-- Class:    {0}", dashingSettings.ConfigurationName);
             Console.WriteLine();
 
-            var migrationScript = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings);
+            IEnumerable<string> warnings, errors;
+            var migrationScript = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, out warnings, out errors);
+
+            // report errors
+            DisplayMigrationWarningsAndErrors(errors, warnings);
+
+            // write it
             using (var writer = string.IsNullOrEmpty(pathOrNull) ? Console.Out : new StreamWriter(File.OpenWrite(pathOrNull))) {
                 writer.WriteLine(migrationScript);
+            }
+        }
+
+        private static void DisplayMigrationWarningsAndErrors(IEnumerable<string> errors, IEnumerable<string> warnings) {
+            using (Color(ConsoleColor.Red)) {
+                foreach (var error in errors) {
+                    Console.Write("-- ");
+                    Console.WriteLine(error);
+                }
+            }
+
+            using (Color(ConsoleColor.Yellow)) {
+                foreach (var warning in warnings) {
+                    Console.Write("-- ");
+                    Console.WriteLine(warning);
+                }
             }
         }
 
@@ -125,9 +147,14 @@
             ConnectionStringSettings connectionStringSettings,
             DashingSettings dashingSettings) {
             if (naive) {
-                var script = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings);
-                var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
+                IEnumerable<string> warnings, errors;
+                var script = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, out warnings, out errors);
 
+                // report errors
+                DisplayMigrationWarningsAndErrors(errors, warnings);
+
+                // migrate it
+                var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
                 using (var connection = factory.CreateConnection()) {
                     if (connection == null) {
                         throw new Exception("Could not connect to database");
@@ -197,7 +224,9 @@
 
         private static string GenerateNaiveMigrationScript(
             ConnectionStringSettings connectionStringSettings,
-            DashingSettings dashingSettings) {
+            DashingSettings dashingSettings,
+            out IEnumerable<string> warnings,
+            out IEnumerable<string> errors) {
             // fetch the to state
             IConfiguration config;
             using (new TimedOperation("-- Fetching configuration contents...")) {
@@ -222,7 +251,6 @@
             var migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), null);
             
             // run the migrator
-            IEnumerable<string> warnings, errors;
             var script = migrator.GenerateNaiveSqlDiff(maps, config.Maps, out warnings, out errors);
 
             // TODO: do things with warnings and errors
