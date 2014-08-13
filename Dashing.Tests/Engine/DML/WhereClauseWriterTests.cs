@@ -112,6 +112,19 @@
             Assert.Equal(" where [IsEnabled]", actual.Sql);
         }
 
+        [Fact]
+        public void WherePredicateIsDefinedOnInterface() {
+            // assemble
+            var target = MakeTarget();
+            Expression<Func<IEnableable, bool>> whereClause = u => u.IsEnabled;
+
+            // act
+            var actual = target.GenerateSql(new[] { whereClause }, null);
+
+            // assert
+            Assert.Equal(" where [IsEnabled]", actual.Sql);
+        }
+
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }
