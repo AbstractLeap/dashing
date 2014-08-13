@@ -81,7 +81,8 @@
 
         private static Dictionary<Type, IMap> MakeMaps(params Type[] types) {
             var mapper = MakeMapper();
-            var maps = types.ToDictionary(t => t, mapper.MapFor);
+            var config = new MockConfiguration();
+            var maps = types.ToDictionary(t => t, t => mapper.MapFor(t, config));
             return maps;
         }
 

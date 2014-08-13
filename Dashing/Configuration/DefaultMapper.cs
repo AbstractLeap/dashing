@@ -33,10 +33,11 @@
         ///     Return a typed map for the typeparameter specified
         /// </summary>
         /// <typeparam name="T">Type to be mapped</typeparam>
+        /// <param name="configuration">Configuration that the map belongs to</param>
         /// <returns>Map for the type</returns>
-        public IMap<T> MapFor<T>() {
+        public IMap<T> MapFor<T>(IConfiguration configuration) {
             var map = new Map<T>();
-            this.Build(typeof(T), map);
+            this.Build(typeof(T), map, configuration);
             return map;
         }
 
@@ -44,8 +45,9 @@
         ///     Return a generic map for the type specified
         /// </summary>
         /// <param name="type">Type to be mapped</param>
+        /// <param name="configuration">Configuration that the map belongs to</param>
         /// <returns>Map for the type</returns>
-        public IMap MapFor(Type type) {
+        public IMap MapFor(Type type, IConfiguration configuration) {
             var gt = typeof(Map<>).MakeGenericType(type);
             var ctor = gt.GetConstructor(new Type[] { });
             if (ctor == null) {
@@ -53,20 +55,12 @@
             }
 
             var map = (IMap)ctor.Invoke(new object[] { });
-            this.Build(type, map);
+            this.Build(type, map, configuration);
             return map;
         }
 
-        /// <summary>
-        ///     The build.
-        /// </summary>
-        /// <param name="entity">
-        ///     The entity.
-        /// </param>
-        /// <param name="map">
-        ///     The map.
-        /// </param>
-        private void Build(Type entity, IMap map) {
+        private void Build(Type entity, IMap map, IConfiguration configuration) {
+            map.Configuration = configuration;
             map.Table = this.convention.TableFor(entity);
             map.Schema = this.convention.SchemaFor(entity);
             map.Columns = entity.GetProperties().Select(property => this.BuildColumn(map, entity, property)).ToDictionary(c => c.Name, c => c);
@@ -86,19 +80,6 @@
             }
         }
 
-        /// <summary>
-        ///     The build column.
-        /// </summary>
-        /// <param name="entityType">
-        ///     The entity.
-        /// </param>
-        /// <param name="map"></param>
-        /// <param name="property">
-        ///     The property.
-        /// </param>
-        /// <returns>
-        ///     The <see cref="Column" />.
-        /// </returns>
         private IColumn BuildColumn(IMap map, Type entityType, PropertyInfo property) {
             // TODO: this can be cached
             var column = (IColumn)Activator.CreateInstance(typeof(Column<>).MakeGenericType(property.PropertyType));
@@ -112,18 +93,6 @@
             return column;
         }
 
-        /// <summary>
-        ///     The resolve relationship.
-        /// </summary>
-        /// <param name="entity">
-        ///     The entity.
-        /// </param>
-        /// <param name="property">
-        ///     The property.
-        /// </param>
-        /// <param name="column">
-        ///     The column.
-        /// </param>
         private void ResolveRelationship(Type entity, PropertyInfo property, IColumn column) {
             if (property.PropertyType.IsEntityType()) {
                 if (property.PropertyType.IsCollection()) {
@@ -168,18 +137,6 @@
             column.Relationship = RelationshipType.OneToMany;
         }
 
-        /// <summary>
-        ///     The apply annotations.
-        /// </summary>
-        /// <param name="entity">
-        ///     The entity.
-        /// </param>
-        /// <param name="property">
-        ///     The property.
-        /// </param>
-        /// <param name="column">
-        ///     The column.
-        /// </param>
         private void ApplyAnnotations(Type entity, PropertyInfo property, IColumn column) {
             /* should do something, innit! */
         }
