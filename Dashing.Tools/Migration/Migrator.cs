@@ -37,7 +37,8 @@
             var sql = new StringBuilder();
             var from = fromMaps as List<IMap> ?? fromMaps.ToList();
             var to = toMaps as List<IMap> ?? toMaps.ToList();
-            warnings = new List<string>();
+            var warningList = new List<string>();
+            warnings = warningList;
             errors = new List<string>();
 
             // look for a shortcut
@@ -45,8 +46,8 @@
             if (!pairs.Any(p => p.RequiresUpdate())) {
                 from = from.Except(pairs.Select(p => p.From)).ToList();
                 to = to.Except(pairs.Select(p => p.To)).ToList();
+                warningList.AddRange(pairs.Select(p => string.Format("Ignoring {0} as no change was detected", p.From.Table)));
             }
-                    
 
             // drop tables
             foreach (var map in from.OrderTopologically()) {
