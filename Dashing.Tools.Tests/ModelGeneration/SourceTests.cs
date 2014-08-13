@@ -1,15 +1,11 @@
-﻿namespace Dashing.Tests.Tools.ModelGeneration {
-    using System;
+namespace Dashing.Tools.Tests.ModelGeneration {
+    using System.Collections.Generic;
     using System.Linq;
 
     using Dashing.Configuration;
-    using Dashing.Engine;
-    using Dashing.Tests.TestDomain;
     using Dashing.Tools.ModelGeneration;
 
     using DatabaseSchemaReader.DataSchema;
-
-    using Moq;
 
     using Xunit;
 
@@ -21,7 +17,7 @@
             var generator = new ModelGenerator();
             var config = new CustomConfig();
             var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace);
-            Assert.Contains("namespace " + TestNamespace, results.First().Value);
+            Assert.Contains("namespace " + TestNamespace, Enumerable.First<KeyValuePair<string, string>>(results).Value);
         }
 
         [Fact]
@@ -69,21 +65,6 @@
             }
 
             return result;
-        }
-    }
-
-    public class CustomConfig : DefaultConfiguration, ISeeder {
-        public CustomConfig()
-            : base(new System.Configuration.ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=dashingtest;Integrated Security=True", "System.Data.SqlClient")) {
-            this.AddNamespaceOf<Post>();
-        }
-
-        public void Seed(ISession session) {
-            var blog = new Blog { Title = "My Blog", CreateDate = DateTime.Now };
-            session.InsertOrUpdate(blog);
-
-            var user = new User { Username = "Mark", EmailAddress = "maj@113.com" };
-            session.InsertOrUpdate(user);
         }
     }
 }

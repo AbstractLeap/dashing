@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tests.Tools.ReverseEngineering {
+namespace Dashing.Tools.Tests.ReverseEngineering {
     using System.Linq;
 
     using Dashing.Configuration;
