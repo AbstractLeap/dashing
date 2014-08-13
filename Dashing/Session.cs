@@ -8,7 +8,7 @@
     using Dashing.Configuration;
     using Dashing.Engine;
 
-    public sealed class Session : ISession {
+    public sealed class Session : ISession, IExecuteSelectQueries {
         public IDapper Dapper { get; private set; }
 
         private readonly IEngine engine;
@@ -145,7 +145,15 @@
         }
 
         public ISelectQuery<T> Query<T>() {
-            return new SelectQuery<T>(this.engine, this.Transaction);
+            return new SelectQuery<T>(this);
+        }
+
+        public IEnumerable<T> Query<T>(SelectQuery<T> query) {
+            return this.engine.Query(this.Transaction, query);
+        }
+
+        public Page<T> QueryPaged<T>(SelectQuery<T> query) {
+            return this.engine.QueryPaged(this.Transaction, query);
         }
 
         public int Insert<T>(IEnumerable<T> entities) {

@@ -18,6 +18,8 @@ namespace Dashing.Engine {
 
         IEnumerable<T> Query<T>(IDbTransaction transaction, SelectQuery<T> query);
 
+        Page<T> QueryPaged<T>(IDbTransaction transaction, SelectQuery<T> query);
+
         int Insert<T>(IDbTransaction transaction, IEnumerable<T> entities);
 
         int Save<T>(IDbTransaction transaction, IEnumerable<T> entities);

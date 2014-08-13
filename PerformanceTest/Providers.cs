@@ -35,5 +35,11 @@ namespace PerformanceTest {
                 return "NHibernate";
             }
         }
+
+        public static string LightSpeed {
+            get {
+                return "LightSpeed";
+            }
+        }
     }
 }

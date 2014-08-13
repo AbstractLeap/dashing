@@ -19,14 +19,8 @@
         [Fact]
         public void SimpleQueryBuilds() {
             var dialect = new SqlServerDialect();
-            var engine = new SqlEngine(dialect);
-            var connection = new Mock<IDbConnection>(MockBehavior.Strict);
-            var transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
-            transaction.Setup(m => m.Connection).Returns(connection.Object);
-            connection.Setup(c => c.State).Returns(ConnectionState.Open);
             var selectWriter = new SelectWriter(dialect, MakeConfig());
-            var sql = selectWriter.GenerateSql(new SelectQuery<User>(engine, transaction.Object));
-            Debug.Write(sql.Sql);
+            var sql = selectWriter.GenerateSql(new SelectQuery<User>(new Mock<IExecuteSelectQueries>().Object));
         }
 
         [Fact]
@@ -253,7 +247,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset 0 fetch next @take rows",
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset 0 rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -283,7 +277,7 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip", sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip rows", sql.Sql);
         }
 
         [Fact]
@@ -292,7 +286,7 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip", sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip rows", sql.Sql);
         }
 
         [Fact]
@@ -319,12 +313,17 @@
 
         [Fact]
         public void SkipAndTakeWorksSql2012WithoutOrder() {
+            // assemble
             var query = this.GetSelectQuery<Post>().Skip(1).Take(10);
             var selectQuery = query as SelectQuery<Post>;
+
+            // act
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+
+            // assert
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip fetch next @take rows",
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -335,7 +334,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip fetch next @take rows",
+                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -393,12 +392,7 @@
         }
 
         private SelectQuery<T> GetSelectQuery<T>() {
-            var engine = new Mock<IEngine>().Object;
-            var connection = new Mock<IDbConnection>(MockBehavior.Strict);
-            connection.Setup(c => c.State).Returns(ConnectionState.Open);
-            var transaction = new Mock<IDbTransaction>(MockBehavior.Strict);
-            transaction.Setup(m => m.Connection).Returns(connection.Object);
-            return new SelectQuery<T>(engine, transaction.Object);
+            return new SelectQuery<T>(new Mock<IExecuteSelectQueries>().Object);
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {

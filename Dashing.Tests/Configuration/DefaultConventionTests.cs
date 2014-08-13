@@ -18,9 +18,40 @@
         }
 
         [Fact]
-        public void DefaultPrimaryKeyIsTheEntityNamePlusId() {
+        public void IdIsPickedAsPrimaryKey() {
             var target = this.MakeTarget();
-            Assert.Equal("PostId", target.PrimaryKeyFor(typeof(Post)));
+            var primaryKey = target.PrimaryKeyFor(typeof(Post), new[] { "Id", "SomeOtherProperty" });
+            Assert.Equal("Id", primaryKey);
+        }
+
+        [Fact]
+        public void IdIsPickedAsPrimaryKeyCaseInsensitively() {
+            var target = this.MakeTarget();
+            var primaryKey1 = target.PrimaryKeyFor(typeof(Post), new[] { "ID", "SomeOtherProperty" });
+            Assert.Equal("ID", primaryKey1);
+            var primaryKey2 = target.PrimaryKeyFor(typeof(Post), new[] { "id", "SomeOtherProperty" });
+            Assert.Equal("id", primaryKey2);
+        }
+
+        [Fact]
+        public void EntityNamePlusIdIsPickedAsPrimaryKey() {
+            var target = this.MakeTarget();
+            var primaryKey = target.PrimaryKeyFor(typeof(Post), new[] { "PostId", "SomeOtherProperty" });
+            Assert.Equal("PostId", primaryKey);
+        }
+
+        [Fact]
+        public void EntityNamePlusIdIsPickedAsPrimaryKeyCaseInsensitively() {
+            var target = this.MakeTarget();
+            var primaryKey = target.PrimaryKeyFor(typeof(Post), new[] { "PoStiD", "SomeOtherProperty" });
+            Assert.Equal("PoStiD", primaryKey);
+        }
+
+        [Fact]
+        public void EntityNamePlusIdHasPrecedenceOverJustIdAsPrimaryKey() {
+            var target = this.MakeTarget();
+            var primaryKey = target.PrimaryKeyFor(typeof(Post), new[] { "Id", "PostId", "SomeOtherProperty" });
+            Assert.Equal("PostId", primaryKey);
         }
 
         [Fact]

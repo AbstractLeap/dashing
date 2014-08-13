@@ -24,6 +24,11 @@
             Can async queries be pipelined?
             </summary>
         </member>
+        <member name="F:Dapper.CommandFlags.NoCache">
+            <summary>
+            Should the plan cache be bypassed?
+            </summary>
+        </member>
         <member name="T:Dapper.CommandDefinition">
             <summary>
             Represents the key aspects of a sql operation
@@ -62,6 +67,11 @@
         <member name="P:Dapper.CommandDefinition.Buffered">
             <summary>
             Should data be buffered before returning?
+            </summary>
+        </member>
+        <member name="P:Dapper.CommandDefinition.AddToCache">
+            <summary>
+            Should the plan for this query be cached?
             </summary>
         </member>
         <member name="P:Dapper.CommandDefinition.Flags">
@@ -113,12 +123,22 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="M:Dapper.SqlMapper.ResetTypeHandlers">
+            <summary>
+            Clear the registered type handlers
+            </summary>
+        </member>
         <member name="M:Dapper.SqlMapper.AddTypeMap(System.Type,System.Data.DbType)">
             <summary>
             Configire the specified type to be mapped to a given db-type
             </summary>
         </member>
         <member name="M:Dapper.SqlMapper.AddTypeHandler(System.Type,Dapper.SqlMapper.ITypeHandler)">
+            <summary>
+            Configire the specified type to be processed by a custom handler
+            </summary>
+        </member>
+        <member name="M:Dapper.SqlMapper.AddTypeHandlerImpl(System.Type,Dapper.SqlMapper.ITypeHandler,System.Boolean)">
             <summary>
             Configire the specified type to be processed by a custom handler
             </summary>
@@ -139,6 +159,30 @@
             Execute parameterized SQL  
             </summary>
             <returns>Number of rows affected</returns>
+        </member>
+        <member name="M:Dapper.SqlMapper.ExecuteScalar(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Execute parameterized SQL that selects a single value
+            </summary>
+            <returns>The first cell selected</returns>
+        </member>
+        <member name="M:Dapper.SqlMapper.ExecuteScalar``1(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Execute parameterized SQL that selects a single value
+            </summary>
+            <returns>The first cell selected</returns>
+        </member>
+        <member name="M:Dapper.SqlMapper.ExecuteScalar(System.Data.IDbConnection,Dapper.CommandDefinition)">
+            <summary>
+            Execute parameterized SQL that selects a single value
+            </summary>
+            <returns>The first cell selected</returns>
+        </member>
+        <member name="M:Dapper.SqlMapper.ExecuteScalar``1(System.Data.IDbConnection,Dapper.CommandDefinition)">
+            <summary>
+            Execute parameterized SQL that selects a single value
+            </summary>
+            <returns>The first cell selected</returns>
         </member>
         <member name="M:Dapper.SqlMapper.ExecuteReader(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
             <summary>
@@ -653,6 +697,30 @@
             or <see cref="T:System.Data.DataSet"/>.
             </remarks>
         </member>
+        <member name="M:Dapper.SqlMapper.ExecuteScalarAsync(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Execute parameterized SQL that selects a single value
+            </summary>
+            <returns>The first cell selected</returns>
+        </member>
+        <member name="M:Dapper.SqlMapper.ExecuteScalarAsync``1(System.Data.IDbConnection,System.String,System.Object,System.Data.IDbTransaction,System.Nullable{System.Int32},System.Nullable{System.Data.CommandType})">
+            <summary>
+            Execute parameterized SQL that selects a single value
+            </summary>
+            <returns>The first cell selected</returns>
+        </member>
+        <member name="M:Dapper.SqlMapper.ExecuteScalarAsync(System.Data.IDbConnection,Dapper.CommandDefinition)">
+            <summary>
+            Execute parameterized SQL that selects a single value
+            </summary>
+            <returns>The first cell selected</returns>
+        </member>
+        <member name="M:Dapper.SqlMapper.ExecuteScalarAsync``1(System.Data.IDbConnection,Dapper.CommandDefinition)">
+            <summary>
+            Execute parameterized SQL that selects a single value
+            </summary>
+            <returns>The first cell selected</returns>
+        </member>
         <member name="E:Dapper.SqlMapper.QueryCachePurged">
             <summary>
             Called if the query cache is purged via PurgeQueryCache
@@ -954,6 +1022,11 @@
         <member name="M:Dapper.SqlMapper.GridReader.Dispose">
             <summary>
             Dispose the grid, closing and disposing both the underlying reader and command.
+            </summary>
+        </member>
+        <member name="P:Dapper.SqlMapper.GridReader.IsConsumed">
+            <summary>
+            Has the underlying reader been consumed?
             </summary>
         </member>
         <member name="T:Dapper.DynamicParameters">

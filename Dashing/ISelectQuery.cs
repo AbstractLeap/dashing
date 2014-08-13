@@ -165,5 +165,7 @@ namespace Dashing {
         T LastOrDefault();
 
         T LastOrDefault(Expression<Func<T, bool>> predicate);
+
+        Page<T> AsPaged(int skip, int take);
     }
 }

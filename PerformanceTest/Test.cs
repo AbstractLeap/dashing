@@ -20,5 +20,11 @@ namespace PerformanceTest {
         public string TestName { get; private set; }
 
         public Action<int> TestFunc { get; private set; }
+
+        public string FriendlyName {
+            get {
+                return this.Method == null ? this.Provider : string.Format("{0} ({1})", this.Provider, this.Method);
+            }
+        }
     }
 }
