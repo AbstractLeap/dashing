@@ -149,11 +149,45 @@
         }
 
         public int Insert<T>(IEnumerable<T> entities) {
-            return this.engine.Insert(this.Transaction, entities);
+            if (this.Configuration.EventHandlers.PreInsertListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PreInsertListeners) {
+                        handler.OnPreSave(entity, this);
+                    }
+                }
+            }
+
+            var insertedRows = this.engine.Insert(this.Transaction, entities);
+            if (this.Configuration.EventHandlers.PostInsertListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PostInsertListeners) {
+                        handler.OnPostSave(entity, this);
+                    }
+                }
+            }
+
+            return insertedRows;
         }
 
         public int Save<T>(IEnumerable<T> entities) {
-            return this.engine.Save(this.Transaction, entities);
+            if (this.Configuration.EventHandlers.PreUpdateListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PreUpdateListeners) {
+                        handler.OnPreUpdate(entity, this);
+                    }
+                }
+            }
+
+            var updatedRows = this.engine.Save(this.Transaction, entities);
+            if (this.Configuration.EventHandlers.PostUpdateListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PostUpdateListeners) {
+                        handler.OnPostUpdate(entity, this);
+                    }
+                }
+            }
+
+            return updatedRows;
         }
 
         public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
@@ -161,7 +195,24 @@
         }
 
         public int Delete<T>(IEnumerable<T> entities) {
-            return this.engine.Delete(this.Transaction, entities);
+            if (this.Configuration.EventHandlers.PreDeleteListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PreDeleteListeners) {
+                        handler.OnPreDelete(entity, this);
+                    }
+                }
+            }
+
+            var deletedRows = this.engine.Delete(this.Transaction, entities);
+            if (this.Configuration.EventHandlers.PostDeleteListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PostDeleteListeners) {
+                        handler.OnPostDelete(entity, this);
+                    }
+                }
+            }
+
+            return deletedRows;
         }
 
         public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {

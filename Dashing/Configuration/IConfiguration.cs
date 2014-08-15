@@ -5,6 +5,7 @@
 
     using Dashing.CodeGeneration;
     using Dashing.Engine;
+using Dashing.Events;
 
     public interface IConfiguration {
         /// <summary>
@@ -44,6 +45,10 @@
         /// </summary>
         /// <returns></returns>
         IGeneratedCodeManager CodeManager { get; }
+
+        ICollection<IEventListener> EventListeners { get; }
+
+        EventHandlers EventHandlers { get; }
 
         /// <summary>
         ///     The engine for this configuration

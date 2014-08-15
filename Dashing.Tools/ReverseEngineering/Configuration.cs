@@ -72,5 +72,14 @@ namespace Dashing.Tools.ReverseEngineering {
                 throw new NotImplementedException();
             }
         }
+
+
+        public ICollection<Events.IEventListener> EventListeners {
+            get { throw new NotImplementedException(); }
+        }
+
+        public Events.EventHandlers EventHandlers {
+            get { throw new NotImplementedException(); }
+        }
     }
 }
