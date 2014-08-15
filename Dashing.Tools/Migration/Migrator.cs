@@ -35,7 +35,7 @@
         /// <returns></returns>
         public string GenerateNaiveSqlDiff(IEnumerable<IMap> fromMaps, IEnumerable<IMap> toMaps, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             var sql = new StringBuilder();
-            var from = fromMaps as List<IMap> ?? fromMaps.OrderTopologically().ToList();
+            var from = fromMaps.OrderTopologically().ToList();
             var to = toMaps as List<IMap> ?? toMaps.ToList();
             var warningList = new List<string>();
             warnings = warningList;
