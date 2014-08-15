@@ -11,7 +11,7 @@ namespace Dashing.ElasticSearch.Tests {
     public class ListenerTests {
         [Fact]
         public void AddEntityIndexes() {
-            var clientFactory = new SingletonClientFactory("http://localhost:9200", "test");
+            var clientFactory = new SingletonClientFactory("http://helga-ubuntu.cloudapp.net", "test", "superuser", "Fjj4axy3lou5nab5");
             var listener = new ElasticSearchEventListener(clientFactory);
             listener.AddTypeToIndex(typeof(Post));
             var session = new Mock<ISession>();

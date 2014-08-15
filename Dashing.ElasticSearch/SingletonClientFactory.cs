@@ -10,9 +10,11 @@ namespace Dashing.ElasticSearch {
     public class SingletonClientFactory : IClientFactory {
         private IElasticClient client;
 
-        public SingletonClientFactory(string uri, string defaultIndex) :
-            this(new ConnectionSettings(new Uri(uri), defaultIndex), null, null) {
-
+        public SingletonClientFactory(string uri, string defaultIndex, string username, string password) {
+            var uriuri = new Uri(uri);
+            var settings = new ConnectionSettings(uriuri, defaultIndex);
+            var connection = new BasicallyAuthenticatedHttpConnection(username, password, new ConnectionConfiguration(uriuri));
+            CreateClient(settings, connection, null, null);
         }
 
         public SingletonClientFactory(IConnectionSettingsValues settings = null, IConnection connection = null, ITransport transport = null, INestSerializer serializer = null) {

@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BasicallyAuthenticatedHttpConnection.cs" />
     <Compile Include="SessionExtensions.cs" />
     <Compile Include="SingletonClientFactory.cs" />
     <Compile Include="ElasticSearchEventListener.cs" />
