@@ -115,8 +115,20 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == Release (
+del dbm.exe
+del dbm.exe.config
+..\..\..\packages\ilmerge.2.13.0307\ILMerge.exe .\dbmanager.exe CommandLine.dll Dapper.dll Dashing.Tools.dll DatabaseSchemaReader.dll /out:dbm.exe
+del dbmanager.exe
+del CommandLine.dll
+del Dapper.dll
+del Dashing.Tools.dll 
+del DatabaseSchemaReader.dll
+del *.pdb
+del *.xml
+del *.vshost.*
+ren dbmanager.exe.config dbm.exe.config
+)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

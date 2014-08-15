@@ -8,7 +8,7 @@
     using Dashing.Configuration;
     using Dashing.Engine;
 
-    public sealed class Session : ISession {
+    public sealed class Session : ISession, IExecuteSelectQueries {
         public IDapper Dapper { get; private set; }
 
         private readonly IEngine engine;
@@ -145,14 +145,22 @@
         }
 
         public ISelectQuery<T> Query<T>() {
-            return new SelectQuery<T>(this.engine, this.Transaction);
+            return new SelectQuery<T>(this);
+        }
+
+        public IEnumerable<T> Query<T>(SelectQuery<T> query) {
+            return this.engine.Query(this.Transaction, query);
+        }
+
+        public Page<T> QueryPaged<T>(SelectQuery<T> query) {
+            return this.engine.QueryPaged(this.Transaction, query);
         }
 
         public int Insert<T>(IEnumerable<T> entities) {
             if (this.Configuration.EventHandlers.PreInsertListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PreInsertListeners) {
-                        handler.OnPreSave(entity, this);
+                        handler.OnPreInsert(entity, this);
                     }
                 }
             }
@@ -161,7 +169,7 @@
             if (this.Configuration.EventHandlers.PostInsertListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PostInsertListeners) {
-                        handler.OnPostSave(entity, this);
+                        handler.OnPostInsert(entity, this);
                     }
                 }
             }
@@ -170,19 +178,19 @@
         }
 
         public int Save<T>(IEnumerable<T> entities) {
-            if (this.Configuration.EventHandlers.PreUpdateListeners.Any()) {
+            if (this.Configuration.EventHandlers.PreSaveListeners.Any()) {
                 foreach (var entity in entities) {
-                    foreach (var handler in this.Configuration.EventHandlers.PreUpdateListeners) {
-                        handler.OnPreUpdate(entity, this);
+                    foreach (var handler in this.Configuration.EventHandlers.PreSaveListeners) {
+                        handler.OnPreSave(entity, this);
                     }
                 }
             }
 
             var updatedRows = this.engine.Save(this.Transaction, entities);
-            if (this.Configuration.EventHandlers.PostUpdateListeners.Any()) {
+            if (this.Configuration.EventHandlers.PostSaveListeners.Any()) {
                 foreach (var entity in entities) {
-                    foreach (var handler in this.Configuration.EventHandlers.PostUpdateListeners) {
-                        handler.OnPostUpdate(entity, this);
+                    foreach (var handler in this.Configuration.EventHandlers.PostSaveListeners) {
+                        handler.OnPostSave(entity, this);
                     }
                 }
             }

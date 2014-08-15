@@ -175,7 +175,7 @@
                 throw new ArgumentException("Namespace of the indicator type is null");
             }
 
-            return this.Add(type.Assembly.GetTypes().Where(t => t.IsVisible && t.Namespace != null && t.Namespace.StartsWith(ns)));
+            return this.Add(type.Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsVisible && t.Namespace != null && t.Namespace.StartsWith(ns)));
         }
 
         protected IMap<T> Setup<T>() {

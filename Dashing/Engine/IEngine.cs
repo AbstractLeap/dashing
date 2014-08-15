@@ -5,8 +5,11 @@ namespace Dashing.Engine {
     using System.Linq.Expressions;
 
     using Dashing.Configuration;
+    using Dashing.Engine.Dialects;
 
     public interface IEngine {
+        ISqlDialect SqlDialect { get; }
+
         IConfiguration Configuration { get; set; }
 
         IEnumerable<T> Query<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
@@ -14,6 +17,8 @@ namespace Dashing.Engine {
         IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
         IEnumerable<T> Query<T>(IDbTransaction transaction, SelectQuery<T> query);
+
+        Page<T> QueryPaged<T>(IDbTransaction transaction, SelectQuery<T> query);
 
         int Insert<T>(IDbTransaction transaction, IEnumerable<T> entities);
 

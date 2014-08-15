@@ -1,4 +1,5 @@
 namespace Dashing.Engine.Dialects {
+    using System.Data;
     using System.Text;
 
     using Dashing.Configuration;
@@ -26,6 +27,10 @@ namespace Dashing.Engine.Dialects {
         ///     The sql command will be past the parameters @take and @skip so those names should be used. It is assumed that
         ///     either take or skip are > 0
         /// </remarks>
-        void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip);
+        void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip);
+
+        bool TypeTakesLength(DbType type);
+
+        bool TypeTakesPrecisionAndScale(DbType type);
     }
 }

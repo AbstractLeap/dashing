@@ -199,5 +199,9 @@
         public int Execute(string sql, IDbTransaction transaction, dynamic param = null) {
             return transaction.Connection.Execute(sql, (object)param, transaction);
         }
+
+        public T QueryScalar<T>(string sql, IDbTransaction transaction, dynamic param = null) {
+            return transaction.Connection.Query<T>(sql, (object)param, transaction).SingleOrDefault();
+        }
     }
 }

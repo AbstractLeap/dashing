@@ -41,10 +41,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\references\Dapper\Dapper.dll</HintPath>
     </Reference>
-    <Reference Include="DatabaseSchemaReader, Version=1.3.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\DatabaseSchemaReader-polyfork.1.3.4.3\lib\net40\DatabaseSchemaReader.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.0.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
@@ -68,7 +64,6 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="BaseQueryWriterTest.cs" />
     <Compile Include="CodeGeneration\Fixtures\GenerateAndOutputCodeFixture.cs" />
     <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
     <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
@@ -92,27 +87,27 @@
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Configuration\ReverseEngineer\Sandbox.cs" />
-    <Compile Include="Engine\DeleteWriterTests.cs" />
-    <Compile Include="Engine\DialectFactoryTests.cs" />
-    <Compile Include="Engine\InsertWriterTests.cs" />
-    <Compile Include="Engine\MySqlDialectBaseTests.cs" />
-    <Compile Include="Engine\SqlServerDialectBaseTests.cs" />
-    <Compile Include="Engine\AnsiSqlDialectTests.cs" />
-    <Compile Include="Engine\SqlDialectBaseTests.cs" />
+    <Compile Include="Engine\Dialects\AnsiSqlDialectTests.cs" />
+    <Compile Include="Engine\Dialects\DialectFactoryTests.cs" />
+    <Compile Include="Engine\Dialects\MySqlDialectBaseTests.cs" />
+    <Compile Include="Engine\Dialects\SqlDialectBaseTests.cs" />
+    <Compile Include="Engine\Dialects\SqlServerDialectBaseTests.cs" />
+    <Compile Include="Engine\DML\CountWriterTests.cs" />
+    <Compile Include="Engine\DML\DeleteWriterTests.cs" />
+    <Compile Include="Engine\DML\InsertWriterTests.cs" />
+    <Compile Include="Engine\DML\SelectWriterTests.cs" />
+    <Compile Include="Engine\DML\WhereClauseWriterTests.cs" />
     <Compile Include="Engine\DML\UpdateWriterTests.cs" />
-    <Compile Include="Engine\WhereClauseWriterTests.cs" />
+    <Compile Include="Extensions\DynamicParametersExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensionsTests.cs" />
     <Compile Include="MockConfiguration.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="SchemaGenerationSandbox.cs" />
     <Compile Include="Engine\DDL\DropTableWriterTests.cs" />
     <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />
-    <Compile Include="Engine\SelectWriterTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
-    <Compile Include="FetchTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QuerySandbox.cs" />
-    <Compile Include="SelectTest.cs" />
+    <Compile Include="SelectQueryTests.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Like.cs" />
@@ -120,8 +115,6 @@
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />
     <Compile Include="TestDomain\User.cs" />
-    <Compile Include="Tools\ModelGeneration\SourceTests.cs" />
-    <Compile Include="Tools\ReverseEngineering\EngineerTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

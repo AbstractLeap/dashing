@@ -20,7 +20,7 @@ namespace Dashing.Engine.Dialects {
             return "SELECT LAST_INSERT_ID() id";
         }
 
-        public override void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
+        public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             if (take > 0 && skip > 0) {
                 sql.Append(" limit @skip, @take");
             }

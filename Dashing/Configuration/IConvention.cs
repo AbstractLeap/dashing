@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Configuration {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     ///     The Convention interface.
@@ -33,10 +34,13 @@
         /// <param name="entity">
         ///     The entity.
         /// </param>
+        /// <param name="propertyNames">
+        ///     List of property names to choose from
+        /// </param>
         /// <returns>
         ///     The property name of the primary key.
         /// </returns>
-        string PrimaryKeyFor(Type entity);
+        string PrimaryKeyFor(Type entity, IEnumerable<string> propertyNames);
 
         /// <summary>
         ///     Identifies whether the primary key is auto-generated for a given entity

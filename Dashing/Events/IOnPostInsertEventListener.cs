@@ -6,6 +6,6 @@ using System.Threading.Tasks;
 
 namespace Dashing.Events {
     public interface IOnPostInsertEventListener : IEventListener {
-        void OnPostSave(object entity, ISession session);
+        void OnPostInsert(object entity, ISession session);
     }
 }

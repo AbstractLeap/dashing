@@ -3,8 +3,6 @@
     using System.Configuration;
     using System.Linq;
 
-    using Dapper;
-
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
@@ -13,6 +11,8 @@
     using Xunit;
 
     public class QuerySandbox {
+        private static readonly ConnectionStringSettings PolyTestConnectionString = new ConnectionStringSettings("Default", "Server=tcp:dzarexnyar.database.windows.net;Database=poly-test;User ID=polyadmin@dzarexnyar;Password=Fgg7aEy1bzX8qvs2;Trusted_Connection=False;Encrypt=True;", "System.Data.SqlClient");
+
         [Fact(Skip = "connects to real database")]
         public void ExecuteSimpleQuery() {
             var config = new CustomConfig();
@@ -44,7 +44,11 @@
         public void TestInsert() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {
-                var post = new User { Username = "Joe", EmailAddress = "m@j.com", Password = "blah" };
+                var post = new User {
+                    Username = "Joe", 
+                    EmailAddress = "m@j.com", 
+                    Password = "blah"
+                };
                 session.Insert(post);
             }
         }
@@ -53,7 +57,11 @@
         public void TestInsertUpdatesId() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {
-                var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
+                var user = new User {
+                    Username = "Bob", 
+                    EmailAddress = "asd", 
+                    Password = "asdf"
+                };
                 session.Insert(user);
                 Assert.NotEqual(0, user.UserId);
             }
@@ -63,8 +71,16 @@
         public void TestMultipleInsertUpdatesIds() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {
-                var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
-                var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
+                var user = new User {
+                    Username = "Bob", 
+                    EmailAddress = "asd", 
+                    Password = "asdf"
+                };
+                var user2 = new User {
+                    Username = "Bob2", 
+                    EmailAddress = "asd", 
+                    Password = "asdf"
+                };
                 session.Insert(user, user2);
                 Assert.NotEqual(0, user.UserId);
                 Assert.NotEqual(0, user2.UserId);
@@ -92,8 +108,16 @@
         public void TestSingleAndFirst() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {
-                var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
-                var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
+                var user = new User {
+                    Username = "Bob", 
+                    EmailAddress = "asd", 
+                    Password = "asdf"
+                };
+                var user2 = new User {
+                    Username = "Bob2", 
+                    EmailAddress = "asd", 
+                    Password = "asdf"
+                };
                 session.Insert(user, user2);
 
                 // now fetch them
@@ -155,14 +179,44 @@
         }
 
         [Fact(Skip = "connects to real database")]
+        public void TestFetchingEmptyCollection() {
+            // aka FetchingEmptyCollectionReturnsEmptyCollection
+            // assemble
+            var dialect = new SqlServerDialect();
+            var createTableWriter = new CreateTableWriter(dialect);
+            var dropTableWriter = new DropTableWriter(dialect);
+            var config = NeedToDash.Configure(PolyTestConnectionString).AddNamespaceOf<Post>();
+            var post = new Post {
+                PostId = 1
+            };
+
+            using (var session = config.BeginSession()) {
+                foreach (var map in config.Maps) {
+                    session.Dapper.Execute(dropTableWriter.DropTableIfExists(map));
+                    session.Dapper.Execute(createTableWriter.CreateTable(map));
+                }
+
+                session.Insert(post);
+                session.Complete();
+            }
+
+            // act
+            Post result;
+            using (var session = config.BeginSession()) {
+                var query = session.Query<Post>().Where(p => p.PostId == 1).Fetch(p => p.Comments);
+                result = query.SingleOrDefault();
+            }
+
+            // assert
+            Assert.NotNull(result);
+            Assert.Empty(result.Comments);
+        }
+
+        [Fact(Skip = "connects to real database")]
         public void TestChainedCollectionFetch() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {
-                var blog =
-                    session.Query<Blog>()
-                           .FetchMany(p => p.Posts)
-                           .ThenFetch(p => p.Comments)
-                           .First();
+                var blog = session.Query<Blog>().FetchMany(p => p.Posts).ThenFetch(p => p.Comments).First();
             }
         }
 
@@ -171,7 +225,7 @@
             var dialect = new SqlServerDialect();
             var dropTableWriter = new DropTableWriter(dialect);
             var createTableWriter = new CreateTableWriter(dialect);
-            var config = NeedToDash.Configure(SchemaGenerationSandbox.PolyTestConnectionString).AddNamespaceOf<Post>();
+            var config = NeedToDash.Configure(PolyTestConnectionString).AddNamespaceOf<Post>();
 
             using (var session = config.BeginSession()) {
                 foreach (var map in config.Maps) {
@@ -179,7 +233,10 @@
                     session.Dapper.Execute(createTableWriter.CreateTable(map));
                 }
 
-                session.Insert(new User { Username = "james", EmailAddress = "james@polylytics.com" });
+                session.Insert(new User {
+                    Username = "james", 
+                    EmailAddress = "james@polylytics.com"
+                });
                 session.Complete();
             }
 

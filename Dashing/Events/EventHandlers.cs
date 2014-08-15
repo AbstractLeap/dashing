@@ -9,22 +9,22 @@ namespace Dashing.Events {
         public EventHandlers(ICollection<IEventListener> listeners) {
             this.UpdateListeners(listeners);
             this.PreInsertListeners = new List<IOnPreInsertEventListener>();
-            this.PreUpdateListeners = new List<IOnPreUpdateEventListener>();
+            this.PreSaveListeners = new List<IOnPreSaveEventListener>();
             this.PreDeleteListeners = new List<IOnPreDeleteEventListener>();
             this.PostInsertListeners = new List<IOnPostInsertEventListener>();
-            this.PostUpdateListeners = new List<IOnPostUpdateEventListener>();
+            this.PostSaveListeners = new List<IOnPostSaveEventListener>();
             this.PostDeleteListeners = new List<IOnPostDeleteEventListener>();
         }
 
         public IList<IOnPreInsertEventListener> PreInsertListeners { get; private set; }
 
-        public IList<IOnPreUpdateEventListener> PreUpdateListeners { get; private set; }
+        public IList<IOnPreSaveEventListener> PreSaveListeners { get; private set; }
 
         public IList<IOnPreDeleteEventListener> PreDeleteListeners { get; private set; }
 
         public IList<IOnPostInsertEventListener> PostInsertListeners { get; private set; }
 
-        public IList<IOnPostUpdateEventListener> PostUpdateListeners { get; private set; }
+        public IList<IOnPostSaveEventListener> PostSaveListeners { get; private set; }
 
         public IList<IOnPostDeleteEventListener> PostDeleteListeners { get; private set; }
 
@@ -38,8 +38,8 @@ namespace Dashing.Events {
                     this.PreInsertListeners.Add(listener as IOnPreInsertEventListener);
                 }
 
-                if (listener is IOnPreUpdateEventListener) {
-                    this.PreUpdateListeners.Add(listener as IOnPreUpdateEventListener);
+                if (listener is IOnPreSaveEventListener) {
+                    this.PreSaveListeners.Add(listener as IOnPreSaveEventListener);
                 }
 
                 if (listener is IOnPreDeleteEventListener) {
@@ -50,8 +50,8 @@ namespace Dashing.Events {
                     this.PostInsertListeners.Add(listener as IOnPostInsertEventListener);
                 }
 
-                if (listener is IOnPostUpdateEventListener) {
-                    this.PostUpdateListeners.Add(listener as IOnPostUpdateEventListener);
+                if (listener is IOnPostSaveEventListener) {
+                    this.PostSaveListeners.Add(listener as IOnPostSaveEventListener);
                 }
 
                 if (listener is IOnPostDeleteEventListener) {

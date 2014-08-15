@@ -1,7 +1,5 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System;
-    using System.Collections.Generic;
-
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
@@ -11,12 +9,12 @@
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Tests.CodeGeneration.Fixtures;
     using Dashing.Tests.TestDomain;
 
     using Moq;
 
     using Xunit;
-    using Dashing.Tests.CodeGeneration.Fixtures;
 
     public class ConfigurationBaseTests : IUseFixture<GenerateCodeFixture> {
         private static readonly ConnectionStringSettings DummyConnectionString = new ConnectionStringSettings { ConnectionString = "Data Source=dummy.local", ProviderName = "System.Data.SqlClient" };
@@ -393,7 +391,8 @@
 
         private class BasicConfigurationWithCodeManager : ConfigurationBase {
             public BasicConfigurationWithCodeManager(ICodeGenerator codeGenerator)
-                : base(MakeMockEngine().Object, DummyConnectionString, MakeMockDbProviderFactory().Object, new DefaultMapper(new DefaultConvention()), MakeMockSf().Object, codeGenerator) {
+                // ReSharper disable once RedundantNameQualifier - StyleCope and R# can't decide who is right on this one
+                : base(MakeMockEngine().Object, ConfigurationBaseTests.DummyConnectionString, MakeMockDbProviderFactory().Object, new DefaultMapper(new DefaultConvention()), MakeMockSf().Object, codeGenerator) {
                 this.Add<Post>();
             }
         }

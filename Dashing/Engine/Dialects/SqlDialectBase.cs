@@ -5,7 +5,7 @@ namespace Dashing.Engine.Dialects {
 
     using Dashing.Configuration;
 
-    public class SqlDialectBase : ISqlDialect {
+    public abstract class SqlDialectBase : ISqlDialect {
         protected char BeginQuoteCharacter { get; set; }
 
         protected char EndQuoteCharacter { get; set; }
@@ -153,7 +153,7 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
-        protected virtual bool TypeTakesLength(DbType type) {
+        public virtual bool TypeTakesLength(DbType type) {
             switch (type) {
                 case DbType.AnsiString:
                 case DbType.AnsiStringFixedLength:
@@ -167,7 +167,7 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
-        protected virtual bool TypeTakesPrecisionAndScale(DbType type) {
+        public virtual bool TypeTakesPrecisionAndScale(DbType type) {
             switch (type) {
                 case DbType.Decimal:
                     return true;
@@ -190,8 +190,6 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
-        public virtual void ApplyPaging(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
-            throw new InvalidProgramException("ApplyPaging must be overridden in a deriving class");
-        }
+        public abstract void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip);
     }
 }
