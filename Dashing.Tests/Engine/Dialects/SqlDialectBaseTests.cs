@@ -83,6 +83,28 @@
             Assert.Equal("<foo> int not null generated always as identity primary key", sb.ToString());
         }
 
+        [Fact]
+        public void AppendColumnSpecificationAppendsNameAndLength() {
+            var sb = new StringBuilder();
+            var col = new Column<int> { DbName = "foo", DbType = DbType.String, Length = 255 };
+            var target = this.MakeTarget();
+
+            target.AppendColumnSpecification(sb, col);
+
+            Assert.Equal("<foo> nvarchar(255) not null", sb.ToString());
+        }
+
+        [Fact]
+        public void AppendColumnSpecificationAppendsNameAndMaxLength() {
+            var sb = new StringBuilder();
+            var col = new Column<int> { DbName = "foo", DbType = DbType.String, Length = 0 };
+            var target = this.MakeTarget();
+
+            target.AppendColumnSpecification(sb, col);
+
+            Assert.Equal("<foo> nvarchar(max) not null", sb.ToString());
+        }
+
         private TestDialect MakeTarget() {
             return new TestDialect();
         }

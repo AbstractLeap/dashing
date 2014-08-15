@@ -10,8 +10,8 @@
     public class AnsiSqlDialectBaseTests {
         [Fact]
         public void BinaryColumnHasBitType() {
-            var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.Binary });
-            Assert.Equal("\"foo\" bit(0) not null", actual);
+            var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.Binary, Length = 1 });
+            Assert.Equal("\"foo\" bit(1) not null", actual);
         }
 
         [Fact]
