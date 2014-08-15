@@ -1,13 +1,10 @@
-﻿namespace Dashing.Tests.Engine {
+﻿namespace Dashing.Tests.Engine.DML {
     using System.Diagnostics;
 
     using Dashing.Configuration;
-    using Dashing.Engine;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Tests.TestDomain;
-
-    using Moq;
 
     using Xunit;
 

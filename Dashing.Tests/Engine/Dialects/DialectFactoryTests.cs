@@ -1,7 +1,6 @@
-﻿namespace Dashing.Tests.Engine {
+﻿namespace Dashing.Tests.Engine.Dialects {
     using System.Configuration;
 
-    using Dashing.Engine;
     using Dashing.Engine.Dialects;
 
     using Xunit;

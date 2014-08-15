@@ -1,11 +1,8 @@
-﻿namespace Dashing.Tests.Engine {
-    using System.Data;
-    using System.Data.Common;
+﻿namespace Dashing.Tests.Engine.DML {
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
 
     using Dashing.Configuration;
-    using Dashing.Engine;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Extensions;
@@ -21,6 +18,8 @@
             var dialect = new SqlServerDialect();
             var selectWriter = new SelectWriter(dialect, MakeConfig());
             var sql = selectWriter.GenerateSql(new SelectQuery<User>(new Mock<IExecuteSelectQueries>().Object));
+
+            Assert.NotNull(sql);
         }
 
         [Fact]
@@ -120,7 +119,7 @@
         }
 
         [Fact]
-        public void WhereNonPKFetch() {
+        public void WhereOnFetchedProperty() {
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author).Where(p => p.Author.Username == "bob");
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
@@ -131,7 +130,7 @@
         }
 
         [Fact]
-        public void WherePKFetch() {
+        public void WhereOnFetchedPrimaryKey() {
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author).Where(p => p.Author.UserId == 1);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
@@ -142,7 +141,18 @@
         }
 
         [Fact]
-        public void MultipleLevelPKFetch() {
+        public void WhereOnPrimaryKeyAndFetchSomethingElse() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post).Where(c => c.User.UserId == 2);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId where (t.[UserId] = @l_1)",
+                sql.Sql);
+        }
+
+        [Fact]
+        public void WhereOnDeepFetchedPrimaryKey() {
             var query = this.GetSelectQuery<Comment>().Fetch(p => p.Post.Author).Where(p => p.Post.Author.UserId == 1);
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
@@ -153,24 +163,13 @@
         }
 
         [Fact]
-        public void WhereFetchMultiple() {
+        public void WhereOnDeepDetchedProperty() {
             var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Author).Where(c => c.Post.Author.Username == "bob");
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
                 "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[BlogId], t_1.[DoNotMap], t_2.[UserId], t_2.[Username], t_2.[EmailAddress], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Users] as t_2 on t_1.AuthorId = t_2.UserId where (t_2.[Username] = @l_1)",
-                sql.Sql);
-        }
-
-        [Fact]
-        public void FetchWithNonFetchPKWhereClause() {
-            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post).Where(c => c.User.UserId == 2);
-            var selectQuery = query as SelectQuery<Comment>;
-            var sql = this.GetWriter().GenerateSql(selectQuery);
-            Debug.Write(sql.Sql);
-            Assert.Equal(
-                "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId where (t.[UserId] = @l_1)",
                 sql.Sql);
         }
 

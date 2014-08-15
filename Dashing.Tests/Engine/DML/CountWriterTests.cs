@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tests.Engine {
+﻿namespace Dashing.Tests.Engine.DML {
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;

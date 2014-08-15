@@ -98,5 +98,14 @@ namespace Dashing.Tests {
             this.GetMap<T>().Configuration = this;
             return this.GetMap<T>();
         }
+
+
+        public ICollection<Events.IEventListener> EventListeners {
+            get { throw new NotImplementedException(); }
+        }
+
+        public Events.EventHandlers EventHandlers {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

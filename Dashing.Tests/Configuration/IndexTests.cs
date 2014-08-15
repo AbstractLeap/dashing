@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.Tests.Configuration {
+    using System;
+    using System.Linq;
 
-namespace Dashing.Tests.Configuration {
     using Dashing.Configuration;
     using Dashing.Tests.TestDomain;
 

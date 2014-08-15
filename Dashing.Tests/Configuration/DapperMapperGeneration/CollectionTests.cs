@@ -13,16 +13,25 @@
     using Moq;
     using Xunit;
 
-
     public class CollectionTests {
         [Fact]
         public void SingleCollectionWorks() {
             var funcFac = GenerateSingleMapper();
-            var post1 = new Post { PostId = 1 };
-            var post2 = new Post { PostId = 2 };
-            var comment1 = new Comment { CommentId = 1 };
-            var comment2 = new Comment { CommentId = 2 };
-            var comment3 = new Comment { CommentId = 3 };
+            var post1 = new Post {
+                PostId = 1
+            };
+            var post2 = new Post {
+                PostId = 2
+            };
+            var comment1 = new Comment {
+                CommentId = 1
+            };
+            var comment2 = new Comment {
+                CommentId = 2
+            };
+            var comment3 = new Comment {
+                CommentId = 3
+            };
             var dict = new Dictionary<object, Post>();
             var func = (Func<Post, Comment, Post>)funcFac.DynamicInvoke(dict);
             func(post1, comment1);
@@ -36,11 +45,21 @@
         [Fact]
         public void SingleCollectionAwkwardObjectWorks() {
             var funcFac = GenerateSingleAwkwardMapper();
-            var post1 = new PostWithoutCollectionInitializerInConstructor { PostWithoutCollectionInitializerInConstructorId = 1 };
-            var post2 = new PostWithoutCollectionInitializerInConstructor { PostWithoutCollectionInitializerInConstructorId = 2 };
-            var comment1 = new CommentTwo { CommentTwoId = 1 };
-            var comment2 = new CommentTwo { CommentTwoId = 2 };
-            var comment3 = new CommentTwo { CommentTwoId = 3 };
+            var post1 = new PostWithoutCollectionInitializerInConstructor {
+                PostWithoutCollectionInitializerInConstructorId = 1
+            };
+            var post2 = new PostWithoutCollectionInitializerInConstructor {
+                PostWithoutCollectionInitializerInConstructorId = 2
+            };
+            var comment1 = new CommentTwo {
+                CommentTwoId = 1
+            };
+            var comment2 = new CommentTwo {
+                CommentTwoId = 2
+            };
+            var comment3 = new CommentTwo {
+                CommentTwoId = 3
+            };
             var dict = new Dictionary<object, PostWithoutCollectionInitializerInConstructor>();
             var func = (Func<PostWithoutCollectionInitializerInConstructor, CommentTwo, PostWithoutCollectionInitializerInConstructor>)funcFac.DynamicInvoke(dict);
             func(post1, comment1);
@@ -55,14 +74,30 @@
         public void MultiCollectionWorks() {
             var funcFac = GenerateMultiMapper();
 
-            var post1 = new Post { PostId = 1 };
-            var post2 = new Post { PostId = 2 };
-            var comment1 = new Comment { CommentId = 1 };
-            var comment2 = new Comment { CommentId = 2 };
-            var comment3 = new Comment { CommentId = 3 };
-            var postTag1 = new PostTag { PostTagId = 1 };
-            var postTag2 = new PostTag { PostTagId = 2 };
-            var postTag3 = new PostTag { PostTagId = 3 };
+            var post1 = new Post {
+                PostId = 1
+            };
+            var post2 = new Post {
+                PostId = 2
+            };
+            var comment1 = new Comment {
+                CommentId = 1
+            };
+            var comment2 = new Comment {
+                CommentId = 2
+            };
+            var comment3 = new Comment {
+                CommentId = 3
+            };
+            var postTag1 = new PostTag {
+                PostTagId = 1
+            };
+            var postTag2 = new PostTag {
+                PostTagId = 2
+            };
+            var postTag3 = new PostTag {
+                PostTagId = 3
+            };
             var otherDict = new Dictionary<string, IDictionary<object, object>>();
             otherDict.Add("fetchParam_1", new Dictionary<object, object>());
             otherDict.Add("fetchParam_2", new Dictionary<object, object>());
@@ -151,17 +186,17 @@
                 this.Add<CommentTwo>();
             }
         }
-    }
 
-    public class PostWithoutCollectionInitializerInConstructor {
-        public virtual int PostWithoutCollectionInitializerInConstructorId { get; set; }
+        private class PostWithoutCollectionInitializerInConstructor {
+            public virtual int PostWithoutCollectionInitializerInConstructorId { get; set; }
 
-        public virtual ICollection<CommentTwo> Comments { get; set; }
-    }
+            public virtual ICollection<CommentTwo> Comments { get; set; }
+        }
 
-    public class CommentTwo {
-        public virtual int CommentTwoId { get; set; }
+        private class CommentTwo {
+            public virtual int CommentTwoId { get; set; }
 
-        public virtual PostWithoutCollectionInitializerInConstructor PostWithoutCollectionInitializerInConstructor { get; set; }
+            public virtual PostWithoutCollectionInitializerInConstructor PostWithoutCollectionInitializerInConstructor { get; set; }
+        }
     }
 }

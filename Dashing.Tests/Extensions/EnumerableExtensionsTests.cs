@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dashing.Configuration;
-using Dashing.Extensions;
-using Dashing.Tests.TestDomain;
-using Xunit;
+﻿namespace Dashing.Tests.Extensions {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-namespace Dashing.Tests.Extensions {
+    using Dashing.Configuration;
+    using Dashing.Extensions;
+    using Dashing.Tests.TestDomain;
+
+    using Xunit;
+
     public class EnumerableExtensionsTests {
         [Fact]
         public void TopologicalSortWorks() {
@@ -46,9 +46,9 @@ namespace Dashing.Tests.Extensions {
             Assert.True(mapIndexes[typeof(PostTag)] < mapIndexes[typeof(Post)]);
         }
 
-        class CustomConfig : DefaultConfiguration {
+        private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new System.Configuration.ConnectionStringSettings("Default", "", "System.Data.SqlClient")) {
+                : base(new System.Configuration.ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
                     this.AddNamespaceOf<Post>();
             }
         }

@@ -125,6 +125,14 @@
     <Compile Include="Engine\DML\WhereClauseWriter.cs" />
     <Compile Include="Engine\SqlEngine.cs" />
     <Compile Include="Engine\IEngine.cs" />
+    <Compile Include="Events\EventHandlers.cs" />
+    <Compile Include="Events\IEventListener.cs" />
+    <Compile Include="Events\IOnPostDeleteEventListener.cs" />
+    <Compile Include="Events\IOnPreDeleteEventListener.cs" />
+    <Compile Include="Events\IOnPostSaveEventListener.cs" />
+    <Compile Include="Events\IOnPostInsertEventListener.cs" />
+    <Compile Include="Events\IOnPreInsertEventListener.cs" />
+    <Compile Include="Events\IOnPreSaveEventListener.cs" />
     <Compile Include="Extensions\DapperExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
