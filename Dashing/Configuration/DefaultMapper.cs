@@ -143,6 +143,8 @@
             column.DbName = propertyName;
             column.DbType = propertyType.GetDbType();
 
+            column.IsNullable = propertyType.IsNullable();
+
             // check particular types for defaults
             switch (column.DbType) {
                 case DbType.Decimal:
