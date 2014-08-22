@@ -99,6 +99,25 @@
             Assert.Equal(typeof(int), actual.Parameters.GetValue("l_1").GetType());
         }
 
+
+        private class WherePropertyIsDefinedOnInterfaceDemonstrator<T>
+            where T : IEnableable {
+            private readonly WhereClauseWriter writer;
+
+            private readonly IList<Expression<Func<T, bool>>> whereClauses;
+
+            public WherePropertyIsDefinedOnInterfaceDemonstrator(WhereClauseWriter writer) {
+                this.writer = writer;
+                this.whereClauses = new List<Expression<Func<T, bool>>> {
+                    z => z.IsEnabled
+                };
+            }
+
+            public SelectWriterResult Execute() {
+                return this.writer.GenerateSql(this.whereClauses, null);
+            }
+        }
+
         [Fact]
         public void WherePropertyIsDefinedOnInterface() {
             // assemble
@@ -116,14 +135,15 @@
         public void WherePredicateIsDefinedOnInterface() {
             // assemble
             var target = MakeTarget();
-            Expression<Func<IEnableable, bool>> whereClause = u => u.IsEnabled;
 
             // act
-            var actual = target.GenerateSql(new[] { whereClause }, null);
+            var demonstrator = new WherePropertyIsDefinedOnInterfaceDemonstrator<User>(target);
+            var actual = demonstrator.Execute();
 
             // assert
             Assert.Equal(" where [IsEnabled]", actual.Sql);
         }
+
 
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
