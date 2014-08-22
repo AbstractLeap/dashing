@@ -89,8 +89,8 @@
             var columnT = column as Column<TProperty>;
 
             if (columnT == null) {
-                map.Columns[columnName] = columnT = Column<TProperty>.From(column);
-                    // lift the Column into a Column<T>
+                // lift the Column into a Column<T>
+                map.Columns[columnName] = columnT = Column<TProperty>.From(column); 
             }
 
             return columnT;

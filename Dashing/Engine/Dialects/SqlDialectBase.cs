@@ -55,12 +55,14 @@ namespace Dashing.Engine.Dialects {
 
         protected virtual void AppendLength(StringBuilder sql, ushort length) {
             sql.Append("(");
+
             if (length == 0) {
                 sql.Append("max");
             }
             else {
                 sql.Append(length);
             }
+
             sql.Append(")");
         }
 

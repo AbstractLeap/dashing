@@ -38,7 +38,7 @@ namespace Dashing.Engine.DDL {
 
         public IEnumerable<string> CreateForeignKeys(IMap map) {
             var sqlStatements = new List<string>();
-            var fkIdx = 0;
+            var idx = 0;
             foreach (
                 var manyToOneColumn in
                     map.Columns.Where(
@@ -47,7 +47,7 @@ namespace Dashing.Engine.DDL {
                 var sql = new StringBuilder();
                 sql.Append("alter table ");
                 this.dialect.AppendQuotedTableName(sql, map);
-                sql.Append(" add constraint fk" + map.Type.Name + "_" + ++fkIdx);
+                sql.Append(" add constraint fk" + map.Type.Name + "_" + ++idx);
                 sql.Append(" foreign key (");
                 this.dialect.AppendQuotedName(sql, manyToOneColumn.Value.DbName);
                 sql.Append(") references ");
@@ -64,11 +64,16 @@ namespace Dashing.Engine.DDL {
         }
 
         public IEnumerable<string> CreateIndexes(IMap map) {
-            var sqlStatements = new List<string>();
             var indexIdx = 0;
+
             foreach (var index in map.Indexes) {
-                var sql = new StringBuilder();
-                sql.Append("create " + (index.IsUnique ? "unique" : "") + " index ");
+                var sql = new StringBuilder(128);
+                sql.Append("create ");
+                if (index.IsUnique) {
+                    sql.Append("unique ");
+                }
+
+                sql.Append("index ");
                 sql.Append("idx" + map.Type.Name + "_" + ++indexIdx);
                 sql.Append(" on ");
                 this.dialect.AppendQuotedTableName(sql, map);
@@ -77,12 +82,11 @@ namespace Dashing.Engine.DDL {
                     this.dialect.AppendQuotedName(sql, column.DbName);
                     sql.Append(", ");
                 }
+
                 sql.Remove(sql.Length - 2, 2);
                 sql.Append(")");
-                sqlStatements.Add(sql.ToString());
+                yield return sql.ToString();
             }
-
-            return sqlStatements;
         }
     }
 }

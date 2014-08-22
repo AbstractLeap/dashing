@@ -99,7 +99,6 @@
             Assert.Equal(typeof(int), actual.Parameters.GetValue("l_1").GetType());
         }
 
-
         private class WherePropertyIsDefinedOnInterfaceDemonstrator<T>
             where T : IEnableable {
             private readonly WhereClauseWriter writer;
@@ -143,7 +142,6 @@
             // assert
             Assert.Equal(" where [IsEnabled]", actual.Sql);
         }
-
 
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());

@@ -74,31 +74,26 @@ namespace Dashing {
             return session.Delete(predicates);
         }
 
-        public static int InsertOrUpdate<T>(
-            this ISession session,
-            T entity,
-            Expression<Func<T, bool>> equalityComparer = null) {
-
+        public static int InsertOrUpdate<T>(this ISession session, T entity, Expression<Func<T, bool>> equalityComparer = null) where T : class {
             if (equalityComparer == null) {
                 // if the equality comparer is null then they should be passing us a valid PK value in the entity so call update
                 var updated = session.Save(entity);
-                if (updated == 0) {
-                    return session.Insert(entity);
-                }
-
-                return updated;
+                return updated == 0 ? session.Insert(entity) : updated;
             }
-            else {
-                // for seeding the users identity is based on something else
-                var existingEntity = session.Query<T>().SingleOrDefault(equalityComparer);
-                var map = session.Configuration.GetMap<T>();
-                foreach (var col in map.OwnedColumns()) {
-                    // map over to existing entity
-                    map.SetColumnValue(existingEntity, col, map.GetColumnValue(entity, col));
-                }
-
-                return session.Save(existingEntity);
+            
+            // we support different equalityComparers so we can cope with e.g. username 
+            var existingEntity = session.Query<T>().AsTracked().SingleOrDefault(equalityComparer);
+            if (existingEntity == null) {
+                return session.Insert(entity);
             }
+            
+            // map the properties on to the existing entity
+            var map = session.Configuration.GetMap<T>();
+            foreach (var col in map.OwnedColumns()) {
+                map.SetColumnValue(existingEntity, col, map.GetColumnValue(entity, col));
+            }
+
+            return session.Save(existingEntity);
         }
     }
 }

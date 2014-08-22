@@ -53,8 +53,7 @@
                        .Where(c => !c.IsPrimaryKey)
                        .ToDictionary(
                             c => c.Name,
-                            c => typeof(T).GetProperty(c.Name).GetValue(entity) // TODO: map does this for you?
-                       );
+                            c => typeof(T).GetProperty(c.Name).GetValue(entity)); // TODO: map does this for you?
             }
 
             sql.Append("update ");
@@ -95,25 +94,27 @@
             parameters.Add(idParamName, this.Configuration.GetMap<T>().GetPrimaryKeyValue(entity));
             sql.Append(idParamName);
 
-
             // FIN
             sql.Append(";");
 
             //// TODO Should we update collections here or is that the users job? Guess we should do ManyToMany tho
         }
 
+        /// <summary>
+        /// look up the column type and decide where to get the value from
+        /// </summary>
+        /// <param name="mappedColumn"></param>
+        /// <param name="propertyValue"></param>
+        /// <returns></returns>
         private object GetValueOrPrimaryKey(IColumn mappedColumn, object propertyValue) {
-            object paramValue;
-
-            // look up the column type and decide where to get the value from
             switch (mappedColumn.Relationship) {
                 case RelationshipType.None:
-                    paramValue = propertyValue;
-                    break;
+                    return propertyValue;
+
                 case RelationshipType.ManyToOne:
                     var foreignKeyMap = this.Configuration.GetMap(mappedColumn.Type);
-                    paramValue = foreignKeyMap.GetPrimaryKeyValue(propertyValue);
-                    break;
+                    return foreignKeyMap.GetPrimaryKeyValue(propertyValue);
+
                 default:
                     throw new NotImplementedException(
                         string.Format(
@@ -122,7 +123,6 @@
                             mappedColumn.Type.Name,
                             mappedColumn.Name));
             }
-            return paramValue;
         }
 
         public SqlWriterResult GenerateBulkSql<T>(T updateClass, IEnumerable<Expression<Func<T, bool>>> predicates) {

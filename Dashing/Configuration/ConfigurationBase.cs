@@ -91,12 +91,12 @@
             this.mappedTypes = new Dictionary<Type, IMap>();
             
             var eventListeners = new ObservableCollection<IEventListener>();
-            eventListeners.CollectionChanged += eventListeners_CollectionChanged;
+            eventListeners.CollectionChanged += this.EventListenersCollectionChanged;
             this.EventListeners = eventListeners;
             this.EventHandlers = new EventHandlers(this.EventListeners);
         }
 
-        void eventListeners_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+        private void EventListenersCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
             // let's make this real simple, just invalidate the eventhandlers property
             this.EventHandlers.Invalidate(this.EventListeners);
         }

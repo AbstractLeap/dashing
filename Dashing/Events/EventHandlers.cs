@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.Events {
+    using System.Collections.Generic;
 
-namespace Dashing.Events {
     public class EventHandlers {
-        public EventHandlers(ICollection<IEventListener> listeners) {
-            this.UpdateListeners(listeners);
+        public EventHandlers(IEnumerable<IEventListener> listeners) {
             this.PreInsertListeners = new List<IOnPreInsertEventListener>();
             this.PreSaveListeners = new List<IOnPreSaveEventListener>();
             this.PreDeleteListeners = new List<IOnPreDeleteEventListener>();
             this.PostInsertListeners = new List<IOnPostInsertEventListener>();
             this.PostSaveListeners = new List<IOnPostSaveEventListener>();
             this.PostDeleteListeners = new List<IOnPostDeleteEventListener>();
+            this.UpdateListeners(listeners);
         }
 
         public IList<IOnPreInsertEventListener> PreInsertListeners { get; private set; }
@@ -28,11 +24,11 @@ namespace Dashing.Events {
 
         public IList<IOnPostDeleteEventListener> PostDeleteListeners { get; private set; }
 
-        internal void Invalidate(ICollection<IEventListener> listeners) {
+        internal void Invalidate(IEnumerable<IEventListener> listeners) {
             this.UpdateListeners(listeners);
         }
 
-        private void UpdateListeners(ICollection<IEventListener> listeners) {
+        private void UpdateListeners(IEnumerable<IEventListener> listeners) {
             foreach (var listener in listeners) {
                 if (listener is IOnPreInsertEventListener) {
                     this.PreInsertListeners.Add(listener as IOnPreInsertEventListener);

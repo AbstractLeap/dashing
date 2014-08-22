@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dashing.Events {
+﻿namespace Dashing.Events {
     public interface IOnPostInsertEventListener : IEventListener {
         void OnPostInsert(object entity, ISession session);
     }

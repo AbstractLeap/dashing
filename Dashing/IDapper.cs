@@ -99,7 +99,6 @@ namespace Dashing {
         /// </summary>
         IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, dynamic param = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null);
 
-
         /// <summary>
         /// Perform a multi mapping query with 7 input parameters
         /// </summary>

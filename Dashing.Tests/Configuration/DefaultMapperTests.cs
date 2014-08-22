@@ -202,25 +202,25 @@
 
         [Fact]
         public void NullableIntColumnIsNullable() {
-            var property = this.MapAndGetProperty<NullableMappingsTestClass, int?>(u => u.nullableInt);
+            var property = this.MapAndGetProperty<NullableMappingsTestClass, int?>(u => u.NullableInt);
             Assert.True(property.IsNullable);
         }
 
         [Fact]
         public void NotNullableIntColumnIsNotNullable() {
-            var property = this.MapAndGetProperty<NullableMappingsTestClass, int>(u => u.notNullableInt);
+            var property = this.MapAndGetProperty<NullableMappingsTestClass, int>(u => u.NotNullableInt);
             Assert.False(property.IsNullable);
         }
 
         [Fact]
         public void NullableDecimalColumnIsNullable() {
-            var property = this.MapAndGetProperty<NullableMappingsTestClass, decimal?>(u => u.nullableDecimal);
+            var property = this.MapAndGetProperty<NullableMappingsTestClass, decimal?>(u => u.NullableDecimal);
             Assert.True(property.IsNullable);
         }
 
         [Fact]
         public void NotNullableDecimalColumnIsNotNullable() {
-            var property = this.MapAndGetProperty<NullableMappingsTestClass, decimal>(u => u.notNullableDecimal);
+            var property = this.MapAndGetProperty<NullableMappingsTestClass, decimal>(u => u.NotNullableDecimal);
             Assert.False(property.IsNullable);
         }
 
@@ -291,13 +291,13 @@
         }
 
         private class NullableMappingsTestClass {
-            public virtual int? nullableInt { get; set; }
+            public virtual int? NullableInt { get; set; }
 
-            public virtual int notNullableInt { get; set; }
+            public virtual int NotNullableInt { get; set; }
 
-            public virtual decimal? nullableDecimal { get; set; }
+            public virtual decimal? NullableDecimal { get; set; }
 
-            public virtual decimal notNullableDecimal { get; set; }
+            public virtual decimal NotNullableDecimal { get; set; }
         }
     }
 }

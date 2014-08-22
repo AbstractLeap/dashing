@@ -81,7 +81,8 @@
             if (!this.constantChecker.HasParams) {
                 var value = Expression.Lambda(b).Compile().DynamicInvoke(null);
                 this.AddParameter(value);
-            } else {
+            } 
+            else {
                 // left hand side of expression
                 this.Sql.Append("(");
                 this.isTopOfBinary = true;
@@ -123,7 +124,8 @@
                             this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                             this.chainedColumnType = m.Member.DeclaringType;
                             this.getForeignKeyName = false;
-                        } else {
+                        }
+                        else {
                             this.chainedEntityNames.Push(m.Member.Name);
                         }
                     } else {
@@ -147,6 +149,7 @@
                             }
                         }
                     }
+
                     break;
 
                 case ExpressionType.Constant:
@@ -325,7 +328,8 @@
             if (this.isClosureConstantAccess) {
                 if (this.isChainedMemberAccess) {
                     value = Expression.Lambda(this.chainedMemberAccessExpression).Compile().DynamicInvoke(null);
-                } else {
+                }
+                else {
                     var currentType = c.Value.GetType();
                     while (currentType != null) {
                         var field = currentType.GetField(this.constantMemberAccessName, BindingFlags.Public | BindingFlags.Instance);
@@ -344,7 +348,8 @@
                         currentType = currentType.BaseType;
                     }
                 }
-            } else {
+            }
+            else {
                 value = c.Value;
             }
 
@@ -358,7 +363,7 @@
                     value = this.configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);
                 }
 
-                AddParameter(value);
+                this.AddParameter(value);
             }
 
             return c;
