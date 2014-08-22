@@ -77,26 +77,25 @@ namespace Dashing.Tests {
             return this.BeginSession();
         }
 
-        protected MockConfiguration Add<T>() {
+        public MockConfiguration Add<T>() {
             ConfigurationHelper.Add<T>(this, this.mappedTypes);
             return this;
         }
 
-        protected MockConfiguration Add(IEnumerable<Type> types) {
+        public MockConfiguration Add(IEnumerable<Type> types) {
             ConfigurationHelper.Add(this, this.mappedTypes, types);
             return this;
         }
 
-        protected MockConfiguration AddNamespaceOf<T>() {
+        public MockConfiguration AddNamespaceOf<T>() {
             ConfigurationHelper.AddNamespaceOf<T>(this, this.mappedTypes);
             return this;
         }
 
-        protected IMap<T> Setup<T>() {
+        public IMap<T> Setup<T>() {
             return ConfigurationHelper.Setup<T>(this, this.mappedTypes);
         }
-
-
+        
         public ICollection<Events.IEventListener> EventListeners {
             get { throw new NotImplementedException(); }
         }
