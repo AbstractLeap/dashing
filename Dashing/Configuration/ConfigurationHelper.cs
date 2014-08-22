@@ -54,7 +54,7 @@ namespace Dashing.Configuration {
             }
 
             // definitely not mapped
-            throw new ArgumentException("That type is not mapped");
+            throw new ArgumentException(string.Format("Type {0} is not mapped", type.Name));
         }
 
         public static bool HasMap(Type type, IDictionary<Type, IMap> mappedTypes, CodeGeneratorConfig config) {
