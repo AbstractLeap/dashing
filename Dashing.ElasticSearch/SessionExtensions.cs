@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Nest;
-using Dashing;
+﻿namespace Dashing.ElasticSearch {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-namespace Dashing.ElasticSearch {
+    using Nest;
+
     public static class SessionExtensions {
-        public static IClientFactory ClientFactory { get; set; }
+        public static IElasticClientFactory ElasticClientFactory { get; set; }
 
         public static IEnumerable<T> Elastic<T>(this ISession session, Func<SearchDescriptor<T>, SearchDescriptor<T>> descriptor) where T : class {
-            if (ClientFactory == null) {
-                throw new NullReferenceException("The ClientFactory must be explicitly set prior to use");
+            // TODO: this is a bad pattern, we should put some dependency resolution into Dashing so that you can ask the Session for a component
+            if (ElasticClientFactory == null) {
+                throw new NullReferenceException(
+                    "The ClientFactory must be explicitly set prior to use");
             }
 
-            var results = ClientFactory.Create().Search<T>(descriptor);
-            foreach (var result in results.Hits) {
-                yield return result.Source;
-            }
+            return ElasticClientFactory.Create().Search(descriptor).Hits.Select(result => result.Source);
         }
     }
 }

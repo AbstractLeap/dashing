@@ -53,10 +53,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicallyAuthenticatedHttpConnection.cs" />
+    <Compile Include="ElasticClientFactory.cs" />
+    <Compile Include="IElasticClientFactory.cs" />
     <Compile Include="SessionExtensions.cs" />
-    <Compile Include="SingletonClientFactory.cs" />
     <Compile Include="ElasticSearchEventListener.cs" />
-    <Compile Include="IClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

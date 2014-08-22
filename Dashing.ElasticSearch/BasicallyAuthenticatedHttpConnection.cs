@@ -1,26 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Elasticsearch.Net.Connection;
+﻿namespace Dashing.ElasticSearch {
+    using System;
+    using System.Net;
+    using System.Text;
 
-namespace Dashing.ElasticSearch {
+    using Elasticsearch.Net.Connection;
+    using Elasticsearch.Net.Connection.Configuration;
+
     public class BasicallyAuthenticatedHttpConnection : HttpConnection {
-        private string username;
-        private string password;
-        public BasicallyAuthenticatedHttpConnection(string username, string password, IConnectionConfigurationValues settings)
+        private readonly string authorizationHeader;
+
+        public BasicallyAuthenticatedHttpConnection(
+            string username, string password, IConnectionConfigurationValues settings)
             : base(settings) {
-                this.username = username;
-                this.password = password;
+            this.authorizationHeader = string.Format("Basic {0}", Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + password)));
         }
 
-        protected override System.Net.HttpWebRequest CreateHttpWebRequest(Uri uri, string method, byte[] data, Elasticsearch.Net.Connection.Configuration.IRequestConfiguration requestSpecificConfig) {
+        protected override HttpWebRequest CreateHttpWebRequest(Uri uri, string method, byte[] data, IRequestConfiguration requestSpecificConfig) {
             var request = base.CreateHttpWebRequest(uri, method, data, requestSpecificConfig);
-            request.Credentials = new NetworkCredential(this.username, this.password);
-            request.Headers["Authorization"] =
-                "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(request.RequestUri.UserInfo));
+            request.Headers["Authorization"] = this.authorizationHeader;
             return request;
         }
     }
