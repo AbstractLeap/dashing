@@ -9,14 +9,16 @@
         ///     Return a typed map for the typeparameter specified
         /// </summary>
         /// <typeparam name="T">Type to be mapped</typeparam>
+        /// <param name="configuration">Configuration that the map belongs to</param>
         /// <returns>Map for the type</returns>
-        IMap<T> MapFor<T>();
+        IMap<T> MapFor<T>(IConfiguration configuration);
 
         /// <summary>
         ///     Return a generic map for the type specified
         /// </summary>
         /// <param name="type">Type to be mapped</param>
+        /// <param name="configuration">Configuration that the map belongs to</param>
         /// <returns>Map for the type</returns>
-        IMap MapFor(Type type);
+        IMap MapFor(Type type, IConfiguration configuration);
     }
 }
