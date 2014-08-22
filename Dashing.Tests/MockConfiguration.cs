@@ -95,5 +95,14 @@ namespace Dashing.Tests {
         protected IMap<T> Setup<T>() {
             return ConfigurationHelper.Setup<T>(this, this.mappedTypes);
         }
+
+
+        public ICollection<Events.IEventListener> EventListeners {
+            get { throw new NotImplementedException(); }
+        }
+
+        public Events.EventHandlers EventHandlers {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

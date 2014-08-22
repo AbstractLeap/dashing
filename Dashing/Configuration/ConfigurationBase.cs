@@ -1,12 +1,16 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
+    using System.Linq;
+    using System.Reflection;
 
     using Dashing.CodeGeneration;
     using Dashing.Engine;
+    using Dashing.Events;
 
     public abstract class ConfigurationBase : IConfiguration {
         private readonly ConnectionStringSettings connectionStringSettings;
@@ -43,6 +47,13 @@
             }
         }
 
+        public ICollection<IEventListener> EventListeners {
+            get;
+            private set;
+        }
+
+        public EventHandlers EventHandlers { get; private set; }
+
         public bool GetIsTrackedByDefault { get; set; }
 
         protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
@@ -78,6 +89,16 @@
             this.sessionFactory = sessionFactory;
             this.codeGenerator = codeGenerator;
             this.mappedTypes = new Dictionary<Type, IMap>();
+            
+            var eventListeners = new ObservableCollection<IEventListener>();
+            eventListeners.CollectionChanged += eventListeners_CollectionChanged;
+            this.EventListeners = eventListeners;
+            this.EventHandlers = new EventHandlers(this.EventListeners);
+        }
+
+        void eventListeners_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+            // let's make this real simple, just invalidate the eventhandlers property
+            this.EventHandlers.Invalidate(this.EventListeners);
         }
 
         public IMap<T> GetMap<T>() {

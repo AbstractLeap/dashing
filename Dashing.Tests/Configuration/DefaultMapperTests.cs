@@ -201,6 +201,30 @@
         }
 
         [Fact]
+        public void NullableIntColumnIsNullable() {
+            var property = this.MapAndGetProperty<NullableMappingsTestClass, int?>(u => u.nullableInt);
+            Assert.True(property.IsNullable);
+        }
+
+        [Fact]
+        public void NotNullableIntColumnIsNotNullable() {
+            var property = this.MapAndGetProperty<NullableMappingsTestClass, int>(u => u.notNullableInt);
+            Assert.False(property.IsNullable);
+        }
+
+        [Fact]
+        public void NullableDecimalColumnIsNullable() {
+            var property = this.MapAndGetProperty<NullableMappingsTestClass, decimal?>(u => u.nullableDecimal);
+            Assert.True(property.IsNullable);
+        }
+
+        [Fact]
+        public void NotNullableDecimalColumnIsNotNullable() {
+            var property = this.MapAndGetProperty<NullableMappingsTestClass, decimal>(u => u.notNullableDecimal);
+            Assert.False(property.IsNullable);
+        }
+
+        [Fact]
         public void StringColumnIsNullable() {
             var property = this.MapAndGetProperty<Post, string>(u => u.Content);
             Assert.True(property.IsNullable);
@@ -264,6 +288,16 @@
             var map = target.MapFor<T>(this.mockConfiguration.Object);
             Assert.NotNull(map);
             return map;
+        }
+
+        private class NullableMappingsTestClass {
+            public virtual int? nullableInt { get; set; }
+
+            public virtual int notNullableInt { get; set; }
+
+            public virtual decimal? nullableDecimal { get; set; }
+
+            public virtual decimal notNullableDecimal { get; set; }
         }
     }
 }
