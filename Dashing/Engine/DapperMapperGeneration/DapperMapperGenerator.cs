@@ -26,7 +26,6 @@
         public Delegate GenerateCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
             // note that we can only fetch one collection at a time
             // so, if there's more than one in the SelectQuery they should be split out prior to calling this
-            bool visitedCollection = false;
             var tt = typeof(T);
             var rootType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
             var dictionaryParam = Expression.Parameter(typeof(IDictionary<,>).MakeGenericType(typeof(object), rootType), "dict");
@@ -118,7 +117,7 @@
             return ex;
         }
 
-        [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."),SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "Reviewed. Suppression is OK here.")]
         private static ConditionalExpression InitialiseCollectionAndAddChild(
             ParameterExpression parentParam,
             FetchNode childNode,
@@ -180,6 +179,7 @@
             return Expression.Lambda(Expression.Lambda(Expression.Block(statements), parameters), rootDictionaryParam, otherDictionaryParam).Compile();
         }
 
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "Reviewed. Suppression is OK here.")]
         private void VisitMultiCollectionTree<T>(FetchNode node, IList<Expression> statements, IList<ParameterExpression> parameters, ParameterExpression otherDictionaryParam, ref int collectionFetchParamCounter) {
             var parentParam = parameters.Last();
             foreach (var child in node.Children) {
@@ -204,7 +204,7 @@
                         otherDictionaryParam,
                         "Item",
                         Expression.Constant(childParam.Name));
-                    var pkPropertyExpr = Expression.Property(
+                    var primaryKeyProperty = Expression.Property(
                         childParam,
                         child.Value.Column.ChildColumn.Map.PrimaryKey.Name);
                     var ex =
@@ -218,17 +218,17 @@
                                     typeof(IDictionary<,>).MakeGenericType(
                                         typeof(object),
                                         typeof(object)).GetMethod("ContainsKey"),
-                                    Expression.Convert(pkPropertyExpr, typeof(object))),
+                                    new Expression[] { Expression.Convert(primaryKeyProperty, typeof(object)) }),
                                 Expression.Assign(
                                     childParam,
-                                    Expression.Convert(Expression.Property(dictAccessExpr, "Item", Expression.Convert(pkPropertyExpr, typeof(object))), childParam.Type)),
+                                    Expression.Convert(Expression.Property(dictAccessExpr, "Item", Expression.Convert(primaryKeyProperty, typeof(object))), childParam.Type)),
                                 Expression.Block(
                                     Expression.Call(
                                         dictAccessExpr,
                                         typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object)).GetMethods()
                                                             .First(
                                                                 m => m.Name == "Add" && m.GetParameters().Count() == 2),
-                                        Expression.Convert(pkPropertyExpr, typeof(object)),
+                                        Expression.Convert(primaryKeyProperty, typeof(object)),
                                         childParam),
                                     Expression.Call(
                                         Expression.Property(parentParam, child.Value.Column.Name),

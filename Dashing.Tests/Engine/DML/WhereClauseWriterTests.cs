@@ -23,33 +23,30 @@
 
         [Fact]
         public void TwoWhereClausesStack() {
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
-
+            // assemble
+            var target = MakeTarget();
             Expression<Func<Post, bool>> whereClause1 = p => p.PostId > 0;
-            Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
+            Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
-            var foo = new List<Expression<System.Func<Post, bool>>> {
-                                                                        whereClause1,
-                                                                        whereClause2
-                                                                    };
+            // act
+            var result = target.GenerateSql(new List<Expression<Func<Post, bool>>> { whereClause1,  whereClause2 }, null);
 
-            var result = whereClauseWriter.GenerateSql(foo, null);
+            // assert
             Debug.Write(result.Sql);
             Assert.Equal(" where ([PostId] > @l_1) and ([PostId] < @l_2)", result.Sql);
         }
 
         [Fact]
         public void TwoWhereClausesParametersOkay() {
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+            // assemble
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> whereClause1 = p => p.PostId > 0;
+            Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
-            Expression<System.Func<Post, bool>> whereClause1 = p => p.PostId > 0;
-            Expression<System.Func<Post, bool>> whereClause2 = p => p.PostId < 2;
+            // act
+            var result = target.GenerateSql(new List<Expression<Func<Post, bool>>> { whereClause1, whereClause2 }, null);
 
-            var foo = new List<Expression<System.Func<Post, bool>>>();
-            foo.Add(whereClause1);
-            foo.Add(whereClause2);
-
-            var result = whereClauseWriter.GenerateSql(foo, null);
+            // assert
             Debug.Write(result.Sql);
             Assert.Equal(0, result.Parameters.GetValue("l_1"));
             Assert.Equal(2, result.Parameters.GetValue("l_2"));
@@ -58,12 +55,12 @@
         [Fact]
         public void UsesPrimaryKeyWhereEntityEqualsEntity() {
             // assemble
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
-            var user = new User() { UserId = 1 };
-            Expression<System.Func<User, bool>> whereClause = u => u == user;
+            var target = MakeTarget();
+            var user = new User { UserId = 1 };
+            Expression<Func<User, bool>> whereClause = u => u == user;
 
             // act
-            var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
+            var actual = target.GenerateSql(new[] { whereClause }, null);
 
             // assert
             Assert.Equal(" where ([UserId] = @l_1)", actual.Sql);
@@ -72,14 +69,14 @@
         [Fact]
         public void WhereEntityEqualsTrackedEntity() {
             // assemble
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+            var target = MakeTarget();
             var post = this.codeManager.CreateTrackingInstance<Post>();
             post.PostId = 1;
             this.codeManager.TrackInstance(post);
-            Expression<System.Func<Post, bool>> whereClause = p => p == post;
+            Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
-            var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
+            var actual = target.GenerateSql(new[] { whereClause }, null);
 
             // assert
             Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
@@ -89,37 +86,74 @@
         [Fact]
         public void WhereEntityEqualsGeneratedEntity() {
             // assemble
-            var whereClauseWriter = new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+            var target = MakeTarget();
             var post = this.codeManager.CreateForeignKeyInstance<Post>();
             post.PostId = 1;
-            Expression<System.Func<Post, bool>> whereClause = p => p == post;
+            Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
-            var actual = whereClauseWriter.GenerateSql(new[] { whereClause }, null);
+            var actual = target.GenerateSql(new[] { whereClause }, null);
 
             // assert
             Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
             Assert.Equal(typeof(int), actual.Parameters.GetValue("l_1").GetType());
         }
 
-        private static IConfiguration MakeConfig(bool withIgnore = false) {
-            if (withIgnore) {
-                return new CustomConfigWithIgnore();
+        private class WherePropertyIsDefinedOnInterfaceDemonstrator<T>
+            where T : IEnableable {
+            private readonly WhereClauseWriter writer;
+
+            private readonly IList<Expression<Func<T, bool>>> whereClauses;
+
+            public WherePropertyIsDefinedOnInterfaceDemonstrator(WhereClauseWriter writer) {
+                this.writer = writer;
+                this.whereClauses = new List<Expression<Func<T, bool>>> {
+                    z => z.IsEnabled
+                };
             }
 
+            public SelectWriterResult Execute() {
+                return this.writer.GenerateSql(this.whereClauses, null);
+            }
+        }
+
+        [Fact]
+        public void WherePropertyIsDefinedOnInterface() {
+            // assemble
+            var target = MakeTarget();
+            Expression<Func<User, bool>> whereClause = u => u.IsEnabled;
+
+            // act
+            var actual = target.GenerateSql(new[] { whereClause }, null);
+
+            // assert
+            Assert.Equal(" where [IsEnabled]", actual.Sql);
+        }
+
+        [Fact]
+        public void WherePredicateIsDefinedOnInterface() {
+            // assemble
+            var target = MakeTarget();
+
+            // act
+            var demonstrator = new WherePropertyIsDefinedOnInterfaceDemonstrator<User>(target);
+            var actual = demonstrator.Execute();
+
+            // assert
+            Assert.Equal(" where [IsEnabled]", actual.Sql);
+        }
+
+        private static WhereClauseWriter MakeTarget() {
+            return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
+        }
+
+        private static IConfiguration MakeConfig() {
             return new CustomConfig();
         }
 
         private class CustomConfig : MockConfiguration {
             public CustomConfig() {
                 this.AddNamespaceOf<Post>();
-            }
-        }
-
-        private class CustomConfigWithIgnore : MockConfiguration {
-            public CustomConfigWithIgnore() {
-                this.AddNamespaceOf<Post>();
-                this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }
         }
     }

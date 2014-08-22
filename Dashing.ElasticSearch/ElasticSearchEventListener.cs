@@ -1,47 +1,61 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Dashing.Events;
-using Nest;
+﻿namespace Dashing.ElasticSearch {
+    using System;
+    using System.Collections.Generic;
 
-namespace Dashing.ElasticSearch {
-    public class ElasticSearchEventListener : IOnPostInsertEventListener, IOnPostSaveEventListener, IOnPostDeleteEventListener {
-        private IClientFactory factory;
+    using Dashing.Events;
 
-        private HashSet<Type> types;
+    using Nest;
 
-        public ElasticSearchEventListener(IClientFactory factory) {
+    public class ElasticSearchEventListener : IOnPostInsertEventListener, 
+                                              IOnPostSaveEventListener, 
+                                              IOnPostDeleteEventListener {
+        private readonly IElasticClientFactory factory;
+
+        private readonly HashSet<Type> indexedTypes;
+
+        public ElasticSearchEventListener(IElasticClientFactory factory) {
             this.factory = factory;
-            this.types = new HashSet<Type>();
+            this.indexedTypes = new HashSet<Type>();
         }
 
         public void AddTypeToIndex(Type type) {
-            this.types.Add(type);
-        }
-
-        public void AddTypesToIndex(IEnumerable<Type> types) {
-            foreach (var type in types) {
-                this.AddTypeToIndex(type);
-            }
+            this.indexedTypes.Add(type);
         }
 
         public void OnPostDelete(object entity, ISession session) {
-            if (this.types.Contains(entity.GetType())) {
-                this.factory.Create().DeleteAsync(session.Configuration.GetMap(entity.GetType()).GetPrimaryKeyValue(entity).ToString(), d => d.Type(entity.GetType().Name)).Wait();
-            }
+            this.MaybeDelete(entity, session);
         }
 
         public void OnPostSave(object entity, ISession session) {
-            if (this.types.Contains(entity.GetType())) {
-                this.factory.Create().IndexAsync(entity, i => i.Type(entity.GetType().Name).Id(session.Configuration.GetMap(entity.GetType()).GetPrimaryKeyValue(entity).ToString())).Wait();
-            }
+            this.MaybeIndex(entity, session);
         }
 
         public void OnPostInsert(object entity, ISession session) {
-            if (this.types.Contains(entity.GetType())) {
-                this.factory.Create().IndexAsync(entity, i => i.Type(entity.GetType().Name).Id(session.Configuration.GetMap(entity.GetType()).GetPrimaryKeyValue(entity).ToString())).Wait();
+            this.MaybeIndex(entity, session);
+        }
+
+        private void MaybeIndex(object entity, ISession session) {
+            if (!this.indexedTypes.Contains(entity.GetType())) {
+                return;
             }
+
+            this.factory.Create().Index(entity, i => i.Type(TypeOf(entity)).Id(IdOf(entity, session)));
+        }
+
+        private void MaybeDelete(object entity, ISession session) {
+            if (!this.indexedTypes.Contains(entity.GetType())) {
+                return;
+            }
+
+            this.factory.Create().Delete(IdOf(entity, session), d => d.Type(TypeOf(entity)));
+        }
+
+        private static string IdOf(object entity, ISession session) {
+            return session.Configuration.GetMap(entity.GetType()).GetPrimaryKeyValue(entity).ToString();
+        }
+
+        private static string TypeOf(object entity) {
+            return entity.GetType().Name;
         }
     }
 }

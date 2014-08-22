@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing.ElasticSearch</id>
-        <version>0.0.1</version>
+        <version>0.0.2</version>
         <title>Dashing ElasticSearch plugin</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>Adds full text search capabilities to Dashing using ElasticSearch</summary>
-        <releaseNotes>* 0.0.1 - Our very first release. Be gentle.</releaseNotes>
+        <releaseNotes>* 0.0.2 - Matches Dashing 0.0.20
+* 0.0.1 - Our very first release. Be gentle.</releaseNotes>
         <copyright>© Polylytics Limited, 2014</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>

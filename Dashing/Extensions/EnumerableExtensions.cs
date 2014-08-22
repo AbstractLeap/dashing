@@ -6,24 +6,21 @@
     using Dashing.Configuration;
 
     public static class EnumerableExtensions {
-        public static IList<IMap> OrderTopologically(this IEnumerable<IMap> maps) {
-            // NOTE: In terms of efficiency this isn't the best. If it's ever used in a time critical piece of code
-            // I'd suggest re-writing. However, in terms of being able to understand it it's pretty simple i.e.
-            // iterate over each map, see if it's at the bottom of the tree (or if everything underneath is already mapped)
-            // and then add in. Otherwise skip it and come back to later.
-
+        /// <remarks>
+        /// In terms of efficiency this isn't the best. If it's ever used in a time critical piece of code
+        /// I'd suggest re-writing. However, in terms of being able to understand it it's pretty simple i.e.
+        /// iterate over each map, see if it's at the bottom of the tree (or if everything underneath is already mapped)
+        /// and then add in. Otherwise skip it and come back to later.
+        /// </remarks>
+        public static IList<IMap> OrderTopologically(this IEnumerable<IMap> enumerableOfMaps) {
+            var maps = enumerableOfMaps as List<IMap> ?? enumerableOfMaps.ToList();
             var result = new List<IMap>();
             var skippedMaps = new List<IMap>();
             maps = maps.ToList();
-            foreach (var map in maps) {
-                // if already processed ignore
-                if (result.Contains(map)) {
-                    continue;
-                }
-
+            foreach (var map in maps.Where(map => !result.Contains(map))) {
                 // if has collection properties or referenced by something else then skip
-                if ((map.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map)))
-                    || maps.Any(m => !result.Contains(m) &&  m.Columns.Any(c => c.Value.Relationship == RelationshipType.ManyToOne && c.Value.Type == map.Type))) {
+                if (map.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map))
+                    || maps.Any(m => !result.Contains(m) && m.Columns.Any(c => c.Value.Relationship == RelationshipType.ManyToOne && c.Value.Type == map.Type))) {
                     skippedMaps.Add(map);
                     continue;
                 }
@@ -40,7 +37,7 @@
                     continue;
                 }
 
-                if (!((map.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map)))
+                if (!(map.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map))
                     || maps.Any(m => !result.Contains(m) && m.Columns.Any(c => c.Value.Relationship == RelationshipType.ManyToOne && c.Value.Type == map.Type)))) {
                     AddToResult(map, result, skippedMaps, maps);
                     skippedMaps.Remove(map);
@@ -57,19 +54,13 @@
             return result;
         }
 
-        private static void AddToResult(IMap map, IList<IMap> result, IList<IMap> skippedMaps, IEnumerable<IMap> maps) {
+        private static void AddToResult(IMap map, IList<IMap> result, IList<IMap> skippedMaps, List<IMap> maps) {
             result.Add(map);
             
             // now check for all relationship properties
-            foreach (var relatedMap in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne).Select(c => c.Value.ParentMap)) {
-                // if already mapped ignore
-                if (result.Contains(relatedMap)) {
-                    // this should come after this map so let's move it
-                    continue;
-                }
-
+            foreach (var relatedMap in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne).Select(c => c.Value.ParentMap).Where(relatedMap => !result.Contains(relatedMap))) {
                 // if has collection properties that aren't the map ignore
-                if ((relatedMap.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map)))
+                if (relatedMap.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map))
                     || maps.Any(m => !result.Contains(m) && m.Columns.Any(c => c.Value.Relationship == RelationshipType.ManyToOne && c.Value.Type == relatedMap.Type))) {
                     skippedMaps.Add(relatedMap);
                     continue;

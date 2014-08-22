@@ -90,6 +90,7 @@
                     sql.Append(whereSql);
                     sql.Append(" union all ");
                 }
+
                 sql.Remove(sql.Length - 11, 11);
                 sql.Append(") as u");
             }
@@ -186,12 +187,10 @@
                 var hasSplit = collectionFetchesAtThisLevel > 1 || numberOfBranchesWithMultiFetches > 1;
                 if (hasSplit) {
                     // we need to generate a new sub query for the new branch
-                    splitProcessed = false;
                     var currentStringBuilderIdx = currentCountOfSubQueries - 1;
-                    foreach (var child in node.Children) {
-                        var childNode = child.Value;
-                        AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, currentStringBuilderIdx, splitOns, childNode);
-                        AddNodeResult result = this.VisitMultiCollectionTree(childNode, outerColumns, innerColumnSqls, innerTableSqls);
+                    foreach (var childNode in node.Children.Values) {
+                        this.AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, currentStringBuilderIdx, splitOns, childNode);
+                        var result = this.VisitMultiCollectionTree(childNode, outerColumns, innerColumnSqls, innerTableSqls);
                         if (!(childNode.ContainedCollectionfetchesCount == 0 && childNode.Column.Relationship == RelationshipType.ManyToOne)) {
                             currentStringBuilderIdx++;
                         }
@@ -209,7 +208,7 @@
             // simply add null to the other inner queries and add column names to these queries
             foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
                 var childNode = child.Value;
-                AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, innerTableSqls.Count - 1, splitOns, childNode);
+                this.AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, innerTableSqls.Count - 1, splitOns, childNode);
                 
                 var childResult = this.VisitMultiCollectionTree(childNode, outerColumns, innerColumnSqls, innerTableSqls);
                 if (childNode.IsFetched) {
@@ -317,6 +316,7 @@
                 foreach (var collectionFetch in selectQuery.CollectionFetches) {
                     var entityNames = new Stack<string>();
                     var currentNode = rootNode;
+
                     // start at the top of the stack, pop the expression off and do as above
                     while (collectionFetch.Value.Count > 0) {
                         var lambdaExpr = collectionFetch.Value.Pop() as LambdaExpression;

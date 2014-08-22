@@ -81,7 +81,8 @@
             if (!this.constantChecker.HasParams) {
                 var value = Expression.Lambda(b).Compile().DynamicInvoke(null);
                 this.AddParameter(value);
-            } else {
+            } 
+            else {
                 // left hand side of expression
                 this.Sql.Append("(");
                 this.isTopOfBinary = true;
@@ -115,99 +116,118 @@
 
         protected override Expression VisitMemberAccess(MemberExpression m) {
             this.isTopOfBinary = false;
-            if (m.Expression.NodeType == ExpressionType.MemberAccess) {
-                // in a chain of member access i.e. e.A.B.C == Z this is (e.A).B or (e.A.B).C
-                if (this.isChainedMemberAccess) {
-                    if (this.getForeignKeyName) {
-                        // at this point let's fetch the foreign key name
-                        this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
-                        this.chainedColumnType = m.Member.DeclaringType;
-                        this.getForeignKeyName = false;
-                    } else {
-                        this.chainedEntityNames.Push(m.Member.Name);
-                    }
-                } else {
-                    this.isChainedMemberAccess = true;
-                    this.chainedMemberAccessExpression = m;
-                    var propInfo = m.Member as PropertyInfo;
-
-                    if (propInfo != null && !propInfo.PropertyType.IsValueType && this.configuration.HasMap(propInfo.PropertyType)) {
-                        // here we're doing a e.Entity == entity so get primary key underlying
-                        this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
-                        this.chainedColumnType = m.Member.ReflectedType;
-                        this.chainedEntityNames.Push(m.Member.Name);
-                    } else if (this.configuration.HasMap(m.Member.DeclaringType)) {
-                        // we want to check for a primary key here because in that case we can put the where clause on the referencing object
-                        if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name) {
-                            this.getForeignKeyName = true;
-                        } else {
-                            // we need this column name
+            switch (m.Expression.NodeType) {
+                case ExpressionType.MemberAccess:
+                    if (this.isChainedMemberAccess) {
+                        if (this.getForeignKeyName) {
+                            // at this point let's fetch the foreign key name
                             this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
                             this.chainedColumnType = m.Member.DeclaringType;
+                            this.getForeignKeyName = false;
                         }
-                    }
-                }
-            } else if (m.Expression.NodeType == ExpressionType.Constant) {
-                // we're getting a constant value out of an expression i.e. e.A == z.Prop we're doing z.Prop
-                this.isClosureConstantAccess = true;
-                this.constantMemberAccessName = m.Member.Name;
-            } else if (m.Expression.NodeType == ExpressionType.Parameter) {
-                // at the bottom of expression i.e. e.A.B.C == Z we're at e.A
-                if (this.isChainedMemberAccess) {
-                    if (this.getForeignKeyName) {
-                        // we're at the bottom and we need to reference the foreign key column name
-                        if (this.rootNode != null && this.rootNode.Alias.Length > 0) {
-                            this.Sql.Append(this.rootNode.Alias + ".");
+                        else {
+                            this.chainedEntityNames.Push(m.Member.Name);
                         }
-
-                        this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName);
                     } else {
-                        // we need to find the alias
-                        // we've got chained entity names and the root node
-                        if (this.rootNode == null) {
-                            this.rootNode = new FetchNode { Alias = "t" };
-                        }
+                        this.isChainedMemberAccess = true;
+                        this.chainedMemberAccessExpression = m;
+                        var propInfo = m.Member as PropertyInfo;
 
-                        this.chainedEntityNames.Push(m.Member.Name);
-                        var currentNode = this.rootNode;
-                        var declaringType = m.Member.DeclaringType;
-                        var numNames = this.chainedEntityNames.Count;
-                        for (int i = 0; i < numNames; ++i) {
-                            var propName = this.chainedEntityNames.Pop();
-                            if (!currentNode.Children.ContainsKey(propName)) {
-                                // create the new node with isFetched = false
-                                var newNode = new FetchNode {
-                                    Alias = "t_" + ++this.aliasCounter,
-                                    IsFetched = false,
-                                    Parent = currentNode,
-                                    Column = this.configuration.GetMap(declaringType).Columns[propName]
-                                };
-                                currentNode.Children.Add(propName, newNode);
+                        if (propInfo != null && !propInfo.PropertyType.IsValueType && this.configuration.HasMap(propInfo.PropertyType)) {
+                            // here we're doing a e.Entity == entity so get primary key underlying
+                            this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
+                            this.chainedColumnType = m.Member.ReflectedType;
+                            this.chainedEntityNames.Push(m.Member.Name);
+                        } else if (this.configuration.HasMap(m.Member.DeclaringType)) {
+                            // we want to check for a primary key here because in that case we can put the where clause on the referencing object
+                            if (this.configuration.GetMap(m.Member.DeclaringType).PrimaryKey.Name == m.Member.Name) {
+                                this.getForeignKeyName = true;
+                            } else {
+                                // we need this column name
+                                this.chainedColumnName = this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName;
+                                this.chainedColumnType = m.Member.DeclaringType;
                             }
-
-                            currentNode = currentNode.Children[propName];
-                            declaringType = currentNode.Column.Type;
                         }
-
-                        if (!this.insideSubQuery) {
-                            this.Sql.Append(currentNode.Alias + ".");
-                        }
-
-                        this.dialect.AppendQuotedName(this.Sql, this.chainedColumnName);
-                    }
-                } else {
-                    if (this.rootNode != null && this.rootNode.Alias.Length > 0) {
-                        this.Sql.Append(this.rootNode.Alias + ".");
                     }
 
-                    this.dialect.AppendQuotedName(this.Sql, this.configuration.GetMap(m.Member.DeclaringType).Columns[m.Member.Name].DbName);
-                }
+                    break;
+
+                case ExpressionType.Constant:
+                    this.isClosureConstantAccess = true;
+                    this.constantMemberAccessName = m.Member.Name;
+                    break;
+
+                case ExpressionType.Convert:
+                    this.VisitMemberExpressionParameter(m, ((UnaryExpression)m.Expression).Operand.Type);
+                    break;
+
+                case ExpressionType.Parameter:
+                    this.VisitMemberExpressionParameter(m, m.Member.DeclaringType);
+                    break;
             }
 
             var expr = base.VisitMemberAccess(m);
             this.isChainedMemberAccess = false;
             this.isClosureConstantAccess = false;
             return expr;
+        }
+
+        private void VisitMemberExpressionParameter(MemberExpression m, Type declaringType) {
+            if (this.isChainedMemberAccess) {
+                if (this.getForeignKeyName) {
+                    // we're at the bottom and we need to reference the foreign key column name
+                    if (this.rootNode != null && this.rootNode.Alias.Length > 0) {
+                        this.Sql.Append(this.rootNode.Alias + ".");
+                    }
+
+                    this.dialect.AppendQuotedName(
+                        this.Sql,
+                        this.configuration.GetMap(declaringType).Columns[m.Member.Name].DbName);
+                }
+                else {
+                    // we need to find the alias
+                    // we've got chained entity names and the root node
+                    if (this.rootNode == null) {
+                        this.rootNode = new FetchNode {
+                            Alias = "t"
+                        };
+                    }
+
+                    this.chainedEntityNames.Push(m.Member.Name);
+                    var currentNode = this.rootNode;
+                    for (int i = 0, c = this.chainedEntityNames.Count; i < c; ++i) {
+                        var propName = this.chainedEntityNames.Pop();
+                        if (!currentNode.Children.ContainsKey(propName)) {
+                            // create the new node with isFetched = false
+                            var newNode = new FetchNode {
+                                Alias = "t_" + ++this.aliasCounter,
+                                IsFetched = false,
+                                Parent = currentNode,
+                                Column = this.configuration.GetMap(declaringType).Columns[propName]
+                            };
+                            currentNode.Children.Add(propName, newNode);
+                        }
+
+                        currentNode = currentNode.Children[propName];
+                        declaringType = currentNode.Column.Type;
+                    }
+
+                    if (!this.insideSubQuery) {
+                        this.Sql.Append(currentNode.Alias + ".");
+                    }
+
+                    this.dialect.AppendQuotedName(this.Sql, this.chainedColumnName);
+                }
+            }
+            else {
+                if (this.rootNode != null && this.rootNode.Alias.Length > 0) {
+                    this.Sql.Append(this.rootNode.Alias + ".");
+                }
+
+                this.dialect.AppendQuotedName(
+                    this.Sql,
+                    this.configuration.GetMap(declaringType).Columns[m.Member.Name].DbName);
+            }
         }
 
         protected override Expression VisitUnary(UnaryExpression u) {
@@ -308,7 +328,8 @@
             if (this.isClosureConstantAccess) {
                 if (this.isChainedMemberAccess) {
                     value = Expression.Lambda(this.chainedMemberAccessExpression).Compile().DynamicInvoke(null);
-                } else {
+                }
+                else {
                     var currentType = c.Value.GetType();
                     while (currentType != null) {
                         var field = currentType.GetField(this.constantMemberAccessName, BindingFlags.Public | BindingFlags.Instance);
@@ -327,7 +348,8 @@
                         currentType = currentType.BaseType;
                     }
                 }
-            } else {
+            }
+            else {
                 value = c.Value;
             }
 
@@ -341,7 +363,7 @@
                     value = this.configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);
                 }
 
-                AddParameter(value);
+                this.AddParameter(value);
             }
 
             return c;

@@ -12,8 +12,6 @@
 
     using Dashing.Configuration;
 
-    // TODO: Use Refly instead of CodeDom - http://www.codeproject.com/Articles/6283/Refly-makes-the-CodeDom-er-life-easier
-
     public class CodeGenerator : ICodeGenerator {
         private readonly CodeGeneratorConfig generatorConfig;
 
@@ -79,9 +77,7 @@
 
             using (var sw = new StringWriter()) {
                 // write the code into the string
-                provider.GenerateCodeFromCompileUnit(compileUnit, sw, new CodeGeneratorOptions {
-                    BracingStyle = "C"
-                });
+                provider.GenerateCodeFromCompileUnit(compileUnit, sw, new CodeGeneratorOptions { BracingStyle = "C" });
 
                 // do some hinky string replace because the DOM doesnt have the right method
                 var source = sw.ToString().Replace("DelegateQuery(", "DelegateQuery<T>(");
