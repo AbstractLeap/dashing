@@ -99,17 +99,18 @@
             Assert.Equal(typeof(int), actual.Parameters.GetValue("l_1").GetType());
         }
 
-        private class WherePropertyIsDefinedOnInterfaceDemonstrator<T>
-            where T : IEnableable {
+        private class WhereClauseWriterHarness<T> {
             private readonly WhereClauseWriter writer;
 
             private readonly IList<Expression<Func<T, bool>>> whereClauses;
 
-            public WherePropertyIsDefinedOnInterfaceDemonstrator(WhereClauseWriter writer) {
+            public WhereClauseWriterHarness(WhereClauseWriter writer) {
                 this.writer = writer;
-                this.whereClauses = new List<Expression<Func<T, bool>>> {
-                    z => z.IsEnabled
-                };
+                this.whereClauses = new List<Expression<Func<T, bool>>>();
+            }
+
+            public void Where(Expression<Func<T, bool>> predicate) {
+                this.whereClauses.Add(predicate);
             }
 
             public SelectWriterResult Execute() {
@@ -117,27 +118,41 @@
             }
         }
 
+        private static class WhereOnInterfaceDemonstrator<T> where T : IEnableable {
+            public static void ActUpon(WhereClauseWriterHarness<T> harness) {
+                harness.Where(t => t.IsEnabled);
+            }
+        }
+
+        private static class WhereOnGenericTypeConstraintDemonstrator<T> where T : class, IEnableable {
+            public static void ActUpon(WhereClauseWriterHarness<T> harness) {
+                harness.Where(t => t.IsEnabled);
+            }
+        }
+
         [Fact]
-        public void WherePropertyIsDefinedOnInterface() {
+        public void WhereOnInterface() {
             // assemble
             var target = MakeTarget();
-            Expression<Func<User, bool>> whereClause = u => u.IsEnabled;
 
             // act
-            var actual = target.GenerateSql(new[] { whereClause }, null);
+            var harness = new WhereClauseWriterHarness<User>(target);
+            WhereOnInterfaceDemonstrator<User>.ActUpon(harness);
+            var actual = harness.Execute();
 
             // assert
             Assert.Equal(" where [IsEnabled]", actual.Sql);
         }
 
         [Fact]
-        public void WherePredicateIsDefinedOnInterface() {
+        public void WhereOnGenericTypeConstraint() {
             // assemble
             var target = MakeTarget();
 
             // act
-            var demonstrator = new WherePropertyIsDefinedOnInterfaceDemonstrator<User>(target);
-            var actual = demonstrator.Execute();
+            var harness = new WhereClauseWriterHarness<User>(target);
+            WhereOnGenericTypeConstraintDemonstrator<User>.ActUpon(harness);
+            var actual = harness.Execute();
 
             // assert
             Assert.Equal(" where [IsEnabled]", actual.Sql);
