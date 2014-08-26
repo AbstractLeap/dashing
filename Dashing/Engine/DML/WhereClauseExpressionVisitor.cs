@@ -162,7 +162,7 @@
                     break;
 
                 case ExpressionType.Parameter:
-                    this.VisitMemberExpressionParameter(m, m.Member.DeclaringType);
+                    this.VisitMemberExpressionParameter(m, m.Expression.Type);
                     break;
             }
 
