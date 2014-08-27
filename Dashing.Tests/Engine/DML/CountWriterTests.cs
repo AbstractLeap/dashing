@@ -49,7 +49,7 @@
             query.Fetch(p => p.Comments);
             var sql = target.GenerateCountSql(query);
 
-            Assert.Equal("select count(distinct [PostId]) from [Posts] as t left join [Comments] as t_1 on t.PostId = t_1.PostId", sql.Sql);
+            Assert.Equal("select count(distinct t.[PostId]) from [Posts] as t left join [Comments] as t_1 on t.PostId = t_1.PostId", sql.Sql);
         }
 
         private static SelectQuery<User> MakeUserQuery() {
