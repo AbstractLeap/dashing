@@ -20,6 +20,12 @@
         }
 
         public SqlWriterResult GenerateSql<T>(IEnumerable<T> entities) {
+            var entitiesArray = entities as T[] ?? entities.ToArray();
+
+            if (!entitiesArray.Any()) {
+                throw new ArgumentOutOfRangeException("entities", "Entities does not contain any members");
+            }
+
             var map = this.Configuration.GetMap<T>();
             var sql = new StringBuilder();
             var paramIdx = 0;
@@ -31,7 +37,7 @@
             this.Dialect.AppendQuotedName(sql, map.PrimaryKey.DbName);
             sql.Append(" in (");
 
-            foreach (var entity in entities) {
+            foreach (var entity in entitiesArray) {
                 var paramName = "@p_" + ++paramIdx;
                 sql.Append(paramName);
                 sql.Append(", ");

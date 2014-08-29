@@ -124,8 +124,15 @@ namespace Dashing.Engine {
         }
 
         public virtual int Delete<T>(IDbTransaction transaction, IEnumerable<T> entities) {
+            var entityArray = entities as T[] ?? entities.ToArray();
+            
+            // take the short path
+            if (!entityArray.Any()) {
+                return 0;
+            }
+
             this.EnsureConfigurationLoaded();
-            var sqlQuery = this.deleteWriter.GenerateSql(entities);
+            var sqlQuery = this.deleteWriter.GenerateSql(entityArray);
             return this.Configuration.CodeManager.Execute(sqlQuery.Sql, transaction, sqlQuery.Parameters);
         }
 

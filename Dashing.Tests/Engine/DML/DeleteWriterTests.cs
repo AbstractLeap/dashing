@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Tests.Engine.DML {
+    using System;
     using System.Diagnostics;
 
     using Dashing.Configuration;
@@ -9,6 +10,12 @@
     using Xunit;
 
     public class DeleteWriterTests {
+        [Fact]
+        public void EmptyDeleteThrows() {
+            var deleteWriter = new DeleteWriter(new SqlServerDialect(), MakeConfig());
+            Assert.Throws<ArgumentOutOfRangeException>(() => deleteWriter.GenerateSql(new Post[0]));
+        }
+
         [Fact]
         public void SingleDeleteWorks() {
             var deleteWriter = new DeleteWriter(new SqlServerDialect(), MakeConfig());
