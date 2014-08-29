@@ -41,13 +41,31 @@
             warnings = warningList;
             errors = new List<string>();
 
+            // segment the changes
+            var comparer = new TableNameEqualityComparer();
+            var additions = to.Except(from, comparer).ToArray(); 
+            var removals = from.Except(to, comparer).ToArray();
+            var matches = @from.Join(to, f => f.Table, t => t.Table, MigrationPair.Of).ToArray();
+            
+            // print out adds
+            warningList.AddRange(additions.Select(a => string.Format("Adding {0}", a.Table)));
+
+            // print out deletes
+            warningList.AddRange(removals.Select(a => string.Format("Removing {0}", a.Table)));
+
             // look for a shortcut
-            var pairs = @from.Join(to, f => f.Table, t => t.Table, MigrationPair.Of).ToArray();
-            if (!pairs.Any(p => p.RequiresUpdate())) {
-                from = from.Except(pairs.Select(p => p.From)).ToList();
-                to = to.Except(pairs.Select(p => p.To)).ToList();
-                warningList.AddRange(pairs.Select(p => string.Format("Ignoring {0} as no change was detected", p.From.Table)));
+            foreach (var pair in matches) {
+                string message;
+                if (pair.RequiresUpdate(out message)) {
+                    warningList.Add(string.Format("{0} requires update: {1}", pair.From.Table, message));
+                }
+                else {
+                    from.Remove(pair.From);
+                    to.Remove(pair.To);
+                    warningList.Add(string.Format("No changes detected for {0}", pair.From.Table));
+                }
             }
+
 
             // drop tables (ordered topologically, might work if we haven't broken things above)
             foreach (var map in from) {

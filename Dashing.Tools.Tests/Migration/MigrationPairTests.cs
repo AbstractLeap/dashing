@@ -20,7 +20,8 @@
 
             var target = MigrationPair.Of(from, to);
 
-            Assert.False(target.RequiresUpdate());
+            string dontcare;
+            Assert.False(target.RequiresUpdate(out dontcare));
         }
 
         [Fact]
@@ -55,7 +56,8 @@
 
             var target = MigrationPair.Of(@from, to);
 
-            Assert.True(target.RequiresUpdate());
+            string dontcare;
+            Assert.True(target.RequiresUpdate(out dontcare));
         }
 
         private IMap<Post> GenerateMap() {

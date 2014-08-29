@@ -53,6 +53,7 @@
     <Compile Include="Migration\IMigrator.cs" />
     <Compile Include="Migration\MigrationPair.cs" />
     <Compile Include="Migration\Migrator.cs" />
+    <Compile Include="Migration\TableNameEqualityComparer.cs" />
     <Compile Include="ModelGeneration\DefaultConvention.cs" />
     <Compile Include="ModelGeneration\IConvention.cs" />
     <Compile Include="ModelGeneration\IModelGenerator.cs" />
