@@ -32,10 +32,12 @@ namespace Dashing.Engine.DML {
             }
             else {
                 sql.Append("distinct ");
+
                 if (rootNode != null) {
                     sql.Append(rootNode.Alias);
                     sql.Append('.');
                 }
+
                 this.Dialect.AppendQuotedName(sql, this.Configuration.GetMap<T>().PrimaryKey.DbName);
             }
 
