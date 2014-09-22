@@ -5,12 +5,14 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     using CommandLine;
     using CommandLine.Text;
 
     using Dashing.Configuration;
     using Dashing.Console.Settings;
+    using Dashing.Engine;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
     using Dashing.Tools;
@@ -29,6 +31,13 @@
             catch (CatchyException e) {
                 using (Color(ConsoleColor.Red)) {
                     Console.WriteLine(e.Message);
+                }
+            }
+            catch (Exception e) {
+                using (Color(ConsoleColor.Red)) {
+                    Console.WriteLine("There was a fatal error:");
+                    Console.WriteLine(e.Message);
+                    Console.Write(e.StackTrace);
                 }
             }
         }
@@ -75,7 +84,7 @@
             }
             else if (options.Migration) {
                 DoMigrate(options.Naive, connectionStringSettings, dashingSettings);
-            } 
+            }
             else if (options.ReverseEngineer) {
                 DoReverseEngineer(options, dashingSettings, reverseEngineerSettings, connectionStringSettings);
             }
@@ -103,12 +112,15 @@
             ConnectionStringSettings connectionStringSettings,
             DashingSettings dashingSettings) {
             if (!naive) {
-                NotImplemented();
+                using (Color(ConsoleColor.Yellow)) {
+                    Console.WriteLine("Non naive migration is experimental. Please check output");
+                }
             }
 
             Console.WriteLine();
-            using (Color(ConsoleColor.Yellow))
-                Console.WriteLine("-- Dashing: Naive Migration Script");
+            using (Color(ConsoleColor.Yellow)) {
+                Console.WriteLine("-- Dashing: Migration Script");
+            }
             Console.WriteLine("-- -------------------------------");
             Console.WriteLine("-- Assembly: {0}", dashingSettings.PathToDll);
             Console.WriteLine("-- Class:    {0}", dashingSettings.ConfigurationName);
@@ -121,7 +133,7 @@
             }
 
             IEnumerable<string> warnings, errors;
-            var migrationScript = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, config, out warnings, out errors);
+            var migrationScript = GenerateMigrationScript(connectionStringSettings, dashingSettings, config, naive, out warnings, out errors);
 
             // report errors
             DisplayMigrationWarningsAndErrors(errors, warnings);
@@ -155,14 +167,20 @@
                 config = LoadConfiguration(dashingSettings);
             }
 
-            if (naive) {
-                IEnumerable<string> warnings, errors;
-                var script = GenerateNaiveMigrationScript(connectionStringSettings, dashingSettings, config, out warnings, out errors);
 
-                // report errors
-                DisplayMigrationWarningsAndErrors(errors, warnings);
+            IEnumerable<string> warnings, errors;
+            var script = GenerateMigrationScript(connectionStringSettings, dashingSettings, config, naive, out warnings, out errors);
 
+            // report errors
+            DisplayMigrationWarningsAndErrors(errors, warnings);
 
+            if (errors.Any()) {
+                using (Color(ConsoleColor.Red)) {
+                    Console.WriteLine(
+                        "-- Fatal errors encountered: aborting migration. Please review the output.");
+                }
+            }
+            else {
                 // migrate it
                 var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
                 using (var connection = factory.CreateConnection()) {
@@ -179,7 +197,10 @@
                         }
                     }
                     else {
-                        using (new TimedOperation("-- Executing migration script on {0}", connection.ConnectionString))
+                        using (
+                            new TimedOperation(
+                                "-- Executing migration script on {0}",
+                                connection.ConnectionString))
                         using (var command = connection.CreateCommand()) {
                             using (Color(ConsoleColor.DarkGray)) {
                                 Console.WriteLine(script);
@@ -187,12 +208,12 @@
 
                             command.CommandText = script;
                             command.ExecuteNonQuery();
-                        }    
+                        }
                     }
-                    
+
                     // magical crazy time! see http://stackoverflow.com/a/2658326/1255065
                     AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainAssemblyResolve;
-                    
+
                     // now let's call Seed
                     var seederConfig = config as ISeeder;
                     if (seederConfig != null) {
@@ -203,11 +224,7 @@
                         }
                     }
                 }
-
-                return;
             }
-
-            NotImplemented();
         }
 
         private static Assembly CurrentDomainAssemblyResolve(object sender, ResolveEventArgs args) {
@@ -236,7 +253,7 @@
                 connectionString.ConnectionString,
                 connectionString.ProviderName);
             schema = databaseReader.ReadAll();
-            var maps = engineer.ReverseEngineer(schema);
+            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()));
             var reverseEngineer = new ModelGenerator();
             var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace);
 
@@ -249,8 +266,10 @@
             Console.Write(HelpText.AutoBuild(options));
         }
 
-        private static string GenerateNaiveMigrationScript(ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, IConfiguration configuration, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, IConfiguration configuration, bool naive, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             // fetch the from state
+            var dialectFactory = new DialectFactory();
+            var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
             IEnumerable<IMap> fromMaps;
             using (new TimedOperation("-- Reading database contents...")) {
                 DatabaseSchema schema;
@@ -259,16 +278,26 @@
                     connectionStringSettings.ConnectionString,
                     connectionStringSettings.ProviderName);
                 schema = databaseReader.ReadAll();
-                fromMaps = engineer.ReverseEngineer(schema);
+                fromMaps = engineer.ReverseEngineer(schema, dialect);
             }
 
             // set up migrator
-            var dialectFactory = new DialectFactory();
-            var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
-            var migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), null);
-            
+            IMigrator migrator;
+            if (naive) {
+                migrator = new NaiveMigrator(
+                    new CreateTableWriter(dialect),
+                    new DropTableWriter(dialect),
+                    null);
+            }
+            else {
+                migrator = new Migrator(
+                    new CreateTableWriter(dialect),
+                    new DropTableWriter(dialect),
+                    new AlterTableWriter(dialect));
+            }
+
             // run the migrator
-            var script = migrator.GenerateNaiveSqlDiff(fromMaps, configuration.Maps, out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, out warnings, out errors);
 
             // TODO: do things with warnings and errors
             return script;

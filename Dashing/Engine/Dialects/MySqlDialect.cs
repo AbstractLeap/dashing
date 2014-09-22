@@ -1,6 +1,8 @@
 namespace Dashing.Engine.Dialects {
     using System.Text;
 
+    using Dashing.Configuration;
+
     public class MySqlDialect : SqlDialectBase {
         public MySqlDialect()
             : base('`', '`') {
@@ -13,6 +15,25 @@ namespace Dashing.Engine.Dialects {
         public override string WriteDropTableIfExists(string tableName) {
             var sql = new StringBuilder("drop table if exists ");
             this.AppendQuotedName(sql, tableName);
+            return sql.ToString();
+        }
+
+        public override string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {
+            var sql = new StringBuilder("alter table ");
+            this.AppendQuotedTableName(sql, toColumn.Map);
+            sql.Append(" change ");
+            this.AppendQuotedName(sql, fromColumn.DbName);
+            sql.Append(" ");
+            this.AppendQuotedName(sql, toColumn.DbName);
+            this.AppendColumnSpecificationWithoutName(sql, fromColumn);
+            return sql.ToString();
+        }
+
+        public override string ModifyColumn(IColumn fromColumn, IColumn toColumn) {
+            var sql = new StringBuilder("alter table ");
+            this.AppendQuotedTableName(sql, toColumn.Map);
+            sql.Append(" modify column ");
+            this.AppendColumnSpecification(sql, toColumn);
             return sql.ToString();
         }
 

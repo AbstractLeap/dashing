@@ -37,27 +37,35 @@ namespace Dashing.Engine.DDL {
         }
 
         public IEnumerable<string> CreateForeignKeys(IMap map) {
-            var sqlStatements = new List<string>();
-            var idx = 0;
-            foreach (
-                var manyToOneColumn in
+            return
+                this.CreateForeignKeys(
                     map.Columns.Where(
                         c =>
-                        !c.Value.IsIgnored && c.Value.Relationship == RelationshipType.ManyToOne)) {
-                var sql = new StringBuilder();
-                sql.Append("alter table ");
-                this.dialect.AppendQuotedTableName(sql, map);
-                sql.Append(" add constraint fk" + map.Type.Name + "_" + ++idx);
-                sql.Append(" foreign key (");
-                this.dialect.AppendQuotedName(sql, manyToOneColumn.Value.DbName);
-                sql.Append(") references ");
-                this.dialect.AppendQuotedTableName(sql, manyToOneColumn.Value.ParentMap);
-                sql.Append("(");
-                this.dialect.AppendQuotedName(
-                sql,
-                manyToOneColumn.Value.ParentMap.PrimaryKey.DbName);
-                sql.Append(")");
-                sqlStatements.Add(sql.ToString());
+                        !c.Value.IsIgnored && c.Value.Relationship == RelationshipType.ManyToOne).Select(m => m.Value));
+        }
+
+        private void CreateForeignKeyForColumn(
+            IColumn column,
+            List<string> sqlStatements) {
+            var sql = new StringBuilder();
+            var map = column.Map;
+            sql.Append("alter table ");
+            this.dialect.AppendQuotedTableName(sql, map);
+            sql.Append(" add constraint fk" + map.Type.Name + "_" + column.Name);
+            sql.Append(" foreign key (");
+            this.dialect.AppendQuotedName(sql, column.DbName);
+            sql.Append(") references ");
+            this.dialect.AppendQuotedTableName(sql, column.ParentMap);
+            sql.Append("(");
+            this.dialect.AppendQuotedName(sql, column.ParentMap.PrimaryKey.DbName);
+            sql.Append(")");
+            sqlStatements.Add(sql.ToString());
+        }
+
+        public IEnumerable<string> CreateForeignKeys(IEnumerable<IColumn> columns) {
+            var sqlStatements = new List<string>();
+            foreach (var column in columns) {
+                this.CreateForeignKeyForColumn(column, sqlStatements);
             }
 
             return sqlStatements;

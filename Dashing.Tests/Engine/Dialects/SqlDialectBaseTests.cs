@@ -47,13 +47,13 @@
 
             target.AppendColumnSpecification(sb, col);
 
-            Assert.Equal("<foo> int not null", sb.ToString());
+            Assert.Equal("<foo> int not null default 0", sb.ToString());
         }
 
         [Fact]
         public void AppendColumnSpecificationAppendsNameAndTypeAndNull() {
             var sb = new StringBuilder();
-            var col = new Column<int> { DbName = "foo", DbType = DbType.Int32, IsNullable = true };
+            var col = new Column<int> { DbName = "foo", DbType = DbType.Int32, IsNullable = true }; // MJ should this throw an InvalidOperationException - seems nasty to have nullable db col with non nullable CLR type
             var target = this.MakeTarget();
 
             target.AppendColumnSpecification(sb, col);
@@ -112,6 +112,14 @@
         private class TestDialect : SqlDialectBase {
             public TestDialect()
                 : base('<', '>') {
+            }
+
+            public override string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {
+                throw new System.NotImplementedException();
+            }
+
+            public override string ModifyColumn(IColumn fromColumn, IColumn toColumn) {
+                throw new System.NotImplementedException();
             }
 
             public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {

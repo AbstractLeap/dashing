@@ -57,6 +57,19 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
+        public override string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {
+            return "EXEC sp_RENAME '" + toColumn.Map.Table + "." + fromColumn.DbName + "', '"
+                   + toColumn.DbName + "', 'COLUMN'";
+        }
+
+        public override string ModifyColumn(IColumn fromColumn, IColumn toColumn) {
+            var sql = new StringBuilder("alter table ");
+            this.AppendQuotedTableName(sql, toColumn.Map);
+            sql.Append(" alter column ");
+            this.AppendColumnSpecification(sql, toColumn);
+            return sql.ToString();
+        }
+
         public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             if (skip == 0) {
                 // query starts with SELECT so insert top (X) there

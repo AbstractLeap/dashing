@@ -3,6 +3,8 @@ namespace Dashing.Engine.Dialects {
     using System.Data;
     using System.Text;
 
+    using Dashing.Configuration;
+
     public class AnsiSqlDialect : SqlDialectBase {
         protected override string TypeName(DbType type) {
             switch (type) {
@@ -28,6 +30,14 @@ namespace Dashing.Engine.Dialects {
                 default:
                     return base.TypeName(type);
             }
+        }
+
+        public override string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {
+            throw new InvalidOperationException("There is no Ansi-SQL way of changing a column name.");
+        }
+
+        public override string ModifyColumn(IColumn fromColumn, IColumn toColumn) {
+            throw new InvalidOperationException("There is no Ansi-SQL way of changing a column type.");
         }
 
         public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {

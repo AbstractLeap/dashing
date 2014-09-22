@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Data.Entity.Design.PluralizationServices;
     using System.Globalization;
     using System.Linq;

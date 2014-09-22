@@ -2,10 +2,11 @@
     using System.Collections.Generic;
 
     using Dashing.Configuration;
+    using Dashing.Engine.Dialects;
 
     using DatabaseSchemaReader.DataSchema;
 
     public interface IEngineer {
-        IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema);
+        IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect);
     }
 }

@@ -44,6 +44,11 @@
         ushort Length { get; set; }
 
         /// <summary>
+        /// Gets or sets the default value for this column
+        /// </summary>
+        string Default { get; set; }
+
+        /// <summary>
         ///     Gets or sets whether the column is nullable
         /// </summary>
         bool IsNullable { get; set; }

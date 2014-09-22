@@ -66,6 +66,47 @@
                                                                                                        { DbType.Time, typeof(TimeSpan) }
                                                                                                    };
 
+        public static string DefaultFor(this DbType dbType, bool isNullable) {
+            switch (dbType) {
+                case DbType.AnsiString:
+                case DbType.AnsiStringFixedLength:
+                case DbType.String:
+                case DbType.StringFixedLength:
+                    return isNullable ? null : string.Empty;
+                case DbType.Boolean:
+                case DbType.Byte:
+                case DbType.Currency:
+                case DbType.Decimal:
+                case DbType.Double:
+                case DbType.Int16:
+                case DbType.Int32:
+                case DbType.Int64:
+                case DbType.SByte:
+                case DbType.Single:
+                case DbType.UInt16:
+                case DbType.UInt32:
+                case DbType.UInt64:
+                    return isNullable ? null : "0";
+                case DbType.Binary:
+                    return null;
+                case DbType.Date:
+                case DbType.DateTime:
+                case DbType.DateTime2:
+                case DbType.Time:
+                    return isNullable ? null : "current_timestamp";
+                case DbType.Guid:
+                    return isNullable ? null : "newid()";
+                case DbType.DateTimeOffset:
+                    return isNullable ? null : "sysdatetimeoffset()";
+                case DbType.Object:
+                    return null;
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        "dbType",
+                        "Unknown Db Type for Default value resolution");
+            }
+        }
+
         /// <summary>
         ///     The is entity type.
         /// </summary>

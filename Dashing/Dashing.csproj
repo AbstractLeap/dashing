@@ -92,6 +92,7 @@
     <Compile Include="DapperWrapper.cs" />
     <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
     <Compile Include="Engine\DapperMapperGeneration\IDapperMapperGenerator.cs" />
+    <Compile Include="Engine\DDL\AlterTableWriter.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
     <Compile Include="Engine\DDL\IAlterTableWriter.cs" />

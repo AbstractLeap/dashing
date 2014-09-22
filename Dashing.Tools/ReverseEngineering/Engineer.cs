@@ -4,6 +4,7 @@
     using System.Reflection;
     using System.Reflection.Emit;
     using Dashing.Configuration;
+    using Dashing.Engine.Dialects;
     using Dashing.Extensions;
     using DatabaseSchemaReader.DataSchema;
 
@@ -39,15 +40,16 @@
         }
 
         private Type GenerateType(string name) {
-            var typeBuilder = this.moduleBuilder.DefineType(name, TypeAttributes.Public);
+            var className = this.convention.ClassNameFor(name);
+            var typeBuilder = this.moduleBuilder.DefineType(className, TypeAttributes.Public);
             var type = typeBuilder.CreateType();
             this.typeMap.Add(name, type);
             return type;
         }
 
-        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema) {
+        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect) {
             var maps = new List<IMap>();
-            this.configuration = new Configuration();
+            this.configuration = new Configuration(sqlDialect);
             foreach (var table in schema.Tables) {
                 maps.Add(this.MapTable(table));
             }

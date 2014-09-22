@@ -17,31 +17,31 @@
         [Fact]
         public void BooleanColumnHasSmallintUnsignedType() {
             var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.Boolean });
-            Assert.Equal("\"foo\" smallint unsigned not null", actual);
+            Assert.Equal("\"foo\" smallint unsigned not null default 0", actual);
         }
 
         [Fact]
         public void DateTimeColumnHasTimestampType() {
             var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.DateTime });
-            Assert.Equal("\"foo\" timestamp not null", actual);
+            Assert.Equal("\"foo\" timestamp not null default current_timestamp", actual);
         }
 
         [Fact]
         public void DateTime2ColumnHasTimestampType() {
             var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.DateTime2 });
-            Assert.Equal("\"foo\" timestamp not null", actual);
+            Assert.Equal("\"foo\" timestamp not null default current_timestamp", actual);
         }
 
         [Fact]
         public void DateTimeOffsetColumnHasTimestampTzType() {
             var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.DateTimeOffset });
-            Assert.Equal("\"foo\" timestamptz not null", actual);
+            Assert.Equal("\"foo\" timestamptz not null default sysdatetimeoffset()", actual);
         }
 
         [Fact]
         public void DoubleColumnHasDoublePrecisionType() {
             var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.Double });
-            Assert.Equal("\"foo\" double precision not null", actual);
+            Assert.Equal("\"foo\" double precision not null default 0", actual);
         }
 
         private string GetColumnSpec(IColumn col) {
