@@ -80,10 +80,10 @@
 
             // now decide what to do
             if (options.Script) {
-                DoScript(options.Location, options.Naive, connectionStringSettings, dashingSettings);
+                DoScript(options.Location, options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
             }
             else if (options.Migration) {
-                DoMigrate(options.Naive, connectionStringSettings, dashingSettings);
+                DoMigrate(options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
             }
             else if (options.ReverseEngineer) {
                 DoReverseEngineer(options, dashingSettings, reverseEngineerSettings, connectionStringSettings);
@@ -110,7 +110,8 @@
             string pathOrNull,
             bool naive,
             ConnectionStringSettings connectionStringSettings,
-            DashingSettings dashingSettings) {
+            DashingSettings dashingSettings,
+            ReverseEngineerSettings reverseEngineerSettings) {
             if (!naive) {
                 using (Color(ConsoleColor.Yellow)) {
                     Console.WriteLine("Non naive migration is experimental. Please check output");
@@ -133,7 +134,7 @@
             }
 
             IEnumerable<string> warnings, errors;
-            var migrationScript = GenerateMigrationScript(connectionStringSettings, dashingSettings, config, naive, out warnings, out errors);
+            var migrationScript = GenerateMigrationScript(connectionStringSettings, dashingSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
 
             // report errors
             DisplayMigrationWarningsAndErrors(errors, warnings);
@@ -160,7 +161,13 @@
             }
         }
 
-        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings) {
+        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings) {
+            if (!naive) {
+                using (Color(ConsoleColor.Yellow)) {
+                    Console.WriteLine("Non naive migration is experimental. Please check output");
+                }
+            }
+
             // fetch the to state
             IConfiguration config;
             using (new TimedOperation("-- Fetching configuration contents...")) {
@@ -169,7 +176,7 @@
 
 
             IEnumerable<string> warnings, errors;
-            var script = GenerateMigrationScript(connectionStringSettings, dashingSettings, config, naive, out warnings, out errors);
+            var script = GenerateMigrationScript(connectionStringSettings, dashingSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
 
             // report errors
             DisplayMigrationWarningsAndErrors(errors, warnings);
@@ -248,7 +255,7 @@
             }
 
             DatabaseSchema schema;
-            var engineer = new Engineer();
+            var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
             var databaseReader = new DatabaseReader(
                 connectionString.ConnectionString,
                 connectionString.ProviderName);
@@ -266,14 +273,14 @@
             Console.Write(HelpText.AutoBuild(options));
         }
 
-        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, IConfiguration configuration, bool naive, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings, IConfiguration configuration, bool naive, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             // fetch the from state
             var dialectFactory = new DialectFactory();
             var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
             IEnumerable<IMap> fromMaps;
             using (new TimedOperation("-- Reading database contents...")) {
                 DatabaseSchema schema;
-                var engineer = new Engineer();
+                var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
                 var databaseReader = new DatabaseReader(
                     connectionStringSettings.ConnectionString,
                     connectionStringSettings.ProviderName);

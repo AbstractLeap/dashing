@@ -40,6 +40,26 @@
             MigrationPair[] matches;
             var additions = GetTableChanges(to, @from, out removals, out matches);
 
+            // TODO table name changes i.e. look for classes that appear to have changed name
+
+            // do removal of foreign keys and indexes that we don't need
+            // only do this on remaining tables as drops should be deleted automatically
+            foreach (var matchPair in matches) {
+                var fkRemovals = matchPair.From.ForeignKeys.Except(matchPair.To.ForeignKeys);
+                foreach (var foreignKey in fkRemovals) {
+                    sql.Append(this.alterTableWriter.DropForeignKey(foreignKey));
+                    this.AppendSemiColonIfNecesssary(sql);
+                    sql.AppendLine();
+                }
+
+                var indexRemovals = matchPair.From.Indexes.Except(matchPair.To.Indexes);
+                foreach (var index in indexRemovals) {
+                    sql.AppendLine(this.alterTableWriter.DropIndex(index));
+                    this.AppendSemiColonIfNecesssary(sql);
+                    sql.AppendLine();
+                }
+            }
+
             // do creates first as other changes may depend on them
             foreach (var map in additions) {
                 sql.Append(this.createTableWriter.CreateTable(map));
@@ -75,9 +95,9 @@
                 }
             }
 
-            // add in foreign keys for new columns
-            if (newForeignKeyColumns.Any()) {
-                var statements = this.createTableWriter.CreateForeignKeys(newForeignKeyColumns);
+            // add in new indexes for additions
+            foreach (var map in additions) {
+                var statements = this.createTableWriter.CreateIndexes(map);
                 foreach (var statement in statements) {
                     sql.Append(statement);
                     this.AppendSemiColonIfNecesssary(sql);
@@ -85,7 +105,24 @@
                 }
             }
 
-            // TODO add in new indexes
+            // add in missing foreign keys and indexes
+            foreach (var matchPair in matches) {
+                var fkAdditions = matchPair.To.ForeignKeys.Except(matchPair.From.ForeignKeys);
+                var fkStatements = this.createTableWriter.CreateForeignKeys(fkAdditions);
+                foreach (var statement in fkStatements) {
+                    sql.Append(statement);
+                    this.AppendSemiColonIfNecesssary(sql);
+                    sql.AppendLine();
+                }
+
+                var indexAdditions = matchPair.To.Indexes.Except(matchPair.From.Indexes);
+                var indexStatements = this.createTableWriter.CreateIndexes(indexAdditions);
+                foreach (var statement in indexStatements) {
+                    sql.Append(statement);
+                    this.AppendSemiColonIfNecesssary(sql);
+                    sql.AppendLine();
+                }
+            }
 
             errors = errorList;
             warnings = warningList;
@@ -99,13 +136,24 @@
             IList<string> warnings,
             IList<string> errors) {
             // try to figure out additions, removals, changes
-            // TODO changes in ManyToOne reference type should prob result in drop and recreate of column
             var toColumns = match.To.OwnedColumns(true).ToDictionary(c => c.DbName, c => c);
             var fromColumns = match.From.OwnedColumns(true).ToDictionary(c => c.DbName, c => c);
 
             var addedColumnDbNames = toColumns.Keys.Except(fromColumns.Keys).ToList();
             var removedColumnDbNames = fromColumns.Keys.Except(toColumns.Keys).ToList();
             var nameChangedDbNames = new List<Tuple<string, string>>();
+
+            // try to find some manytoone references with a changed type
+            foreach (
+                var fromColumn in
+                    fromColumns.Where(k => k.Value.Relationship == RelationshipType.ManyToOne)) {
+                var matchingToColumn =
+                    toColumns.Select(c => c.Value).SingleOrDefault(c => c.Name == fromColumn.Value.Name);
+                if (matchingToColumn != null && fromColumn.Value.Type != matchingToColumn.Type) {
+                    removedColumnDbNames.Add(fromColumn.Key);
+                    addedColumnDbNames.Add(matchingToColumn.DbName);
+                }
+            }
 
             // see if we can change these in to changed names
             if (removedColumnDbNames.Any()) {
@@ -182,6 +230,14 @@
             out string sql,
             ref IList<string> warnings,
             ref IList<string> errors) {
+            // first check for manytoonecolumns that have changed type as we drop and recreate those
+            if (fromColumn.Relationship == RelationshipType.ManyToOne
+                && toColumn.Relationship == RelationshipType.ManyToOne
+                && fromColumn.Type != toColumn.Type) {
+                sql = string.Empty;
+                return false;
+            }
+
             if (fromColumn.DbType != toColumn.DbType || fromColumn.IsNullable != toColumn.IsNullable
                 || (fromColumn.Length != toColumn.Length && fromColumn.Map.Configuration.Engine.SqlDialect.TypeTakesLength(toColumn.DbType))
                 || ((fromColumn.Precision != toColumn.Precision || fromColumn.Scale != toColumn.Scale) && fromColumn.Map.Configuration.Engine.SqlDialect.TypeTakesPrecisionAndScale(toColumn.DbType))) {

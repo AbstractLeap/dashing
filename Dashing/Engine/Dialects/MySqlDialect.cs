@@ -37,6 +37,22 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
+        public override string DropForeignKey(ForeignKey foreignKey) {
+            var sql = new StringBuilder("alter table "); 
+            this.AppendQuotedTableName(sql, foreignKey.ChildColumn.Map);
+            sql.Append(" drop foreign key ");
+            this.AppendQuotedName(sql, foreignKey.Name);
+            return sql.ToString();
+        }
+
+        public override string DropIndex(Index index) {
+            var sql = new StringBuilder("alter table ");
+            this.AppendQuotedTableName(sql, index.Map);
+            sql.Append(" drop index ");
+            this.AppendQuotedName(sql, index.Name);
+            return sql.ToString();
+        }
+
         public override string GetIdSql() {
             return "SELECT LAST_INSERT_ID() id";
         }

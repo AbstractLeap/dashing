@@ -39,6 +39,11 @@ namespace Dashing.Configuration {
         ICollection<Index> Indexes { get; set; }
 
         /// <summary>
+        /// Gets or sets the foreign keys specified for this map
+        /// </summary>
+        ICollection<ForeignKey> ForeignKeys { get; set; }
+
+        /// <summary>
         ///     Gets the primary key for the object
         /// </summary>
         /// <param name="entity"></param>

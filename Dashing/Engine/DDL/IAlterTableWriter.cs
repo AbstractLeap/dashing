@@ -9,5 +9,9 @@
         string ChangeColumnName(IColumn fromColumn, IColumn toColumn);
 
         string ModifyColumn(IColumn fromColumn, IColumn toColumn);
+
+        string DropForeignKey(ForeignKey foreignKey);
+
+        string DropIndex(Index index);
     }
 }

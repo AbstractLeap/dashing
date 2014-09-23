@@ -34,5 +34,13 @@
         public string ModifyColumn(IColumn fromColumn, IColumn toColumn) {
             return this.dialect.ModifyColumn(fromColumn, toColumn);
         }
+
+        public string DropForeignKey(ForeignKey foreignKey) {
+            return this.dialect.DropForeignKey(foreignKey);
+        }
+
+        public string DropIndex(Index index) {
+            return this.dialect.DropIndex(index);
+        }
     }
 }

@@ -8,8 +8,10 @@
 
         IEnumerable<string> CreateForeignKeys(IMap map);
 
-        IEnumerable<string> CreateForeignKeys(IEnumerable<IColumn> columns);
+        IEnumerable<string> CreateForeignKeys(IEnumerable<ForeignKey> foreignKeys);
 
         IEnumerable<string> CreateIndexes(IMap map);
+
+        IEnumerable<string> CreateIndexes(IEnumerable<Index> indexes);
     }
 }

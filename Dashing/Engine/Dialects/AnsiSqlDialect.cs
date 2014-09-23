@@ -40,6 +40,14 @@ namespace Dashing.Engine.Dialects {
             throw new InvalidOperationException("There is no Ansi-SQL way of changing a column type.");
         }
 
+        public override string DropForeignKey(ForeignKey foreignKey) {
+            throw new InvalidOperationException("There is no Ansi-SQL way of dropping a foreign key.");
+        }
+
+        public override string DropIndex(Index index) {
+            throw new InvalidOperationException("There is no Ansi-SQL way of dropping an index.");
+        }
+
         public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             throw new InvalidOperationException("There is no Ansi-SQL way of expressing an offset-limit / skip-take clause.");
         }

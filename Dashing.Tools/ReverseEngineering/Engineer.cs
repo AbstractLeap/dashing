@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tools.ReverseEngineering {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
     using Dashing.Configuration;
@@ -21,8 +22,8 @@
         /// </summary>
         private IDictionary<string, IList<IColumn>> manyToOneColumns;
 
-        public Engineer()
-            : this(new DefaultConvention()) {
+        public Engineer(string extraPluralizationWords)
+            : this(new DefaultConvention(extraPluralizationWords)) {
         }
 
         public Engineer(IConvention convention) {
@@ -55,6 +56,11 @@
             this.configuration = new Configuration(sqlDialect);
             foreach (var table in schema.Tables) {
                 maps.Add(this.MapTable(table));
+            }
+
+            // go back through and add indexes and foreign keys
+            foreach (var map in maps) {
+                GetIndexesAndForeignKeys(schema.Tables.First(t => t.Name == map.Table), map);
             }
 
             // now we go through and add onetomany columns so that topological ordering works
@@ -96,6 +102,33 @@
 
             this.configuration.AddMap(type, iMap);
             return iMap;
+        }
+
+        private void GetIndexesAndForeignKeys(DatabaseTable table, IMap map) {
+            // try to find indexes
+            var indexes = new List<Index>();
+            foreach (var index in table.Indexes) {
+                if (!index.IsUniqueKeyIndex(table)) {
+                    indexes.Add(
+                        new Index(
+                            map,
+                            index.Columns.Select(c => map.Columns[this.convention.PropertyNameForManyToOneColumnName(c.Name)]).ToList(),
+                            index.Name,
+                            index.IsUnique));
+                }
+            }
+
+            map.Indexes = indexes;
+
+            // try to find foreign keys
+            var foreignKeys = new List<ForeignKey>();
+            foreach (var foreignKey in table.ForeignKeys) {
+                var childColumn =
+                    map.Columns.Select(c => c.Value).First(c => c.DbName == foreignKey.Columns.First());
+                foreignKeys.Add(new ForeignKey(childColumn.ParentMap, childColumn, foreignKey.Name));
+            }
+
+            map.ForeignKeys = foreignKeys;
         }
 
         private KeyValuePair<string, IColumn> MapColumn(IMap map, DatabaseColumn column) {

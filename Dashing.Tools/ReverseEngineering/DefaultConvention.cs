@@ -1,12 +1,42 @@
 ﻿namespace Dashing.Tools.ReverseEngineering {
+    using System;
     using System.Data.Entity.Design.PluralizationServices;
     using System.Globalization;
 
     public class DefaultConvention : IConvention {
         private readonly PluralizationService pluralizer;
 
-        public DefaultConvention() {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="extraPluralizationWords">A string containing extra pluralization words
+        /// in the form Singular1,Plural1|Singular2,Plural2|Singular3,Plural3 ...</param>
+        public DefaultConvention(string extraPluralizationWords) {
             this.pluralizer = PluralizationService.CreateService(new CultureInfo("en-GB"));
+
+            // ok, damned EnglishPluralizationService is an internal class so bit of reflection...
+            var addWordMethod =
+                typeof(PluralizationService).Assembly.GetType(
+                    "System.Data.Entity.Design.PluralizationServices.EnglishPluralizationService")
+                    .GetMethod("AddWord");
+            
+            if (!string.IsNullOrWhiteSpace(extraPluralizationWords)) {
+                try {
+                    var pairs = extraPluralizationWords.Split('|');
+
+                    foreach (var pair in pairs) {
+                        var words = pair.Split(',');
+                        if (words.Length == 2) {
+                            addWordMethod.Invoke(
+                                this.pluralizer,
+                                new object[] { words[0], words[1] });
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    throw new Exception("At the moment only English pluralization is supported", e);
+                }
+            }
         }
 
         public string PropertyNameForManyToOneColumnName(string columnName) {

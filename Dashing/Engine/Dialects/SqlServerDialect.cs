@@ -70,6 +70,22 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
+        public override string DropForeignKey(ForeignKey foreignKey) {
+            var sql = new StringBuilder("alter table ");
+            this.AppendQuotedTableName(sql, foreignKey.ChildColumn.Map);
+            sql.Append(" drop constraint ");
+            this.AppendQuotedName(sql, foreignKey.Name);
+            return sql.ToString();
+        }
+
+        public override string DropIndex(Index index) {
+            var sql = new StringBuilder("drop index ");
+            this.AppendQuotedTableName(sql, index.Map);
+            sql.Append(".");
+            this.AppendQuotedName(sql, index.Name);
+            return sql.ToString();
+        }
+
         public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             if (skip == 0) {
                 // query starts with SELECT so insert top (X) there

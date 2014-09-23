@@ -122,6 +122,14 @@
                 throw new System.NotImplementedException();
             }
 
+            public override string DropForeignKey(ForeignKey foreignKey) {
+                throw new System.NotImplementedException();
+            }
+
+            public override string DropIndex(Index index) {
+                throw new System.NotImplementedException();
+            }
+
             public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
                 throw new System.NotImplementedException();
             }

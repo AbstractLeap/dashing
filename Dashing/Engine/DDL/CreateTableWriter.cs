@@ -37,44 +37,33 @@ namespace Dashing.Engine.DDL {
         }
 
         public IEnumerable<string> CreateForeignKeys(IMap map) {
-            return
-                this.CreateForeignKeys(
-                    map.Columns.Where(
-                        c =>
-                        !c.Value.IsIgnored && c.Value.Relationship == RelationshipType.ManyToOne).Select(m => m.Value));
+            return this.CreateForeignKeys(map.ForeignKeys);
         }
 
-        private void CreateForeignKeyForColumn(
-            IColumn column,
-            List<string> sqlStatements) {
+        private string CreateForeignKey(ForeignKey foreignKey) {
             var sql = new StringBuilder();
-            var map = column.Map;
             sql.Append("alter table ");
-            this.dialect.AppendQuotedTableName(sql, map);
-            sql.Append(" add constraint fk" + map.Type.Name + "_" + column.Name);
-            sql.Append(" foreign key (");
-            this.dialect.AppendQuotedName(sql, column.DbName);
+            this.dialect.AppendQuotedTableName(sql, foreignKey.ChildColumn.Map);
+            sql.Append(" add constraint ").Append(foreignKey.Name).Append(" foreign key (");
+            this.dialect.AppendQuotedName(sql, foreignKey.ChildColumn.DbName);
             sql.Append(") references ");
-            this.dialect.AppendQuotedTableName(sql, column.ParentMap);
+            this.dialect.AppendQuotedTableName(sql, foreignKey.ParentMap);
             sql.Append("(");
-            this.dialect.AppendQuotedName(sql, column.ParentMap.PrimaryKey.DbName);
+            this.dialect.AppendQuotedName(sql, foreignKey.ParentMap.PrimaryKey.DbName);
             sql.Append(")");
-            sqlStatements.Add(sql.ToString());
+            return sql.ToString();
         }
 
-        public IEnumerable<string> CreateForeignKeys(IEnumerable<IColumn> columns) {
-            var sqlStatements = new List<string>();
-            foreach (var column in columns) {
-                this.CreateForeignKeyForColumn(column, sqlStatements);
-            }
-
-            return sqlStatements;
+        public IEnumerable<string> CreateForeignKeys(IEnumerable<ForeignKey> foreignKeys) {
+            return foreignKeys.Select(f => this.CreateForeignKey(f));
         }
 
         public IEnumerable<string> CreateIndexes(IMap map) {
-            var indexIdx = 0;
+            return this.CreateIndexes(map.Indexes);
+        }
 
-            foreach (var index in map.Indexes) {
+        public IEnumerable<string> CreateIndexes(IEnumerable<Index> indexes) {
+            foreach (var index in indexes) {
                 var sql = new StringBuilder(128);
                 sql.Append("create ");
                 if (index.IsUnique) {
@@ -82,9 +71,9 @@ namespace Dashing.Engine.DDL {
                 }
 
                 sql.Append("index ");
-                sql.Append("idx" + map.Type.Name + "_" + ++indexIdx);
+                this.dialect.AppendQuotedName(sql, index.Name);
                 sql.Append(" on ");
-                this.dialect.AppendQuotedTableName(sql, map);
+                this.dialect.AppendQuotedTableName(sql, index.Map);
                 sql.Append(" (");
                 foreach (var column in index.Columns) {
                     this.dialect.AppendQuotedName(sql, column.DbName);

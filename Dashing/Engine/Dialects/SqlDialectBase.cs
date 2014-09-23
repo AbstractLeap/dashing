@@ -196,6 +196,10 @@ namespace Dashing.Engine.Dialects {
 
         public abstract string ModifyColumn(IColumn fromColumn, IColumn toColumn);
 
+        public abstract string DropForeignKey(ForeignKey foreignKey);
+
+        public abstract string DropIndex(Index index);
+
         public virtual string GetIdSql() {
             return "select @@identity id";
         }

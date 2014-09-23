@@ -51,5 +51,9 @@ namespace Dashing.Engine.Dialects {
         /// <returns></returns>
         /// <remarks>Assumes the column is named as in toColumn (i.e. use ChangeColumnName to change name) and the toColumn table</remarks>
         string ModifyColumn(IColumn fromColumn, IColumn toColumn);
+
+        string DropForeignKey(ForeignKey foreignKey);
+
+        string DropIndex(Index index);
     }
 }

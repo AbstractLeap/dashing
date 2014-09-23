@@ -11,7 +11,15 @@ namespace Dashing.Configuration {
 
         private ICollection<Index> indexes;
 
+        private ICollection<ForeignKey> foreignKeys;
+
+        private bool hasCalculatedForeignKeys;
+
+        private bool hasSetForeignKeys;
+
         private bool hasAddedForeignKeyIndexes;
+
+        private bool hasSetIndexes;
 
         public Map(Type type) {
             this.Type = type;
@@ -48,15 +56,10 @@ namespace Dashing.Configuration {
 
         public ICollection<Index> Indexes {
             get {
-                if (!this.hasAddedForeignKeyIndexes) {
+                if (!this.hasSetIndexes && !this.hasAddedForeignKeyIndexes) {
                     // add in any indexes for the foreign keys in this map
-                    foreach (
-                        var column in
-                            this.Columns.Where(
-                                c =>
-                                !c.Value.IsIgnored
-                                && c.Value.Relationship == RelationshipType.ManyToOne)) {
-                        this.indexes.Add(new Index { Map = this, IsUnique = false, Columns = new List<IColumn> { column.Value } });
+                    foreach (var foreignKey in this.ForeignKeys) {
+                        this.indexes.Add(new Index(this, new List<IColumn>{ foreignKey.ChildColumn }));
                     }
 
                     this.hasAddedForeignKeyIndexes = true;
@@ -67,6 +70,31 @@ namespace Dashing.Configuration {
 
             set {
                 this.indexes = value;
+                this.hasSetIndexes = true;
+            }
+        }
+
+        /// <summary>
+        /// Returns the foreign keys for this map
+        /// </summary>
+        public ICollection<ForeignKey> ForeignKeys {
+            get {
+                if (!this.hasSetForeignKeys && !this.hasCalculatedForeignKeys && this.foreignKeys == null) {
+                    this.foreignKeys =
+                        this.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne)
+                            .Select(
+                                c =>
+                                new ForeignKey(c.Value.ParentMap, c.Value))
+                            .ToList();
+                    hasCalculatedForeignKeys = true;
+                }
+
+                return this.foreignKeys;
+            }
+
+            set {
+                this.foreignKeys = value;
+                this.hasSetForeignKeys = true;
             }
         }
 
