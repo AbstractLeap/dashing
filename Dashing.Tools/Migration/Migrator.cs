@@ -149,7 +149,7 @@
                     fromColumns.Where(k => k.Value.Relationship == RelationshipType.ManyToOne)) {
                 var matchingToColumn =
                     toColumns.Select(c => c.Value).SingleOrDefault(c => c.Name == fromColumn.Value.Name);
-                if (matchingToColumn != null && fromColumn.Value.Type != matchingToColumn.Type) {
+                if (matchingToColumn != null && fromColumn.Value.Type.Name != matchingToColumn.Type.Name) {
                     removedColumnDbNames.Add(fromColumn.Key);
                     addedColumnDbNames.Add(matchingToColumn.DbName);
                 }
