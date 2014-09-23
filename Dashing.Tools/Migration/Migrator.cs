@@ -220,6 +220,7 @@
                 }
 
                 sql = this.alterTableWriter.ModifyColumn(fromColumn, toColumn);
+                return true;
             }
 
             sql = string.Empty;

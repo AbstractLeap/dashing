@@ -16,7 +16,10 @@
         private readonly IDictionary<string, Type> typeMap;
         private IReverseEngineeringConfiguration configuration;
 
-        private IList<KeyValuePair<string, Type>> manyToOneColumns;
+        /// <summary>
+        /// maps table name to list of many to one columns
+        /// </summary>
+        private IDictionary<string, IList<IColumn>> manyToOneColumns;
 
         public Engineer()
             : this(new DefaultConvention()) {
@@ -25,7 +28,7 @@
         public Engineer(IConvention convention) {
             this.convention = convention;
             this.typeMap = new Dictionary<string, Type>();
-            this.manyToOneColumns = new List<KeyValuePair<string, Type>>();
+            this.manyToOneColumns = new Dictionary<string, IList<IColumn>>();
             this.InitTypeGenerator();
         }
 
@@ -55,22 +58,30 @@
             }
 
             // now we go through and add onetomany columns so that topological ordering works
-            foreach (var manyToOneField in this.manyToOneColumns) {
-                var map = this.configuration.GetMap(this.typeMap[manyToOneField.Key]);
-                var propName = Guid.NewGuid().ToString("N");
-                map.Columns.Add(propName, this.BuildOneToManyColumn(map, manyToOneField, propName));
+            foreach (var tableWithManyToOne in this.manyToOneColumns) {
+                foreach (var manyToOneColumn in tableWithManyToOne.Value) {
+                    var propName = Guid.NewGuid().ToString("N");
+                    manyToOneColumn.Map.Columns.Add(
+                        propName,
+                        this.BuildOneToManyColumn(manyToOneColumn, propName));
+                }
             }
 
             return maps;
         }
 
-        private IColumn BuildOneToManyColumn(IMap map, KeyValuePair<string, Type> manyToOneField, string propName) {
-            var col = Activator.CreateInstance(typeof(Column<>).MakeGenericType(typeof(IList<>).MakeGenericType(manyToOneField.Value)));
-            var mapColumn = col as IColumn;
-            mapColumn.Map = map;
-            mapColumn.Name = propName;
-            mapColumn.Relationship = RelationshipType.OneToMany;
-            return mapColumn;
+        private IColumn BuildOneToManyColumn(IColumn manyToOneColumn, string propName) {
+            var col = Activator.CreateInstance(typeof(Column<>).MakeGenericType(typeof(IList<>).MakeGenericType(manyToOneColumn.Type)));
+            var manyToOneReverseEngineeredColumn = manyToOneColumn as IReverseEngineeringColumn;
+            var oneToManyColumn = col as IColumn;
+            oneToManyColumn.Name = propName;
+            oneToManyColumn.Relationship = RelationshipType.OneToMany;
+            oneToManyColumn.Map =
+                manyToOneColumn.Map.Configuration.GetMap(
+                    manyToOneReverseEngineeredColumn.TypeMap[
+                        manyToOneReverseEngineeredColumn.ForeignKeyTableName]);
+            oneToManyColumn.ChildColumn = manyToOneColumn;
+            return oneToManyColumn;
         }
 
         private IMap MapTable(DatabaseTable table) {
@@ -133,7 +144,11 @@
                 var iReverseEngineeringColumn = col as IReverseEngineeringColumn;
                 iReverseEngineeringColumn.ForeignKeyTableName = column.ForeignKeyTableName;
                 iReverseEngineeringColumn.TypeMap = this.typeMap;
-                this.manyToOneColumns.Add(new KeyValuePair<string, Type>(column.ForeignKeyTableName, map.Type));
+                if (!this.manyToOneColumns.ContainsKey(column.ForeignKeyTableName)) {
+                    this.manyToOneColumns.Add(column.ForeignKeyTableName, new List<IColumn>());
+                }
+
+                this.manyToOneColumns[column.ForeignKeyTableName].Add(mapColumn);
             }
             else {
                 mapColumn.Relationship = RelationshipType.None;
