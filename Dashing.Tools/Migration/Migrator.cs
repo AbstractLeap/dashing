@@ -141,6 +141,7 @@
 
             var addedColumnDbNames = toColumns.Keys.Except(fromColumns.Keys).ToList();
             var removedColumnDbNames = fromColumns.Keys.Except(toColumns.Keys).ToList();
+            var manyToOneChangedTypeDbNames = new List<string>();
             var nameChangedDbNames = new List<Tuple<string, string>>();
 
             // try to find some manytoone references with a changed type
@@ -150,8 +151,7 @@
                 var matchingToColumn =
                     toColumns.Select(c => c.Value).SingleOrDefault(c => c.Name == fromColumn.Value.Name);
                 if (matchingToColumn != null && fromColumn.Value.Type.Name != matchingToColumn.Type.Name) {
-                    removedColumnDbNames.Add(fromColumn.Key);
-                    addedColumnDbNames.Add(matchingToColumn.DbName);
+                    manyToOneChangedTypeDbNames.Add(matchingToColumn.DbName);
                 }
             }
 
@@ -174,6 +174,18 @@
 
             // ok, now we have a list of added columns, removed columns, potential name changes 
             // and all the others are either the same or updated
+
+            // first we do the drop and recreate of the namytoone name changes
+            foreach (var manyToOneDbName in manyToOneChangedTypeDbNames) {
+                sql.AppendLine(this.alterTableWriter.DropColumn(fromColumns[manyToOneDbName]));
+                this.AppendSemiColonIfNecesssary(sql);
+                sql.AppendLine();
+                sql.AppendLine(this.alterTableWriter.AddColumn(toColumns[manyToOneDbName]));
+                this.AppendSemiColonIfNecesssary(sql);
+                sql.AppendLine();
+            }
+
+            // do additions
             foreach (var addedColumnDbName in addedColumnDbNames) {
                 // addition of column
                 sql.AppendLine(this.alterTableWriter.AddColumn(toColumns[addedColumnDbName]));
