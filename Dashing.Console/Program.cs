@@ -256,6 +256,7 @@
 
             DatabaseSchema schema;
             var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
+            
             var databaseReader = new DatabaseReader(
                 connectionString.ConnectionString,
                 connectionString.ProviderName);

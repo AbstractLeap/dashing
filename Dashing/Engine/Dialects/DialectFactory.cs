@@ -19,8 +19,22 @@
                 case "MySql.Data.MySqlClient":
                     return new MySqlDialect();
 
+                case "System.Data.OleDb":
+                    if (connectionString.ConnectionString.Contains("SQLNCLI11")) {
+                        return new SqlServer2012Dialect();
+                    }
+                    else if (connectionString.ConnectionString.Contains("SQLNCLI10")
+                        || connectionString.ConnectionString.Contains("SQLNCLI;")) {
+                        return new SqlServerDialect();
+                    } else if (connectionString.ConnectionString.Contains("MySQLProv")) {
+                        return new MySqlDialect();
+                    }
+
+                    throw new NotImplementedException(
+                        "For OleDb we only recognise Sql Server Native Client and MySQL provider");
+
                 default:
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("Sorry, we don't support the \"" + connectionString.ProviderName + "\" provider just yet");
             }
         }
     }

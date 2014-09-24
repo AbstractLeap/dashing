@@ -109,21 +109,6 @@
         }
 
         private void GetIndexesAndForeignKeys(DatabaseTable table, IMap map) {
-            // try to find indexes
-            var indexes = new List<Index>();
-            foreach (var index in table.Indexes) {
-                if (!index.IsUniqueKeyIndex(table)) {
-                    indexes.Add(
-                        new Index(
-                            map,
-                            index.Columns.Select(c => map.Columns[this.convention.PropertyNameForManyToOneColumnName(c.Name)]).ToList(),
-                            index.Name,
-                            index.IsUnique));
-                }
-            }
-
-            map.Indexes = indexes;
-
             // try to find foreign keys
             var foreignKeys = new List<ForeignKey>();
             foreach (var foreignKey in table.ForeignKeys) {
@@ -133,6 +118,21 @@
             }
 
             map.ForeignKeys = foreignKeys;
+
+            // try to find indexes
+            var indexes = new List<Index>();
+            foreach (var index in table.Indexes) {
+                if (!index.IsUniqueKeyIndex(table)) {
+                    indexes.Add(
+                        new Index(
+                            map,
+                            index.Columns.Select(c => map.Columns[foreignKeys.Any(f => f.ChildColumn.DbName == c.Name) ? this.convention.PropertyNameForManyToOneColumnName(c.Name) : c.Name]).ToList(),
+                            index.Name,
+                            index.IsUnique));
+                }
+            }
+
+            map.Indexes = indexes;
         }
 
         private KeyValuePair<string, IColumn> MapColumn(IMap map, DatabaseColumn column) {
