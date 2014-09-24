@@ -51,10 +51,14 @@
             return type;
         }
 
-        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect) {
+        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect, IEnumerable<string> tablesToIgnore) {
+            if (tablesToIgnore == null) {
+                tablesToIgnore = new string[0];
+            }
+
             var maps = new List<IMap>();
             this.configuration = new Configuration(sqlDialect);
-            foreach (var table in schema.Tables) {
+            foreach (var table in schema.Tables.Where(t => !tablesToIgnore.Contains(t.Name))) {
                 maps.Add(this.MapTable(table));
             }
 

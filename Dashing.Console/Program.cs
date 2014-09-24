@@ -260,7 +260,7 @@
                 connectionString.ConnectionString,
                 connectionString.ProviderName);
             schema = databaseReader.ReadAll();
-            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()));
+            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore());
             var reverseEngineer = new ModelGenerator();
             var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace);
 
@@ -285,7 +285,7 @@
                     connectionStringSettings.ConnectionString,
                     connectionStringSettings.ProviderName);
                 schema = databaseReader.ReadAll();
-                fromMaps = engineer.ReverseEngineer(schema, dialect);
+                fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore());
             }
 
             // set up migrator
