@@ -90,7 +90,7 @@ namespace Dashing.Configuration {
                         this.propertySetters = new Dictionary<IColumn, Action<T, object>>();
                         foreach (var col in this.OwnedColumns(true)) {
                             var entityParam = Expression.Parameter(typeof(T));
-                            var valueParam = Expression.Parameter(value.GetType());
+                            var valueParam = Expression.Parameter(typeof(object));
                             var setter =
                                 Expression.Lambda<Action<T, object>>(
                                     Expression.Assign(
