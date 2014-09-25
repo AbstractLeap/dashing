@@ -200,6 +200,28 @@ namespace Dashing.Engine.Dialects {
 
         public abstract string DropIndex(Index index);
 
+        public virtual string CreateIndex(Index index) {
+            var sql = new StringBuilder(128);
+            sql.Append("create ");
+            if (index.IsUnique) {
+                sql.Append("unique ");
+            }
+
+            sql.Append("index ");
+            this.AppendQuotedName(sql, index.Name);
+            sql.Append(" on ");
+            this.AppendQuotedTableName(sql, index.Map);
+            sql.Append(" (");
+            foreach (var column in index.Columns) {
+                this.AppendQuotedName(sql, column.DbName);
+                sql.Append(", ");
+            }
+
+            sql.Remove(sql.Length - 2, 2);
+            sql.Append(")");
+            return sql.ToString();
+        }
+
         public virtual string GetIdSql() {
             return "select @@identity id";
         }

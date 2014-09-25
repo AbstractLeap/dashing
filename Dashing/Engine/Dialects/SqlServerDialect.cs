@@ -1,5 +1,6 @@
 namespace Dashing.Engine.Dialects {
     using System.Data;
+    using System.Linq;
     using System.Text;
 
     using Dashing.Configuration;
@@ -99,6 +100,27 @@ namespace Dashing.Engine.Dialects {
 
             // see MySqlDialect for explanation of the crazy number 18446744073709551615
             sql.Append(") as pagetable where pagetable.RowNum between @skip + 1 and " + (take > 0 ? "@skip + @take" : "18446744073709551615") + " order by pagetable.RowNum");
+        }
+
+        public override string CreateIndex(Index index) {
+            var statement = base.CreateIndex(index);
+            if (index.IsUnique && index.Columns.Any(c => c.IsNullable)) {
+                var whereClause = new StringBuilder();
+                whereClause.Append(" where ");
+                bool first = true;
+                foreach (var column in index.Columns.Where(c => c.IsNullable)) {
+                    if (!first) {
+                        whereClause.Append(" and ");
+                    }
+
+                    this.AppendQuotedName(whereClause, column.DbName);
+                    whereClause.Append(" is not null");
+                    first = false;
+                }
+                statement += whereClause.ToString();
+            }
+
+            return statement;
         }
     }
 }

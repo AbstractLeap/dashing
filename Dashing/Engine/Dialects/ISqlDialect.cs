@@ -55,5 +55,7 @@ namespace Dashing.Engine.Dialects {
         string DropForeignKey(ForeignKey foreignKey);
 
         string DropIndex(Index index);
+
+        string CreateIndex(Index index);
     }
 }

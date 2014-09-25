@@ -64,25 +64,7 @@ namespace Dashing.Engine.DDL {
 
         public IEnumerable<string> CreateIndexes(IEnumerable<Index> indexes) {
             foreach (var index in indexes) {
-                var sql = new StringBuilder(128);
-                sql.Append("create ");
-                if (index.IsUnique) {
-                    sql.Append("unique ");
-                }
-
-                sql.Append("index ");
-                this.dialect.AppendQuotedName(sql, index.Name);
-                sql.Append(" on ");
-                this.dialect.AppendQuotedTableName(sql, index.Map);
-                sql.Append(" (");
-                foreach (var column in index.Columns) {
-                    this.dialect.AppendQuotedName(sql, column.DbName);
-                    sql.Append(", ");
-                }
-
-                sql.Remove(sql.Length - 2, 2);
-                sql.Append(")");
-                yield return sql.ToString();
+                yield return this.dialect.CreateIndex(index);
             }
         }
     }
