@@ -84,7 +84,7 @@
 
             var mockSessionFactory = MakeMockSf();
             var session = new Mock<ISession>();
-            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, null, true, false)).Returns(session.Object).Verifiable();
+            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, null, true, false, false)).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, mockProvider.Object, MakeMockMapper().Object, mockSessionFactory.Object);
 
@@ -106,7 +106,7 @@
             var mockEngine = MakeMockEngine();
             
             var mockSessionFactory = MakeMockSf();
-            mockSessionFactory.Setup<ISession>(m => m.Create(mockEngine.Object, connection.Object, null, false, false)).Returns(session.Object).Verifiable();
+            mockSessionFactory.Setup<ISession>(m => m.Create(mockEngine.Object, connection.Object, null, false, false, false)).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, MakeMockDbProviderFactory().Object, MakeMockMapper().Object, mockSessionFactory.Object);
 
@@ -128,7 +128,7 @@
             var mockEngine = MakeMockEngine();
 
             var mockSessionFactory = MakeMockSf();
-            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, transaction.Object, false, false)).Returns(session.Object).Verifiable();
+            mockSessionFactory.Setup(m => m.Create(mockEngine.Object, connection.Object, transaction.Object, false, false, false)).Returns(session.Object).Verifiable();
 
             var target = new CustomConfiguration(mockEngine.Object, MakeMockDbProviderFactory().Object, MakeMockMapper().Object, mockSessionFactory.Object);
 

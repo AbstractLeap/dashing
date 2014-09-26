@@ -22,6 +22,15 @@
 
         private static readonly ConcurrentDictionary<Tuple<Type, string>, string> QueryCache = new ConcurrentDictionary<Tuple<Type, string>, string>();
 
+        public SqlWriterResult GenerateGetSql<T, TPrimaryKey>(TPrimaryKey id) {
+            return
+                new SqlWriterResult(
+                    QueryCache.GetOrAdd(
+                        Tuple.Create(typeof(T), "GetSingle"),
+                        k => this.GenerateGetSql<T>(false)),
+                    new DynamicParameters(new { Id = id }));
+        }
+
         public SqlWriterResult GenerateGetSql<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
             var primaryKeys = ids as TPrimaryKey[] ?? ids.ToArray();
 

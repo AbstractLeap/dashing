@@ -135,7 +135,21 @@
         }
 
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.sessionFactory.Create(this.Engine, connection, transaction, false);
+            return this.sessionFactory.Create(this.Engine, connection, transaction: transaction, disposeConnection: false);
+        }
+
+        public ISession BeginTransactionLessSession() {
+            var connection = this.dbProviderFactory.CreateConnection();
+            if (connection == null) {
+                throw new InvalidOperationException("Could not create a connection using the supplied DbProviderFactory");
+            }
+
+            connection.ConnectionString = this.connectionStringSettings.ConnectionString;
+            return this.sessionFactory.Create(this.Engine, connection, isTransactionLess: true);
+        }
+
+        public ISession BeginTransactionLessSession(IDbConnection connection) {
+            return this.sessionFactory.Create(this.Engine, connection, isTransactionLess: true);
         }
 
         protected IConfiguration Add<T>() {

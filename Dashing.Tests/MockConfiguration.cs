@@ -14,6 +14,10 @@ namespace Dashing.Tests {
 
         public bool GetIsTrackedByDefault { get; set; }
 
+        public ISession BeginTransactionLessSession(IDbConnection connection) {
+            throw new NotImplementedException();
+        }
+
         public IGeneratedCodeManager CodeManager {
             get {
                 return this.MockCodeManager.Object;
@@ -75,6 +79,10 @@ namespace Dashing.Tests {
 
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
             return this.BeginSession();
+        }
+
+        public ISession BeginTransactionLessSession() {
+            throw new NotImplementedException();
         }
 
         public MockConfiguration Add<T>() {

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Dashing.Configuration;
 
 namespace Dashing.Tools.ReverseEngineering {
+    using System.Data;
+
     using Dashing.Engine;
     using Dashing.Engine.Dialects;
 
@@ -53,6 +55,14 @@ namespace Dashing.Tools.ReverseEngineering {
         }
 
         public ISession BeginSession(System.Data.IDbConnection connection, System.Data.IDbTransaction transaction) {
+            throw new NotImplementedException();
+        }
+
+        public ISession BeginTransactionLessSession() {
+            throw new NotImplementedException();
+        }
+
+        public ISession BeginTransactionLessSession(IDbConnection connection) {
             throw new NotImplementedException();
         }
 

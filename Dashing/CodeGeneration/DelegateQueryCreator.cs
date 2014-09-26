@@ -42,7 +42,7 @@
             this.foreignKeyNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
         }
 
-        public Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>> GetTrackingCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetTrackingCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
             var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
             var factoryDictionary = isTracked ? this.trackingMapperFactories : this.foreignKeyMapperFactories;
 
@@ -71,10 +71,10 @@
                     t => this.GenerateTrackingCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched));
             }
 
-            return ((Func<Delegate, Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>>>)func)(mapperFactory);
+            return ((Func<Delegate, Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>>)func)(mapperFactory);
         }
 
-        public Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>> GetTrackingNoCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetTrackingNoCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
             if (this.trackingNoCollectionQueries == null) {
                 throw new NotImplementedException();
             }
@@ -82,7 +82,7 @@
             throw new NotImplementedException();
         }
 
-        public Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>> GetFKCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetFKCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
             var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
             var factoryDictionary = isTracked ? this.trackingMapperFactories : this.foreignKeyMapperFactories;
 
@@ -115,10 +115,10 @@
                         result.NumberCollectionsFetched));
             }
 
-            return (Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>>)func.DynamicInvoke(mapperFactory);
+            return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>)func.DynamicInvoke(mapperFactory);
         }
 
-        public Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>> GetFKNoCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetFKNoCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
             if (this.foreignKeyNoCollectionQueries == null) {
                 throw new NotImplementedException();
             }
@@ -145,6 +145,7 @@
             // Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>>
             var resultParam = Expression.Parameter(typeof(SelectWriterResult));
             var queryParam = Expression.Parameter(typeof(SelectQuery<>).MakeGenericType(tt));
+            var connectionParam = Expression.Parameter(typeof(IDbConnection));
             var transactionParam = Expression.Parameter(typeof(IDbTransaction));
 
             // huh?
@@ -228,7 +229,7 @@
             variableExpressions.Add(mapperVariable);
             statements.Add(mapperExpr);
             
-            // var queryResult = SqlMapper.Query<...>(transaction.Connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
+            // var queryResult = SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
             var queryResultVariable = Expression.Variable(typeof(IEnumerable<>).MakeGenericType(tt), "queryResult");
             var sqlMapperQuery = typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.GetGenericArguments().Count() == mapperParams.Count()).MakeGenericMethod(mapperParams);
             var queryExpr = Expression.Assign(
@@ -236,7 +237,7 @@
                 Expression.Call(
                     sqlMapperQuery,
                     new Expression[] {
-                        Expression.Property(transactionParam, "Connection"), 
+                        connectionParam, 
                         Expression.Property(resultParam, "Sql"), 
                         mapperVariable, 
                         Expression.Property(resultParam, "Parameters"),
@@ -253,7 +254,7 @@
             var returnDictValuesExpr = Expression.Property(dictionaryVariable, "Values");
             statements.Add(returnDictValuesExpr);
 
-            // funcFactory => ((results, sql, transaction) => /* above */ )
+            // funcFactory => ((results, sql, connection, transaction) => /* above */ )
             var lambdaExpression =
                 Expression.Lambda(
                     Expression.Lambda(
@@ -262,6 +263,7 @@
                             statements),
                         resultParam,
                         queryParam,
+                        connectionParam,
                         transactionParam),
                     funcFactoryParam);
             return lambdaExpression.Compile();

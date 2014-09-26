@@ -56,26 +56,26 @@
         /// <summary>
         ///     Calls the correct static function within the generated code for a particular fetch tree
         /// </summary>
-        IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbTransaction transaction);
+        IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction);
 
         /// <summary>
         ///     Calls the correct static function within the generated code for a particular fetch tree
         /// </summary>
-        IEnumerable<T> Query<T>(SqlWriterResult result, IDbTransaction transaction, bool asTracked = false);
+        IEnumerable<T> Query<T>(SqlWriterResult result, IDbConnection connection, IDbTransaction transaction, bool asTracked = false);
 
         /// <summary>
         ///     Calls the correct static function within the generated code for a particular fetch tree
         /// </summary>
-        IEnumerable<T> Query<T>(IDbTransaction transaction, string sql, dynamic parameters = null);
+        IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, string sql, dynamic parameters = null);
 
         /// <summary>
         ///     Executes some sql against the connection (wraps Dapper method)
         /// </summary>
-        int Execute(string sql, IDbTransaction transaction, dynamic param = null);
+        int Execute(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null);
 
         /// <summary>
         ///     Executes some sql against the connection (wraps Dapper method)
         /// </summary>
-        T QueryScalar<T>(string sql, IDbTransaction transaction, dynamic param = null);
+        T QueryScalar<T>(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null);
     }
 }
