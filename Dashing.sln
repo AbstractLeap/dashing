@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing", "Dashing\Dashing.csproj", "{9F337C75-5BB7-4678-A761-BBC371E7FC86}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.ElasticSearch.Tests", "Dashing.ElasticSearch.Tests\Dashing.ElasticSearch.Tests.csproj", "{625C86A8-5298-41B8-B40F-85FA88E678BF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Annotations", "Dashing.Annotations\Dashing.Annotations.csproj", "{EC6B7D59-2A0D-45B9-99A3-0D0A3070A943}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.IntegrationTests", "Dashing.IntegrationTests\Dashing.IntegrationTests.csproj", "{62186CA2-59A3-480E-BEC9-BAA168054190}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{EC6B7D59-2A0D-45B9-99A3-0D0A3070A943}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC6B7D59-2A0D-45B9-99A3-0D0A3070A943}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC6B7D59-2A0D-45B9-99A3-0D0A3070A943}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62186CA2-59A3-480E-BEC9-BAA168054190}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62186CA2-59A3-480E-BEC9-BAA168054190}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62186CA2-59A3-480E-BEC9-BAA168054190}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62186CA2-59A3-480E-BEC9-BAA168054190}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
