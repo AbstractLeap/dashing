@@ -49,7 +49,7 @@
 
         private delegate IEnumerable<T> NoFetchDelegate<out T>(IDbConnection conn, string sql, dynamic parameters, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null);
 
-        private delegate EnumerableWrapper<T> NoFetchDelegateAsync<T>(IDbConnection conn, string sql, dynamic parameters, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
+        private delegate IEnumerableAwaiter<T> NoFetchDelegateAsync<T>(IDbConnection conn, string sql, dynamic parameters, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
 
         public GeneratedCodeManager(CodeGeneratorConfig config, Assembly generatedCodeAssembly) {
             this.Config = config;
@@ -187,9 +187,9 @@
                 fetchCalls.Add(baseType, noFetchQueryCall);
             }
             else {
-                var wrapper = Expression.Variable(typeof(EnumerableWrapper<>).MakeGenericType(baseType));
-                var initWrapper = Expression.Assign(wrapper, Expression.New(typeof(EnumerableWrapper<>).MakeGenericType(baseType)));
-                var results = Expression.Assign(Expression.Property(wrapper, "Task"), noFetchMethodCallExpr);
+                var wrapper = Expression.Variable(typeof(EnumerableAwaiter<>).MakeGenericType(type));
+                var initWrapper = Expression.Assign(wrapper, Expression.New(wrapper.Type));
+                var results = Expression.Assign(Expression.Property(wrapper, "Awaiter"), Expression.Call(noFetchMethodCallExpr, typeof(Task<>).MakeGenericType(typeof(IEnumerable<>).MakeGenericType(type)).GetMethod("GetAwaiter")));
                 var noFetchQueryCall =
                     Expression.Lambda(
                         noFetchDelegateType.MakeGenericType(baseType),

@@ -814,7 +814,7 @@ select * from Comments where PostId = @id";
                 for (var i = 0; i <= 500; i++) {
                     var userId = r.Next(100);
                     var blogId = r.Next(100);
-                    var post = new Post { Author = users[userId], Blog = blogs[blogId] };
+                    var post = new Post { Author = users[userId], Blog = blogs[blogId], Title = Guid.NewGuid().ToString("N") };
                     setupSession.Insert(post);
                     posts.Add(post);
                 }
