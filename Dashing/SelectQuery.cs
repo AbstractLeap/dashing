@@ -6,6 +6,7 @@ namespace Dashing {
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Threading.Tasks;
 
     using Dashing.Engine;
     using Dashing.Extensions;
@@ -359,6 +360,99 @@ namespace Dashing {
         public Page<T> AsPaged(int skip, int take) {
             this.Skip(skip).Take(take);
             return this.selectQueryExecutor.QueryPaged(this);
+        }
+
+        public async Task<IEnumerable<T>> ToListAsync() {
+            var result = await this.selectQueryExecutor.QueryAsync(this);
+            return result.ToList();
+        }
+
+        public async Task<T> FirstAsync() {
+            var result = await this.FirstOrDefaultAsync();
+            if (result == null) {
+                throw new InvalidOperationException("The query returned no results");
+            }
+
+            return result;
+        }
+
+        public async Task<T> FirstAsync(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return await this.FirstAsync();
+        }
+
+        public async Task<T> FirstOrDefaultAsync() {
+            this.Take(1);
+            var result = await this.selectQueryExecutor.QueryAsync(this);
+            return result.FirstOrDefault();
+        }
+
+        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return await this.FirstOrDefaultAsync();
+        }
+
+        public async Task<T> SingleAsync() {
+            var result = await this.SingleOrDefaultAsync();
+            if (result == null) {
+                throw new InvalidOperationException("The query returned no results");
+            }
+
+            return result;
+        }
+
+        public async Task<T> SingleAsync(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return await this.SingleAsync();
+        }
+
+        public async Task<T> SingleOrDefaultAsync() {
+            this.Take(2);
+            var result = await this.selectQueryExecutor.QueryAsync(this);
+            return result.SingleOrDefault();
+        }
+
+        public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return await this.SingleOrDefaultAsync();
+        }
+
+        public async Task<T> LastAsync() {
+            var result = await this.LastOrDefaultAsync();
+            if (result == null) {
+                throw new InvalidOperationException("The query returned no results");
+            }
+
+            return result;
+        }
+
+        public async Task<T> LastAsync(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return await this.LastAsync();
+        }
+
+        public async Task<T> LastOrDefaultAsync() {
+            if (this.OrderClauses.IsEmpty()) {
+                throw new InvalidOperationException("You can not request the last item without specifying an order clause");
+            }
+
+            // switch order clause direction
+            foreach (var clause in this.OrderClauses) {
+                clause.Direction = clause.Direction == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
+            }
+
+            this.Take(1);
+            return await this.FirstOrDefaultAsync();
+        }
+
+        public async Task<T> LastOrDefaultAsync(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return await this.LastOrDefaultAsync();
+        }
+
+        public async Task<Page<T>> AsPagedAsync(int skip, int take) {
+            this.Skip(skip).Take(take);
+            return await this.selectQueryExecutor.QueryPagedAsync(this);
         }
     }
 }

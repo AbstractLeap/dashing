@@ -2,6 +2,7 @@ namespace Dashing {
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// </summary>
@@ -167,5 +168,33 @@ namespace Dashing {
         T LastOrDefault(Expression<Func<T, bool>> predicate);
 
         Page<T> AsPaged(int skip, int take);
+
+        Task<IEnumerable<T>> ToListAsync();
+
+        Task<T> FirstAsync();
+
+        Task<T> FirstAsync(Expression<Func<T, bool>> predicate);
+
+        Task<T> FirstOrDefaultAsync();
+
+        Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
+
+        Task<T> SingleAsync();
+
+        Task<T> SingleAsync(Expression<Func<T, bool>> predicate);
+
+        Task<T> SingleOrDefaultAsync();
+
+        Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate);
+
+        Task<T> LastAsync();
+
+        Task<T> LastAsync(Expression<Func<T, bool>> predicate);
+
+        Task<T> LastOrDefaultAsync();
+
+        Task<T> LastOrDefaultAsync(Expression<Func<T, bool>> predicate);
+
+        Task<Page<T>> AsPagedAsync(int skip, int take);
     }
 }

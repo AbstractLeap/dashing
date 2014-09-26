@@ -283,5 +283,104 @@
         public async Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id) {
             return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id);
         }
+
+        public async Task<T> GetTrackedAsync<T, TPrimaryKey>(TPrimaryKey id) {
+            return await this.engine.QueryTrackedAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id);
+        }
+
+        public async Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            return await this.engine.QueryAsync<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids);
+        }
+
+        public async Task<IEnumerable<T>> GetTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            return await this.engine.QueryTrackedAsync<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids);
+        }
+
+        public async Task<IEnumerable<T>> QueryAsync<T>(SelectQuery<T> query) {
+            return await this.engine.QueryAsync(this.GetConnection(), this.GetTransaction(), query);
+        }
+
+        public async Task<Page<T>> QueryPagedAsync<T>(SelectQuery<T> query) {
+            return await this.engine.QueryPagedAsync(this.GetConnection(), this.GetTransaction(), query);
+        }
+
+        public async Task<int> InsertAsync<T>(IEnumerable<T> entities) {
+            if (this.Configuration.EventHandlers.PreInsertListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PreInsertListeners) {
+                        handler.OnPreInsert(entity, this);
+                    }
+                }
+            }
+
+            var insertedRows = await this.engine.InsertAsync(this.GetConnection(), this.GetTransaction(), entities);
+            if (this.Configuration.EventHandlers.PostInsertListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PostInsertListeners) {
+                        handler.OnPostInsert(entity, this);
+                    }
+                }
+            }
+
+            return insertedRows;
+        }
+
+        public async Task<int> SaveAsync<T>(IEnumerable<T> entities) {
+            if (this.Configuration.EventHandlers.PreSaveListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PreSaveListeners) {
+                        handler.OnPreSave(entity, this);
+                    }
+                }
+            }
+
+            var updatedRows = await this.engine.SaveAsync(this.GetConnection(), this.GetTransaction(), entities);
+            if (this.Configuration.EventHandlers.PostSaveListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PostSaveListeners) {
+                        handler.OnPostSave(entity, this);
+                    }
+                }
+            }
+
+            return updatedRows;
+        }
+
+        public async Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            return await this.engine.ExecuteAsync(this.GetConnection(), this.GetTransaction(), update, predicates);
+        }
+
+        public async Task<int> DeleteAsync<T>(IEnumerable<T> entities) {
+            if (this.Configuration.EventHandlers.PreDeleteListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PreDeleteListeners) {
+                        handler.OnPreDelete(entity, this);
+                    }
+                }
+            }
+
+            var deletedRows = await this.engine.DeleteAsync(this.GetConnection(), this.GetTransaction(), entities);
+            if (this.Configuration.EventHandlers.PostDeleteListeners.Any()) {
+                foreach (var entity in entities) {
+                    foreach (var handler in this.Configuration.EventHandlers.PostDeleteListeners) {
+                        handler.OnPostDelete(entity, this);
+                    }
+                }
+            }
+
+            return deletedRows;
+        }
+
+        public async Task<int> DeleteAsync<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
+            return await this.engine.ExecuteBulkDeleteAsync(this.GetConnection(), this.GetTransaction(), predicates);
+        }
+
+        public async Task<int> UpdateAllAsync<T>(Action<T> update) {
+            return await this.engine.ExecuteAsync(this.GetConnection(), this.GetTransaction(), update, null);
+        }
+
+        public async Task<int> DeleteAllAsync<T>() {
+            return await this.engine.ExecuteBulkDeleteAsync<T>(this.GetConnection(), this.GetTransaction(), null);
+        }
     }
 }

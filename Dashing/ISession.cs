@@ -39,5 +39,25 @@ namespace Dashing {
         int DeleteAll<T>();
 
         Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id);
+
+        Task<T> GetTrackedAsync<T, TPrimaryKey>(TPrimaryKey id);
+
+        Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids);
+
+        Task<IEnumerable<T>> GetTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids);
+
+        Task<int> InsertAsync<T>(IEnumerable<T> entities);
+
+        Task<int> SaveAsync<T>(IEnumerable<T> entities);
+
+        Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
+
+        Task<int> DeleteAsync<T>(IEnumerable<T> entities);
+
+        Task<int> DeleteAsync<T>(IEnumerable<Expression<Func<T, bool>>> predicates);
+
+        Task<int> UpdateAllAsync<T>(Action<T> update);
+
+        Task<int> DeleteAllAsync<T>();
     }
 }
