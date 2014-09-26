@@ -12,6 +12,8 @@
         public void IndexExtensionWorks() {
             var config =
                 NeedToDash.Configure(new System.Configuration.ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient"));
+            config.Setup<Blog>();
+            config.Setup<User>();
             config
                           .Setup<Post>()
                           .Index(p => new { p.Rating, p.Title });
@@ -40,6 +42,8 @@
         public void UniqueAddedCorrectly() {
             var config =
                 NeedToDash.Configure(new System.Configuration.ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient"));
+            config.Setup<Blog>();
+            config.Setup<User>();
             config
                           .Setup<Post>()
                           .Index(p => new { p.Rating, p.Title }, true);

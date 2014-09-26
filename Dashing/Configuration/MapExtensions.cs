@@ -35,7 +35,7 @@
             Expression<Func<T, TResult>> indexExpression,
             bool isUnique = false) {
             var columnNames = typeof(TResult).GetProperties();
-            var index = new Index { Map = map, IsUnique = isUnique };
+            var columns = new List<IColumn>();
             foreach (var columnName in columnNames.Select(p => p.Name)) {
                 if (!map.Columns.ContainsKey(columnName)) {
                     throw new InvalidOperationException(
@@ -47,10 +47,10 @@
                     throw new InvalidOperationException("The index can not be on an ignored column");
                 }
 
-                index.Columns.Add(column);
+                columns.Add(column);
             }
 
-            map.Indexes.Add(index);
+            map.Indexes.Add(new Index(map, columns, isUnique: isUnique));
             return map;
         }
 

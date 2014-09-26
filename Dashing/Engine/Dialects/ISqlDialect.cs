@@ -32,5 +32,30 @@ namespace Dashing.Engine.Dialects {
         bool TypeTakesLength(DbType type);
 
         bool TypeTakesPrecisionAndScale(DbType type);
+
+        /// <summary>
+        /// Changes the name of the column from the name in fromColumn to the name in toColumn
+        /// </summary>
+        /// <param name="fromColumn"></param>
+        /// <param name="toColumn"></param>
+        /// <returns></returns>
+        /// <remarks>Assumes the table name given by toColumn and assumes the column structure given by fromColumn
+        /// i.e. if the column specs are different they should not be changed by this statement</remarks>
+        string ChangeColumnName(IColumn fromColumn, IColumn toColumn);
+
+        /// <summary>
+        /// Changes the column specification for a particular column
+        /// </summary>
+        /// <param name="fromColumn"></param>
+        /// <param name="toColumn"></param>
+        /// <returns></returns>
+        /// <remarks>Assumes the column is named as in toColumn (i.e. use ChangeColumnName to change name) and the toColumn table</remarks>
+        string ModifyColumn(IColumn fromColumn, IColumn toColumn);
+
+        string DropForeignKey(ForeignKey foreignKey);
+
+        string DropIndex(Index index);
+
+        string CreateIndex(Index index);
     }
 }

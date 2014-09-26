@@ -29,7 +29,7 @@
         public void CreateWithTransactionReturnsASession() {
             var target = this.MakeTarget();
 
-            var session = target.Create(this.mockEngine.Object, this.mockConnection.Object, this.mockTransaction.Object);
+            var session = target.Create(this.mockEngine.Object, this.mockConnection.Object, transaction: this.mockTransaction.Object);
 
             Assert.NotNull(session);
             Assert.IsType<Session>(session);

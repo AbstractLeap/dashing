@@ -1,6 +1,7 @@
 namespace Dashing {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
 
     using Dashing.Configuration;
@@ -89,7 +90,7 @@ namespace Dashing {
             
             // map the properties on to the existing entity
             var map = session.Configuration.GetMap<T>();
-            foreach (var col in map.OwnedColumns()) {
+            foreach (var col in map.OwnedColumns().Where(c => !c.IsPrimaryKey)) {
                 map.SetColumnValue(existingEntity, col, map.GetColumnValue(entity, col));
             }
 

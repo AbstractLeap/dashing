@@ -124,6 +124,21 @@
         }
 
         /// <summary>
+        /// Sets the db default value for this column
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="defaultValue"></param>
+        /// <returns></returns>
+        public static IColumn Default(this IColumn column, string defaultValue) {
+            if (column == null) {
+                throw new ArgumentNullException("column");
+            }
+
+            column.Default = defaultValue;
+            return column;
+        }
+
+        /// <summary>
         ///     The exclude by default.
         /// </summary>
         /// <param name="column">

@@ -293,6 +293,20 @@ select * from Comments where PostId = @id";
                         }
                     }));
 
+            // add Dashing without transaction
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        using (var dashingSession = dashingConfig.BeginTransactionLessSession()) {
+                            return
+                                dashingSession.Query<Post>()
+                                              .Fetch(p => p.Comments)
+                                              .First(p => p.PostId == i);
+                        }
+                    }, "without transaction"));
+
             // add EF
             tests.Add(new Test(Providers.EntityFramework, TestName,
                 i => {
@@ -408,6 +422,28 @@ select * from Comments where PostId = @id";
                     },
                     "By Id"));
 
+            // add Dashing by id without transaction 
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        using (var dashingSession = dashingConfig.BeginTransactionLessSession()) {
+                            var post = dashingSession.GetTracked<Post>(i);
+                            post.Title = Providers.Dashing + "_" + i + r.Next(100000);
+                            dashingSession.Save(post);
+                            var thatPost = dashingSession.Get<Post>(i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.Dashing
+                                    + " as the update did not work");
+                            }
+
+                            return post;
+                        }
+                    },
+                    "By Id without transaction"));
+
             // add ef
             tests.Add(
                 new Test(
@@ -436,6 +472,28 @@ select * from Comments where PostId = @id";
                     TestName,
                     i => {
                         using (var ormliteConn = connectionFactory.OpenDbConnection()) {
+                            var post = ormliteConn.SingleById<Post>(i);
+                            post.Title = Providers.ServiceStack + "_" + i + r.Next(100000);
+                            ormliteConn.Update(post);
+                            var thatPost = ormliteConn.SingleById<Post>(i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.ServiceStack
+                                    + " as the update did not work");
+                            }
+
+                            return post;
+                        }
+                    }, "without transaction"));
+
+            // add servicestack with transaction
+            tests.Add(
+                new Test(
+                    Providers.ServiceStack,
+                    TestName,
+                    i => {
+                        using (var ormliteConn = connectionFactory.OpenDbConnection())
+                        using (var tran = ormliteConn.BeginTransaction()) {
                             var post = ormliteConn.SingleById<Post>(i);
                             post.Title = Providers.ServiceStack + "_" + i + r.Next(100000);
                             ormliteConn.Update(post);
@@ -491,6 +549,28 @@ select * from Comments where PostId = @id";
 
                             return post;
                         }
+                    }, "without explicit transaction"));
+
+            // lightspeed
+            tests.Add(
+                new Test(
+                    Providers.LightSpeed,
+                    TestName,
+                    i => {
+                        using (var uow = lsContext.CreateUnitOfWork())
+                        using (var tran = uow.BeginTransaction()) {
+                            var post = uow.FindById<LightSpeed.Domain.Post>(i);
+                            post.Title = Providers.LightSpeed + "_" + i + r.Next(100000);
+                            uow.SaveChanges();
+                            var thatPost = uow.FindById<LightSpeed.Domain.Post>(i);
+                            if (thatPost.Title != post.Title) {
+                                Console.WriteLine(
+                                    TestName + " failed for " + Providers.LightSpeed
+                                    + " as the update did not work");
+                            }
+
+                            return post;
+                        }
                     }));
         }
 
@@ -522,6 +602,19 @@ select * from Comments where PostId = @id";
                         return dashingSession.Query<Post>().Fetch(p => p.Author).First(p => p.PostId == i);
                     }
                 }));
+
+            // dashing without transaction
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        using (var session = dashingConfig.BeginTransactionLessSession()) {
+                            return
+                                session.Query<Post>().Fetch(p => p.Author).First(p => p.PostId == i);
+                        }
+                    },
+                    "Without transaction"));
 
             // add ef
             tests.Add(new Test(Providers.EntityFramework, TestName,
@@ -582,6 +675,18 @@ select * from Comments where PostId = @id";
                     }
                 }));
 
+            // dashing - no transaction
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        using (var dashingSession = dashingConfig.BeginTransactionLessSession()) {
+                            return dashingSession.Get<Post>(i);
+                        }
+                    },
+                "By Id without Transaction"));
+
             // add Dashing by id
             tests.Add(new Test(Providers.Dashing, TestName,
                 i => {
@@ -616,10 +721,19 @@ select * from Comments where PostId = @id";
             // add ormlite
             tests.Add(new Test(Providers.ServiceStack, TestName,
                 i => {
-                    using (var ormliteConn = connectionFactory.OpenDbConnection()) {
-                        return ormliteConn.SingleById<Post>(i);
+                    using (var ormliteConn = connectionFactory.Open())
+                    using (var transaction = ormliteConn.OpenTransaction()) {
+                        return transaction.Connection.SingleById<Post>(i);
                     }
                 }));
+
+            // add ormlite
+            tests.Add(new Test(Providers.ServiceStack, TestName,
+                i => {
+                    using (var ormliteConn = connectionFactory.Open()) {
+                        return ormliteConn.SingleById<Post>(i);
+                    }
+                }, "Without transaction"));
 
             // add simple data
             tests.Add(new Test(Providers.SimpleData, TestName,
@@ -665,7 +779,7 @@ select * from Comments where PostId = @id";
                             return uow.FindById<LightSpeed.Domain.Post>(i);
                         }
                     },
-                    "FindById"));
+                    "FindById without transaction"));
         }
 
         private static void SetupDatabase() {

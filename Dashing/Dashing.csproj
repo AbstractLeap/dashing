@@ -69,12 +69,14 @@
     <Compile Include="Configuration\ConfigurationBase.cs" />
     <Compile Include="Configuration\ConfigurationHelper.cs" />
     <Compile Include="Configuration\DefaultSessionFactory.cs" />
+    <Compile Include="Configuration\ForeignKey.cs" />
     <Compile Include="Configuration\IColumn.cs" />
     <Compile Include="Configuration\ILicenseManager.cs" />
     <Compile Include="Configuration\IMap.cs" />
     <Compile Include="Configuration\IMapper.cs" />
     <Compile Include="Configuration\IMapT.cs" />
     <Compile Include="Configuration\Index.cs" />
+    <Compile Include="Configuration\IndexColumnComparer.cs" />
     <Compile Include="Configuration\ISeeder.cs" />
     <Compile Include="Configuration\ISessionFactory.cs" />
     <Compile Include="Configuration\ColumnExtensions.cs" />
@@ -92,6 +94,7 @@
     <Compile Include="DapperWrapper.cs" />
     <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
     <Compile Include="Engine\DapperMapperGeneration\IDapperMapperGenerator.cs" />
+    <Compile Include="Engine\DDL\AlterTableWriter.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
     <Compile Include="Engine\DDL\IAlterTableWriter.cs" />

@@ -3,6 +3,8 @@
     using System.Data;
     using System.Linq;
 
+    using Dashing.Extensions;
+
     /// <summary>
     ///     The column.
     /// </summary>
@@ -32,8 +34,8 @@
         /// </summary>
         public DbType DbType {
             get {
-                return this.Relationship == RelationshipType.ManyToOne 
-                    ? this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType 
+                return this.Relationship == RelationshipType.ManyToOne
+                    ? this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType
                     : this.dbType;
             }
 
@@ -61,6 +63,20 @@
         ///     Gets or sets the length.
         /// </summary>
         public ushort Length { get; set; }
+
+        private string defaultValue;
+
+        /// <summary>
+        /// The default value for the db column
+        /// </summary>
+        public string Default {
+            get {
+                return defaultValue ?? (this.IsPrimaryKey || this.Relationship != RelationshipType.None ? null : this.DbType.DefaultFor(this.IsNullable));
+            }
+            set {
+                this.defaultValue = value;
+            }
+        }
 
         /// <summary>
         ///     Gets or sets whether the column is nullable

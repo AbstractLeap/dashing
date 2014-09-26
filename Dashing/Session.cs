@@ -25,12 +25,9 @@
 
         private bool isDisposed;
 
-        public Session(
-            IEngine engine,
-            IDbConnection connection,
-            IDbTransaction transaction = null,
-            bool disposeConnection = true,
-            bool commitAndDisposeTransaction = false) {
+        private bool isTransactionLess;
+
+        public Session(IEngine engine, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false, bool isTransactionLess = false) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -39,11 +36,22 @@
                 throw new ArgumentNullException("connection");
             }
 
+            if (transaction != null && isTransactionLess) {
+                throw new InvalidOperationException(
+                    "Unable to start a transaction-less session as transaction is not null");
+            }
+
+            if (isTransactionLess && commitAndDisposeTransaction) {
+                throw new InvalidOperationException(
+                    "As this session is transaction-less it will not be possible to commit and dispose of the transaction");
+            }
+
             this.engine = engine;
             this.connection = connection;
             this.transaction = transaction;
             this.shouldDisposeConnection = disposeConnection;
             this.shouldCommitAndDisposeTransaction = commitAndDisposeTransaction;
+            this.isTransactionLess = isTransactionLess;
             this.Dapper = new DapperWrapper(
                 new Lazy<IDbConnection>(() => this.Connection),
                 new Lazy<IDbTransaction>(() => this.Transaction));
@@ -85,8 +93,10 @@
                 }
 
                 if (this.transaction == null) {
-                    this.transaction = this.Connection.BeginTransaction();
-                    this.shouldCommitAndDisposeTransaction = true;
+                    if (!this.isTransactionLess) {
+                        this.transaction = this.Connection.BeginTransaction();
+                        this.shouldCommitAndDisposeTransaction = true;
+                    }
                 }
 
                 return this.transaction;
@@ -127,21 +137,21 @@
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id) {
             return
-                this.engine.Query<T, TPrimaryKey>(this.Transaction, new[] { id }).SingleOrDefault();
+                this.engine.Query<T, TPrimaryKey>(this.Connection, this.Transaction, id);
         }
 
         public T GetTracked<T, TPrimaryKey>(TPrimaryKey id) {
             return
-                this.engine.QueryTracked<T, TPrimaryKey>(this.Transaction, new[] { id })
+                this.engine.QueryTracked<T, TPrimaryKey>(this.Connection, this.Transaction, new[] { id })
                     .SingleOrDefault();
         }
 
         public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.engine.Query<T, TPrimaryKey>(this.Transaction, ids);
+            return this.engine.Query<T, TPrimaryKey>(this.Connection, this.Transaction, ids);
         }
 
         public IEnumerable<T> GetTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.engine.QueryTracked<T, TPrimaryKey>(this.Transaction, ids);
+            return this.engine.QueryTracked<T, TPrimaryKey>(this.Connection, this.Transaction, ids);
         }
 
         public ISelectQuery<T> Query<T>() {
@@ -149,11 +159,11 @@
         }
 
         public IEnumerable<T> Query<T>(SelectQuery<T> query) {
-            return this.engine.Query(this.Transaction, query);
+            return this.engine.Query(this.Connection, this.Transaction, query);
         }
 
         public Page<T> QueryPaged<T>(SelectQuery<T> query) {
-            return this.engine.QueryPaged(this.Transaction, query);
+            return this.engine.QueryPaged(this.Connection, this.Transaction, query);
         }
 
         public int Insert<T>(IEnumerable<T> entities) {
@@ -165,7 +175,7 @@
                 }
             }
 
-            var insertedRows = this.engine.Insert(this.Transaction, entities);
+            var insertedRows = this.engine.Insert(this.Connection, this.Transaction, entities);
             if (this.Configuration.EventHandlers.PostInsertListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PostInsertListeners) {
@@ -186,7 +196,7 @@
                 }
             }
 
-            var updatedRows = this.engine.Save(this.Transaction, entities);
+            var updatedRows = this.engine.Save(this.Connection, this.Transaction, entities);
             if (this.Configuration.EventHandlers.PostSaveListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PostSaveListeners) {
@@ -199,7 +209,7 @@
         }
 
         public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
-            return this.engine.Execute(this.Transaction, update, predicates);
+            return this.engine.Execute(this.Connection, this.Transaction, update, predicates);
         }
 
         public int Delete<T>(IEnumerable<T> entities) {
@@ -211,7 +221,7 @@
                 }
             }
 
-            var deletedRows = this.engine.Delete(this.Transaction, entities);
+            var deletedRows = this.engine.Delete(this.Connection, this.Transaction, entities);
             if (this.Configuration.EventHandlers.PostDeleteListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PostDeleteListeners) {
@@ -224,15 +234,15 @@
         }
 
         public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
-            return this.engine.ExecuteBulkDelete(this.Transaction, predicates);
+            return this.engine.ExecuteBulkDelete(this.Connection, this.Transaction, predicates);
         }
 
         public int UpdateAll<T>(Action<T> update) {
-            return this.engine.Execute(this.Transaction, update, null);
+            return this.engine.Execute(this.Connection, this.Transaction, update, null);
         }
 
         public int DeleteAll<T>() {
-            return this.engine.ExecuteBulkDelete<T>(this.Transaction, null);
+            return this.engine.ExecuteBulkDelete<T>(this.Connection, this.Transaction, null);
         }
     }
 }

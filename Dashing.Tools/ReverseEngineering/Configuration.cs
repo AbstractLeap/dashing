@@ -6,14 +6,20 @@ using System.Threading.Tasks;
 using Dashing.Configuration;
 
 namespace Dashing.Tools.ReverseEngineering {
+    using System.Data;
+
+    using Dashing.Engine;
+    using Dashing.Engine.Dialects;
+
     /// <summary>
     /// This configuration pretty much only exists to support fetching of different maps within reverse engineering
     /// </summary>
     internal class Configuration : IReverseEngineeringConfiguration {
         private IDictionary<Type, IMap> maps;
 
-        public Configuration() {
+        public Configuration(ISqlDialect sqlDialect) {
             this.maps = new Dictionary<Type, IMap>();
+            this.Engine = new SqlEngine(sqlDialect);
         }
 
         public void AddMap(Type type, IMap map) {
@@ -52,13 +58,19 @@ namespace Dashing.Tools.ReverseEngineering {
             throw new NotImplementedException();
         }
 
+        public ISession BeginTransactionLessSession() {
+            throw new NotImplementedException();
+        }
+
+        public ISession BeginTransactionLessSession(IDbConnection connection) {
+            throw new NotImplementedException();
+        }
+
         public CodeGeneration.IGeneratedCodeManager CodeManager {
             get { throw new NotImplementedException(); }
         }
 
-        public Engine.IEngine Engine {
-            get { throw new NotImplementedException(); }
-        }
+        public Engine.IEngine Engine { get; set; }
 
         public IMapper Mapper {
             get { throw new NotImplementedException(); }

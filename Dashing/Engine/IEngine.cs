@@ -12,22 +12,24 @@ namespace Dashing.Engine {
 
         IConfiguration Configuration { get; set; }
 
-        IEnumerable<T> Query<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
+        T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id);
 
-        IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
+        IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
-        IEnumerable<T> Query<T>(IDbTransaction transaction, SelectQuery<T> query);
+        IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids);
 
-        Page<T> QueryPaged<T>(IDbTransaction transaction, SelectQuery<T> query);
+        IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query);
 
-        int Insert<T>(IDbTransaction transaction, IEnumerable<T> entities);
+        Page<T> QueryPaged<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query);
 
-        int Save<T>(IDbTransaction transaction, IEnumerable<T> entities);
+        int Insert<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities);
 
-        int Delete<T>(IDbTransaction transaction, IEnumerable<T> entities);
+        int Save<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities);
 
-        int Execute<T>(IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
+        int Delete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities);
 
-        int ExecuteBulkDelete<T>(IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates);
+        int Execute<T>(IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
+
+        int ExecuteBulkDelete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates);
     }
 }

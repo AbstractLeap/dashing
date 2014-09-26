@@ -1,5 +1,6 @@
 namespace Dashing.Engine.Dialects {
     using System.Data;
+    using System.Linq;
     using System.Text;
 
     using Dashing.Configuration;
@@ -57,6 +58,35 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
+        public override string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {
+            return "EXEC sp_RENAME '" + toColumn.Map.Table + "." + fromColumn.DbName + "', '"
+                   + toColumn.DbName + "', 'COLUMN'";
+        }
+
+        public override string ModifyColumn(IColumn fromColumn, IColumn toColumn) {
+            var sql = new StringBuilder("alter table ");
+            this.AppendQuotedTableName(sql, toColumn.Map);
+            sql.Append(" alter column ");
+            this.AppendColumnSpecification(sql, toColumn);
+            return sql.ToString();
+        }
+
+        public override string DropForeignKey(ForeignKey foreignKey) {
+            var sql = new StringBuilder("alter table ");
+            this.AppendQuotedTableName(sql, foreignKey.ChildColumn.Map);
+            sql.Append(" drop constraint ");
+            this.AppendQuotedName(sql, foreignKey.Name);
+            return sql.ToString();
+        }
+
+        public override string DropIndex(Index index) {
+            var sql = new StringBuilder("drop index ");
+            this.AppendQuotedTableName(sql, index.Map);
+            sql.Append(".");
+            this.AppendQuotedName(sql, index.Name);
+            return sql.ToString();
+        }
+
         public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             if (skip == 0) {
                 // query starts with SELECT so insert top (X) there
@@ -70,6 +100,27 @@ namespace Dashing.Engine.Dialects {
 
             // see MySqlDialect for explanation of the crazy number 18446744073709551615
             sql.Append(") as pagetable where pagetable.RowNum between @skip + 1 and " + (take > 0 ? "@skip + @take" : "18446744073709551615") + " order by pagetable.RowNum");
+        }
+
+        public override string CreateIndex(Index index) {
+            var statement = base.CreateIndex(index);
+            if (index.IsUnique && index.Columns.Any(c => c.IsNullable)) {
+                var whereClause = new StringBuilder();
+                whereClause.Append(" where ");
+                bool first = true;
+                foreach (var column in index.Columns.Where(c => c.IsNullable)) {
+                    if (!first) {
+                        whereClause.Append(" and ");
+                    }
+
+                    this.AppendQuotedName(whereClause, column.DbName);
+                    whereClause.Append(" is not null");
+                    first = false;
+                }
+                statement += whereClause.ToString();
+            }
+
+            return statement;
         }
     }
 }

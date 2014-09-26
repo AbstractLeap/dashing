@@ -44,6 +44,11 @@
         ushort Length { get; set; }
 
         /// <summary>
+        /// Gets or sets the default value for this column
+        /// </summary>
+        string Default { get; set; }
+
+        /// <summary>
         ///     Gets or sets whether the column is nullable
         /// </summary>
         bool IsNullable { get; set; }
@@ -80,7 +85,7 @@
         RelationshipType Relationship { get; set; }
 
         /// <summary>
-        ///     References the property on the parent class that this property refers to
+        ///     References the property on the child class that this property refers to
         /// </summary>
         /// <remarks>Only applies to OneToMany Relationship</remarks>
         IColumn ChildColumn { get; set; }

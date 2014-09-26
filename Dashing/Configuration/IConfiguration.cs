@@ -40,6 +40,10 @@ using Dashing.Events;
 
         ISession BeginSession(IDbConnection connection, IDbTransaction transaction);
 
+        ISession BeginTransactionLessSession();
+
+        ISession BeginTransactionLessSession(IDbConnection connection);
+
         /// <summary>
         ///     The code manager for this configuration
         /// </summary>

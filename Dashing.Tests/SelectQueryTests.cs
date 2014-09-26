@@ -23,7 +23,7 @@
         }
 
         private ISession GetDashing() {
-            return new Session(this.mockEngine.Object, this.connection.Object, this.transaction.Object);
+            return new Session(this.mockEngine.Object, this.connection.Object, transaction: this.transaction.Object);
         }
 
         [Fact]
