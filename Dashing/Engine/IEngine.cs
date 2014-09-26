@@ -3,6 +3,7 @@ namespace Dashing.Engine {
     using System.Collections.Generic;
     using System.Data;
     using System.Linq.Expressions;
+    using System.Threading.Tasks;
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
@@ -31,5 +32,7 @@ namespace Dashing.Engine {
         int Execute<T>(IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
 
         int ExecuteBulkDelete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates);
+
+        Task<T> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id);
     }
 }

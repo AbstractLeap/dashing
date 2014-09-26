@@ -4,6 +4,7 @@ namespace Dashing.Engine {
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Threading.Tasks;
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
@@ -163,6 +164,22 @@ namespace Dashing.Engine {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
             return this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
+        }
+
+        public async Task<T> QueryAsync<T, TPrimaryKey>(
+            IDbConnection connection,
+            IDbTransaction transaction,
+            TPrimaryKey id) {
+            this.EnsureConfigurationLoaded();
+            var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
+            var results =
+                await
+                this.configuration.CodeManager.QueryAsync<T>(
+                    sqlQuery,
+                    connection,
+                    transaction,
+                    this.Configuration.GetIsTrackedByDefault);
+            return results.SingleOrDefault();
         }
 
         private void EnsureConfigurationLoaded() {

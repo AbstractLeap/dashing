@@ -1,10 +1,12 @@
 ﻿namespace Dashing.CodeGeneration {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     using Dapper;
 
@@ -23,11 +25,19 @@
 
         private readonly IDictionary<Type, Delegate> queryCalls;
 
+        private readonly IDictionary<Type, Delegate> asyncQueryCalls;
+
         private readonly IDictionary<Type, Delegate> noFetchFkCalls;
 
         private readonly IDictionary<Type, Delegate> noFetchTrackingCalls;
 
+        private readonly IDictionary<Type, Delegate> asyncNoFetchFkCalls;
+
+        private readonly IDictionary<Type, Delegate> asyncNoFetchTrackingCalls;
+
         private delegate IEnumerable<T> DelegateQuery<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction);
+
+        private delegate Task<IEnumerable<T>> DelegateQueryAsync<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction);
 
         private delegate T CreateUpdateClass<T>(Type type);
 
@@ -38,6 +48,8 @@
         private readonly DelegateQueryCreator delegateQueryCreator;
 
         private delegate IEnumerable<T> NoFetchDelegate<out T>(IDbConnection conn, string sql, dynamic parameters, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null);
+
+        private delegate EnumerableWrapper<T> NoFetchDelegateAsync<T>(IDbConnection conn, string sql, dynamic parameters, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
 
         public GeneratedCodeManager(CodeGeneratorConfig config, Assembly generatedCodeAssembly) {
             this.Config = config;
@@ -52,8 +64,11 @@
             this.trackingTypes = new Dictionary<Type, Type>();
             this.updateTypes = new Dictionary<Type, Type>();
             this.queryCalls = new Dictionary<Type, Delegate>();
+            this.asyncQueryCalls = new Dictionary<Type, Delegate>();
             this.noFetchFkCalls = new Dictionary<Type, Delegate>();
             this.noFetchTrackingCalls = new Dictionary<Type, Delegate>();
+            this.asyncNoFetchFkCalls = new Dictionary<Type, Delegate>();
+            this.asyncNoFetchTrackingCalls = new Dictionary<Type, Delegate>();
             this.updateCreators = new Dictionary<Type, Delegate>();
 
             foreach (var type in this.GeneratedCodeAssembly.DefinedTypes) {
@@ -64,28 +79,54 @@
                     // add the queryCall for this base type
                     // compile dynamic expression for calling Query<T>(SqlWriterResult result, SelectQuery<T> query, IDbConnection conn)
                     // on the generated DapperWrapper
-                    var parameters = new List<ParameterExpression> {
-                        Expression.Parameter(typeof(SelectWriterResult), "result"), 
-                        Expression.Parameter(typeof(SelectQuery<>).MakeGenericType(type.BaseType), "query"), 
-                        Expression.Parameter(typeof(IDbConnection), "connection"),
-                        Expression.Parameter(typeof(IDbTransaction), "transaction")
-                    };
-                    var methodCallExpr = Expression.Call(this.GeneratedCodeAssembly.DefinedTypes.First(t => t.Name == "DapperWrapper").GetMethods().First(m => m.Name == "Query").MakeGenericMethod(type.BaseType), parameters);
-                    var queryCall = Expression.Lambda(typeof(DelegateQuery<>).MakeGenericType(type.BaseType), methodCallExpr, parameters).Compile();
-                    this.queryCalls.Add(type.BaseType, queryCall);
+                    this.AddDapperWrapperQueryCall(type, "Query", this.queryCalls, typeof(DelegateQuery<>));
+                    this.AddDapperWrapperQueryCall(type, "QueryAsync", this.asyncQueryCalls, typeof(DelegateQueryAsync<>));
 
                     // add the query for no fetches but fk
-                    this.MakeNoFetchCall(type, type.BaseType, this.noFetchFkCalls);
+                    this.MakeNoFetchCall(type, type.BaseType, this.noFetchFkCalls, "Query", typeof(NoFetchDelegate<>));
+                    this.MakeNoFetchCall(type, type.BaseType, this.asyncNoFetchFkCalls, "QueryAsync", typeof(NoFetchDelegateAsync<>));
                 }
                 else if (type.Name.EndsWith(this.Config.TrackedClassSuffix)) {
                     this.trackingTypes.Add(type.BaseType.BaseType, type); // tracking classes extend fkClasses
-                    this.MakeNoFetchCall(type, type.BaseType.BaseType, this.noFetchTrackingCalls);
+                    this.MakeNoFetchCall(type, type.BaseType.BaseType, this.noFetchTrackingCalls, "Query", typeof(NoFetchDelegate<>));
+                    this.MakeNoFetchCall(type, type.BaseType.BaseType, this.asyncNoFetchTrackingCalls, "QueryAsync", typeof(NoFetchDelegateAsync<>));
                 }
                 else if (type.Name.EndsWith(this.Config.UpdateClassSuffix)) {
                     this.updateTypes.Add(type.BaseType, type);
                     this.updateCreators.Add(type.BaseType, this.MakeUpdateCreator(type));
                 }
             }
+        }
+
+        private void AddDapperWrapperQueryCall(TypeInfo type, string methodName, IDictionary<Type, Delegate> calls, Type delegateQueryType) {
+            var parameters = new List<ParameterExpression> {
+                                                               Expression.Parameter(
+                                                                   typeof(SelectWriterResult),
+                                                                   "result"),
+                                                               Expression.Parameter(
+                                                                   typeof(SelectQuery<>).MakeGenericType(
+                                                                       type.BaseType),
+                                                                   "query"),
+                                                               Expression.Parameter(
+                                                                   typeof(IDbConnection),
+                                                                   "connection"),
+                                                               Expression.Parameter(
+                                                                   typeof(IDbTransaction),
+                                                                   "transaction")
+                                                           };
+            var methodCallExpr =
+                Expression.Call(
+                    this.GeneratedCodeAssembly.DefinedTypes.First(t => t.Name == "DapperWrapper")
+                        .GetMethods()
+                        .First(m => m.Name == methodName)
+                        .MakeGenericMethod(type.BaseType),
+                    parameters);
+            var queryCall =
+                Expression.Lambda(
+                    delegateQueryType.MakeGenericType(type.BaseType),
+                    methodCallExpr,
+                    parameters).Compile();
+            calls.Add(type.BaseType, queryCall);
         }
 
         private Func<Type, string, bool> GenerateExistsFunction() {
@@ -105,11 +146,57 @@
             return lambda.Compile();
         }
 
-        private void MakeNoFetchCall(TypeInfo type, Type baseType, IDictionary<Type, Delegate> fetchCalls) {
-            var noFetchParameters = new List<ParameterExpression> { Expression.Parameter(typeof(IDbConnection), "conn"), Expression.Parameter(typeof(string), "sql"), Expression.Parameter(typeof(object), "parameters"), Expression.Parameter(typeof(IDbTransaction), "tran"), Expression.Parameter(typeof(bool), "buffered"), Expression.Parameter(typeof(Nullable<>).MakeGenericType(typeof(int)), "commandTimeout"), Expression.Parameter(typeof(Nullable<>).MakeGenericType(typeof(CommandType)), "commandType") };
-            var noFetchMethodCallExpr = Expression.Call(typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.IsGenericMethod).MakeGenericMethod(type), noFetchParameters);
-            var noFetchQueryCall = Expression.Lambda(typeof(NoFetchDelegate<>).MakeGenericType(baseType), noFetchMethodCallExpr, noFetchParameters).Compile();
-            fetchCalls.Add(baseType, noFetchQueryCall);
+        private void MakeNoFetchCall(TypeInfo type, Type baseType, IDictionary<Type, Delegate> fetchCalls, string methodName, Type noFetchDelegateType) {
+            var noFetchParameters = new List<ParameterExpression>();
+            bool isAsync = false;
+            if (noFetchDelegateType == typeof(NoFetchDelegateAsync<>)) {
+                isAsync = true;
+                noFetchParameters = new List<ParameterExpression> {
+                                                                      Expression.Parameter(typeof(IDbConnection), "conn"),
+                                                                      Expression.Parameter(typeof(string), "sql"),
+                                                                      Expression.Parameter(typeof(object), "parameters"),
+                                                                      Expression.Parameter(typeof(IDbTransaction), "tran"),
+                                                                      Expression.Parameter(
+                                                                          typeof(Nullable<>).MakeGenericType(typeof(int)),
+                                                                          "commandTimeout"),
+                                                                      Expression.Parameter(
+                                                                          typeof(Nullable<>).MakeGenericType(typeof(CommandType)),
+                                                                          "commandType")
+                                                                  };
+            }
+            else {
+                noFetchParameters = new List<ParameterExpression> {
+                                                                      Expression.Parameter(typeof(IDbConnection), "conn"),
+                                                                      Expression.Parameter(typeof(string), "sql"),
+                                                                      Expression.Parameter(typeof(object), "parameters"),
+                                                                      Expression.Parameter(typeof(IDbTransaction), "tran"),
+                                                                      Expression.Parameter(typeof(bool), "buffered"),
+                                                                      Expression.Parameter(
+                                                                          typeof(Nullable<>).MakeGenericType(typeof(int)),
+                                                                          "commandTimeout"),
+                                                                      Expression.Parameter(
+                                                                          typeof(Nullable<>).MakeGenericType(typeof(CommandType)),
+                                                                          "commandType")
+                                                                  };
+            }
+
+            var noFetchMethodCallExpr = Expression.Call(typeof(SqlMapper).GetMethods().First(m => m.Name == methodName && m.IsGenericMethod && m.GetParameters().Count() == noFetchParameters.Count).MakeGenericMethod(type), noFetchParameters);
+            if (!isAsync) {
+                var noFetchQueryCall =
+                    Expression.Lambda(noFetchDelegateType.MakeGenericType(baseType), noFetchMethodCallExpr, noFetchParameters).Compile();
+                fetchCalls.Add(baseType, noFetchQueryCall);
+            }
+            else {
+                var wrapper = Expression.Variable(typeof(EnumerableWrapper<>).MakeGenericType(baseType));
+                var initWrapper = Expression.Assign(wrapper, Expression.New(typeof(EnumerableWrapper<>).MakeGenericType(baseType)));
+                var results = Expression.Assign(Expression.Property(wrapper, "Task"), noFetchMethodCallExpr);
+                var noFetchQueryCall =
+                    Expression.Lambda(
+                        noFetchDelegateType.MakeGenericType(baseType),
+                        Expression.Block(new[] { wrapper }, new Expression[] { initWrapper, results, wrapper }),
+                        noFetchParameters).Compile();
+                fetchCalls.Add(baseType, noFetchQueryCall);
+            }
         }
 
         private IEnumerable<T> Tracked<T>(IEnumerable<T> rows) {
@@ -193,7 +280,7 @@
         }
 
         public IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, string sql, dynamic parameters = null) {
-            return connection.Query<T>(sql, new DynamicParameters(parameters), transaction);
+            return connection.Query<T>(sql, (object)parameters, transaction);
         }
 
         public int Execute(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null) {
@@ -202,6 +289,78 @@
 
         public T QueryScalar<T>(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null) {
             return connection.Query<T>(sql, (object)param, transaction).SingleOrDefault();
+        }
+
+        public async Task<IEnumerable<T>> QueryAsync<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction) {
+            if (query.HasFetches()) {
+                // we've got a function generated by the CodeGenerator for this
+                if (this.compileTimeFunctionExistsFunction(typeof(T), result.FetchTree.FetchSignature)) {
+                    if (query.IsTracked) {
+                        var results = await ((DelegateQueryAsync<T>)this.asyncQueryCalls[typeof(T)])(result, query, connection, transaction);
+                        return this.Tracked(results);
+                    }
+
+                    return await ((DelegateQueryAsync<T>)this.asyncQueryCalls[typeof(T)])(result, query, connection, transaction);
+                }
+
+                // otherwise, let's have a look in our local runtime cache
+                // TODO support multiple collection fetches
+                if (result.NumberCollectionsFetched > 0) {
+                    if (query.IsTracked) {
+                        var results = await this.delegateQueryCreator.GetTrackingCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
+                        return this.Tracked(results);
+                    }
+
+                    return await this.delegateQueryCreator.GetFKCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
+                }
+
+                if (query.IsTracked) {
+                    var results = this.delegateQueryCreator.GetTrackingNoCollectionFunction<T>(result, true)(result, query, connection, transaction);
+                    return this.Tracked(results);
+                }
+
+                return this.delegateQueryCreator.GetFKNoCollectionFunction<T>(result, false)(result, query, connection, transaction);
+            }
+
+            if (query.IsTracked) {
+                var results = await ((NoFetchDelegateAsync<T>)this.asyncNoFetchTrackingCalls[typeof(T)])(connection, result.Sql, result.Parameters, transaction);
+                return this.Tracked(results as IEnumerable<T>);
+            }
+
+            var asyncNoFetchFkResults = await ((NoFetchDelegateAsync<T>)this.asyncNoFetchFkCalls[typeof(T)])(connection, result.Sql, result.Parameters, transaction);
+            return asyncNoFetchFkResults as IEnumerable<T>;
+        }
+
+        public async Task<IEnumerable<T>> QueryAsync<T>(
+            SqlWriterResult sqlQuery,
+            IDbConnection connection,
+            IDbTransaction transaction,
+            bool asTracked = false) {
+            if (asTracked) {
+                var results = await ((NoFetchDelegateAsync<T>)this.asyncNoFetchTrackingCalls[typeof(T)])(
+                    connection,
+                    sqlQuery.Sql,
+                    sqlQuery.Parameters,
+                    transaction);
+                return this.Tracked(results as IEnumerable<T>);
+            }
+
+            var asyncNoFetchFkResults =
+                await ((NoFetchDelegateAsync<T>)this.asyncNoFetchFkCalls[typeof(T)])(connection, sqlQuery.Sql, sqlQuery.Parameters, transaction);
+            return asyncNoFetchFkResults as IEnumerable<T>;
+        }
+
+        public async Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, string sql, dynamic parameters = null) {
+            return await connection.QueryAsync<T>(sql, (object)parameters, transaction);
+        }
+
+        public async Task<int> ExecuteAsync(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null) {
+            return await connection.ExecuteAsync(sql, (object)param, transaction);
+        }
+
+        public async Task<T> QueryScalarAsync<T>(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null) {
+            var results = await connection.QueryAsync<T>(sql, (object)param, transaction);
+            return results.SingleOrDefault();
         }
     }
 }

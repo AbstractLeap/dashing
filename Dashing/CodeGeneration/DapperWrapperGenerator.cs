@@ -34,37 +34,29 @@ namespace Dashing.CodeGeneration {
 
             // generate the delegate function
             // public delegate IEnumerable<T> DelegateQuery<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection conn);
-            var del = new CodeTypeDelegate("DelegateQuery");
-            del.TypeParameters.Add("T");
-            del.ReturnType = new CodeTypeReference("IEnumerable<T>");
-            del.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
-            del.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
-            del.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "connection"));
-            del.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
-            dapperWrapperClass.Members.Add(del);
+            GetCodeTypeDelegate(dapperWrapperClass, "DelegateQuery", "IEnumerable<T>");
+
+            // generate an async delegate function
+            GetCodeTypeDelegate(dapperWrapperClass, "DelegateQueryAsync", "Task<IEnumerable<T>>");
 
             // generate the type delegates dictionary
-            var delegatesField = new CodeMemberField(typeof(IDictionary<,>).MakeGenericType(typeof(Type), typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate))), "TypeDelegates");
-            delegatesField.Attributes = MemberAttributes.Static | MemberAttributes.Public;
-            dapperWrapperClass.Members.Add(delegatesField);
-            staticConstructor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), "TypeDelegates"), new CodeObjectCreateExpression(new CodeTypeReference(typeof(Dictionary<,>).MakeGenericType(typeof(Type), typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate)))))));
+            var delegatesField = GenerateTypeDelegatesDictionary(dapperWrapperClass, staticConstructor, "TypeDelegates");
+            var asyncDelegatesField = GenerateTypeDelegatesDictionary(
+                dapperWrapperClass,
+                staticConstructor,
+                "TypeDelegatesAsync");
 
             // generate the query method
-            var query = new CodeMemberMethod();
-            query.Name = "Query";
-            query.Attributes = MemberAttributes.Static | MemberAttributes.Public;
-            query.TypeParameters.Add("T");
-            query.ReturnType = new CodeTypeReference("IEnumerable<T>");
-            dapperWrapperClass.Members.Add(query);
-            query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
-            query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
-            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "connection"));
-            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
+            var query = GenerateQueryMethod(dapperWrapperClass, "Query", "IEnumerable<T>");
+            var asyncQuery = GenerateQueryMethod(
+                dapperWrapperClass,
+                "QueryAsync",
+                "Task<IEnumerable<T>>");
 
             //// var meth = (DelegateQuery<T>)TypeDelegates[typeof(T)][result.FetchTree.FetchSignature];
             //// return meth(result, query, conn);
-            query.Statements.Add(new CodeVariableDeclarationStatement("var", "meth", new CodeCastExpression("DelegateQuery<T>", new CodeIndexerExpression(new CodeIndexerExpression(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), "TypeDelegates"), new CodeTypeOfExpression("T")), new CodePropertyReferenceExpression(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "FetchTree"), "FetchSignature")))));
-            query.Statements.Add(new CodeMethodReturnStatement(new CodeDelegateInvokeExpression(new CodeVariableReferenceExpression("meth"), new CodeVariableReferenceExpression("result"), new CodeVariableReferenceExpression("query"), new CodeVariableReferenceExpression("connection"), new CodeVariableReferenceExpression("transaction"))));
+            GenerateQueryBody(query, "DelegateQuery<T>", "TypeDelegates", "meth");
+            GenerateQueryBody(asyncQuery, "DelegateQueryAsync<T>", "TypeDelegatesAsync", "methAsync");
 
             // now foreach type we wish to find all possible fetch trees (up to a certain depth) and generate mappers and query functions
             foreach (var map in maps) {
@@ -73,20 +65,169 @@ namespace Dashing.CodeGeneration {
                 var signatures = this.TraverseAndGenerateMappersAndQueries(dapperWrapperClass, rootNode, rootNode, map.Type, map.Type, getMap, 0, generatorConfig.MapperGenerationMaxRecursion, generatorConfig);
 
                 // now add in the dictionary statement
-                var delegateField = new CodeMemberField(typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate)), map.Type.Name + "Delegates");
-                delegateField.Attributes = MemberAttributes.Static;
-                dapperWrapperClass.Members.Add(delegateField);
+                GenerateMapDelegatesDictionary(map, dapperWrapperClass, map.Type.Name + "Delegates");
+                GenerateMapDelegatesDictionary(
+                    map,
+                    dapperWrapperClass,
+                    map.Type.Name + "DelegatesAsync");
 
-                staticConstructor.Statements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), map.Type.Name + "Delegates"), new CodeObjectCreateExpression(new CodeTypeReference(typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(Delegate))))));
+                GenerateMapDictionaryInitialiser(staticConstructor, map.Type.Name + "Delegates");
+                GenerateMapDictionaryInitialiser(
+                    staticConstructor,
+                    map.Type.Name + "DelegatesAsync");
 
                 foreach (var signature in signatures) {
-                    staticConstructor.Statements.Add(new CodeMethodInvokeExpression(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), map.Type.Name + "Delegates"), "Add", new CodeSnippetExpression("\"" + signature.Item1 + "\""), new CodeObjectCreateExpression("DelegateQuery<" + map.Type.Name + ">", new CodeSnippetExpression(signature.Item2))));
+                    if (signature.Item2.EndsWith("Async")) {
+                        GenerateMapDictionaryAdder(
+                        staticConstructor,
+                        map.Type.Name + "DelegatesAsync",
+                        "DelegateQueryAsync<" + map.Type.Name + ">",
+                        signature);
+                    }
+                    else {
+                        GenerateMapDictionaryAdder(staticConstructor, map.Type.Name + "Delegates", "DelegateQuery<" + map.Type.Name + ">", signature);
+                    }
                 }
 
-                staticConstructor.Statements.Add(new CodeMethodInvokeExpression(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), delegatesField.Name), "Add", new CodeSnippetExpression("typeof(" + map.Type.Name + ")"), new CodeFieldReferenceExpression(new CodeTypeReferenceExpression("DapperWrapper"), map.Type.Name + "Delegates")));
+                GenerateTypeDictionaryAdder(staticConstructor, delegatesField, map, map.Type.Name + "Delegates");
+                GenerateTypeDictionaryAdder(staticConstructor, asyncDelegatesField, map, map.Type.Name + "DelegatesAsync");
             }
 
             return dapperWrapperClass;
+        }
+
+        private static void GenerateTypeDictionaryAdder(
+            CodeTypeConstructor staticConstructor,
+            CodeMemberField delegatesField,
+            IMap map,
+            string mapDictionaryName) {
+            staticConstructor.Statements.Add(
+                new CodeMethodInvokeExpression(
+                    new CodeFieldReferenceExpression(
+                        new CodeTypeReferenceExpression("DapperWrapper"),
+                        delegatesField.Name),
+                    "Add",
+                    new CodeSnippetExpression("typeof(" + map.Type.Name + ")"),
+                    new CodeFieldReferenceExpression(
+                        new CodeTypeReferenceExpression("DapperWrapper"),
+                        mapDictionaryName)));
+        }
+
+        private static void GenerateMapDictionaryAdder(
+            CodeTypeConstructor staticConstructor,
+           string dictionaryName,
+            string delegateType,
+            Tuple<string, string> signature) {
+            staticConstructor.Statements.Add(
+                new CodeMethodInvokeExpression(
+                    new CodeFieldReferenceExpression(
+                        new CodeTypeReferenceExpression("DapperWrapper"),
+                        dictionaryName),
+                    "Add",
+                    new CodeSnippetExpression("\"" + signature.Item1 + "\""),
+                    new CodeObjectCreateExpression(
+                        delegateType,
+                        new CodeSnippetExpression(signature.Item2))));
+        }
+
+        private static void GenerateMapDictionaryInitialiser(
+            CodeTypeConstructor staticConstructor,
+            string name) {
+            staticConstructor.Statements.Add(
+                new CodeAssignStatement(
+                    new CodeFieldReferenceExpression(
+                        new CodeTypeReferenceExpression("DapperWrapper"),
+                        name),
+                    new CodeObjectCreateExpression(
+                        new CodeTypeReference(
+                            typeof(Dictionary<,>).MakeGenericType(typeof(string), typeof(Delegate))))));
+        }
+
+        private static void GenerateMapDelegatesDictionary(IMap map, CodeTypeDeclaration dapperWrapperClass, string name) {
+            var delegateField =
+                new CodeMemberField(
+                    typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate)),
+                    name);
+            delegateField.Attributes = MemberAttributes.Static;
+            dapperWrapperClass.Members.Add(delegateField);
+        }
+
+        private static void GenerateQueryBody(CodeMemberMethod query, string delegateName, string typeDelegatesName, string delegateVariableName) {
+            query.Statements.Add(
+                new CodeVariableDeclarationStatement(
+                    "var",
+                    delegateVariableName,
+                    new CodeCastExpression(
+                        delegateName,
+                        new CodeIndexerExpression(
+                            new CodeIndexerExpression(
+                                new CodeFieldReferenceExpression(
+                                    new CodeTypeReferenceExpression("DapperWrapper"),
+                                    typeDelegatesName),
+                                new CodeTypeOfExpression("T")),
+                            new CodePropertyReferenceExpression(
+                                new CodePropertyReferenceExpression(
+                                    new CodeVariableReferenceExpression("result"),
+                                    "FetchTree"),
+                                "FetchSignature")))));
+            query.Statements.Add(
+                new CodeMethodReturnStatement(
+                    new CodeDelegateInvokeExpression(
+                        new CodeVariableReferenceExpression(delegateVariableName),
+                        new CodeVariableReferenceExpression("result"),
+                        new CodeVariableReferenceExpression("query"),
+                        new CodeVariableReferenceExpression("connection"),
+                        new CodeVariableReferenceExpression("transaction"))));
+        }
+
+        private static CodeMemberMethod GenerateQueryMethod(CodeTypeDeclaration dapperWrapperClass, string name, string returnType) {
+            var query = new CodeMemberMethod();
+            query.Name = name;
+            query.Attributes = MemberAttributes.Static | MemberAttributes.Public;
+            query.TypeParameters.Add("T");
+            query.ReturnType = new CodeTypeReference(returnType);
+            dapperWrapperClass.Members.Add(query);
+            query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "connection"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
+            return query;
+        }
+
+        private static CodeMemberField GenerateTypeDelegatesDictionary(
+            CodeTypeDeclaration dapperWrapperClass,
+            CodeTypeConstructor staticConstructor,
+            string name) {
+            var delegatesField =
+                new CodeMemberField(
+                    typeof(IDictionary<,>).MakeGenericType(
+                        typeof(Type),
+                        typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate))),
+                    name);
+            delegatesField.Attributes = MemberAttributes.Static | MemberAttributes.Public;
+            dapperWrapperClass.Members.Add(delegatesField);
+            staticConstructor.Statements.Add(
+                new CodeAssignStatement(
+                    new CodeFieldReferenceExpression(
+                        new CodeTypeReferenceExpression("DapperWrapper"),
+                        name),
+                    new CodeObjectCreateExpression(
+                        new CodeTypeReference(
+                            typeof(Dictionary<,>).MakeGenericType(
+                                typeof(Type),
+                                typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(Delegate)))))));
+            return delegatesField;
+        }
+
+        private static void GetCodeTypeDelegate(CodeTypeDeclaration dapperWrapperClass, string delegateName, string returnType) {
+            var del = new CodeTypeDelegate(delegateName);
+            del.TypeParameters.Add("T");
+            del.ReturnType = new CodeTypeReference(returnType);
+            del.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
+            del.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<T>", "query"));
+            del.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "connection"));
+            del.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
+            dapperWrapperClass.Members.Add(del);
         }
 
         private IEnumerable<Tuple<string, string>> TraverseAndGenerateMappersAndQueries(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, FetchNode currentPath, Type rootType, Type currentType, Func<Type, IMap> getMap, int recursionLevel, int maxRecursion, CodeGeneratorConfig codeConfig, string signaturePrefix = "", string signatureSuffix = "") {
@@ -132,16 +273,25 @@ namespace Dashing.CodeGeneration {
             var mapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature);
 
             // generate the query method
-            var query = this.GenerateQueryMethod(dapperWrapperClass, rootNode, rootType, signature, mapper, codeConfig);
+            var query = this.GenerateQueryMethod(dapperWrapperClass, rootNode, rootType, signature, mapper, codeConfig, false);
+            var asyncQuery = this.GenerateQueryMethod(
+                dapperWrapperClass,
+                rootNode,
+                rootType,
+                signature,
+                mapper,
+                codeConfig,
+                true);
 
             return new List<Tuple<string, string>> {
-                new Tuple<string, string>(signature, query.Name)
+                new Tuple<string, string>(signature, query.Name),
+                new Tuple<string, string>(signature, asyncQuery.Name)
             };
         }
 
         // TODO: Add in mapped on <-- what's this?
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private CodeMemberMethod GenerateQueryMethod(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature, CodeMemberMethod mapper, CodeGeneratorConfig codeConfig) {
+        private CodeMemberMethod GenerateQueryMethod(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature, CodeMemberMethod mapper, CodeGeneratorConfig codeConfig, bool isAsync) {
             var foreignKeyTypes = new List<string>();
             foreignKeyTypes.Add(rootType.Name + codeConfig.ForeignKeyAccessClassSuffix);
             foreignKeyTypes.AddRange(rootNode.Children.Select(c => c.Value.Column.Type.Name + codeConfig.ForeignKeyAccessClassSuffix));
@@ -151,14 +301,15 @@ namespace Dashing.CodeGeneration {
             trackingTypes.AddRange(rootNode.Children.Select(c => c.Value.Column.Type.Name + codeConfig.TrackedClassSuffix));
 
             // public static IEnumerable<T> EntityName_FetchSignature(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction)
+            var connParameterName = isAsync ? "asyncConn" : "conn";
             var query = new CodeMemberMethod {
-                Name = rootType.Name + "_" + signature,
-                ReturnType = new CodeTypeReference("IEnumerable<" + rootType.Name + ">"),
+                Name = rootType.Name + "_" + signature + (isAsync ? "Async" : ""),
+                ReturnType = new CodeTypeReference(isAsync ? "Task<IEnumerable<" + rootType.Name + ">>" : "IEnumerable<" + rootType.Name + ">"),
                 Attributes = MemberAttributes.Static
             };
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectWriterResult", "result"));
             query.Parameters.Add(new CodeParameterDeclarationExpression("SelectQuery<" + rootType.Name + ">", "query"));
-            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", "conn"));
+            query.Parameters.Add(new CodeParameterDeclarationExpression("IDbConnection", connParameterName));
             query.Parameters.Add(new CodeParameterDeclarationExpression("IDbTransaction", "transaction"));
 
             // Type[] Types; = new[] { typeof(Entity), ... }
@@ -176,9 +327,9 @@ namespace Dashing.CodeGeneration {
             var returnStatement = new CodeMethodReturnStatement(
                 new CodeMethodInvokeExpression(
                     new CodeMethodReferenceExpression(
-                        new CodeTypeReferenceExpression("SqlMapper"), "Query", new CodeTypeReference(rootType.Name)), 
+                        new CodeTypeReferenceExpression("SqlMapper"), isAsync ? "QueryAsync" : "Query", new CodeTypeReference(rootType.Name)),
                         new CodeExpression[] {
-                            new CodeVariableReferenceExpression("conn"), 
+                            new CodeVariableReferenceExpression(connParameterName), 
                             new CodePropertyReferenceExpression(new CodeVariableReferenceExpression("result"), "Sql"), 
                             new CodeVariableReferenceExpression("types"),
                             new CodeMethodReferenceExpression(null, mapper.Name), 
@@ -202,7 +353,7 @@ namespace Dashing.CodeGeneration {
                 Attributes = MemberAttributes.Static
             };
             mapper.Parameters.Add(new CodeParameterDeclarationExpression(typeof(object[]), "objects"));
-            
+
             // dry, innit
             var objects = new CodeVariableReferenceExpression("objects");
 
@@ -215,8 +366,8 @@ namespace Dashing.CodeGeneration {
             foreach (var node in rootNode.Children) {
                 mapper.Statements.Add(
                     new CodeAssignStatement(
-                        new CodePropertyReferenceExpression(root, node.Key), 
-                        new CodeCastExpression(node.Value.Column.Type,  new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(++i)))));
+                        new CodePropertyReferenceExpression(root, node.Key),
+                        new CodeCastExpression(node.Value.Column.Type, new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(++i)))));
             }
 
             // add a return statement

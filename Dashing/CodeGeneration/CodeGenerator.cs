@@ -80,7 +80,13 @@
                 provider.GenerateCodeFromCompileUnit(compileUnit, sw, new CodeGeneratorOptions { BracingStyle = "C" });
 
                 // do some hinky string replace because the DOM doesnt have the right method
-                var source = sw.ToString().Replace("DelegateQuery(", "DelegateQuery<T>(");
+                var source = sw.ToString()
+                    .Replace("DelegateQuery(", "DelegateQuery<T>(")
+                    .Replace("DelegateQueryAsync(", "DelegateQueryAsync<T>(")
+                    .Replace("Task<IEnumerable<T>> QueryAsync", "async Task<IEnumerable<T>> QueryAsync")
+                    .Replace("return methAsync", "return await methAsync")
+                    .Replace("return SqlMapper.QueryAsync", "return await SqlMapper.QueryAsync")
+                    .Replace("static Task<", "async static Task<");
 
                 var results = provider.CompileAssemblyFromSource(compilerParameters, source);
 
@@ -113,6 +119,7 @@
             yield return "System.Collections.Generic";
             yield return "System.Data";
             yield return "System.Diagnostics";
+            yield return "System.Threading.Tasks";
             yield return "Dapper";
             yield return "Dashing.Engine";
             yield return "Dashing.Engine.DML";

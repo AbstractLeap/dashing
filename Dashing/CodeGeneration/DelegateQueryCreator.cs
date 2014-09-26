@@ -7,6 +7,7 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     using Dapper;
 
@@ -25,9 +26,13 @@
 
         private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> trackingNoCollectionQueries;
 
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncTrackingCollectionQueries;
+
         private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> foreignKeyCollectionQueries;
 
         private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> foreignKeyNoCollectionQueries;
+
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncForeignKeyCollectionQueries;
 
         private readonly IGeneratedCodeManager generatedCodeManager;
 
@@ -38,8 +43,44 @@
             this.foreignKeyMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.trackingCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.trackingNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.asyncTrackingCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.foreignKeyCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.foreignKeyNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.asyncForeignKeyCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+        }
+
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>>  GetTrackingCollectionFunctionAsync<T>(
+            SelectWriterResult result,
+            bool isTracked) {
+            var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
+            var factoryDictionary = isTracked ? this.trackingMapperFactories : this.foreignKeyMapperFactories;
+
+            Delegate mapperFactory;
+            Delegate func;
+            if (result.NumberCollectionsFetched == 1) {
+                mapperFactory = factoryDictionary.GetOrAdd(
+                    key,
+                    t =>
+                    this.dapperMapperGenerator.GenerateCollectionMapper<T>(
+                        result.FetchTree,
+                        isTracked));
+                func = this.asyncTrackingCollectionQueries.GetOrAdd(
+                    key,
+                    t => this.GenerateTrackingCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, true));
+            }
+            else {
+                mapperFactory = factoryDictionary.GetOrAdd(
+                    key,
+                    t =>
+                    this.dapperMapperGenerator.GenerateMultiCollectionMapper<T>(
+                        result.FetchTree,
+                        isTracked));
+                func = this.asyncTrackingCollectionQueries.GetOrAdd(
+                    key,
+                    t => this.GenerateTrackingCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, true));
+            }
+
+            return ((Func<Delegate, Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>>>)func)(mapperFactory);
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetTrackingCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
@@ -57,7 +98,7 @@
                         isTracked));
                 func = this.trackingCollectionQueries.GetOrAdd(
                     key,
-                    t => this.GenerateTrackingCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched));
+                    t => this.GenerateTrackingCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, false));
             }
             else {
                 mapperFactory = factoryDictionary.GetOrAdd(
@@ -68,7 +109,7 @@
                         isTracked));
                 func = this.trackingCollectionQueries.GetOrAdd(
                     key,
-                    t => this.GenerateTrackingCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched));
+                    t => this.GenerateTrackingCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, false));
             }
 
             return ((Func<Delegate, Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>>)func)(mapperFactory);
@@ -80,6 +121,44 @@
             }
 
             throw new NotImplementedException();
+        }
+
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>> GetFKCollectionFunctionAsync<T>(
+            SelectWriterResult result,
+            bool isTracked) {
+            var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
+            var factoryDictionary = isTracked ? this.trackingMapperFactories : this.foreignKeyMapperFactories;
+
+            Delegate mapperFactory;
+            Delegate func;
+            if (result.NumberCollectionsFetched == 1) {
+                mapperFactory = factoryDictionary.GetOrAdd(
+                    key,
+                    t =>
+                    this.dapperMapperGenerator.GenerateCollectionMapper<T>(
+                        result.FetchTree,
+                        isTracked));
+                func = this.asyncForeignKeyCollectionQueries.GetOrAdd(
+                    key,
+                    t => this.GenerateForeignKeyCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, true));
+            }
+            else {
+                mapperFactory = factoryDictionary.GetOrAdd(
+                    key,
+                    t =>
+                    this.dapperMapperGenerator.GenerateMultiCollectionMapper<T>(
+                        result.FetchTree,
+                        isTracked));
+                func = this.asyncForeignKeyCollectionQueries.GetOrAdd(
+                    key,
+                    t =>
+                    this.GenerateForeignKeyCollection<T>(
+                        mapperFactory,
+                        isTracked,
+                        result.NumberCollectionsFetched, true));
+            }
+
+            return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>>)func.DynamicInvoke(mapperFactory);
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetFKCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
@@ -97,7 +176,7 @@
                         isTracked));
                 func = this.foreignKeyCollectionQueries.GetOrAdd(
                     key,
-                    t => this.GenerateForeignKeyCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched));
+                    t => this.GenerateForeignKeyCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, false));
             }
             else {
                 mapperFactory = factoryDictionary.GetOrAdd(
@@ -112,7 +191,8 @@
                     this.GenerateForeignKeyCollection<T>(
                         mapperFactory,
                         isTracked,
-                        result.NumberCollectionsFetched));
+                        result.NumberCollectionsFetched,
+                        false));
             }
 
             return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>)func.DynamicInvoke(mapperFactory);
@@ -126,18 +206,18 @@
             throw new NotImplementedException();
         }
 
-        private Delegate GenerateTrackingCollection<T>(Delegate mapperFactory, bool isTracked, int numberCollectionFetches) {
+        private Delegate GenerateTrackingCollection<T>(Delegate mapperFactory, bool isTracked, int numberCollectionFetches, bool isAsync) {
             var mapperParams = mapperFactory.GetType().GetGenericArguments().Last().GetGenericArguments();
-            return this.GenerateCollectionFactory<T>(mapperParams, isTracked, numberCollectionFetches);
+            return this.GenerateCollectionFactory<T>(mapperParams, isTracked, numberCollectionFetches, isAsync);
         }
 
-        private Delegate GenerateForeignKeyCollection<T>(Delegate mapperFactory, bool isTracked, int numberCollectionFetches) {
+        private Delegate GenerateForeignKeyCollection<T>(Delegate mapperFactory, bool isTracked, int numberCollectionFetches, bool isAsync) {
             var mapperParams = mapperFactory.GetType().GetGenericArguments().Last().GetGenericArguments();
-            return this.GenerateCollectionFactory<T>(mapperParams, isTracked, numberCollectionFetches);
+            return this.GenerateCollectionFactory<T>(mapperParams, isTracked, numberCollectionFetches, isAsync);
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private Delegate GenerateCollectionFactory<T>(Type[] mapperParams, bool isTracked, int numberCollectionFetches) {
+        private Delegate GenerateCollectionFactory<T>(Type[] mapperParams, bool isTracked, int numberCollectionFetches, bool isAsync) {
             var tt = typeof(T);
             var statements = new List<Expression>();
             var variableExpressions = new List<ParameterExpression>();
@@ -230,8 +310,17 @@
             statements.Add(mapperExpr);
             
             // var queryResult = SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
-            var queryResultVariable = Expression.Variable(typeof(IEnumerable<>).MakeGenericType(tt), "queryResult");
-            var sqlMapperQuery = typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.GetGenericArguments().Count() == mapperParams.Count()).MakeGenericMethod(mapperParams);
+            ParameterExpression queryResultVariable = null;
+            MethodInfo sqlMapperQuery = null;
+            if (isAsync) {
+                queryResultVariable = Expression.Variable(typeof(Task<>).MakeGenericType(typeof(IEnumerable<>).MakeGenericType(tt)), "queryResult");
+                sqlMapperQuery = typeof(SqlMapper).GetMethods().First(m => m.Name == "QueryAsync" && m.GetGenericArguments().Count() == mapperParams.Count()).MakeGenericMethod(mapperParams);
+            }
+            else {
+                queryResultVariable = Expression.Variable(typeof(IEnumerable<>).MakeGenericType(tt), "queryResult");
+                sqlMapperQuery = typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.GetGenericArguments().Count() == mapperParams.Count()).MakeGenericMethod(mapperParams);
+            }
+
             var queryExpr = Expression.Assign(
                 queryResultVariable,
                 Expression.Call(

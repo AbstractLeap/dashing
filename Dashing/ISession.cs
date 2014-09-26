@@ -3,6 +3,7 @@ namespace Dashing {
     using System.Collections.Generic;
     using System.Data;
     using System.Linq.Expressions;
+    using System.Threading.Tasks;
 
     using Dashing.Configuration;
 
@@ -36,5 +37,7 @@ namespace Dashing {
         int UpdateAll<T>(Action<T> update);
 
         int DeleteAll<T>();
+
+        Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id);
     }
 }

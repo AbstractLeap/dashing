@@ -53,6 +53,7 @@
     <Compile Include="CodeGeneration\CodeHelpers.cs" />
     <Compile Include="CodeGeneration\DapperWrapperGenerator.cs" />
     <Compile Include="CodeGeneration\DelegateQueryCreator.cs" />
+    <Compile Include="CodeGeneration\EnumerableWrapper.cs" />
     <Compile Include="CodeGeneration\GeneratedCodeManager.cs" />
     <Compile Include="CodeGeneration\ICodeGenerator.cs" />
     <Compile Include="CodeGeneration\IDapperWrapperGenerator.cs" />

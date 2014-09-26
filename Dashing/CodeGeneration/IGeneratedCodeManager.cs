@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Threading.Tasks;
 
     using Dashing.Engine.DML;
 
@@ -77,5 +78,26 @@
         ///     Executes some sql against the connection (wraps Dapper method)
         /// </summary>
         T QueryScalar<T>(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null);
+        /// <summary>
+        ///     Calls the correct static function within the generated code for a particular fetch tree
+        /// </summary>
+        Task<IEnumerable<T>> QueryAsync<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction);
+
+        Task<IEnumerable<T>> QueryAsync<T>(SqlWriterResult sqlQuery, IDbConnection connection, IDbTransaction transaction, bool asTracked = false);
+
+        /// <summary>
+        ///     Calls the correct static function within the generated code for a particular fetch tree
+        /// </summary>
+        Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, string sql, dynamic parameters = null);
+
+        /// <summary>
+        ///     Executes some sql against the connection (wraps Dapper method)
+        /// </summary>
+        Task<int> ExecuteAsync(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null);
+
+        /// <summary>
+        ///     Executes some sql against the connection (wraps Dapper method)
+        /// </summary>
+        Task<T> QueryScalarAsync<T>(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null);
     }
 }
