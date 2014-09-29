@@ -5,6 +5,7 @@
     public class Blog {
         public Blog() {
             this.CreateDate = DateTime.Now;
+            this.Posts = new List<Post>();
         }
 
         public virtual int BlogId { get; set; }

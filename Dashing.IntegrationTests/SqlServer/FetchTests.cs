@@ -10,9 +10,14 @@ namespace Dashing.IntegrationTests.SqlServer {
 
     using Xunit;
 
-    public class FetchTests : IUseFixture<SqlServerFixture>
-    {
+    public class FetchTests : IUseFixture<SqlServerFixture> {
         private SqlServerFixture fixture;
+
+        [Fact]
+        public void ExecuteSimpleQuery() {
+            var blogs = this.fixture.Session.Query<Blog>().ToList();
+            Assert.NotEmpty(blogs);
+        }
 
         [Fact]
         public void SimpleFetchWorks() {

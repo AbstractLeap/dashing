@@ -11,7 +11,7 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
     using Dashing.Tools.Migration;
 
     public class SqlServerFixture : IDisposable {
-        public ISession Session { get; private set; }
+        public ISession Session { get; set; }
 
         public string DatabaseName { get; private set; }
 
@@ -71,6 +71,18 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
             // insert single comment with null User to check that nulls are returned properly
             var nullUserComment = new Comment { Post = posts[0], User = null, Content = "Nullable User Content" };
             this.Session.Insert(nullUserComment);
+
+            // add user for bulk update
+            this.Session.Insert(new User { Username = "BulkUpdate", Password = "Blah" });
+
+            // add users for bulk delete
+            this.Session.Insert(new User { Username = "BulkDelete", Password = "Foo" }, new User { Username = "BulkDelete", Password = "Bar" });
+
+            // test delete user
+            this.Session.Insert(new User { Username = "TestDelete", Password = "Blah" });
+
+            // test empty collection
+            this.Session.Insert(new Blog { Title = "EmptyBlog" });
 
             var tags = new List<Tag>();
             for (var i = 0; i < 20; i++) {
