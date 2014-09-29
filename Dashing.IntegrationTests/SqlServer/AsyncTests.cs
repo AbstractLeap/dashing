@@ -19,6 +19,12 @@ namespace Dashing.IntegrationTests.SqlServer {
             Assert.Equal(1, post.PostId);
         }
 
+        [Fact]
+        public async void QueryWorks() {
+            var posts = await this.fixture.Session.Query<Post>().ToListAsync();
+            Assert.Equal(20, posts.Count());
+        }
+
         public void SetFixture(SqlServerFixture data) {
             this.fixture = data;
         }

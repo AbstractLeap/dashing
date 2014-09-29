@@ -40,44 +40,43 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
         }
 
         private void InsertData() {
-            var r = new Random();
             var users = new List<User>();
             for (var i = 0; i < 10; i++) {
-                var user = new User();
+                var user = new User { Username = "User_" + i };
                 users.Add(user);
                 this.Session.Insert(user);
             }
 
             var blogs = new List<Blog>();
             for (var i = 0; i < 10; i++) {
-                var blog = new Blog();
+                var blog = new Blog { Title = "Blog_" + i };
                 blogs.Add(blog);
                 this.Session.Insert(blog);
             }
 
             var posts = new List<Post>();
-            for (var i = 0; i <= 20; i++) {
-                var userId = r.Next(10);
-                var blogId = r.Next(10);
-                var post = new Post { Author = users[userId], Blog = blogs[blogId], Title = Guid.NewGuid().ToString("N") };
+            for (var i = 0; i < 20; i++) {
+                var userId = i / 2;
+                var blogId = i / 2;
+                var post = new Post { Author = users[userId], Blog = blogs[blogId], Title = "Post_" + i };
                 this.Session.Insert(post);
                 posts.Add(post);
             }
 
             for (var i = 0; i < 30; i++) {
-                var comment = new Comment { Post = posts[r.Next(20)], User = users[r.Next(10)] };
+                var comment = new Comment { Post = posts[i / 2], User = users[i / 3], Content = "Comment_" + i };
                 this.Session.Insert(comment);
             }
 
             var tags = new List<Tag>();
             for (var i = 0; i < 20; i++) {
-                var tag = new Tag { Content = "Tag" + i };
+                var tag = new Tag { Content = "Tag_" + i };
                 tags.Add(tag);
                 this.Session.Insert(tag);
             }
 
             for (var i = 0; i < 30; i++) {
-                var postTag = new PostTag { Post = posts[r.Next(20)], Tag = tags[r.Next(20)] };
+                var postTag = new PostTag { Post = posts[i / 2], Tag = tags[i / 2] };
                 this.Session.Insert(postTag);
             }
         }
