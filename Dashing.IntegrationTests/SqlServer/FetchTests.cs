@@ -33,6 +33,19 @@ namespace Dashing.IntegrationTests.SqlServer {
             Assert.NotNull(comment.First().Post.Blog.Title);
         }
 
+        [Fact]
+        public void MultipleFetchWithNestedWorks() {
+            var comment = fixture.Session.Query<Comment>().Fetch(c => c.Post.Blog).Fetch(c => c.User);
+            Assert.NotNull(comment.First().Post.Blog.Title);
+            Assert.NotNull(comment.First().User.Username);
+        }
+
+        [Fact]
+        public void NullableFetchReturnsNull() {
+            var comment = fixture.Session.Query<Comment>().Fetch(c => c.User).Where(c => c.Content == "Nullable User Content");
+            Assert.Null(comment.First().User);
+        }
+
         public void SetFixture(SqlServerFixture data) {
             this.fixture = data;
         }

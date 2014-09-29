@@ -270,14 +270,16 @@ namespace Dashing.CodeGeneration {
 
         private IEnumerable<Tuple<string, string>> GenerateMappersAndQueries(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature, CodeGeneratorConfig codeConfig) {
             // generate the mapper
-            var mapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature);
+            IEnumerable<Type> fetchedTypes;
+            var mapper = this.GenerateMapper(dapperWrapperClass, rootNode, rootType, signature, out fetchedTypes);
 
             // generate the query method
-            var query = this.GenerateQueryMethod(dapperWrapperClass, rootNode, rootType, signature, mapper, codeConfig, false);
+            var query = this.GenerateQueryMethod(dapperWrapperClass, rootNode, rootType, fetchedTypes, signature, mapper, codeConfig, false);
             var asyncQuery = this.GenerateQueryMethod(
                 dapperWrapperClass,
                 rootNode,
                 rootType,
+                fetchedTypes,
                 signature,
                 mapper,
                 codeConfig,
@@ -291,14 +293,14 @@ namespace Dashing.CodeGeneration {
 
         // TODO: Add in mapped on <-- what's this?
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private CodeMemberMethod GenerateQueryMethod(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature, CodeMemberMethod mapper, CodeGeneratorConfig codeConfig, bool isAsync) {
+        private CodeMemberMethod GenerateQueryMethod(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, IEnumerable<Type> fetchedTypes, string signature, CodeMemberMethod mapper, CodeGeneratorConfig codeConfig, bool isAsync) {
             var foreignKeyTypes = new List<string>();
             foreignKeyTypes.Add(rootType.Name + codeConfig.ForeignKeyAccessClassSuffix);
-            foreignKeyTypes.AddRange(rootNode.Children.Select(c => c.Value.Column.Type.Name + codeConfig.ForeignKeyAccessClassSuffix));
+            foreignKeyTypes.AddRange(fetchedTypes.Select(t => t.Name + codeConfig.ForeignKeyAccessClassSuffix));
 
             var trackingTypes = new List<string>();
             trackingTypes.Add(rootType.Name + codeConfig.TrackedClassSuffix);
-            trackingTypes.AddRange(rootNode.Children.Select(c => c.Value.Column.Type.Name + codeConfig.TrackedClassSuffix));
+            trackingTypes.AddRange(fetchedTypes.Select(t => t.Name + codeConfig.TrackedClassSuffix));
 
             // public static IEnumerable<T> EntityName_FetchSignature(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction)
             var connParameterName = isAsync ? "asyncConn" : "conn";
@@ -345,7 +347,7 @@ namespace Dashing.CodeGeneration {
             return query;
         }
 
-        private CodeMemberMethod GenerateMapper(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature) {
+        private CodeMemberMethod GenerateMapper(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, Type rootType, string signature, out IEnumerable<Type> fetchedTypes) {
             // static RootType RootType_Signature(object[] objects)
             var mapper = new CodeMemberMethod {
                 Name = rootType.Name + "_" + signature,
@@ -363,27 +365,32 @@ namespace Dashing.CodeGeneration {
 
             // root.Post = (Post)objects[i];
             var i = 0;
+            var actualFetchedTypes = new List<Type>();
             foreach (var node in rootNode.Children) {
-                mapper.Statements.Add(
-                    new CodeAssignStatement(
-                        new CodePropertyReferenceExpression(root, node.Key),
-                        new CodeCastExpression(node.Value.Column.Type, new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(++i)))));
+                actualFetchedTypes.AddRange(this.AddAssignment(mapper, root, node, objects, ref i));
             }
 
             // add a return statement
             mapper.Statements.Add(new CodeMethodReturnStatement(root));
             dapperWrapperClass.Members.Add(mapper);
+
+            // output fetched types
+            fetchedTypes = actualFetchedTypes;
             return mapper;
         }
 
-        private void AddParameterAndAssignment(CodeMemberMethod mapper, string previousName, KeyValuePair<string, FetchNode> node) {
-            var nodeTypeName = node.Value.Column.Type.Name;
-            var nodeTypeLowerName = nodeTypeName.ToLower() + Guid.NewGuid().ToString("N").ToLower();
-            mapper.Parameters.Add(new CodeParameterDeclarationExpression(nodeTypeName, nodeTypeLowerName));
-            mapper.Statements.Add(new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(previousName), node.Key), new CodeVariableReferenceExpression(nodeTypeLowerName)));
+        private IEnumerable<Type> AddAssignment(CodeMemberMethod mapper, CodeExpression currentObject, KeyValuePair<string, FetchNode> node, CodeVariableReferenceExpression objects, ref int i) {
+            var types = new List<Type> { node.Value.Column.Type };
+            var objectRef = new CodePropertyReferenceExpression(currentObject, node.Key);
+            mapper.Statements.Add(new CodeAssignStatement(
+                objectRef,
+                new CodeCastExpression(node.Value.Column.Type, new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(++i)))));
             foreach (var child in node.Value.Children) {
-                this.AddParameterAndAssignment(mapper, nodeTypeLowerName, child);
+                var nestedTypes = this.AddAssignment(mapper, objectRef, child, objects, ref i);
+                types.AddRange(nestedTypes);
             }
+
+            return types;
         }
     }
 }

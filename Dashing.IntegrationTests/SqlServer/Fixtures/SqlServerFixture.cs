@@ -68,6 +68,10 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
                 this.Session.Insert(comment);
             }
 
+            // insert single comment with null User to check that nulls are returned properly
+            var nullUserComment = new Comment { Post = posts[0], User = null, Content = "Nullable User Content" };
+            this.Session.Insert(nullUserComment);
+
             var tags = new List<Tag>();
             for (var i = 0; i < 20; i++) {
                 var tag = new Tag { Content = "Tag_" + i };
