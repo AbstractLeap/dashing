@@ -9,8 +9,6 @@
             this.SourceCodePath = "Dashing.Generated.cs";
             this.MapperGenerationMaxRecursion = 8;
             this.UpdateClassSuffix = "_Update";
-            this.OutputAssembly = true;
-            this.OutputSourceCode = true;
         }
 
         /// <summary>
