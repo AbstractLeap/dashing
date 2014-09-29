@@ -417,7 +417,7 @@
                 foreach (var node in rootNode.Children.OrderBy(c => c.Value.Column.FetchId)) {
                     var signature = this.AddNode(node.Value, tableSql, columnSql);
                     if (node.Value.IsFetched) {
-                        signatureBuilder.Append(node.Value.Column.FetchId + "S" + signature.Signature + "E");
+                        signatureBuilder.Append(signature.Signature);
                         splitOns.AddRange(signature.SplitOn);
                     }
                 }
@@ -470,12 +470,17 @@
             foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
                 var signature = this.AddNode(child.Value, tableSql, columnSql);
                 if (child.Value.IsFetched) {
-                    signatureBuilder.Append(child.Value.Column.FetchId + "S" + signature.Signature + "E");
+                    signatureBuilder.Append(signature.Signature);
                     splitOns.AddRange(signature.SplitOn);
                 }
             }
 
-            return new AddNodeResult { Signature = signatureBuilder.ToString(), SplitOn = splitOns };
+            var actualSignature = signatureBuilder.ToString();
+            if (node.IsFetched) {
+                actualSignature = node.Column.FetchId + "S" + actualSignature + "E";
+            }
+            
+            return new AddNodeResult { Signature = actualSignature, SplitOn = splitOns };
         }
 
         private void AddColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode, bool removeTrailingComma = true) {

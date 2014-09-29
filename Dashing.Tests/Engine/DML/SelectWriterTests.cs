@@ -34,6 +34,76 @@
         }
 
         [Fact]
+        public void SimpleFetchReturnsGoodSignature() {
+            var query = this.GetSelectQuery<Post>().Fetch(p => p.Author);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Assert.Equal("1SE", sql.FetchTree.FetchSignature);
+        }
+
+        [Fact]
+        public void SimpleFetchReturnsGoodSplitOn() {
+            var query = this.GetSelectQuery<Post>().Fetch(p => p.Author);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Assert.Equal("UserId", sql.FetchTree.SplitOn);
+        }
+
+        [Fact]
+        public void NestedFetchTest() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[DoNotMap], t_2.[BlogId], t_2.[Title], t_2.[CreateDate], t_2.[Description] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Blogs] as t_2 on t_1.BlogId = t_2.BlogId",
+                sql.Sql);
+        }
+
+        [Fact]
+        public void NestedFetchGetsGoodSignature() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Assert.Equal("2S2SEE", sql.FetchTree.FetchSignature);
+        }
+
+        [Fact]
+        public void NestedFetchTestGetsGoodSpliton() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Assert.Equal("PostId,BlogId", sql.FetchTree.SplitOn);
+        }
+
+        [Fact]
+        public void NestedMultipleFetchTest() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog).Fetch(c => c.User);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[CommentId], t.[Content], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[DoNotMap], t_2.[BlogId], t_2.[Title], t_2.[CreateDate], t_2.[Description], t_3.[UserId], t_3.[Username], t_3.[EmailAddress], t_3.[Password], t_3.[IsEnabled], t_3.[HeightInMeters] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Blogs] as t_2 on t_1.BlogId = t_2.BlogId left join [Users] as t_3 on t.UserId = t_3.UserId",
+                sql.Sql);
+        }
+
+        [Fact]
+        public void NestedMultipleFetchGetsGoodSignature() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog).Fetch(c => c.User);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Assert.Equal("2S2SEE3SE", sql.FetchTree.FetchSignature);
+        }
+
+        [Fact]
+        public void NestedMultipleFetchTestGetsGoodSpliton() {
+            var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog).Fetch(c => c.User);
+            var selectQuery = query as SelectQuery<Comment>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Assert.Equal("PostId,BlogId,UserId", sql.FetchTree.SplitOn);
+        }
+
+        [Fact]
         public void WhereIdPlus1() {
             var post = new Post { PostId = 1 };
             var query = this.GetSelectQuery<Post>().Where(p => p.PostId == post.PostId + 2);

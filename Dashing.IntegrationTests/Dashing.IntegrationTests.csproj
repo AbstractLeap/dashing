@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServer\AsyncTests.cs" />
+    <Compile Include="SqlServer\FetchTests.cs" />
     <Compile Include="SqlServer\Fixtures\SqlServerFixture.cs" />
     <Compile Include="SqlServer\SqlServerConfiguration.cs" />
     <Compile Include="TestDomain\Blog.cs" />

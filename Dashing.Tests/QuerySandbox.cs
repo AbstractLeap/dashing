@@ -23,24 +23,6 @@
         }
 
         [Fact(Skip = "connects to real database")]
-        public void ExecuteOneFetchQuery() {
-            var config = new CustomConfig();
-            using (var session = config.BeginSession()) {
-                var posts = session.Query<Post>().Fetch(p => p.Blog);
-                Assert.NotNull(posts.First().Blog.Title);
-            }
-        }
-
-        [Fact(Skip = "connects to real database")]
-        public void ExecuteNestFetchQuery() {
-            var config = new CustomConfig();
-            using (var session = config.BeginSession()) {
-                var comment = session.Query<Comment>().Fetch(c => c.Post.Blog);
-                Assert.NotNull(comment.First().Post.Blog.Title);
-            }
-        }
-
-        [Fact(Skip = "connects to real database")]
         public void TestInsert() {
             var config = new CustomConfig();
             using (var session = config.BeginSession()) {
