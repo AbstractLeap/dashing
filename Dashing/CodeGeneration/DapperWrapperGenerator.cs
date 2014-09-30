@@ -1,6 +1,7 @@
 namespace Dashing.CodeGeneration {
     using System;
     using System.CodeDom;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
@@ -365,9 +366,11 @@ namespace Dashing.CodeGeneration {
 
             // root.Post = (Post)objects[i];
             var i = 0;
-            var actualFetchedTypes = new List<Type>();
+            var nestedFetchedTypes = new List<Type>();
             foreach (var node in rootNode.Children) {
-                actualFetchedTypes.AddRange(this.AddAssignment(mapper, root, node, objects, ref i));
+                IEnumerable<Type> childFetchedTypes;
+                mapper.Statements.Add(this.AddAssignment(mapper, root, node, objects, ref i, out childFetchedTypes));
+                nestedFetchedTypes.AddRange(childFetchedTypes);
             }
 
             // add a return statement
@@ -375,22 +378,37 @@ namespace Dashing.CodeGeneration {
             dapperWrapperClass.Members.Add(mapper);
 
             // output fetched types
-            fetchedTypes = actualFetchedTypes;
+            fetchedTypes = nestedFetchedTypes;
             return mapper;
         }
 
-        private IEnumerable<Type> AddAssignment(CodeMemberMethod mapper, CodeExpression currentObject, KeyValuePair<string, FetchNode> node, CodeVariableReferenceExpression objects, ref int i) {
+        private CodeStatement AddAssignment(CodeMemberMethod mapper, CodeExpression currentObject, KeyValuePair<string, FetchNode> node, CodeVariableReferenceExpression objects, ref int i, out IEnumerable<Type> fetchedTypes) {
             var types = new List<Type> { node.Value.Column.Type };
             var objectRef = new CodePropertyReferenceExpression(currentObject, node.Key);
-            mapper.Statements.Add(new CodeAssignStatement(
+            var statements = new List<CodeStatement>();
+
+            // add the cast statement
+            statements.Add(new CodeAssignStatement(
                 objectRef,
                 new CodeCastExpression(node.Value.Column.Type, new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(++i)))));
+            var thisI = i;
             foreach (var child in node.Value.Children) {
-                var nestedTypes = this.AddAssignment(mapper, objectRef, child, objects, ref i);
+                IEnumerable<Type> nestedTypes;
+                statements.Add(this.AddAssignment(mapper, objectRef, child, objects, ref i, out nestedTypes));
                 types.AddRange(nestedTypes);
             }
 
-            return types;
+            // add the if not null wrapper
+            var ifStatement =
+                new CodeConditionStatement(
+                    new CodeBinaryOperatorExpression(
+                        new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(thisI)),
+                        CodeBinaryOperatorType.IdentityInequality,
+                        new CodePrimitiveExpression(null)),
+                    statements.ToArray());
+
+            fetchedTypes = types;
+            return ifStatement;
         }
     }
 }

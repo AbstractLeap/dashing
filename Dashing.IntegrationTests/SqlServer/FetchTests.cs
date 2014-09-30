@@ -51,6 +51,12 @@ namespace Dashing.IntegrationTests.SqlServer {
             Assert.Null(comment.First().User);
         }
 
+        [Fact]
+        public void NullableTripleFetchDoesNotThrow() {
+            var comment = fixture.Session.Query<PostTag>().Fetch(c => c.Post.Blog).Where(t => t.Tag.Content == "Null Post Tag");
+            Assert.Null(comment.First().Post);
+        }
+
         public void SetFixture(SqlServerFixture data) {
             this.fixture = data;
         }

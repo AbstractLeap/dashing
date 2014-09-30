@@ -68,9 +68,26 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
                 this.Session.Insert(comment);
             }
 
+            var tags = new List<Tag>();
+            for (var i = 0; i < 20; i++) {
+                var tag = new Tag { Content = "Tag_" + i };
+                tags.Add(tag);
+                this.Session.Insert(tag);
+            }
+
+            for (var i = 0; i < 30; i++) {
+                var postTag = new PostTag { Post = posts[i / 2], Tag = tags[i / 2] };
+                this.Session.Insert(postTag);
+            }
+
             // insert single comment with null User to check that nulls are returned properly
             var nullUserComment = new Comment { Post = posts[0], User = null, Content = "Nullable User Content" };
             this.Session.Insert(nullUserComment);
+
+            var nullTag = new Tag { Content = "Null Post Tag" };
+            this.Session.Insert(nullTag);
+            var nullPostTag = new PostTag { Tag = nullTag };
+            this.Session.Insert(nullPostTag);
 
             // add user for bulk update
             this.Session.Insert(new User { Username = "BulkUpdate", Password = "Blah" });
@@ -83,18 +100,6 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
 
             // test empty collection
             this.Session.Insert(new Blog { Title = "EmptyBlog" });
-
-            var tags = new List<Tag>();
-            for (var i = 0; i < 20; i++) {
-                var tag = new Tag { Content = "Tag_" + i };
-                tags.Add(tag);
-                this.Session.Insert(tag);
-            }
-
-            for (var i = 0; i < 30; i++) {
-                var postTag = new PostTag { Post = posts[i / 2], Tag = tags[i / 2] };
-                this.Session.Insert(postTag);
-            }
         }
 
         public void Dispose() {
