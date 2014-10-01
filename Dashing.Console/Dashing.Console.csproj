@@ -58,6 +58,18 @@
     <Reference Include="DatabaseSchemaReader">
       <HintPath>..\packages\DatabaseSchemaReader-polyfork.1.3.4.3\lib\net40\DatabaseSchemaReader.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\packages\Mono.Cecil.0.9.5.4\lib\net40\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>..\packages\Mono.Cecil.0.9.5.4\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>..\packages\Mono.Cecil.0.9.5.4\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>..\packages\Mono.Cecil.0.9.5.4\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -117,12 +129,16 @@
     <PostBuildEvent>if $(ConfigurationName) == Release (
 del dbm.exe
 del dbm.exe.config
-..\..\..\packages\ilmerge.2.13.0307\ILMerge.exe .\dbmanager.exe CommandLine.dll Dapper.dll Dashing.Tools.dll DatabaseSchemaReader.dll /out:dbm.exe
+..\..\..\packages\ilmerge.2.13.0307\ILMerge.exe .\dbmanager.exe CommandLine.dll Dapper.dll Dashing.Tools.dll DatabaseSchemaReader.dll Mono.Cecil.dll Mono.Cecil.Mdb.dll Mono.Cecil.Pdb.dll Mono.Cecil.Rocks.dll /out:dbm.exe
 del dbmanager.exe
 del CommandLine.dll
 del Dapper.dll
 del Dashing.Tools.dll 
 del DatabaseSchemaReader.dll
+del Mono.Cecil.dll
+del Mono.Cecil.Mdb.dll
+del Mono.Cecil.Pdb.dll
+del Mono.Cecil.Rocks.dll
 del *.pdb
 del *.xml
 del *.vshost.*

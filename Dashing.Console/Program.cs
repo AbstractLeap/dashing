@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Console {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data.Common;
     using System.IO;
     using System.Linq;
@@ -22,6 +23,11 @@
 
     using DatabaseSchemaReader;
     using DatabaseSchemaReader.DataSchema;
+
+    using Mono.Cecil;
+    using Mono.Cecil.Cil;
+
+    using ConnectionStringSettings = Dashing.Console.Settings.ConnectionStringSettings;
 
     internal class Program {
         private static void Main(string[] args) {
@@ -130,7 +136,7 @@
             // fetch the to state
             IConfiguration config;
             using (new TimedOperation("-- Fetching configuration contents...")) {
-                config = LoadConfiguration(dashingSettings);
+                config = LoadConfiguration(dashingSettings, connectionStringSettings);
             }
 
             IEnumerable<string> warnings, errors;
@@ -171,7 +177,7 @@
             // fetch the to state
             IConfiguration config;
             using (new TimedOperation("-- Fetching configuration contents...")) {
-                config = LoadConfiguration(dashingSettings);
+                config = LoadConfiguration(dashingSettings, connectionStringSettings);
             }
 
 
@@ -256,7 +262,7 @@
 
             DatabaseSchema schema;
             var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
-            
+
             var databaseReader = new DatabaseReader(
                 connectionString.ConnectionString,
                 connectionString.ProviderName);
@@ -311,7 +317,7 @@
             return script;
         }
 
-        private static IConfiguration LoadConfiguration(DashingSettings dashingSettings) {
+        private static IConfiguration LoadConfiguration(DashingSettings dashingSettings, ConnectionStringSettings connectionStringSettings) {
             // fetch the to state
             var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
             GC.KeepAlive(configAssembly);
@@ -328,9 +334,45 @@
                 }
             }
 
+            // attempt to find the call to ConfigurationManager and overwrite the connection string
+            InjectConnectionString(dashingSettings, connectionStringSettings);
+
             // TODO add in a factory way of generating the config for cases where constructor not empty
             var config = (IConfiguration)Activator.CreateInstance(configType);
             return config;
+        }
+
+        private static void InjectConnectionString(DashingSettings dashingSettings, ConnectionStringSettings connectionStringSettings) {
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(dashingSettings.PathToDll);
+            var cecilConfigType = assemblyDefinition.MainModule.Types.Single(t => t.FullName == dashingSettings.ConfigurationName);
+            var constructor = cecilConfigType.Methods.FirstOrDefault(m => m.IsConstructor && !m.HasParameters); // default constructor
+            if (constructor == null) {
+                using (Color(ConsoleColor.Red)) {
+                    throw new CatchyException("Unable to find a Default Constructor on the Configuration");
+                }
+            }
+
+            var getConnectionStringCall =
+                constructor.Body.Instructions.FirstOrDefault(
+                    i =>
+                    i.OpCode.Code == Code.Call
+                    && i.Operand.ToString()
+                    == "System.Configuration.ConnectionStringSettingsCollection System.Configuration.ConfigurationManager::get_ConnectionStrings()");
+            if (getConnectionStringCall == null) {
+                using (Color(ConsoleColor.Red)) {
+                    throw new CatchyException("Unable to find the ConnectionStrings call in the constructor");
+                }
+            }
+
+            var connectionStringKey = getConnectionStringCall.Next.Operand.ToString();
+            // override readonly property of connectionstrings
+            typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
+                                                  .SetValue(ConfigurationManager.ConnectionStrings, false);
+            ConfigurationManager.ConnectionStrings.Add(
+                new System.Configuration.ConnectionStringSettings(
+                    connectionStringKey,
+                    connectionStringSettings.ConnectionString,
+                    connectionStringSettings.ProviderName));
         }
 
         private static void NotImplemented() {
