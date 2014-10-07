@@ -1,0 +1,67 @@
+[1mdiff --git a/Dashing.IntegrationTests/Dashing.IntegrationTests.csproj b/Dashing.IntegrationTests/Dashing.IntegrationTests.csproj[m
+[1mindex ccd82e6..67ed76b 100644[m
+[1m--- a/Dashing.IntegrationTests/Dashing.IntegrationTests.csproj[m
+[1m+++ b/Dashing.IntegrationTests/Dashing.IntegrationTests.csproj[m
+[36m@@ -53,6 +53,7 @@[m
+     <Compile Include="SqlServer\EnumeratingTests.cs" />[m
+     <Compile Include="SqlServer\FetchTests.cs" />[m
+     <Compile Include="SqlServer\Fixtures\SqlServerFixture.cs" />[m
+[32m+[m[32m    <Compile Include="SqlServer\SelectTests.cs" />[m
+     <Compile Include="SqlServer\SqlServerConfiguration.cs" />[m
+     <Compile Include="SqlServer\TransactionTests.cs" />[m
+     <Compile Include="TestDomain\Blog.cs" />[m
+[1mdiff --git a/Dashing.Tests/Engine/DML/SelectWriterTests.cs b/Dashing.Tests/Engine/DML/SelectWriterTests.cs[m
+[1mindex f5b5285..45064e4 100644[m
+[1m--- a/Dashing.Tests/Engine/DML/SelectWriterTests.cs[m
+[1m+++ b/Dashing.Tests/Engine/DML/SelectWriterTests.cs[m
+[36m@@ -1,6 +1,7 @@[m
+ ﻿namespace Dashing.Tests.Engine.DML {[m
+     using System.Diagnostics;[m
+     using System.Diagnostics.CodeAnalysis;[m
+[32m+[m[32m    using System.Linq;[m
+ [m
+     using Dashing.Configuration;[m
+     using Dashing.Engine.Dialects;[m
+[36m@@ -163,6 +164,16 @@[m
+         }[m
+ [m
+         [Fact][m
+[32m+[m[32m        public void WhereEnumerableContains() {[m
+[32m+[m[32m            var ids = new[] { 1, 2, 3 };[m
+[32m+[m[32m            var query = this.GetSelectQuery<Post>().Where(p => ids.Contains(p.PostId));[m
+[32m+[m[32m            var selectQuery = query as SelectQuery<Post>;[m
+[32m+[m[32m            var sql = this.GetWriter().GenerateSql(selectQuery);[m
+[32m+[m[32m            Debug.Write(sql.Sql);[m
+[32m+[m[32m            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where [PostId] in @l_1", sql.Sql);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        [Fact][m
+         public void NonFetchedRelationship() {[m
+             var query = this.GetSelectQuery<Post>().Where(p => p.Blog.Title == "Boo");[m
+             var selectQuery = query as SelectQuery<Post>;[m
+[1mdiff --git a/Dashing/Engine/DML/WhereClauseExpressionVisitor.cs b/Dashing/Engine/DML/WhereClauseExpressionVisitor.cs[m
+[1mindex 9175081..31dd5ac 100644[m
+[1m--- a/Dashing/Engine/DML/WhereClauseExpressionVisitor.cs[m
+[1m+++ b/Dashing/Engine/DML/WhereClauseExpressionVisitor.cs[m
+[36m@@ -275,9 +275,8 @@[m
+                     }[m
+ [m
+                     this.Visit(memberExpr);[m
+[31m-                    this.Sql.Append(" in (");[m
+[32m+[m[32m                    this.Sql.Append(" in ");[m
+                     this.Visit(valuesExpr);[m
+[31m-                    this.Sql.Append(")");[m
+                     break;[m
+ [m
+                 case "StartsWith":[m
+[36m@@ -354,10 +353,6 @@[m
+             }[m
+ [m
+             if (value != null) {[m
+[31m-                if (value.GetType().IsCollection()) {[m
+[31m-                    throw new NotImplementedException("Queries of the type foo.BarId in (@barIds) are not supported yet");[m
+[31m-                }[m
+[31m-[m
+                 if (this.configuration.HasMap(value.GetType())) {[m
+                     // fetch the primary key[m
+                     value = this.configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);[m

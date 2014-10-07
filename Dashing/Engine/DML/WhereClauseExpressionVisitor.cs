@@ -275,9 +275,8 @@
                     }
 
                     this.Visit(memberExpr);
-                    this.Sql.Append(" in (");
+                    this.Sql.Append(" in ");
                     this.Visit(valuesExpr);
-                    this.Sql.Append(")");
                     break;
 
                 case "StartsWith":
@@ -354,10 +353,6 @@
             }
 
             if (value != null) {
-                if (value.GetType().IsCollection()) {
-                    throw new NotImplementedException("Queries of the type foo.BarId in (@barIds) are not supported yet");
-                }
-
                 if (this.configuration.HasMap(value.GetType())) {
                     // fetch the primary key
                     value = this.configuration.GetMap(value.GetType()).GetPrimaryKeyValue(value);

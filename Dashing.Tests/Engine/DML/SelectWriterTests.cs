@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tests.Engine.DML {
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
@@ -160,6 +161,16 @@
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([BlogId] = @l_1)", sql.Sql);
+        }
+
+        [Fact]
+        public void WhereEnumerableContains() {
+            var ids = new[] { 1, 2, 3 };
+            var query = this.GetSelectQuery<Post>().Where(p => ids.Contains(p.PostId));
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where [PostId] in @l_1", sql.Sql);
         }
 
         [Fact]

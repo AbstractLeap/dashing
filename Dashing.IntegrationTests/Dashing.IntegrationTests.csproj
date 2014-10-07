@@ -53,6 +53,7 @@
     <Compile Include="SqlServer\EnumeratingTests.cs" />
     <Compile Include="SqlServer\FetchTests.cs" />
     <Compile Include="SqlServer\Fixtures\SqlServerFixture.cs" />
+    <Compile Include="SqlServer\SelectTests.cs" />
     <Compile Include="SqlServer\SqlServerConfiguration.cs" />
     <Compile Include="SqlServer\TransactionTests.cs" />
     <Compile Include="TestDomain\Blog.cs" />
