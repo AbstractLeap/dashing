@@ -111,7 +111,7 @@
             // generate new tracked instance and map over properties
             var expressions = new List<Expression>();
             expressions.Add(Expression.Assign(returnVar, Expression.New(type)));
-            foreach (var property in baseType.GetProperties()) {
+            foreach (var property in baseType.GetProperties().Where(p => p.CanWrite && p.GetSetMethod() != null)) {
                 expressions.Add(Expression.Assign(Expression.Property(returnVar, property.Name), Expression.Property(parameter, property.Name)));
             }
 
