@@ -77,10 +77,10 @@
                 else {
                     var relatedEntity = map.GetColumnValue(entity, column);
                     if (relatedEntity != null) {
-                        parameters.Add(paramName, this.configuration.GetMap(column.Type).GetPrimaryKeyValue(relatedEntity));
+                        parameters.Add(paramName, this.configuration.GetMap(column.Type).GetPrimaryKeyValue(relatedEntity), column.DbType);
                     }
                     else {
-                        parameters.Add(paramName);
+                        parameters.Add(paramName, null, column.DbType);
                     }
                 }
             }

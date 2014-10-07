@@ -75,7 +75,7 @@
                 }
 
                 // add the parameter
-                parameters.Add(paramName, paramValue);
+                parameters.Add(paramName, paramValue, mappedColumn.DbType);
 
                 // finish up the set claus
                 this.Dialect.AppendQuotedName(sql, mappedColumn.DbName);
