@@ -47,9 +47,13 @@
 
         private readonly DelegateQueryCreator delegateQueryCreator;
 
+        private readonly IDictionary<Type, Delegate> addTrackingToInstanceDelegates;
+
         private delegate IEnumerable<T> NoFetchDelegate<out T>(IDbConnection conn, string sql, dynamic parameters, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null);
 
         private delegate IEnumerableAwaiter<T> NoFetchDelegateAsync<T>(IDbConnection conn, string sql, dynamic parameters, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
+
+        private delegate T AddTrackingDelegate<T>(T entity);
 
         public GeneratedCodeManager(CodeGeneratorConfig config, Assembly generatedCodeAssembly) {
             this.Config = config;
@@ -70,6 +74,7 @@
             this.asyncNoFetchFkCalls = new Dictionary<Type, Delegate>();
             this.asyncNoFetchTrackingCalls = new Dictionary<Type, Delegate>();
             this.updateCreators = new Dictionary<Type, Delegate>();
+            this.addTrackingToInstanceDelegates = new Dictionary<Type, Delegate>();
 
             foreach (var type in this.GeneratedCodeAssembly.DefinedTypes) {
                 // find the base type from the users code
@@ -90,12 +95,36 @@
                     this.trackingTypes.Add(type.BaseType.BaseType, type); // tracking classes extend fkClasses
                     this.MakeNoFetchCall(type, type.BaseType.BaseType, this.noFetchTrackingCalls, "Query", typeof(NoFetchDelegate<>));
                     this.MakeNoFetchCall(type, type.BaseType.BaseType, this.asyncNoFetchTrackingCalls, "QueryAsync", typeof(NoFetchDelegateAsync<>));
+                    this.MakeAddTrackingDelegate(type, type.BaseType.BaseType);
                 }
                 else if (type.Name.EndsWith(this.Config.UpdateClassSuffix)) {
                     this.updateTypes.Add(type.BaseType, type);
                     this.updateCreators.Add(type.BaseType, this.MakeUpdateCreator(type));
                 }
             }
+        }
+
+        private void MakeAddTrackingDelegate(TypeInfo type, Type baseType) {
+            var parameter = Expression.Parameter(baseType);
+            var returnVar = Expression.Variable(type);
+
+            // generate new tracked instance and map over properties
+            var expressions = new List<Expression>();
+            expressions.Add(Expression.Assign(returnVar, Expression.New(type)));
+            foreach (var property in baseType.GetProperties()) {
+                expressions.Add(Expression.Assign(Expression.Property(returnVar, property.Name), Expression.Property(parameter, property.Name)));
+            }
+
+            // set istracked to true
+            expressions.Add(Expression.Assign(Expression.Property(returnVar, "IsTracking"), Expression.Constant(true)));
+
+            // return
+            expressions.Add(returnVar);
+
+            // add to dict
+            this.addTrackingToInstanceDelegates.Add(
+                baseType,
+                Expression.Lambda(typeof(AddTrackingDelegate<>).MakeGenericType(baseType), Expression.Block(new[] { returnVar }, expressions), new[] { parameter }).Compile());
         }
 
         private void AddDapperWrapperQueryCall(TypeInfo type, string methodName, IDictionary<Type, Delegate> calls, Type delegateQueryType) {
@@ -225,6 +254,14 @@
 
         public T CreateTrackingInstance<T>() {
             return (T)Activator.CreateInstance(this.GetTrackingType(typeof(T)));
+        }
+
+        public T CreateTrackingInstance<T>(T entity) {
+            if (entity is ITrackedEntity) {
+                return entity;
+            }
+
+            return ((AddTrackingDelegate<T>)this.addTrackingToInstanceDelegates[typeof(T)])(entity);
         }
 
         public T CreateUpdateInstance<T>() {

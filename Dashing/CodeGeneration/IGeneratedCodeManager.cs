@@ -43,6 +43,13 @@
         T CreateTrackingInstance<T>();
 
         /// <summary>
+        /// Returns an instance of a tracking class for the entity or simply returns entity if it's already tracked
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        T CreateTrackingInstance<T>(T entity);
+
+        /// <summary>
         ///     Returns an instance of an update class for the type T
         /// </summary>
         /// <typeparam name="T"></typeparam>

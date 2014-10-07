@@ -13,6 +13,43 @@
         }
 
         [Fact]
+        public void AddTrackingWorks() {
+            var post = new Post { PostId = 1 };
+            var trackedPost = this.codeManager.CreateTrackingInstance(post);
+            Assert.IsType(this.codeManager.GetTrackingType(typeof(Post)), trackedPost);
+        }
+
+        [Fact]
+        public void AddTrackingReturnsEntityIfAlreadyTracked() {
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+            var trackedPost = this.codeManager.CreateTrackingInstance(post);
+            Assert.Same(post, trackedPost);
+        }
+
+        [Fact]
+        public void AddTrackingDoesNotMakeDirty() {
+            var post = new Post { PostId = 1, Author = new User { UserId = 1 }, Title = "Blah" };
+            var trackedPost = this.codeManager.CreateTrackingInstance(post);
+            Assert.Empty(((ITrackedEntity)trackedPost).DirtyProperties);
+        }
+
+        [Fact]
+        public void AddTrackingCopiesValues() {
+            var post = new Post { PostId = 1, Author = new User { UserId = 1 }, Title = "Blah" };
+            var trackedPost = this.codeManager.CreateTrackingInstance(post);
+            Assert.Equal(1, trackedPost.PostId);
+            Assert.Equal(1, trackedPost.Author.UserId);
+            Assert.Equal("Blah", trackedPost.Title);
+        }
+
+        [Fact]
+        public void AddTrackingStartsTracking() {
+            var post = new Post { PostId = 1, Author = new User { UserId = 1 }, Title = "Blah" };
+            var trackedPost = this.codeManager.CreateTrackingInstance(post);
+            Assert.True(((ITrackedEntity)trackedPost).IsTracking);
+        }
+
+        [Fact]
         public void ChangeRelationshipPropertyFromNullMarksAsDirty() {
             var post = this.codeManager.CreateTrackingInstance<Post>();
             this.codeManager.TrackInstance(post);
