@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Engine.DapperMapperGeneration {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
@@ -68,7 +69,7 @@
         [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private void VisitTree(FetchNode node, IList<Expression> statements, IList<ParameterExpression> parameters, bool visitedCollection) {
             var parentParam = parameters.Last();
-            foreach (var childNode in node.Children.Values) {
+            foreach (var childNode in node.Children.Values.OrderBy(n => n.Column.FetchId)) {
                 // create a param
                 Type childType;
                 if (childNode.Column.Relationship == RelationshipType.OneToMany) {
@@ -139,6 +140,7 @@
                             Expression.New(
                                 typeof(List<>).MakeGenericType(
                                     childNode.Column.Type.GetGenericArguments().First())))),
+                                    Expression.Call(null, typeof(Debug).GetMethod("Write", new[] { typeof(object)}), childParam),
                     // if the child is not null, add it to the list
                     Expression.IfThen(
                         // if (child != null)
