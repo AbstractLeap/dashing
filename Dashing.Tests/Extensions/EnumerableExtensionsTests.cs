@@ -46,6 +46,13 @@
             Assert.True(mapIndexes[typeof(PostTag)] < mapIndexes[typeof(Post)]);
         }
 
+        [Fact]
+        public void SubsetWorks() {
+            var list = new[] { 1, 2, 3 };
+            var subsets = list.Subsets();
+            Assert.Equal(8, subsets.Count());
+        }
+
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
                 : base(new System.Configuration.ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {

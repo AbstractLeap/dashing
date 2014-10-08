@@ -27,20 +27,20 @@ namespace Dashing.IntegrationTests.SqlServer {
 
         [Fact]
         public void MultipleFetchParentWorks() {
-            var posts = fixture.Session.Query<PostTag>().Fetch(p => p.Post).Fetch(p => p.Tag).ToList();
+            var posts = fixture.Session.Query<PostTag>().Fetch(p => p.Post).Fetch(p => p.Tag).OrderBy(p => p.PostTagId).ToList();
             Assert.NotNull(posts.First().Post.Title);
             Assert.NotNull(posts.First().Tag.Content);
         }
 
         [Fact]
         public void NestedFetchWorks() {
-            var comment = fixture.Session.Query<Comment>().Fetch(c => c.Post.Blog);
+            var comment = fixture.Session.Query<Comment>().Fetch(c => c.Post.Blog).OrderBy(c => c.CommentId);
             Assert.NotNull(comment.First().Post.Blog.Title);
         }
 
         [Fact]
         public void MultipleFetchWithNestedWorks() {
-            var comment = fixture.Session.Query<Comment>().Fetch(c => c.Post.Blog).Fetch(c => c.User);
+            var comment = fixture.Session.Query<Comment>().Fetch(c => c.Post.Blog).Fetch(c => c.User).OrderBy(c => c.CommentId);
             Assert.NotNull(comment.First().Post.Blog.Title);
             Assert.NotNull(comment.First().User.Username);
         }

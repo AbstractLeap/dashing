@@ -7,7 +7,7 @@
             this.TrackedClassSuffix = "_Tracked";
             this.AssemblyPath = "Dashing.Generated.dll";
             this.SourceCodePath = "Dashing.Generated.cs";
-            this.MapperGenerationMaxRecursion = 8;
+            this.MapperGenerationMaxRecursion = 3;
             this.UpdateClassSuffix = "_Update";
         }
 

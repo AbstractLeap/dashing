@@ -288,17 +288,17 @@
                 // TODO support multiple collection fetches
                 if (result.NumberCollectionsFetched > 0) {
                     if (query.IsTracked) {
-                        return this.Tracked(this.delegateQueryCreator.GetTrackingCollectionFunction<T>(result, true)(result, query, connection, transaction));
+                        return this.Tracked(this.delegateQueryCreator.GetCollectionFunction<T>(result, true)(result, query, connection, transaction));
                     }
 
-                    return this.delegateQueryCreator.GetFKCollectionFunction<T>(result, false)(result, query, connection, transaction);
+                    return this.delegateQueryCreator.GetCollectionFunction<T>(result, false)(result, query, connection, transaction);
                 }
 
                 if (query.IsTracked) {
-                    return this.Tracked(this.delegateQueryCreator.GetTrackingNoCollectionFunction<T>(result, true)(result, query, connection, transaction));
+                    return this.Tracked(this.delegateQueryCreator.GetNoCollectionFunction<T>(result, true)(result, query, connection, transaction));
                 }
 
-                return this.delegateQueryCreator.GetFKNoCollectionFunction<T>(result, false)(result, query, connection, transaction);
+                return this.delegateQueryCreator.GetNoCollectionFunction<T>(result, false)(result, query, connection, transaction);
             }
 
             if (query.IsTracked) {
@@ -344,19 +344,19 @@
                 // TODO support multiple collection fetches
                 if (result.NumberCollectionsFetched > 0) {
                     if (query.IsTracked) {
-                        var results = await this.delegateQueryCreator.GetTrackingCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
+                        var results = await this.delegateQueryCreator.GetCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
                         return this.Tracked(results);
                     }
 
-                    return await this.delegateQueryCreator.GetFKCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
+                    return await this.delegateQueryCreator.GetCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
                 }
 
                 if (query.IsTracked) {
-                    var results = this.delegateQueryCreator.GetTrackingNoCollectionFunction<T>(result, true)(result, query, connection, transaction);
+                    var results = this.delegateQueryCreator.GetNoCollectionFunction<T>(result, true)(result, query, connection, transaction);
                     return this.Tracked(results);
                 }
 
-                return this.delegateQueryCreator.GetFKNoCollectionFunction<T>(result, false)(result, query, connection, transaction);
+                return this.delegateQueryCreator.GetNoCollectionFunction<T>(result, false)(result, query, connection, transaction);
             }
 
             if (query.IsTracked) {

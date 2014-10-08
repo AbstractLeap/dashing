@@ -15,7 +15,7 @@
             var post = new Post { PostId = 1, Title = "Boo", Rating = 11 };
             var result = insertWriter.GenerateSql(post);
             Debug.Write(result.Sql);
-            Assert.Equal("insert into [Posts] ([Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap]) values (@p_1, @p_2, @p_3, @p_4, @p_5, @p_6)", result.Sql);
+            Assert.Equal("insert into [Posts] ([AuthorId], [BlogId], [Content], [DoNotMap], [Rating], [Title]) values (@p_1, @p_2, @p_3, @p_4, @p_5, @p_6)", result.Sql);
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {

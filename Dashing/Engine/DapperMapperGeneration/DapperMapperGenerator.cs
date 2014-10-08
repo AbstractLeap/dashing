@@ -140,7 +140,6 @@
                             Expression.New(
                                 typeof(List<>).MakeGenericType(
                                     childNode.Column.Type.GetGenericArguments().First())))),
-                                    Expression.Call(null, typeof(Debug).GetMethod("Write", new[] { typeof(object)}), childParam),
                     // if the child is not null, add it to the list
                     Expression.IfThen(
                         // if (child != null)
