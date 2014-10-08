@@ -24,15 +24,19 @@
 
         private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> trackingCollectionQueries;
 
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> trackingNoCollectionQueries;
-
         private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncTrackingCollectionQueries;
 
         private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> foreignKeyCollectionQueries;
 
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncForeignKeyCollectionQueries;
+
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> trackingNoCollectionQueries;
+
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncTrackingNoCollectionQueries;
+
         private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> foreignKeyNoCollectionQueries;
 
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncForeignKeyCollectionQueries;
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncForeignKeyNoCollectionQueries;
 
         private readonly IGeneratedCodeManager generatedCodeManager;
 
@@ -42,11 +46,13 @@
             this.trackingMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.foreignKeyMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.trackingCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.trackingNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.asyncTrackingCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.foreignKeyCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.foreignKeyNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
             this.asyncForeignKeyCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.trackingNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.asyncTrackingNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.foreignKeyNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.asyncForeignKeyNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
@@ -62,7 +68,36 @@
             Delegate func;
             var mapperFactory = this.GetCollectionFunction<T>(result, isTracked, true, out func);
 
-            return ((Func<Delegate, Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>>>)func)(mapperFactory);
+            return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>>)func.DynamicInvoke(mapperFactory);
+        }
+
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetNoCollectionFunction<T>(
+            SelectWriterResult result,
+            bool isTracked) {
+            Delegate func;
+            var mapper = this.GetNoCollectionFunction<T>(result, isTracked, false, out func);
+
+            return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>)func.DynamicInvoke(mapper);
+        }
+
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>> GetNoCollectionFunctionAsync<T>(
+            SelectWriterResult result,
+            bool isTracked) {
+            Delegate func;
+            var mapper = this.GetNoCollectionFunction<T>(result, isTracked, true, out func);
+
+            return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>>)func.DynamicInvoke(mapper);
+        }
+
+        private Delegate GetNoCollectionFunction<T>(SelectWriterResult result, bool isTracked, bool isAsync, out Delegate func) {
+            var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
+            var factoryDictionary = isTracked ? this.trackingMapperFactories : this.foreignKeyMapperFactories;
+            var queries = isAsync
+                              ? (isTracked ? this.asyncTrackingNoCollectionQueries : this.asyncForeignKeyNoCollectionQueries)
+                              : (isTracked ? this.trackingNoCollectionQueries : this.foreignKeyNoCollectionQueries);
+            Delegate mapper = factoryDictionary.GetOrAdd(key, t => this.dapperMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree, isTracked));
+            func = queries.GetOrAdd(key, t => this.GenerateQuery<T>(mapper, isTracked, isAsync));
+            return mapper;
         }
 
         private Delegate GetCollectionFunction<T>(SelectWriterResult result, bool isTracked, bool isAsync, out Delegate func) {
@@ -82,17 +117,37 @@
             return mapperFactory;
         }
 
-        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetNoCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
-            if (this.trackingNoCollectionQueries == null) {
-                throw new NotImplementedException();
-            }
-
-            throw new NotImplementedException();
-        }
-
         private Delegate GenerateCollection<T>(Delegate mapperFactory, bool isTracked, int numberCollectionsFetched, bool isAsync) {
             var mapperParams = mapperFactory.GetType().GetGenericArguments().Last().GetGenericArguments();
             return this.GenerateCollectionFactory<T>(mapperParams, isTracked, numberCollectionsFetched, isAsync);
+        }
+
+        private Delegate GenerateQuery<T>(Delegate mapper, bool isTracked, bool isAsync) {
+            var mapperParams = mapper.GetType().GetGenericArguments();
+            var tt = typeof(T);
+
+            // Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>>
+            var resultParam = Expression.Parameter(typeof(SelectWriterResult));
+            var queryParam = Expression.Parameter(typeof(SelectQuery<>).MakeGenericType(tt));
+            var connectionParam = Expression.Parameter(typeof(IDbConnection));
+            var transactionParam = Expression.Parameter(typeof(IDbTransaction));
+            var mapperParam = Expression.Parameter(mapper.GetType());
+
+            // call query function
+            MethodInfo sqlMapperQuery;
+            var queryResultVariable = GetQueryMethod<T>(mapperParams, isAsync, tt, out sqlMapperQuery);
+            var callQueryExpression = GetCallQueryExpression<T>(sqlMapperQuery, connectionParam, resultParam, mapperParam, transactionParam);
+
+            // generate lambda (mapper) => ((result, query, connection, transaction) => SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
+            var expr = Expression.Lambda(
+                        Expression.Lambda(
+                            callQueryExpression,
+                            resultParam,
+                            queryParam,
+                            connectionParam,
+                            transactionParam),
+                            mapperParam);
+            return expr.Compile();
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
@@ -188,32 +243,12 @@
             statements.Add(mapperExpr);
 
             // var queryResult = SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
-            ParameterExpression queryResultVariable = null;
-            MethodInfo sqlMapperQuery = null;
-            if (isAsync) {
-                queryResultVariable = Expression.Variable(typeof(Task<>).MakeGenericType(typeof(IEnumerable<>).MakeGenericType(tt)), "queryResult");
-                sqlMapperQuery = typeof(SqlMapper).GetMethods().First(m => m.Name == "QueryAsync" && m.GetGenericArguments().Count() == mapperParams.Count()).MakeGenericMethod(mapperParams);
-            }
-            else {
-                queryResultVariable = Expression.Variable(typeof(IEnumerable<>).MakeGenericType(tt), "queryResult");
-                sqlMapperQuery = typeof(SqlMapper).GetMethods().First(m => m.Name == "Query" && m.GetGenericArguments().Count() == mapperParams.Count()).MakeGenericMethod(mapperParams);
-            }
+            MethodInfo sqlMapperQuery;
+            var queryResultVariable = GetQueryMethod<T>(mapperParams, isAsync, tt, out sqlMapperQuery);
 
             var queryExpr = Expression.Assign(
                 queryResultVariable,
-                Expression.Call(
-                    sqlMapperQuery,
-                    new Expression[] {
-                        connectionParam, 
-                        Expression.Property(resultParam, "Sql"), 
-                        mapperVariable, 
-                        Expression.Property(resultParam, "Parameters"),
-                        transactionParam,
-                        Expression.Constant(true),
-                        Expression.Property(Expression.Property(resultParam, "FetchTree"), "SplitOn"),
-                        Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(int))),
-                        Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(CommandType)))
-                    }));
+                GetCallQueryExpression<T>(sqlMapperQuery, connectionParam, resultParam, mapperVariable, transactionParam));
             variableExpressions.Add(queryResultVariable);
             statements.Add(queryExpr);
 
@@ -234,6 +269,42 @@
                         transactionParam),
                     funcFactoryParam);
             return lambdaExpression.Compile();
+        }
+
+        private static MethodCallExpression GetCallQueryExpression<T>(MethodInfo sqlMapperQuery, ParameterExpression connectionParam, ParameterExpression resultParam, ParameterExpression mapperVariable, ParameterExpression transactionParam) {
+            return Expression.Call(
+                sqlMapperQuery,
+                new Expression[] {
+                                     connectionParam, 
+                                     Expression.Property(resultParam, "Sql"), 
+                                     mapperVariable, 
+                                     Expression.Property(resultParam, "Parameters"),
+                                     transactionParam,
+                                     Expression.Constant(true),
+                                     Expression.Property(Expression.Property(resultParam, "FetchTree"), "SplitOn"),
+                                     Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(int))),
+                                     Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(CommandType)))
+                                 });
+        }
+
+        private static ParameterExpression GetQueryMethod<T>(Type[] mapperParams, bool isAsync, Type tt, out MethodInfo sqlMapperQuery) {
+            ParameterExpression queryResultVariable = null;
+            sqlMapperQuery = null;
+            if (isAsync) {
+                queryResultVariable = Expression.Variable(typeof(Task<>).MakeGenericType(typeof(IEnumerable<>).MakeGenericType(tt)), "queryResult");
+                sqlMapperQuery =
+                    typeof(SqlMapper).GetMethods()
+                                     .First(m => m.Name == "QueryAsync" && m.GetGenericArguments().Count() == mapperParams.Count())
+                                     .MakeGenericMethod(mapperParams);
+            }
+            else {
+                queryResultVariable = Expression.Variable(typeof(IEnumerable<>).MakeGenericType(tt), "queryResult");
+                sqlMapperQuery =
+                    typeof(SqlMapper).GetMethods()
+                                     .First(m => m.Name == "Query" && m.GetGenericArguments().Count() == mapperParams.Count())
+                                     .MakeGenericMethod(mapperParams);
+            }
+            return queryResultVariable;
         }
     }
 }

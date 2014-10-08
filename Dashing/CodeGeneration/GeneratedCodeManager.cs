@@ -352,11 +352,11 @@
                 }
 
                 if (query.IsTracked) {
-                    var results = this.delegateQueryCreator.GetNoCollectionFunction<T>(result, true)(result, query, connection, transaction);
+                    var results = await this.delegateQueryCreator.GetNoCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
                     return this.Tracked(results);
                 }
 
-                return this.delegateQueryCreator.GetNoCollectionFunction<T>(result, false)(result, query, connection, transaction);
+                return await this.delegateQueryCreator.GetNoCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
             }
 
             if (query.IsTracked) {
