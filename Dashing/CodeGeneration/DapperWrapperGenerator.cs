@@ -306,7 +306,7 @@ namespace Dashing.CodeGeneration {
             // public static IEnumerable<T> EntityName_FetchSignature(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction)
             var connParameterName = isAsync ? "asyncConn" : "conn";
             var query = new CodeMemberMethod {
-                Name = rootType.Name + "_" + signature + (isAsync ? "Async" : ""),
+                Name = rootType.Name + "_" + signature + (isAsync ? "Async" : string.Empty),
                 ReturnType = new CodeTypeReference(isAsync ? "Task<IEnumerable<" + rootType.Name + ">>" : "IEnumerable<" + rootType.Name + ">"),
                 Attributes = MemberAttributes.Static
             };

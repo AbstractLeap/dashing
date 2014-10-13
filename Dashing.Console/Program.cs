@@ -365,6 +365,7 @@
             }
 
             var connectionStringKey = getConnectionStringCall.Next.Operand.ToString();
+
             // override readonly property of connectionstrings
             typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
                                                   .SetValue(ConfigurationManager.ConnectionStrings, false);

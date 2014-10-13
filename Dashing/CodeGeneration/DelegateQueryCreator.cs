@@ -11,7 +11,6 @@
 
     using Dapper;
 
-    using Dashing.Engine;
     using Dashing.Engine.DapperMapperGeneration;
     using Dashing.Engine.DML;
 
@@ -55,7 +54,9 @@
             this.asyncForeignKeyNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
         }
 
-        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetCollectionFunction<T>(SelectWriterResult result, bool isTracked) {
+        public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetCollectionFunction<T>(
+            SelectWriterResult result,
+            bool isTracked) {
             Delegate func;
             var mapperFactory = this.GetCollectionFunction<T>(result, isTracked, false, out func);
 
@@ -95,7 +96,9 @@
             var queries = isAsync
                               ? (isTracked ? this.asyncTrackingNoCollectionQueries : this.asyncForeignKeyNoCollectionQueries)
                               : (isTracked ? this.trackingNoCollectionQueries : this.foreignKeyNoCollectionQueries);
-            Delegate mapper = factoryDictionary.GetOrAdd(key, t => this.dapperMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree, isTracked));
+            Delegate mapper = factoryDictionary.GetOrAdd(
+                key,
+                t => this.dapperMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree, isTracked));
             func = queries.GetOrAdd(key, t => this.GenerateQuery<T>(mapper, isTracked, isAsync));
             return mapper;
         }
@@ -103,17 +106,28 @@
         private Delegate GetCollectionFunction<T>(SelectWriterResult result, bool isTracked, bool isAsync, out Delegate func) {
             var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
             var factoryDictionary = isTracked ? this.trackingMapperFactories : this.foreignKeyMapperFactories;
-            var collectionQueries = isAsync ? (isTracked ? this.asyncTrackingCollectionQueries : this.asyncForeignKeyCollectionQueries) : (isTracked ? this.trackingCollectionQueries : this.foreignKeyCollectionQueries);
+            var collectionQueries = isAsync
+                                        ? (isTracked ? this.asyncTrackingCollectionQueries : this.asyncForeignKeyCollectionQueries)
+                                        : (isTracked ? this.trackingCollectionQueries : this.foreignKeyCollectionQueries);
 
             Delegate mapperFactory;
             if (result.NumberCollectionsFetched == 1) {
-                mapperFactory = factoryDictionary.GetOrAdd(key, t => this.dapperMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree, isTracked));
-                func = collectionQueries.GetOrAdd(key, t => this.GenerateCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, isAsync));
+                mapperFactory = factoryDictionary.GetOrAdd(
+                    key,
+                    t => this.dapperMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree, isTracked));
+                func = collectionQueries.GetOrAdd(
+                    key,
+                    t => this.GenerateCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, isAsync));
             }
             else {
-                mapperFactory = factoryDictionary.GetOrAdd(key, t => this.dapperMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree, isTracked));
-                func = collectionQueries.GetOrAdd(key, t => this.GenerateCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, isAsync));
+                mapperFactory = factoryDictionary.GetOrAdd(
+                    key,
+                    t => this.dapperMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree, isTracked));
+                func = collectionQueries.GetOrAdd(
+                    key,
+                    t => this.GenerateCollection<T>(mapperFactory, isTracked, result.NumberCollectionsFetched, isAsync));
             }
+
             return mapperFactory;
         }
 
@@ -140,17 +154,13 @@
 
             // generate lambda (mapper) => ((result, query, connection, transaction) => SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
             var expr = Expression.Lambda(
-                        Expression.Lambda(
-                            callQueryExpression,
-                            resultParam,
-                            queryParam,
-                            connectionParam,
-                            transactionParam),
-                            mapperParam);
+                Expression.Lambda(callQueryExpression, resultParam, queryParam, connectionParam, transactionParam),
+                mapperParam);
             return expr.Compile();
         }
 
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines",
+            Justification = "This is hard to read the StyleCop way")]
         private Delegate GenerateCollectionFactory<T>(Type[] mapperParams, bool isTracked, int numberCollectionFetches, bool isAsync) {
             var tt = typeof(T);
             var statements = new List<Expression>();
@@ -170,19 +180,12 @@
                 typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object)));
             ParameterExpression funcFactoryParam;
             if (numberCollectionFetches > 1) {
-                funcFactoryParam =
-                    Expression.Parameter(
-                        typeof(Func<,,>).MakeGenericType(
-                            rootDictType,
-                            otherDictType,
-                            typeof(Delegate)));
+                funcFactoryParam = Expression.Parameter(typeof(Func<,,>).MakeGenericType(rootDictType, otherDictType, typeof(Delegate)));
             }
             else {
                 funcFactoryParam =
                     Expression.Parameter(
-                        typeof(Func<,>).MakeGenericType(
-                            typeof(IDictionary<,>).MakeGenericType(typeof(object), returnType),
-                            typeof(Delegate)));
+                        typeof(Func<,>).MakeGenericType(typeof(IDictionary<,>).MakeGenericType(typeof(object), returnType), typeof(Delegate)));
             }
 
             // Dictionary<object,T> dict = new Dictionary<object, T>();
@@ -195,12 +198,8 @@
             if (numberCollectionFetches > 1) {
                 // Dictionary<string, IDictionary<object, object>
                 var otherDictionaryVariable = Expression.Variable(otherDictType);
-                var otherDictionaryInit =
-                    Expression.New(
-                        typeof(Dictionary<,>).MakeGenericType(otherDictType.GetGenericArguments()));
-                var otherDictionaryExpr = Expression.Assign(
-                    otherDictionaryVariable,
-                    otherDictionaryInit);
+                var otherDictionaryInit = Expression.New(typeof(Dictionary<,>).MakeGenericType(otherDictType.GetGenericArguments()));
+                var otherDictionaryExpr = Expression.Assign(otherDictionaryVariable, otherDictionaryInit);
                 variableExpressions.Add(otherDictionaryVariable);
                 statements.Add(otherDictionaryExpr);
 
@@ -208,11 +207,9 @@
                 for (var i = 1; i <= numberCollectionFetches; ++i) {
                     var addExpr = Expression.Call(
                         otherDictionaryVariable,
-                        otherDictType.GetMethods()
-                                     .First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
+                        otherDictType.GetMethods().First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
                         Expression.Constant("fetchParam_" + i),
-                        Expression.New(
-                            typeof(Dictionary<,>).MakeGenericType(typeof(object), typeof(object))));
+                        Expression.New(typeof(Dictionary<,>).MakeGenericType(typeof(object), typeof(object))));
                     statements.Add(addExpr);
                 }
             }
@@ -226,17 +223,13 @@
                 mapperExpr = Expression.Assign(
                     mapperVariable,
                     Expression.Convert(
-                        Expression.Invoke(
-                            funcFactoryParam,
-                            new Expression[] { dictionaryVariable, variableExpressions.ElementAt(1) }),
+                        Expression.Invoke(funcFactoryParam, new Expression[] { dictionaryVariable, variableExpressions.ElementAt(1) }),
                         mapperType));
             }
             else {
                 mapperExpr = Expression.Assign(
                     mapperVariable,
-                    Expression.Convert(
-                        Expression.Invoke(funcFactoryParam, new Expression[] { dictionaryVariable }),
-                        mapperType));
+                    Expression.Convert(Expression.Invoke(funcFactoryParam, new Expression[] { dictionaryVariable }), mapperType));
             }
 
             variableExpressions.Add(mapperVariable);
@@ -259,29 +252,24 @@
             // funcFactory => ((results, sql, connection, transaction) => /* above */ )
             var lambdaExpression =
                 Expression.Lambda(
-                    Expression.Lambda(
-                        Expression.Block(
-                           variableExpressions,
-                            statements),
-                        resultParam,
-                        queryParam,
-                        connectionParam,
-                        transactionParam),
+                    Expression.Lambda(Expression.Block(variableExpressions, statements), resultParam, queryParam, connectionParam, transactionParam),
                     funcFactoryParam);
             return lambdaExpression.Compile();
         }
 
-        private static MethodCallExpression GetCallQueryExpression<T>(MethodInfo sqlMapperQuery, ParameterExpression connectionParam, ParameterExpression resultParam, ParameterExpression mapperVariable, ParameterExpression transactionParam) {
+        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines",
+            Justification = "This is hard to read the StyleCop way")]
+        private static MethodCallExpression GetCallQueryExpression<T>(
+            MethodInfo sqlMapperQuery,
+            ParameterExpression connectionParam,
+            ParameterExpression resultParam,
+            ParameterExpression mapperVariable,
+            ParameterExpression transactionParam) {
             return Expression.Call(
                 sqlMapperQuery,
                 new Expression[] {
-                                     connectionParam, 
-                                     Expression.Property(resultParam, "Sql"), 
-                                     mapperVariable, 
-                                     Expression.Property(resultParam, "Parameters"),
-                                     transactionParam,
-                                     Expression.Constant(true),
-                                     Expression.Property(Expression.Property(resultParam, "FetchTree"), "SplitOn"),
+                                     connectionParam, Expression.Property(resultParam, "Sql"), mapperVariable, Expression.Property(resultParam, "Parameters"),
+                                     transactionParam, Expression.Constant(true), Expression.Property(Expression.Property(resultParam, "FetchTree"), "SplitOn"),
                                      Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(int))),
                                      Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(CommandType)))
                                  });
@@ -304,6 +292,7 @@
                                      .First(m => m.Name == "Query" && m.GetGenericArguments().Count() == mapperParams.Count())
                                      .MakeGenericMethod(mapperParams);
             }
+
             return queryResultVariable;
         }
     }

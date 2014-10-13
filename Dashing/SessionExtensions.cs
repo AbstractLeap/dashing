@@ -97,6 +97,7 @@ namespace Dashing {
 
             return session.Save(existingEntity);
         }
+
         public static async Task<T> GetAsync<T>(this ISession session, int id) {
             return await session.GetAsync<T, int>(id);
         }

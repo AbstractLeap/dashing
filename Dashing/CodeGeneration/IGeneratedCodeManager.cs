@@ -43,7 +43,7 @@
         T CreateTrackingInstance<T>();
 
         /// <summary>
-        /// Returns an instance of a tracking class for the entity or simply returns entity if it's already tracked
+        ///     Returns an instance of a tracking class for the entity or simply returns entity if it's already tracked
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -85,6 +85,7 @@
         ///     Executes some sql against the connection (wraps Dapper method)
         /// </summary>
         T QueryScalar<T>(string sql, IDbConnection connection, IDbTransaction transaction, dynamic param = null);
+
         /// <summary>
         ///     Calls the correct static function within the generated code for a particular fetch tree
         /// </summary>
