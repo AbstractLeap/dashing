@@ -10,10 +10,10 @@
         /// <typeparam name="T">The base type of the tree</typeparam>
         /// <param name="fetchTree">The fetch tree to generate the mapper for</param>
         /// <returns>A factory for generating mappers</returns>
-        Delegate GenerateCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
+        Tuple<Delegate, Type[]> GenerateCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
 
-        Delegate GenerateNonCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
+        Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
 
-        Delegate GenerateMultiCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
+        Tuple<Delegate, Type[]> GenerateMultiCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
     }
 }
