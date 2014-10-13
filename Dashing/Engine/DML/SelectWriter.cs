@@ -157,6 +157,10 @@
                         parameters.Add("@skip", selectQuery.SkipN);
                     }
                 }
+
+                if (selectQuery.IsForUpdate) {
+                    this.Dialect.AppendForUpdateOnQueryFinish(sql);
+                }
             }
 
             return new SelectWriterResult(sql.ToString(), parameters, rootNode) { NumberCollectionsFetched = numberCollectionFetches };
@@ -410,6 +414,9 @@
 
             if (rootNode != null && rootNode.Children.Any()) {
                 tableSql.Append(" as t");
+                if (selectQuery.IsForUpdate) {
+                    this.Dialect.AppendForUpdateUsingTableHint(tableSql);
+                }
 
                 // now let's go through the tree and generate the sql
                 var signatureBuilder = new StringBuilder();
@@ -424,6 +431,11 @@
 
                 rootNode.FetchSignature = signatureBuilder.ToString();
                 rootNode.SplitOn = string.Join(",", splitOns);
+            }
+            else {
+                if (selectQuery.IsForUpdate) {
+                    this.Dialect.AppendForUpdateUsingTableHint(tableSql);
+                }
             }
         }
 

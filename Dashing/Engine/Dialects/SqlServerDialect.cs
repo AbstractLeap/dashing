@@ -122,5 +122,13 @@ namespace Dashing.Engine.Dialects {
 
             return statement;
         }
+
+        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
+            tableSql.Append(" with (rowlock, xlock)");
+        }
+
+        public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
+            return;
+        }
     }
 }

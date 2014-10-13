@@ -57,5 +57,17 @@ namespace Dashing.Engine.Dialects {
         string DropIndex(Index index);
 
         string CreateIndex(Index index);
+
+        /// <summary>
+        /// Applies "for update" sql using table hints i.e. like SQL Server
+        /// </summary>
+        /// <param name="tableSql"></param>
+        void AppendForUpdateUsingTableHint(StringBuilder tableSql);
+
+        /// <summary>
+        /// Applies "for update" sql using a query modifier at the end of the query i.e. like MySql
+        /// </summary>
+        /// <param name="sql"></param>
+        void AppendForUpdateOnQueryFinish(StringBuilder sql);
     }
 }

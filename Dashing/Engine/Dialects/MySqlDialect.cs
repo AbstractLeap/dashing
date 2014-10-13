@@ -53,6 +53,14 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
+        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
+            return;
+        }
+
+        public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
+            sql.Append(" for update");
+        }
+
         public override string GetIdSql() {
             return "SELECT LAST_INSERT_ID() id";
         }

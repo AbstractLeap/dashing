@@ -222,6 +222,10 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
+        public abstract void AppendForUpdateUsingTableHint(StringBuilder tableSql);
+
+        public abstract void AppendForUpdateOnQueryFinish(StringBuilder sql);
+
         public virtual string GetIdSql() {
             return "select @@identity id";
         }

@@ -130,6 +130,14 @@
                 throw new System.NotImplementedException();
             }
 
+            public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
+                throw new System.NotImplementedException();
+            }
+
+            public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
+                throw new System.NotImplementedException();
+            }
+
             public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
                 throw new System.NotImplementedException();
             }
