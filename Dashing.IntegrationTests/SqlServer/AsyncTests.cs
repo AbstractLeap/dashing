@@ -14,14 +14,20 @@ namespace Dashing.IntegrationTests.SqlServer {
         private SqlServerFixture fixture;
 
         [Fact]
-        public async void GetByIdWorks() {
+        public async Task GetByIdWorks() {
             var post = await this.fixture.Session.GetAsync<Post, int>(1);
             Assert.Equal(1, post.PostId);
         }
 
         [Fact]
-        public async void QueryWorks() {
+        public async Task QueryWorks() {
             var posts = await this.fixture.Session.Query<Post>().ToListAsync();
+            Assert.Equal(20, posts.Count());
+        }
+
+        [Fact]
+        public async Task CollectionWorks() {
+            var posts = await this.fixture.Session.Query<Post>().Fetch(p => p.Comments).ToListAsync();
             Assert.Equal(20, posts.Count());
         }
 

@@ -289,19 +289,19 @@
         }
 
         public async Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return await this.engine.QueryAsync<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids);
+            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids);
         }
 
         public async Task<IEnumerable<T>> GetTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return await this.engine.QueryTrackedAsync<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids);
+            return await this.engine.QueryTrackedAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids);
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(SelectQuery<T> query) {
-            return await this.engine.QueryAsync(this.GetConnection(), this.GetTransaction(), query);
+            return await this.engine.QueryAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), query);
         }
 
         public async Task<Page<T>> QueryPagedAsync<T>(SelectQuery<T> query) {
-            return await this.engine.QueryPagedAsync(this.GetConnection(), this.GetTransaction(), query);
+            return await this.engine.QueryPagedAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), query);
         }
 
         public async Task<int> InsertAsync<T>(IEnumerable<T> entities) {
@@ -313,7 +313,7 @@
                 }
             }
 
-            var insertedRows = await this.engine.InsertAsync(this.GetConnection(), this.GetTransaction(), entities);
+            var insertedRows = await this.engine.InsertAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), entities);
             if (this.Configuration.EventHandlers.PostInsertListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PostInsertListeners) {
@@ -334,7 +334,7 @@
                 }
             }
 
-            var updatedRows = await this.engine.SaveAsync(this.GetConnection(), this.GetTransaction(), entities);
+            var updatedRows = await this.engine.SaveAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), entities);
             if (this.Configuration.EventHandlers.PostSaveListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PostSaveListeners) {
@@ -347,7 +347,7 @@
         }
 
         public async Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
-            return await this.engine.ExecuteAsync(this.GetConnection(), this.GetTransaction(), update, predicates);
+            return await this.engine.ExecuteAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), update, predicates);
         }
 
         public async Task<int> DeleteAsync<T>(IEnumerable<T> entities) {
@@ -359,7 +359,7 @@
                 }
             }
 
-            var deletedRows = await this.engine.DeleteAsync(this.GetConnection(), this.GetTransaction(), entities);
+            var deletedRows = await this.engine.DeleteAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), entities);
             if (this.Configuration.EventHandlers.PostDeleteListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PostDeleteListeners) {
@@ -372,15 +372,15 @@
         }
 
         public async Task<int> DeleteAsync<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
-            return await this.engine.ExecuteBulkDeleteAsync(this.GetConnection(), this.GetTransaction(), predicates);
+            return await this.engine.ExecuteBulkDeleteAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), predicates);
         }
 
         public async Task<int> UpdateAllAsync<T>(Action<T> update) {
-            return await this.engine.ExecuteAsync(this.GetConnection(), this.GetTransaction(), update, null);
+            return await this.engine.ExecuteAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), update, null);
         }
 
         public async Task<int> DeleteAllAsync<T>() {
-            return await this.engine.ExecuteBulkDeleteAsync<T>(this.GetConnection(), this.GetTransaction(), null);
+            return await this.engine.ExecuteBulkDeleteAsync<T>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), null);
         }
     }
 }

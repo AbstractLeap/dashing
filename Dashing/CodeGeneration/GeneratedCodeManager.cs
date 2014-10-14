@@ -381,19 +381,22 @@
                     if (query.IsTracked) {
                         var results =
                             await this.delegateQueryCreator.GetCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
+                        return this.Tracked((IEnumerable<T>)results.Values);
+                    }
+
+                    var thisResults = await this.delegateQueryCreator.GetCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
+                    return (IEnumerable<T>)thisResults.Values;
+                } else {
+
+                    if (query.IsTracked) {
+                        var results =
+                            await this.delegateQueryCreator.GetNoCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
                         return this.Tracked(results);
                     }
 
-                    return await this.delegateQueryCreator.GetCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
+                    var thisResults = await this.delegateQueryCreator.GetNoCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
+                    return thisResults;
                 }
-
-                if (query.IsTracked) {
-                    var results =
-                        await this.delegateQueryCreator.GetNoCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
-                    return this.Tracked(results);
-                }
-
-                return await this.delegateQueryCreator.GetNoCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
             }
 
             if (query.IsTracked) {
