@@ -166,7 +166,7 @@
             var otherDictionaryParam =
                 Expression.Parameter(
                     typeof(IDictionary<,>).MakeGenericType(
-                        typeof(string),
+                        typeof(int),
                         typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object))));
 
             // var rootVar = (RootType)objects[0];
@@ -202,7 +202,7 @@
                     var dictAccessExpr = Expression.Property(
                         otherDictionaryParam,
                         "Item",
-                        Expression.Constant("fetchParam_" + i));
+                        Expression.Constant(i));
                     var primaryKeyProperty = Expression.Property(
                         convertExpr,
                         child.Value.Column.ChildColumn.Map.PrimaryKey.Name);

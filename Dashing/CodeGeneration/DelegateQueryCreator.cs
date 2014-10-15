@@ -202,7 +202,7 @@
             var returnType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
             var rootDictType = typeof(IDictionary<,>).MakeGenericType(typeof(object), returnType);
             var otherDictType = typeof(IDictionary<,>).MakeGenericType(
-                typeof(string),
+                typeof(int),
                 typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object)));
             ParameterExpression funcFactoryParam;
             if (numberCollectionFetches > 1) {
@@ -234,7 +234,7 @@
                     var addExpr = Expression.Call(
                         otherDictionaryVariable,
                         otherDictType.GetMethods().First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
-                        Expression.Constant("fetchParam_" + i),
+                        Expression.Constant(i),
                         Expression.New(typeof(Dictionary<,>).MakeGenericType(typeof(object), typeof(object))));
                     statements.Add(addExpr);
                 }

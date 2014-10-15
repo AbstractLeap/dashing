@@ -129,9 +129,9 @@
             var postTag3 = new PostTag {
                 PostTagId = 3
             };
-            var otherDict = new Dictionary<string, IDictionary<object, object>>();
-            otherDict.Add("fetchParam_1", new Dictionary<object, object>());
-            otherDict.Add("fetchParam_2", new Dictionary<object, object>());
+            var otherDict = new Dictionary<int, IDictionary<object, object>>();
+            otherDict.Add(1, new Dictionary<object, object>());
+            otherDict.Add(2, new Dictionary<object, object>());
             var dict = new Dictionary<object, Post>();
             var func = (Func<object[], Post>)funcFac.DynamicInvoke(dict, otherDict);
             func(new object[] { post1, comment1, postTag1 });
