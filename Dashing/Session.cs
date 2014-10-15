@@ -5,10 +5,12 @@
     using System.Data.Common;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Extensions;
 
     public sealed class Session : ISession, IExecuteSelectQueries {
         public IDapper Dapper { get; private set; }
@@ -28,6 +30,10 @@
         private bool isDisposed;
 
         private readonly bool isTransactionLess;
+
+        private readonly object connectionOpenLock = new object();
+
+        private readonly AsyncLock asyncConnectionOpenLock = new AsyncLock();
 
         public Session(IEngine engine, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false, bool isTransactionLess = false) {
             if (engine == null) {
@@ -70,8 +76,12 @@
                 throw new ObjectDisposedException("Session");
             }
 
-            if (this.connection.State == ConnectionState.Closed) {
-                this.connection.Open();
+            if (this.connection.State == ConnectionState.Closed || this.connection.State == ConnectionState.Connecting) {
+                lock (this.connectionOpenLock) {
+                    if (this.connection.State == ConnectionState.Closed) {
+                        this.connection.Open();
+                    }
+                }
             }
 
             if (this.connection.State != ConnectionState.Open) {
@@ -86,8 +96,12 @@
                 throw new ObjectDisposedException("Session");
             }
 
-            if (this.connection.State == ConnectionState.Closed) {
-                await ((DbConnection)this.connection).OpenAsync();
+            if (this.connection.State == ConnectionState.Closed || this.connection.State == ConnectionState.Connecting) {
+                using (await asyncConnectionOpenLock.LockAsync()) {
+                    if (this.connection.State == ConnectionState.Closed) {
+                        await ((DbConnection)this.connection).OpenAsync();
+                    }
+                }
             }
 
             if (this.connection.State != ConnectionState.Open) {
