@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.37</version>
+        <version>0.0.38</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.37 - Concurrent multiple open connections
+        <releaseNotes>* 0.0.38 - ToArrayAsync and fixed ToListAsync
+* 0.0.37 - Concurrent multiple open connections
 * 0.0.36 - Async now supports fetching collections
 * 0.0.35 - Switched internal queries to use Arbitrary Query
 * 0.0.34 - More DefaultConfiguration overloads
