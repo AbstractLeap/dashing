@@ -362,9 +362,14 @@ namespace Dashing {
             return this.selectQueryExecutor.QueryPaged(this);
         }
 
-        public async Task<IEnumerable<T>> ToListAsync() {
+        public async Task<IList<T>> ToListAsync() {
             var result = await this.selectQueryExecutor.QueryAsync(this);
             return result.ToList();
+        }
+
+        public async Task<T[]> ToArrayAsync() {
+            var result = await this.selectQueryExecutor.QueryAsync(this);
+            return result.ToArray();
         }
 
         public async Task<T> FirstAsync() {

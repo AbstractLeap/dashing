@@ -169,7 +169,9 @@ namespace Dashing {
 
         Page<T> AsPaged(int skip, int take);
 
-        Task<IEnumerable<T>> ToListAsync();
+        Task<IList<T>> ToListAsync();
+
+        Task<T[]> ToArrayAsync();
 
         Task<T> FirstAsync();
 
