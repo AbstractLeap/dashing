@@ -157,9 +157,11 @@
 
             // see if we can change these in to changed names
             if (removedColumnDbNames.Any()) {
-                foreach (var dbName in addedColumnDbNames) {
+                var copyOfAddedColumnDbNames = addedColumnDbNames.Select(s => s).ToArray();
+                var copyOfRemovedColumnDbNames = removedColumnDbNames.Select(s => s).ToArray();
+                foreach (var dbName in copyOfAddedColumnDbNames) {
                     var addedColumn = toColumns[dbName];
-                    foreach (var removedColumnDbName in removedColumnDbNames) {
+                    foreach (var removedColumnDbName in copyOfRemovedColumnDbNames) {
                         var removedColumn = fromColumns[removedColumnDbName];
                         if (this.IsPotentialNameChange(addedColumn, removedColumn)) {
                             addedColumnDbNames.Remove(addedColumn.DbName);
@@ -212,13 +214,25 @@
                         toColumns[changedColumnDbName.Item2]));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
+
+                // now check to see if the column spec has changed as well
+                var toColumn = toColumns[changedColumnDbName.Item2];
+                var fromColumn = fromColumns[changedColumnDbName.Item1];
+                string changeColumnSql;
+                if (this.ColumnHasChanged(
+                    fromColumn,
+                    toColumn,
+                    out changeColumnSql,
+                    ref warnings,
+                    ref errors)) {
+                    sql.AppendLine(changeColumnSql);
+                    this.AppendSemiColonIfNecesssary(sql);
+                    sql.AppendLine();
+                }
             }
 
             // right, now let's look for changes to column specifications
-            var existingColumnDbNames =
-                nameChangedDbNames.Select(t => t.Item2)
-                                  .Union(fromColumns.Keys.Intersect(toColumns.Keys))
-                                  .ToArray();
+            var existingColumnDbNames = fromColumns.Keys.Intersect(toColumns.Keys).ToArray();
             foreach (var existingColumnDbName in existingColumnDbNames) {
                 var toColumn = toColumns[existingColumnDbName];
                 var fromColumn = fromColumns[existingColumnDbName];
