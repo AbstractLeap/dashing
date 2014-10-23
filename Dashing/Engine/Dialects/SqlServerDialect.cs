@@ -123,6 +123,10 @@ namespace Dashing.Engine.Dialects {
             return statement;
         }
 
+        public override string GetIdSql() {
+            return "SELECT CAST(SCOPE_IDENTITY() as int) id";
+        }
+
         public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
             tableSql.Append(" with (rowlock, xlock)");
         }

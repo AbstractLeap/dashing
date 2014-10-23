@@ -31,6 +31,13 @@ namespace Dashing.IntegrationTests.SqlServer {
             Assert.Equal(20, posts.Count());
         }
 
+        [Fact]
+        public async Task InsertWorks() {
+            var comment = new Comment { Content = "Foo" };
+            await this.fixture.Session.InsertAsync(comment);
+            Assert.NotEqual(0, comment.CommentId);
+        }
+
         public void SetFixture(SqlServerFixture data) {
             this.fixture = data;
         }
