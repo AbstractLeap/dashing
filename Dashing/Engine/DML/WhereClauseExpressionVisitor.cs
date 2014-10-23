@@ -183,6 +183,7 @@
                     this.dialect.AppendQuotedName(
                         this.Sql,
                         this.configuration.GetMap(declaringType).Columns[m.Member.Name].DbName);
+                    this.getForeignKeyName = false;
                 }
                 else {
                     // we need to find the alias
