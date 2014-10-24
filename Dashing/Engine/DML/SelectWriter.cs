@@ -109,11 +109,11 @@
                 var whereSql = new StringBuilder();
                 var orderSql = new StringBuilder();
 
-                // add select columns
-                this.AddColumns(selectQuery, columnSql, rootNode);
-
                 // add where clause
                 parameters = this.AddWhereClause(selectQuery.WhereClauses, whereSql, ref rootNode);
+
+                // add select columns
+                this.AddColumns(selectQuery, columnSql, rootNode); // do columns second as we may not be fetching but need joins for the where clause
 
                 // add in the tables
                 this.AddTables(selectQuery, tableSql, columnSql, rootNode);
@@ -496,10 +496,10 @@
         }
 
         private void AddColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode, bool removeTrailingComma = true) {
-            var alias = selectQuery.HasFetches() ? "t" : null;
+            var alias = rootNode != null ? rootNode.Alias : null;
 
             if (selectQuery.Projection == null) {
-                foreach (var column in this.Configuration.GetMap<T>().OwnedColumns(selectQuery.FetchAllProperties).Where(c => rootNode == null || !rootNode.Children.ContainsKey(c.Name))) {
+                foreach (var column in this.Configuration.GetMap<T>().OwnedColumns(selectQuery.FetchAllProperties).Where(c => rootNode == null || !rootNode.Children.ContainsKey(c.Name) || !rootNode.Children[c.Name].IsFetched)) {
                     this.AddColumn(columnSql, column, alias);
                     columnSql.Append(", ");
                 }

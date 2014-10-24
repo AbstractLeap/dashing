@@ -180,7 +180,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[Title] = @l_1)",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[Title] = @l_1)",
                 sql.Sql);
         }
 
@@ -457,6 +457,14 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal("select u.[BlogId], u.[Title], u.[CreateDate], u.[Description], u.t_1_PostId as PostId, u.t_1_Title as Title, u.t_1_Content as Content, u.t_1_Rating as Rating, u.t_1_AuthorId as AuthorId, u.t_1_BlogId as BlogId, u.t_1_DoNotMap as DoNotMap, u.t_2_CommentId as CommentId, u.t_2_Content as Content, u.t_2_PostId as PostId, u.t_2_UserId as UserId, u.t_2_CommentDate as CommentDate, u.t_3_LikeId as LikeId, u.t_3_UserId as UserId, u.t_3_CommentId as CommentId from (select t.[BlogId], t.[Title], t.[CreateDate], t.[Description], t_1.[PostId] as t_1_PostId, t_1.[Title] as t_1_Title, t_1.[Content] as t_1_Content, t_1.[Rating] as t_1_Rating, t_1.[AuthorId] as t_1_AuthorId, t_1.[BlogId] as t_1_BlogId, t_1.[DoNotMap] as t_1_DoNotMap, t_2.[CommentId] as t_2_CommentId, t_2.[Content] as t_2_Content, t_2.[PostId] as t_2_PostId, t_2.[UserId] as t_2_UserId, t_2.[CommentDate] as t_2_CommentDate, t_3.[LikeId] as t_3_LikeId, t_3.[UserId] as t_3_UserId, t_3.[CommentId] as t_3_CommentId from [Blogs] as t left join [Posts] as t_1 on t.BlogId = t_1.BlogId left join [Comments] as t_2 on t_1.PostId = t_2.PostId left join [Likes] as t_3 on t_2.CommentId = t_3.CommentId) as u", sql.Sql);
+        }
+
+        [Fact]
+        public void WhereOnRelationshipWithNoFetchesAliasesAll() {
+            var query = this.GetSelectQuery<Post>().Where(p => p.Content == "Foo" &&  p.Author.EmailAddress == "Foo");
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Users] as t_100 on t.AuthorId = t_100.UserId where ((t.[Content] = @l_1) and (t_100.[EmailAddress] = @l_2))", sql.Sql);
         }
 
         private SelectWriter GetWriter(bool withIgnore = false) {
