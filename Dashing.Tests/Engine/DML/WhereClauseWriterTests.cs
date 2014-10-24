@@ -22,6 +22,18 @@
         }
 
         [Fact]
+        public void StaticPropertyMakesParameter() {
+            var start = DateTime.UtcNow;
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.CommentDate < DateTime.UtcNow;
+            var result = target.GenerateSql(new[] { pred }, null);
+            var end = DateTime.UtcNow;
+            var param = (DateTime)result.Parameters.GetValue("l_1");
+            Assert.Equal(" where ([CommentDate] < @l_1)", result.Sql);
+            Assert.True(param >= start && param <= end);
+        }
+
+        [Fact]
         public void TwoWhereClausesStack() {
             // assemble
             var target = MakeTarget();

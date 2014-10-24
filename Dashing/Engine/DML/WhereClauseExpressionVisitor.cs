@@ -115,6 +115,11 @@
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m) {
+            if (m.Expression == null) { // Static property e.g. DateTime.Now
+                this.AddParameter(Expression.Lambda(m).Compile().DynamicInvoke(null));
+                return m;
+            }
+
             this.isTopOfBinary = false;
             switch (m.Expression.NodeType) {
                 case ExpressionType.MemberAccess:
