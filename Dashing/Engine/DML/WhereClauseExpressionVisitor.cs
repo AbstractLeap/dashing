@@ -49,6 +49,8 @@
 
         private bool isTopOfBinary;
 
+        private bool isInBinaryComparisonExpression;
+
         private int aliasCounter;
 
         public StringBuilder Sql {
@@ -95,6 +97,7 @@
         }
 
         protected override Expression VisitBinary(BinaryExpression b) {
+            this.isInBinaryComparisonExpression = b.NodeType != ExpressionType.AndAlso && b.NodeType != ExpressionType.OrElse;
             // if this bianry expression does not contain any parameters it's constant so just invoke the thing
             this.constantChecker.Reset();
             this.constantChecker.VisitTree(b);
@@ -118,6 +121,7 @@
                 this.sqlElements.Enqueue(new ConstantElement(")"));
             }
 
+            this.isInBinaryComparisonExpression = false;
             return b;
         }
 
@@ -190,6 +194,12 @@
             var expr = base.VisitMemberAccess(m);
             this.isChainedMemberAccess = false;
             this.isClosureConstantAccess = false;
+
+            if (!isInBinaryComparisonExpression && m.Type == typeof(Boolean)) {
+                // add == 1 to the thing
+                this.sqlElements.Enqueue(new ConstantElement(" = 1"));
+            }
+
             return expr;
         }
 
