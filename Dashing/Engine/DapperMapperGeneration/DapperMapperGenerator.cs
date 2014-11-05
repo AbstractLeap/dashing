@@ -77,19 +77,19 @@
         [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
         private IEnumerable<Expression> VisitTree(FetchNode node, Expression parentExpression, ParameterExpression objectsParam, bool visitedCollection, IList<Type> mappedTypes, ref int i) {
             var statements = new List<Expression>();
-            foreach (var childNode in node.Children.Values.OrderBy(n => n.Column.FetchId)) {
+            foreach (var childNode in node.Children) {
                 // create a param
                 Type childType;
-                if (childNode.Column.Relationship == RelationshipType.OneToMany) {
+                if (childNode.Value.Column.Relationship == RelationshipType.OneToMany) {
                     if (visitedCollection) {
                         throw new InvalidOperationException("You can only generate a mapper for one collection at a time");
                     }
 
-                    childType = childNode.Column.Type.GetGenericArguments().First();
+                    childType = childNode.Value.Column.Type.GetGenericArguments().First();
                     visitedCollection = true;
                 }
                 else {
-                    childType = childNode.Column.Type;
+                    childType = childNode.Value.Column.Type;
                 }
 
                 var mappedType = this.generatedCodeManager.GetForeignKeyType(childType);
@@ -97,23 +97,23 @@
                 var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
                 var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
                 var convertExpr = Expression.Convert(arrayIndexExpr, mappedType);
-                var propExpr = Expression.Property(parentExpression, childNode.Column.Name);
+                var propExpr = Expression.Property(parentExpression, childNode.Value.Column.Name);
 
                 Expression ex;
-                switch (childNode.Column.Relationship) {
+                switch (childNode.Value.Column.Relationship) {
                     case RelationshipType.OneToMany:
-                        ex = InitialiseCollectionAndAddChild(propExpr, childNode, convertExpr);
+                        ex = InitialiseCollectionAndAddChild(propExpr, childNode.Value, convertExpr);
                         break;
                     case RelationshipType.ManyToOne:
                         ex = Expression.Assign(propExpr, convertExpr);
                         break;
                     default:
-                        throw new InvalidOperationException(string.Format("Unexpected RelationshipType: {0}", childNode.Column.Relationship));
+                        throw new InvalidOperationException(string.Format("Unexpected RelationshipType: {0}", childNode.Value.Column.Relationship));
                 }
 
                 // now visit the next fetch
                 ++i;
-                var innerStatements = this.VisitTree(childNode, convertExpr, objectsParam, visitedCollection, mappedTypes, ref i);
+                var innerStatements = this.VisitTree(childNode.Value, convertExpr, objectsParam, visitedCollection, mappedTypes, ref i);
                 var thenExpr = new List<Expression> { ex };
                 thenExpr.AddRange(innerStatements);
                 statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));

@@ -2,13 +2,14 @@
     using System.Collections.Generic;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
 
     public class FetchNode {
         public IColumn Column { get; set; }
 
         public string Alias { get; set; }
 
-        public IDictionary<string, FetchNode> Children { get; set; }
+        public OrderedDictionary<string, FetchNode> Children { get; set; }
 
         public FetchNode Parent { get; set; }
 
@@ -30,7 +31,7 @@
         public int ContainedCollectionfetchesCount { get; set; }
 
         public FetchNode() {
-            this.Children = new Dictionary<string, FetchNode>();
+            this.Children = new OrderedDictionary<string, FetchNode>();
         }
     }
 }

@@ -239,7 +239,27 @@
                                 Parent = currentNode,
                                 Column = this.configuration.GetMap(declaringType).Columns[propName]
                             };
-                            currentNode.Children.Add(propName, newNode);
+
+                            if (currentNode.Children.Any()) {
+                                var j = 0;
+                                var inserted = false;
+                                foreach (var child in currentNode.Children) {
+                                    if (child.Value.Column.FetchId > newNode.Column.FetchId) {
+                                        currentNode.Children.Insert(j, new KeyValuePair<string, FetchNode>(propName, newNode));
+                                        inserted = true;
+                                        break;
+                                    }
+
+                                    j++;
+                                }
+
+                                if (!inserted) {
+                                    currentNode.Children.Add(propName, newNode);
+                                }
+                            }
+                            else {
+                                currentNode.Children.Add(propName, newNode);
+                            }
                         }
 
                         currentNode = currentNode.Children[propName];

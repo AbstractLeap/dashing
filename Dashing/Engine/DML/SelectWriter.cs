@@ -201,15 +201,15 @@
                 if (hasSplit) {
                     // we need to generate a new sub query for the new branch
                     var currentStringBuilderIdx = currentCountOfSubQueries - 1;
-                    foreach (var childNode in node.Children.Values) {
-                        this.AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, currentStringBuilderIdx, splitOns, childNode);
-                        var result = this.VisitMultiCollectionTree(childNode, outerColumns, innerColumnSqls, innerTableSqls);
-                        if (!(childNode.ContainedCollectionfetchesCount == 0 && childNode.Column.Relationship == RelationshipType.ManyToOne)) {
+                    foreach (var childNode in node.Children) {
+                        this.AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, currentStringBuilderIdx, splitOns, childNode.Value);
+                        var result = this.VisitMultiCollectionTree(childNode.Value, outerColumns, innerColumnSqls, innerTableSqls);
+                        if (!(childNode.Value.ContainedCollectionfetchesCount == 0 && childNode.Value.Column.Relationship == RelationshipType.ManyToOne)) {
                             currentStringBuilderIdx++;
                         }
 
-                        if (childNode.IsFetched) {
-                            signatureBuilder.Append(childNode.Column.FetchId + "S" + result.Signature + "E");
+                        if (childNode.Value.IsFetched) {
+                            signatureBuilder.Append(childNode.Value.Column.FetchId + "S" + result.Signature + "E");
                             splitOns.AddRange(result.SplitOn);
                         }
                     }
@@ -219,7 +219,7 @@
             }
 
             // simply add null to the other inner queries and add column names to these queries
-            foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
+            foreach (var child in node.Children) {
                 var childNode = child.Value;
                 this.AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, innerTableSqls.Count - 1, splitOns, childNode);
                 
@@ -398,7 +398,29 @@
                         }
                     }
 
-                    currentNode.Children.Add(propName, node);
+                    // insert the node in the correct order (i.e. respecting the FetchId and then all other things that depend on this
+                    // should be constant
+                    if (currentNode.Children.Any()) {
+                        var i = 0;
+                        var inserted = false;
+                        foreach (var child in currentNode.Children) {
+                            if (child.Value.Column.FetchId > column.FetchId) {
+                                currentNode.Children.Insert(i, new KeyValuePair<string, FetchNode>(propName, node));
+                                inserted = true;
+                                break;
+                            }
+
+                            i++;
+                        }
+
+                        if (!inserted) {
+                            currentNode.Children.Add(propName, node);
+                        }
+                    }
+                    else {
+                        currentNode.Children.Add(propName, node);
+                    }
+
                     currentNode = node;
                 }
                 else {
@@ -421,7 +443,7 @@
                 // now let's go through the tree and generate the sql
                 var signatureBuilder = new StringBuilder();
                 var splitOns = new List<string>();
-                foreach (var node in rootNode.Children.OrderBy(c => c.Value.Column.FetchId)) {
+                foreach (var node in rootNode.Children) {
                     var signature = this.AddNode(node.Value, tableSql, columnSql);
                     if (node.Value.IsFetched) {
                         signatureBuilder.Append(signature.Signature);
@@ -479,7 +501,7 @@
 
             // add its children
             var signatureBuilder = new StringBuilder();
-            foreach (var child in node.Children.OrderBy(c => c.Value.Column.FetchId)) {
+            foreach (var child in node.Children) {
                 var signature = this.AddNode(child.Value, tableSql, columnSql);
                 if (child.Value.IsFetched) {
                     signatureBuilder.Append(signature.Signature);
