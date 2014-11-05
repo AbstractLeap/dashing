@@ -265,7 +265,7 @@
             }
 
             if (fromColumn.DbType != toColumn.DbType || fromColumn.IsNullable != toColumn.IsNullable
-                || (fromColumn.Length != toColumn.Length && fromColumn.Map.Configuration.Engine.SqlDialect.TypeTakesLength(toColumn.DbType))
+                || (fromColumn.Map.Configuration.Engine.SqlDialect.TypeTakesLength(toColumn.DbType) && (fromColumn.MaxLength != toColumn.MaxLength || (!fromColumn.MaxLength && fromColumn.Length != toColumn.Length)))
                 || ((fromColumn.Precision != toColumn.Precision || fromColumn.Scale != toColumn.Scale) && fromColumn.Map.Configuration.Engine.SqlDialect.TypeTakesPrecisionAndScale(toColumn.DbType))) {
                 // check for potential errors
                 if (toColumn.Length < fromColumn.Length || toColumn.Precision < fromColumn.Precision

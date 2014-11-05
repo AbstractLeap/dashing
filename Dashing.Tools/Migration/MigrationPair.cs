@@ -54,8 +54,8 @@ namespace Dashing.Tools.Migration {
                     return true;
                 }
 
-                if (this.To.Configuration.Engine.SqlDialect.TypeTakesLength(fromColumn.DbType) 
-                    && fromColumn.Length != toColumn.Length) {
+                if (this.To.Configuration.Engine.SqlDialect.TypeTakesLength(fromColumn.DbType)
+                    && (fromColumn.MaxLength != toColumn.MaxLength || (!fromColumn.MaxLength && fromColumn.Length != toColumn.Length))) {
                     message = string.Format("{0} has changed length", fromColumn.Name);
                     return true;
                 }
