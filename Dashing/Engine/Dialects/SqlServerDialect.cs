@@ -22,20 +22,6 @@ namespace Dashing.Engine.Dialects {
             this.AppendQuotedName(sql, map.Table);
         }
 
-        protected override void AppendLength(StringBuilder sql, ushort length) {
-            sql.Append("(");
-
-            // TODO: this is a bit dodge, probs should think of a better way to do it
-            if (length > 2000) {
-                sql.Append("max");
-            }
-            else {
-                sql.Append(length);
-            }
-
-            sql.Append(")");
-        }
-
         protected override void AppendAutoGenerateModifier(StringBuilder sql) {
             sql.Append(" identity(1,1)");
         }

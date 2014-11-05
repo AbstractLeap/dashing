@@ -39,6 +39,11 @@
         byte Scale { get; set; }
 
         /// <summary>
+        /// Indicates whether the column should have it's length set to Max
+        /// </summary>
+        bool MaxLength { get; set; }
+
+        /// <summary>
         ///     Gets or sets the length.
         /// </summary>
         ushort Length { get; set; }

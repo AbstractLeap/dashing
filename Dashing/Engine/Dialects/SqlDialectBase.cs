@@ -35,7 +35,16 @@ namespace Dashing.Engine.Dialects {
             sql.Append(this.TypeName(column.DbType));
 
             if (this.TypeTakesLength(column.DbType)) {
-                this.AppendLength(sql, column.Length);
+                sql.Append("(");
+                if (column.MaxLength) {
+                    sql.Append("max");
+                }
+                else {
+                    sql.Append(column.Length);
+                }
+
+
+                sql.Append(")");
             }
 
             if (this.TypeTakesPrecisionAndScale(column.DbType)) {
@@ -59,19 +68,6 @@ namespace Dashing.Engine.Dialects {
 
         public virtual void AppendEscaped(StringBuilder sql, string s) {
             sql.Append(s.Replace("'", "''"));
-        }
-
-        protected virtual void AppendLength(StringBuilder sql, ushort length) {
-            sql.Append("(");
-
-            if (length == 0) {
-                sql.Append("max");
-            }
-            else {
-                sql.Append(length);
-            }
-
-            sql.Append(")");
         }
 
         protected virtual void AppendPrecisionAndScale(StringBuilder sql, byte precision, byte scale) {

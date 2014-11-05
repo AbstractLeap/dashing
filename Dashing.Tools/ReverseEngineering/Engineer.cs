@@ -161,7 +161,13 @@
             }
 
             if (column.Length.HasValue) {
-                mapColumn.Length = (ushort)column.Length.Value;
+                if (column.Length == -1) {
+                    // max
+                    mapColumn.MaxLength = true;
+                }
+                else {
+                    mapColumn.Length = (ushort)column.Length.Value;
+                }
             }
 
             if (column.Precision.HasValue) {

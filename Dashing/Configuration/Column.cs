@@ -57,6 +57,8 @@
         /// </summary>
         public byte Scale { get; set; }
 
+        public bool MaxLength { get; set; }
+
         /// <summary>
         ///     Gets or sets the length.
         /// </summary>

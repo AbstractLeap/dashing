@@ -141,6 +141,13 @@
             Assert.Equal("Post", column.ChildColumnName);
         }
 
+        [Fact]
+        public void MaxLengthWorks() {
+            var column = MakeTarget();
+            column.MaxLength(true);
+            Assert.True(column.MaxLength);
+        }
+
         private static Column<IList<Comment>> MakeCollectionTarget() {
             return new Column<IList<Comment>>();
         }

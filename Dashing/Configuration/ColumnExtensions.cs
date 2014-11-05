@@ -101,6 +101,22 @@
         }
 
         /// <summary>
+        /// Specifies that a column should have it's length set to Max (if true)
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="isMax"></param>
+        /// <returns></returns>
+        /// <remarks>This overwrites the behaviour of the length property</remarks>
+        public static IColumn MaxLength(this IColumn column, bool isMax = true) {
+            if (column == null) {
+                throw new ArgumentNullException("column");
+            }
+
+            column.MaxLength = isMax;
+            return column;
+        }
+
+        /// <summary>
         ///     The length.
         /// </summary>
         /// <param name="column">

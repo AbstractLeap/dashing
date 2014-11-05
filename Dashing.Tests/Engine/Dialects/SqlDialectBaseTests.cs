@@ -97,7 +97,7 @@
         [Fact]
         public void AppendColumnSpecificationAppendsNameAndMaxLength() {
             var sb = new StringBuilder();
-            var col = new Column<int> { DbName = "foo", DbType = DbType.String, Length = 0 };
+            var col = new Column<int> { DbName = "foo", DbType = DbType.String, Length = 0, MaxLength = true };
             var target = this.MakeTarget();
 
             target.AppendColumnSpecification(sb, col);
