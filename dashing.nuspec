@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.44</version>
+        <version>0.0.45</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.44 - Fixed boolean comparisons
+        <releaseNotes>* 0.0.45 - Max length handling and default constraint dropping in sql server
+* 0.0.44 - Fixed boolean comparisons
 * 0.0.43 - Fixed issue with where clauses on related entities
 * 0.0.42 - Fixed bug with accessing static properties in where clause
 * 0.0.41 - Fixed bug in Whereclausewriter
