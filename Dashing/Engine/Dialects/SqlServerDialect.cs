@@ -1,4 +1,5 @@
 namespace Dashing.Engine.Dialects {
+    using System;
     using System.Data;
     using System.Linq;
     using System.Text;
@@ -133,6 +134,22 @@ namespace Dashing.Engine.Dialects {
 
         public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
             return;
+        }
+
+        public override string OnBeforeDropColumn(IColumn column) {
+            var commandName = "@OBDCommand" + Guid.NewGuid().ToString("N");
+            var sb = new StringBuilder("declare ").Append(commandName).AppendLine(" nvarchar(1000);").Append("select ").Append(commandName).Append(" = 'ALTER TABLE ");
+            this.AppendQuotedTableName(sb, column.Map);
+            sb.Append(" drop constraint ' + d.name ").Append(@"from sys.tables t   
+                          join    sys.default_constraints d       
+                           on d.parent_object_id = t.object_id  
+                          join    sys.columns c      
+                           on c.object_id = t.object_id      
+                            and c.column_id = d.parent_column_id
+                         where t.name = '");
+            sb.Append(column.Map.Table).Append("' and c.name = '").Append(column.DbName).AppendLine("';");
+            sb.Append("execute(").Append(commandName).AppendLine(");");
+            return sb.ToString();
         }
     }
 }

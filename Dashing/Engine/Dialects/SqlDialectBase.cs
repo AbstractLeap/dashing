@@ -226,6 +226,10 @@ namespace Dashing.Engine.Dialects {
 
         public abstract void AppendForUpdateOnQueryFinish(StringBuilder sql);
 
+        public virtual string OnBeforeDropColumn(IColumn column) {
+            return string.Empty;
+        }
+
         public virtual string GetIdSql() {
             return "select @@identity id";
         }

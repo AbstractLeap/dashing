@@ -54,7 +54,7 @@
 
                 var indexRemovals = matchPair.From.Indexes.Except(matchPair.To.Indexes);
                 foreach (var index in indexRemovals) {
-                    sql.AppendLine(this.alterTableWriter.DropIndex(index));
+                    sql.Append(this.alterTableWriter.DropIndex(index));
                     this.AppendSemiColonIfNecesssary(sql);
                     sql.AppendLine();
                 }
@@ -80,7 +80,7 @@
 
             // removals
             foreach (var map in removals) {
-                sql.AppendLine(this.dropTableWriter.DropTableIfExists(map));
+                sql.Append(this.dropTableWriter.DropTableIfExists(map));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
             }
@@ -179,10 +179,10 @@
 
             // first we do the drop and recreate of the namytoone name changes
             foreach (var manyToOneDbName in manyToOneChangedTypeDbNames) {
-                sql.AppendLine(this.alterTableWriter.DropColumn(fromColumns[manyToOneDbName]));
+                sql.Append(this.alterTableWriter.DropColumn(fromColumns[manyToOneDbName]));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
-                sql.AppendLine(this.alterTableWriter.AddColumn(toColumns[manyToOneDbName]));
+                sql.Append(this.alterTableWriter.AddColumn(toColumns[manyToOneDbName]));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
             }
@@ -190,7 +190,7 @@
             // do additions
             foreach (var addedColumnDbName in addedColumnDbNames) {
                 // addition of column
-                sql.AppendLine(this.alterTableWriter.AddColumn(toColumns[addedColumnDbName]));
+                sql.Append(this.alterTableWriter.AddColumn(toColumns[addedColumnDbName]));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
 
@@ -201,14 +201,14 @@
 
             // now do removals of columns
             foreach (var removedColumnDbName in removedColumnDbNames) {
-                sql.AppendLine(this.alterTableWriter.DropColumn(fromColumns[removedColumnDbName]));
+                sql.Append(this.alterTableWriter.DropColumn(fromColumns[removedColumnDbName]));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
             }
 
             // now do name changes - we do the name change now and any change of type later
             foreach (var changedColumnDbName in nameChangedDbNames) {
-                sql.AppendLine(
+                sql.Append(
                     this.alterTableWriter.ChangeColumnName(
                         fromColumns[changedColumnDbName.Item1],
                         toColumns[changedColumnDbName.Item2]));
@@ -243,7 +243,7 @@
                     out changeColumnSql,
                     ref warnings,
                     ref errors)) {
-                    sql.AppendLine(changeColumnSql);
+                    sql.Append(changeColumnSql);
                     this.AppendSemiColonIfNecesssary(sql);
                     sql.AppendLine();
                 }

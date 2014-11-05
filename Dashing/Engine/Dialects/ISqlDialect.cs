@@ -69,5 +69,13 @@ namespace Dashing.Engine.Dialects {
         /// </summary>
         /// <param name="sql"></param>
         void AppendForUpdateOnQueryFinish(StringBuilder sql);
+
+        /// <summary>
+        /// Called before a column is dropped
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        /// <remarks>Useful for e.g. dropping default constraints in sql server</remarks>
+        string OnBeforeDropColumn(IColumn column);
     }
 }
