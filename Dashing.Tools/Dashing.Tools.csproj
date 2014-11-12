@@ -35,8 +35,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DatabaseSchemaReader, Version=1.3.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="DatabaseSchemaReader">
       <HintPath>..\packages\DatabaseSchemaReader-polyfork.1.3.4.3\lib\net40\DatabaseSchemaReader.dll</HintPath>
     </Reference>
     <Reference Include="System" />
