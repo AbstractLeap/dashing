@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Dashing.Console</RootNamespace>
-    <AssemblyName>dbmanager</AssemblyName>
+    <AssemblyName>dbm</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -81,6 +81,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CatchyException.cs" />
+    <Compile Include="IniParser.cs" />
     <Compile Include="Settings\CommandLineOptions.cs" />
     <Compile Include="ColorContext.cs" />
     <Compile Include="Program.cs" />
@@ -91,7 +93,6 @@
     <Compile Include="TimedOperation.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Test.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -124,16 +125,24 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="lib\CommandLine.dll" />
+    <EmbeddedResource Include="lib\Dapper.dll" />
+    <EmbeddedResource Include="lib\Dashing.dll" />
+    <EmbeddedResource Include="lib\Dashing.Tools.dll" />
+    <EmbeddedResource Include="lib\DatabaseSchemaReader.dll" />
+    <EmbeddedResource Include="lib\Mono.Cecil.dll" />
+    <EmbeddedResource Include="lib\Mono.Cecil.Mdb.dll" />
+    <EmbeddedResource Include="lib\Mono.Cecil.Pdb.dll" />
+    <EmbeddedResource Include="lib\Mono.Cecil.Rocks.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName) == Release (
-del dbm.exe
-del dbm.exe.config
-..\..\..\packages\ilmerge.2.13.0307\ILMerge.exe .\dbmanager.exe CommandLine.dll Dapper.dll Dashing.Tools.dll DatabaseSchemaReader.dll Mono.Cecil.dll Mono.Cecil.Mdb.dll Mono.Cecil.Pdb.dll Mono.Cecil.Rocks.dll /out:dbm.exe
-del dbmanager.exe
-del CommandLine.dll
+    <PostBuildEvent>del CommandLine.dll
 del Dapper.dll
+del Dashing.dll
 del Dashing.Tools.dll 
 del DatabaseSchemaReader.dll
 del Mono.Cecil.dll
@@ -141,10 +150,17 @@ del Mono.Cecil.Mdb.dll
 del Mono.Cecil.Pdb.dll
 del Mono.Cecil.Rocks.dll
 del *.pdb
-del *.xml
-del *.vshost.*
-ren dbmanager.exe.config dbm.exe.config
-)</PostBuildEvent>
+del *.xml</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>del ..\..\lib\* /q
+xcopy ..\..\..\packages\CommandLineParser.1.9.71\lib\net40\*.dll ..\..\lib\
+xcopy ..\..\..\packages\Mono.Cecil.0.9.5.4\lib\net40\*.dll ..\..\lib\
+xcopy ..\..\..\Dashing.Tools\bin\$(ConfigurationName)\Dapper.dll ..\..\lib\
+xcopy ..\..\..\Dashing.Tools\bin\$(ConfigurationName)\Dashing.dll ..\..\lib\
+xcopy ..\..\..\Dashing.Tools\bin\$(ConfigurationName)\Dashing.Tools.dll ..\..\lib\
+xcopy ..\..\..\Dashing.Tools\bin\$(ConfigurationName)\DatabaseSchemaReader.dll ..\..\lib\
+</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -6,17 +6,14 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
 
     using CommandLine;
     using CommandLine.Text;
 
     using Dashing.Configuration;
     using Dashing.Console.Settings;
-    using Dashing.Engine;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
-    using Dashing.Tools;
     using Dashing.Tools.Migration;
     using Dashing.Tools.ModelGeneration;
     using Dashing.Tools.ReverseEngineering;
@@ -30,7 +27,11 @@
     using ConnectionStringSettings = Dashing.Console.Settings.ConnectionStringSettings;
 
     internal class Program {
+        private static object configObject;
+
         private static void Main(string[] args) {
+            ConfigureAssemblyResolution();
+
             try {
                 InnerMain(args);
             }
@@ -39,21 +40,66 @@
                     Console.WriteLine(e.Message);
                 }
             }
+            catch (TargetInvocationException e) {
+                using (Color(ConsoleColor.Red)) {
+                    Console.WriteLine();
+                    Console.WriteLine("Encountered a problem instantiating the configuration object");
+                }
+
+                var rtle = e.InnerException as ReflectionTypeLoadException;
+                if (rtle != null) {
+                    foreach (var le in rtle.LoaderExceptions) {
+                        Console.WriteLine(le.Message);
+                    }
+                }
+            }
             catch (Exception e) {
                 using (Color(ConsoleColor.Red)) {
-                    Console.WriteLine("There was a fatal error:");
+                    Console.WriteLine("Caught unhandled {0}", e.GetType().Name);
                     Console.WriteLine(e.Message);
-                    Console.Write(e.StackTrace);
+                    var ee = e;
+                    while ((ee = ee.InnerException) != null) {
+                        Console.WriteLine(ee.Message);
+                    }
+                }
+
+                using (Color(ConsoleColor.Gray)) {
+                    Console.WriteLine(e.StackTrace);
                 }
             }
         }
 
-        private class CatchyException : Exception {
-            public CatchyException(string message)
-                : base(message) { }
+        private static void ConfigureAssemblyResolution() { // http://blogs.msdn.com/b/microsoft_press/archive/2010/02/03/jeffrey-richter-excerpt-2-from-clr-via-c-third-edition.aspx
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) => {
+                var assemblyName = new AssemblyName(iargs.Name);
 
-            public CatchyException(string format, params object[] args)
-                : base(string.Format(format, args)) { }
+                // look in app domain
+                var loaded = AppDomain.CurrentDomain.GetAssemblies()
+                                      .SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                if (loaded != null) {
+                    return loaded;
+                }
+
+                // look in embedded resources
+                var resourceName = "Dashing.Console.lib." + assemblyName.Name + ".dll";
+                using (var stream = Assembly.GetExecutingAssembly()
+                                            .GetManifestResourceStream(resourceName)) {
+                    if (stream != null) {
+                        var assemblyData = new byte[stream.Length];
+                        stream.Read(assemblyData, 0, assemblyData.Length);
+                        return Assembly.Load(assemblyData);
+                    }
+                }
+
+                // we couldn't find it, look on disk
+                var path = assemblyName.Name + ".dll";
+                if (File.Exists(path)) {
+                    var assemblyData = File.ReadAllBytes(path);
+                    return Assembly.Load(assemblyData);
+                }
+
+                return null;
+            };
         }
 
         private static void InnerMain(string[] args) {
@@ -77,19 +123,24 @@
             ConnectionStringSettings connectionStringSettings;
             DashingSettings dashingSettings;
             ReverseEngineerSettings reverseEngineerSettings;
-            ParseConfiguration(options, out connectionStringSettings, out dashingSettings, out reverseEngineerSettings);
+            ParseIni(options, out connectionStringSettings, out dashingSettings, out reverseEngineerSettings);
 
             // postvalidation
             if (!File.Exists(dashingSettings.PathToDll)) {
                 throw new CatchyException("Could not locate {0}", dashingSettings.PathToDll);
             }
 
+            // load the configuration NOW and try to inherit its version of Dashing, Dapper, etc
+            var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
+            GC.KeepAlive(configAssembly);
+            configObject = LoadConfiguration(configAssembly, dashingSettings, connectionStringSettings);
+
             // now decide what to do
             if (options.Script) {
                 DoScript(options.Location, options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
             }
             else if (options.Migration) {
-                DoMigrate(options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
+                DoMigrate(options.Naive, connectionStringSettings, reverseEngineerSettings);
             }
             else if (options.ReverseEngineer) {
                 DoReverseEngineer(options, dashingSettings, reverseEngineerSettings, connectionStringSettings);
@@ -99,7 +150,7 @@
             }
         }
 
-        private static void ParseConfiguration(CommandLineOptions options, out ConnectionStringSettings connectionStringSettings, out DashingSettings dashingSettings, out ReverseEngineerSettings reverseEngineerSettings) {
+        private static void ParseIni(CommandLineOptions options, out ConnectionStringSettings connectionStringSettings, out DashingSettings dashingSettings, out ReverseEngineerSettings reverseEngineerSettings) {
             var config = IniParser.Parse(options.ProjectName + ".ini");
 
             connectionStringSettings = new ConnectionStringSettings();
@@ -112,48 +163,112 @@
             reverseEngineerSettings = IniParser.AssignTo(config["ReverseEngineer"], reverseEngineerSettings);
         }
 
-        private static void DoScript(
-            string pathOrNull,
-            bool naive,
-            ConnectionStringSettings connectionStringSettings,
-            DashingSettings dashingSettings,
-            ReverseEngineerSettings reverseEngineerSettings) {
-            if (!naive) {
-                using (Color(ConsoleColor.Yellow)) {
-                    Console.WriteLine("Non naive migration is experimental. Please check output");
+        private static object LoadConfiguration(Assembly configAssembly, DashingSettings dashingSettings, ConnectionStringSettings connectionStringSettings) {
+            // fetch the to state
+            var configType = configAssembly.DefinedTypes.SingleOrDefault(t => t.FullName == dashingSettings.ConfigurationName);
+
+            if (configType == null) {
+                using (Color(ConsoleColor.Red)) {
+                    var candidates = configAssembly.DefinedTypes.Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null)
+                                                   .ToArray();
+                    if (candidates.Any()) {
+                        throw new CatchyException("Could not locate {0}, but found candidates: {1}", dashingSettings.ConfigurationName, string.Join(", ", candidates.Select(c => c.FullName)));
+                    }
+
+                    throw new CatchyException("Could not locate {0}, and found no candidate configurations", dashingSettings.ConfigurationName);
                 }
             }
 
-            Console.WriteLine();
-            using (Color(ConsoleColor.Yellow)) {
-                Console.WriteLine("-- Dashing: Migration Script");
+            // attempt to find the call to ConfigurationManager and overwrite the connection string
+            InjectConnectionString(dashingSettings, connectionStringSettings);
+
+            // TODO add in a factory way of generating the config for cases where constructor not empty
+            return Activator.CreateInstance(configType);
+        }
+
+        private static void InjectConnectionString(DashingSettings dashingSettings, ConnectionStringSettings connectionStringSettings) {
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(dashingSettings.PathToDll);
+            var cecilConfigType = assemblyDefinition.MainModule.Types.Single(t => t.FullName == dashingSettings.ConfigurationName);
+            var constructor = cecilConfigType.Methods.FirstOrDefault(m => m.IsConstructor && !m.HasParameters); // default constructor
+            if (constructor == null) {
+                using (Color(ConsoleColor.Red)) {
+                    throw new CatchyException("Unable to find a Default Constructor on the Configuration");
+                }
             }
-            Console.WriteLine("-- -------------------------------");
-            Console.WriteLine("-- Assembly: {0}", dashingSettings.PathToDll);
-            Console.WriteLine("-- Class:    {0}", dashingSettings.ConfigurationName);
-            Console.WriteLine();
+
+            var getConnectionStringCall = constructor.Body.Instructions.FirstOrDefault(i => i.OpCode.Code == Code.Call && i.Operand.ToString() == "System.Configuration.ConnectionStringSettingsCollection System.Configuration.ConfigurationManager::get_ConnectionStrings()");
+            if (getConnectionStringCall == null) {
+                using (Color(ConsoleColor.Red)) {
+                    throw new CatchyException("Unable to find the ConnectionStrings call in the constructor");
+                }
+            }
+
+            var connectionStringKey = getConnectionStringCall.Next.Operand.ToString();
+
+            // override readonly property of connectionstrings
+                var readOnlyField = typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (readOnlyField != null) {
+                    readOnlyField.SetValue(ConfigurationManager.ConnectionStrings, false);
+                }
+
+            // remove any existing
+            if (ConfigurationManager.ConnectionStrings[connectionStringKey] != null) {
+                ConfigurationManager.ConnectionStrings.Remove(connectionStringKey);
+            }
+            
+            // and add in the one from our ini
+            ConfigurationManager.ConnectionStrings.Add(new System.Configuration.ConnectionStringSettings(connectionStringKey, connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName));
+        }
+
+        private static void DoScript(string pathOrNull, bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings) {
+            DisplayMigrationHeader(naive, dashingSettings);
 
             // fetch the to state
-            IConfiguration config;
-            using (new TimedOperation("-- Fetching configuration contents...")) {
-                config = LoadConfiguration(dashingSettings, connectionStringSettings);
-            }
+            var config = (IConfiguration)configObject;
 
-            IEnumerable<string> warnings, errors;
-            var migrationScript = GenerateMigrationScript(connectionStringSettings, dashingSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
+            IEnumerable<string> warnings,
+                                errors;
+            var migrationScript = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
 
             // report errors
             DisplayMigrationWarningsAndErrors(errors, warnings);
 
             // write it
-            using (var writer = string.IsNullOrEmpty(pathOrNull) ? Console.Out : new StreamWriter(File.OpenWrite(pathOrNull))) {
+            using (var writer = string.IsNullOrEmpty(pathOrNull)
+                                    ? Console.Out
+                                    : new StreamWriter(File.OpenWrite(pathOrNull))) {
                 writer.WriteLine(migrationScript);
             }
         }
 
-        private static void DisplayMigrationWarningsAndErrors(IEnumerable<string> errors, IEnumerable<string> warnings) {
+        private static void DisplayMigrationHeader(bool naive, DashingSettings dashingSettings) {
+            using (Color(ConsoleColor.Yellow)) {
+                Console.WriteLine("-- Dashing: Migration Script");
+            }
+
+            Console.WriteLine("-- -------------------------------");
+            Console.WriteLine("-- Assembly: {0}", dashingSettings.PathToDll);
+            Console.WriteLine("-- Class:    {0}", dashingSettings.ConfigurationName);
+            Console.WriteLine("-- ");
+
+            if (!naive) {
+                using (Color(ConsoleColor.Yellow)) {
+                    Console.WriteLine("-- -------------------------------");
+                    Console.WriteLine("-- Migration is experimental!");
+                    Console.WriteLine("-- Please check output!");
+                    Console.WriteLine("-- ");
+                }
+            }
+
+            Console.WriteLine();
+        }
+
+        private static bool DisplayMigrationWarningsAndErrors(IEnumerable<string> errors, IEnumerable<string> warnings) {
+            bool shouldExit = false;
+
             using (Color(ConsoleColor.Red)) {
                 foreach (var error in errors) {
+                    shouldExit = true;
                     Console.Write("-- ");
                     Console.WriteLine(error);
                 }
@@ -165,9 +280,11 @@
                     Console.WriteLine(warning);
                 }
             }
+
+            return shouldExit;
         }
 
-        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings) {
+        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, ReverseEngineerSettings reverseEngineerSettings) {
             if (!naive) {
                 using (Color(ConsoleColor.Yellow)) {
                     Console.WriteLine("Non naive migration is experimental. Please check output");
@@ -175,22 +292,15 @@
             }
 
             // fetch the to state
-            IConfiguration config;
-            using (new TimedOperation("-- Fetching configuration contents...")) {
-                config = LoadConfiguration(dashingSettings, connectionStringSettings);
-            }
+            var config = (IConfiguration)configObject;
 
-
-            IEnumerable<string> warnings, errors;
-            var script = GenerateMigrationScript(connectionStringSettings, dashingSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
-
-            // report errors
-            DisplayMigrationWarningsAndErrors(errors, warnings);
-
-            if (errors.Any()) {
+            IEnumerable<string> warnings,
+                                errors;
+            var script = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
+            
+            if (DisplayMigrationWarningsAndErrors(errors, warnings)) {
                 using (Color(ConsoleColor.Red)) {
-                    Console.WriteLine(
-                        "-- Fatal errors encountered: aborting migration. Please review the output.");
+                    Console.WriteLine("-- Fatal errors encountered: aborting migration. Please review the output.");
                 }
             }
             else {
@@ -210,38 +320,30 @@
                         }
                     }
                     else {
-                        using (
-                            new TimedOperation(
-                                "-- Executing migration script on {0}",
-                                connection.ConnectionString))
-                        using (var command = connection.CreateCommand()) {
-                            using (Color(ConsoleColor.DarkGray)) {
-                                Console.WriteLine(script);
-                            }
+                        using (new TimedOperation("-- Executing migration script on {0}", connection.ConnectionString)) {
+                            using (var command = connection.CreateCommand()) {
+                                using (Color(ConsoleColor.DarkGray)) {
+                                    Console.WriteLine(script);
+                                }
 
-                            command.CommandText = script;
-                            command.ExecuteNonQuery();
+                                command.CommandText = script;
+                                command.ExecuteNonQuery();
+                            }
                         }
                     }
-
-                    // magical crazy time! see http://stackoverflow.com/a/2658326/1255065
-                    AppDomain.CurrentDomain.AssemblyResolve += CurrentDomainAssemblyResolve;
 
                     // now let's call Seed
                     var seederConfig = config as ISeeder;
                     if (seederConfig != null) {
-                        using (new TimedOperation("-- Executing seeds"))
-                        using (var session = config.BeginSession(connection)) {
-                            seederConfig.Seed(session);
-                            session.Complete();
+                        using (new TimedOperation("-- Executing seeds")) {
+                            using (var session = config.BeginSession(connection)) {
+                                seederConfig.Seed(session);
+                                session.Complete();
+                            }
                         }
                     }
                 }
             }
-        }
-
-        private static Assembly CurrentDomainAssemblyResolve(object sender, ResolveEventArgs args) {
-            return ((AppDomain)sender).GetAssemblies().FirstOrDefault(assembly => assembly.FullName == args.Name);
         }
 
         private static void DoReverseEngineer(CommandLineOptions options, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings, ConnectionStringSettings connectionString) {
@@ -263,9 +365,7 @@
             DatabaseSchema schema;
             var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
 
-            var databaseReader = new DatabaseReader(
-                connectionString.ConnectionString,
-                connectionString.ProviderName);
+            var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
             schema = databaseReader.ReadAll();
             var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore());
             var reverseEngineer = new ModelGenerator();
@@ -280,7 +380,7 @@
             Console.Write(HelpText.AutoBuild(options));
         }
 
-        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings, IConfiguration configuration, bool naive, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, ReverseEngineerSettings reverseEngineerSettings, IConfiguration configuration, bool naive, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             // fetch the from state
             var dialectFactory = new DialectFactory();
             var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
@@ -288,9 +388,7 @@
             using (new TimedOperation("-- Reading database contents...")) {
                 DatabaseSchema schema;
                 var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
-                var databaseReader = new DatabaseReader(
-                    connectionStringSettings.ConnectionString,
-                    connectionStringSettings.ProviderName);
+                var databaseReader = new DatabaseReader(connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName);
                 schema = databaseReader.ReadAll();
                 fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore());
             }
@@ -298,16 +396,10 @@
             // set up migrator
             IMigrator migrator;
             if (naive) {
-                migrator = new NaiveMigrator(
-                    new CreateTableWriter(dialect),
-                    new DropTableWriter(dialect),
-                    null);
+                migrator = new NaiveMigrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), null);
             }
             else {
-                migrator = new Migrator(
-                    new CreateTableWriter(dialect),
-                    new DropTableWriter(dialect),
-                    new AlterTableWriter(dialect));
+                migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), new AlterTableWriter(dialect));
             }
 
             // run the migrator
@@ -315,70 +407,6 @@
 
             // TODO: do things with warnings and errors
             return script;
-        }
-
-        private static IConfiguration LoadConfiguration(DashingSettings dashingSettings, ConnectionStringSettings connectionStringSettings) {
-            // fetch the to state
-            var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
-            GC.KeepAlive(configAssembly);
-            var configType = configAssembly.DefinedTypes.SingleOrDefault(t => t.FullName == dashingSettings.ConfigurationName);
-
-            if (configType == null) {
-                using (Color(ConsoleColor.Red)) {
-                    var candidates = configAssembly.DefinedTypes.Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null).ToArray();
-                    if (candidates.Any()) {
-                        throw new CatchyException("Could not locate {0}, but found candidates: {1}", dashingSettings.ConfigurationName, string.Join(", ", candidates.Select(c => c.FullName)));
-                    }
-
-                    throw new CatchyException("Could not locate {0}, and found no candidate configurations", dashingSettings.ConfigurationName);
-                }
-            }
-
-            // attempt to find the call to ConfigurationManager and overwrite the connection string
-            InjectConnectionString(dashingSettings, connectionStringSettings);
-
-            // TODO add in a factory way of generating the config for cases where constructor not empty
-            var config = (IConfiguration)Activator.CreateInstance(configType);
-            return config;
-        }
-
-        private static void InjectConnectionString(DashingSettings dashingSettings, ConnectionStringSettings connectionStringSettings) {
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(dashingSettings.PathToDll);
-            var cecilConfigType = assemblyDefinition.MainModule.Types.Single(t => t.FullName == dashingSettings.ConfigurationName);
-            var constructor = cecilConfigType.Methods.FirstOrDefault(m => m.IsConstructor && !m.HasParameters); // default constructor
-            if (constructor == null) {
-                using (Color(ConsoleColor.Red)) {
-                    throw new CatchyException("Unable to find a Default Constructor on the Configuration");
-                }
-            }
-
-            var getConnectionStringCall =
-                constructor.Body.Instructions.FirstOrDefault(
-                    i =>
-                    i.OpCode.Code == Code.Call
-                    && i.Operand.ToString()
-                    == "System.Configuration.ConnectionStringSettingsCollection System.Configuration.ConfigurationManager::get_ConnectionStrings()");
-            if (getConnectionStringCall == null) {
-                using (Color(ConsoleColor.Red)) {
-                    throw new CatchyException("Unable to find the ConnectionStrings call in the constructor");
-                }
-            }
-
-            var connectionStringKey = getConnectionStringCall.Next.Operand.ToString();
-
-            // override readonly property of connectionstrings
-            typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic)
-                                                  .SetValue(ConfigurationManager.ConnectionStrings, false);
-            ConfigurationManager.ConnectionStrings.Add(
-                new System.Configuration.ConnectionStringSettings(
-                    connectionStringKey,
-                    connectionStringSettings.ConnectionString,
-                    connectionStringSettings.ProviderName));
-        }
-
-        private static void NotImplemented() {
-            Console.WriteLine("Sorry, that's not implemented yet.");
-            Environment.Exit(1);
         }
 
         private static ColorContext Color(ConsoleColor color) {
