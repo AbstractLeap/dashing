@@ -68,9 +68,9 @@ namespace Dashing.Engine.Dialects {
 
         public override string DropIndex(Index index) {
             var sql = new StringBuilder("drop index ");
-            this.AppendQuotedTableName(sql, index.Map);
-            sql.Append(".");
             this.AppendQuotedName(sql, index.Name);
+            sql.Append(" on ");
+            this.AppendQuotedTableName(sql, index.Map);
             return sql.ToString();
         }
 
