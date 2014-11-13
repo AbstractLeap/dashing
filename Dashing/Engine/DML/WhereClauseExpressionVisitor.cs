@@ -98,6 +98,7 @@
 
         protected override Expression VisitBinary(BinaryExpression b) {
             this.isInBinaryComparisonExpression = b.NodeType != ExpressionType.AndAlso && b.NodeType != ExpressionType.OrElse;
+
             // if this bianry expression does not contain any parameters it's constant so just invoke the thing
             this.constantChecker.Reset();
             this.constantChecker.VisitTree(b);
@@ -375,6 +376,7 @@
             object value = null;
 
             if (this.isClosureConstantAccess) {
+                this.getForeignKeyName = false; // tidy up this property
                 if (this.isChainedMemberAccess) {
                     value = Expression.Lambda(this.chainedMemberAccessExpression).Compile().DynamicInvoke(null);
                 }

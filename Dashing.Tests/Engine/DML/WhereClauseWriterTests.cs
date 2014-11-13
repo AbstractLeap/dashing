@@ -22,6 +22,15 @@
         }
 
         [Fact]
+        public void PreviousForeignKeyPredicateDoesntInterrupt() {
+            var target = MakeTarget();
+            var author = new User { UserId = 1 };
+            Expression<Func<Comment, bool>> pred = c => c.Post.Author.UserId == author.UserId && c.Post.Author.IsEnabled;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ((t_100.[AuthorId] = @l_1) and t_101.[IsEnabled] = 1)", result.Sql);
+        }
+
+        [Fact]
         public void UnaryBoolGetsEqualsOne() {
             var target = MakeTarget();
             Expression<Func<BoolClass, bool>> pred = b => b.IsFoo;

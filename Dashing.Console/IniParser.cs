@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tools {
+namespace Dashing.Console {
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;

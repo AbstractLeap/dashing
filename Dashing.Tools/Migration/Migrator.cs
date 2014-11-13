@@ -158,9 +158,9 @@
             // see if we can change these in to changed names
             if (removedColumnDbNames.Any()) {
                 var copyOfAddedColumnDbNames = addedColumnDbNames.Select(s => s).ToArray();
-                var copyOfRemovedColumnDbNames = removedColumnDbNames.Select(s => s).ToArray();
                 foreach (var dbName in copyOfAddedColumnDbNames) {
                     var addedColumn = toColumns[dbName];
+                    var copyOfRemovedColumnDbNames = removedColumnDbNames.Select(s => s).ToArray();
                     foreach (var removedColumnDbName in copyOfRemovedColumnDbNames) {
                         var removedColumn = fromColumns[removedColumnDbName];
                         if (this.IsPotentialNameChange(addedColumn, removedColumn)) {
