@@ -21,7 +21,7 @@ namespace Dashing.Configuration {
                 throw new ArgumentException("Namespace of the indicator type is null");
             }
 
-            Add(configuration, mappedTypes, type.Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsVisible && t.Namespace != null && t.Namespace.StartsWith(ns)));
+            Add(configuration, mappedTypes, type.Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsVisible && t.Namespace != null && t.Namespace == ns));
         }
 
         public static void Add(IConfiguration configuration, IDictionary<Type, IMap> mappedTypes, IEnumerable<Type> types) {
