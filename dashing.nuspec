@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.49</version>
+        <version>0.0.50</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.49 - Switched AddNamespace to use equals
+        <releaseNotes>* 0.0.50 - Prevented fetching of Ignored Columns
+* 0.0.49 - Switched AddNamespace to use equals
 * 0.0.48 - Fixed constant access issue
 * 0.0.47 - Fixed issues with non-deterministic ordering of FetchTree
 * 0.0.46 - Max Length fix

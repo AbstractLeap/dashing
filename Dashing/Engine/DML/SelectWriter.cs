@@ -378,6 +378,11 @@
                     var column =
                         this.Configuration.GetMap(
                         currentNode == rootNode ? typeof(T) : (currentNode.Column.Relationship == RelationshipType.OneToMany ? currentNode.Column.Type.GetGenericArguments().First() : currentNode.Column.Type)).Columns[propName];
+                    if (column.IsIgnored) {
+                        //TODO we should probably warn at this point
+                        continue;
+                    }
+
                     if (column.Relationship == RelationshipType.OneToMany) {
                         ++numberCollectionFetches;
                     }

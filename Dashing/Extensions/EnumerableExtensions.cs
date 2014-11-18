@@ -14,59 +14,76 @@
         /// </remarks>
         public static IList<IMap> OrderTopologically(this IEnumerable<IMap> enumerableOfMaps) {
             var maps = enumerableOfMaps as List<IMap> ?? enumerableOfMaps.ToList();
-            var result = new List<IMap>();
-            var skippedMaps = new List<IMap>();
-            maps = maps.ToList();
-            foreach (var map in maps.Where(map => !result.Contains(map))) {
+            var resultHash = new HashSet<IMap>();
+            var resultList = new List<IMap>();
+            var skippedMapsHash = new HashSet<IMap>();
+            var skippedMapsList = new List<IMap>();
+            foreach (var map in maps.Where(map => !resultHash.Contains(map))) {
                 // if has collection properties or referenced by something else then skip
-                if (map.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map))
-                    || maps.Any(m => !result.Contains(m) && m.Columns.Any(c => c.Value.Relationship == RelationshipType.ManyToOne && c.Value.Type == map.Type))) {
-                    skippedMaps.Add(map);
+                if (HasNonOrderedReference(maps, resultHash, map)) {
+                    AddMapToSkipped(map, skippedMapsList, skippedMapsHash);
                     continue;
                 }
 
                 // otherwise we add it in and follow the tree
-                AddToResult(map, result, skippedMaps, maps);
+                AddToResult(map, resultHash, resultList, skippedMapsHash, skippedMapsList, maps);
             }
 
             // fix up the skipped ones
-            while (skippedMaps.Any()) {
-                var map = skippedMaps.First();
-                if (result.Contains(map)) {
-                    skippedMaps.Remove(map);
+            while (skippedMapsList.Any()) {
+                var map = skippedMapsList.First();
+                if (resultHash.Contains(map)) {
+                    RemoveMapFromSkipped(map, skippedMapsList, skippedMapsHash);
                     continue;
                 }
 
-                if (!(map.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map))
-                    || maps.Any(m => !result.Contains(m) && m.Columns.Any(c => c.Value.Relationship == RelationshipType.ManyToOne && c.Value.Type == map.Type)))) {
-                    AddToResult(map, result, skippedMaps, maps);
-                    skippedMaps.Remove(map);
+                if (!HasNonOrderedReference(maps, resultHash, map)) {
+                    AddToResult(map, resultHash, resultList, skippedMapsHash, skippedMapsList, maps);
+                    RemoveMapFromSkipped(map, skippedMapsList, skippedMapsHash);
                     continue;
                 }
 
                 // otherwise, we can't add this now, let's move it to the end
-                skippedMaps.Remove(map);
-                skippedMaps.Add(map);
+                RemoveMapFromSkipped(map, skippedMapsList, skippedMapsHash);
+                AddMapToSkipped(map, skippedMapsList, skippedMapsHash);
             }
 
-            Debug.Assert(maps.Count() == result.Count, "These should match, definitely a bug if not");
+            Debug.Assert(maps.Count() == resultList.Count, "These should match, definitely a bug if not");
 
-            return result;
+            return resultList;
         }
 
-        private static void AddToResult(IMap map, IList<IMap> result, IList<IMap> skippedMaps, List<IMap> maps) {
-            result.Add(map);
-            
+        private static void AddMapToSkipped(IMap map, IList<IMap> skippedMapsList, HashSet<IMap> skippedMapsHash) {
+            if (!skippedMapsHash.Contains(map)) {
+                skippedMapsList.Add(map);
+                skippedMapsHash.Add(map);
+            }
+        }
+
+        private static void RemoveMapFromSkipped(IMap map, IList<IMap> skippedMapsList, HashSet<IMap> skippedMapsHash) {
+            if (skippedMapsHash.Contains(map)) {
+                skippedMapsList.Remove(map);
+                skippedMapsHash.Remove(map);
+            }
+        }
+
+        private static bool HasNonOrderedReference(List<IMap> maps, HashSet<IMap> resultHash, IMap map) {
+            return maps.Any(m => !resultHash.Contains(m) && m.Columns.Any(mp => mp.Value.Relationship == RelationshipType.ManyToOne && mp.Value.Type == map.Type));
+        }
+
+        private static void AddToResult(IMap map, HashSet<IMap> resultHash, List<IMap> resultList, HashSet<IMap> skippedMapsHash, IList<IMap> skippedMapsList, List<IMap> maps) {
+            resultHash.Add(map);
+            resultList.Add(map);
+
             // now check for all relationship properties
-            foreach (var relatedMap in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne).Select(c => c.Value.ParentMap).Where(relatedMap => !result.Contains(relatedMap))) {
+            foreach (var relatedMap in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne).Select(c => c.Value.ParentMap).Where(relatedMap => !resultHash.Contains(relatedMap))) {
                 // if has collection properties that aren't the map ignore
-                if (relatedMap.Columns.Any(c => c.Value.Relationship == RelationshipType.OneToMany && c.Value.ChildColumn.Map != map && !result.Contains(c.Value.ChildColumn.Map))
-                    || maps.Any(m => !result.Contains(m) && m.Columns.Any(c => c.Value.Relationship == RelationshipType.ManyToOne && c.Value.Type == relatedMap.Type))) {
-                    skippedMaps.Add(relatedMap);
+                if (HasNonOrderedReference(maps, resultHash, relatedMap)) {
+                    AddMapToSkipped(relatedMap, skippedMapsList, skippedMapsHash);
                     continue;
                 }
 
-                AddToResult(relatedMap, result, skippedMaps, maps);
+                AddToResult(relatedMap, resultHash, resultList, skippedMapsHash, skippedMapsList, maps);
             }
         }
 
