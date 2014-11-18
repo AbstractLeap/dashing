@@ -62,6 +62,10 @@
 
             // do creates first as other changes may depend on them
             foreach (var map in additions) {
+                if (map.PrimaryKey == null) {
+                    throw new NullReferenceException("The type " + map.Type.FullName + " does not have a primary key set.");
+                }
+
                 sql.Append(this.createTableWriter.CreateTable(map));
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
