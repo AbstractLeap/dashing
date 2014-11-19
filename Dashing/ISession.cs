@@ -14,6 +14,8 @@ namespace Dashing {
 
         void Complete();
 
+        void Reject();
+
         T Get<T, TPrimaryKey>(TPrimaryKey id);
 
         T GetTracked<T, TPrimaryKey>(TPrimaryKey id);

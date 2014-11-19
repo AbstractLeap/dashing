@@ -143,6 +143,7 @@
     <Compile Include="Events\IOnPostInsertEventListener.cs" />
     <Compile Include="Events\IOnPreInsertEventListener.cs" />
     <Compile Include="Events\IOnPreSaveEventListener.cs" />
+    <Compile Include="Extensions\AsyncLazy.cs" />
     <Compile Include="Extensions\AsyncLock.cs" />
     <Compile Include="Extensions\DapperExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />

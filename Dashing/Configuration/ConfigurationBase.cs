@@ -56,6 +56,8 @@
 
         public bool GetIsTrackedByDefault { get; set; }
 
+        public bool CompleteFailsSilentlyIfRejected { get; set; }
+
         protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
@@ -94,6 +96,7 @@
             eventListeners.CollectionChanged += this.EventListenersCollectionChanged;
             this.EventListeners = eventListeners;
             this.EventHandlers = new EventHandlers(this.EventListeners);
+            this.CompleteFailsSilentlyIfRejected = true;
         }
 
         private void EventListenersCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
