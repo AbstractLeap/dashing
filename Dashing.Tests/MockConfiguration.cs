@@ -14,6 +14,8 @@ namespace Dashing.Tests {
 
         public bool GetIsTrackedByDefault { get; set; }
 
+        public bool CompleteFailsSilentlyIfRejected { get; set; }
+
         public ISession BeginTransactionLessSession(IDbConnection connection) {
             throw new NotImplementedException();
         }

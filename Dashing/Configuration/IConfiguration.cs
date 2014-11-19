@@ -70,5 +70,7 @@ using Dashing.Events;
         ///     Indicates whether Get method calls return tracked entities by default or not
         /// </summary>
         bool GetIsTrackedByDefault { get; set; }
+
+        bool CompleteFailsSilentlyIfRejected { get; set; }
     }
 }

@@ -29,6 +29,8 @@
 
         private bool isDisposed;
 
+        private bool isRejected;
+
         private readonly bool isTransactionLess;
 
         private readonly object connectionOpenLock = new object();
@@ -177,11 +179,21 @@
                 throw new InvalidOperationException("Transaction is already complete");
             }
 
-            if (this.transaction != null && this.shouldCommitAndDisposeTransaction) {
+            if (this.isRejected && !this.Configuration.CompleteFailsSilentlyIfRejected) {
+                throw new InvalidOperationException("This transaction has been rejected");
+            }
+
+            if (this.transaction != null && this.shouldCommitAndDisposeTransaction && !this.isRejected) {
                 this.transaction.Commit();
             }
 
-            this.isComplete = true;
+            if (!this.isRejected) {
+                this.isComplete = true;
+            }
+        }
+
+        public void Reject() {
+            this.isRejected = true;
         }
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id) {

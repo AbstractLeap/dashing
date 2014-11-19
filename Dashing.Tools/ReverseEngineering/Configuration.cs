@@ -86,6 +86,7 @@ namespace Dashing.Tools.ReverseEngineering {
             }
         }
 
+        public bool CompleteFailsSilentlyIfRejected { get; set; }
 
         public ICollection<Events.IEventListener> EventListeners {
             get { throw new NotImplementedException(); }
