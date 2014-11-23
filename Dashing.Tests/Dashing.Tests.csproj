@@ -98,6 +98,7 @@
     <Compile Include="Engine\DML\DeleteWriterTests.cs" />
     <Compile Include="Engine\DML\InsertWriterTests.cs" />
     <Compile Include="Engine\DML\SelectWriterTests.cs" />
+    <Compile Include="Engine\DML\WhereClauseWriterPerformanceTests.cs" />
     <Compile Include="Engine\DML\WhereClauseWriterTests.cs" />
     <Compile Include="Engine\DML\UpdateWriterTests.cs" />
     <Compile Include="Extensions\DynamicParametersExtensions.cs" />

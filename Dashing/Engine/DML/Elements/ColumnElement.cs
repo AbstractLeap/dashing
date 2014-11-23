@@ -1,9 +1,9 @@
-﻿namespace Dashing.Engine.DML {
+﻿namespace Dashing.Engine.DML.Elements {
     using System.Text;
 
     using Dashing.Engine.Dialects;
 
-    internal class ColumnElement : ISqlElement {
+    internal sealed class ColumnElement : ISqlElement {
         private readonly string columnName;
 
         private readonly ISqlDialect dialect;

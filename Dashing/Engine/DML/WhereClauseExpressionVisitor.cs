@@ -10,6 +10,7 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
+    using Dashing.Engine.DML.Elements;
     using Dashing.Extensions;
 
     internal class WhereClauseExpressionVisitor : BaseExpressionVisitor {
@@ -108,18 +109,18 @@
             } 
             else {
                 // left hand side of expression
-                this.sqlElements.Enqueue(new ConstantElement("("));
+                this.sqlElements.Enqueue(new StringElement("("));
                 this.isTopOfBinary = true;
                 this.Visit(b.Left);
 
                 // equality operator
                 // TODO What about == entity where entity is null??
-                this.sqlElements.Enqueue(new ConstantElement(this.GetOperator(b.NodeType, b.Right.ToString() == "null")));
+                this.sqlElements.Enqueue(new StringElement(this.GetOperator(b.NodeType, b.Right.ToString() == "null")));
 
                 // right hand side of expression
                 this.isTopOfBinary = true;
                 this.Visit(b.Right);
-                this.sqlElements.Enqueue(new ConstantElement(")"));
+                this.sqlElements.Enqueue(new StringElement(")"));
             }
 
             this.isInBinaryComparisonExpression = false;
@@ -198,7 +199,7 @@
 
             if (!isInBinaryComparisonExpression && m.Type == typeof(Boolean)) {
                 // add == 1 to the thing
-                this.sqlElements.Enqueue(new ConstantElement(" = 1"));
+                this.sqlElements.Enqueue(new StringElement(" = 1"));
             }
 
             return expr;
@@ -283,13 +284,13 @@
 
         protected override Expression VisitUnary(UnaryExpression u) {
             if (u.NodeType == ExpressionType.Not) {
-                this.sqlElements.Enqueue(new ConstantElement("not ("));
+                this.sqlElements.Enqueue(new StringElement("not ("));
             }
 
             base.VisitUnary(u);
 
             if (u.NodeType == ExpressionType.Not) {
-                this.sqlElements.Enqueue(new ConstantElement(")"));
+                this.sqlElements.Enqueue(new StringElement(")"));
             }
 
             return u;
@@ -306,7 +307,7 @@
                         memberExpr = m.Object;
                         valuesExpr = m.Arguments[0];
                         this.Visit(memberExpr);
-                        this.sqlElements.Enqueue(new ConstantElement(" like "));
+                        this.sqlElements.Enqueue(new StringElement(" like "));
                         this.doPrependValue = this.doAppendValue = true;
                         this.prependValue = this.appendValue = "%";
                         this.Visit(valuesExpr);
@@ -326,7 +327,7 @@
                     }
 
                     this.Visit(memberExpr);
-                        this.sqlElements.Enqueue(new ConstantElement(" in "));
+                        this.sqlElements.Enqueue(new StringElement(" in "));
                     this.Visit(valuesExpr);
                     break;
 
@@ -334,7 +335,7 @@
                     memberExpr = m.Object;
                     valuesExpr = m.Arguments[0];
                     this.Visit(memberExpr);
-                        this.sqlElements.Enqueue(new ConstantElement(" like "));
+                        this.sqlElements.Enqueue(new StringElement(" like "));
                     this.doAppendValue = true;
                     this.appendValue = "%";
                     this.Visit(valuesExpr);
@@ -345,7 +346,7 @@
                     memberExpr = m.Object;
                     valuesExpr = m.Arguments[0];
                     this.Visit(memberExpr);
-                        this.sqlElements.Enqueue(new ConstantElement(" like "));
+                        this.sqlElements.Enqueue(new StringElement(" like "));
                     this.doPrependValue = true;
                     this.prependValue = "%";
                     this.Visit(valuesExpr);
@@ -356,12 +357,12 @@
                     memberExpr = m.Arguments[1];
                     var relatedType = m.Arguments[0].Type.GenericTypeArguments[0];
                     var map = this.configuration.GetMap(relatedType);
-                    this.sqlElements.Enqueue(new ConstantElement("exists (select 1 from "));
+                    this.sqlElements.Enqueue(new StringElement("exists (select 1 from "));
                     this.dialect.AppendQuotedTableName(this.Sql, map);
-                    this.sqlElements.Enqueue(new ConstantElement(" where "));
+                    this.sqlElements.Enqueue(new StringElement(" where "));
                     this.insideSubQuery = true;
                     this.Visit(m.Arguments[1]);
-                    this.sqlElements.Enqueue(new ConstantElement(")"));
+                    this.sqlElements.Enqueue(new StringElement(")"));
                     this.insideSubQuery = false;
                     break;
 
@@ -417,7 +418,7 @@
         }
 
         private void AddParameter(object value) {
-            this.sqlElements.Enqueue(new ConstantElement("@l_" + ++this.paramCounter));
+            this.sqlElements.Enqueue(new StringElement("@l_" + ++this.paramCounter));
             this.Parameters.Add("@l_" + this.paramCounter, this.doAppendValue || this.doPrependValue ? this.WrapValue(value) : value);
         }
 

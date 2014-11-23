@@ -113,9 +113,10 @@
     <Compile Include="Engine\Dialects\SqlServerDialect.cs" />
     <Compile Include="Engine\DML\BaseExpressionVisitor.cs" />
     <Compile Include="Engine\DML\BaseWriter.cs" />
-    <Compile Include="Engine\DML\ColumnElement.cs" />
+    <Compile Include="Engine\DML\Elements\ColumnElement.cs" />
     <Compile Include="Engine\DML\ConstantChecker.cs" />
-    <Compile Include="Engine\DML\ConstantElement.cs" />
+    <Compile Include="Engine\DML\Elements\ConstantElement.cs" />
+    <Compile Include="Engine\DML\Elements\StringElement.cs" />
     <Compile Include="Engine\DML\CountWriter.cs" />
     <Compile Include="Engine\DML\DeleteWriter.cs" />
     <Compile Include="Engine\DML\FetchNode.cs" />
@@ -124,7 +125,7 @@
     <Compile Include="Engine\DML\IInsertWriter.cs" />
     <Compile Include="Engine\DML\InsertWriter.cs" />
     <Compile Include="Engine\DML\ISelectWriter.cs" />
-    <Compile Include="Engine\DML\ISqlElement.cs" />
+    <Compile Include="Engine\DML\Elements\ISqlElement.cs" />
     <Compile Include="Engine\DML\IUpdateWriter.cs" />
     <Compile Include="Engine\DML\IWhereClauseWriter.cs" />
     <Compile Include="Engine\DML\SelectWriter.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Engine\DML\UpdateWriter.cs" />
     <Compile Include="Engine\DML\WhereClauseExpressionVisitor.cs" />
     <Compile Include="Engine\DML\WhereClauseWriter.cs" />
+    <Compile Include="Engine\DML\WhereClauseWriterOld.cs" />
     <Compile Include="Engine\SqlEngine.cs" />
     <Compile Include="Engine\IEngine.cs" />
     <Compile Include="Events\EventHandlers.cs" />
