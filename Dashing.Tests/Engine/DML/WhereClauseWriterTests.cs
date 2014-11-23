@@ -23,6 +23,56 @@
         }
 
         [Fact]
+        public void NullLeftHandSideGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => null == c.Content;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+        }
+
+        [Fact]
+        public void NullLeftHandSideGetsGoodParams() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => null == c.Content;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void NullValueGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.Content == null;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+        }
+
+        [Fact]
+        public void NullValueGetsGoodParams() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.Content == null;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void NullConstantGetsGoodSql() {
+            var target = MakeTarget();
+            var c1 = new Comment();
+            Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+        }
+
+        [Fact]
+        public void NullConstantGetsGoodParams() {
+            var target = MakeTarget();
+            var c1 = new Comment();
+            Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
         public void PreviousForeignKeyPredicateDoesntInterrupt() {
             var target = MakeTarget();
             var author = new User { UserId = 1 };

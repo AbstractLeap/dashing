@@ -132,9 +132,7 @@
     <Compile Include="Engine\DML\SelectWriterResult.cs" />
     <Compile Include="Engine\DML\SqlWriterResult.cs" />
     <Compile Include="Engine\DML\UpdateWriter.cs" />
-    <Compile Include="Engine\DML\WhereClauseExpressionVisitor.cs" />
     <Compile Include="Engine\DML\WhereClauseWriter.cs" />
-    <Compile Include="Engine\DML\WhereClauseWriterOld.cs" />
     <Compile Include="Engine\SqlEngine.cs" />
     <Compile Include="Engine\IEngine.cs" />
     <Compile Include="Events\EventHandlers.cs" />

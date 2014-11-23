@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dashing.Engine.DML {
+﻿namespace Dashing.Engine.DML {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Text;
+    using System.Threading.Tasks;
 
     using Dapper;
 
@@ -15,7 +14,7 @@ namespace Dashing.Engine.DML {
     using Dashing.Engine.DML.Elements;
     using Dashing.Extensions;
 
-    public sealed class WhereClauseWriter : IWhereClauseWriter {
+    internal sealed class WhereClauseWriter : IWhereClauseWriter {
         private readonly ISqlDialect dialect;
 
         private readonly IConfiguration config;
@@ -161,7 +160,7 @@ namespace Dashing.Engine.DML {
                         }
                     }
 
-                    throw new NotImplementedException("Contains is not supported where neither parameter is an entity property");
+                    break;
 
                 case "StartsWith":
                     memberExpr = exp.Object;
@@ -183,8 +182,7 @@ namespace Dashing.Engine.DML {
                         }
                     }
 
-                    throw new NotImplementedException(
-                            "It does not make sense to provide a string StartsWith method that does not operate on a sql field");
+                    break;
 
                 case "EndsWith":
                     memberExpr = exp.Object;
@@ -205,8 +203,7 @@ namespace Dashing.Engine.DML {
                         }
                     }
 
-                    throw new NotImplementedException(
-                            "It does not make sense to provide a string EnsWith method that does not operate on a sql field");
+                    break;
 
                 //case "Any":
                 //    memberExpr = exp.Arguments[1];
@@ -221,13 +218,9 @@ namespace Dashing.Engine.DML {
                 //    this.sqlElements.Enqueue(new StringElement(")"));
                 //    this.insideSubQuery = false;
                 //    break;
-
-                default:
-                    // assume constant access here
-                    this.isConstantExpression = true;
-                    return null;
             }
 
+            this.isConstantExpression = true;
             return null;
         }
 
@@ -485,21 +478,16 @@ namespace Dashing.Engine.DML {
                 this.sqlElements.Enqueue(new StringElement("("));
                 if (isLeftConstantExpression && ((ConstantElement)left).Value == null) {
                     this.sqlElements.Enqueue(right);
-                    this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, true, true)));
+                    this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, true)));
                     this.sqlElements.Enqueue(left);
-                }
-                else if (isRightConstantExpression && ((ConstantElement)right).Value == null) {
-                    this.sqlElements.Enqueue(left);
-                    this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, true, false)));
-                    this.sqlElements.Enqueue(right);
                 }
                 else {
                     this.sqlElements.Enqueue(left);
-                    this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, false, false)));
+                    this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, isRightConstantExpression && ((ConstantElement)right).Value == null)));
                     this.sqlElements.Enqueue(right);
-                    this.sqlElements.Enqueue(new StringElement(")"));
                 }
 
+                this.sqlElements.Enqueue(new StringElement(")"));
                 this.isInBinaryComparisonExpression = false;
             }
             else if (isInAndOrOrExpression) {
@@ -512,7 +500,7 @@ namespace Dashing.Engine.DML {
                     this.sqlElements.Enqueue(new StringElement(this.isNegated ? " = 0" : " = 1"));
                 }
 
-                this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, false, false)));
+                this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, false)));
                 this.ResetVariables();
                 var right = this.Visit(exp.Right);
                 if (right != null) {
@@ -544,21 +532,17 @@ namespace Dashing.Engine.DML {
             }
         }
 
-        private string GetOperator(ExpressionType nodeType, bool isNull, bool switchOperator) {
+        private string GetOperator(ExpressionType nodeType, bool isNull) {
             switch (nodeType) {
                 case ExpressionType.Equal:
                     return isNull ? " is " : " = ";
                 case ExpressionType.GreaterThanOrEqual:
-                    if (switchOperator) return " <= ";
                     return " >= ";
                 case ExpressionType.GreaterThan:
-                    if (switchOperator) return " < ";
                     return " > ";
                 case ExpressionType.LessThanOrEqual:
-                    if (switchOperator) return " >= ";
                     return " <= ";
                 case ExpressionType.LessThan:
-                    if (switchOperator) return " > ";
                     return " < ";
                 case ExpressionType.NotEqual:
                     return isNull ? " is not " : " != ";
