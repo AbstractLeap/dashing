@@ -280,6 +280,60 @@
         }
 
         [Fact]
+        public void WhereStringContainsUsingClosure() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => p.Title.Contains(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringContainsUsingClosureGetsGoodParam() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => p.Title.Contains(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("%Foo%", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringStartsWithUsingClosure() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => p.Title.StartsWith(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringStartsWithUsingClosureGetsGoodParam() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => p.Title.StartsWith(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("Foo%", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringEndsWithUsingClosure() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => p.Title.EndsWith(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringEndsWithUsingClosureGetsGoodParam() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => p.Title.EndsWith(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
         public void WhereStringContainsParamsGood() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.Contains("Foo");

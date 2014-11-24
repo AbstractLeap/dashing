@@ -117,8 +117,11 @@
                             this.doPrependValue = this.doAppendValue = true;
                             this.prependValue = this.appendValue = "%";
                             var valuesEl = this.Visit(valuesExpr);
-                            var isValuesElConstant = this.isConstantExpression;
-                            if (isValuesElConstant && valuesEl != null) {
+                            if (this.isConstantExpression) {
+                                if (valuesEl == null) {
+                                    valuesEl = this.AddParameter(this.GetDynamicValue(valuesExpr));
+                                }
+
                                 this.sqlElements.Enqueue(memberEl);
                                 this.sqlElements.Enqueue(new StringElement(" like "));
                                 this.sqlElements.Enqueue(valuesEl);
@@ -148,7 +151,7 @@
                             var valuesEl = this.Visit(valuesExpr);
                             if (this.isConstantExpression) {
                                 if (valuesEl == null) {
-                                    valuesEl = this.AddParameter(Expression.Lambda(valuesExpr).Compile().DynamicInvoke(null));
+                                    valuesEl = this.AddParameter(this.GetDynamicValue(valuesExpr));
                                 }
 
                                 this.sqlElements.Enqueue(containsMemberEl);
@@ -172,8 +175,11 @@
                         this.doAppendValue = true;
                         this.appendValue = "%";
                         var valuesEl = this.Visit(valuesExpr);
-                        var isValuesElConstant = this.isConstantExpression;
-                        if (isValuesElConstant && valuesEl != null) {
+                        if (this.isConstantExpression) {
+                            if (valuesEl == null) {
+                                valuesEl = this.AddParameter(this.GetDynamicValue(valuesExpr));
+                            }
+
                             this.sqlElements.Enqueue(startsWithMemberEl);
                             this.sqlElements.Enqueue(new StringElement(" like "));
                             this.sqlElements.Enqueue(valuesEl);
@@ -194,8 +200,11 @@
                         this.doPrependValue = true;
                         this.prependValue = "%";
                         var valuesEl = this.Visit(valuesExpr);
-                        var isValuesElConstant = this.isConstantExpression;
-                        if (isValuesElConstant && valuesEl != null) {
+                        if (this.isConstantExpression) {
+                            if (valuesEl == null) {
+                                valuesEl = this.AddParameter(this.GetDynamicValue(valuesExpr));
+                            }
+
                             this.sqlElements.Enqueue(endsWithMemberEl);
                             this.sqlElements.Enqueue(new StringElement(" like "));
                             this.sqlElements.Enqueue(valuesEl);
@@ -241,7 +250,7 @@
                     }
 
                     // slow path
-                    return this.AddParameter(Expression.Lambda(exp).Compile().DynamicInvoke(null));
+                    return this.AddParameter(this.GetDynamicValue(exp));
                 }
 
                 return null;
@@ -271,20 +280,18 @@
                 }
             }
             else {
-                if (this.isInBinaryComparisonExpression) {
-                    if (value != null) {
-                        var propInfo = exp.Member as PropertyInfo;
-                        if (propInfo != null) {
-                            value = propInfo.GetValue(value);
+                if (value != null) {
+                    var propInfo = exp.Member as PropertyInfo;
+                    if (propInfo != null) {
+                        value = propInfo.GetValue(value);
+                    }
+                    else {
+                        var fieldInfo = exp.Member as FieldInfo;
+                        if (fieldInfo != null) {
+                            value = fieldInfo.GetValue(value);
                         }
                         else {
-                            var fieldInfo = exp.Member as FieldInfo;
-                            if (fieldInfo != null) {
-                                value = fieldInfo.GetValue(value);
-                            }
-                            else {
-                                value = null;
-                            }
+                            value = null;
                         }
                     }
                 }
@@ -420,6 +427,10 @@
             return null;
         }
 
+        private object GetDynamicValue(Expression expr) {
+            return Expression.Lambda(expr).Compile().DynamicInvoke(null);
+        }
+
         private ConstantElement AddParameter(object value) {
             var param = "@l_" + ++this.paramCounter;
             if (value != null) {
@@ -468,11 +479,11 @@
                 var isRightConstantExpression = this.isConstantExpression;
 
                 if (isLeftConstantExpression && left == null) {
-                    left = this.AddParameter(Expression.Lambda(exp.Left).Compile().DynamicInvoke(null));
+                    left = this.AddParameter(this.GetDynamicValue(exp.Left));
                 }
 
                 if (isRightConstantExpression && right == null) {
-                    right = this.AddParameter(Expression.Lambda(exp.Right).Compile().DynamicInvoke(null));
+                    right = this.AddParameter(this.GetDynamicValue(exp.Right));
                 }
 
                 this.sqlElements.Enqueue(new StringElement("("));
