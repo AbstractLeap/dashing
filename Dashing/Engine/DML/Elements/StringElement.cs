@@ -1,12 +1,12 @@
-﻿namespace Dashing.Engine.DML {
+﻿namespace Dashing.Engine.DML.Elements {
     using System.Text;
 
     using Dashing.Engine.Dialects;
 
-    internal class ConstantElement : ISqlElement {
+    internal sealed class StringElement : ISqlElement {
         private readonly string sqlElement;
 
-        public ConstantElement(string sqlElement) {
+        public StringElement(string sqlElement) {
             this.sqlElement = sqlElement;
         }
 

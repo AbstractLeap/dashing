@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Linq.Expressions;
 
     using Dashing.CodeGeneration;
@@ -19,6 +20,56 @@
 
         public void SetFixture(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
+        }
+
+        [Fact]
+        public void NullLeftHandSideGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => null == c.Content;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+        }
+
+        [Fact]
+        public void NullLeftHandSideGetsGoodParams() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => null == c.Content;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void NullValueGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.Content == null;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+        }
+
+        [Fact]
+        public void NullValueGetsGoodParams() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.Content == null;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void NullConstantGetsGoodSql() {
+            var target = MakeTarget();
+            var c1 = new Comment();
+            Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+        }
+
+        [Fact]
+        public void NullConstantGetsGoodParams() {
+            var target = MakeTarget();
+            var c1 = new Comment();
+            Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(null, result.Parameters.GetValue("l_1"));
         }
 
         [Fact]
@@ -60,7 +111,7 @@
             var target = MakeTarget();
             Expression<Func<BoolClass, bool>> pred = b => !b.IsFoo;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(" where not ([IsFoo] = 1)", result.Sql);
+            Assert.Equal(" where [IsFoo] = 0", result.Sql);
         }
 
         [Fact]
@@ -218,6 +269,72 @@
 
             // assert
             Assert.Equal(" where [IsEnabled] = 1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringContains() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Title.Contains("Foo");
+            var actual = target.GenerateSql(new[] {pred}, null);
+            Assert.Equal(" where [Title] like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringContainsParamsGood() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Title.Contains("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("%Foo%", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringStartsWith() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Title.StartsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringStartsWithParamsGood() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Title.StartsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("Foo%", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringEndsWith() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Title.EndsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringEndsWithParamsGood() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Title.EndsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereContainsOnQueryable() {
+            var target = MakeTarget();
+            var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            Expression<Func<Post, bool>> pred = p => ints.Where(i => i % 2 == 0).Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [PostId] in @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereContainsOnQueryableGetGoodParam() {
+            var target = MakeTarget();
+            var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            Expression<Func<Post, bool>> pred = p => ints.Where(i => i % 2 == 0).Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(new[] {2, 4, 6, 8 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
         private static WhereClauseWriter MakeTarget() {
