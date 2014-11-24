@@ -1,4 +1,4 @@
-﻿namespace Dashing.Engine.DML {
+﻿namespace Dashing.Engine.DML.Elements {
     using System.Text;
 
     using Dashing.Engine.Dialects;
