@@ -420,10 +420,7 @@
                 return AddParameter(exp.Value);
             }
 
-            if (this.isInBinaryComparisonExpression) {
-                value = exp.Value;
-            }
-
+            value = exp.Value;
             return null;
         }
 
