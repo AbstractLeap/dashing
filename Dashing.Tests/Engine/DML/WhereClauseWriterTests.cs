@@ -43,7 +43,7 @@
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.Content == null;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+            Assert.Equal(" where ([Content] is null)", result.Sql);
         }
 
         [Fact]
@@ -51,7 +51,23 @@
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.Content == null;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+            Assert.Empty(result.Parameters.ParameterNames);
+        }
+
+        [Fact]
+        public void NotNullValueGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.Content != null;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Content] is not null)", result.Sql);
+        }
+
+        [Fact]
+        public void NotNullValueGetsGoodParams() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.Content != null;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Empty(result.Parameters.ParameterNames);
         }
 
         [Fact]
@@ -60,7 +76,7 @@
             var c1 = new Comment();
             Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+            Assert.Equal(" where ([Content] is null)", result.Sql);
         }
 
         [Fact]
@@ -69,7 +85,7 @@
             var c1 = new Comment();
             Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+            Assert.Empty(result.Parameters.ParameterNames);
         }
 
         [Fact]
