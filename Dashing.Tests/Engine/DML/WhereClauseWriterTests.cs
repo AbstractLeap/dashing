@@ -43,7 +43,7 @@
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.Content == null;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+            Assert.Equal(" where ([Content] is null)", result.Sql);
         }
 
         [Fact]
@@ -51,7 +51,23 @@
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.Content == null;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+            Assert.Empty(result.Parameters.ParameterNames);
+        }
+
+        [Fact]
+        public void NotNullValueGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.Content != null;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Content] is not null)", result.Sql);
+        }
+
+        [Fact]
+        public void NotNullValueGetsGoodParams() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.Content != null;
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Empty(result.Parameters.ParameterNames);
         }
 
         [Fact]
@@ -60,7 +76,7 @@
             var c1 = new Comment();
             Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(" where ([Content] is @l_1)", result.Sql);
+            Assert.Equal(" where ([Content] is null)", result.Sql);
         }
 
         [Fact]
@@ -69,7 +85,7 @@
             var c1 = new Comment();
             Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(null, result.Parameters.GetValue("l_1"));
+            Assert.Empty(result.Parameters.ParameterNames);
         }
 
         [Fact]
@@ -389,6 +405,24 @@
             Expression<Func<Post, bool>> pred = p => ints.Where(i => i % 2 == 0).Contains(p.PostId);
             var actual = target.GenerateSql(new[] { pred }, null);
             Assert.Equal(new[] {2, 4, 6, 8 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
+        public void WhereClauseOnHashsetGetsGoodQuery() {
+            var target = MakeTarget();
+            var ints = new HashSet<int>(new[] { 1, 2, 3, 4, 5 });
+            Expression<Func<Post, bool>> pred = p => ints.Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [PostId] in @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereClauseOnHashsetGetsGoodParams() {
+            var target = MakeTarget();
+            var ints = new HashSet<int>(new[] { 1, 2, 3, 4, 5 });
+            Expression<Func<Post, bool>> pred = p => ints.Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(new[] { 1, 2, 3, 4, 5 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
         private static WhereClauseWriter MakeTarget() {

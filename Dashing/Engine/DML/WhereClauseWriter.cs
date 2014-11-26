@@ -416,7 +416,8 @@
 
         private ISqlElement VisitConstant(ConstantExpression exp) {
             this.isConstantExpression = true;
-            if (this.isTopOfBinaryOrMethod) {
+
+            if (exp.Value != null && this.isTopOfBinaryOrMethod) {
                 return AddParameter(exp.Value);
             }
 
@@ -480,7 +481,8 @@
                 }
 
                 if (isRightConstantExpression && right == null) {
-                    right = this.AddParameter(this.GetDynamicValue(exp.Right));
+                    var dynamicValue = this.GetDynamicValue(exp.Right);
+                    right = (dynamicValue == null) ? new ConstantElement("null", null) : this.AddParameter(dynamicValue);
                 }
 
                 this.sqlElements.Enqueue(new StringElement("("));
