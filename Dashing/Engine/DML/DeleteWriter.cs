@@ -12,11 +12,7 @@
 
     internal class DeleteWriter : BaseWriter, IDeleteWriter {
         public DeleteWriter(ISqlDialect dialect, IConfiguration config)
-            : base(dialect, new WhereClauseWriter(dialect, config), config) {
-        }
-
-        public DeleteWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {
+            : base(dialect, config) {
         }
 
         public SqlWriterResult GenerateSql<T>(IEnumerable<T> entities) {
@@ -71,7 +67,8 @@
                 return;
             }
 
-            var whereResult = this.WhereClauseWriter.GenerateSql(predicateArray, null);
+            var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
+            var whereResult = whereClauseWriter.GenerateSql(predicateArray, null);
             if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
                 throw new NotImplementedException("Dashing does not currently support where clause across tables in a delete");
             }

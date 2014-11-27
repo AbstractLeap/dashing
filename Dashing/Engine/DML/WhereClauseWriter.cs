@@ -103,6 +103,7 @@
         private ISqlElement VisitMethodCall(MethodCallExpression exp) {
             Expression memberExpr = null;
             Expression valuesExpr = null;
+            var isCurrentlyNegated = this.isNegated;
 
             switch (exp.Method.Name) {
                 case "Contains":
@@ -123,7 +124,13 @@
                                 }
 
                                 this.sqlElements.Enqueue(memberEl);
-                                this.sqlElements.Enqueue(new StringElement(" like "));
+                                if (isCurrentlyNegated) {
+                                    this.sqlElements.Enqueue(new StringElement(" not like "));
+                                }
+                                else {
+                                    this.sqlElements.Enqueue(new StringElement(" like "));
+                                }
+
                                 this.sqlElements.Enqueue(valuesEl);
                                 this.ResetVariables();
                                 return null;
@@ -155,7 +162,13 @@
                                 }
 
                                 this.sqlElements.Enqueue(containsMemberEl);
-                                this.sqlElements.Enqueue(new StringElement(" in "));
+                                if (isCurrentlyNegated) {
+                                    this.sqlElements.Enqueue(new StringElement(" not in "));
+                                }
+                                else {
+                                    this.sqlElements.Enqueue(new StringElement(" in "));
+                                }
+
                                 this.sqlElements.Enqueue(valuesEl);
                                 this.ResetVariables();
                                 return null;
@@ -181,7 +194,13 @@
                             }
 
                             this.sqlElements.Enqueue(startsWithMemberEl);
-                            this.sqlElements.Enqueue(new StringElement(" like "));
+                            if (isCurrentlyNegated) {
+                                this.sqlElements.Enqueue(new StringElement(" not like "));
+                            }
+                            else {
+                                this.sqlElements.Enqueue(new StringElement(" like "));
+                            }
+
                             this.sqlElements.Enqueue(valuesEl);
                             this.ResetVariables();
                             return null;
@@ -206,7 +225,13 @@
                             }
 
                             this.sqlElements.Enqueue(endsWithMemberEl);
-                            this.sqlElements.Enqueue(new StringElement(" like "));
+                            if (isCurrentlyNegated) {
+                                this.sqlElements.Enqueue(new StringElement(" not like "));
+                            }
+                            else {
+                                this.sqlElements.Enqueue(new StringElement(" like "));
+                            }
+
                             this.sqlElements.Enqueue(valuesEl);
                             return null;
                         }

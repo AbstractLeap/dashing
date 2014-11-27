@@ -425,6 +425,162 @@
             Assert.Equal(new[] { 1, 2, 3, 4, 5 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
+        [Fact]
+        public void WhereNotContainsQueryableGetsGoodSql() {
+            var target = MakeTarget();
+            var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            Expression<Func<Post, bool>> pred = p => !ints.Where(i => i % 2 == 0).Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [PostId] not in @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereNotContainsQueryableGetsGoodParams() {
+            var target = MakeTarget();
+            var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            Expression<Func<Post, bool>> pred = p => !ints.Where(i => i % 2 == 0).Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(new[] { 2, 4, 6, 8 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
+        public void WhereNotContainsOnHashsetGetsGoodQuery() {
+            var target = MakeTarget();
+            var ints = new HashSet<int>(new[] { 1, 2, 3, 4, 5 });
+            Expression<Func<Post, bool>> pred = p => !ints.Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [PostId] not in @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereNotContainsOnHashsetGetsGoodParams() {
+            var target = MakeTarget();
+            var ints = new HashSet<int>(new[] { 1, 2, 3, 4, 5 });
+            Expression<Func<Post, bool>> pred = p => !ints.Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(new[] { 1, 2, 3, 4, 5 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
+        public void WhereNotContainsGetsGoodQuery() {
+            var target = MakeTarget();
+            var ints = new[] { 1, 2, 3, 4, 5 };
+            Expression<Func<Post, bool>> pred = p => !ints.Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [PostId] not in @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereNotContainsGetsGoodParams() {
+            var target = MakeTarget();
+            var ints = new[] { 1, 2, 3, 4, 5 };
+            Expression<Func<Post, bool>> pred = p => !ints.Contains(p.PostId);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(new[] { 1, 2, 3, 4, 5 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
+        public void WhereStringNotContains() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !p.Title.Contains("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] not like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringNotContainsUsingClosure() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => !p.Title.Contains(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] not like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringNotContainsUsingClosureGetsGoodParam() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => !p.Title.Contains(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("%Foo%", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringNotStartsWithUsingClosure() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => !p.Title.StartsWith(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] not like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringNotStartsWithUsingClosureGetsGoodParam() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => !p.Title.StartsWith(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("Foo%", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringNotEndsWithUsingClosure() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => !p.Title.EndsWith(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] not like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringNotEndsWithUsingClosureGetsGoodParam() {
+            var target = MakeTarget();
+            var c = new Comment { Content = "Foo" };
+            Expression<Func<Post, bool>> pred = p => !p.Title.EndsWith(c.Content);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringNotContainsParamsGood() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !p.Title.Contains("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("%Foo%", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringNotStartsWith() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !p.Title.StartsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] not like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringNotStartsWithParamsGood() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !p.Title.StartsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("Foo%", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereStringNotEndsWith() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !p.Title.EndsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [Title] not like @l_1", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereStringNotEndsWithParamsGood() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !p.Title.EndsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
+        }
+
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }
