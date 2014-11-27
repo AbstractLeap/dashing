@@ -14,11 +14,7 @@
 
     internal class UpdateWriter : BaseWriter, IUpdateWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) {
-        }
-
-        public UpdateWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {
+            : base(dialect, config) {
         }
 
         public SqlWriterResult GenerateSql<T>(IEnumerable<T> entities) {
@@ -153,7 +149,8 @@
             sql.Remove(sql.Length - 2, 2);
 
             if (predicates != null && predicates.Any()) {
-                var whereResult = this.WhereClauseWriter.GenerateSql(predicates, null);
+                var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
+                var whereResult = whereClauseWriter.GenerateSql(predicates, null);
                 if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
                     throw new NotImplementedException("Dashing does not currently support where clause across tables in an update");
                 }

@@ -13,11 +13,7 @@
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
         public SelectWriter(ISqlDialect dialect, IConfiguration config)
-            : this(dialect, new WhereClauseWriter(dialect, config), config) {
-        }
-
-        public SelectWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config)
-            : base(dialect, whereClauseWriter, config) {
+            : base(dialect, config) {
         }
 
         private static readonly ConcurrentDictionary<Tuple<Type, string>, string> QueryCache = new ConcurrentDictionary<Tuple<Type, string>, string>();

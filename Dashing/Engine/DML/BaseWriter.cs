@@ -14,18 +14,16 @@
     internal class BaseWriter {
         protected internal ISqlDialect Dialect { get; set; }
 
-        protected internal IWhereClauseWriter WhereClauseWriter { get; set; }
-
         protected internal IConfiguration Configuration { get; set; }
 
-        public BaseWriter(ISqlDialect dialect, IWhereClauseWriter whereClauseWriter, IConfiguration config) {
+        public BaseWriter(ISqlDialect dialect, IConfiguration config) {
             this.Dialect = dialect;
-            this.WhereClauseWriter = whereClauseWriter;
             this.Configuration = config;
         }
 
         public DynamicParameters AddWhereClause<T>(IList<Expression<Func<T, bool>>> whereClauses, StringBuilder sql, ref FetchNode rootNode) {
-            var result = this.WhereClauseWriter.GenerateSql(whereClauses, rootNode);
+            var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
+            var result = whereClauseWriter.GenerateSql(whereClauses, rootNode);
             if (result.Sql.Length > 0) {
                 sql.Append(result.Sql);
             }
