@@ -12,7 +12,7 @@
     using Dashing.Engine;
     using Dashing.Extensions;
 
-    public sealed class Session : ISession, IExecuteSelectQueries {
+    public sealed class Session : ISession, ISelectQueryExecutor {
         public IDapper Dapper { get; private set; }
 
         private readonly IEngine engine;

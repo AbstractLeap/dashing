@@ -57,7 +57,7 @@
             return sql.ToString();
         }
 
-        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery) {
+        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, bool enforceAlias = false) {
             // TODO: one StringBuilder to rule them all - Good luck with that ;-) (insertions are expensive)
             var sql = new StringBuilder();
             DynamicParameters parameters = new DynamicParameters();
@@ -104,6 +104,10 @@
                 var tableSql = new StringBuilder();
                 var whereSql = new StringBuilder();
                 var orderSql = new StringBuilder();
+
+                if (rootNode == null && enforceAlias) {
+                    rootNode = new FetchNode { Alias = "t" };
+                }
 
                 // add where clause
                 parameters = this.AddWhereClause(selectQuery.WhereClauses, whereSql, ref rootNode);
@@ -435,25 +439,27 @@
             tableSql.Append(" from ");
             this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap<T>());
 
-            if (rootNode != null && rootNode.Children.Any()) {
+            if (rootNode != null) {
                 tableSql.Append(" as t");
                 if (selectQuery.IsForUpdate) {
                     this.Dialect.AppendForUpdateUsingTableHint(tableSql);
                 }
 
-                // now let's go through the tree and generate the sql
-                var signatureBuilder = new StringBuilder();
-                var splitOns = new List<string>();
-                foreach (var node in rootNode.Children) {
-                    var signature = this.AddNode(node.Value, tableSql, columnSql);
-                    if (node.Value.IsFetched) {
-                        signatureBuilder.Append(signature.Signature);
-                        splitOns.AddRange(signature.SplitOn);
+                if (rootNode.Children.Any()) {
+                    // now let's go through the tree and generate the sql
+                    var signatureBuilder = new StringBuilder();
+                    var splitOns = new List<string>();
+                    foreach (var node in rootNode.Children) {
+                        var signature = this.AddNode(node.Value, tableSql, columnSql);
+                        if (node.Value.IsFetched) {
+                            signatureBuilder.Append(signature.Signature);
+                            splitOns.AddRange(signature.SplitOn);
+                        }
                     }
-                }
 
-                rootNode.FetchSignature = signatureBuilder.ToString();
-                rootNode.SplitOn = string.Join(",", splitOns);
+                    rootNode.FetchSignature = signatureBuilder.ToString();
+                    rootNode.SplitOn = string.Join(",", splitOns);
+                }
             }
             else {
                 if (selectQuery.IsForUpdate) {

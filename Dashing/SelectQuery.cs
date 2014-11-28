@@ -17,13 +17,13 @@ namespace Dashing {
     /// <typeparam name="T">
     /// </typeparam>
     public class SelectQuery<T> : ISelectQuery<T> {
-        private readonly IExecuteSelectQueries selectQueryExecutor;
+        private readonly ISelectQueryExecutor selectQueryExecutorExecutor;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SelectQuery{T}" /> class.
         /// </summary>
-        public SelectQuery(IExecuteSelectQueries selectQueryExecutor) {
-            this.selectQueryExecutor = selectQueryExecutor;
+        public SelectQuery(ISelectQueryExecutor selectQueryExecutorExecutor) {
+            this.selectQueryExecutorExecutor = selectQueryExecutorExecutor;
             this.Includes = new List<Expression>();
             this.Excludes = new List<Expression>();
             this.Fetches = new List<Expression>();
@@ -265,7 +265,7 @@ namespace Dashing {
         }
 
         public IEnumerator<T> GetEnumerator() {
-            return this.selectQueryExecutor.Query(this).GetEnumerator();
+            return this.selectQueryExecutorExecutor.Query(this).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() {
@@ -359,16 +359,16 @@ namespace Dashing {
 
         public Page<T> AsPaged(int skip, int take) {
             this.Skip(skip).Take(take);
-            return this.selectQueryExecutor.QueryPaged(this);
+            return this.selectQueryExecutorExecutor.QueryPaged(this);
         }
 
         public async Task<IList<T>> ToListAsync() {
-            var result = await this.selectQueryExecutor.QueryAsync(this);
+            var result = await this.selectQueryExecutorExecutor.QueryAsync(this);
             return result.ToList();
         }
 
         public async Task<T[]> ToArrayAsync() {
-            var result = await this.selectQueryExecutor.QueryAsync(this);
+            var result = await this.selectQueryExecutorExecutor.QueryAsync(this);
             return result.ToArray();
         }
 
@@ -388,7 +388,7 @@ namespace Dashing {
 
         public async Task<T> FirstOrDefaultAsync() {
             this.Take(1);
-            var result = await this.selectQueryExecutor.QueryAsync(this);
+            var result = await this.selectQueryExecutorExecutor.QueryAsync(this);
             return result.FirstOrDefault();
         }
 
@@ -413,7 +413,7 @@ namespace Dashing {
 
         public async Task<T> SingleOrDefaultAsync() {
             this.Take(2);
-            var result = await this.selectQueryExecutor.QueryAsync(this);
+            var result = await this.selectQueryExecutorExecutor.QueryAsync(this);
             return result.SingleOrDefault();
         }
 
@@ -457,7 +457,7 @@ namespace Dashing {
 
         public async Task<Page<T>> AsPagedAsync(int skip, int take) {
             this.Skip(skip).Take(take);
-            return await this.selectQueryExecutor.QueryPagedAsync(this);
+            return await this.selectQueryExecutorExecutor.QueryPagedAsync(this);
         }
     }
 }

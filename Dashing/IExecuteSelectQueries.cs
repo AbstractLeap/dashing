@@ -2,7 +2,7 @@ namespace Dashing {
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    public interface IExecuteSelectQueries {
+    public interface ISelectQueryExecutor {
         IEnumerable<T> Query<T>(SelectQuery<T> query);
 
         Page<T> QueryPaged<T>(SelectQuery<T> query);

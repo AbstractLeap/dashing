@@ -1,10 +1,12 @@
 ﻿namespace Dashing.Engine.DML {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
 
     using Dapper;
@@ -239,19 +241,64 @@
 
                     break;
 
-                //case "Any":
-                //    memberExpr = exp.Arguments[1];
-                //    var relatedType = exp.Arguments[0].Type.GenericTypeArguments[0];
-                //    var map = this.config.GetMap(relatedType);
-                //    this.sqlElements.Enqueue(new StringElement("exists (select 1 from "));
-                //    var tableSql = new StringBuilder();
-                //    this.dialect.AppendQuotedTableName(tableSql, map);
-                //    this.sqlElements.Enqueue(new StringElement(" where "));
-                //    this.insideSubQuery = true;
-                //    this.Visit(exp.Arguments[1]);
-                //    this.sqlElements.Enqueue(new StringElement(")"));
-                //    this.insideSubQuery = false;
-                //    break;
+                case "Any":
+                    memberExpr = exp.Arguments[1]; // c => c.Content == value()
+                    var columnWithAnyExpression = exp.Arguments[0] as MemberExpression; // p.Comments
+                    if (columnWithAnyExpression != null) {
+                            var columnType = columnWithAnyExpression.Type.GenericTypeArguments.First();
+
+                        // we use a new whereclausewriter to generate the inner statement
+                        var innerSelectWriter = new SelectWriter(this.dialect, this.config);
+                        var selectQuery = Activator.CreateInstance(typeof(SelectQuery<>).MakeGenericType(columnType), new NonExecutingSelectQueryExecutor());
+                        var whereMethod = selectQuery.GetType().GetMethod("Where");
+                        whereMethod.Invoke(selectQuery, new object[] { memberExpr });
+                        var generateSqlMethod = innerSelectWriter.GetType().GetMethod("GenerateSql").MakeGenericMethod(columnType);
+                        var innerStatement = (SelectWriterResult)generateSqlMethod.Invoke(innerSelectWriter, new object[] { selectQuery, true });
+                    
+                        // remove the columns from the expression
+                        // TODO tell the select writer to not do this in the first place
+                        var fromIdx = innerStatement.Sql.IndexOf(" from ");
+                        innerStatement.Sql = "select 1" + innerStatement.Sql.Substring(fromIdx);
+
+                        // re-write the aliases to not use t_ as that's probably in the outer query
+                        // TODO speed this up
+                        // TODO Support nested anys!
+                        innerStatement.Sql = innerStatement.Sql.Replace(" t ", " i ").Replace("t_", "i_").Replace("t.", "i.");
+                        //innerStatement.Sql = innerStatement.Sql.Replace("t_", "i_");
+
+                        // add the column sql
+                        this.EnsureRootNodeExists(); // we need everything to have an alias now
+                        this.ResetVariables();
+                        var columnElement = (ColumnElement)this.Visit(columnWithAnyExpression); // this ensures we're joining the correct stuff
+                        this.sqlElements.Enqueue(new StringElement("exists ("));
+                    
+                        // add the reference back to the related column
+                        var thisTinyBitOfSql = new StringBuilder(" and ");
+                        var mapPrimaryKey = this.config.GetMap(columnWithAnyExpression.Expression.Type).PrimaryKey.DbName;
+                        thisTinyBitOfSql.Append(columnElement.Node != null ? columnElement.Node.Alias : "t");
+                        thisTinyBitOfSql.Append(".");
+                        this.dialect.AppendQuotedName(thisTinyBitOfSql, mapPrimaryKey);
+                        thisTinyBitOfSql.Append(" = ");
+                        thisTinyBitOfSql.Append("i.");
+                        this.dialect.AppendQuotedName(thisTinyBitOfSql, this.config.GetMap(columnWithAnyExpression.Expression.Type).Columns[columnWithAnyExpression.Member.Name].ChildColumn.DbName);
+
+                        // add the parameters to this dictionary
+                        var paramPrefix = "l" + Guid.NewGuid().ToString("N").Substring(0, 8); // chances of clash inside nested Any queries ??? l is so that first letter is character
+                        foreach (var param in innerStatement.Parameters.ParameterNames) {
+                            // rename it 
+                            var newName = paramPrefix + param;
+                            innerStatement.Sql = innerStatement.Sql.Replace("@l_", "@" + paramPrefix + "l_");
+                            this.parameters.Add(newName, innerStatement.Parameters.GetValue(param));
+                        }
+                    
+                        // finish off the sql
+                        this.sqlElements.Enqueue(new StringElement(innerStatement.Sql + thisTinyBitOfSql));
+                        this.sqlElements.Enqueue(new StringElement(")"));
+
+                        return null;
+                    }
+
+                    break;
             }
 
             this.isConstantExpression = true;

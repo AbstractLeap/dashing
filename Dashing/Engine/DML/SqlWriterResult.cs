@@ -2,9 +2,9 @@ namespace Dashing.Engine.DML {
     using Dapper;
 
     public class SqlWriterResult {
-        public string Sql { get; private set; }
+        public string Sql { get; internal set; }
 
-        public DynamicParameters Parameters { get; private set; }
+        public DynamicParameters Parameters { get; internal set; }
 
         public SqlWriterResult(string sql, DynamicParameters parameters) {
             this.Parameters = parameters;

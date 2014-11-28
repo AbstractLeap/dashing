@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.57</version>
+        <version>0.0.58</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.57 - Fixes for threads and !
+        <releaseNotes>* 0.0.58 - Any in Where Clause
+* 0.0.57 - Fixes for threads and !
 * 0.0.56 - nullity sql writing
 * 0.0.55 - value missed
 * 0.0.54 - Fixed string methods closure access
