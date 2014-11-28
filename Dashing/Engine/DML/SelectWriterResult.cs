@@ -2,7 +2,7 @@
     using Dapper;
 
     public class SelectWriterResult : SqlWriterResult {
-        public FetchNode FetchTree { get; private set; }
+        public FetchNode FetchTree { get; internal set; }
 
         public int NumberCollectionsFetched { get; set; }
 

@@ -20,6 +20,12 @@ namespace Dashing.IntegrationTests.SqlServer {
             Assert.Equal(3, posts.Count);
         }
 
+        [Fact]
+        public void WhereAnyWorks() {
+            var posts = this.fixture.Session.Query<Post>().Where(p => p.Comments.Any(c => c.Content == "Comment_1")).ToList();
+            Assert.Equal(1, posts.Count);
+        }
+
         public void SetFixture(SqlServerFixture data) {
             this.fixture = data;
         }

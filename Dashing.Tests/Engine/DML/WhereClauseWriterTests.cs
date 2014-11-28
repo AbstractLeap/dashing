@@ -581,6 +581,38 @@
             Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
         }
 
+        [Fact]
+        public void WhereAnyGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Comments.Any(c => c.Content == "foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            var indexOfParam = actual.Sql.IndexOf("@l");
+            Assert.Equal(" where exists (select 1 from [Comments] as i where (i.[Content] = ", actual.Sql.Substring(0, indexOfParam));
+            Assert.Equal(") and t.[PostId] = i.[PostId])", actual.Sql.Substring(indexOfParam + 13));
+        }
+
+        [Fact]
+        public void WhereAnyRelatedGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Comments.Any(c => c.User.EmailAddress == "foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            var indexOfParam = actual.Sql.IndexOf("@l");
+            Assert.Equal(" where exists (select 1 from [Comments] as i left join [Users] as i_100 on i.UserId = i_100.UserId where (i_100.[EmailAddress] = ", actual.Sql.Substring(0, indexOfParam));
+            Assert.Equal(") and t.[PostId] = i.[PostId])", actual.Sql.Substring(indexOfParam + 13));
+        }
+
+        [Fact]
+        public void WhereAnyAndGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Comments.Any(c => c.Content == "foo" && c.CommentDate > DateTime.UtcNow);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            var indexOfParam = actual.Sql.IndexOf("@l");
+            var nextParamIndex = actual.Sql.IndexOf("@l", indexOfParam + 2);
+            Assert.Equal(" where exists (select 1 from [Comments] as i where ((i.[Content] = ", actual.Sql.Substring(0, indexOfParam));
+            Assert.Equal(") and (i.[CommentDate] > ", actual.Sql.Substring(indexOfParam + 13, nextParamIndex - indexOfParam - 13));
+            Assert.Equal(")) and t.[PostId] = i.[PostId])", actual.Sql.Substring(nextParamIndex + 13));
+        }
+
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }

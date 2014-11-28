@@ -2,7 +2,7 @@
     using System.Collections.Generic;
 
     public interface ISelectWriter {
-        SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery);
+        SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, bool enforceAlias = false);
 
         SqlWriterResult GenerateGetSql<T, TPrimaryKey>(TPrimaryKey id);
 
