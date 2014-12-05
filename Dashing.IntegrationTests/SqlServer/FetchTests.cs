@@ -57,6 +57,12 @@ namespace Dashing.IntegrationTests.SqlServer {
             Assert.Null(comment.First().Post);
         }
 
+        [Fact]
+        public void FetchWithNonFetchedWhere() {
+            var comment = fixture.Session.Query<Comment>().Fetch(c => c.Post.Blog).Where(c => c.User.EmailAddress == "foo");
+            Assert.Null(comment.FirstOrDefault());
+        }
+
         public void SetFixture(SqlServerFixture data) {
             this.fixture = data;
         }

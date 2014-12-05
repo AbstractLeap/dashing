@@ -6,7 +6,7 @@
 
     internal class SqlServerConfiguration : DefaultConfiguration {
         public SqlServerConfiguration()
-            : base(new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true", "System.Data.SqlClient")) {
+            : base(new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true", "System.Data.SqlClient"), new CodeGeneration.CodeGeneratorConfig { MapperGenerationMaxRecursion = 0 }) {
             this.AddNamespaceOf<Post>();
         }
     }

@@ -78,45 +78,48 @@
         private IEnumerable<Expression> VisitTree(FetchNode node, Expression parentExpression, ParameterExpression objectsParam, bool visitedCollection, IList<Type> mappedTypes, ref int i) {
             var statements = new List<Expression>();
             foreach (var childNode in node.Children) {
-                // create a param
-                Type childType;
-                if (childNode.Value.Column.Relationship == RelationshipType.OneToMany) {
-                    if (visitedCollection) {
-                        throw new InvalidOperationException("You can only generate a mapper for one collection at a time");
+                if (childNode.Value.IsFetched) {
+                    // create a param
+                    Type childType;
+                    if (childNode.Value.Column.Relationship == RelationshipType.OneToMany) {
+                        if (visitedCollection) {
+                            throw new InvalidOperationException("You can only generate a mapper for one collection at a time");
+                        }
+
+                        childType = childNode.Value.Column.Type.GetGenericArguments().First();
+                        visitedCollection = true;
+                    }
+                    else {
+                        childType = childNode.Value.Column.Type;
                     }
 
-                    childType = childNode.Value.Column.Type.GetGenericArguments().First();
-                    visitedCollection = true;
-                }
-                else {
-                    childType = childNode.Value.Column.Type;
-                }
+                    var mappedType = this.generatedCodeManager.GetForeignKeyType(childType);
+                    mappedTypes.Add(mappedType);
+                    var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
+                    var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
+                    var convertExpr = Expression.Convert(arrayIndexExpr, mappedType);
+                    var propExpr = Expression.Property(parentExpression, childNode.Value.Column.Name);
 
-                var mappedType = this.generatedCodeManager.GetForeignKeyType(childType);
-                mappedTypes.Add(mappedType);
-                var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
-                var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
-                var convertExpr = Expression.Convert(arrayIndexExpr, mappedType);
-                var propExpr = Expression.Property(parentExpression, childNode.Value.Column.Name);
+                    Expression ex;
+                    switch (childNode.Value.Column.Relationship) {
+                        case RelationshipType.OneToMany:
+                            ex = InitialiseCollectionAndAddChild(propExpr, childNode.Value, convertExpr);
+                            break;
+                        case RelationshipType.ManyToOne:
+                            ex = Expression.Assign(propExpr, convertExpr);
+                            break;
+                        default:
+                            throw new InvalidOperationException(
+                                string.Format("Unexpected RelationshipType: {0}", childNode.Value.Column.Relationship));
+                    }
 
-                Expression ex;
-                switch (childNode.Value.Column.Relationship) {
-                    case RelationshipType.OneToMany:
-                        ex = InitialiseCollectionAndAddChild(propExpr, childNode.Value, convertExpr);
-                        break;
-                    case RelationshipType.ManyToOne:
-                        ex = Expression.Assign(propExpr, convertExpr);
-                        break;
-                    default:
-                        throw new InvalidOperationException(string.Format("Unexpected RelationshipType: {0}", childNode.Value.Column.Relationship));
+                    // now visit the next fetch
+                    ++i;
+                    var innerStatements = this.VisitTree(childNode.Value, convertExpr, objectsParam, visitedCollection, mappedTypes, ref i);
+                    var thenExpr = new List<Expression> { ex };
+                    thenExpr.AddRange(innerStatements);
+                    statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                 }
-
-                // now visit the next fetch
-                ++i;
-                var innerStatements = this.VisitTree(childNode.Value, convertExpr, objectsParam, visitedCollection, mappedTypes, ref i);
-                var thenExpr = new List<Expression> { ex };
-                thenExpr.AddRange(innerStatements);
-                statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
             }
 
             return statements;
@@ -186,61 +189,65 @@
         private IEnumerable<Expression> VisitMultiCollectionTree<T>(FetchNode node, ParameterExpression otherDictionaryParam, ref int collectionFetchParamCounter, Expression parentExpression, ParameterExpression objectsParam, IList<Type> mappedTypes, ref int i) {
             var statements = new List<Expression>();
             foreach (var child in node.Children) {
-                // create a param
-                Type childType = child.Value.Column.Relationship == RelationshipType.OneToMany ? child.Value.Column.Type.GetGenericArguments().First() : child.Value.Column.Type;
-                var mappedType = this.generatedCodeManager.GetForeignKeyType(childType);
-                mappedTypes.Add(mappedType);
-                var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
-                var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
-                var convertExpr = Expression.Convert(arrayIndexExpr, mappedType);
-                var propExpr = Expression.Property(parentExpression, child.Value.Column.Name);
+                if (child.Value.IsFetched) {
+                    // create a param
+                    Type childType = child.Value.Column.Relationship == RelationshipType.OneToMany
+                                         ? child.Value.Column.Type.GetGenericArguments().First()
+                                         : child.Value.Column.Type;
+                    var mappedType = this.generatedCodeManager.GetForeignKeyType(childType);
+                    mappedTypes.Add(mappedType);
+                    var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
+                    var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
+                    var convertExpr = Expression.Convert(arrayIndexExpr, mappedType);
+                    var propExpr = Expression.Property(parentExpression, child.Value.Column.Name);
 
-                // add the member assign expression
-                Expression ex = null;
-                if (child.Value.Column.Relationship == RelationshipType.OneToMany) {
-                    // check dictionary for existing instance
-                    var dictAccessExpr = Expression.Property(
-                        otherDictionaryParam,
-                        "Item",
-                        Expression.Constant(i));
-                    var primaryKeyProperty = Expression.Property(
-                        convertExpr,
-                        child.Value.Column.ChildColumn.Map.PrimaryKey.Name);
-                    var assignExpr = Expression.Assign(
-                        Expression.ArrayAccess(objectsParam, Expression.Constant(i)),
-                        Expression.Property(dictAccessExpr, "Item", Expression.Convert(primaryKeyProperty, typeof(object))));
-                    ex = Expression.IfThenElse(
+                    // add the member assign expression
+                    Expression ex = null;
+                    if (child.Value.Column.Relationship == RelationshipType.OneToMany) {
+                        // check dictionary for existing instance
+                        var dictAccessExpr = Expression.Property(otherDictionaryParam, "Item", Expression.Constant(i));
+                        var primaryKeyProperty = Expression.Property(convertExpr, child.Value.Column.ChildColumn.Map.PrimaryKey.Name);
+                        var assignExpr = Expression.Assign(
+                            Expression.ArrayAccess(objectsParam, Expression.Constant(i)),
+                            Expression.Property(dictAccessExpr, "Item", Expression.Convert(primaryKeyProperty, typeof(object))));
+                        ex =
+                            Expression.IfThenElse(
                                 Expression.Call(
                                     dictAccessExpr,
-                                    typeof(IDictionary<,>).MakeGenericType(
-                                        typeof(object),
-                                        typeof(object)).GetMethod("ContainsKey"),
+                                    typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object)).GetMethod("ContainsKey"),
                                     new Expression[] { Expression.Convert(primaryKeyProperty, typeof(object)) }),
                                 assignExpr,
                                 Expression.Block(
                                     Expression.Call(
                                         dictAccessExpr,
-                                        typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object)).GetMethods()
-                                                            .First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
+                                        typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object))
+                                                              .GetMethods()
+                                                              .First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
                                         Expression.Convert(primaryKeyProperty, typeof(object)),
                                         arrayIndexExpr),
                                     Expression.Call(
                                         propExpr,
-                                        typeof(ICollection<>).MakeGenericType(
-                                            child.Value.Column.Type.GetGenericArguments().First())
-                                                             .GetMethod("Add"),
+                                        typeof(ICollection<>).MakeGenericType(child.Value.Column.Type.GetGenericArguments().First()).GetMethod("Add"),
                                         new Expression[] { convertExpr })));
-                }
-                else {
-                    ex = Expression.Assign(propExpr, convertExpr);
-                }
+                    }
+                    else {
+                        ex = Expression.Assign(propExpr, convertExpr);
+                    }
 
-                // add each child node
-                ++i;
-                var innerStatements = this.VisitMultiCollectionTree<T>(child.Value, otherDictionaryParam, ref collectionFetchParamCounter, convertExpr, objectsParam, mappedTypes, ref i);
-                var thenExpr = new List<Expression> { ex };
-                thenExpr.AddRange(innerStatements);
-                statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
+                    // add each child node
+                    ++i;
+                    var innerStatements = this.VisitMultiCollectionTree<T>(
+                        child.Value,
+                        otherDictionaryParam,
+                        ref collectionFetchParamCounter,
+                        convertExpr,
+                        objectsParam,
+                        mappedTypes,
+                        ref i);
+                    var thenExpr = new List<Expression> { ex };
+                    thenExpr.AddRange(innerStatements);
+                    statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
+                }
             }
 
             return statements;
@@ -275,23 +282,20 @@
         private IEnumerable<Expression> VisitNonCollectionTree<T>(FetchNode fetchTree, ParameterExpression objectsParam, Expression parent, ref int i, IList<Type> mappedTypes) {
             var statements = new List<Expression>();
             foreach (var child in fetchTree.Children) {
-                var propExpr = Expression.Property(parent, child.Value.Column.Name);
-                var indexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
-                var ifExpr = Expression.NotEqual(indexExpr, Expression.Constant(null));
-                var mappedType = this.generatedCodeManager.GetForeignKeyType(child.Value.Column.Type);
-                var assignExpr = Expression.Assign(propExpr, Expression.Convert(indexExpr, mappedType));
-                ++i;
-                mappedTypes.Add(mappedType);
-                var innerStatements = this.VisitNonCollectionTree<T>(
-                    child.Value,
-                    objectsParam,
-                    propExpr,
-                    ref i,
-                    mappedTypes);
+                if (child.Value.IsFetched) {
+                    var propExpr = Expression.Property(parent, child.Value.Column.Name);
+                    var indexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
+                    var ifExpr = Expression.NotEqual(indexExpr, Expression.Constant(null));
+                    var mappedType = this.generatedCodeManager.GetForeignKeyType(child.Value.Column.Type);
+                    var assignExpr = Expression.Assign(propExpr, Expression.Convert(indexExpr, mappedType));
+                    ++i;
+                    mappedTypes.Add(mappedType);
+                    var innerStatements = this.VisitNonCollectionTree<T>(child.Value, objectsParam, propExpr, ref i, mappedTypes);
 
-                var thenExpr = new List<Expression> { assignExpr };
-                thenExpr.AddRange(innerStatements);
-                statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
+                    var thenExpr = new List<Expression> { assignExpr };
+                    thenExpr.AddRange(innerStatements);
+                    statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
+                }
             }
 
             return statements;
