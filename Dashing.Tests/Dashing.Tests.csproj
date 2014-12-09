@@ -115,6 +115,7 @@
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\IEnableable.cs" />
     <Compile Include="TestDomain\Like.cs" />
+    <Compile Include="TestDomain\OneToOne\Category.cs" />
     <Compile Include="TestDomain\OneToOne\OneToOneLeft.cs" />
     <Compile Include="TestDomain\OneToOne\OneToOneRight.cs" />
     <Compile Include="TestDomain\Post.cs" />

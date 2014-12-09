@@ -7,7 +7,7 @@
     public class TopologicalOrderResult {
         public IEnumerable<IMap> OrderedMaps { get; set; }
 
-        public Tuple<IMap, IMap> OneToOneMapPairs { get; set; }
+        public IEnumerable<IMap> OneToOneMaps { get; set; }
 
         public IEnumerable<IMap> SelfReferencingMaps { get; set; }
     }
