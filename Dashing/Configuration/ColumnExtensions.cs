@@ -234,6 +234,15 @@
             return column;
         }
 
+        /// <summary>
+        /// Specifies the child column on a collection property
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TCollection"></typeparam>
+        /// <typeparam name="TProperty"></typeparam>
+        /// <param name="column"></param>
+        /// <param name="mapToExpression"></param>
+        /// <returns></returns>
         public static Column<T> MapsTo<T, TCollection, TProperty>(this Column<T> column, Expression<Func<TCollection, TProperty>> mapToExpression)
             where T : IEnumerable<TCollection> {
             var memberExpression = mapToExpression.Body as MemberExpression;
@@ -242,6 +251,25 @@
             }
 
             column.ChildColumnName = memberExpression.Member.Name;
+            return column;
+        }
+
+        /// <summary>
+        /// Specifies the opposite column on a one to one relationship
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TOther"></typeparam>
+        /// <param name="column"></param>
+        /// <param name="mapToExpression"></param>
+        /// <returns></returns>
+        public static Column<T> MapsOneToOneTo<T, TOther>(this Column<T> column, Expression<Func<TOther, T>> mapToExpression) {
+            var memberExpression = mapToExpression.Body as MemberExpression;
+            if (memberExpression == null) {
+                throw new ArgumentException("mapToExpression must be a MemberExpression");
+            }
+
+            column.Relationship = RelationshipType.OneToOne;
+            column.OppositeColumnName = memberExpression.Member.Name;
             return column;
         }
     }

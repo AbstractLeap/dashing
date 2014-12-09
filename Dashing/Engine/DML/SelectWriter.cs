@@ -204,7 +204,7 @@
                     foreach (var childNode in node.Children) {
                         this.AddNodeSql(outerColumns, innerColumnSqls, innerTableSqls, currentStringBuilderIdx, splitOns, childNode.Value);
                         var result = this.VisitMultiCollectionTree(childNode.Value, outerColumns, innerColumnSqls, innerTableSqls);
-                        if (!(childNode.Value.ContainedCollectionfetchesCount == 0 && childNode.Value.Column.Relationship == RelationshipType.ManyToOne)) {
+                        if (!(childNode.Value.ContainedCollectionfetchesCount == 0 && (childNode.Value.Column.Relationship == RelationshipType.ManyToOne || childNode.Value.Column.Relationship == RelationshipType.OneToOne))) {
                             currentStringBuilderIdx++;
                         }
 
@@ -267,7 +267,7 @@
                             // add actual values to last query
                             sqlBuilder.Append(childNode.Alias).Append(".");
                             this.Dialect.AppendQuotedName(sqlBuilder, column.DbName);
-                            if (column.Relationship == RelationshipType.ManyToOne) {
+                            if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
                                 sqlBuilder.Append(" as ").Append(childNode.Alias).Append("_").Append(column.DbName);
                             }
                             else {
@@ -278,7 +278,7 @@
                         }
                         else {
                             // add nulls to other queries
-                            if (column.Relationship == RelationshipType.ManyToOne) {
+                            if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
                                 sqlBuilder.Append("null as " + childNode.Alias + "_" + column.DbName + ", ");
                             }
                             else {
@@ -288,7 +288,7 @@
                     }
 
                     // add columns to outer query
-                    if (column.Relationship == RelationshipType.ManyToOne) {
+                    if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
                         outerColumns.Append("u." + childNode.Alias + "_" + column.DbName).Append(" as ").Append(column.DbName).Append(", ");
                     }
                     else {
@@ -476,7 +476,7 @@
             if (node.Column.Relationship == RelationshipType.OneToMany) {
                 map = this.Configuration.GetMap(node.Column.Type.GetGenericArguments()[0]);
             }
-            else if (node.Column.Relationship == RelationshipType.ManyToOne) {
+            else if (node.Column.Relationship == RelationshipType.ManyToOne || node.Column.Relationship == RelationshipType.OneToOne) {
                 map = this.Configuration.GetMap(node.Column.Type);
             }
             else {
@@ -491,7 +491,7 @@
             this.Dialect.AppendQuotedTableName(tableSql, map);
             tableSql.Append(" as " + node.Alias);
 
-            if (node.Column.Relationship == RelationshipType.ManyToOne) {
+            if (node.Column.Relationship == RelationshipType.ManyToOne || node.Column.Relationship == RelationshipType.OneToOne) {
                 tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + map.PrimaryKey.DbName);
             }
             else if (node.Column.Relationship == RelationshipType.OneToMany) {

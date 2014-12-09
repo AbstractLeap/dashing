@@ -99,5 +99,10 @@
         /// References the parent map in a ManyToOne relationship
         /// </summary>
         IMap ParentMap { get; }
+
+        /// <summary>
+        /// References the opposite column in a one-to-one relationship
+        /// </summary>
+        IColumn OppositeColumn { get; }
     }
 }

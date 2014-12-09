@@ -108,6 +108,7 @@
                     return propertyValue;
 
                 case RelationshipType.ManyToOne:
+                case RelationshipType.OneToOne:
                     var foreignKeyMap = this.Configuration.GetMap(mappedColumn.Type);
                     return foreignKeyMap.GetPrimaryKeyValue(propertyValue);
 

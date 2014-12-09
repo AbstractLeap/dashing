@@ -63,7 +63,7 @@
             map.Configuration = configuration;
             map.Table = this.convention.TableFor(entity);
             map.Schema = this.convention.SchemaFor(entity);
-            map.Columns = entity.GetProperties().Select(property => this.BuildColumn(map, entity, property)).ToDictionary(c => c.Name, c => c);
+            map.Columns = entity.GetProperties().Select(property => this.BuildColumn(map, entity, property, configuration)).ToDictionary(c => c.Name, c => c);
             this.ResolvePrimaryKey(entity, map);
             this.AssignFetchIds(map);
         }
@@ -80,26 +80,26 @@
             }
         }
 
-        private IColumn BuildColumn(IMap map, Type entityType, PropertyInfo property) {
+        private IColumn BuildColumn(IMap map, Type entityType, PropertyInfo property, IConfiguration configuration) {
             // TODO: this can be cached
             var column = (IColumn)Activator.CreateInstance(typeof(Column<>).MakeGenericType(property.PropertyType));
             column.Map = map;
             column.Name = property.Name;
             column.IsIgnored = !(property.CanRead && property.CanWrite);
 
-            this.ResolveRelationship(entityType, property, column);
+            this.ResolveRelationship(entityType, property, column, configuration);
             this.ApplyAnnotations(entityType, property, column);
 
             return column;
         }
 
-        private void ResolveRelationship(Type entity, PropertyInfo property, IColumn column) {
+        private void ResolveRelationship(Type entity, PropertyInfo property, IColumn column, IConfiguration configuration) {
             if (property.PropertyType.IsEntityType()) {
                 if (property.PropertyType.IsCollection()) {
                     this.ResolveOneToManyColumn(column);
                 }
                 else {
-                    this.ResolveManyToOneColumn(column, property.Name);
+                    this.ResolveEntityColumn(column, property.Name, configuration);
                 }
             }
             else {
@@ -126,6 +126,63 @@
                     column.IsNullable = true;
                     break;
             }
+        }
+
+        private void ResolveEntityColumn(IColumn column, string propertyName, IConfiguration configuration) {
+            if (configuration.HasMap(column.Type)) {
+                // we have a reference to the referenced type
+                // note, that at this point (in general) we may have not mapped the opposite type yet
+                // find a property with our type
+                var candidateColumns =
+                    configuration.GetMap(column.Type)
+                                 .Columns.Where(
+                                     c =>
+                                     c.Value.Type == column.Map.Type
+                                     || (c.Value.Type.IsCollection() && c.Value.Type.GetGenericArguments().First() == column.Map.Type))
+                                 .ToArray();
+                if (candidateColumns.Length == 0) {
+                    // assume many to one
+                    this.ResolveManyToOneColumn(column, propertyName);
+                }
+                else if (candidateColumns.Length == 1) {
+                    if (candidateColumns[0].Value.Type.IsCollection()) {
+                        this.ResolveManyToOneColumn(column, propertyName);
+                    }
+                    else {
+                        // assume one to one
+                        this.ResolveOneToOneColumn(column, propertyName);
+
+                        // now fix the other side
+                        candidateColumns[0].Value.Relationship = RelationshipType.OneToOne;
+                    }
+                }
+                else {
+                    // ambiguous column reference, go for many to one and assume it gets sorted by further config later
+                    this.ResolveManyToOneColumn(column, propertyName);
+                }
+            }
+            else {
+                if (column.Type == column.Map.Type) {
+                    // self referencing
+                    // at this point not all columns may be mapped so we'll use reflection
+                    if (column.Map.Type.GetProperties().Any(p => p.PropertyType == column.Type && p.Name != column.Name)) {
+                        this.ResolveOneToOneColumn(column, propertyName);
+                    }
+                    else {
+                        this.ResolveManyToOneColumn(column, propertyName);
+                    }
+                }
+                else {
+                    // we don't currently have the other side of the map so assume many to one and rely on the above (when it is mapped) to fix
+                    this.ResolveManyToOneColumn(column, propertyName);
+                }
+            }
+        }
+
+        private void ResolveOneToOneColumn(IColumn column, string propertyName) {
+            column.Relationship = RelationshipType.OneToOne;
+            column.DbName = propertyName + "Id";
+            column.IsNullable = true;
         }
 
         private void ResolveManyToOneColumn(IColumn column, string propertyName) {

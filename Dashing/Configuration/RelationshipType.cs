@@ -21,6 +21,11 @@
         /// <summary>
         ///     The many to many.
         /// </summary>
-        ManyToMany
+        ManyToMany,
+
+        /// <summary>
+        ///     One to One
+        /// </summary>
+        OneToOne
     }
 }

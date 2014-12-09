@@ -7,8 +7,6 @@ namespace Dashing.Configuration {
     using Dashing.CodeGeneration;
 
     public static class ConfigurationHelper {
-        private static readonly MethodInfo MapFor = typeof(IMapper).GetMethod("MapFor", new[] { typeof(Type), typeof(IConfiguration) });
-
         public static void Add<T>(IConfiguration configuration, IDictionary<Type, IMap> mappedTypes) {
             Add(configuration, mappedTypes, new[] { typeof(T) });
         }
@@ -27,8 +25,8 @@ namespace Dashing.Configuration {
         public static void Add(IConfiguration configuration, IDictionary<Type, IMap> mappedTypes, IEnumerable<Type> types) {
             var maps = types.Distinct()
                             .Where(t => !mappedTypes.ContainsKey(t))
-                            .AsParallel()
-                            .Select(t => MapFor.Invoke(configuration.Mapper, new object[] { t, configuration }) as IMap);
+                            //.AsParallel() // don't do parallel, we want sequential processing as the mapper will attempt to recognise (and post-fix) one-to-one mappings
+                            .Select(t => configuration.Mapper.MapFor(t, configuration));
 
             // force sequential evaluation (not thread safe?)
             foreach (var map in maps) {

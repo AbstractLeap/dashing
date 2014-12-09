@@ -68,8 +68,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ModelGeneration\SourceTests.cs" />
     <Compile Include="TestDomain\Blog.cs" />
+    <Compile Include="TestDomain\Category.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\Like.cs" />
+    <Compile Include="TestDomain\OneToOneLeft.cs" />
+    <Compile Include="TestDomain\OneToOneRight.cs" />
+    <Compile Include="TestDomain\Pair.cs" />
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />

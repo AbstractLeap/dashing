@@ -106,6 +106,7 @@
                             ex = InitialiseCollectionAndAddChild(propExpr, childNode.Value, convertExpr);
                             break;
                         case RelationshipType.ManyToOne:
+                        case RelationshipType.OneToOne:
                             ex = Expression.Assign(propExpr, convertExpr);
                             break;
                         default:

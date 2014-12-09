@@ -13,7 +13,15 @@
         /// and then add in. Otherwise skip it and come back to later.
         /// </remarks>
         public static IList<IMap> OrderTopologically(this IEnumerable<IMap> enumerableOfMaps) {
+            //var result = new TopologicalOrderResult();
+
+            // start by finding self referencing stuff
             var maps = enumerableOfMaps as List<IMap> ?? enumerableOfMaps.ToList();
+            //result.SelfReferencingMaps = maps.Where(m => m.Columns.Any(c => c.Value.ParentMap.Type == m.Type))
+
+
+
+
             var resultHash = new HashSet<IMap>();
             var resultList = new List<IMap>();
             var skippedMapsHash = new HashSet<IMap>();
