@@ -8,6 +8,7 @@
     using Dashing.Configuration;
     using Dashing.Tests.Annotations;
     using Dashing.Tests.TestDomain;
+    using Dashing.Tests.TestDomain.OneToOne;
 
     using Moq;
 
@@ -270,6 +271,55 @@
         public void EntityCollectionColumnRelationshipIsOneToMany() {
             var property = this.MapAndGetProperty<Post, IList<Comment>>(p => p.Comments);
             Assert.Equal(RelationshipType.OneToMany, property.Relationship);
+        }
+
+        [Fact]
+        public void EntityOneToOneMappedToManyToOneIfFirst() {
+            var mapper = this.MakeTarget();
+            mockConfiguration.Setup(c => c.HasMap(typeof(OneToOneRight))).Returns(false);
+            var map = mapper.MapFor<OneToOneLeft>(mockConfiguration.Object);
+            Assert.Equal(RelationshipType.ManyToOne, map.Columns.First(c => c.Key == "Right").Value.Relationship);
+        }
+
+        [Fact]
+        public void EntityOneToOneMappedToOneToOneIfSecond() {
+            var mapper = this.MakeTarget();
+            mockConfiguration.Setup(c => c.HasMap(typeof(OneToOneRight))).Returns(true);
+            mockConfiguration.Setup(c => c.GetMap(typeof(OneToOneRight)))
+                             .Returns(
+                                 new Map<OneToOneRight> {
+                                                            Columns =
+                                                                new IColumn[] {
+                                                                                  new Column<int> { Name = "OneToOneRightId" },
+                                                                                  new Column<OneToOneLeft> {
+                                                                                                               Name = "Left",
+                                                                                                               Relationship = RelationshipType.ManyToOne
+                                                                                                           }
+                                                                              }
+                                                                .ToDictionary(c => c.Name, c => c)
+                                                        });
+            var map = mapper.MapFor<OneToOneLeft>(mockConfiguration.Object);
+            Assert.Equal(RelationshipType.OneToOne, map.Columns.First(c => c.Key == "Right").Value.Relationship);
+        }
+
+        [Fact]
+        public void EntityOneToOneFixedIfMappedFirst() {
+            var mapper = this.MakeTarget();
+            mockConfiguration.Setup(c => c.HasMap(typeof(OneToOneRight))).Returns(true);
+            var manyToOneColumnToFix = new Column<OneToOneLeft> { Name = "Left", Relationship = RelationshipType.ManyToOne };
+            mockConfiguration.Setup(c => c.GetMap(typeof(OneToOneRight)))
+                             .Returns(
+                                 new Map<OneToOneRight> {
+                                     Columns =
+                                         new IColumn[] {
+                                                                                  new Column<int> { Name = "OneToOneRightId" },
+                                                                                  manyToOneColumnToFix
+                                                                              }
+                                         .ToDictionary(c => c.Name, c => c)
+                                 });
+
+            var map = mapper.MapFor<OneToOneLeft>(mockConfiguration.Object);
+            Assert.Equal(RelationshipType.OneToOne, manyToOneColumnToFix.Relationship);
         }
 
         private DefaultMapper MakeTarget() {

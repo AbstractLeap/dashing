@@ -5,6 +5,7 @@
 
     using Dashing.Configuration;
     using Dashing.Tests.TestDomain;
+    using Dashing.Tests.TestDomain.OneToOne;
 
     using Xunit;
 
@@ -139,6 +140,20 @@
             var column = MakeCollectionTarget();
             column.MapsTo<IList<Comment>, Comment, Post>(c => c.Post);
             Assert.Equal("Post", column.ChildColumnName);
+        }
+
+        [Fact]
+        public void MapsOneToOneToWorks() {
+            var column = new Column<OneToOneLeft>();
+            column.MapsOneToOneTo<OneToOneLeft, OneToOneRight>(p => p.Left);
+            Assert.Equal("Left", column.OppositeColumnName);
+        }
+
+        [Fact]
+        public void MapsOneToOneSetsColumnToOneToOne() {
+            var column = new Column<OneToOneLeft> { Relationship = RelationshipType.ManyToOne };
+            column.MapsOneToOneTo<OneToOneLeft, OneToOneRight>(p => p.Left);
+            Assert.Equal(RelationshipType.OneToOne, column.Relationship);
         }
 
         [Fact]

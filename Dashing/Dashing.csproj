@@ -150,6 +150,7 @@
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\OrderedDictionary.cs" />
+    <Compile Include="Extensions\TopologicalOrderResult.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />
     <Compile Include="IDapper.cs" />

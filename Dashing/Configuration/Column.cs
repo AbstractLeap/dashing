@@ -34,7 +34,7 @@
         /// </summary>
         public DbType DbType {
             get {
-                return this.Relationship == RelationshipType.ManyToOne ? this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType : this.dbType;
+                return this.Relationship == RelationshipType.ManyToOne || this.Relationship == RelationshipType.OneToOne ? this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType : this.dbType;
             }
 
             set {
@@ -136,7 +136,7 @@
                             }
                             else {
                                 // map by convention
-                                var possibleColumns = this.Map.Configuration.GetMap(childType).Columns.Where(c => c.Value.Type == parentType).ToList();
+                                var possibleColumns = this.Map.Configuration.GetMap(childType).Columns.Where(c => c.Value.Type == parentType && !c.Value.IsIgnored).ToList();
                                 if (possibleColumns.Count == 1) {
                                     this.childColumn = possibleColumns.First().Value;
                                 }
@@ -149,7 +149,7 @@
 
                                     throw new InvalidOperationException(
                                         "The child type \"" + childType.Name + "\" has more than one property of type " + parentType.Name
-                                        + ". Please specify which property this column maps to using IConfiguration.Setup().Property().MapsTo()");
+                                        + ". Please specify which property this column maps to using IConfiguration.Setup().Property().MapsOneToOneTo()");
                                 }
                             }
                         }
@@ -164,7 +164,53 @@
             }
         }
 
-        public string ChildColumnName { get; set; }
+        internal string ChildColumnName { get; set; }
+
+        private IColumn oppositeColumn;
+
+        private readonly object oppositeColumnLock = new object();
+
+        internal string OppositeColumnName { get; set; }
+
+        public IColumn OppositeColumn {
+            get {
+                if (this.Relationship != RelationshipType.OneToOne) {
+                    throw new InvalidOperationException("An OppositeColumn only exists on a OneToOne relationship");
+                }
+
+                if (this.oppositeColumn == null) {
+                    lock (this.oppositeColumnLock) {
+                        if (this.oppositeColumn == null) {
+                            if (this.OppositeColumnName != null) {
+                                this.oppositeColumn = this.Map.Configuration.GetMap(this.Type).Columns[this.OppositeColumnName];
+                            }
+                            else {
+                                var candidates = this.Map.Configuration.GetMap(this.Type).Columns.Where(c => c.Value.Type == this.Map.Type && c.Value != this && !c.Value.IsIgnored).ToArray();
+                                if (candidates.Length == 0) {
+                                    throw new InvalidOperationException(
+                                        "Column " + this.Name + " on " + this.Map.Type.FullName
+                                        + " is set to OneToOne but there is no matching column on type " + this.Type.FullName);
+                                }
+                                else if (candidates.Length > 1) {
+                                    throw new InvalidOperationException(
+                                        "The type \"" + this.Type.FullName + "\" has more than one property of type " + this.Map.Type.FullName
+                                        + ". Please specify which property this column maps to using IConfiguration.Setup().Property().MapsTo()");
+                                }
+                                else {
+                                    this.oppositeColumn = candidates.First().Value;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return this.oppositeColumn;
+            }
+
+            set {
+                this.oppositeColumn = value;
+            }
+        }
 
         /// <summary>
         ///     The from.

@@ -114,7 +114,8 @@
                     c =>
                     !c.IsIgnored && (includeExcludedByDefault || !c.IsExcludedByDefault)
                     && (c.Relationship == RelationshipType.None
-                        || c.Relationship == RelationshipType.ManyToOne));
+                        || c.Relationship == RelationshipType.ManyToOne
+                        || c.Relationship == RelationshipType.OneToOne));
         }
     }
 }

@@ -362,7 +362,7 @@ namespace Dashing.CodeGeneration {
 
             foreach (
                 var column in
-                    map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne)) {
+                    map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne || c.Value.Relationship == RelationshipType.OneToOne)) {
                 if (!column.Value.Map.Type.GetProperty(column.Value.Name).GetGetMethod().IsVirtual) {
                     // TODO: send a warning back to the programmer, did they mean to do this?
                     continue;

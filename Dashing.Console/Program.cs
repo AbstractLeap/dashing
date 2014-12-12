@@ -367,9 +367,9 @@
 
             var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
             schema = databaseReader.ReadAll();
-            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore());
+            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore(), new ConsoleAnswerProvider());
             var reverseEngineer = new ModelGenerator();
-            var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace);
+            var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace, new ConsoleAnswerProvider());
 
             foreach (var source in sources) {
                 File.WriteAllText(options.Location + "\\" + source.Key + ".cs", source.Value);
@@ -390,7 +390,7 @@
                 var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
                 var databaseReader = new DatabaseReader(connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName);
                 schema = databaseReader.ReadAll();
-                fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore());
+                fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), new ConsoleAnswerProvider());
             }
 
             // set up migrator
@@ -403,7 +403,7 @@
             }
 
             // run the migrator
-            var script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, new ConsoleAnswerProvider(), out warnings, out errors);
 
             // TODO: do things with warnings and errors
             return script;

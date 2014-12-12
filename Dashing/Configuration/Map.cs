@@ -81,10 +81,10 @@ namespace Dashing.Configuration {
             get {
                 if (!this.hasSetForeignKeys && !this.hasCalculatedForeignKeys && this.foreignKeys == null) {
                     this.foreignKeys =
-                        this.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne && !c.Value.IsIgnored)
+                        this.Columns.Where(c => (c.Value.Relationship == RelationshipType.ManyToOne || c.Value.Relationship == RelationshipType.OneToOne) && !c.Value.IsIgnored)
                             .Select(
                                 c =>
-                                new ForeignKey(c.Value.ParentMap, c.Value))
+                                new ForeignKey(c.Value.Relationship == RelationshipType.ManyToOne ? c.Value.ParentMap : c.Value.OppositeColumn.Map, c.Value))
                             .ToList();
                     hasCalculatedForeignKeys = true;
                 }
