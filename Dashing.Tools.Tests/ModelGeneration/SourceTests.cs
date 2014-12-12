@@ -16,7 +16,7 @@ namespace Dashing.Tools.Tests.ModelGeneration {
         public void NamespaceAdded() {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace);
+            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace, null);
             Assert.Contains("namespace " + TestNamespace, Enumerable.First<KeyValuePair<string, string>>(results).Value);
         }
 
@@ -24,7 +24,7 @@ namespace Dashing.Tools.Tests.ModelGeneration {
         public void PrimaryKeyAdded() {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace);
+            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace, null);
             Assert.Contains("public System.Int32 PostId { get; set; }", results["Post"]);
         }
 
@@ -32,7 +32,7 @@ namespace Dashing.Tools.Tests.ModelGeneration {
         public void ParentColumnAdded() {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace);
+            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace, null);
             Assert.Contains("public Blog Blog { get; set; }", results["Post"]);
         }
 
@@ -40,7 +40,7 @@ namespace Dashing.Tools.Tests.ModelGeneration {
         public void CollectionColumnAdded() {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace);
+            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace, null);
             Assert.Contains("public IList<Comment> Comments { get; set; }", results["Post"]);
         }
 
@@ -48,7 +48,7 @@ namespace Dashing.Tools.Tests.ModelGeneration {
         public void CollectionColumnInitStatementAdded() {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
-            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace);
+            var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace, null);
             Assert.Contains("this.Comments = new List<Comment>();", results["Post"]);
         }
 

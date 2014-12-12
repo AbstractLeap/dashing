@@ -51,7 +51,7 @@
             return type;
         }
 
-        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect, IEnumerable<string> tablesToIgnore) {
+        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect, IEnumerable<string> tablesToIgnore, IAnswerProvider answerProvider) {
             if (tablesToIgnore == null) {
                 tablesToIgnore = new string[0];
             }
@@ -67,17 +67,55 @@
                 GetIndexesAndForeignKeys(schema.Tables.First(t => t.Name == map.Table), map);
             }
 
-            // now we go through and add onetomany columns so that topological ordering works
-            foreach (var tableWithManyToOne in this.manyToOneColumns) {
-                foreach (var manyToOneColumn in tableWithManyToOne.Value) {
-                    var propName = Guid.NewGuid().ToString("N");
-                    manyToOneColumn.Map.Columns.Add(
-                        propName,
-                        this.BuildOneToManyColumn(manyToOneColumn, propName));
-                }
+            // go back through and try to spot one-to-one columns
+            foreach (var map in maps) {
+                FindOneToOnes(map, answerProvider);
             }
 
             return maps;
+        }
+
+        private void FindOneToOnes(IMap map, IAnswerProvider answerProvider) {
+            foreach (var column in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne)) {
+                var otherMapCandidates = column.Value.ParentMap.Columns.Where(c => c.Value.Type == column.Value.Map.Type
+                    && (column.Value.ParentMap != map || c.Key != column.Key)).ToArray();
+                if (otherMapCandidates.Length == 0) {
+                    continue; // assume many to one
+                }
+                else if (otherMapCandidates.Length == 1) {
+                    column.Value.Relationship = RelationshipType.OneToOne; // one relationship coming back, assume one to one
+                    column.Value.OppositeColumn = otherMapCandidates.First().Value;
+                }
+                else {
+                    // we've got more than 1 foreign key coming back - let's ask the user
+                    var choices = otherMapCandidates.Select(c => new MultipleChoice<IColumn> { DisplayString = c.Key, Choice = c.Value }).ToList();
+                    const string oneToOneText = "No matching column but one-to-one";
+                    const string manyToOneText = "No matching column but many-to-one";
+                    choices.Add(
+                        new MultipleChoice<IColumn> {
+                                                        DisplayString = oneToOneText,
+                                                        Choice = new Column<string> { Name = "One to One" }
+                                                    });
+                    choices.Add(
+                        new MultipleChoice<IColumn> {
+                            DisplayString = manyToOneText,
+                            Choice = new Column<string> { Name = "Many to One" }
+                        });
+                    var oppositeColumn =
+                        answerProvider.GetMultipleChoiceAnswer(
+                            "The column " + column.Key + " on " + column.Value.Map.Table
+                            + " has multiple incoming relationships. Which column on the related table is the other side of the one-to-one relationship?",
+                            choices);
+                    if (oppositeColumn.DisplayString == manyToOneText) {
+                        continue; // many to one
+                    }
+
+                    column.Value.Relationship = RelationshipType.OneToOne;
+                    if (oppositeColumn.DisplayString != oneToOneText) {
+                        column.Value.OppositeColumn = oppositeColumn.Choice;
+                    }
+                }
+            }
         }
 
         private IColumn BuildOneToManyColumn(IColumn manyToOneColumn, string propName) {

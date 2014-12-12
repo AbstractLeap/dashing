@@ -103,6 +103,6 @@
         /// <summary>
         /// References the opposite column in a one-to-one relationship
         /// </summary>
-        IColumn OppositeColumn { get; }
+        IColumn OppositeColumn { get; set; }
     }
 }

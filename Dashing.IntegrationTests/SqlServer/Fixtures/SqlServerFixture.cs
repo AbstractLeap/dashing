@@ -27,7 +27,7 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
                 new DropTableWriter(config.Engine.SqlDialect),
                 new AlterTableWriter(config.Engine.SqlDialect));
             IEnumerable<string> warnings, errors;
-            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), config.Maps, out warnings, out errors);
+            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), config.Maps, null, out warnings, out errors);
             using (var transactionLessSession = config.BeginTransactionLessSession()) {
                 transactionLessSession.Dapper.Execute("create database " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute("use " + this.DatabaseName);

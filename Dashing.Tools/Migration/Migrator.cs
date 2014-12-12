@@ -26,7 +26,7 @@
 
         public string GenerateSqlDiff(
             IEnumerable<IMap> fromMaps,
-            IEnumerable<IMap> toMaps,
+            IEnumerable<IMap> toMaps, IAnswerProvider answerProvider,
             out IEnumerable<string> warnings,
             out IEnumerable<string> errors) {
             var sql = new StringBuilder();
@@ -40,7 +40,9 @@
             MigrationPair[] matches;
             var additions = GetTableChanges(to, @from, out removals, out matches);
 
-            // TODO table name changes i.e. look for classes that appear to have changed name
+            if (additions.Any() && removals.Any()) {
+                this.AttemptRenames(additions, removals, answerProvider, sql);
+            }
 
             // do removal of foreign keys and indexes that we don't need
             // only do this on remaining tables as drops should be deleted automatically
@@ -74,6 +76,7 @@
             // next do changes
             IList<IColumn> newForeignKeyColumns = new List<IColumn>();
             foreach (var match in matches) {
+                this.CorrectOneToOneIfNecessary(match, answerProvider);
                 string message;
                 if (match.RequiresUpdate(out message)) {
                     warningList.Add(
@@ -131,6 +134,21 @@
             errors = errorList;
             warnings = warningList;
             return sql.ToString();
+        }
+
+        private void CorrectOneToOneIfNecessary(MigrationPair match, IAnswerProvider answerProvider) {
+            foreach (var column in match.To.Columns.Where(c => c.Value.Relationship == RelationshipType.OneToOne && !c.Value.IsIgnored)) {
+                var hasMatchingColumn = match.From.Columns.ContainsKey(column.Key);
+                if (hasMatchingColumn) {
+                    match.From.Columns[column.Key].Relationship = RelationshipType.OneToOne;
+                }
+            }
+        }
+
+        private void AttemptRenames(IMap[] additions, IMap[] removals, IAnswerProvider answerProvider, StringBuilder sql) {
+            foreach (var removal in removals) {
+                // TODO implement this
+            }
         }
 
         private void GenerateMapDiff(
@@ -198,7 +216,7 @@
                 this.AppendSemiColonIfNecesssary(sql);
                 sql.AppendLine();
 
-                if (toColumns[addedColumnDbName].Relationship == RelationshipType.ManyToOne) {
+                if (toColumns[addedColumnDbName].Relationship == RelationshipType.ManyToOne || toColumns[addedColumnDbName].Relationship == RelationshipType.OneToOne) {
                     newForeignKeyColumns.Add(toColumns[addedColumnDbName]);
                 }
             }

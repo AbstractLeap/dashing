@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CatchyException.cs" />
+    <Compile Include="ConsoleAnswerProvider.cs" />
     <Compile Include="IniParser.cs" />
     <Compile Include="Settings\CommandLineOptions.cs" />
     <Compile Include="ColorContext.cs" />

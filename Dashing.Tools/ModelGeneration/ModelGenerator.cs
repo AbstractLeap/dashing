@@ -19,7 +19,7 @@
             this.convention = convention;
         }
 
-        public IDictionary<string, string> GenerateFiles(IEnumerable<IMap> maps, DatabaseSchema schema, string domainNamespace) {
+        public IDictionary<string, string> GenerateFiles(IEnumerable<IMap> maps, DatabaseSchema schema, string domainNamespace, IAnswerProvider answerProvider) {
             // note that we're just doing string building here
             // simple POCOs and CodeDom does not support auto-properties
             // and frankly I wouldn't want these things to have backing fields in the source code

@@ -137,8 +137,9 @@
                     configuration.GetMap(column.Type)
                                  .Columns.Where(
                                      c =>
-                                     c.Value.Type == column.Map.Type
+                                     (c.Value.Type == column.Map.Type
                                      || (c.Value.Type.IsCollection() && c.Value.Type.GetGenericArguments().First() == column.Map.Type))
+                                     && !c.Value.IsIgnored)
                                  .ToArray();
                 if (candidateColumns.Length == 0) {
                     // assume many to one

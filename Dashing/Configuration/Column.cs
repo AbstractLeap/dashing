@@ -206,6 +206,10 @@
 
                 return this.oppositeColumn;
             }
+
+            set {
+                this.oppositeColumn = value;
+            }
         }
 
         /// <summary>
