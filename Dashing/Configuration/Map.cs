@@ -84,7 +84,7 @@ namespace Dashing.Configuration {
                         this.Columns.Where(c => (c.Value.Relationship == RelationshipType.ManyToOne || c.Value.Relationship == RelationshipType.OneToOne) && !c.Value.IsIgnored)
                             .Select(
                                 c =>
-                                new ForeignKey(c.Value.Relationship == RelationshipType.ManyToOne ? c.Value.ParentMap : c.Value.OppositeColumn.Map, c.Value))
+                                new ForeignKey(c.Value.Relationship == RelationshipType.ManyToOne ? c.Value.ParentMap : this.Configuration.GetMap(c.Value.Type), c.Value))
                             .ToList();
                     hasCalculatedForeignKeys = true;
                 }
