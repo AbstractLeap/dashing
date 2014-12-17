@@ -141,7 +141,13 @@
                 this.Dialect.AppendQuotedName(sql, column.DbName);
                 var paramName = "@" + updatedProp;
                 var propertyValue = map.GetColumnValue(updateClass, column);
-                parameters.Add(paramName, this.GetValueOrPrimaryKey(column, propertyValue));
+                if (propertyValue == null) {
+                    parameters.Add(paramName, null);
+                }
+                else {
+                    parameters.Add(paramName, this.GetValueOrPrimaryKey(column, propertyValue));
+                }
+
                 sql.Append(" = ");
                 sql.Append(paramName);
                 sql.Append(", ");
