@@ -1,37 +1,29 @@
 ﻿namespace Dashing.Tests.Configuration.DapperMapperGeneration {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
-    using System.Data;
+    using System.Configuration;
     using System.Linq;
+
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine.DapperMapperGeneration;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Tests.TestDomain;
+
     using Moq;
+
     using Xunit;
 
     public class CollectionTests {
         [Fact]
         public void SingleCollectionWorks() {
             var funcFac = GenerateSingleMapper();
-            var post1 = new Post {
-                PostId = 1
-            };
-            var post2 = new Post {
-                PostId = 2
-            };
-            var comment1 = new Comment {
-                CommentId = 1
-            };
-            var comment2 = new Comment {
-                CommentId = 2
-            };
-            var comment3 = new Comment {
-                CommentId = 3
-            };
+            var post1 = new Post { PostId = 1 };
+            var post2 = new Post { PostId = 2 };
+            var comment1 = new Comment { CommentId = 1 };
+            var comment2 = new Comment { CommentId = 2 };
+            var comment3 = new Comment { CommentId = 3 };
             var dict = new Dictionary<object, Post>();
             var func = (Func<object[], Post>)funcFac.DynamicInvoke(dict);
             func(new object[] { post1, comment1 });
@@ -45,21 +37,11 @@
         [Fact]
         public void SingleCollectionAwkwardObjectWorks() {
             var funcFac = GenerateSingleAwkwardMapper();
-            var post1 = new PostWithoutCollectionInitializerInConstructor {
-                PostWithoutCollectionInitializerInConstructorId = 1
-            };
-            var post2 = new PostWithoutCollectionInitializerInConstructor {
-                PostWithoutCollectionInitializerInConstructorId = 2
-            };
-            var comment1 = new CommentTwo {
-                CommentTwoId = 1
-            };
-            var comment2 = new CommentTwo {
-                CommentTwoId = 2
-            };
-            var comment3 = new CommentTwo {
-                CommentTwoId = 3
-            };
+            var post1 = new PostWithoutCollectionInitializerInConstructor { PostWithoutCollectionInitializerInConstructorId = 1 };
+            var post2 = new PostWithoutCollectionInitializerInConstructor { PostWithoutCollectionInitializerInConstructorId = 2 };
+            var comment1 = new CommentTwo { CommentTwoId = 1 };
+            var comment2 = new CommentTwo { CommentTwoId = 2 };
+            var comment3 = new CommentTwo { CommentTwoId = 3 };
             var dict = new Dictionary<object, PostWithoutCollectionInitializerInConstructor>();
             var func = (Func<object[], PostWithoutCollectionInitializerInConstructor>)funcFac.DynamicInvoke(dict);
             func(new object[] { post1, comment1 });
@@ -92,7 +74,8 @@
 
         private static Delegate GenerateThenFetchMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Comments).ThenFetch(c => c.User) as SelectQuery<Post>;
+            var selectQuery =
+                new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Comments).ThenFetch(c => c.User) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
@@ -105,30 +88,14 @@
         public void MultiCollectionWorks() {
             var funcFac = GenerateMultiMapper();
 
-            var post1 = new Post {
-                PostId = 1
-            };
-            var post2 = new Post {
-                PostId = 2
-            };
-            var comment1 = new Comment {
-                CommentId = 1
-            };
-            var comment2 = new Comment {
-                CommentId = 2
-            };
-            var comment3 = new Comment {
-                CommentId = 3
-            };
-            var postTag1 = new PostTag {
-                PostTagId = 1
-            };
-            var postTag2 = new PostTag {
-                PostTagId = 2
-            };
-            var postTag3 = new PostTag {
-                PostTagId = 3
-            };
+            var post1 = new Post { PostId = 1 };
+            var post2 = new Post { PostId = 2 };
+            var comment1 = new Comment { CommentId = 1 };
+            var comment2 = new Comment { CommentId = 2 };
+            var comment3 = new Comment { CommentId = 3 };
+            var postTag1 = new PostTag { PostTagId = 1 };
+            var postTag2 = new PostTag { PostTagId = 2 };
+            var postTag3 = new PostTag { PostTagId = 3 };
             var otherDict = new Dictionary<int, IDictionary<object, object>>();
             otherDict.Add(1, new Dictionary<object, object>());
             otherDict.Add(2, new Dictionary<object, object>());
@@ -178,7 +145,9 @@
 
         private static Delegate GenerateSingleAwkwardMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<PostWithoutCollectionInitializerInConstructor>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments) as SelectQuery<PostWithoutCollectionInitializerInConstructor>;
+            var selectQuery =
+                new SelectQuery<PostWithoutCollectionInitializerInConstructor>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments) as
+                SelectQuery<PostWithoutCollectionInitializerInConstructor>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
@@ -195,7 +164,8 @@
             mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(User))).Returns(typeof(User));
             mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Tag))).Returns(typeof(Tag));
             mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(PostTag))).Returns(typeof(PostTag));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(PostWithoutCollectionInitializerInConstructor))).Returns(typeof(PostWithoutCollectionInitializerInConstructor));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(PostWithoutCollectionInitializerInConstructor)))
+                           .Returns(typeof(PostWithoutCollectionInitializerInConstructor));
             mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(CommentTwo))).Returns(typeof(CommentTwo));
 
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Post)))).Returns(typeof(Post));
@@ -204,14 +174,15 @@
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(User)))).Returns(typeof(User));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Tag)))).Returns(typeof(Tag));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(PostTag)))).Returns(typeof(PostTag));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(PostWithoutCollectionInitializerInConstructor)))).Returns(typeof(PostWithoutCollectionInitializerInConstructor));
+            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(PostWithoutCollectionInitializerInConstructor))))
+                           .Returns(typeof(PostWithoutCollectionInitializerInConstructor));
             mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(CommentTwo)))).Returns(typeof(CommentTwo));
             return mockCodeManager;
         }
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new System.Configuration.ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
+                : base(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
                 this.AddNamespaceOf<Post>();
                 this.Add<PostWithoutCollectionInitializerInConstructor>();
                 this.Add<CommentTwo>();

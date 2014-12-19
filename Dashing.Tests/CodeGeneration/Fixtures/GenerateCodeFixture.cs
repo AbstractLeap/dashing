@@ -8,10 +8,15 @@
         public ICodeGenerator CodeGenerator { get; set; }
 
         public GenerateCodeFixture()
-            : this(null) { }
+            : this(null) {}
 
+        /// <remarks>We can't output the assembly or the source as the tests run in parallel, and IO doesn't!</remarks>
         protected GenerateCodeFixture(CodeGeneratorConfig generatorConfig) {
-            this.CodeGenerator = new CodeGenerator(generatorConfig ?? new CodeGeneratorConfig() { CompileInDebug = true, OutputAssembly = true, OutputSourceCode = true }, new ProxyGenerator(), new DapperWrapperGenerator());
+            this.CodeGenerator =
+                new CodeGenerator(
+                    generatorConfig ?? new CodeGeneratorConfig { CompileInDebug = true, OutputAssembly = false, OutputSourceCode = false },
+                    new ProxyGenerator(),
+                    new DapperWrapperGenerator());
             this.CodeManager = this.CodeGenerator.Generate(new CustomConfig());
         }
 

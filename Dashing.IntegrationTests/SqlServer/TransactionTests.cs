@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dashing.IntegrationTests.SqlServer {
-    using System.Configuration;
-
-    using Dashing.Configuration;
-    using Dashing.Engine.DDL;
-    using Dashing.Engine.Dialects;
+﻿namespace Dashing.IntegrationTests.SqlServer {
     using Dashing.IntegrationTests.SqlServer.Fixtures;
     using Dashing.IntegrationTests.TestDomain;
 
     using Xunit;
 
-    public class TransactionTests : IUseFixture<SqlServerFixture>{
-        private SqlServerFixture fixture;
+    public class TransactionTests : IClassFixture<SqlServerFixture> {
+        private readonly SqlServerFixture fixture;
+
+        public TransactionTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public void TestTransactioning() {
@@ -26,10 +19,7 @@ namespace Dashing.IntegrationTests.SqlServer {
 
             using (var session = this.fixture.Session.Configuration.BeginSession()) {
                 session.Dapper.Execute("use " + this.fixture.DatabaseName);
-                session.Insert(new User {
-                    Username = "james",
-                    EmailAddress = "james@polylytics.com"
-                });
+                session.Insert(new User { Username = "james", EmailAddress = "james@polylytics.com" });
                 session.Complete();
             }
 
@@ -46,10 +36,6 @@ namespace Dashing.IntegrationTests.SqlServer {
             }
 
             this.fixture.Session = this.fixture.Session.Configuration.BeginSession();
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

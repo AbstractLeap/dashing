@@ -1,5 +1,4 @@
 namespace Dashing.Tools.Tests.ModelGeneration {
-    using System.Collections.Generic;
     using System.Linq;
 
     using Dashing.Configuration;
@@ -17,7 +16,7 @@ namespace Dashing.Tools.Tests.ModelGeneration {
             var generator = new ModelGenerator();
             var config = new CustomConfig();
             var results = generator.GenerateFiles(config.Maps, this.MakeSchema(config), TestNamespace, null);
-            Assert.Contains("namespace " + TestNamespace, Enumerable.First<KeyValuePair<string, string>>(results).Value);
+            Assert.Contains("namespace " + TestNamespace, results.First().Value);
         }
 
         [Fact]

@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.IntegrationTests.SqlServer {
+    using System.Linq;
 
-namespace Dashing.IntegrationTests.SqlServer {
-    using Dashing.Engine.DDL;
-    using Dashing.Engine.Dialects;
     using Dashing.IntegrationTests.SqlServer.Fixtures;
     using Dashing.IntegrationTests.TestDomain;
 
     using Xunit;
 
-    public class CollectionTests : IUseFixture<SqlServerFixture> {
-        private SqlServerFixture fixture;
+    public class CollectionTests : IClassFixture<SqlServerFixture> {
+        private readonly SqlServerFixture fixture;
+
+        public CollectionTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public void TestCollectionFetch() {
@@ -41,10 +39,6 @@ namespace Dashing.IntegrationTests.SqlServer {
             var blog = this.fixture.Session.Query<Blog>().FetchMany(p => p.Posts).ThenFetch(p => p.Comments).First();
             Assert.True(blog.Posts.Count == 2);
             Assert.True(blog.Posts.First().Comments.Count == 3);
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

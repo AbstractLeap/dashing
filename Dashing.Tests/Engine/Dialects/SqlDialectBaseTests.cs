@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Tests.Engine.Dialects {
+    using System;
     using System.Data;
     using System.Text;
 
@@ -53,7 +54,8 @@
         [Fact]
         public void AppendColumnSpecificationAppendsNameAndTypeAndNull() {
             var sb = new StringBuilder();
-            var col = new Column<int> { DbName = "foo", DbType = DbType.Int32, IsNullable = true }; // MJ should this throw an InvalidOperationException - seems nasty to have nullable db col with non nullable CLR type
+            var col = new Column<int> { DbName = "foo", DbType = DbType.Int32, IsNullable = true };
+                // MJ should this throw an InvalidOperationException - seems nasty to have nullable db col with non nullable CLR type
             var target = this.MakeTarget();
 
             target.AppendColumnSpecification(sb, col);
@@ -111,35 +113,34 @@
 
         private class TestDialect : SqlDialectBase {
             public TestDialect()
-                : base('<', '>') {
-            }
+                : base('<', '>') {}
 
             public override string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public override string ModifyColumn(IColumn fromColumn, IColumn toColumn) {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public override string DropForeignKey(ForeignKey foreignKey) {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public override string DropIndex(Index index) {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
         }
     }

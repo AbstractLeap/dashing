@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.IntegrationTests.SqlServer.Fixtures {
+    using System;
+    using System.Collections.Generic;
 
-namespace Dashing.IntegrationTests.SqlServer.Fixtures {
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.IntegrationTests.TestDomain;
@@ -15,28 +12,28 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
 
         public string DatabaseName { get; private set; }
 
-        private IConfiguration config;
+        private readonly IConfiguration config;
 
         public SqlServerFixture() {
-            config = new SqlServerConfiguration();
+            this.config = new SqlServerConfiguration();
             this.DatabaseName = "DashingIntegration_" + Guid.NewGuid().ToString("D").Substring(0, 8);
 
             // load the data
             var migrator = new Migrator(
-                new CreateTableWriter(config.Engine.SqlDialect),
-                new DropTableWriter(config.Engine.SqlDialect),
-                new AlterTableWriter(config.Engine.SqlDialect));
+                new CreateTableWriter(this.config.Engine.SqlDialect),
+                new DropTableWriter(this.config.Engine.SqlDialect),
+                new AlterTableWriter(this.config.Engine.SqlDialect));
             IEnumerable<string> warnings, errors;
-            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), config.Maps, null, out warnings, out errors);
-            using (var transactionLessSession = config.BeginTransactionLessSession()) {
+            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), this.config.Maps, null, out warnings, out errors);
+            using (var transactionLessSession = this.config.BeginTransactionLessSession()) {
                 transactionLessSession.Dapper.Execute("create database " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute("use " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute(createStatement);
             }
 
-            this.Session = config.BeginSession();
+            this.Session = this.config.BeginSession();
             this.Session.Dapper.Execute("use " + this.DatabaseName);
-            InsertData();
+            this.InsertData();
         }
 
         private void InsertData() {
@@ -104,7 +101,7 @@ namespace Dashing.IntegrationTests.SqlServer.Fixtures {
 
         public void Dispose() {
             this.Session.Dispose();
-            using (var transactionLessSession = config.BeginTransactionLessSession()) {
+            using (var transactionLessSession = this.config.BeginTransactionLessSession()) {
                 transactionLessSession.Dapper.Execute("drop database " + this.DatabaseName);
             }
         }

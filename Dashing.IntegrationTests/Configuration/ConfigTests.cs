@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dashing.IntegrationTests.Configuration {
+﻿namespace Dashing.IntegrationTests.Configuration {
     using Dashing.Configuration;
     using Dashing.IntegrationTests.Configuration.Domain;
 
@@ -13,7 +7,7 @@ namespace Dashing.IntegrationTests.Configuration {
     public class ConfigTests {
         [Fact]
         public void ConfigDoesNotThrow() {
-            Assert.DoesNotThrow(() => new TestConfig());
+            Assert.NotNull(new TestConfig());
         }
 
         [Fact]

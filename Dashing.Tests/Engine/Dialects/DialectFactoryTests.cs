@@ -16,7 +16,10 @@
             // i.e. they'll get an error with they attempt to take or skip and then they'll need to modify the connection string
             Assert.IsType<SqlServer2012Dialect>(
                 new DialectFactory().Create(
-                    new ConnectionStringSettings("Default", "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;", "System.Data.SqlClient")));
+                    new ConnectionStringSettings(
+                        "Default",
+                        "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;",
+                        "System.Data.SqlClient")));
         }
 
         [Fact]

@@ -3,7 +3,6 @@ namespace Dashing.Tests.CodeGeneration.Fixtures {
 
     public class GenerateAndOutputCodeFixture : GenerateCodeFixture {
         public GenerateAndOutputCodeFixture()
-            : base(new CodeGeneratorConfig { CompileInDebug = true, OutputAssembly = true, OutputSourceCode = true }) {
-        }
+            : base(new CodeGeneratorConfig { CompileInDebug = true, OutputAssembly = true, OutputSourceCode = true }) {}
     }
 }

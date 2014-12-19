@@ -5,10 +5,10 @@
 
     using Xunit;
 
-    public class TrackingTests : IUseFixture<GenerateCodeFixture> {
-        private IGeneratedCodeManager codeManager;
+    public class TrackingTests : IClassFixture<GenerateCodeFixture> {
+        private readonly IGeneratedCodeManager codeManager;
 
-        public void SetFixture(GenerateCodeFixture data) {
+        public TrackingTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 

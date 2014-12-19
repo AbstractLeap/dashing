@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tests.Extensions {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Linq;
 
     using Dashing.Configuration;
@@ -58,47 +59,43 @@
         public void OneToOneGetsSpotted() {
             var maps = new CustomOneToOneConfig().Maps;
             var sortedMaps = maps.OrderTopologically();
-            Assert.Equal(
-                new[] { maps.First(m => m.Type == typeof(OneToOneLeft)), maps.First(m => m.Type == typeof(OneToOneRight)) },
-                sortedMaps.OneToOneMaps);
+            Assert.Equal(new[] { maps.First(m => m.Type == typeof(OneToOneLeft)), maps.First(m => m.Type == typeof(OneToOneRight)) }, sortedMaps.OneToOneMaps);
         }
 
         [Fact]
         public void SelfReferencingGetsSpotted() {
             var maps = new CustomOneToOneConfig().Maps;
             var sortedMaps = maps.OrderTopologically();
-            Assert.Equal(
-                new[] { maps.First(m => m.Type == typeof(Category)) },
-                sortedMaps.SelfReferencingMaps);
+            Assert.Equal(new[] { maps.First(m => m.Type == typeof(Category)) }, sortedMaps.SelfReferencingMaps);
         }
 
         [Fact]
         public void OrderedMapsContainsSelfReferencing() {
             var maps = new CustomOneToOneConfig().Maps;
             var sortedMaps = maps.OrderTopologically();
-            Assert.Contains(maps.First(m => m.Type == typeof(Category)),
-                sortedMaps.OrderedMaps);
+            Assert.Contains(maps.First(m => m.Type == typeof(Category)), sortedMaps.OrderedMaps);
         }
 
         [Fact]
         public void OrderedMapsContainOneToOne() {
             var maps = new CustomOneToOneConfig().Maps;
             var sortedMaps = maps.OrderTopologically();
-            Assert.Equal(2, 
-                new[] { maps.First(m => m.Type == typeof(OneToOneLeft)), maps.First(m => m.Type == typeof(OneToOneRight)) }.Intersect(
-                sortedMaps.OrderedMaps).Count());
+            Assert.Equal(
+                2,
+                new[] { maps.First(m => m.Type == typeof(OneToOneLeft)), maps.First(m => m.Type == typeof(OneToOneRight)) }.Intersect(sortedMaps.OrderedMaps)
+                                                                                                                           .Count());
         }
 
         private class CustomConfig : DefaultConfiguration {
             public CustomConfig()
-                : base(new System.Configuration.ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
-                    this.AddNamespaceOf<Post>();
+                : base(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
+                this.AddNamespaceOf<Post>();
             }
         }
 
         private class CustomOneToOneConfig : DefaultConfiguration {
             public CustomOneToOneConfig()
-                : base(new System.Configuration.ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
+                : base(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
                 this.AddNamespaceOf<Post>();
                 this.AddNamespaceOf<OneToOneLeft>();
             }

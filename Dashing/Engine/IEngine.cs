@@ -25,6 +25,8 @@ namespace Dashing.Engine {
 
         Page<T> QueryPaged<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query);
 
+        int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query);
+
         int Insert<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities);
 
         int Save<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities);
@@ -46,6 +48,8 @@ namespace Dashing.Engine {
         Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query);
 
         Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query);
+
+        Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query);
 
         Task<int> InsertAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities);
 

@@ -81,8 +81,9 @@ namespace Dashing.Tools.Tests.ReverseEngineering {
             var schema = new DatabaseSchema(string.Empty, SqlType.SqlServer);
             var peopleTable = new DatabaseTable { Name = "People" };
 
-            peopleTable.Columns.Add(new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "PersonId", DataType = new DataType("int", "System.Int32") });
-            
+            peopleTable.Columns.Add(
+                new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "PersonId", DataType = new DataType("int", "System.Int32") });
+
             schema.Tables.Add(peopleTable);
             return schema;
         }
@@ -94,7 +95,12 @@ namespace Dashing.Tools.Tests.ReverseEngineering {
             categoryTable.Columns.Add(
                 new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "CategoryId", DataType = new DataType("int", "System.Int32") });
             categoryTable.Columns.Add(
-                new DatabaseColumn { Name = "ParentId", IsForeignKey = true, ForeignKeyTableName = "Categories", DataType = new DataType("int", "System.Int32") });
+                new DatabaseColumn {
+                    Name = "ParentId",
+                    IsForeignKey = true,
+                    ForeignKeyTableName = "Categories",
+                    DataType = new DataType("int", "System.Int32")
+                });
 
             schema.Tables.Add(categoryTable);
             return schema;
@@ -120,10 +126,19 @@ namespace Dashing.Tools.Tests.ReverseEngineering {
             var customerTable = new DatabaseTable { Name = "Customers" };
             var peopleTable = new DatabaseTable { Name = "People" };
 
-            customerTable.Columns.Add(new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "CustomerId", DataType = new DataType("int", "System.Int32") });
-            customerTable.Columns.Add(new DatabaseColumn { Name = "PersonId", IsForeignKey = true, ForeignKeyTableName = "People", DataType = new DataType("int", "System.Int32") });
-            peopleTable.Columns.Add(new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "PersonId", DataType = new DataType("int", "System.Int32") });
-            peopleTable.Columns.Add(new DatabaseColumn { Name = "CustomerId", IsForeignKey = true, ForeignKeyTableName = "Customers", DataType = new DataType("int", "System.Int32") });
+            customerTable.Columns.Add(
+                new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "CustomerId", DataType = new DataType("int", "System.Int32") });
+            customerTable.Columns.Add(
+                new DatabaseColumn { Name = "PersonId", IsForeignKey = true, ForeignKeyTableName = "People", DataType = new DataType("int", "System.Int32") });
+            peopleTable.Columns.Add(
+                new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "PersonId", DataType = new DataType("int", "System.Int32") });
+            peopleTable.Columns.Add(
+                new DatabaseColumn {
+                    Name = "CustomerId",
+                    IsForeignKey = true,
+                    ForeignKeyTableName = "Customers",
+                    DataType = new DataType("int", "System.Int32")
+                });
 
             schema.Tables.Add(peopleTable);
             schema.Tables.Add(customerTable);
@@ -139,9 +154,12 @@ namespace Dashing.Tools.Tests.ReverseEngineering {
             var postTable = new DatabaseTable { Name = "Posts" };
             var blogsTable = new DatabaseTable { Name = "Blogs" };
 
-            postTable.Columns.Add(new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "PostId", DataType = new DataType("int", "System.Int32") });
-            postTable.Columns.Add(new DatabaseColumn { Name = "BlogId", IsForeignKey = true, ForeignKeyTableName = "Blogs", DataType = new DataType("int", "System.Int32") });
-            blogsTable.Columns.Add(new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "BlogId", DataType = new DataType("int", "System.Int32") });
+            postTable.Columns.Add(
+                new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "PostId", DataType = new DataType("int", "System.Int32") });
+            postTable.Columns.Add(
+                new DatabaseColumn { Name = "BlogId", IsForeignKey = true, ForeignKeyTableName = "Blogs", DataType = new DataType("int", "System.Int32") });
+            blogsTable.Columns.Add(
+                new DatabaseColumn { IsAutoNumber = true, IsPrimaryKey = true, Name = "BlogId", DataType = new DataType("int", "System.Int32") });
 
             schema.Tables.Add(postTable);
             schema.Tables.Add(blogsTable);

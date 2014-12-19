@@ -1,11 +1,9 @@
 ﻿namespace Dashing.Tests.Configuration.DapperMapperGeneration {
     using System;
     using System.Configuration;
-    using System.Data;
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
-    using Dashing.Engine;
     using Dashing.Engine.DapperMapperGeneration;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
