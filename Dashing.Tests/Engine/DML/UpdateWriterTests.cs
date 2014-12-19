@@ -14,7 +14,7 @@
     using Xunit;
 
     public class UpdateWriterTests : IClassFixture<GenerateCodeFixture> {
-        private IGeneratedCodeManager codeManager;
+        private readonly IGeneratedCodeManager codeManager;
 
         public UpdateWriterTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
@@ -38,13 +38,9 @@
             // assemble
             var post = this.codeManager.CreateTrackingInstance<Post>();
             post.PostId = 1;
-            post.Blog = new Blog {
-                BlogId = 1
-            };
+            post.Blog = new Blog { BlogId = 1 };
             this.codeManager.TrackInstance(post);
-            post.Blog = new Blog {
-                BlogId = 2
-            };
+            post.Blog = new Blog { BlogId = 2 };
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
 
             // act
@@ -110,7 +106,9 @@
 
             // assert
             Debug.Write(result.Sql);
-            Assert.Equal("update [Posts] set [Title] = @p_1, [Content] = @p_2, [Rating] = @p_3, [AuthorId] = @p_4, [BlogId] = @p_5 where [PostId] = @p_6;", result.Sql);
+            Assert.Equal(
+                "update [Posts] set [Title] = @p_1, [Content] = @p_2, [Rating] = @p_3, [AuthorId] = @p_4, [BlogId] = @p_5 where [PostId] = @p_6;",
+                result.Sql);
         }
 
         [Fact]
@@ -137,9 +135,7 @@
             // assemble
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
             var updateClass = this.codeManager.CreateUpdateInstance<Post>();
-            updateClass.Blog = new Blog {
-                BlogId = 1
-            };
+            updateClass.Blog = new Blog { BlogId = 1 };
 
             // act
             Expression<Func<Post, bool>> predicate = p => p.PostId == 1;

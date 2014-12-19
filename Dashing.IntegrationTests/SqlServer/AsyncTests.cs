@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.IntegrationTests.SqlServer {
+    using System.Linq;
+    using System.Threading.Tasks;
 
-namespace Dashing.IntegrationTests.SqlServer {
     using Dashing.IntegrationTests.SqlServer.Fixtures;
     using Dashing.IntegrationTests.TestDomain;
 
     using Xunit;
 
     public class AsyncTests : IClassFixture<SqlServerFixture> {
-        private SqlServerFixture fixture;
+        private readonly SqlServerFixture fixture;
 
         public AsyncTests(SqlServerFixture data) {
             this.fixture = data;

@@ -1,12 +1,13 @@
 namespace Dashing.Tools.Tests {
     using System;
+    using System.Configuration;
 
     using Dashing.Configuration;
     using Dashing.Tools.Tests.TestDomain;
 
     public class CustomConfig : DefaultConfiguration, ISeeder {
         public CustomConfig()
-            : base(new System.Configuration.ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=dashingtest;Integrated Security=True", "System.Data.SqlClient")) {
+            : base(new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=dashingtest;Integrated Security=True", "System.Data.SqlClient")) {
             this.AddNamespaceOf<Post>();
         }
 

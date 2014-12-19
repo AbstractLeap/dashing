@@ -7,7 +7,7 @@
     using Xunit;
 
     public class EnumeratingTests : IClassFixture<SqlServerFixture> {
-        private SqlServerFixture fixture;
+        private readonly SqlServerFixture fixture;
 
         public EnumeratingTests(SqlServerFixture data) {
             this.fixture = data;

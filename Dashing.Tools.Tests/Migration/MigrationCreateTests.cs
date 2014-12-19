@@ -34,8 +34,7 @@
             Assert.Equal(@"create table [Categories] ([CategoryId] int not null identity(1,1) primary key, [ParentId] int null, [Name] nvarchar(255) null);
 alter table [Categories] add constraint fk_Category_Category_Parent foreign key ([ParentId]) references [Categories]([CategoryId]);
 create index [idx_Category_Parent] on [Categories] ([ParentId]);
-",
-                script);
+", script);
         }
 
         [Fact]

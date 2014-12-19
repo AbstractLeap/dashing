@@ -6,7 +6,7 @@
     using Xunit;
 
     public class TrackingTests : IClassFixture<GenerateCodeFixture> {
-        private IGeneratedCodeManager codeManager;
+        private readonly IGeneratedCodeManager codeManager;
 
         public TrackingTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;

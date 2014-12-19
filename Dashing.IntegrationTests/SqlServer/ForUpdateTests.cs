@@ -9,7 +9,7 @@
     using Xunit;
 
     public class ForUpdateTests : IClassFixture<SqlServerFixture> {
-        private SqlServerFixture fixture;
+        private readonly SqlServerFixture fixture;
 
         public ForUpdateTests(SqlServerFixture data) {
             this.fixture = data;

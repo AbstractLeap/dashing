@@ -6,7 +6,7 @@
     using Xunit;
 
     public class ForeignKeyTests : IClassFixture<GenerateCodeFixture> {
-        private IGeneratedCodeManager codeManager;
+        private readonly IGeneratedCodeManager codeManager;
 
         public ForeignKeyTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
