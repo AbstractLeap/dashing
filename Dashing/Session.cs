@@ -229,6 +229,10 @@
             return this.engine.QueryPaged(this.GetConnection(), this.GetTransaction(), query);
         }
 
+        public int Count<T>(SelectQuery<T> query) {
+            return this.engine.Count(this.GetConnection(), this.GetTransaction(), query);
+        }
+
         public int Insert<T>(IEnumerable<T> entities) {
             if (this.Configuration.EventHandlers.PreInsertListeners.Any()) {
                 foreach (var entity in entities) {
@@ -330,6 +334,10 @@
 
         public async Task<Page<T>> QueryPagedAsync<T>(SelectQuery<T> query) {
             return await this.engine.QueryPagedAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), query);
+        }
+
+        public async Task<int> CountAsync<T>(SelectQuery<T> query) {
+            return await this.engine.CountAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), query);
         }
 
         public async Task<int> InsertAsync<T>(IEnumerable<T> entities) {

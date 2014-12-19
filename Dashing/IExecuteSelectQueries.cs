@@ -7,8 +7,12 @@ namespace Dashing {
 
         Page<T> QueryPaged<T>(SelectQuery<T> query);
 
+        int Count<T>(SelectQuery<T> query);
+
         Task<IEnumerable<T>> QueryAsync<T>(SelectQuery<T> query);
 
         Task<Page<T>> QueryPagedAsync<T>(SelectQuery<T> query);
+
+        Task<int> CountAsync<T>(SelectQuery<T> query);
     }
 }
