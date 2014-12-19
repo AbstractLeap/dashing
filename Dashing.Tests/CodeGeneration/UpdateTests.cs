@@ -5,10 +5,10 @@
 
     using Xunit;
 
-    public class UpdateTests : IUseFixture<GenerateCodeFixture> {
+    public class UpdateTests : IClassFixture<GenerateCodeFixture> {
         private IGeneratedCodeManager codeManager;
 
-        public void SetFixture(GenerateCodeFixture data) {
+        public UpdateTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 

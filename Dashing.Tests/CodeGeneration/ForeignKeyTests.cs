@@ -5,10 +5,10 @@
 
     using Xunit;
 
-    public class ForeignKeyTests : IUseFixture<GenerateCodeFixture> {
+    public class ForeignKeyTests : IClassFixture<GenerateCodeFixture> {
         private IGeneratedCodeManager codeManager;
 
-        public void SetFixture(GenerateCodeFixture data) {
+        public ForeignKeyTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 

@@ -8,8 +8,12 @@
 
     using Xunit;
 
-    public class ForUpdateTests : IUseFixture<SqlServerFixture> {
+    public class ForUpdateTests : IClassFixture<SqlServerFixture> {
         private SqlServerFixture fixture;
+
+        public ForUpdateTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact(Skip = "Has Explicit Delay")]
         public void LockPreventsRead() {
@@ -111,10 +115,6 @@
             // do some clear up
             this.fixture.Session = this.fixture.Session.Configuration.BeginSession();
             this.fixture.Session.Dapper.Execute("use " + this.fixture.DatabaseName);
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

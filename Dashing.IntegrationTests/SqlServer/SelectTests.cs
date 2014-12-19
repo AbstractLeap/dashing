@@ -10,8 +10,12 @@ namespace Dashing.IntegrationTests.SqlServer {
 
     using Xunit;
 
-    public class SelectTests : IUseFixture<SqlServerFixture> {
+    public class SelectTests : IClassFixture<SqlServerFixture> {
         private SqlServerFixture fixture;
+
+        public SelectTests(SqlServerFixture fixture) {
+            this.fixture = fixture;
+        }
 
         [Fact]
         public void WhereEnumerableWorks() {

@@ -13,7 +13,7 @@ namespace Dashing.IntegrationTests.Configuration {
     public class ConfigTests {
         [Fact]
         public void ConfigDoesNotThrow() {
-            Assert.DoesNotThrow(() => new TestConfig());
+            Assert.NotNull(new TestConfig());
         }
 
         [Fact]

@@ -12,8 +12,12 @@ namespace Dashing.IntegrationTests.SqlServer {
 
     using Xunit;
 
-    public class CollectionTests : IUseFixture<SqlServerFixture> {
+    public class CollectionTests : IClassFixture<SqlServerFixture> {
         private SqlServerFixture fixture;
+
+        public CollectionTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public void TestCollectionFetch() {
@@ -41,10 +45,6 @@ namespace Dashing.IntegrationTests.SqlServer {
             var blog = this.fixture.Session.Query<Blog>().FetchMany(p => p.Posts).ThenFetch(p => p.Comments).First();
             Assert.True(blog.Posts.Count == 2);
             Assert.True(blog.Posts.First().Comments.Count == 3);
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

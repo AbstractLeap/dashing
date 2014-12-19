@@ -10,8 +10,12 @@ namespace Dashing.IntegrationTests.SqlServer {
 
     using Xunit;
 
-    public class CUDTests : IUseFixture<SqlServerFixture> {
+    public class CUDTests : IClassFixture<SqlServerFixture> {
         private SqlServerFixture fixture;
+
+        public CUDTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public void TestInsert() {
@@ -82,10 +86,6 @@ namespace Dashing.IntegrationTests.SqlServer {
             var user = this.fixture.Session.Query<User>().Where(u => u.Username == "TestDelete").AsTracked().First();
             this.fixture.Session.Delete(user);
             Assert.Empty(this.fixture.Session.Query<User>().Where(u => u.Username == "TestDelete"));
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

@@ -16,7 +16,7 @@
 
     using Xunit;
 
-    public class ConfigurationBaseTests : IUseFixture<GenerateCodeFixture> {
+    public class ConfigurationBaseTests : IClassFixture<GenerateCodeFixture> {
         private static readonly ConnectionStringSettings DummyConnectionString = new ConnectionStringSettings { ConnectionString = "Data Source=dummy.local", ProviderName = "System.Data.SqlClient" };
 
         private const string ExampleTableName = "foo";
@@ -24,8 +24,8 @@
         private ICodeGenerator codeGenerator;
 
         private IGeneratedCodeManager codeManager;
-        
-        public void SetFixture(GenerateCodeFixture data) {
+
+        public ConfigurationBaseTests(GenerateCodeFixture data) {
             this.codeGenerator = data.CodeGenerator;
             this.codeManager = data.CodeManager;
         }

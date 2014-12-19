@@ -10,8 +10,12 @@ namespace Dashing.IntegrationTests.SqlServer {
 
     using Xunit;
 
-    public class FetchTests : IUseFixture<SqlServerFixture> {
+    public class FetchTests : IClassFixture<SqlServerFixture> {
         private SqlServerFixture fixture;
+
+        public FetchTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public void ExecuteSimpleQuery() {
@@ -61,10 +65,6 @@ namespace Dashing.IntegrationTests.SqlServer {
         public void FetchWithNonFetchedWhere() {
             var comment = fixture.Session.Query<Comment>().Fetch(c => c.Post.Blog).Where(c => c.User.EmailAddress == "foo");
             Assert.Null(comment.FirstOrDefault());
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

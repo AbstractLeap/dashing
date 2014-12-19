@@ -10,8 +10,12 @@ namespace Dashing.IntegrationTests.SqlServer {
 
     using Xunit;
 
-    public class AsyncTests : IUseFixture<SqlServerFixture> {
+    public class AsyncTests : IClassFixture<SqlServerFixture> {
         private SqlServerFixture fixture;
+
+        public AsyncTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public async Task GetByIdWorks() {
@@ -36,10 +40,6 @@ namespace Dashing.IntegrationTests.SqlServer {
             var comment = new Comment { Content = "Foo" };
             await this.fixture.Session.InsertAsync(comment);
             Assert.NotEqual(0, comment.CommentId);
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

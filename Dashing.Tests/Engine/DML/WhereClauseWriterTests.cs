@@ -15,10 +15,10 @@
 
     using Xunit;
 
-    public class WhereClauseWriterTests : IUseFixture<GenerateCodeFixture> {
+    public class WhereClauseWriterTests : IClassFixture<GenerateCodeFixture> {
         private IGeneratedCodeManager codeManager;
 
-        public void SetFixture(GenerateCodeFixture data) {
+        public WhereClauseWriterTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 

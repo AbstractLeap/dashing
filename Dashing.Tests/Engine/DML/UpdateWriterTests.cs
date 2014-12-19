@@ -13,10 +13,10 @@
 
     using Xunit;
 
-    public class UpdateWriterTests : IUseFixture<GenerateCodeFixture> {
+    public class UpdateWriterTests : IClassFixture<GenerateCodeFixture> {
         private IGeneratedCodeManager codeManager;
 
-        public void SetFixture(GenerateCodeFixture data) {
+        public UpdateWriterTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 
