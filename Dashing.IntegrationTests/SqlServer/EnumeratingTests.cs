@@ -6,8 +6,12 @@
 
     using Xunit;
 
-    public class EnumeratingTests : IUseFixture<SqlServerFixture> {
-        private SqlServerFixture fixture;
+    public class EnumeratingTests : IClassFixture<SqlServerFixture> {
+        private readonly SqlServerFixture fixture;
+
+        public EnumeratingTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public void TestSingleAndFirst() {
@@ -31,10 +35,6 @@
 
             var t6 = this.fixture.Session.Query<User>().SingleOrDefault(u => u.Username == "Boo");
             Assert.Null(t6);
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

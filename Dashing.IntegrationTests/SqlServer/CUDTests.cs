@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.IntegrationTests.SqlServer {
+    using System;
 
-namespace Dashing.IntegrationTests.SqlServer {
     using Dashing.IntegrationTests.SqlServer.Fixtures;
     using Dashing.IntegrationTests.TestDomain;
 
     using Xunit;
 
-    public class CUDTests : IUseFixture<SqlServerFixture> {
-        private SqlServerFixture fixture;
+    public class CUDTests : IClassFixture<SqlServerFixture> {
+        private readonly SqlServerFixture fixture;
+
+        public CUDTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public void TestInsert() {
-            var user = new User {
-                Username = "Joe",
-                EmailAddress = Guid.NewGuid().ToString(),
-                Password = "blah"
-            };
+            var user = new User { Username = "Joe", EmailAddress = Guid.NewGuid().ToString(), Password = "blah" };
             this.fixture.Session.Insert(user);
             var dbUser = this.fixture.Session.Query<User>().First(u => u.EmailAddress == user.EmailAddress);
             Assert.NotNull(dbUser);
@@ -27,27 +23,15 @@ namespace Dashing.IntegrationTests.SqlServer {
 
         [Fact]
         public void TestInsertGetsId() {
-            var user = new User {
-                Username = "Joe",
-                EmailAddress = Guid.NewGuid().ToString(),
-                Password = "blah"
-            };
+            var user = new User { Username = "Joe", EmailAddress = Guid.NewGuid().ToString(), Password = "blah" };
             this.fixture.Session.Insert(user);
             Assert.NotEqual(0, user.UserId);
         }
 
         [Fact]
         public void TestMultipleInsertUpdatesIds() {
-            var user = new User {
-                Username = "Bob",
-                EmailAddress = "asd",
-                Password = "asdf"
-            };
-            var user2 = new User {
-                Username = "Bob2",
-                EmailAddress = "asd",
-                Password = "asdf"
-            };
+            var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
+            var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
             this.fixture.Session.Insert(user, user2);
             Assert.NotEqual(0, user.UserId);
             Assert.NotEqual(0, user2.UserId);
@@ -82,10 +66,6 @@ namespace Dashing.IntegrationTests.SqlServer {
             var user = this.fixture.Session.Query<User>().Where(u => u.Username == "TestDelete").AsTracked().First();
             this.fixture.Session.Delete(user);
             Assert.Empty(this.fixture.Session.Query<User>().Where(u => u.Username == "TestDelete"));
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

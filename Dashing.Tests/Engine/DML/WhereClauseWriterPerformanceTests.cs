@@ -1,19 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Dashing.Tests.Engine.DML {
-    using System.Diagnostics;
-    using System.Linq.Expressions;
-
+﻿namespace Dashing.Tests.Engine.DML {
     using Dashing.Configuration;
-    using Dashing.Engine.Dialects;
-    using Dashing.Engine.DML;
     using Dashing.Tests.TestDomain;
-
-    using Xunit;
 
     public class WhereClauseWriterPerformanceTests {
         //[Fact(Skip = "Just for performance testing")]

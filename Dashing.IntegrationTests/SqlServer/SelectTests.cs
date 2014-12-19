@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.IntegrationTests.SqlServer {
+    using System.Linq;
 
-namespace Dashing.IntegrationTests.SqlServer {
     using Dashing.IntegrationTests.SqlServer.Fixtures;
     using Dashing.IntegrationTests.TestDomain;
 
     using Xunit;
 
-    public class SelectTests : IUseFixture<SqlServerFixture> {
+    public class SelectTests : IClassFixture<SqlServerFixture> {
         private SqlServerFixture fixture;
+
+        public SelectTests(SqlServerFixture fixture) {
+            this.fixture = fixture;
+        }
 
         [Fact]
         public void WhereEnumerableWorks() {

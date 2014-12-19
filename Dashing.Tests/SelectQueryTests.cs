@@ -23,16 +23,13 @@
         }
 
         private ISession GetDashing() {
-            return new Session(this.mockEngine.Object, this.connection.Object, transaction: this.transaction.Object);
+            return new Session(this.mockEngine.Object, this.connection.Object, this.transaction.Object);
         }
 
         [Fact]
         public void TestProjection() {
             var dashing = this.GetDashing();
-            var query = dashing.Query<Blog>().Select(b => new {
-                b.BlogId, 
-                b.Title
-            });
+            var query = dashing.Query<Blog>().Select(b => new { b.BlogId, b.Title });
 
             var selectQuery = query as SelectQuery<Blog>;
             Assert.NotNull(selectQuery);

@@ -167,6 +167,10 @@ namespace Dashing {
 
         T LastOrDefault(Expression<Func<T, bool>> predicate);
 
+        int Count();
+
+        int Count(Expression<Func<T, bool>> predicate);
+        
         Page<T> AsPaged(int skip, int take);
 
         Task<IList<T>> ToListAsync();
@@ -196,6 +200,10 @@ namespace Dashing {
         Task<T> LastOrDefaultAsync();
 
         Task<T> LastOrDefaultAsync(Expression<Func<T, bool>> predicate);
+
+        Task<int> CountAsync();
+
+        Task<int> CountAsync(Expression<Func<T, bool>> predicate);
 
         Task<Page<T>> AsPagedAsync(int skip, int take);
     }

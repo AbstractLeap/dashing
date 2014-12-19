@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.IntegrationTests.SqlServer {
+    using System.Linq;
+    using System.Threading.Tasks;
 
-namespace Dashing.IntegrationTests.SqlServer {
     using Dashing.IntegrationTests.SqlServer.Fixtures;
     using Dashing.IntegrationTests.TestDomain;
 
     using Xunit;
 
-    public class AsyncTests : IUseFixture<SqlServerFixture> {
-        private SqlServerFixture fixture;
+    public class AsyncTests : IClassFixture<SqlServerFixture> {
+        private readonly SqlServerFixture fixture;
+
+        public AsyncTests(SqlServerFixture data) {
+            this.fixture = data;
+        }
 
         [Fact]
         public async Task GetByIdWorks() {
@@ -36,10 +37,6 @@ namespace Dashing.IntegrationTests.SqlServer {
             var comment = new Comment { Content = "Foo" };
             await this.fixture.Session.InsertAsync(comment);
             Assert.NotEqual(0, comment.CommentId);
-        }
-
-        public void SetFixture(SqlServerFixture data) {
-            this.fixture = data;
         }
     }
 }

@@ -9,7 +9,10 @@
     using Xunit;
 
     public class DefaultConfigurationTests {
-        private readonly ConnectionStringSettings connectionString = new ConnectionStringSettings { ConnectionString = "Data Source=dummy.local", ProviderName = "System.Data.SqlClient" };
+        private readonly ConnectionStringSettings connectionString = new ConnectionStringSettings {
+            ConnectionString = "Data Source=dummy.local",
+            ProviderName = "System.Data.SqlClient"
+        };
 
         [Fact]
         public void Constructs() {

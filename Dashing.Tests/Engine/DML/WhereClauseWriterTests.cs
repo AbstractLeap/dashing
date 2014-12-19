@@ -15,10 +15,10 @@
 
     using Xunit;
 
-    public class WhereClauseWriterTests : IUseFixture<GenerateCodeFixture> {
-        private IGeneratedCodeManager codeManager;
+    public class WhereClauseWriterTests : IClassFixture<GenerateCodeFixture> {
+        private readonly IGeneratedCodeManager codeManager;
 
-        public void SetFixture(GenerateCodeFixture data) {
+        public WhereClauseWriterTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 
@@ -108,7 +108,7 @@
         [Fact]
         public void BinaryBoolDoesNotGetExtraOne() {
             var target = MakeTarget();
-            Expression<Func<BoolClass, bool>> pred = b => b.IsFoo == true;
+            Expression<Func<BoolClass, bool>> pred = b => b.IsFoo;
             var result = target.GenerateSql(new[] { pred }, null);
             Assert.Equal(" where ([IsFoo] = @l_1)", result.Sql);
         }
@@ -158,7 +158,7 @@
             Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
             // act
-            var result = target.GenerateSql(new List<Expression<Func<Post, bool>>> { whereClause1,  whereClause2 }, null);
+            var result = target.GenerateSql(new List<Expression<Func<Post, bool>>> { whereClause1, whereClause2 }, null);
 
             // assert
             Debug.Write(result.Sql);
@@ -247,13 +247,15 @@
             }
         }
 
-        private static class WhereOnInterfaceDemonstrator<T> where T : IEnableable {
+        private static class WhereOnInterfaceDemonstrator<T>
+            where T : IEnableable {
             public static void ActUpon(WhereClauseWriterHarness<T> harness) {
                 harness.Where(t => t.IsEnabled);
             }
         }
 
-        private static class WhereOnGenericTypeConstraintDemonstrator<T> where T : class, IEnableable {
+        private static class WhereOnGenericTypeConstraintDemonstrator<T>
+            where T : class, IEnableable {
             public static void ActUpon(WhereClauseWriterHarness<T> harness) {
                 harness.Where(t => t.IsEnabled);
             }
@@ -291,7 +293,7 @@
         public void WhereStringContains() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.Contains("Foo");
-            var actual = target.GenerateSql(new[] {pred}, null);
+            var actual = target.GenerateSql(new[] { pred }, null);
             Assert.Equal(" where [Title] like @l_1", actual.Sql);
         }
 
@@ -404,7 +406,7 @@
             var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             Expression<Func<Post, bool>> pred = p => ints.Where(i => i % 2 == 0).Contains(p.PostId);
             var actual = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(new[] {2, 4, 6, 8 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+            Assert.Equal(new[] { 2, 4, 6, 8 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
         [Fact]
@@ -597,7 +599,9 @@
             Expression<Func<Post, bool>> pred = p => p.Comments.Any(c => c.User.EmailAddress == "foo");
             var actual = target.GenerateSql(new[] { pred }, null);
             var indexOfParam = actual.Sql.IndexOf("@l");
-            Assert.Equal(" where exists (select 1 from [Comments] as i left join [Users] as i_100 on i.UserId = i_100.UserId where (i_100.[EmailAddress] = ", actual.Sql.Substring(0, indexOfParam));
+            Assert.Equal(
+                " where exists (select 1 from [Comments] as i left join [Users] as i_100 on i.UserId = i_100.UserId where (i_100.[EmailAddress] = ",
+                actual.Sql.Substring(0, indexOfParam));
             Assert.Equal(") and t.[PostId] = i.[PostId])", actual.Sql.Substring(indexOfParam + 13));
         }
 

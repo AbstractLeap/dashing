@@ -6,9 +6,7 @@
 
     public class TestConfig : DefaultConfiguration {
         public TestConfig()
-            : base(
-                new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=dashingtest;Integrated Security=True", "System.Data.SqlClient")
-                ) {
+            : base(new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=dashingtest;Integrated Security=True", "System.Data.SqlClient")) {
             this.AddNamespaceOf<Post>();
         }
     }

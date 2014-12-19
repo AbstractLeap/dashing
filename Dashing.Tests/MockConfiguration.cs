@@ -6,6 +6,7 @@ namespace Dashing.Tests {
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Events;
 
     using Moq;
 
@@ -105,13 +106,17 @@ namespace Dashing.Tests {
         public IMap<T> Setup<T>() {
             return ConfigurationHelper.Setup<T>(this, this.mappedTypes);
         }
-        
-        public ICollection<Events.IEventListener> EventListeners {
-            get { throw new NotImplementedException(); }
+
+        public ICollection<IEventListener> EventListeners {
+            get {
+                throw new NotImplementedException();
+            }
         }
 
-        public Events.EventHandlers EventHandlers {
-            get { throw new NotImplementedException(); }
+        public EventHandlers EventHandlers {
+            get {
+                throw new NotImplementedException();
+            }
         }
     }
 }

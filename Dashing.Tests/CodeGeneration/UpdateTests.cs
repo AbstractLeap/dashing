@@ -5,10 +5,10 @@
 
     using Xunit;
 
-    public class UpdateTests : IUseFixture<GenerateCodeFixture> {
-        private IGeneratedCodeManager codeManager;
+    public class UpdateTests : IClassFixture<GenerateCodeFixture> {
+        private readonly IGeneratedCodeManager codeManager;
 
-        public void SetFixture(GenerateCodeFixture data) {
+        public UpdateTests(GenerateCodeFixture data) {
             this.codeManager = data.CodeManager;
         }
 
@@ -24,7 +24,7 @@
         [Fact]
         public void PropertiesInitializedInConstructorAreNotMarkedAsUpdated() {
             // act
-            var updatePost = this.codeManager.CreateUpdateInstance<Post>(); 
+            var updatePost = this.codeManager.CreateUpdateInstance<Post>();
 
             // assert
             // ReSharper disable once SuspiciousTypeConversion.Global Reviewed, ok here.
