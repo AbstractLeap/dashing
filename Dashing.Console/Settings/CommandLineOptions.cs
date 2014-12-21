@@ -17,6 +17,9 @@
         [Option('m', HelpText = "Perform the database migration", Required = false, MutuallyExclusiveSet = "ReverseEngineer")]
         public bool Migration { get; set; }
 
+        [Option('e', HelpText = "Seed the database with default values", Required = false, MutuallyExclusiveSet = "ReverseEngineer")]
+        public bool Seed { get; set; }
+
         [Option('r', HelpText = "Reverse engineer a database", Required = false, MutuallyExclusiveSet = "Script,Migration")]
         public bool ReverseEngineer { get; set; }
 

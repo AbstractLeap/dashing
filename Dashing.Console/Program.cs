@@ -139,6 +139,9 @@
             if (options.Script) {
                 DoScript(options.Location, options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
             }
+            else if (options.Seed) {
+                DoSeed(connectionStringSettings);
+            }
             else if (options.Migration) {
                 DoMigrate(options.Naive, connectionStringSettings, reverseEngineerSettings);
             }
@@ -206,16 +209,16 @@
             var connectionStringKey = getConnectionStringCall.Next.Operand.ToString();
 
             // override readonly property of connectionstrings
-                var readOnlyField = typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
-                if (readOnlyField != null) {
-                    readOnlyField.SetValue(ConfigurationManager.ConnectionStrings, false);
-                }
+            var readOnlyField = typeof(ConfigurationElementCollection).GetField("bReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (readOnlyField != null) {
+                readOnlyField.SetValue(ConfigurationManager.ConnectionStrings, false);
+            }
 
             // remove any existing
             if (ConfigurationManager.ConnectionStrings[connectionStringKey] != null) {
                 ConfigurationManager.ConnectionStrings.Remove(connectionStringKey);
             }
-            
+
             // and add in the one from our ini
             ConfigurationManager.ConnectionStrings.Add(new System.Configuration.ConnectionStringSettings(connectionStringKey, connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName));
         }
@@ -297,7 +300,7 @@
             IEnumerable<string> warnings,
                                 errors;
             var script = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
-            
+
             if (DisplayMigrationWarningsAndErrors(errors, warnings)) {
                 using (Color(ConsoleColor.Red)) {
                     Console.WriteLine("-- Fatal errors encountered: aborting migration. Please review the output.");
@@ -346,6 +349,34 @@
                     }
                 }
             }
+        }
+
+
+        private static void DoSeed(ConnectionStringSettings connectionStringSettings) {
+            // fetch the to state
+            var config = (IConfiguration)configObject;
+
+            var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
+            using (var connection = factory.CreateConnection()) {
+                if (connection == null) {
+                    throw new Exception("Could not connect to database");
+                }
+
+                connection.ConnectionString = connectionStringSettings.ConnectionString;
+                connection.Open();
+
+                // now let's call Seed
+                var seederConfig = config as ISeeder;
+                if (seederConfig != null) {
+                    using (new TimedOperation("-- Executing seeds")) {
+                        using (var session = config.BeginSession(connection)) {
+                            seederConfig.Seed(session);
+                            session.Complete();
+                        }
+                    }
+                }
+            }
+
         }
 
         private static void DoReverseEngineer(CommandLineOptions options, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings, ConnectionStringSettings connectionString) {
