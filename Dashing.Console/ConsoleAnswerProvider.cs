@@ -17,21 +17,44 @@
         }
 
         public MultipleChoice<T> GetMultipleChoiceAnswer<T>(string question, IEnumerable<MultipleChoice<T>> choices) {
-            Console.WriteLine(question);
+            var multipleChoices = choices as MultipleChoice<T>[] ?? choices.ToArray();
+
+            // ask the question
+            Console.WriteLine();
+            using (Color(ConsoleColor.Green)) {
+                Console.WriteLine(question);
+            }
+            
+            // lay out the answers
             var i = 1;
-            foreach (var option in choices) {
-                Console.WriteLine(i + " : " + option.DisplayString);
+            foreach (var option in multipleChoices) {
+                Console.WriteLine(i++ + ") " + option.DisplayString);
             }
 
-            Console.WriteLine("Please enter the number for the correct option?");
-            var result = Console.ReadLine().Trim();
+            // prompt
+            var readLine = string.Empty;
             int number;
-            if (!int.TryParse(result, out number)) {
-                Console.WriteLine("Please enter a number");
-                return GetMultipleChoiceAnswer(question, choices);
+            var prompt = "Enter " + string.Join(", ", Enumerable.Range(1, multipleChoices.Count() - 1)) + " or " + multipleChoices.Count() + ": ";
+            Console.WriteLine(prompt);
+
+            // first attempt
+            readLine = Console.ReadLine().Trim();
+
+            // now prompt again until they answer
+            while (!int.TryParse(readLine, out number)) {
+                using (Color(ConsoleColor.Red)) {
+                    Console.WriteLine(prompt);
+                }
+
+                readLine = Console.ReadLine().Trim();
             }
 
-            return choices.ElementAt(number);
+            Console.WriteLine();
+            return multipleChoices.ElementAt(number);
+        }
+
+        private static ColorContext Color(ConsoleColor color) {
+            return new ColorContext(color);
         }
     }
 }
