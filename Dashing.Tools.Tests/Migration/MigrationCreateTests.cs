@@ -19,7 +19,7 @@
             IEnumerable<string> warnings;
             var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, out warnings, out errors);
             Assert.Equal(
-                "create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime not null default current_timestamp);\r\n",
+                "create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime not null default (current_timestamp));\r\n",
                 script);
         }
 
@@ -80,18 +80,18 @@ create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
             var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, out warnings, out errors);
-            Assert.Equal(@"create table [Blogs] ([BlogId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [CreateDate] datetime not null default current_timestamp, [Description] nvarchar(255) null);
+            Assert.Equal(@"create table [Blogs] ([BlogId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [CreateDate] datetime not null default (current_timestamp), [Description] nvarchar(255) null);
 create table [Categories] ([CategoryId] int not null identity(1,1) primary key, [ParentId] int null, [Name] nvarchar(255) null);
-create table [Comments] ([CommentId] int not null identity(1,1) primary key, [Content] nvarchar(255) null, [PostId] int null, [UserId] int null, [CommentDate] datetime not null default current_timestamp);
+create table [Comments] ([CommentId] int not null identity(1,1) primary key, [Content] nvarchar(255) null, [PostId] int null, [UserId] int null, [CommentDate] datetime not null default (current_timestamp));
 create table [Likes] ([LikeId] int not null identity(1,1) primary key, [UserId] int null, [CommentId] int null);
 create table [OneToOneLefts] ([OneToOneLeftId] int not null identity(1,1) primary key, [RightId] int null, [Name] nvarchar(255) null);
 create table [OneToOneRights] ([OneToOneRightId] int not null identity(1,1) primary key, [LeftId] int null, [Name] nvarchar(255) null);
 create table [Pairs] ([PairId] int not null identity(1,1) primary key, [ReferencesId] int null, [ReferencedById] int null);
-create table [Posts] ([PostId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [Content] nvarchar(255) null, [Rating] decimal(18,10) not null default 0, [AuthorId] int null, [BlogId] int null, [DoNotMap] bit not null default 0);
+create table [Posts] ([PostId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [Content] nvarchar(255) null, [Rating] decimal(18,10) not null default (0), [AuthorId] int null, [BlogId] int null, [DoNotMap] bit not null default (0));
 create table [PostTags] ([PostTagId] int not null identity(1,1) primary key, [PostId] int null, [TagId] int null);
-create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime not null default current_timestamp);
+create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime not null default (current_timestamp));
 create table [Tags] ([TagId] int not null identity(1,1) primary key, [Content] nvarchar(255) null);
-create table [Users] ([UserId] int not null identity(1,1) primary key, [Username] nvarchar(255) null, [EmailAddress] nvarchar(255) null, [Password] nvarchar(255) null, [IsEnabled] bit not null default 0, [HeightInMeters] decimal(18,10) not null default 0);
+create table [Users] ([UserId] int not null identity(1,1) primary key, [Username] nvarchar(255) null, [EmailAddress] nvarchar(255) null, [Password] nvarchar(255) null, [IsEnabled] bit not null default (0), [HeightInMeters] decimal(18,10) not null default (0));
 alter table [Categories] add constraint fk_Category_Category_Parent foreign key ([ParentId]) references [Categories]([CategoryId]);
 alter table [Comments] add constraint fk_Comment_Post_Post foreign key ([PostId]) references [Posts]([PostId]);
 alter table [Comments] add constraint fk_Comment_User_User foreign key ([UserId]) references [Users]([UserId]);
