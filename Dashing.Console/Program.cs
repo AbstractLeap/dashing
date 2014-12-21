@@ -14,6 +14,7 @@
     using Dashing.Console.Settings;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
+    using Dashing.Tools;
     using Dashing.Tools.Migration;
     using Dashing.Tools.ModelGeneration;
     using Dashing.Tools.ReverseEngineering;
@@ -28,6 +29,8 @@
 
     internal class Program {
         private static object configObject;
+
+        private static IAnswerProvider consoleAnswerProvider;
 
         private static void Main(string[] args) {
             ConfigureAssemblyResolution();
@@ -119,6 +122,9 @@
                 throw new CatchyException("Could not locate configuration file {0}", options.ConfigPath);
             }
 
+            // dependency init
+            consoleAnswerProvider = new ConsoleAnswerProvider("~" + Path.GetFileNameWithoutExtension(options.ConfigPath) + ".answers");
+
             // parse all of the configuration stuffs
             ConnectionStringSettings connectionStringSettings;
             DashingSettings dashingSettings;
@@ -154,7 +160,7 @@
         }
 
         private static void ParseIni(CommandLineOptions options, out ConnectionStringSettings connectionStringSettings, out DashingSettings dashingSettings, out ReverseEngineerSettings reverseEngineerSettings) {
-            var config = IniParser.Parse(options.ProjectName + ".ini");
+            var config = IniParser.Parse(options.ConfigPath);
 
             connectionStringSettings = new ConnectionStringSettings();
             connectionStringSettings = IniParser.AssignTo(config["Database"], connectionStringSettings);
@@ -351,7 +357,6 @@
             }
         }
 
-
         private static void DoSeed(ConnectionStringSettings connectionStringSettings) {
             // fetch the to state
             var config = (IConfiguration)configObject;
@@ -400,9 +405,9 @@
 
             var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
             schema = databaseReader.ReadAll();
-            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore(), new ConsoleAnswerProvider());
+            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider);
             var reverseEngineer = new ModelGenerator();
-            var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace, new ConsoleAnswerProvider());
+            var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace, consoleAnswerProvider);
 
             foreach (var source in sources) {
                 File.WriteAllText(options.Location + "\\" + source.Key + ".cs", source.Value);
@@ -423,7 +428,7 @@
                 var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
                 var databaseReader = new DatabaseReader(connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName);
                 schema = databaseReader.ReadAll();
-                fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), new ConsoleAnswerProvider());
+                fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider);
             }
 
             // set up migrator
@@ -436,7 +441,7 @@
             }
 
             // run the migrator
-            var script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, new ConsoleAnswerProvider(), out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, consoleAnswerProvider, out warnings, out errors);
 
             // TODO: do things with warnings and errors
             return script;
