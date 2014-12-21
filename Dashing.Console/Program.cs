@@ -323,7 +323,9 @@
                         using (new TimedOperation("-- Executing migration script on {0}", connection.ConnectionString)) {
                             using (var command = connection.CreateCommand()) {
                                 using (Color(ConsoleColor.DarkGray)) {
+                                    Console.WriteLine();
                                     Console.WriteLine(script);
+                                    Console.WriteLine();
                                 }
 
                                 command.CommandText = script;
