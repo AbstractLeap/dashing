@@ -26,9 +26,15 @@
 
         public string GenerateSqlDiff(
             IEnumerable<IMap> fromMaps,
-            IEnumerable<IMap> toMaps, IAnswerProvider answerProvider,
+            IEnumerable<IMap> toMaps, 
+            IAnswerProvider answerProvider,
+            Action<string, object[]> trace, 
             out IEnumerable<string> warnings,
             out IEnumerable<string> errors) {
+            if (trace == null) {
+                trace = (a, b) => { };
+            }
+
             var sql = new StringBuilder();
             var from = fromMaps.OrderTopologically().OrderedMaps.ToList();
             var to = toMaps as List<IMap> ?? toMaps.ToList();
@@ -41,7 +47,7 @@
             var additions = GetTableChanges(to, @from, out removals, out matches);
 
             if (additions.Any() && removals.Any()) {
-                this.AttemptRenames(additions, removals, answerProvider, sql);
+                this.AttemptRenames(additions, removals, answerProvider, trace, sql);
             }
 
             // do removal of foreign keys and indexes that we don't need
@@ -76,11 +82,10 @@
             // next do changes
             IList<IColumn> newForeignKeyColumns = new List<IColumn>();
             foreach (var match in matches) {
-                this.CorrectOneToOneIfNecessary(match, answerProvider);
+                this.CorrectOneToOneIfNecessary(match, answerProvider, trace);
                 string message;
                 if (match.RequiresUpdate(out message)) {
-                    warningList.Add(
-                        string.Format("{0} requires update: {1}", match.From.Table, message));
+                    trace("{0} requires update: {1}", new object[] { match.From.Table, message });
                     this.GenerateMapDiff(match, sql, newForeignKeyColumns, warningList, errorList);
                 }
             }
@@ -136,16 +141,17 @@
             return sql.ToString();
         }
 
-        private void CorrectOneToOneIfNecessary(MigrationPair match, IAnswerProvider answerProvider) {
+        private void CorrectOneToOneIfNecessary(MigrationPair match, IAnswerProvider answerProvider, Action<string, object[]> trace) {
             foreach (var column in match.To.Columns.Where(c => c.Value.Relationship == RelationshipType.OneToOne && !c.Value.IsIgnored)) {
                 var hasMatchingColumn = match.From.Columns.ContainsKey(column.Key);
                 if (hasMatchingColumn) {
+                    trace("setting relationship on {0}.{1} to OneToOne, if only I knew why", new object[] { column.Value.Map.Table, column.Key });
                     match.From.Columns[column.Key].Relationship = RelationshipType.OneToOne;
                 }
             }
         }
 
-        private void AttemptRenames(IMap[] additions, IMap[] removals, IAnswerProvider answerProvider, StringBuilder sql) {
+        private void AttemptRenames(IMap[] additions, IMap[] removals, IAnswerProvider answerProvider, Action<string, object[]> trace, StringBuilder sql) {
             foreach (var removal in removals) {
                 // TODO implement this
             }

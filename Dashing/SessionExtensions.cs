@@ -84,7 +84,7 @@ namespace Dashing {
             }
             
             // we support different equalityComparers so we can cope with e.g. username 
-            var existingEntity = session.Query<T>().AsTracked().SingleOrDefault(equalityComparer);
+            var existingEntity = session.Query<T>().AsTracked().FirstOrDefault(equalityComparer);
             if (existingEntity == null) {
                 return session.Insert(entity);
             }
@@ -174,7 +174,7 @@ namespace Dashing {
             }
 
             // we support different equalityComparers so we can cope with e.g. username 
-            var existingEntity = await session.Query<T>().AsTracked().SingleOrDefaultAsync(equalityComparer);
+            var existingEntity = await session.Query<T>().AsTracked().FirstOrDefaultAsync(equalityComparer);
             if (existingEntity == null) {
                 return await session.InsertAsync(entity);
             }

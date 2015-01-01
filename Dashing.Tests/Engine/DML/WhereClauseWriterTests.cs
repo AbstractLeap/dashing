@@ -110,7 +110,7 @@
             var target = MakeTarget();
             Expression<Func<BoolClass, bool>> pred = b => b.IsFoo;
             var result = target.GenerateSql(new[] { pred }, null);
-            Assert.Equal(" where ([IsFoo] = @l_1)", result.Sql);
+            Assert.Equal(" where [IsFoo] = 1", result.Sql);
         }
 
         [Fact]

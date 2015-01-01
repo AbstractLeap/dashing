@@ -27,15 +27,15 @@
             this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()))
                 .Callback<StringBuilder, IMap>((s, m) => s.Append("<tablename>"));
 
-            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()))
-                .Callback<StringBuilder, IColumn>((s, m) => s.Append("<colspec:" + m.Name + ">"));
+            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true))
+                .Callback<StringBuilder, IColumn, bool>((s, m, b) => s.Append("<colspec:" + m.Name + ">"));
 
             var sql = target.CreateTable(MakeMap(new Column<string> { Name = "Username" }));
 
             Assert.Equal("create table <tablename> (<colspec:DummyId>, <colspec:Username>)", sql);
 
             this.mockDialect.Verify(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()), Times.Once());
-            this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()), Times.Exactly(2));
+            this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true), Times.Exactly(2));
         }
 
         private static IMap MakeMap(params IColumn[] columns) {
@@ -46,34 +46,34 @@
         [Fact]
         public void IgnoredPropertyExcludedFromColumnSpecification() {
             this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
-            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()));
+            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true));
 
             var target = this.MakeTarget();
             target.CreateTable(MakeMap(new Column<string> { Name = "Ignored", IsIgnored = true }));
 
-            this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()), Times.Once());
+            this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true), Times.Once());
         }
 
         [Fact]
         public void OneToManyPropertyExcludedFromColumnSpecification() {
             this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
-            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()));
+            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true));
 
             var target = this.MakeTarget();
             target.CreateTable(MakeMap(new Column<string> { Name = "Ignored", Relationship = RelationshipType.OneToMany }));
 
-            this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()), Times.Once());
+            this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true), Times.Once());
         }
 
         [Fact]
         public void ManyToManyPropertyExcludedFromColumnSpecification() {
             this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
-            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()));
+            this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true));
 
             var target = this.MakeTarget();
             target.CreateTable(MakeMap(new Column<string> { Name = "Ignored", Relationship = RelationshipType.ManyToMany }));
 
-            this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>()), Times.Once());
+            this.mockDialect.Verify(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true), Times.Once());
         }
 
         private CreateTableWriter MakeTarget() {
