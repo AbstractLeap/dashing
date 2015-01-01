@@ -32,6 +32,8 @@
 
         private static IAnswerProvider consoleAnswerProvider;
 
+        private static bool isVerbose;
+
         private static void Main(string[] args) {
             ConfigureAssemblyResolution();
 
@@ -80,6 +82,7 @@
                 var loaded = AppDomain.CurrentDomain.GetAssemblies()
                                       .SingleOrDefault(a => a.FullName == assemblyName.FullName);
                 if (loaded != null) {
+                    Trace("Loaded assembly {0} from existing AppDomain, {1}", assemblyName, loaded.Location);
                     return loaded;
                 }
 
@@ -88,6 +91,7 @@
                 using (var stream = Assembly.GetExecutingAssembly()
                                             .GetManifestResourceStream(resourceName)) {
                     if (stream != null) {
+                        Trace("Loaded assembly {0} from embedded resources", assemblyName);
                         var assemblyData = new byte[stream.Length];
                         stream.Read(assemblyData, 0, assemblyData.Length);
                         return Assembly.Load(assemblyData);
@@ -97,6 +101,7 @@
                 // we couldn't find it, look on disk
                 var path = assemblyName.Name + ".dll";
                 if (File.Exists(path)) {
+                    Trace("Loaded assembly {0} from disk", assemblyName);
                     var assemblyData = File.ReadAllBytes(path);
                     return Assembly.Load(assemblyData);
                 }
@@ -105,6 +110,7 @@
             };
         }
 
+
         private static void InnerMain(string[] args) {
             var options = new CommandLineOptions();
 
@@ -112,6 +118,8 @@
                 ShowHelpText(options);
                 return;
             }
+
+            isVerbose = options.Verbose;
 
             // prevalidation
             if (string.IsNullOrWhiteSpace(options.ConfigPath)) {
@@ -149,7 +157,7 @@
                 DoSeed(connectionStringSettings);
             }
             else if (options.Migration) {
-                DoMigrate(options.Naive, connectionStringSettings, reverseEngineerSettings);
+                DoMigrate(options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
             }
             else if (options.ReverseEngineer) {
                 DoReverseEngineer(options, dashingSettings, reverseEngineerSettings, connectionStringSettings);
@@ -237,7 +245,7 @@
 
             IEnumerable<string> warnings,
                                 errors;
-            var migrationScript = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
+            var migrationScript = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, Trace, out warnings, out errors);
 
             // report errors
             DisplayMigrationWarningsAndErrors(errors, warnings);
@@ -263,9 +271,9 @@
             if (!naive) {
                 using (Color(ConsoleColor.Yellow)) {
                     Console.WriteLine("-- -------------------------------");
-                    Console.WriteLine("-- Migration is experimental!");
-                    Console.WriteLine("-- Please check output!");
-                    Console.WriteLine("-- ");
+                    Console.WriteLine("-- Migration is experimental:");
+                    Console.WriteLine("-- Please check the output!");
+                    Console.WriteLine("-- -------------------------------");
                 }
             }
 
@@ -293,19 +301,15 @@
             return shouldExit;
         }
 
-        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, ReverseEngineerSettings reverseEngineerSettings) {
-            if (!naive) {
-                using (Color(ConsoleColor.Yellow)) {
-                    Console.WriteLine("Non naive migration is experimental. Please check output");
-                }
-            }
+        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings) {
+            DisplayMigrationHeader(naive, dashingSettings);
 
             // fetch the to state
             var config = (IConfiguration)configObject;
 
             IEnumerable<string> warnings,
                                 errors;
-            var script = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
+            var script = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, Trace, out warnings, out errors);
 
             if (DisplayMigrationWarningsAndErrors(errors, warnings)) {
                 using (Color(ConsoleColor.Red)) {
@@ -418,16 +422,20 @@
             Console.Write(HelpText.AutoBuild(options));
         }
 
-        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, ReverseEngineerSettings reverseEngineerSettings, IConfiguration configuration, bool naive, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, ReverseEngineerSettings reverseEngineerSettings, IConfiguration configuration, bool naive, Action<string, object[]> verbose, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             // fetch the from state
             var dialectFactory = new DialectFactory();
             var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
-            IEnumerable<IMap> fromMaps;
+            
+            DatabaseSchema schema;
             using (new TimedOperation("-- Reading database contents...")) {
-                DatabaseSchema schema;
-                var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
                 var databaseReader = new DatabaseReader(connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName);
                 schema = databaseReader.ReadAll();
+            }        
+        
+            IEnumerable<IMap> fromMaps;
+            using (new TimedOperation("-- Reverse engineering...")) {
+                var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
                 fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider);
             }
 
@@ -441,10 +449,27 @@
             }
 
             // run the migrator
-            var script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, consoleAnswerProvider, out warnings, out errors);
+            string script;
+            using (new TimedOperation("-- Generating diff...")) {
+                script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, consoleAnswerProvider, Trace, out warnings, out errors);
+            }
 
             // TODO: do things with warnings and errors
             return script;
+        }
+
+        private static void Trace(string text) {
+            if (!isVerbose) {
+                return;
+            }
+
+            using (Color(ConsoleColor.Gray)) {
+                Console.WriteLine(text);
+            }
+        }
+
+        private static void Trace(string format, params object[] args) {
+            Trace(string.Format(format, args));
         }
 
         private static ColorContext Color(ConsoleColor color) {

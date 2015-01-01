@@ -17,7 +17,7 @@
             var config = new SimpleClassConfig();
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, out warnings, out errors);
             Assert.Equal(
                 "create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime not null default (current_timestamp));\r\n",
                 script);
@@ -30,7 +30,7 @@
             config.Add<Category>();
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, out warnings, out errors);
             Assert.Equal(@"create table [Categories] ([CategoryId] int not null identity(1,1) primary key, [ParentId] int null, [Name] nvarchar(255) null);
 alter table [Categories] add constraint fk_Category_Category_Parent foreign key ([ParentId]) references [Categories]([CategoryId]);
 create index [idx_Category_Parent] on [Categories] ([ParentId]);
@@ -44,7 +44,7 @@ create index [idx_Category_Parent] on [Categories] ([ParentId]);
             config.Add<Pair>();
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, out warnings, out errors);
             Assert.Equal(@"create table [Pairs] ([PairId] int not null identity(1,1) primary key, [ReferencesId] int null, [ReferencedById] int null);
 alter table [Pairs] add constraint fk_Pair_Pair_References foreign key ([ReferencesId]) references [Pairs]([PairId]);
 alter table [Pairs] add constraint fk_Pair_Pair_ReferencedBy foreign key ([ReferencedById]) references [Pairs]([PairId]);
@@ -61,7 +61,7 @@ create index [idx_Pair_ReferencedBy] on [Pairs] ([ReferencedById]);
             config.Add<OneToOneRight>();
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, out warnings, out errors);
             Assert.Equal(@"create table [OneToOneLefts] ([OneToOneLeftId] int not null identity(1,1) primary key, [RightId] int null, [Name] nvarchar(255) null);
 create table [OneToOneRights] ([OneToOneRightId] int not null identity(1,1) primary key, [LeftId] int null, [Name] nvarchar(255) null);
 alter table [OneToOneLefts] add constraint fk_OneToOneLeft_OneToOneRight_Right foreign key ([RightId]) references [OneToOneRights]([OneToOneRightId]);
@@ -79,7 +79,7 @@ create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);
             config.AddNamespaceOf<Post>();
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, out warnings, out errors);
             Assert.Equal(@"create table [Blogs] ([BlogId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [CreateDate] datetime not null default (current_timestamp), [Description] nvarchar(255) null);
 create table [Categories] ([CategoryId] int not null identity(1,1) primary key, [ParentId] int null, [Name] nvarchar(255) null);
 create table [Comments] ([CommentId] int not null identity(1,1) primary key, [Content] nvarchar(255) null, [PostId] int null, [UserId] int null, [CommentDate] datetime not null default (current_timestamp));

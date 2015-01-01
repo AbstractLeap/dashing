@@ -29,7 +29,7 @@
         /// <param name="warnings"></param>
         /// <param name="errors"></param>
         /// <returns></returns>
-        public string GenerateSqlDiff(IEnumerable<IMap> fromMaps, IEnumerable<IMap> toMaps, IAnswerProvider answerProvider, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+        public string GenerateSqlDiff(IEnumerable<IMap> fromMaps, IEnumerable<IMap> toMaps, IAnswerProvider answerProvider, Action<string, object[]> trace, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             throw new InvalidOperationException("The naive migrator has been deprecated");
             var sql = new StringBuilder();
             var from = fromMaps.OrderTopologically().OrderedMaps.ToList();

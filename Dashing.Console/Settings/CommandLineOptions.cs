@@ -23,6 +23,9 @@
         [Option('r', HelpText = "Reverse engineer a database", Required = false, MutuallyExclusiveSet = "Script,Migration")]
         public bool ReverseEngineer { get; set; }
 
+        [Option('v', HelpText = "Verbose", Required = false)]
+        public bool Verbose { get; set; }
+
         // this doesnt seem to do anything?
         ////[Option('f', HelpText = "This will force a migration, preventing a prompt to override", Required = false)]
         ////public bool Force { get; set; }
