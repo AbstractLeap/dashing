@@ -34,7 +34,10 @@
         /// </summary>
         public DbType DbType {
             get {
-                return this.Relationship == RelationshipType.ManyToOne || this.Relationship == RelationshipType.OneToOne ? this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType : this.dbType;
+                return (this.Relationship == RelationshipType.ManyToOne || this.Relationship == RelationshipType.OneToOne)
+                    && this.Map.Configuration.HasMap(this.Type)
+                    ?  this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType 
+                    : this.dbType;
             }
 
             set {

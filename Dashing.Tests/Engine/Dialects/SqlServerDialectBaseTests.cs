@@ -37,19 +37,19 @@
         [Fact]
         public void BooleanColumnHasBitType() {
             var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.Boolean });
-            Assert.Equal("[foo] bit not null default 0", actual);
+            Assert.Equal("[foo] bit not null default (0)", actual);
         }
 
         [Fact]
         public void DateTime2ColumnHasDateTime2Type() {
             var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.DateTime2 });
-            Assert.Equal("[foo] datetime2 not null default current_timestamp", actual);
+            Assert.Equal("[foo] datetime2 not null default (current_timestamp)", actual);
         }
 
         [Fact]
         public void GuidColumnHasUniqueidentifierType() {
             var actual = this.GetColumnSpec(new Column<int> { DbName = "foo", DbType = DbType.Guid });
-            Assert.Equal("[foo] uniqueidentifier not null default newid()", actual);
+            Assert.Equal("[foo] uniqueidentifier not null default (newid())", actual);
         }
 
         [Fact]

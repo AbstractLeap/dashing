@@ -48,7 +48,7 @@
 
             target.AppendColumnSpecification(sb, col);
 
-            Assert.Equal("<foo> int not null default 0", sb.ToString());
+            Assert.Equal("<foo> int not null default (0)", sb.ToString());
         }
 
         [Fact]
