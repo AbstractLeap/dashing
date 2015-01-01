@@ -9,7 +9,7 @@ namespace Dashing.Engine.Dialects {
 
         void AppendQuotedName(StringBuilder sql, string name);
 
-        void AppendColumnSpecification(StringBuilder sql, IColumn column);
+        void AppendColumnSpecification(StringBuilder sql, IColumn column, bool scriptDefault = true);
 
         void AppendEscaped(StringBuilder sql, string s);
 
