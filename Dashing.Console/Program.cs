@@ -60,7 +60,8 @@
             }
             catch (Exception e) {
                 using (Color(ConsoleColor.Red)) {
-                    Console.WriteLine("Caught unhandled {0}", e.GetType().Name);
+                    Console.WriteLine("Caught unhandled {0}", e.GetType()
+                                                               .Name);
                     Console.WriteLine(e.Message);
                     var ee = e;
                     while ((ee = ee.InnerException) != null) {
@@ -109,7 +110,6 @@
                 return null;
             };
         }
-
 
         private static void InnerMain(string[] args) {
             var options = new CommandLineOptions();
@@ -245,10 +245,14 @@
 
             IEnumerable<string> warnings,
                                 errors;
-            var migrationScript = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, Trace, out warnings, out errors);
+            var migrationScript = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
 
             // report errors
             DisplayMigrationWarningsAndErrors(errors, warnings);
+
+            if (string.IsNullOrWhiteSpace(migrationScript)) {
+                migrationScript = "-- Nothing to be migrated";
+            }
 
             // write it
             using (var writer = string.IsNullOrEmpty(pathOrNull)
@@ -276,8 +280,6 @@
                     Console.WriteLine("-- -------------------------------");
                 }
             }
-
-            Console.WriteLine();
         }
 
         private static bool DisplayMigrationWarningsAndErrors(IEnumerable<string> errors, IEnumerable<string> warnings) {
@@ -309,7 +311,7 @@
 
             IEnumerable<string> warnings,
                                 errors;
-            var script = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, Trace, out warnings, out errors);
+            var script = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
 
             if (DisplayMigrationWarningsAndErrors(errors, warnings)) {
                 using (Color(ConsoleColor.Red)) {
@@ -385,7 +387,6 @@
                     }
                 }
             }
-
         }
 
         private static void DoReverseEngineer(CommandLineOptions options, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings, ConnectionStringSettings connectionString) {
@@ -422,21 +423,23 @@
             Console.Write(HelpText.AutoBuild(options));
         }
 
-        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, ReverseEngineerSettings reverseEngineerSettings, IConfiguration configuration, bool naive, Action<string, object[]> verbose, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, ReverseEngineerSettings reverseEngineerSettings, IConfiguration configuration, bool naive, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
             // fetch the from state
             var dialectFactory = new DialectFactory();
             var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
-            
+
             DatabaseSchema schema;
             using (new TimedOperation("-- Reading database contents...")) {
                 var databaseReader = new DatabaseReader(connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName);
                 schema = databaseReader.ReadAll();
-            }        
-        
+            }
+
             IEnumerable<IMap> fromMaps;
             using (new TimedOperation("-- Reverse engineering...")) {
+                Console.WriteLine();
                 var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
                 fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider);
+                Console.Write("-- ");
             }
 
             // set up migrator
