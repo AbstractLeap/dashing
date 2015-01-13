@@ -330,7 +330,7 @@ namespace Dashing.CodeGeneration {
                                                                                 new CodeIndexerExpression(
                                                                                 CodeHelpers.ThisProperty("OldValues"), 
                                                                                 new CodePrimitiveExpression(prop.Name)), 
-                                                                                new CodePropertySetValueReferenceExpression())
+                                                                                CodeHelpers.BaseField(prop.Name))
                                                                         }), 
                                                 new CodeAssignStatement(
                                                     new CodeIndexerExpression(
