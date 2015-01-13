@@ -1,4 +1,6 @@
 ﻿namespace Dashing.Tests.CodeGeneration {
+    using System.Linq;
+
     using Dashing.CodeGeneration;
     using Dashing.Tests.CodeGeneration.Fixtures;
     using Dashing.Tests.TestDomain;
@@ -140,6 +142,50 @@
             post.Comments.RemoveAt(0);
 
             Assert.True(inspector.IsPropertyDirty(p => p.Comments));
+        }
+
+        [Fact]
+        public void OldValueForWorks() {
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+            post.Title = "Foo";
+            this.codeManager.TrackInstance(post);
+            var inspector = new TrackedEntityInspector<Post>(post);
+            post.Title = "Boo";
+
+            Assert.Equal("Foo", inspector.OldValueFor(p => p.Title));
+        }
+
+        [Fact]
+        public void NewValueForWorks() {
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+            post.Title = "Foo";
+            this.codeManager.TrackInstance(post);
+            var inspector = new TrackedEntityInspector<Post>(post);
+            post.Title = "Boo";
+
+            Assert.Equal("Boo", inspector.NewValueFor(p => p.Title));
+        }
+
+        [Fact]
+        public void OldValuesWorks() {
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+            post.Title = "Foo";
+            this.codeManager.TrackInstance(post);
+            var inspector = new TrackedEntityInspector<Post>(post);
+            post.Title = "Boo";
+
+            Assert.Equal("Foo", inspector.OldValues.First().Value);
+        }
+
+        [Fact]
+        public void NewValuesWorks() {
+            var post = this.codeManager.CreateTrackingInstance<Post>();
+            post.Title = "Foo";
+            this.codeManager.TrackInstance(post);
+            var inspector = new TrackedEntityInspector<Post>(post);
+            post.Title = "Boo";
+
+            Assert.Equal("Boo", inspector.NewValues.First().Value);
         }
     }
 }
