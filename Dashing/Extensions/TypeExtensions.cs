@@ -62,6 +62,9 @@
                                                                                                        { DbType.Byte, typeof(byte) },
                                                                                                        { DbType.SByte, typeof(sbyte) },
                                                                                                        { DbType.String, typeof(string) },
+                                                                                                       { DbType.AnsiString, typeof(string) },
+                                                                                                       { DbType.AnsiStringFixedLength, typeof(string) },
+                                                                                                       { DbType.StringFixedLength, typeof(string) },
                                                                                                        { DbType.Guid, typeof(Guid) },
                                                                                                        { DbType.Time, typeof(TimeSpan) }
                                                                                                    };
