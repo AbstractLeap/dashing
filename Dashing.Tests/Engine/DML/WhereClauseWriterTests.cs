@@ -617,6 +617,42 @@
             Assert.Equal(")) and t.[PostId] = i.[PostId])", actual.Sql.Substring(nextParamIndex + 13));
         }
 
+        [Fact]
+        public void WhereDictionaryItemGetsGoodSql() {
+            var target = MakeTarget();
+            var dict = new Dictionary<string, string> { { "Foo", "Bar" } };
+            Expression<Func<Post, bool>> pred = p => p.Content == dict["Foo"];
+            var actual = target.GenerateSql(new[] { pred}, null);
+            Assert.Equal(" where ([Content] = @l_1)", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereDictionaryItemGetsGoodParams() {
+            var target = MakeTarget();
+            var dict = new Dictionary<string, string> { { "Foo", "Bar" } };
+            Expression<Func<Post, bool>> pred = p => p.Content == dict["Foo"];
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("Bar", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereNestedDictionaryItemGetsGoodParams() {
+            var target = MakeTarget();
+            var dict = new { A = new Dictionary<string, string> { { "Foo", "Bar" } } };
+            Expression<Func<Post, bool>> pred = p => p.Content == dict.A["Foo"];
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("Bar", actual.Parameters.GetValue("l_1"));
+        }
+
+        [Fact]
+        public void WhereDictionaryItemWithPropertyGetsGoodParams() {
+            var target = MakeTarget();
+            var dict = new Dictionary<string, Post> { { "Foo", new Post { Content = "Bar" } } };
+            Expression<Func<Post, bool>> pred = p => p.Content == dict["Foo"].Content;
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal("Bar", actual.Parameters.GetValue("l_1"));
+        }
+
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }
