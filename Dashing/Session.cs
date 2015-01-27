@@ -65,8 +65,8 @@
             this.Dapper = new DapperWrapper(
                 new Lazy<IDbConnection>(this.GetConnection),
                 new Lazy<IDbTransaction>(this.GetTransaction),
-                new AsyncLazy<IDbConnection>(async () => await this.GetConnectionAsync()),
-                new AsyncLazy<IDbTransaction>(async () => await this.GetTransactionAsync()));
+                new AsyncLazy<IDbConnection>(() => this.GetConnectionAsync()),
+                new AsyncLazy<IDbTransaction>(() => this.GetTransactionAsync()));
         }
 
         public IConfiguration Configuration {

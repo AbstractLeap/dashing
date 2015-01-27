@@ -86,7 +86,7 @@ namespace Dashing {
         }
 
         public async Task<IEnumerable<dynamic>> QueryAsync(string sql, dynamic param = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null) {
-            return await SqlMapper.Query(await this.asyncConnection, sql, param, await this.asyncTransaction, buffered, commandTimeout, commandType);
+            return await SqlMapper.QueryAsync(await this.asyncConnection, sql, param, await this.asyncTransaction, commandTimeout, commandType);
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(string sql, dynamic param = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null) {
