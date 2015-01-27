@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.71</version>
+        <version>0.0.72</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.71 - Bugfix
+        <releaseNotes>* 0.0.72 - Back to dapper!
+* 0.0.71 - Bugfix
 * 0.0.70 - Bugfix
 * 0.0.69 - Migration SQL prettify
 * 0.0.68 - Bugfix
@@ -83,6 +84,9 @@
         <copyright>© Polylytics Limited, 2014</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>
+        <dependencies>
+            <dependency id="Dapper" version="1.38" />
+        </dependencies>
         <frameworkAssemblies>
             <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
             <frameworkAssembly assemblyName="System" targetFramework="" />
@@ -96,9 +100,6 @@
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="Dashing\bin\Release\Dapper.dll" target="lib\net45\Dapper.dll" />
-        <file src="Dashing\bin\Release\Dapper.pdb" target="lib\net45\Dapper.pdb" />
-        <file src="Dashing\bin\Release\Dapper.xml" target="lib\net45\Dapper.xml" />
         <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
         <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
         <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
