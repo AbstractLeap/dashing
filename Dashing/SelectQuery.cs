@@ -218,6 +218,16 @@ namespace Dashing {
             return this.executor.QueryPaged(this);
         }
 
+        public bool Any() {
+            this.Take(1);
+            return this.executor.Query(this).Any();
+        }
+
+        public bool Any(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return this.Any();
+        }
+
         public async Task<IList<T>> ToListAsync() {
             var result = await this.executor.QueryAsync(this);
             return result.ToList();
@@ -323,6 +333,16 @@ namespace Dashing {
         public Task<Page<T>> AsPagedAsync(int skip, int take) {
             this.Skip(skip).Take(take);
             return this.executor.QueryPagedAsync(this);
+        }
+
+        public async Task<bool> AnyAsync() {
+            this.Take(1);
+            return (await this.executor.QueryAsync(this)).Any();
+        }
+
+        public Task<bool> AnyAsync(Expression<Func<T, bool>> predicate) {
+            this.Where(predicate);
+            return this.AnyAsync();
         }
     }
 }
