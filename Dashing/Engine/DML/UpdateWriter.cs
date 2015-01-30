@@ -44,12 +44,7 @@
                 dirtyProperties = inspector.DirtyProperties.ToDictionary(p => p, p => inspector.NewValues[p]);
             }
             else {
-                dirtyProperties =
-                    map.OwnedColumns(true)
-                       .Where(c => !c.IsPrimaryKey)
-                       .ToDictionary(
-                            c => c.Name,
-                            c => typeof(T).GetProperty(c.Name).GetValue(entity)); // TODO: map does this for you?
+                throw new InvalidOperationException("In order to Save entities you must fetch Tracked entities");
             }
 
             sql.Append("update ");
