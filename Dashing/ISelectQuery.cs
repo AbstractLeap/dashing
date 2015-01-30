@@ -85,6 +85,12 @@ namespace Dashing {
         ISelectQuery<T> AsTracked();
 
         /// <summary>
+        /// Fetch the entities as untracked
+        /// </summary>
+        /// <returns></returns>
+        ISelectQuery<T> AsNonTracked();
+
+        /// <summary>
         ///     The skip.
         /// </summary>
         /// <param name="skip">

@@ -13,8 +13,6 @@ namespace Dashing.Tests {
     public class MockConfiguration : IConfiguration {
         public IMapper Mapper { get; private set; }
 
-        public bool GetIsTrackedByDefault { get; set; }
-
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
         public ISession BeginTransactionLessSession(IDbConnection connection) {

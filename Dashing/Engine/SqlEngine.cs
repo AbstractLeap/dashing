@@ -50,28 +50,16 @@ namespace Dashing.Engine {
             this.dialect = dialect;
         }
 
-        public T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) {
+        public T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id, bool isTracked) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
-            return this.configuration.CodeManager.Query<T>(sqlQuery, connection, transaction, this.Configuration.GetIsTrackedByDefault).SingleOrDefault();
+            return this.configuration.CodeManager.Query<T>(sqlQuery, connection, transaction, isTracked).SingleOrDefault();
         }
 
-        public T QueryTracked<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) {
-            this.EnsureConfigurationLoaded();
-            var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
-            return this.configuration.CodeManager.Query<T>(sqlQuery, connection, transaction, true).SingleOrDefault();
-        }
-
-        public IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
+        public IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids, bool isTracked) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            return this.Configuration.CodeManager.Query<T>(sqlQuery, connection, transaction, this.Configuration.GetIsTrackedByDefault);
-        }
-
-        public IEnumerable<T> QueryTracked<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
-            this.EnsureConfigurationLoaded();
-            var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            return this.Configuration.CodeManager.Query<T>(sqlQuery, connection, transaction, true);
+            return this.Configuration.CodeManager.Query<T>(sqlQuery, connection, transaction, isTracked);
         }
 
         public virtual IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {
@@ -180,30 +168,17 @@ namespace Dashing.Engine {
             return this.Configuration.CodeManager.Execute(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
         }
 
-        public async Task<T> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) {
+        public async Task<T> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id, bool isTracked) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
-            var results = await this.configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, this.Configuration.GetIsTrackedByDefault);
+            var results = await this.configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, isTracked);
             return results.SingleOrDefault();
         }
 
-        public async Task<T> QueryTrackedAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) {
-            this.EnsureConfigurationLoaded();
-            var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
-            var results = await this.configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, true);
-            return results.SingleOrDefault();
-        }
-
-        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
+        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids, bool isTracked) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            return await this.Configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, this.Configuration.GetIsTrackedByDefault);
-        }
-
-        public async Task<IEnumerable<T>> QueryTrackedAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
-            this.EnsureConfigurationLoaded();
-            var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            return await this.Configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, true);
+            return await this.Configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, isTracked);
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {

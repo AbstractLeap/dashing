@@ -407,7 +407,7 @@ select * from Comments where PostId = @id";
                     TestName,
                     i => {
                         using (var dashingSession = dashingConfig.BeginSession()) {
-                            var post = dashingSession.GetTracked<Post>(i);
+                            var post = dashingSession.Get<Post>(i);
                             post.Title = Providers.Dashing + "_" + i + r.Next(100000);
                             dashingSession.Save(post);
                             var thatPost = dashingSession.Get<Post>(i);
@@ -429,7 +429,7 @@ select * from Comments where PostId = @id";
                     TestName,
                     i => {
                         using (var dashingSession = dashingConfig.BeginTransactionLessSession()) {
-                            var post = dashingSession.GetTracked<Post>(i);
+                            var post = dashingSession.Get<Post>(i);
                             post.Title = Providers.Dashing + "_" + i + r.Next(100000);
                             dashingSession.Save(post);
                             var thatPost = dashingSession.Get<Post>(i);
