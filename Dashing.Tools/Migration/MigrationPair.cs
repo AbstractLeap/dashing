@@ -32,7 +32,7 @@ namespace Dashing.Tools.Migration {
 
             foreach (var fromColumnPair in fromColumns) {
                 var fromColumn = fromColumnPair.Value;
-                var toColumn = this.To.Columns.Single(c => c.Value.DbName == fromColumn.DbName).Value;
+                var toColumn = this.To.Columns.Single(c => !c.Value.IsIgnored && c.Value.DbName == fromColumn.DbName).Value;
 
                 if (fromColumn.Relationship == RelationshipType.ManyToOne
                     && toColumn.Relationship == RelationshipType.ManyToOne
