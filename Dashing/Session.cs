@@ -5,7 +5,6 @@
     using System.Data.Common;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Threading;
     using System.Threading.Tasks;
 
     using Dashing.Configuration;
@@ -37,7 +36,13 @@
 
         private readonly AsyncLock asyncConnectionOpenLock = new AsyncLock();
 
-        public Session(IEngine engine, IDbConnection connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false, bool isTransactionLess = false) {
+        public Session(
+            IEngine engine,
+            IDbConnection connection,
+            IDbTransaction transaction = null,
+            bool disposeConnection = true,
+            bool commitAndDisposeTransaction = false,
+            bool isTransactionLess = false) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -47,8 +52,7 @@
             }
 
             if (transaction != null && isTransactionLess) {
-                throw new InvalidOperationException(
-                    "Unable to start a transaction-less session as transaction is not null");
+                throw new InvalidOperationException("Unable to start a transaction-less session as transaction is not null");
             }
 
             if (isTransactionLess && commitAndDisposeTransaction) {
@@ -101,7 +105,7 @@
             }
 
             if (this.connection.State == ConnectionState.Closed || this.connection.State == ConnectionState.Connecting) {
-                using (await asyncConnectionOpenLock.LockAsync()) {
+                using (await this.asyncConnectionOpenLock.LockAsync()) {
                     if (this.connection.State == ConnectionState.Closed) {
                         await ((DbConnection)this.connection).OpenAsync();
                     }
@@ -121,8 +125,7 @@
             }
 
             if (this.isComplete) {
-                throw new InvalidOperationException(
-                    "Transaction was marked as completed, no further operations are permitted");
+                throw new InvalidOperationException("Transaction was marked as completed, no further operations are permitted");
             }
 
             if (this.transaction == null) {
@@ -141,8 +144,7 @@
             }
 
             if (this.isComplete) {
-                throw new InvalidOperationException(
-                    "Transaction was marked as completed, no further operations are permitted");
+                throw new InvalidOperationException("Transaction was marked as completed, no further operations are permitted");
             }
 
             if (this.transaction == null) {
@@ -199,22 +201,19 @@
         }
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id) {
-            return
-                this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), id);
+            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), id, true);
         }
 
-        public T GetTracked<T, TPrimaryKey>(TPrimaryKey id) {
-            return
-                this.engine.QueryTracked<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), new[] { id })
-                    .SingleOrDefault();
+        public T GetNonTracked<T, TPrimaryKey>(TPrimaryKey id) {
+            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), new[] { id }, false).SingleOrDefault();
         }
 
         public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids);
+            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids, true);
         }
 
-        public IEnumerable<T> GetTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.engine.QueryTracked<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids);
+        public IEnumerable<T> GetNonTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids, false);
         }
 
         public ISelectQuery<T> Query<T>() {
@@ -313,19 +312,19 @@
         }
 
         public async Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id) {
-            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id);
+            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id, true);
         }
 
-        public async Task<T> GetTrackedAsync<T, TPrimaryKey>(TPrimaryKey id) {
-            return await this.engine.QueryTrackedAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id);
+        public async Task<T> GetNonTrackedAsync<T, TPrimaryKey>(TPrimaryKey id) {
+            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id, false);
         }
 
         public async Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids);
+            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids, true);
         }
 
-        public async Task<IEnumerable<T>> GetTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return await this.engine.QueryTrackedAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids);
+        public async Task<IEnumerable<T>> GetNonTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids, false);
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(SelectQuery<T> query) {

@@ -54,8 +54,6 @@
 
         public EventHandlers EventHandlers { get; private set; }
 
-        public bool GetIsTrackedByDefault { get; set; }
-
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
         protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {

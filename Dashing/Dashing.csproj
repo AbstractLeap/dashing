@@ -124,10 +124,12 @@
     <Compile Include="Engine\DML\IDeleteWriter.cs" />
     <Compile Include="Engine\DML\IInsertWriter.cs" />
     <Compile Include="Engine\DML\InsertWriter.cs" />
+    <Compile Include="Engine\DML\IOrderClauseWriter.cs" />
     <Compile Include="Engine\DML\ISelectWriter.cs" />
     <Compile Include="Engine\DML\Elements\ISqlElement.cs" />
     <Compile Include="Engine\DML\IUpdateWriter.cs" />
     <Compile Include="Engine\DML\IWhereClauseWriter.cs" />
+    <Compile Include="Engine\DML\OrderClauseWriter.cs" />
     <Compile Include="Engine\DML\SelectWriter.cs" />
     <Compile Include="Engine\DML\SelectWriterResult.cs" />
     <Compile Include="Engine\DML\SqlWriterResult.cs" />

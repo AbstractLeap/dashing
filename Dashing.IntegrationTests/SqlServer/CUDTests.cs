@@ -54,7 +54,7 @@
 
         [Fact]
         public void TestUpdate() {
-            var user = this.fixture.Session.Query<User>().AsTracked().First();
+            var user = this.fixture.Session.Query<User>().First();
             user.HeightInMeters = 1.7m;
             this.fixture.Session.Save(user);
             var dbUser = this.fixture.Session.Get<User>(user.UserId);
@@ -63,7 +63,7 @@
 
         [Fact]
         public void TestDelete() {
-            var user = this.fixture.Session.Query<User>().Where(u => u.Username == "TestDelete").AsTracked().First();
+            var user = this.fixture.Session.Query<User>().First(u => u.Username == "TestDelete");
             this.fixture.Session.Delete(user);
             Assert.Empty(this.fixture.Session.Query<User>().Where(u => u.Username == "TestDelete"));
         }

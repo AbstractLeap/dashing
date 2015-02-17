@@ -32,20 +32,19 @@
             return result.Parameters;
         }
 
-        public void AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql) {
-            if (orderClauses.IsEmpty()) {
+        public void AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql, FetchNode rootNode) {
+            if (orderClauses.Count == 0) {
                 return;
             }
 
             sql.Append(" order by ");
-            foreach (var orderClause in orderClauses) {
-                var lambdaExpr = orderClause.Expression as LambdaExpression;
-                var memberExpr = lambdaExpr.Body as MemberExpression;
-                this.Dialect.AppendQuotedName(sql, this.Configuration.GetMap<T>().Columns[memberExpr.Member.Name].DbName);
-                sql.Append(orderClause.Direction == ListSortDirection.Ascending ? " asc, " : "desc, ");
+            var orderClauseWriter = new OrderClauseWriter(this.Configuration, this.Dialect);
+            while (orderClauses.Count > 0) {
+                sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode));
+                if (orderClauses.Count > 0) {
+                    sql.Append(", ");
+                }
             }
-
-            sql.Remove(sql.Length - 2, 2);
         }
     }
 }

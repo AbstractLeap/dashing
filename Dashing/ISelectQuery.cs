@@ -85,6 +85,12 @@ namespace Dashing {
         ISelectQuery<T> AsTracked();
 
         /// <summary>
+        /// Fetch the entities as untracked
+        /// </summary>
+        /// <returns></returns>
+        ISelectQuery<T> AsNonTracked();
+
+        /// <summary>
         ///     The skip.
         /// </summary>
         /// <param name="skip">
@@ -173,6 +179,10 @@ namespace Dashing {
         
         Page<T> AsPaged(int skip, int take);
 
+        bool Any();
+
+        bool Any(Expression<Func<T, bool>> predicate);
+
         Task<IList<T>> ToListAsync();
 
         Task<T[]> ToArrayAsync();
@@ -206,5 +216,9 @@ namespace Dashing {
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
 
         Task<Page<T>> AsPagedAsync(int skip, int take);
+
+        Task<bool> AnyAsync();
+
+        Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
     }
 }
