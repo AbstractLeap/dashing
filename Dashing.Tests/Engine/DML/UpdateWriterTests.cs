@@ -93,7 +93,7 @@
             Assert.Equal("update [Posts] set [Title] = @p_1, [Content] = @p_2 where [PostId] = @p_3;", result.Sql);
         }
 
-        [Fact]
+        [Fact(Skip = "Not true any more")]
         public void UpdateDetachedEntityWorks() {
             // assemble
             var post = new Post();
