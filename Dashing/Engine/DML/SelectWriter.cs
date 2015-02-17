@@ -120,7 +120,7 @@
 
                 // add order by
                 if (selectQuery.OrderClauses.Any()) {
-                    this.AddOrderByClause(selectQuery.OrderClauses, orderSql);
+                    this.AddOrderByClause(selectQuery.OrderClauses, orderSql, rootNode);
                 }
                 else if (selectQuery.SkipN > 0) {
                     // need to add a default order on the sort clause
