@@ -161,8 +161,6 @@ namespace Dashing {
         }
 
         public T SingleOrDefault() {
-            this.Take(2);
-            // we need to fetch a least two rows in order for the SingleOrDefault to work
             return Enumerable.SingleOrDefault(this);
         }
 
@@ -268,7 +266,6 @@ namespace Dashing {
         }
 
         public async Task<T> SingleOrDefaultAsync() {
-            this.Take(2);
             var result = await this.executor.QueryAsync(this);
             return result.SingleOrDefault();
         }
