@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tests.Configuration.DapperMapperGeneration {
+﻿namespace Dashing.Tests.Engine.DapperMapperGeneration {
     using System;
     using System.Collections.Generic;
     using System.Configuration;
@@ -24,14 +24,15 @@
             var comment1 = new Comment { CommentId = 1 };
             var comment2 = new Comment { CommentId = 2 };
             var comment3 = new Comment { CommentId = 3 };
-            var dict = new Dictionary<object, Post>();
-            var func = (Func<object[], Post>)funcFac.DynamicInvoke(dict);
+            Post currentRoot = null;
+            IList<Post> results = new List<Post>();
+            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results);
             func(new object[] { post1, comment1 });
             func(new object[] { post1, comment2 });
             func(new object[] { post2, comment3 });
-            Assert.Equal(1, dict[1].Comments.First().CommentId);
-            Assert.Equal(2, dict[1].Comments.Last().CommentId);
-            Assert.Equal(3, dict[2].Comments.First().CommentId);
+            Assert.Equal(1, results[0].Comments.First().CommentId);
+            Assert.Equal(2, results[0].Comments.Last().CommentId);
+            Assert.Equal(3, results[1].Comments.First().CommentId);
         }
 
         [Fact]
@@ -42,14 +43,15 @@
             var comment1 = new CommentTwo { CommentTwoId = 1 };
             var comment2 = new CommentTwo { CommentTwoId = 2 };
             var comment3 = new CommentTwo { CommentTwoId = 3 };
-            var dict = new Dictionary<object, PostWithoutCollectionInitializerInConstructor>();
-            var func = (Func<object[], PostWithoutCollectionInitializerInConstructor>)funcFac.DynamicInvoke(dict);
+            PostWithoutCollectionInitializerInConstructor currentRoot = null;
+            IList<PostWithoutCollectionInitializerInConstructor> results = new List<PostWithoutCollectionInitializerInConstructor>();
+            var func = (Func<object[], PostWithoutCollectionInitializerInConstructor>)funcFac.DynamicInvoke(currentRoot, results);
             func(new object[] { post1, comment1 });
             func(new object[] { post1, comment2 });
             func(new object[] { post2, comment3 });
-            Assert.Equal(1, dict[1].Comments.First().CommentTwoId);
-            Assert.Equal(2, dict[1].Comments.Last().CommentTwoId);
-            Assert.Equal(3, dict[2].Comments.First().CommentTwoId);
+            Assert.Equal(1, results[0].Comments.First().CommentTwoId);
+            Assert.Equal(2, results[0].Comments.Last().CommentTwoId);
+            Assert.Equal(3, results[1].Comments.First().CommentTwoId);
         }
 
         [Fact]
@@ -62,14 +64,15 @@
             var comment3 = new Comment { CommentId = 3 };
             var user1 = new User { UserId = 1 };
             var user2 = new User { UserId = 2 };
-            var dict = new Dictionary<object, Post>();
-            var func = (Func<object[], Post>)funcFac.DynamicInvoke(dict);
+            Post currentRoot = null;
+            IList<Post> results = new List<Post>();
+            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results);
             func(new object[] { post1, comment1, user1 });
             func(new object[] { post1, comment2, user2 });
             func(new object[] { post2, comment3, user1 });
-            Assert.Equal(1, dict[1].Comments.First().User.UserId);
-            Assert.Equal(2, dict[1].Comments.Last().User.UserId);
-            Assert.Equal(1, dict[2].Comments.First().User.UserId);
+            Assert.Equal(1, results[0].Comments.First().User.UserId);
+            Assert.Equal(2, results[0].Comments.Last().User.UserId);
+            Assert.Equal(1, results[1].Comments.First().User.UserId);
         }
 
         private static Delegate GenerateThenFetchMapper() {
@@ -79,7 +82,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object);
+            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
             var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
             return func.Item1;
         }
@@ -96,29 +99,30 @@
             var postTag1 = new PostTag { PostTagId = 1 };
             var postTag2 = new PostTag { PostTagId = 2 };
             var postTag3 = new PostTag { PostTagId = 3 };
-            var otherDict = new Dictionary<int, IDictionary<object, object>>();
-            otherDict.Add(1, new Dictionary<object, object>());
-            otherDict.Add(2, new Dictionary<object, object>());
-            var dict = new Dictionary<object, Post>();
-            var func = (Func<object[], Post>)funcFac.DynamicInvoke(dict, otherDict);
+            Post currentRoot = null;
+            IList<Post> results = new List<Post>();
+            IDictionary<int, Comment> dict0 = new Dictionary<int, Comment>();
+            IDictionary<int, PostTag> dict1 = new Dictionary<int, PostTag>();
+
+            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results, dict0, dict1);
             func(new object[] { post1, comment1, postTag1 });
             func(new object[] { post1, comment2, postTag1 });
             func(new object[] { post2, comment3, postTag2 });
             func(new object[] { post2, comment3, postTag3 });
 
-            Assert.Equal(1, dict[1].Comments.First().CommentId);
-            Assert.Equal(2, dict[1].Comments.Last().CommentId);
-            Assert.Equal(2, dict[1].Comments.Count);
+            Assert.Equal(1, results[0].Comments.First().CommentId);
+            Assert.Equal(2, results[0].Comments.Last().CommentId);
+            Assert.Equal(2, results[0].Comments.Count);
 
-            Assert.Equal(3, dict[2].Comments.First().CommentId);
-            Assert.Equal(1, dict[2].Comments.Count);
+            Assert.Equal(3, results[1].Comments.First().CommentId);
+            Assert.Equal(1, results[1].Comments.Count);
 
-            Assert.Equal(1, dict[1].Tags.First().PostTagId);
-            Assert.Equal(1, dict[1].Tags.Count);
+            Assert.Equal(1, results[0].Tags.First().PostTagId);
+            Assert.Equal(1, results[0].Tags.Count);
 
-            Assert.Equal(2, dict[2].Tags.First().PostTagId);
-            Assert.Equal(3, dict[2].Tags.Last().PostTagId);
-            Assert.Equal(2, dict[2].Tags.Count);
+            Assert.Equal(2, results[1].Tags.First().PostTagId);
+            Assert.Equal(3, results[1].Tags.Last().PostTagId);
+            Assert.Equal(2, results[1].Tags.Count);
         }
 
         private static Delegate GenerateMultiMapper() {
@@ -127,7 +131,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object);
+            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
             var func = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree, false);
             return func.Item1;
         }
@@ -138,7 +142,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object);
+            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
             var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
             return func.Item1;
         }
@@ -151,7 +155,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object);
+            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
             var func = mapper.GenerateCollectionMapper<PostWithoutCollectionInitializerInConstructor>(result.FetchTree, false);
             return func.Item1;
         }

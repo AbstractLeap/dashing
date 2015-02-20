@@ -120,12 +120,7 @@
                     TestName,
                     i => {
                         using (var EfDb = new EfContext()) {
-                            return
-                                QueryableExtensions.Include(
-                                    QueryableExtensions.Include(EfDb.Posts, p => p.Tags),
-                                    p => p.Comments)
-                                                   .Where(p => p.PostId > i && p.PostId < i + 3)
-                                                   .ToList();
+                            return EfDb.Posts.Include(p => p.Comments).Include(p => p.Tags).Where(p => p.PostId > i && p.PostId < i + 3).ToList();
                         }
                     }));
 

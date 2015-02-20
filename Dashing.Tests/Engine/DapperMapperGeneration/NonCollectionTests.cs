@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tests.Configuration.DapperMapperGeneration {
+﻿namespace Dashing.Tests.Engine.DapperMapperGeneration {
     using System;
     using System.Configuration;
 
@@ -39,7 +39,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
             var mockCodeManager = GetMockCodeManager();
-            var mapper = new DapperMapperGenerator(mockCodeManager.Object);
+            var mapper = new DapperMapperGenerator(mockCodeManager.Object, config);
             var func = mapper.GenerateNonCollectionMapper<Post>(result.FetchTree, false);
             return func.Item1;
         }
@@ -84,7 +84,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
             var mockCodeManager = GetMockCodeManager();
-            var mapper = new DapperMapperGenerator(mockCodeManager.Object);
+            var mapper = new DapperMapperGenerator(mockCodeManager.Object, config);
             var func = mapper.GenerateNonCollectionMapper<Comment>(result.FetchTree, false);
             return func.Item1;
         }

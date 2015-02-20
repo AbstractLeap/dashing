@@ -77,24 +77,6 @@ namespace Dashing.Engine {
         public virtual IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
-            if (sqlQuery.NumberCollectionsFetched > 0 && (query.TakeN > 0 || query.SkipN > 0)) {
-                var results = this.Configuration.CodeManager.Query(sqlQuery, query, connection, transaction);
-
-                if (query.SkipN > 0 && query.TakeN > 0) {
-                    return results.Skip(query.SkipN).Take(query.TakeN);
-                }
-
-                if (query.SkipN > 0) {
-                    return results.Skip(query.SkipN);
-                }
-
-                if (query.TakeN > 0) {
-                    return results.Take(query.TakeN);
-                }
-
-                return results;
-            }
-
             return this.Configuration.CodeManager.Query(sqlQuery, query, connection, transaction);
         }
 
@@ -194,35 +176,22 @@ namespace Dashing.Engine {
             return results.SingleOrDefault();
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
+        public Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            return await this.Configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, this.Configuration.GetIsTrackedByDefault);
+            return this.Configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, this.Configuration.GetIsTrackedByDefault);
         }
 
-        public async Task<IEnumerable<T>> QueryTrackedAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
+        public Task<IEnumerable<T>> QueryTrackedAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            return await this.Configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, true);
+            return this.Configuration.CodeManager.QueryAsync<T>(sqlQuery, connection, transaction, true);
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {
+        public Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
-            if (sqlQuery.NumberCollectionsFetched > 0 && (query.TakeN > 0 || query.SkipN > 0)) {
-                IEnumerable<T> results = await this.Configuration.CodeManager.QueryAsync(sqlQuery, query, connection, transaction);
-                if (query.TakeN > 0) {
-                    results.Take(query.TakeN);
-                }
-
-                if (query.SkipN > 0) {
-                    results.Skip(query.SkipN);
-                }
-
-                return results;
-            }
-
-            return await this.Configuration.CodeManager.QueryAsync(sqlQuery, query, connection, transaction);
+            return this.Configuration.CodeManager.QueryAsync(sqlQuery, query, connection, transaction);
         }
 
         public async Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {
@@ -270,20 +239,20 @@ namespace Dashing.Engine {
             return sqlQuery.Sql.Length == 0 ? 0 : await this.Configuration.CodeManager.ExecuteAsync(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
         }
 
-        public async Task<int> DeleteAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) {
+        public Task<int> DeleteAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) {
             var entityArray = entities as T[] ?? entities.ToArray();
 
             // take the short path
             if (!entityArray.Any()) {
-                return 0;
+                return Task.FromResult<int>(0);
             }
 
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateSql(entityArray);
-            return await this.Configuration.CodeManager.ExecuteAsync(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
+            return this.Configuration.CodeManager.ExecuteAsync(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
         }
 
-        public async Task<int> ExecuteAsync<T>(
+        public Task<int> ExecuteAsync<T>(
             IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
             this.EnsureConfigurationLoaded();
 
@@ -292,14 +261,14 @@ namespace Dashing.Engine {
             update(updateClass);
             var sqlQuery = this.updateWriter.GenerateBulkSql(updateClass, predicates);
 
-            return sqlQuery.Sql.Length == 0 ? 0 : await this.Configuration.CodeManager.ExecuteAsync(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
+            return sqlQuery.Sql.Length == 0 ? Task.FromResult<int>(0) : this.Configuration.CodeManager.ExecuteAsync(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
         }
 
-        public async Task<int> ExecuteBulkDeleteAsync<T>(
+        public Task<int> ExecuteBulkDeleteAsync<T>(
             IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
-            return await this.Configuration.CodeManager.ExecuteAsync(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
+            return this.Configuration.CodeManager.ExecuteAsync(sqlQuery.Sql, connection, transaction, sqlQuery.Parameters);
         }
 
         private void EnsureConfigurationLoaded() {

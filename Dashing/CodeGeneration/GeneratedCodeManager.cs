@@ -9,6 +9,7 @@
 
     using Dapper;
 
+    using Dashing.Configuration;
     using Dashing.Engine.DML;
 
     public class GeneratedCodeManager : IGeneratedCodeManager {
@@ -75,10 +76,10 @@
 
         private delegate T AddTrackingDelegate<T>(T entity);
 
-        public GeneratedCodeManager(CodeGeneratorConfig config, Assembly generatedCodeAssembly) {
+        public GeneratedCodeManager(CodeGeneratorConfig config, Assembly generatedCodeAssembly, IConfiguration configuration) {
             this.Config = config;
             this.GeneratedCodeAssembly = generatedCodeAssembly;
-            this.delegateQueryCreator = new DelegateQueryCreator(this);
+            this.delegateQueryCreator = new DelegateQueryCreator(this, configuration);
 
             // generate function for checking which delegates exist
             this.compileTimeFunctionExistsFunction = this.GenerateExistsFunction();
@@ -380,21 +381,20 @@
                 if (result.NumberCollectionsFetched > 0) {
                     if (query.IsTracked) {
                         var results =
-                            await this.delegateQueryCreator.GetCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
-                        return this.Tracked((IEnumerable<T>)results.Values);
+                            await this.delegateQueryCreator.GetAsyncCollectionFunction<T>(result, true)(result, query, connection, transaction);
+                        return this.Tracked(results);
                     }
 
-                    var thisResults = await this.delegateQueryCreator.GetCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
-                    return (IEnumerable<T>)thisResults.Values;
+                    return await this.delegateQueryCreator.GetAsyncCollectionFunction<T>(result, false)(result, query, connection, transaction);
                 } else {
 
                     if (query.IsTracked) {
                         var results =
-                            await this.delegateQueryCreator.GetNoCollectionFunctionAsync<T>(result, true)(result, query, connection, transaction);
+                            await this.delegateQueryCreator.GetAsyncNoCollectionFunction<T>(result, true)(result, query, connection, transaction);
                         return this.Tracked(results);
                     }
 
-                    var thisResults = await this.delegateQueryCreator.GetNoCollectionFunctionAsync<T>(result, false)(result, query, connection, transaction);
+                    var thisResults = await this.delegateQueryCreator.GetAsyncNoCollectionFunction<T>(result, false)(result, query, connection, transaction);
                     return thisResults;
                 }
             }

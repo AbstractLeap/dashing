@@ -37,8 +37,8 @@
         [Fact]
         public void TestChainedCollectionFetch() {
             var blog = this.fixture.Session.Query<Blog>().FetchMany(p => p.Posts).ThenFetch(p => p.Comments).First();
-            Assert.True(blog.Posts.Count == 2);
-            Assert.True(blog.Posts.First().Comments.Count == 3);
+            Assert.Equal(2, blog.Posts.Count);
+            Assert.Equal(3, blog.Posts.First().Comments.Count);
         }
     }
 }

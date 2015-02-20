@@ -32,7 +32,7 @@
             return result.Parameters;
         }
 
-        public void AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql, FetchNode rootNode) {
+        public void AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql, FetchNode rootNode, Func<IColumn, FetchNode, string> aliasRewriter = null, Func<IColumn, FetchNode, string> nameRewriter = null) {
             if (orderClauses.Count == 0) {
                 return;
             }
@@ -40,7 +40,13 @@
             sql.Append(" order by ");
             var orderClauseWriter = new OrderClauseWriter(this.Configuration, this.Dialect);
             while (orderClauses.Count > 0) {
-                sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode));
+                if (aliasRewriter == null && nameRewriter == null) {
+                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode));
+                }
+                else {
+                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode, aliasRewriter, nameRewriter));
+                }
+
                 if (orderClauses.Count > 0) {
                     sql.Append(", ");
                 }
