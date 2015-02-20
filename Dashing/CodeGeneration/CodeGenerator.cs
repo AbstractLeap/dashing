@@ -37,7 +37,7 @@
             // Look for an assembly that was already loaded 
             foreach (var generatedCodeAssembly in
                 AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetReferencedAssemblies().Where(a => a.Name == this.generatorConfig.Namespace))) {
-                return new GeneratedCodeManager(this.generatorConfig, Assembly.Load(generatedCodeAssembly));
+                return new GeneratedCodeManager(this.generatorConfig, Assembly.Load(generatedCodeAssembly), configuration);
             }
 
             var timer = new Stopwatch();
@@ -106,7 +106,7 @@
                 }
 
                 // return the wrapper
-                return new GeneratedCodeManager(this.generatorConfig, results.CompiledAssembly);
+                return new GeneratedCodeManager(this.generatorConfig, results.CompiledAssembly, configuration);
             }
         }
 

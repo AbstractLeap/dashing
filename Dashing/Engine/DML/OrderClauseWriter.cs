@@ -17,6 +17,22 @@
         }
 
         public string GetOrderClause<T>(OrderClause<T> clause, FetchNode rootNode) {
+            return this.GetOrderClauseInner(clause, rootNode, null, null);
+        }
+
+        public string GetOrderClause<T>(OrderClause<T> clause, FetchNode rootNode, Func<IColumn, FetchNode, string> aliasRewriter, Func<IColumn, FetchNode, string> nameRewriter) {
+            if (aliasRewriter == null) {
+                throw new ArgumentNullException("aliasRewriter");
+            }
+
+            if (nameRewriter == null) {
+                throw new ArgumentNullException("nameRewriter");
+            }
+
+            return this.GetOrderClauseInner(clause, rootNode, aliasRewriter, nameRewriter);
+        }
+
+        private string GetOrderClauseInner<T>(OrderClause<T> clause, FetchNode rootNode, Func<IColumn, FetchNode, string> aliasRewriter, Func<IColumn, FetchNode, string> nameRewriter) {
             var lambdaExpression = clause.Expression as LambdaExpression;
             if (lambdaExpression == null) {
                 throw new InvalidOperationException("OrderBy clauses must be LambdaExpressions");
@@ -25,20 +41,22 @@
             var node = this.VisitOrderClause(lambdaExpression.Body, rootNode);
             var sb = new StringBuilder();
             if (node == null) {
+                var column = this.configuration.GetMap<T>().Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
                 this.dialect.AppendQuotedName(
-                    sb,
-                    this.configuration.GetMap<T>().Columns[((MemberExpression)lambdaExpression.Body).Member.Name].DbName);
+                    sb, nameRewriter != null ? nameRewriter(column, node) : column.DbName);
                 sb.Append(" ").Append(clause.Direction == System.ComponentModel.ListSortDirection.Ascending ? "asc" : "desc");
             }
             else {
-                sb.Append(node.Alias).Append(".");
+                IColumn column = null;
                 if (Object.ReferenceEquals(node, rootNode)) {
-                    this.dialect.AppendQuotedName(sb, this.configuration.GetMap<T>().Columns[((MemberExpression)lambdaExpression.Body).Member.Name].DbName);
+                    column = this.configuration.GetMap<T>().Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
                 }
                 else {
-                    this.dialect.AppendQuotedName(sb, node.Column.ParentMap.Columns[((MemberExpression)lambdaExpression.Body).Member.Name].DbName);
+                    column = node.Column.ParentMap.Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
                 }
-
+                
+                sb.Append(aliasRewriter != null ? aliasRewriter(column, node) : node.Alias).Append(".");
+                this.dialect.AppendQuotedName(sb, nameRewriter != null ? nameRewriter(column, node) : column.DbName);
                 sb.Append(" ").Append(clause.Direction == System.ComponentModel.ListSortDirection.Ascending ? "asc" : "desc");
             }
 

@@ -85,8 +85,8 @@
     <Compile Include="CodeGeneration\UpdateTests.cs" />
     <Compile Include="CodeGeneration\TrackingTests.cs" />
     <Compile Include="Configuration\ColumnExtensionTests.cs" />
-    <Compile Include="Configuration\DapperMapperGeneration\CollectionTests.cs" />
-    <Compile Include="Configuration\DapperMapperGeneration\NonCollectionTests.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\CollectionTests.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\NonCollectionTests.cs" />
     <Compile Include="Configuration\DefaultConventionTests.cs" />
     <Compile Include="Configuration\DefaultSessionFactoryTests.cs" />
     <Compile Include="Configuration\IndexTests.cs" />
