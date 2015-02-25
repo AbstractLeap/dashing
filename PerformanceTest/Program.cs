@@ -545,7 +545,7 @@ select * from Comments where PostId = @id";
                     TestName,
                     i => {
                         using (var ormliteConn = connectionFactory.OpenDbConnection())
-                        using (var tran = ormliteConn.BeginTransaction()) {
+                        using (var tran = ormliteConn.OpenTransaction()) {
                             var post = ormliteConn.SingleById<Post>(i);
                             post.Title = Providers.ServiceStack + "_" + i + r.Next(100000);
                             ormliteConn.Update(post);
@@ -774,8 +774,8 @@ select * from Comments where PostId = @id";
             tests.Add(new Test(Providers.ServiceStack, TestName,
                 i => {
                     using (var ormliteConn = connectionFactory.Open())
-                    using (var transaction = ormliteConn.OpenTransaction()) {
-                        return transaction.Connection.SingleById<Post>(i);
+                    using (ormliteConn.OpenTransaction()) {
+                        return ormliteConn.SingleById<Post>(i);
                     }
                 }));
 
