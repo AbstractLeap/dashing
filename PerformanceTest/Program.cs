@@ -768,7 +768,7 @@ select * from Comments where PostId = @id";
                             return post;
                         }
                     },
-                    "Using Find with AutoDetechChangesEnabled = false"));
+                    "Using Find with AutoDetectChangesEnabled = false"));
 
             // add ormlite
             tests.Add(new Test(Providers.ServiceStack, TestName,
