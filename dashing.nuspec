@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.73</version>
+        <version>0.0.74-alpha1</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.73 - Ordering across Fetches
+        <releaseNotes>* 0.0.74 - Collection fetching improvements
+* 0.0.73 - Ordering across Fetches
 * 0.0.72 - Back to dapper!
 * 0.0.71 - Bugfix
 * 0.0.70 - Bugfix
