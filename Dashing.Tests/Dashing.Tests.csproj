@@ -121,6 +121,7 @@
     <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />
     <Compile Include="Extensions\ObjectPopulationExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="FuckedOffTests.cs" />
     <Compile Include="SelectQueryTests.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\BoolClass.cs" />
