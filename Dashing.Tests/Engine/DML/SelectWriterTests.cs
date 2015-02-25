@@ -435,6 +435,17 @@
         }
 
         [Fact]
+        public void CollectionThenFetch() {
+            var query = this.GetSelectQuery<Post>().FetchMany(p => p.Comments).ThenFetch(c => c.User);
+            var selectQuery = query as SelectQuery<Post>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap], t_1.[CommentId], t_1.[Content], t_1.[PostId], t_1.[CommentDate], t_2.[UserId], t_2.[Username], t_2.[EmailAddress], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters] from [Posts] as t left join [Comments] as t_1 on t.PostId = t_1.PostId left join [Users] as t_2 on t_1.UserId = t_2.UserId",
+                sql.Sql);
+        }
+
+        [Fact]
         public void MultipleCollectionAtRoot() {
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Tags).Fetch(p => p.Comments);
             var selectQuery = query as SelectQuery<Post>;

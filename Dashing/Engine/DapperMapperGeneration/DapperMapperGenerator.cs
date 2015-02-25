@@ -63,7 +63,8 @@
 
             // add in the return statement and parameter
             statements.Add(rootVar);
-            return Tuple.Create(Expression.Lambda(Expression.Lambda(Expression.Block(new ParameterExpression[] { rootVar, newRoot }, statements), objectsParam), currentRootParam, resultsParam).Compile(), mappedTypes.ToArray());
+            var innerLambda = Expression.Lambda(Expression.Block(new ParameterExpression[] { rootVar, newRoot }, statements), objectsParam);
+            return Tuple.Create(Expression.Lambda(innerLambda, currentRootParam, resultsParam).Compile(), mappedTypes.ToArray());
         }
 
         [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
@@ -102,7 +103,7 @@
                             var assignRelationExpr = Expression.Assign(propExpr, convertExpr);
                             ex = insideCollection ? 
                                 assignRelationExpr :
-                                (Expression)Expression.IfThen(Expression.IsFalse(newRoot), assignRelationExpr);
+                                (Expression)Expression.IfThen(Expression.IsTrue(newRoot), assignRelationExpr);
                             break;
                         default:
                             throw new InvalidOperationException(
