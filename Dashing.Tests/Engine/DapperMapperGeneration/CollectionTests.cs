@@ -140,10 +140,10 @@
         }
 
         [Fact]
-        public void MultipleManyToManyFetchingWorkgs() {
+        public void MultipleManyToManyFetchingWorks() {
             // setup the factory
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Tags).ThenFetch(p => p.Tag).FetchMany(p => p.DeletedTags).ThenFetch(t => t.Tag) as SelectQuery<Post>;
+            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Tags).ThenFetch(p => p.ElTag).FetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
             var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
@@ -151,6 +151,9 @@
 
             // setup the scenario
             var post1 = new Post { PostId = 1 };
+            var tag1 = new Tag { TagId = 1 };
+            var tag2 = new Tag { TagId = 2 };
+            var tag3 = new Tag { TagId = 3 };
             var postTag1 = new PostTag { PostTagId = 1 };
             var postTag2 = new PostTag { PostTagId = 2 };
             var postTag3 = new PostTag { PostTagId = 3 };
@@ -158,12 +161,12 @@
             // act
             Post currentRoot = null;
             IList<Post> results = new List<Post>();
-            IDictionary<int, PostTag> dict0 = new Dictionary<int, PostTag>();
-            IDictionary<int, PostTag> dict1 = new Dictionary<int, PostTag>();
+            var dict0 = new Dictionary<int, PostTag>();
+            var dict1 = new Dictionary<int, PostTag>();
 
             var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results, dict0, dict1);
-            func(new object[] { post1, postTag1, postTag2 });
-            func(new object[] { post1, postTag1, postTag3 });
+            func(new object[] { post1, postTag1, tag1, postTag2, tag2 });
+            func(new object[] { post1, postTag1, tag1, postTag3, tag3 });
 
             Assert.Equal(1, results.Count);
 
