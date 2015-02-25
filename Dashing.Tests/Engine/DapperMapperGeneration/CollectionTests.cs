@@ -17,6 +17,20 @@
 
     public class CollectionTests {
         [Fact]
+        public void SingleRowCollectionTestForJames() {
+            var funcFac = GenerateSingleMapperWithFetch();
+            var post1 = new Post { PostId = 1 };
+            var comment1 = new Comment { CommentId = 1 };
+            var blog1 = new Blog { BlogId = 1 };
+            Post currentRoot = null;
+            IList<Post> results = new List<Post>();
+            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results);
+            func(new object[] { post1, blog1, comment1 });
+            Assert.Equal(1, results[0].Comments.First().CommentId);
+            Assert.Equal(1, results[0].Blog.BlogId);
+        }
+
+        [Fact]
         public void SingleCollectionWorks() {
             var funcFac = GenerateSingleMapper();
             var post1 = new Post { PostId = 1 };
@@ -133,6 +147,17 @@
 
             var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
             var func = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree, false);
+            return func.Item1;
+        }
+
+        private static Delegate GenerateSingleMapperWithFetch() {
+            var config = new CustomConfig();
+            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Blog) as SelectQuery<Post>;
+            var writer = new SelectWriter(new SqlServer2012Dialect(), config);
+            var result = writer.GenerateSql(selectQuery);
+
+            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
+            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
             return func.Item1;
         }
 
