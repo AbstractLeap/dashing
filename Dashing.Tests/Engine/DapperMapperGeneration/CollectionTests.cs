@@ -116,9 +116,11 @@
             Post currentRoot = null;
             IList<Post> results = new List<Post>();
             IDictionary<int, Comment> dict0 = new Dictionary<int, Comment>();
+            var hashsetPair0 = new HashSet<Tuple<int, int>>();
             IDictionary<int, PostTag> dict1 = new Dictionary<int, PostTag>();
+            var hashsetPair1 = new HashSet<Tuple<int, int>>();
 
-            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results, dict0, dict1);
+            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results, dict0, hashsetPair0, dict1, hashsetPair1);
             func(new object[] { post1, comment1, postTag1 });
             func(new object[] { post1, comment2, postTag1 });
             func(new object[] { post2, comment3, postTag2 });
@@ -162,14 +164,15 @@
             Post currentRoot = null;
             IList<Post> results = new List<Post>();
             var dict0 = new Dictionary<int, PostTag>();
+            var hashsetPair0 = new HashSet<Tuple<int, int>>();
             var dict1 = new Dictionary<int, PostTag>();
+            var hashsetPair1 = new HashSet<Tuple<int, int>>();
 
-            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results, dict0, dict1);
-            func(new object[] { post1, postTag1, tag1, postTag2, tag2 });
-            func(new object[] { post1, postTag1, tag1, postTag3, tag3 });
+            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results, dict0, hashsetPair0, dict1, hashsetPair1);
+            func(new object[] { post1, postTag2, tag2, postTag1, tag1 });
+            func(new object[] { post1, postTag3, tag3, postTag1, tag1 });
 
             Assert.Equal(1, results.Count);
-
             Assert.Equal(1, results[0].Tags.Count);
             Assert.Equal(1, results[0].Tags[0].PostTagId);
             Assert.Equal(2, results[0].DeletedTags.Count);
@@ -177,6 +180,86 @@
             Assert.Equal(3, results[0].DeletedTags[1].PostTagId);
         }
 
+        [Fact]
+        public void NestedMultipleOneToManyFetchingWorks() {
+            // setup the factory
+            var config = new CustomConfig();
+            var selectQuery = new SelectQuery<Blog>(new Mock<ISelectQueryExecutor>().Object).FetchMany(b => b.Posts).ThenFetchMany(p => p.Tags).ThenFetch(t => t.ElTag).FetchMany(b => b.Posts).ThenFetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag).FetchMany(p => p.Posts).ThenFetch(p => p.Author) as SelectQuery<Blog>;
+            var writer = new SelectWriter(new SqlServer2012Dialect(), config);
+            var result = writer.GenerateSql(selectQuery);
+            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
+            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree, false).Item1;
+
+            // setup the scenario
+            var blog1 = new Blog { BlogId = 1 };
+            var blog2 = new Blog { BlogId = 2 };
+            var post1 = new Post { PostId = 1 };
+            var post2 = new Post { PostId = 2 };
+            var post3 = new Post { PostId = 3 };
+            var posttag1 = new PostTag { PostTagId = 1 };
+            var posttag2 = new PostTag { PostTagId = 2 };
+            var posttag3 = new PostTag { PostTagId = 3 };
+            var tag1 = new Tag { TagId = 1 };
+            var tag2 = new Tag { TagId = 2 };
+            var tag3 = new Tag { TagId = 3 };
+            var tag4 = new Tag { TagId = 4 };
+            var delPostTag1 = new PostTag { PostTagId = 3 };
+            var delPostTag2 = new PostTag { PostTagId = 4 };
+            var delPostTag3 = new PostTag { PostTagId = 5 };
+            var author1 = new User { UserId = 1 };
+            var author2 = new User { UserId = 2 };
+
+            // act
+            Blog currentRoot = null;
+            IList<Blog> results = new List<Blog>();
+            var dict0 = new Dictionary<int, Post>();
+            var hashsetPair0 = new HashSet<Tuple<int, int>>();
+            var dict1 = new Dictionary<int, PostTag>();
+            var hashsetPair1 = new HashSet<Tuple<int, int>>();
+            var dict2 = new Dictionary<int, PostTag>();
+            var hashsetPair2 = new HashSet<Tuple<int, int>>();
+
+            var func = (Func<object[], Blog>)funcFac.DynamicInvoke(currentRoot, results, dict0, hashsetPair0, dict1, hashsetPair1, dict2, hashsetPair2);
+            func(new object[] { blog1, post1, author1, null, null, posttag1, tag1 });
+            func(new object[] { blog1, post1, author1, null, null, posttag2, tag2 });
+            func(new object[] { blog1, post2, author2, delPostTag1, tag3, null, null });
+            func(new object[] { blog1, post2, author2, delPostTag2, tag4, null, null });
+            func(new object[] { blog2, post3, author1, delPostTag1, tag3, posttag1, tag1 });
+            func(new object[] { blog2, post3, author1, delPostTag2, tag4, posttag1, tag1 });
+            func(new object[] { blog2, post3, author1, delPostTag3, tag4, posttag1, tag1 });
+            func(new object[] { blog2, post3, author1, delPostTag1, tag3, posttag2, tag2 });
+            func(new object[] { blog2, post3, author1, delPostTag2, tag4, posttag2, tag2 });
+            func(new object[] { blog2, post3, author1, delPostTag3, tag4, posttag2, tag2 });
+            func(new object[] { blog2, post3, author1, delPostTag1, tag3, posttag3, tag3 });
+            func(new object[] { blog2, post3, author1, delPostTag2, tag4, posttag3, tag3 });
+            func(new object[] { blog2, post3, author1, delPostTag3, tag4, posttag3, tag3 });
+
+            Assert.Equal(2, results.Count);
+            Assert.Equal(2, results[0].Posts.Count);
+            Assert.Equal(1, results[0].Posts[0].Author.UserId);
+            Assert.True(results[0].Posts[0].DeletedTags == null || !results[0].Posts[0].DeletedTags.Any());
+            Assert.Equal(2, results[0].Posts[0].Tags.Count);
+            Assert.Equal(1, results[0].Posts[0].Tags[0].PostTagId);
+            Assert.Equal(1, results[0].Posts[0].Tags[0].ElTag.TagId);
+            Assert.Equal(2, results[0].Posts[0].Tags[1].PostTagId);
+            Assert.Equal(2, results[0].Posts[0].Tags[1].ElTag.TagId);
+            Assert.Equal(1, results[1].Posts.Count);
+            Assert.Equal(1, results[1].Posts[0].Author.UserId);
+            Assert.Equal(3, results[1].Posts[0].DeletedTags.Count);
+            Assert.Equal(3, results[1].Posts[0].Tags.Count);
+            Assert.Equal(3, results[1].Posts[0].DeletedTags[0].PostTagId);
+            Assert.Equal(4, results[1].Posts[0].DeletedTags[1].PostTagId);
+            Assert.Equal(5, results[1].Posts[0].DeletedTags[2].PostTagId);
+            Assert.Equal(3, results[1].Posts[0].DeletedTags[0].ElTag.TagId);
+            Assert.Equal(4, results[1].Posts[0].DeletedTags[1].ElTag.TagId);
+            Assert.Equal(4, results[1].Posts[0].DeletedTags[2].ElTag.TagId);
+            Assert.Equal(1, results[1].Posts[0].Tags[0].PostTagId);
+            Assert.Equal(2, results[1].Posts[0].Tags[1].PostTagId);
+            Assert.Equal(3, results[1].Posts[0].Tags[2].PostTagId);
+            Assert.Equal(1, results[1].Posts[0].Tags[0].ElTag.TagId);
+            Assert.Equal(2, results[1].Posts[0].Tags[1].ElTag.TagId);
+            Assert.Equal(3, results[1].Posts[0].Tags[2].ElTag.TagId);
+        }
 
         private static Delegate GenerateMultiMapper() {
             var config = new CustomConfig();

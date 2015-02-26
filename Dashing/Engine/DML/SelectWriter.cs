@@ -137,7 +137,10 @@
             // add order by
             var orderSql = new StringBuilder();
             if (selectQuery.OrderClauses.Any()) {
-                this.AddOrderByClause(selectQuery.OrderClauses, orderSql, rootNode, (c, n) => "i", (c, n) => c.DbName + n.Alias);
+                var containsPrimaryKeyClause = this.AddOrderByClause(selectQuery.OrderClauses, orderSql, rootNode, (c, n) => "i", (c, n) => c.DbName + n.Alias);
+                if (!containsPrimaryKeyClause) {
+                    this.AppendDefaultOrderBy<T>(rootNode, orderSql, "i", this.Configuration.GetMap<T>().PrimaryKey.DbName + rootNode.Alias);
+                }
             }
             else {
                 this.AppendDefaultOrderBy<T>(rootNode, orderSql, "i", this.Configuration.GetMap<T>().PrimaryKey.DbName + rootNode.Alias);
@@ -230,12 +233,15 @@
             sql.Append("select ").Append(outerColumnSql).Append(" from (").Append(innerSql).Append(") as i").Append(outerTableSql);
             var outerOrderSql = new StringBuilder();
             if (selectQuery.OrderClauses.Any()) {
-                this.AddOrderByClause(
+                var containsPrimaryKeyClause = this.AddOrderByClause(
                     selectQuery.OrderClauses,
                     outerOrderSql,
                     rootNode,
                     (c, n) => "i",
                     (c, n) => n == null ? c.Name + "t" : c.Name + n.Alias);
+                if (!containsPrimaryKeyClause) {
+                    this.AppendDefaultOrderBy<T>(rootNode, outerOrderSql, "i");
+                }
             }
             else {
                 this.AppendDefaultOrderBy<T>(rootNode, outerOrderSql, "i");
@@ -271,9 +277,12 @@
 
             // add order by
             if (selectQuery.OrderClauses.Any()) {
-                this.AddOrderByClause(selectQuery.OrderClauses, orderSql, rootNode);
+                var containsPrimaryKeyClause = this.AddOrderByClause(selectQuery.OrderClauses, orderSql, rootNode);
+                if (numberCollectionFetches > 0 && !containsPrimaryKeyClause) {
+                    this.AppendDefaultOrderBy<T>(rootNode, orderSql);
+                }
             }
-            else if (selectQuery.SkipN > 0) {
+            else if (numberCollectionFetches > 0 || selectQuery.SkipN > 0 || selectQuery.TakeN > 0) {
                 // need to add a default order on the sort clause
                 this.AppendDefaultOrderBy<T>(rootNode, orderSql);
             }

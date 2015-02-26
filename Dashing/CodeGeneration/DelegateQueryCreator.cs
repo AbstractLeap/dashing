@@ -201,7 +201,7 @@
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines",
             Justification = "This is hard to read the StyleCop way")]
-        private Delegate GenerateCollectionFactory<T>(bool isTracked, int numberCollectionFetches, bool isAsync, Type[] mappedTypes, Type[] collectionTypes) {
+        private Delegate GenerateCollectionFactory<T>(bool isTracked, int numberCollectionFetches, bool isAsync, Type[] mappedTypes, Type[] mapperClosureTypes) {
             var tt = typeof(T);
             var statements = new List<Expression>();
             var variableExpressions = new List<ParameterExpression>();
@@ -221,15 +221,15 @@
                 funcFactoryParam = Expression.Parameter(typeof(Func<,,>).MakeGenericType(returnType, resultsType, typeof(Delegate)));
             }
             else if (numberCollectionFetches > 1) {
-                if (collectionTypes == null) {
-                    throw new ArgumentNullException("collectionTypes", "Can not be null if numberCollectionFetches > 1");
+                if (mapperClosureTypes == null) {
+                    throw new ArgumentNullException("mapperClosureTypes", "Can not be null if numberCollectionFetches > 1");
                 }
 
-                // Func<T, IList<T>, [IDictionary<Col1PkType, Col1Type>, .... ], typeof(Delegate)> first param is the current root, second param is results, 3rd to N-1 contains look ups for the collections
-                var nonGenericFuncType = this.GetFuncTypeFor(3 + numberCollectionFetches);
+                // Func<T, IList<T>, [IDictionary<Col1PkType, Col1Type>, Hashset<Tuple<ParentPkType, Col1PkType>>, .... ], typeof(Delegate)> first param is the current root, second param is results, 3rd to N-1 contains look ups for the collections
+                var nonGenericFuncType = this.GetFuncTypeFor(3 + (numberCollectionFetches * 2));
                 var typeParams = new List<Type> { returnType, resultsType };
-                foreach (var type in collectionTypes) {
-                    typeParams.Add(typeof(IDictionary<,>).MakeGenericType(this.configuration.GetMap(type).PrimaryKey.Type, type));
+                foreach (var type in mapperClosureTypes) {
+                    typeParams.Add(type);
                 }
 
                 typeParams.Add(typeof(Delegate));
@@ -238,19 +238,6 @@
             else {
                 throw new InvalidOperationException("Calling GenerateCollectionFactory on a query with no collections is invalid");
             }
-
-            //var rootDictType = typeof(IDictionary<,>).MakeGenericType(typeof(object), returnType);
-            //var otherDictType = typeof(IDictionary<,>).MakeGenericType(
-            //    typeof(int),
-            //    typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object)));
-            //if (numberCollectionFetches > 1) {
-            //    funcFactoryParam = Expression.Parameter(typeof(Func<,,>).MakeGenericType(rootDictType, otherDictType, typeof(Delegate)));
-            //}
-            //else {
-            //    funcFactoryParam =
-            //        Expression.Parameter(
-            //            typeof(Func<,>).MakeGenericType(typeof(IDictionary<,>).MakeGenericType(typeof(object), returnType), typeof(Delegate)));
-            //}
 
             // T currentRoot = null;
             var currentRootVarible = Expression.Variable(returnType, "currentRoot");
@@ -265,40 +252,27 @@
             variableExpressions.Add(resultVariable);
             statements.Add(resultExpr);
 
-            // Dictionary<object,T> dict = new Dictionary<object, T>();
-            //var dictionaryVariable = Expression.Variable(rootDictType);
-            //var dictionaryInit = Expression.New(typeof(Dictionary<,>).MakeGenericType(typeof(object), returnType));
-            //var dictionaryExpr = Expression.Assign(dictionaryVariable, dictionaryInit);
-            //variableExpressions.Add(dictionaryVariable);
-            //statements.Add(dictionaryExpr);
-
             if (numberCollectionFetches > 1) {
-                for (var i = 0; i < numberCollectionFetches; i++) {
-                    // IDictionary<ColNPkType, ColNType> dictN = new Dictionary<ColNPkType, ColNType>();
-                    var colType = collectionTypes[i];
-                    var dictVariable = Expression.Variable(typeof(IDictionary<,>).MakeGenericType(this.configuration.GetMap(colType).PrimaryKey.Type, colType), "dict" + i);
-                    var dictInit = Expression.New(typeof(Dictionary<,>).MakeGenericType(this.configuration.GetMap(colType).PrimaryKey.Type, colType));
-                    var dictAssign = Expression.Assign(dictVariable, dictInit);
-                    variableExpressions.Add(dictVariable);
-                    statements.Add(dictAssign);
+                // add in all of the closure variables i.e. dict0, hashsetPair0
+                var hashsetType = typeof(HashSet<>);
+                var i = 0;
+                foreach (var mapperClosureType in mapperClosureTypes) {
+                    ParameterExpression closureVariable;
+                    NewExpression closureInit;
+                    if (mapperClosureType.GetGenericTypeDefinition() == hashsetType) {
+                        closureVariable = Expression.Variable(mapperClosureType, "hashsetPair" + (i / 2));
+                        closureInit = Expression.New(mapperClosureType);
+                    }
+                    else {
+                        closureVariable = Expression.Variable(mapperClosureType, "dict" + (i / 2));
+                        closureInit = Expression.New(typeof(Dictionary<,>).MakeGenericType(mapperClosureType.GetGenericArguments()));
+                    }
+
+                    var closureAssign = Expression.Assign(closureVariable, closureInit);
+                    variableExpressions.Add(closureVariable);
+                    statements.Add(closureAssign);
+                    i++;
                 }
-
-                // Dictionary<string, IDictionary<object, object>
-                //var otherDictionaryVariable = Expression.Variable(otherDictType);
-                //var otherDictionaryInit = Expression.New(typeof(Dictionary<,>).MakeGenericType(otherDictType.GetGenericArguments()));
-                //var otherDictionaryExpr = Expression.Assign(otherDictionaryVariable, otherDictionaryInit);
-                //variableExpressions.Add(otherDictionaryVariable);
-                //statements.Add(otherDictionaryExpr);
-
-                //// now initialise inner dictionaries
-                //for (var i = 1; i <= numberCollectionFetches; ++i) {
-                //    var addExpr = Expression.Call(
-                //        otherDictionaryVariable,
-                //        otherDictType.GetMethods().First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
-                //        Expression.Constant(i),
-                //        Expression.New(typeof(Dictionary<,>).MakeGenericType(typeof(object), typeof(object))));
-                //    statements.Add(addExpr);
-                //}
             }
 
             // Func<A,...,Z> mapper = (Func<A,...,Z>)funcFactory(dict)
@@ -309,7 +283,7 @@
                     Expression.Convert(
                         Expression.Invoke(funcFactoryParam, variableExpressions),
                         mapperType));
-            
+
             variableExpressions.Add(mapperVariable);
             statements.Add(mapperExpr);
 

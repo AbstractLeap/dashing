@@ -309,7 +309,7 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select top (@take) [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts]", sql.Sql);
+            Assert.Equal("select top (@take) [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]", sql.Sql);
         }
 
         [Fact]
@@ -318,7 +318,7 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select top (@take) [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts]", sql.Sql);
+            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset 0 rows fetch next @take rows only", sql.Sql);
         }
 
         [Fact]
@@ -338,7 +338,7 @@
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetMySqlWriter().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
-            Assert.Equal("select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` limit @take", sql.Sql);
+            Assert.Equal("select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @take", sql.Sql);
         }
 
         [Fact]
@@ -441,7 +441,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap], t_1.[CommentId], t_1.[Content], t_1.[PostId], t_1.[CommentDate], t_2.[UserId], t_2.[Username], t_2.[EmailAddress], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters] from [Posts] as t left join [Comments] as t_1 on t.PostId = t_1.PostId left join [Users] as t_2 on t_1.UserId = t_2.UserId",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap], t_1.[CommentId], t_1.[Content], t_1.[PostId], t_1.[CommentDate], t_2.[UserId], t_2.[Username], t_2.[EmailAddress], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters] from [Posts] as t left join [Comments] as t_1 on t.PostId = t_1.PostId left join [Users] as t_2 on t_1.UserId = t_2.UserId order by t.[PostId]",
                 sql.Sql);
         }
 
@@ -463,7 +463,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select t.[BlogId], t.[Title], t.[CreateDate], t.[Description], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap], t_2.[CommentId], t_2.[Content], t_2.[PostId], t_2.[UserId], t_2.[CommentDate] from [Blogs] as t left join [Posts] as t_1 on t.BlogId = t_1.BlogId left join [Comments] as t_2 on t_1.PostId = t_2.PostId",
+                "select t.[BlogId], t.[Title], t.[CreateDate], t.[Description], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap], t_2.[CommentId], t_2.[Content], t_2.[PostId], t_2.[UserId], t_2.[CommentDate] from [Blogs] as t left join [Posts] as t_1 on t.BlogId = t_1.BlogId left join [Comments] as t_2 on t_1.PostId = t_2.PostId order by t.[BlogId]",
                 sql.Sql);
         }
 
@@ -474,7 +474,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select t.[BlogId], t.[Title], t.[CreateDate], t.[Description], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap], t_2.[CommentId], t_2.[Content], t_2.[PostId], t_2.[UserId], t_2.[CommentDate], t_3.[LikeId], t_3.[UserId], t_3.[CommentId] from [Blogs] as t left join [Posts] as t_1 on t.BlogId = t_1.BlogId left join [Comments] as t_2 on t_1.PostId = t_2.PostId left join [Likes] as t_3 on t_2.CommentId = t_3.CommentId",
+                "select t.[BlogId], t.[Title], t.[CreateDate], t.[Description], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap], t_2.[CommentId], t_2.[Content], t_2.[PostId], t_2.[UserId], t_2.[CommentDate], t_3.[LikeId], t_3.[UserId], t_3.[CommentId] from [Blogs] as t left join [Posts] as t_1 on t.BlogId = t_1.BlogId left join [Comments] as t_2 on t_1.PostId = t_2.PostId left join [Likes] as t_3 on t_2.CommentId = t_3.CommentId order by t.[BlogId]",
                 sql.Sql);
         }
 
