@@ -62,6 +62,10 @@ namespace Dashing.Console {
         }
 
         private static object GetValue(string value) {
+            if (value.Length == 0) {
+                return value;
+            }
+
             if (new[] { "yes", "true" }.Contains(value.ToLower())) {
                 return true;
             }

@@ -35,7 +35,7 @@
         private static bool isVerbose;
 
         private static void Main(string[] args) {
-            ConfigureAssemblyResolution();
+             ConfigureAssemblyResolution();
 
             try {
                 InnerMain(args);
@@ -454,7 +454,7 @@
             // run the migrator
             string script;
             using (new TimedOperation("-- Generating diff...")) {
-                script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, consoleAnswerProvider, Trace, out warnings, out errors);
+                script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, consoleAnswerProvider, Trace, reverseEngineerSettings.GetIndexesToIgnore(), out warnings, out errors);
             }
 
             // TODO: do things with warnings and errors

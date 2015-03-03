@@ -36,12 +36,18 @@ namespace Dashing.Configuration {
         /// <summary>
         /// Gets or sets the indexes specified for this map
         /// </summary>
-        ICollection<Index> Indexes { get; set; }
+        IEnumerable<Index> Indexes { get; set; }
+
+        /// <summary>
+        /// Add a new index to the map
+        /// </summary>
+        /// <param name="index"></param>
+        void AddIndex(Index index);
 
         /// <summary>
         /// Gets or sets the foreign keys specified for this map
         /// </summary>
-        ICollection<ForeignKey> ForeignKeys { get; set; }
+        IEnumerable<ForeignKey> ForeignKeys { get; set; }
 
         /// <summary>
         ///     Gets the primary key for the object

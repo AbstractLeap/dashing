@@ -29,6 +29,7 @@
             IEnumerable<IMap> toMaps, 
             IAnswerProvider answerProvider,
             Action<string, object[]> trace, 
+            IEnumerable<string> indexesToIgnore,
             out IEnumerable<string> warnings,
             out IEnumerable<string> errors) {
             if (trace == null) {
@@ -61,7 +62,7 @@
                 }
 
                 var indexRemovals = matchPair.From.Indexes.Except(matchPair.To.Indexes);
-                foreach (var index in indexRemovals) {
+                foreach (var index in indexRemovals.Where(i => !indexesToIgnore.Contains(i.Name))) {
                     sql.Append(this.alterTableWriter.DropIndex(index));
                     this.AppendSemiColonIfNecesssary(sql);
                     sql.AppendLine();

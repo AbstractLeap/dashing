@@ -9,9 +9,9 @@ namespace Dashing.Configuration {
 
         private readonly object nonGenericPrimaryKeyGetterLock = new object();
 
-        private ICollection<Index> indexes;
+        private IList<Index> indexes;
 
-        private ICollection<ForeignKey> foreignKeys;
+        private IList<ForeignKey> foreignKeys;
 
         private bool hasCalculatedForeignKeys;
 
@@ -54,12 +54,15 @@ namespace Dashing.Configuration {
         /// </summary>
         public IDictionary<string, IColumn> Columns { get; set; }
 
-        public ICollection<Index> Indexes {
+        public IEnumerable<Index> Indexes {
             get {
                 if (!this.hasSetIndexes && !this.hasAddedForeignKeyIndexes) {
                     // add in any indexes for the foreign keys in this map
                     foreach (var foreignKey in this.ForeignKeys) {
-                        this.indexes.Add(new Index(this, new List<IColumn>{ foreignKey.ChildColumn }));
+                        var index = new Index(this, new List<IColumn> { foreignKey.ChildColumn });
+                        if (!this.indexes.Any(i => i.Columns.SequenceEqual(index.Columns, new IndexColumnComparer()))) {
+                            this.indexes.Add(index);
+                        }
                     }
 
                     this.hasAddedForeignKeyIndexes = true;
@@ -69,15 +72,19 @@ namespace Dashing.Configuration {
             }
 
             set {
-                this.indexes = value;
+                this.indexes = value.ToList();
                 this.hasSetIndexes = true;
             }
+        }
+
+        public void AddIndex(Index index) {
+            this.indexes.Add(index);
         }
 
         /// <summary>
         /// Returns the foreign keys for this map
         /// </summary>
-        public ICollection<ForeignKey> ForeignKeys {
+        public IEnumerable<ForeignKey> ForeignKeys {
             get {
                 if (!this.hasSetForeignKeys && !this.hasCalculatedForeignKeys && this.foreignKeys == null) {
                     this.foreignKeys =
@@ -93,7 +100,7 @@ namespace Dashing.Configuration {
             }
 
             set {
-                this.foreignKeys = value;
+                this.foreignKeys = value.ToList();
                 this.hasSetForeignKeys = true;
             }
         }
