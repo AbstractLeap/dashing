@@ -23,6 +23,10 @@
 
         public virtual IList<PostTag> Tags { get; set; }
 
+        public virtual IList<PostTag> DeletedTags { get; set; }
+        
+        public virtual IList<PostTag> YetMoreTags { get; set; }
+
         public virtual bool DoNotMap { get; set; }
     }
 }

@@ -90,7 +90,46 @@
             SetupFetchCollectionTests(tests);
             SetupFetchMultiCollectionTests(tests);
             SetupFetchMultipleMultiCollection(tests);
+            SetupFetchMultipleChain(tests);
             return tests;
+        }
+
+        private static void SetupFetchMultipleChain(List<Test> tests) {
+            const string TestName = "Fetch Multiple Chained Collections";
+
+            // add dashing
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        using (var dashingSession = dashingConfig.BeginSession()) {
+                            return dashingSession.Query<Blog>().FetchMany(b => b.Posts).ThenFetch(p => p.Tags).SingleOrDefault(b => b.BlogId == i / 5);
+                        }
+                    }));
+
+            // add dashing without transaction
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        using (var dashingSession = dashingConfig.BeginTransactionLessSession()) {
+                            return dashingSession.Query<Blog>().FetchMany(b => b.Posts).ThenFetch(p => p.Tags).SingleOrDefault(b => b.BlogId == i / 5);
+                        }
+                    },
+                "without Transaction"));
+
+            // add EF
+            tests.Add(
+                new Test(
+                    Providers.EntityFramework,
+                    TestName,
+                    i => {
+                        using (var EfDb = new EfContext()) {
+                            return EfDb.Blogs.Include(b => b.Posts.Select(p => p.Tags)).SingleOrDefault(b => b.BlogId == i / 5);
+                        }
+                    }));
         }
 
         private static void SetupFetchMultipleMultiCollection(List<Test> tests) {
@@ -113,6 +152,24 @@
                         }
                     }));
 
+            // add dashing
+            tests.Add(
+                new Test(
+                    Providers.Dashing,
+                    TestName,
+                    i => {
+                        using (var dashingSession = dashingConfig.BeginTransactionLessSession()) {
+                            return
+                                dashingSession.Query<Post>()
+                                              .Fetch(p => p.Comments)
+                                              .Fetch(p => p.Tags)
+                                              .Where(p => p.PostId > i && p.PostId < i + 3)
+                                              .ToList();
+
+                        }
+                    },
+                "without Transaction"));
+
             // add EF
             tests.Add(
                 new Test(
@@ -120,12 +177,7 @@
                     TestName,
                     i => {
                         using (var EfDb = new EfContext()) {
-                            return
-                                QueryableExtensions.Include(
-                                    QueryableExtensions.Include(EfDb.Posts, p => p.Tags),
-                                    p => p.Comments)
-                                                   .Where(p => p.PostId > i && p.PostId < i + 3)
-                                                   .ToList();
+                            return EfDb.Posts.Include(p => p.Comments).Include(p => p.Tags).Where(p => p.PostId > i && p.PostId < i + 3).ToList();
                         }
                     }));
 
@@ -173,7 +225,7 @@
                                 dashingSession.Query<Post>()
                                               .Fetch(p => p.Comments)
                                               .Fetch(p => p.Tags)
-                                              .First(p => p.PostId == i);
+                                              .Single(p => p.PostId == i);
                         }
                     }));
 
@@ -493,7 +545,7 @@ select * from Comments where PostId = @id";
                     TestName,
                     i => {
                         using (var ormliteConn = connectionFactory.OpenDbConnection())
-                        using (var tran = ormliteConn.BeginTransaction()) {
+                        using (var tran = ormliteConn.OpenTransaction()) {
                             var post = ormliteConn.SingleById<Post>(i);
                             post.Title = Providers.ServiceStack + "_" + i + r.Next(100000);
                             ormliteConn.Update(post);
@@ -716,14 +768,14 @@ select * from Comments where PostId = @id";
                             return post;
                         }
                     },
-                    "Using Find with AutoDetechChangesEnabled = false"));
+                    "Using Find with AutoDetectChangesEnabled = false"));
 
             // add ormlite
             tests.Add(new Test(Providers.ServiceStack, TestName,
                 i => {
                     using (var ormliteConn = connectionFactory.Open())
-                    using (var transaction = ormliteConn.OpenTransaction()) {
-                        return transaction.Connection.SingleById<Post>(i);
+                    using (ormliteConn.OpenTransaction()) {
+                        return ormliteConn.SingleById<Post>(i);
                     }
                 }));
 

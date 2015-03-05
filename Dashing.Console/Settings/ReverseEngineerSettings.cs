@@ -9,6 +9,12 @@
 
         public string TablesToIgnore { private get; set; }
 
+        public string IndexesToIgnore { get; set; }
+
+        public IEnumerable<string> GetIndexesToIgnore() {
+            return this.IndexesToIgnore.Split(',', '|').Select(s => s.Trim());
+        }
+
         public IEnumerable<string> GetTablesToIgnore() {
             IEnumerable<string> tablesToIgnore = new List<string>();
             if (!string.IsNullOrWhiteSpace(this.TablesToIgnore)) {

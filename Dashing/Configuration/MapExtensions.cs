@@ -50,7 +50,7 @@
                 columns.Add(column);
             }
 
-            map.Indexes.Add(new Index(map, columns, isUnique: isUnique));
+            map.AddIndex(new Index(map, columns, isUnique: isUnique));
             return map;
         }
 

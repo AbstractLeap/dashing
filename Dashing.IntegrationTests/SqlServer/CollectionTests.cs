@@ -37,8 +37,32 @@
         [Fact]
         public void TestChainedCollectionFetch() {
             var blog = this.fixture.Session.Query<Blog>().FetchMany(p => p.Posts).ThenFetch(p => p.Comments).First();
-            Assert.True(blog.Posts.Count == 2);
-            Assert.True(blog.Posts.First().Comments.Count == 3);
+            Assert.Equal(2, blog.Posts.Count);
+            Assert.Equal(3, blog.Posts.First().Comments.Count);
+        }
+
+        [Fact]
+        public void TestManyFetches() {
+            var post =
+                this.fixture.Session.Query<Post>()
+                    .FetchMany(p => p.Comments)
+                    .ThenFetch(c => c.User)
+                    .Fetch(p => p.Blog)
+                    .Fetch(p => p.Author)
+                    .SingleOrDefault(p => p.PostId == 1);
+            Assert.True(post != null);
+        }
+
+        [Fact]
+        public void TestManyToManyThing() {
+            var post =
+                this.fixture.Session.Query<Post>()
+                    .FetchMany(p => p.Tags)
+                    .ThenFetch(t => t.Tag)
+                    .Fetch(p => p.Blog)
+                    .Fetch(p => p.Author)
+                    .SingleOrDefault(p => p.PostId == 1);
+            Assert.True(post != null);
         }
     }
 }

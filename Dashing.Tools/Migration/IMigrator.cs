@@ -5,6 +5,6 @@
     using Dashing.Configuration;
 
     public interface IMigrator {
-        string GenerateSqlDiff(IEnumerable<IMap> fromMaps, IEnumerable<IMap> toMaps, IAnswerProvider answerProvider, Action<string, object[]> trace, out IEnumerable<string> warnings, out IEnumerable<string> errors);
+        string GenerateSqlDiff(IEnumerable<IMap> fromMaps, IEnumerable<IMap> toMaps, IAnswerProvider answerProvider, Action<string, object[]> trace, IEnumerable<string> indexesToIgnore, out IEnumerable<string> warnings, out IEnumerable<string> errors);
     }
 }

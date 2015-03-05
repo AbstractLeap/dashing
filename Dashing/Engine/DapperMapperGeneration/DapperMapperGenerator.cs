@@ -14,8 +14,11 @@
     internal class DapperMapperGenerator : IDapperMapperGenerator {
         private readonly IGeneratedCodeManager generatedCodeManager;
 
-        public DapperMapperGenerator(IGeneratedCodeManager generatedCodeManager) {
+        private readonly IConfiguration configuration;
+
+        public DapperMapperGenerator(IGeneratedCodeManager generatedCodeManager, IConfiguration configuration) {
             this.generatedCodeManager = generatedCodeManager;
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -29,53 +32,43 @@
             // so, if there's more than one in the SelectQuery they should be split out prior to calling this
             var tt = typeof(T);
             var rootType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
-            var dictionaryParam = Expression.Parameter(typeof(IDictionary<,>).MakeGenericType(typeof(object), rootType), "dict");
+            var currentRootParam = Expression.Parameter(rootType, "currentRoot");
+            var resultsParam = Expression.Parameter(typeof(IList<>).MakeGenericType(rootType), "results");
+
+            //var dictionaryParam = Expression.Parameter(typeof(IDictionary<,>).MakeGenericType(typeof(object), rootType), "dict");
             var objectsParam = Expression.Parameter(typeof(object[]));
             var rootVar = Expression.Variable(rootType);
+            var newRoot = Expression.Variable(typeof(bool), "newRoot");
             var statements = new List<Expression>();
             var mappedTypes = new List<Type> { rootType };
 
             // var rootVar = (RootType)objects[0];
             GetRootAssignment<T>(statements, rootVar, objectsParam, rootType);
 
-            // add dictionary fetch rootVar = dict.GetOrAdd((object)p.PostId, rootVar)
-            this.AddDictionaryFetch<T>(dictionaryParam, fetchTree, statements, rootVar, isTracked);
+            // var newRoot = false;
+            statements.Add(Expression.Assign(newRoot, Expression.Constant(false)));
+
+            // check to see if rootVar different to currentRoot
+            // if currentRoomParam == null || currentRootParam.Pk != rootVar.Pk { results.Add(rootVar); currentRootParam = rootVar; }
+            var pkName = this.configuration.GetMap<T>().PrimaryKey.Name;
+            statements.Add(Expression.IfThen(Expression.OrElse(Expression.Equal(currentRootParam, Expression.Constant(null)), Expression.NotEqual(Expression.Property(currentRootParam, pkName), Expression.Property(rootVar, pkName))),
+                Expression.Block(
+                    Expression.Call(resultsParam, typeof(ICollection<>).MakeGenericType(rootType).GetMethod("Add"), rootVar),
+                    Expression.Assign(currentRootParam, rootVar),
+                    Expression.Assign(newRoot, Expression.Constant(true))
+                )));
+
             var i = 1;
-            statements.AddRange(this.VisitTree(fetchTree, rootVar, objectsParam, false, mappedTypes, ref i));
+            statements.AddRange(this.VisitTree(fetchTree, currentRootParam, newRoot, objectsParam, false, false, mappedTypes, ref i));
 
             // add in the return statement and parameter
             statements.Add(rootVar);
-            return Tuple.Create(Expression.Lambda(Expression.Lambda(Expression.Block(new ParameterExpression[] { rootVar }, statements), objectsParam), dictionaryParam).Compile(), mappedTypes.ToArray());
-        }
-
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private void AddDictionaryFetch<T>(
-            ParameterExpression dictionaryParam,
-            FetchNode fetchTree,
-            IList<Expression> statements,
-            ParameterExpression rootVar,
-            bool isTracked) {
-            // primary key get expression
-            var primaryKeyExpr = Expression.Convert(Expression.Property(rootVar, fetchTree.Children.First().Value.Column.Map.PrimaryKey.Name), typeof(object));
-
-            // check the dictionary for this value
-            // p => dict.GetOrAdd((object)p.PostId, p);
-            var tt = typeof(T);
-            var expr = Expression.Assign(
-                rootVar,
-                Expression.Call(
-                    null,
-                    typeof(DictionaryExtensions).GetMethods()
-                                                .First(m => m.Name == "GetOrAdd" && m.GetParameters().Count() == 3 && m.GetParameters().Count(p => p.Name == "valueCreator") == 0)
-                                                .MakeGenericMethod(
-                                                    typeof(object),
-                                                    isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt)),
-                    new Expression[] { dictionaryParam, primaryKeyExpr, rootVar }));
-            statements.Add(expr);
+            var innerLambda = Expression.Lambda(Expression.Block(new ParameterExpression[] { rootVar, newRoot }, statements), objectsParam);
+            return Tuple.Create(Expression.Lambda(innerLambda, currentRootParam, resultsParam).Compile(), mappedTypes.ToArray());
         }
 
         [SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1515:SingleLineCommentMustBePrecededByBlankLine", Justification = "Reviewed. Suppression is OK here."), SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "This is hard to read the StyleCop way")]
-        private IEnumerable<Expression> VisitTree(FetchNode node, Expression parentExpression, ParameterExpression objectsParam, bool visitedCollection, IList<Type> mappedTypes, ref int i) {
+        private IEnumerable<Expression> VisitTree(FetchNode node, Expression parentExpression, ParameterExpression newRoot, ParameterExpression objectsParam, bool visitedCollection, bool insideCollection, IList<Type> mappedTypes, ref int i) {
             var statements = new List<Expression>();
             foreach (var childNode in node.Children) {
                 if (childNode.Value.IsFetched) {
@@ -107,7 +100,10 @@
                             break;
                         case RelationshipType.ManyToOne:
                         case RelationshipType.OneToOne:
-                            ex = Expression.Assign(propExpr, convertExpr);
+                            var assignRelationExpr = Expression.Assign(propExpr, convertExpr);
+                            ex = insideCollection ? 
+                                assignRelationExpr :
+                                (Expression)Expression.IfThen(Expression.IsTrue(newRoot), assignRelationExpr);
                             break;
                         default:
                             throw new InvalidOperationException(
@@ -116,7 +112,7 @@
 
                     // now visit the next fetch
                     ++i;
-                    var innerStatements = this.VisitTree(childNode.Value, convertExpr, objectsParam, visitedCollection, mappedTypes, ref i);
+                    var innerStatements = this.VisitTree(childNode.Value, convertExpr, newRoot, objectsParam, visitedCollection, insideCollection || childNode.Value.Column.Relationship == RelationshipType.OneToMany, mappedTypes, ref i);
                     var thenExpr = new List<Expression> { ex };
                     thenExpr.AddRange(innerStatements);
                     statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
@@ -153,41 +149,62 @@
                             new Expression[] { mappedType }));
         }
 
-        public Tuple<Delegate, Type[]> GenerateMultiCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
+        public Tuple<Delegate, Type[], Type[]> GenerateMultiCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
             var tt = typeof(T);
-            var rootType = isTracked
-                               ? this.generatedCodeManager.GetTrackingType(tt)
-                               : this.generatedCodeManager.GetForeignKeyType(tt);
+            var rootType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
+            var currentRootParam = Expression.Parameter(rootType, "currentRoot");
+            var resultsParam = Expression.Parameter(typeof(IList<>).MakeGenericType(rootType), "results");
+
             var objectsParam = Expression.Parameter(typeof(object[]));
-            var rootVar = Expression.Variable(rootType);
+            var rootVar = Expression.Variable(rootType, tt.Name);
+            var newRoot = Expression.Variable(typeof(bool), "newRoot");
             var statements = new List<Expression>();
             var mappedTypes = new List<Type> { rootType };
+            var mapperClosureTypes = new List<Type>();
+            var collectionVariables = new List<ParameterExpression>();
+            var newVariables = new List<ParameterExpression>();
 
-            // root dictionary stores the root object
-            var rootDictionaryParam = Expression.Parameter(typeof(IDictionary<,>).MakeGenericType(typeof(object), rootType), "dict");
+            //// root dictionary stores the root object
+            //var rootDictionaryParam = Expression.Parameter(typeof(IDictionary<,>).MakeGenericType(typeof(object), rootType), "dict");
 
-            // other dictionary stores all the other collection objects
-            var otherDictionaryParam =
-                Expression.Parameter(
-                    typeof(IDictionary<,>).MakeGenericType(
-                        typeof(int),
-                        typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object))));
+            //// other dictionary stores all the other collection objects
+            //var otherDictionaryParam =
+            //    Expression.Parameter(
+            //        typeof(IDictionary<,>).MakeGenericType(
+            //            typeof(int),
+            //            typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object))));
 
             // var rootVar = (RootType)objects[0];
             GetRootAssignment<T>(statements, rootVar, objectsParam, rootType);
 
-            this.AddDictionaryFetch<T>(rootDictionaryParam, fetchTree, statements, rootVar, isTracked);
+            // var newRoot = false;
+            statements.Add(Expression.Assign(newRoot, Expression.Constant(false)));
+
+            // check to see if rootVar different to currentRoot
+            // if currentRoomParam == null || currentRootParam.Pk != rootVar.Pk { results.Add(rootVar); currentRootParam = rootVar; }
+            var primaryKey = this.configuration.GetMap<T>().PrimaryKey;
+            var pkName = primaryKey.Name;
+            var currentRootPrimaryKeyExpr = Expression.Property(currentRootParam, pkName);
+            statements.Add(Expression.IfThen(Expression.OrElse(Expression.Equal(currentRootParam, Expression.Constant(null)), Expression.NotEqual(currentRootPrimaryKeyExpr, Expression.Property(rootVar, pkName))),
+                Expression.Block(
+                    Expression.Call(resultsParam, typeof(ICollection<>).MakeGenericType(rootType).GetMethod("Add"), rootVar),
+                    Expression.Assign(currentRootParam, rootVar),
+                    Expression.Assign(newRoot, Expression.Constant(true))
+                )));
+
+
             int collectionFetchParamCounter = 0;
             var i = 1;
-            statements.AddRange(this.VisitMultiCollectionTree<T>(fetchTree, otherDictionaryParam, ref collectionFetchParamCounter, rootVar, objectsParam, mappedTypes, ref i));
+            statements.AddRange(this.VisitMultiCollectionTree<T>(fetchTree, ref collectionFetchParamCounter, currentRootParam, newRoot, primaryKey.Type, currentRootPrimaryKeyExpr, objectsParam, mappedTypes, mapperClosureTypes, collectionVariables, newVariables, ref i));
 
             // add in the return statement and parameter
             statements.Add(rootVar);
-            return Tuple.Create(Expression.Lambda(Expression.Lambda(Expression.Block(new ParameterExpression[] { rootVar }, statements), objectsParam), rootDictionaryParam, otherDictionaryParam).Compile(), mappedTypes.ToArray());
+            var innerLambda = Expression.Lambda(Expression.Block(new ParameterExpression[] { rootVar, newRoot }.Union(newVariables), statements), objectsParam);
+            return Tuple.Create(Expression.Lambda(innerLambda, new[] { currentRootParam, resultsParam }.Union(collectionVariables)).Compile(), mappedTypes.ToArray(), mapperClosureTypes.ToArray());
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "Reviewed. Suppression is OK here.")]
-        private IEnumerable<Expression> VisitMultiCollectionTree<T>(FetchNode node, ParameterExpression otherDictionaryParam, ref int collectionFetchParamCounter, Expression parentExpression, ParameterExpression objectsParam, IList<Type> mappedTypes, ref int i) {
+        private IEnumerable<Expression> VisitMultiCollectionTree<T>(FetchNode node, ref int collectionFetchParamCounter, Expression parentExpression, ParameterExpression newRoot, Type newRootPrimaryKeyType, Expression newRootPrimaryKeyExpr, ParameterExpression objectsParam, IList<Type> mappedTypes, List<Type> mapperClosureTypes, List<ParameterExpression> collectionVariables, List<ParameterExpression> newVariables, ref int i) {
             var statements = new List<Expression>();
             foreach (var child in node.Children) {
                 if (child.Value.IsFetched) {
@@ -199,53 +216,109 @@
                     mappedTypes.Add(mappedType);
                     var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
                     var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
+                    var thisVar = Expression.Parameter(mappedType, childType.Name + i);
+                    newVariables.Add(thisVar);
                     var convertExpr = Expression.Convert(arrayIndexExpr, mappedType);
+                    var thisInit = Expression.Assign(thisVar, convertExpr);
                     var propExpr = Expression.Property(parentExpression, child.Value.Column.Name);
 
+                    var thisChildNewRoot = newRoot;
+                    var thisChildNewRootPrimaryKeyType = newRootPrimaryKeyType;
+                    var thisChildNewRootPrimaryKeyExpr = newRootPrimaryKeyExpr;
+
                     // add the member assign expression
-                    Expression ex = null;
+                    var thenExpr = new List<Expression> { thisInit };
                     if (child.Value.Column.Relationship == RelationshipType.OneToMany) {
                         // check dictionary for existing instance
-                        var dictAccessExpr = Expression.Property(otherDictionaryParam, "Item", Expression.Constant(i));
-                        var primaryKeyProperty = Expression.Property(convertExpr, child.Value.Column.ChildColumn.Map.PrimaryKey.Name);
-                        var assignExpr = Expression.Assign(
-                            Expression.ArrayAccess(objectsParam, Expression.Constant(i)),
-                            Expression.Property(dictAccessExpr, "Item", Expression.Convert(primaryKeyProperty, typeof(object))));
-                        ex =
+                        var pk = child.Value.Column.ChildColumn.Map.PrimaryKey;
+                        var pkType = pk.Type;
+                        var collectionVariableIdx = mapperClosureTypes.Count / 2;
+                        var primaryKeyProperty = Expression.Property(thisVar, pk.Name);
+                        
+                        // dictionary for storing entities by id for this type
+                        var dictType = typeof(IDictionary<,>).MakeGenericType(pkType, mappedType);
+                        mapperClosureTypes.Add(dictType);
+                        var dictVar = Expression.Variable(dictType, "dict" + collectionVariableIdx);
+                        collectionVariables.Add(dictVar);
+                        
+                        // Hashset<Tuple<ParentPkType, ChildPkType>> for indicating if the entity has been added to this entity
+                        // tuple variable for checking whether this entity has been added to this collection
+                        var tupleType = typeof(Tuple<,>).MakeGenericType(newRootPrimaryKeyType, pkType);
+                        var tupleVar = Expression.Variable(tupleType, "tuple" + collectionVariableIdx);
+                        var hashsetPairType = typeof(HashSet<>).MakeGenericType(tupleType);
+                        mapperClosureTypes.Add(hashsetPairType);
+                        var hashsetPairVar = Expression.Variable(hashsetPairType, "hashsetPair" + collectionVariableIdx);
+                        newVariables.Add(tupleVar);
+                        collectionVariables.Add(hashsetPairVar);
+                        thenExpr.Add(Expression.Assign(tupleVar, Expression.New(tupleType.GetConstructor(new[] { newRootPrimaryKeyType, pkType }), newRootPrimaryKeyExpr, primaryKeyProperty)));
+
+                        // variable for checking if the variable is new
+                        var newCollectionEntryVar = Expression.Variable(typeof(bool), "new" + collectionVariableIdx);
+                        thenExpr.Add(Expression.Assign(newCollectionEntryVar, Expression.Constant(false)));
+                        newVariables.Add(newCollectionEntryVar);
+
+                        // check for null and assign expr
+                        var checkForNullAndAssignExpr =
+                            Expression.Block(
+                                Expression.IfThen(
+                                    Expression.Equal(propExpr, Expression.Constant(null)),
+                                    Expression.Assign(propExpr, Expression.New(typeof(List<>).MakeGenericType(childType)))),
+                                Expression.Call(
+                                    propExpr,
+                                    typeof(ICollection<>).MakeGenericType(childType).GetMethod("Add"),
+                                    new Expression[] { thisVar }),
+                                Expression.Call(hashsetPairVar, hashsetPairType.GetMethod("Add"), tupleVar));
+
+
+                        thenExpr.Add(
                             Expression.IfThenElse(
                                 Expression.Call(
-                                    dictAccessExpr,
-                                    typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object)).GetMethod("ContainsKey"),
-                                    new Expression[] { Expression.Convert(primaryKeyProperty, typeof(object)) }),
-                                assignExpr,
+                                    dictVar,
+                                    dictType.GetMethod("ContainsKey"),
+                                    new Expression[] { primaryKeyProperty }),
+                                    Expression.Block(
+                                        Expression.Assign(thisVar, Expression.Property(dictVar, "Item", primaryKeyProperty)),
+                                        Expression.IfThen(Expression.Not(Expression.Call(hashsetPairVar, hashsetPairType.GetMethod("Contains"), tupleVar)),
+                                            checkForNullAndAssignExpr
+                                        )
+                                    )
+                                ,
                                 Expression.Block(
                                     Expression.Call(
-                                        dictAccessExpr,
-                                        typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object))
-                                                              .GetMethods()
-                                                              .First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
-                                        Expression.Convert(primaryKeyProperty, typeof(object)),
-                                        arrayIndexExpr),
-                                    Expression.Call(
-                                        propExpr,
-                                        typeof(ICollection<>).MakeGenericType(child.Value.Column.Type.GetGenericArguments().First()).GetMethod("Add"),
-                                        new Expression[] { convertExpr })));
+                                        dictVar,
+                                        dictType.GetMethods().First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
+                                        primaryKeyProperty,
+                                        thisVar),
+                                        checkForNullAndAssignExpr
+                                    ,
+                                    Expression.Assign(newCollectionEntryVar, Expression.Constant(true))
+                                )
+                            ));
+
+                        // update newRoot parameters to reflect this collection as the new root
+                        thisChildNewRootPrimaryKeyExpr = primaryKeyProperty;
+                        thisChildNewRoot = newCollectionEntryVar;
+                        thisChildNewRootPrimaryKeyType = pkType;
                     }
                     else {
-                        ex = Expression.Assign(propExpr, convertExpr);
+                        thenExpr.Add(Expression.IfThen(Expression.IsTrue(newRoot), Expression.Assign(propExpr, thisVar)));
                     }
 
                     // add each child node
                     ++i;
                     var innerStatements = this.VisitMultiCollectionTree<T>(
                         child.Value,
-                        otherDictionaryParam,
                         ref collectionFetchParamCounter,
-                        convertExpr,
+                        thisVar,
+                        thisChildNewRoot,
+                        thisChildNewRootPrimaryKeyType,
+                        thisChildNewRootPrimaryKeyExpr,
                         objectsParam,
                         mappedTypes,
+                        mapperClosureTypes,
+                        collectionVariables,
+                        newVariables,
                         ref i);
-                    var thenExpr = new List<Expression> { ex };
                     thenExpr.AddRange(innerStatements);
                     statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                 }

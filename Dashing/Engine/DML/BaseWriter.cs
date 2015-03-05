@@ -32,19 +32,33 @@
             return result.Parameters;
         }
 
-        public void AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql, FetchNode rootNode) {
+        public bool AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql, FetchNode rootNode, Func<IColumn, FetchNode, string> aliasRewriter = null, Func<IColumn, FetchNode, string> nameRewriter = null) {
             if (orderClauses.Count == 0) {
-                return;
+                return false;
             }
 
             sql.Append(" order by ");
             var orderClauseWriter = new OrderClauseWriter(this.Configuration, this.Dialect);
+            var containsRootPrimaryKeyClause = false;
             while (orderClauses.Count > 0) {
-                sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode));
+                var isRootPrimaryKeyClause = false;
+                if (aliasRewriter == null && nameRewriter == null) {
+                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode, out isRootPrimaryKeyClause));
+                }
+                else {
+                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode, aliasRewriter, nameRewriter, out isRootPrimaryKeyClause));
+                }
+
                 if (orderClauses.Count > 0) {
                     sql.Append(", ");
                 }
+
+                if (isRootPrimaryKeyClause) {
+                    containsRootPrimaryKeyClause = true;
+                }
             }
+
+            return containsRootPrimaryKeyClause;
         }
     }
 }

@@ -24,7 +24,7 @@
                 new DropTableWriter(this.config.Engine.SqlDialect),
                 new AlterTableWriter(this.config.Engine.SqlDialect));
             IEnumerable<string> warnings, errors;
-            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), this.config.Maps, null, null, out warnings, out errors);
+            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), this.config.Maps, null, null, new string[0], out warnings, out errors);
             using (var transactionLessSession = this.config.BeginTransactionLessSession()) {
                 transactionLessSession.Dapper.Execute("create database " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute("use " + this.DatabaseName);

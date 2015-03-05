@@ -1,26 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
-using System.Collections;
+﻿namespace Dashing.CodeGeneration {
+    using System;
+    using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
 
-namespace Dashing.CodeGeneration {
-    internal class FetchCollectionAwaiter<T> : IDictionaryAwaiter<T> {
+    internal class FetchCollectionAwaiter<T> : IEnumerableAwaiter<T> {
         public TaskAwaiter<IEnumerable<T>> Awaiter { get; set; }
 
-        public IDictionary Results { get; set; }
+        public IEnumerable<T> Results { get; set; }
 
-        public IDictionaryAwaiter<T> GetAwaiter() {
+        public IEnumerableAwaiter<T> GetAwaiter() {
             return this;
         }
 
         public bool IsCompleted {
-            get { return this.Awaiter.IsCompleted; }
+            get {
+                return this.Awaiter.IsCompleted;
+            }
         }
 
-        public IDictionary GetResult() {
+        public IEnumerable<T> GetResult() {
             return this.Results;
         }
 

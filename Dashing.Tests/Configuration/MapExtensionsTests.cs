@@ -1,4 +1,7 @@
 ﻿namespace Dashing.Tests.Configuration {
+    using System.Configuration;
+    using System.Linq;
+
     using Dashing.Configuration;
     using Dashing.Tests.TestDomain;
 
@@ -50,6 +53,34 @@
             var property = map.Property(u => u.Username);
             Assert.NotNull(property);
             Assert.Equal(Username, property.Name);
+        }
+
+        [Fact]
+        public void ForeignKeyIndexesAddedAutomatically() {
+            var config =
+                new MutableConfiguration(
+                    new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true", "System.Data.SqlClient"))
+                    .AddNamespaceOf<Post>();
+            var postMap = config.GetMap<Post>();
+            var blogMap = config.GetMap<Blog>();
+
+            Assert.Equal(2, postMap.ForeignKeys.Count());
+            Assert.Equal(2, postMap.Indexes.Count());
+            Assert.Equal("Blog", postMap.Indexes.Last().Columns.First().Name);
+        }
+
+        [Fact]
+        public void ExistingIndexNotRecreated() {
+            var config =
+                new MutableConfiguration(
+                    new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true", "System.Data.SqlClient"))
+                    .AddNamespaceOf<Post>();
+            var postMap = config.GetMap<Post>();
+            postMap.Index(p => new { p.Blog });
+
+            Assert.Equal(2, postMap.ForeignKeys.Count());
+            Assert.Equal(2, postMap.Indexes.Count());
+            Assert.Equal("Blog", postMap.Indexes.First().Columns.First().Name);
         }
 
         private Map<User> MakeMap() {
