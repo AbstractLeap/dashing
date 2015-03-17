@@ -529,6 +529,9 @@
         private ISqlElement VisitUnary(UnaryExpression exp) {
             if (exp.NodeType == ExpressionType.Not) {
                 this.isNegated = true;
+                if (exp.Operand is BinaryExpression) {
+                    this.sqlElements.Enqueue(new StringElement("not "));
+                }
             }
 
             return this.Visit(exp.Operand);

@@ -139,6 +139,22 @@
         }
 
         [Fact]
+        public void NotBracketsWorks() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !(p.Author.EmailAddress == "Foo" && p.Rating > 3);
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where not ((t_100.[EmailAddress] = @l_1) and (t.[Rating] > @l_2))", result.Sql);
+        }
+
+        [Fact]
+        public void NotSingleBracketWorks() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !(p.Rating > 3);
+            var result = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where not ([Rating] > @l_1)", result.Sql);
+        }
+
+        [Fact]
         public void StaticPropertyMakesParameter() {
             var start = DateTime.UtcNow;
             var target = MakeTarget();
