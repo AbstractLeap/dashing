@@ -45,6 +45,11 @@
                     Console.WriteLine(e.Message);
                 }
             }
+            catch (ReflectionTypeLoadException rtle) {
+                foreach (var le in rtle.LoaderExceptions) {
+                    Console.WriteLine(le.Message);
+                }
+            }
             catch (TargetInvocationException e) {
                 using (Color(ConsoleColor.Red)) {
                     Console.WriteLine();
