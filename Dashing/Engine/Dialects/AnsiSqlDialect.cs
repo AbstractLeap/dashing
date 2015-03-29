@@ -56,6 +56,10 @@ namespace Dashing.Engine.Dialects {
             throw new NotImplementedException();
         }
 
+        public override string ChangeTableName(IMap @from, IMap to) {
+            throw new NotImplementedException();
+        }
+
         public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             throw new InvalidOperationException("There is no Ansi-SQL way of expressing an offset-limit / skip-take clause.");
         }

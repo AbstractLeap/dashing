@@ -139,6 +139,10 @@
                 throw new NotImplementedException();
             }
 
+            public override string ChangeTableName(IMap @from, IMap to) {
+                throw new NotImplementedException();
+            }
+
             public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
                 throw new NotImplementedException();
             }

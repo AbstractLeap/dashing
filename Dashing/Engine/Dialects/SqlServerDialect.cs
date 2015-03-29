@@ -22,8 +22,13 @@ namespace Dashing.Engine.Dialects {
             this.AppendQuotedName(sql, map.Table);
         }
 
-        protected override void AppendAutoGenerateModifier(StringBuilder sql) {
-            sql.Append(" identity(1,1)");
+        protected override void AppendAutoGenerateModifier(StringBuilder sql, IColumn column) {
+            if (column.Type == typeof(Guid)) {
+                sql.Append(" NEWSEQUENTIALID()");
+            }
+            else {
+                sql.Append(" identity(1,1)");
+            }
         }
 
         protected override string TypeName(DbType type) {
@@ -129,6 +134,14 @@ namespace Dashing.Engine.Dialects {
             }
 
             return statement;
+        }
+
+        public override string ChangeTableName(IMap @from, IMap to) {
+            var sql = new StringBuilder("EXEC sp_RENAME ");
+            this.AppendQuotedTableName(sql, from);
+            sql.Append(", ");
+            this.AppendQuotedTableName(sql, to);
+            return sql.ToString();
         }
 
         public override string GetIdSql() {

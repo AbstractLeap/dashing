@@ -77,5 +77,7 @@ namespace Dashing.Engine.Dialects {
         /// <returns></returns>
         /// <remarks>Useful for e.g. dropping default constraints in sql server</remarks>
         string OnBeforeDropColumn(IColumn column);
+
+        string ChangeTableName(IMap @from, IMap to);
     }
 }

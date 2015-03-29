@@ -114,7 +114,6 @@
     <Compile Include="Engine\DML\WhereClauseWriterTests.cs" />
     <Compile Include="Engine\DML\UpdateWriterTests.cs" />
     <Compile Include="Extensions\DynamicParametersExtensions.cs" />
-    <Compile Include="Extensions\EnumerableExtensionsTests.cs" />
     <Compile Include="MockConfiguration.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Engine\DDL\DropTableWriterTests.cs" />

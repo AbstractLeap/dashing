@@ -43,5 +43,9 @@
         public string DropIndex(Index index) {
             return this.dialect.DropIndex(index);
         }
+
+        public string RenameTable(IMap @from, IMap to) {
+            return this.dialect.ChangeTableName(@from, to);
+        }
     }
 }
