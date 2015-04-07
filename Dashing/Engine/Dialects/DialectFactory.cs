@@ -5,6 +5,13 @@
 
     public class DialectFactory {
         public ISqlDialect Create(ConnectionStringSettings connectionString) {
+            if (connectionString == null) { throw new ArgumentNullException("connectionString"); }
+
+            if (string.IsNullOrEmpty(connectionString.ProviderName)) {
+                throw new ArgumentException(
+                    "Please specify the provider name for that connection string (add providerName=\"System.Data.SqlClient\" to the connection string line in app/web.config)");
+            }
+
             switch (connectionString.ProviderName) {
                 case "System.Data.SqlClient":
                     var connectionStringBuilder = new SqlConnectionStringBuilder(connectionString.ConnectionString);
@@ -23,10 +30,13 @@
                     if (connectionString.ConnectionString.Contains("SQLNCLI11")) {
                         return new SqlServer2012Dialect();
                     }
-                    else if (connectionString.ConnectionString.Contains("SQLNCLI10")
+
+                    if (connectionString.ConnectionString.Contains("SQLNCLI10")
                         || connectionString.ConnectionString.Contains("SQLNCLI;")) {
                         return new SqlServerDialect();
-                    } else if (connectionString.ConnectionString.Contains("MySQLProv")) {
+                    }
+
+                    if (connectionString.ConnectionString.Contains("MySQLProv")) {
                         return new MySqlDialect();
                     }
 

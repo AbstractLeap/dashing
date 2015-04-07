@@ -35,7 +35,7 @@
         private static bool isVerbose;
 
         private static void Main(string[] args) {
-             ConfigureAssemblyResolution();
+            ConfigureAssemblyResolution();
 
             try {
                 InnerMain(args);
@@ -43,6 +43,11 @@
             catch (CatchyException e) {
                 using (Color(ConsoleColor.Red)) {
                     Console.WriteLine(e.Message);
+                }
+            }
+            catch (ReflectionTypeLoadException rtle) {
+                foreach (var le in rtle.LoaderExceptions) {
+                    Console.WriteLine(le.Message);
                 }
             }
             catch (TargetInvocationException e) {
@@ -442,23 +447,38 @@
                 Console.Write("-- ");
             }
 
-            // set up migrator
-            IMigrator migrator;
-            if (naive) {
-                migrator = new NaiveMigrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), null);
-            }
-            else {
-                migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), new AlterTableWriter(dialect));
-            }
+            var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
+            using (var connection = factory.CreateConnection()) {
+                // set up migrator
+                IMigrator migrator;
+                if (naive) {
+                    throw new NotSupportedException("The Naive Migrator is no longer supported");
+                }
+                else {
+                    migrator = new Migrator(
+                        dialect,
+                        new CreateTableWriter(dialect),
+                        new AlterTableWriter(dialect),
+                        new DropTableWriter(dialect),
+                        new StatisticsProvider(connection, dialect));
+                }
 
-            // run the migrator
-            string script;
-            using (new TimedOperation("-- Generating diff...")) {
-                script = migrator.GenerateSqlDiff(fromMaps, configuration.Maps, consoleAnswerProvider, Trace, reverseEngineerSettings.GetIndexesToIgnore(), out warnings, out errors);
-            }
+                // run the migrator
+                string script;
+                using (new TimedOperation("-- Generating diff...")) {
+                    script = migrator.GenerateSqlDiff(
+                        fromMaps,
+                        configuration.Maps,
+                        consoleAnswerProvider,
+                        Trace,
+                        reverseEngineerSettings.GetIndexesToIgnore(),
+                        out warnings,
+                        out errors);
 
-            // TODO: do things with warnings and errors
-            return script;
+                    // TODO: do things with warnings and errors
+                    return script;
+                }
+            }
         }
 
         private static void Trace(string text) {

@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Linq;
 
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
@@ -8,13 +9,15 @@
     using Dashing.Tools.Migration;
     using Dashing.Tools.Tests.TestDomain;
 
+    using Moq;
+
     using Xunit;
 
     public class MigrationCreateTests {
         [Fact]
         public void CreateTableWorks() {
-            var migrator = MakeMigrator();
             var config = new SimpleClassConfig();
+            var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
             var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, new string[0], out warnings, out errors);
@@ -25,9 +28,9 @@
 
         [Fact]
         public void SelfReferencingWorks() {
-            var migrator = MakeMigrator();
             var config = new MutableConfiguration(ConnectionString);
             config.Add<Category>();
+            var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
             var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, new string[0], out warnings, out errors);
@@ -39,9 +42,9 @@ create index [idx_Category_Parent] on [Categories] ([ParentId]);
 
         [Fact]
         public void PairWorks() {
-            var migrator = MakeMigrator();
             var config = new MutableConfiguration(ConnectionString);
             config.Add<Pair>();
+            var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
             var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, new string[0], out warnings, out errors);
@@ -55,10 +58,10 @@ create index [idx_Pair_ReferencedBy] on [Pairs] ([ReferencedById]);
 
         [Fact]
         public void OneToOneWorks() {
-            var migrator = MakeMigrator();
             var config = new MutableConfiguration(ConnectionString);
             config.Add<OneToOneLeft>();
             config.Add<OneToOneRight>();
+            var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
             var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, new string[0], out warnings, out errors);
@@ -74,9 +77,9 @@ create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);
 
         [Fact]
         public void ComplexDomainBuilds() {
-            var migrator = MakeMigrator();
             var config = new MutableConfiguration(ConnectionString);
             config.AddNamespaceOf<Post>();
+            var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
             var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, null, new string[0], out warnings, out errors);
@@ -122,11 +125,15 @@ create index [idx_PostTag_Tag] on [PostTags] ([TagId]);
                 script);
         }
 
-        private static Migrator MakeMigrator() {
-            var migrator = new Migrator(
+        private static Migrator MakeMigrator(IConfiguration config) {
+            var mockStatisticsProvider = new Mock<IStatisticsProvider>();
+            mockStatisticsProvider.Setup(s => s.GetStatistics(It.IsAny<IEnumerable<IMap>>()))
+                                  .Returns(config.Maps.ToDictionary(m => m.Type.Name, m => new Statistics()));
+            var migrator = new Migrator(new SqlServerDialect(),
                 new CreateTableWriter(new SqlServerDialect()),
+                new AlterTableWriter(new SqlServerDialect()),
                 new DropTableWriter(new SqlServerDialect()),
-                new AlterTableWriter(new SqlServerDialect()));
+                mockStatisticsProvider.Object);
             return migrator;
         }
 

@@ -1,6 +1,8 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.RegularExpressions;
 
     using Dashing.Configuration;
@@ -8,6 +10,8 @@
     using Dashing.Engine.Dialects;
     using Dashing.Tools.Migration;
     using Dashing.Tools.Tests.TestDomain;
+
+    using Moq;
 
     using Xunit;
 
@@ -23,7 +27,7 @@
             configTo.GetMap<OneToOneRight>().Columns.Remove("Left");
 
             var dialect = new SqlServer2012Dialect();
-            var migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), new AlterTableWriter(dialect));
+            var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
             var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, null, new string[0], out warnings, out errors);
@@ -46,7 +50,7 @@
             configTo.GetMap<OneToOneLeft>().Columns.Remove("Right");
 
             var dialect = new SqlServer2012Dialect();
-            var migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), new AlterTableWriter(dialect));
+            var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
             var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, null, new string[0], out warnings, out errors);
@@ -68,13 +72,19 @@
             mappedTypes.Remove(typeof(Pair));
 
             var dialect = new SqlServer2012Dialect();
-            var migrator = new Migrator(new CreateTableWriter(dialect), new DropTableWriter(dialect), new AlterTableWriter(dialect));
+            var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
             var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, null, new string[0], out warnings, out errors);
 
-            Assert.Equal(@"if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'Pairs') drop table [Pairs];
+            Assert.Equal(@"drop table [Pairs];
 ", script);
+        }
+
+        private IStatisticsProvider GetMockStatisticsProvider(IConfiguration config) {
+            var mock = new Mock<IStatisticsProvider>();
+            mock.Setup(m => m.GetStatistics(It.IsAny<IEnumerable<IMap>>())).Returns(config.Maps.ToDictionary(k => k.Type.Name, k => new Statistics()));
+            return mock.Object;
         }
     }
 }

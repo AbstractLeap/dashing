@@ -13,5 +13,7 @@
         string DropForeignKey(ForeignKey foreignKey);
 
         string DropIndex(Index index);
+
+        string RenameTable(IMap @from, IMap to);
     }
 }

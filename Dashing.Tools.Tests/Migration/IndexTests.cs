@@ -9,6 +9,8 @@
     using Dashing.Tools.Migration;
     using Dashing.Tools.Tests.TestDomain;
 
+    using Moq;
+
     using Xunit;
 
     public class IndexTests {
@@ -38,10 +40,15 @@
         }
 
         private static Migrator MakeMigrator() {
+            var mockStatisticsProvider = new Mock<IStatisticsProvider>();
+            mockStatisticsProvider.Setup(s => s.GetStatistics(It.IsAny<IEnumerable<IMap>>()))
+                                  .Returns(new Dictionary<string, Statistics> { { "SimpleClass", new Statistics { HasRows = false } } });
             var migrator = new Migrator(
+                new SqlServerDialect(),
                 new CreateTableWriter(new SqlServerDialect()),
+                new AlterTableWriter(new SqlServerDialect()),
                 new DropTableWriter(new SqlServerDialect()),
-                new AlterTableWriter(new SqlServerDialect()));
+                mockStatisticsProvider.Object);
             return migrator;
         }
 
