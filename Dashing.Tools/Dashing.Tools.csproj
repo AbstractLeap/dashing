@@ -49,11 +49,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IAnswerProvider.cs" />
+    <Compile Include="Migration\ColumnKeyValuePairEqualityComparer.cs" />
     <Compile Include="Migration\IMigrator.cs" />
+    <Compile Include="Migration\IStatisticsProvider.cs" />
     <Compile Include="Migration\MigrationPair.cs" />
     <Compile Include="Migration\Migrator.cs" />
-    <Compile Include="Migration\MigratorBase.cs" />
-    <Compile Include="Migration\NaiveMigrator.cs" />
+    <Compile Include="Migration\Statistics.cs" />
+    <Compile Include="Migration\StatisticsProvider.cs" />
+    <Compile Include="Migration\StringBuilderExtensions.cs" />
     <Compile Include="Migration\TableNameEqualityComparer.cs" />
     <Compile Include="ModelGeneration\DefaultConvention.cs" />
     <Compile Include="ModelGeneration\IConvention.cs" />

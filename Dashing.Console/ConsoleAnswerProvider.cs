@@ -57,7 +57,7 @@
 
         public bool GetBooleanAnswer(string question) {
             string answer;
-            if (this.TryGetAnswer(question, out answer)) {
+            if (!this.TryGetAnswer(question, out answer)) {
                 Console.WriteLine(question + " (y/n)");
                 answer = Console.ReadLine().ToLowerInvariant().Trim();
                 this.SavePersistedAnswer(question, answer);
@@ -123,6 +123,40 @@
 
             Console.WriteLine();
             return multipleChoices.ElementAt(number);
+        }
+
+        public T GetAnswer<T>(string question) where T : struct {
+            string answer;
+            if (this.TryGetAnswer(question, out answer)) {
+                try {
+                    var typedAnswer = (T)Convert.ChangeType(answer, typeof(T));
+                    return typedAnswer;
+                }
+                catch {
+                    // doesn't matter here, we'll fall back to asking the user
+                }
+            }
+
+            // ask the user
+            Console.WriteLine();
+            using (Color(ConsoleColor.Green)) {
+                Console.WriteLine(question);
+            }
+
+            while (true) {
+                answer = Console.ReadLine();
+                try {
+                    var theTypedAnswer = (T)Convert.ChangeType(answer, typeof(T));
+                    this.SavePersistedAnswer(question, answer);
+                    return theTypedAnswer;
+                }
+                catch (InvalidCastException ex) {
+                    Console.WriteLine("There was an invalid cast exception: " + ex.Message + ". Please re-try:");
+                }
+                catch (FormatException ex) {
+                    Console.WriteLine("There was a format exception: " + ex.Message + ". Please re-try:");
+                } // let the others go
+            }
         }
 
         private static ColorContext Color(ConsoleColor color) {

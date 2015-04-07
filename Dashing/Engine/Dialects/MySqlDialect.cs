@@ -8,7 +8,7 @@ namespace Dashing.Engine.Dialects {
             : base('`', '`') {
         }
 
-        protected override void AppendAutoGenerateModifier(StringBuilder sql) {
+        protected override void AppendAutoGenerateModifier(StringBuilder sql, IColumn column) {
             sql.Append(" auto_increment");
         }
 
@@ -59,6 +59,14 @@ namespace Dashing.Engine.Dialects {
 
         public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
             sql.Append(" for update");
+        }
+
+        public override string ChangeTableName(IMap @from, IMap to) {
+            var sql = new StringBuilder("rename table ");
+            this.AppendQuotedTableName(sql, from);
+            sql.Append(" to ");
+            this.AppendQuotedTableName(sql, to);
+            return sql.ToString();
         }
 
         public override string GetIdSql() {
