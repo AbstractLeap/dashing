@@ -415,7 +415,7 @@
 
             var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
             schema = databaseReader.ReadAll();
-            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider);
+            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider, true);
             var reverseEngineer = new ModelGenerator();
             var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace, consoleAnswerProvider);
 
@@ -443,12 +443,13 @@
             using (new TimedOperation("-- Reverse engineering...")) {
                 Console.WriteLine();
                 var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
-                fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider);
+                fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider, false);
                 Console.Write("-- ");
             }
 
             var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
             using (var connection = factory.CreateConnection()) {
+                connection.ConnectionString = connectionStringSettings.ConnectionString;
                 // set up migrator
                 IMigrator migrator;
                 if (naive) {

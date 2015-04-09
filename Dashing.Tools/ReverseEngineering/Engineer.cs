@@ -51,7 +51,7 @@
             return type;
         }
 
-        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect, IEnumerable<string> tablesToIgnore, IAnswerProvider answerProvider) {
+        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect, IEnumerable<string> tablesToIgnore, IAnswerProvider answerProvider, bool fixOneToOnes) {
             if (tablesToIgnore == null) {
                 tablesToIgnore = new string[0];
             }
@@ -68,8 +68,10 @@
             }
 
             // go back through and try to spot one-to-one columns
-            foreach (var map in maps) {
-                FindOneToOnes(map, answerProvider);
+            if (fixOneToOnes) {
+                foreach (var map in maps) {
+                    FindOneToOnes(map, answerProvider);
+                }
             }
 
             return maps;

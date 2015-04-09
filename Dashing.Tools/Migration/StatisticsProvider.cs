@@ -28,9 +28,15 @@ namespace Dashing.Tools.Migration {
                 var cmd = this.connection.CreateCommand();
                 var sql = new StringBuilder("select * from ");
                 this.dialect.AppendQuotedTableName(sql, map);
-                this.dialect.ApplySkipTake(sql, null, 1, 0);
+                this.dialect.ApplySkipTake(sql, new StringBuilder(), 1, 0);
                 cmd.CommandText = sql.ToString();
                 cmd.CommandType = CommandType.Text;
+                var takeParam = cmd.CreateParameter();
+                takeParam.DbType = DbType.Int32;
+                takeParam.Direction = ParameterDirection.Input;
+                takeParam.ParameterName = "@take";
+                takeParam.Value = 1;
+                cmd.Parameters.Add(takeParam);
                 using (var reader = cmd.ExecuteReader()) {
                     result.Add(map.Type.Name, new Statistics { HasRows = reader.Read() });
                 }
