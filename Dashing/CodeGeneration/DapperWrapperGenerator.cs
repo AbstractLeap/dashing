@@ -233,7 +233,7 @@ namespace Dashing.CodeGeneration {
 
         private IEnumerable<Tuple<string, string>> TraverseAndGenerateMappersAndQueries(CodeTypeDeclaration dapperWrapperClass, FetchNode rootNode, FetchNode currentPath, Type rootType, Type currentType, Func<Type, IMap> getMap, int recursionLevel, int maxRecursion, CodeGeneratorConfig codeConfig, string signaturePrefix = "", string signatureSuffix = "") {
             var map = getMap(currentType);
-            var manyToOneColumns = map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne);
+            var manyToOneColumns = map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne && !c.Value.IsIgnored);
             var signatures = new List<Tuple<string, string>>();
             foreach (var subset in manyToOneColumns.Subsets().Where(s => s.Any())) {
                 // we need to generate a mapping function and a query function
@@ -367,7 +367,7 @@ namespace Dashing.CodeGeneration {
             // root.Post = (Post)objects[i];
             var i = 0;
             var nestedFetchedTypes = new List<Type>();
-            foreach (var node in rootNode.Children) {
+            foreach (var node in rootNode.Children.Where(c => !c.Value.Column.IsIgnored)) {
                 IEnumerable<Type> childFetchedTypes;
                 mapper.Statements.Add(this.AddAssignment(mapper, root, node, objects, ref i, out childFetchedTypes));
                 nestedFetchedTypes.AddRange(childFetchedTypes);
@@ -392,7 +392,7 @@ namespace Dashing.CodeGeneration {
                 objectRef,
                 new CodeCastExpression(node.Value.Column.Type, new CodeArrayIndexerExpression(objects, new CodePrimitiveExpression(++i)))));
             var thisI = i;
-            foreach (var child in node.Value.Children) {
+            foreach (var child in node.Value.Children.Where(c => !c.Value.Column.IsIgnored)) {
                 IEnumerable<Type> nestedTypes;
                 statements.Add(this.AddAssignment(mapper, objectRef, child, objects, ref i, out nestedTypes));
                 types.AddRange(nestedTypes);

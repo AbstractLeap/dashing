@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.77</version>
+        <version>0.0.78</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.77 - Migrator 2.0
+        <releaseNotes>* 0.0.78 - CodeGenerator not ignoring columns
+* 0.0.77 - Migrator 2.0
 * 0.0.76 - Added new NeedToDash methods
 * 0.0.75 - Not Binary Bug Fix
 * 0.0.74 - Collection fetching improvements, fixes to dbm index regeneration
