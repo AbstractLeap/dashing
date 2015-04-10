@@ -372,7 +372,7 @@
         }
 
         private bool RequiresLengthChange(IColumn from, IColumn to) {
-            return this.dialect.TypeTakesLength(from.DbType) && (from.MaxLength != to.MaxLength || from.Length != to.Length);
+            return this.dialect.TypeTakesLength(from.DbType) && (from.MaxLength != to.MaxLength || (!to.MaxLength && from.Length != to.Length));
         }
 
         private bool RequiresPrecisionOrScaleChange(IColumn from, IColumn to) {
