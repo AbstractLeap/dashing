@@ -47,6 +47,10 @@
 
         private bool isPrimaryKeyAccess;
 
+        private bool isEntityFetch;
+
+        private Type entityFetchType;
+
         private Type primaryKeyAccessType;
 
         private bool isNegated;
@@ -100,6 +104,7 @@
             this.doPrependValue = false;
             this.isPrimaryKeyAccess = false;
             this.isNegated = false;
+            this.isEntityFetch = false;
         }
 
         private ISqlElement VisitMethodCall(MethodCallExpression exp) {
@@ -144,23 +149,51 @@
                         // this is IEnumerable.Contains method
                         if (exp.Method.DeclaringType == typeof(Enumerable)) {
                             // static method
-                            memberExpr = exp.Arguments[1] as MemberExpression;
+                            if (exp.Arguments[1].NodeType == ExpressionType.Parameter) {
+                                memberExpr = exp.Arguments[1] as ParameterExpression;
+                            }
+                            else {
+                                memberExpr = exp.Arguments[1] as MemberExpression;
+                            }
+
                             valuesExpr = exp.Arguments[0];
                         }
                         else {
                             // contains on IList
-                            memberExpr = exp.Arguments[0] as MemberExpression;
+                            if (exp.Arguments[0].NodeType == ExpressionType.Parameter) {
+                                memberExpr = exp.Arguments[0] as ParameterExpression;
+                            }
+                            else {
+                                memberExpr = exp.Arguments[0] as MemberExpression;
+                            }
+                            
                             valuesExpr = exp.Object;
                         }
 
                         this.ResetVariables();
                         var containsMemberEl = this.Visit(memberExpr);
                         if (!this.isConstantExpression && containsMemberEl != null) {
+                            var isEntityFetch = this.isEntityFetch;
                             this.ResetVariables();
                             var valuesEl = this.Visit(valuesExpr);
                             if (this.isConstantExpression) {
                                 if (valuesEl == null) {
-                                    valuesEl = this.AddParameter(this.GetDynamicValue(valuesExpr));
+                                    var dynamicValue = this.GetDynamicValue(valuesExpr);
+                                    if (isEntityFetch) {
+                                        // we're got a IEnumerable<Entity> here so need to change to IEnumerable<ValueType>
+                                        var entityMap = this.config.GetMap(entityFetchType);
+                                        var primaryKeyType = entityMap.PrimaryKey.Type;
+                                        var param = Expression.Parameter(entityFetchType);
+                                        var selectExpr = Expression.Lambda(Expression.MakeMemberAccess(param, entityFetchType.GetProperty(entityMap.PrimaryKey.Name)), param).Compile();
+                                        var projectionMethod = typeof(Enumerable)
+                                            .GetMethods()
+                                            .First(m => m.Name == "Select" && m.GetParameters().Any(p => p.ParameterType.GetGenericArguments().Length == 2))
+                                            .MakeGenericMethod(entityFetchType, primaryKeyType);
+                                        //var projectionMethod = typeof(Enumerable).GetMethod("Select", new Type[] { typeof(IEnumerable<>).MakeGenericType(entityFetchType), typeof(Func<,>).MakeGenericType(entityFetchType, primaryKeyType) });
+                                        dynamicValue = projectionMethod.Invoke(null, new object[] { dynamicValue, selectExpr });
+                                    }
+
+                                    valuesEl = this.AddParameter(dynamicValue);
                                 }
 
                                 this.sqlElements.Enqueue(containsMemberEl);
@@ -387,6 +420,8 @@
                 if (this.config.HasMap(propInfo.PropertyType)) {
                     // we're doing e.Entity == entity (or similar)
                     var fkName = this.config.GetMap(declaringType).Columns[propInfo.Name].DbName;
+                    isEntityFetch = true;
+                    entityFetchType = propInfo.PropertyType;
                     return new ColumnElement(this.currentNode, fkName, exp.Expression.NodeType != ExpressionType.MemberAccess);
                 }
                 else if (this.config.HasMap(declaringType)) {
@@ -479,6 +514,8 @@
 
         private ISqlElement VisitParameter(ParameterExpression exp) {
             if (this.isTopOfBinaryOrMethod) {
+                this.isEntityFetch = true;
+                this.entityFetchType = exp.Type;
                 return new ColumnElement(this.modifiedRootNode, this.config.GetMap(exp.Type).PrimaryKey.DbName, true);
             }
 

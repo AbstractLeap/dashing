@@ -392,6 +392,46 @@
         }
 
         [Fact]
+        public void WhereContainsEntity() {
+            var target = MakeTarget();
+            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
+            Expression<Func<Blog, bool>> pred = b => blogs.Contains(b);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [BlogId] in @l_1", actual.Sql);
+            Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
+        public void WhereContainsRelatedEntity() {
+            var target = MakeTarget();
+            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2} };
+            Expression<Func<Post, bool>> pred = p => blogs.Contains(p.Blog);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [BlogId] in @l_1", actual.Sql);
+            Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
+        public void WhereNotContainsEntity() {
+            var target = MakeTarget();
+            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
+            Expression<Func<Blog, bool>> pred = b => !blogs.Contains(b);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [BlogId] not in @l_1", actual.Sql);
+            Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
+        public void WhereNotContainsRelatedEntity() {
+            var target = MakeTarget();
+            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
+            Expression<Func<Post, bool>> pred = p => !blogs.Contains(p.Blog);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [BlogId] not in @l_1", actual.Sql);
+            Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
         public void WhereContainsOnQueryable() {
             var target = MakeTarget();
             var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
