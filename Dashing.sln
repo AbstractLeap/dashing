@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Annotations", "Dash
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.IntegrationTests", "Dashing.IntegrationTests\Dashing.IntegrationTests.csproj", "{62186CA2-59A3-480E-BEC9-BAA168054190}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Testing", "Dashing.Testing\Dashing.Testing.csproj", "{184E1B51-AEF4-47CB-A4A3-FDD2E90B3EED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Testing.Tests", "Dashing.Testing.Tests\Dashing.Testing.Tests.csproj", "{D3615AE1-9A75-4F37-9F28-49F905B8E793}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +73,14 @@ Global
 		{62186CA2-59A3-480E-BEC9-BAA168054190}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62186CA2-59A3-480E-BEC9-BAA168054190}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62186CA2-59A3-480E-BEC9-BAA168054190}.Release|Any CPU.Build.0 = Release|Any CPU
+		{184E1B51-AEF4-47CB-A4A3-FDD2E90B3EED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{184E1B51-AEF4-47CB-A4A3-FDD2E90B3EED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{184E1B51-AEF4-47CB-A4A3-FDD2E90B3EED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{184E1B51-AEF4-47CB-A4A3-FDD2E90B3EED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3615AE1-9A75-4F37-9F28-49F905B8E793}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3615AE1-9A75-4F37-9F28-49F905B8E793}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3615AE1-9A75-4F37-9F28-49F905B8E793}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3615AE1-9A75-4F37-9F28-49F905B8E793}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
