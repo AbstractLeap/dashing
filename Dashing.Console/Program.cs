@@ -181,6 +181,11 @@
             dashingSettings = new DashingSettings();
             dashingSettings = IniParser.AssignTo(config["Dashing"], dashingSettings);
 
+            // fix path to dll to be avsolute path
+            if (!Path.IsPathRooted(dashingSettings.PathToDll)) {
+                dashingSettings.PathToDll = Path.Combine(Path.GetDirectoryName(options.ConfigPath), dashingSettings.PathToDll);
+            }
+
             reverseEngineerSettings = new ReverseEngineerSettings();
             reverseEngineerSettings = IniParser.AssignTo(config["ReverseEngineer"], reverseEngineerSettings);
         }
@@ -470,8 +475,7 @@
                     script = migrator.GenerateSqlDiff(
                         fromMaps,
                         configuration.Maps,
-                        consoleAnswerProvider,
-                        Trace,
+                        consoleAnswerProvider, new ConsoleTraceWriter(isVerbose),
                         reverseEngineerSettings.GetIndexesToIgnore(),
                         out warnings,
                         out errors);
