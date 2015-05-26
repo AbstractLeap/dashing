@@ -34,15 +34,10 @@
             IEnumerable<IMap> fromMaps,
             IEnumerable<IMap> toMaps,
             IAnswerProvider answerProvider,
-            Action<string, object[]> trace,
+            ITraceWriter traceWriter,
             IEnumerable<string> indexesToIgnore,
             out IEnumerable<string> warnings,
             out IEnumerable<string> errors) {
-
-            // catch null trace
-            if (trace == null) {
-                trace = (a, b) => { };
-            }
 
             // fetch data for current database
             IDictionary<string, Statistics> currentData = new Dictionary<string, Statistics>();
@@ -62,6 +57,17 @@
             var additions = to.Except(from, mapComparer).ToList();
             var removals = from.Except(to, mapComparer).ToList();
             var matches = from.Join(to, f => f.Table, t => t.Table, MigrationPair.Of).ToList();
+
+            // trace output
+            traceWriter.Trace("Additions:");
+            traceWriter.Trace("");
+            traceWriter.Trace(additions.Select(a => new { a.Table, a.Type.Name }), new string[] { "Table", "Map Name" });
+            traceWriter.Trace("Removals:");
+            traceWriter.Trace("");
+            traceWriter.Trace(removals.Select(r => new { r.Table, r.Type.Name }), new string[] { "Table", "Map Name" });
+            traceWriter.Trace("Matches:");
+            traceWriter.Trace("");
+            traceWriter.Trace(matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }), new string[] { "From Table", "From Map", "To Table", "To Map" });
 
             // look for possible entity name changes
             if (additions.Any() && removals.Any()) {

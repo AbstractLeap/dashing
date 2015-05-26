@@ -5,7 +5,10 @@
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.IntegrationTests.TestDomain;
+    using Dashing.Tools;
     using Dashing.Tools.Migration;
+
+    using Moq;
 
     public class SqlServerFixture : IDisposable {
         public ISession Session { get; set; }
@@ -27,7 +30,7 @@
                 new DropTableWriter(this.config.Engine.SqlDialect),
                 new StatisticsProvider(null, this.config.Engine.SqlDialect));
             IEnumerable<string> warnings, errors;
-            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), this.config.Maps, null, null, new string[0], out warnings, out errors);
+            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), this.config.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
                 transactionLessSession.Dapper.Execute("create database " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute("use " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute(createStatement);

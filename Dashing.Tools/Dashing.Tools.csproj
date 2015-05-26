@@ -48,7 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleTraceWriter.cs" />
     <Compile Include="IAnswerProvider.cs" />
+    <Compile Include="ITraceWriter.cs" />
     <Compile Include="Migration\ColumnKeyValuePairEqualityComparer.cs" />
     <Compile Include="Migration\IMigrator.cs" />
     <Compile Include="Migration\IStatisticsProvider.cs" />

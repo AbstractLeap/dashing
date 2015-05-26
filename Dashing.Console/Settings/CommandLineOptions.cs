@@ -37,7 +37,7 @@
             }
 
             set {
-                this.configPath = value;
+                this.configPath = Path.GetFullPath(value);
                 this.projectName = Path.GetFileNameWithoutExtension(value);
             }
         }
