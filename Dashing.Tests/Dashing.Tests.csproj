@@ -48,6 +48,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.0\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Build.Tasks.v4.0" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq, Version=4.2.1502.911, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -110,6 +111,7 @@
     <Compile Include="Engine\DML\InsertWriterTests.cs" />
     <Compile Include="Engine\DML\OrderClauseWriterTests.cs" />
     <Compile Include="Engine\DML\SelectWriterTests.cs" />
+    <Compile Include="Engine\DML\TestDomains\Application.cs" />
     <Compile Include="Engine\DML\WhereClauseWriterPerformanceTests.cs" />
     <Compile Include="Engine\DML\WhereClauseWriterTests.cs" />
     <Compile Include="Engine\DML\UpdateWriterTests.cs" />

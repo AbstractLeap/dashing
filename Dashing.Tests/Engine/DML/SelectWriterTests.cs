@@ -7,6 +7,7 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Extensions;
+    using Dashing.Tests.Engine.DML.TestDomains;
     using Dashing.Tests.TestDomain;
 
     using Moq;
@@ -479,6 +480,24 @@
         }
 
         [Fact]
+        public void MultipleFetchManyWithThenFetchAndOneToOne() {
+            var patient = new Person() { PersonId = 1 };
+            var query =
+                this.GetSelectQuery<Application>()
+                    .Fetch(a => a.Person)
+                    .Fetch(a => a.Provider.Organisation)
+                    .FetchMany(a => a.Plans)
+                    .ThenFetch(p => p.ProductInstance.Product)
+                    .FetchMany(a => a.ApplicationReferences)
+                    .ThenFetch(r => r.ParentReference)
+                    .Where(p => p.Person == patient);
+            var selectQuery = query as SelectQuery<Application>;
+            var sql = new SelectWriter(new SqlServer2012Dialect(), new MultipleFetchManyWithThenFetchConfig()).GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal("select i.[ApplicationIdt] as [ApplicationId], i.[ReferenceIdt_7] as [ReferenceId], i.[ApplicationIdt_7] as [ApplicationId], i.[ParentReferenceIdt_8] as [ParentReferenceId], i.[Questiont_8] as [Question], i.[PersonIdt_1] as [PersonId], i.[PlanIdt_4] as [PlanId], i.[ApplicationIdt_4] as [ApplicationId], i.[ProductInstanceIdt_5] as [ProductInstanceId], i.[ProductIdt_6] as [ProductId], i.[Namet_6] as [Name], i.[ProviderIdt_2] as [ProviderId], i.[OrganisationIdt_3] as [OrganisationId], i.[Foot_3] as [Foo], i.[ProviderIdt_3] as [ProviderId] from (select t.[ApplicationId] as [ApplicationIdt], t_7.[ReferenceId] as [ReferenceIdt_7], t_7.[ApplicationId] as [ApplicationIdt_7], t_8.[ParentReferenceId] as [ParentReferenceIdt_8], t_8.[Question] as [Questiont_8], t_1.[PersonId] as [PersonIdt_1], null as PlanIdt_4, null as ApplicationIdt_4, null as ProductInstanceIdt_5, null as ProductIdt_6, null as Namet_6, t_2.[ProviderId] as [ProviderIdt_2], t_3.[OrganisationId] as [OrganisationIdt_3], t_3.[Foo] as [Foot_3], t_3.[ProviderId] as [ProviderIdt_3] from [Applications] as t left join [References] as t_7 on t.ApplicationId = t_7.ApplicationId left join [ParentReferences] as t_8 on t_7.ParentReferenceId = t_8.ParentReferenceId left join [People] as t_1 on t.PersonId = t_1.PersonId left join [Providers] as t_2 on t.ProviderId = t_2.ProviderId left join [Organisations] as t_3 on t_2.ProviderId = t_3.ProviderId where (t.[PersonId] = @l_1) union all select t.[ApplicationId] as [ApplicationIdt], null as ReferenceIdt_7, null as ApplicationIdt_7, null as ParentReferenceIdt_8, null as Questiont_8, t_1.[PersonId] as [PersonIdt_1], t_4.[PlanId] as [PlanIdt_4], t_4.[ApplicationId] as [ApplicationIdt_4], t_5.[ProductInstanceId] as [ProductInstanceIdt_5], t_6.[ProductId] as [ProductIdt_6], t_6.[Name] as [Namet_6], t_2.[ProviderId] as [ProviderIdt_2], t_3.[OrganisationId] as [OrganisationIdt_3], t_3.[Foo] as [Foot_3], t_3.[ProviderId] as [ProviderIdt_3] from [Applications] as t left join [People] as t_1 on t.PersonId = t_1.PersonId left join [Plans] as t_4 on t.ApplicationId = t_4.ApplicationId left join [ProductInstances] as t_5 on t_4.ProductInstanceId = t_5.ProductInstanceId left join [Products] as t_6 on t_5.ProductId = t_6.ProductId left join [Providers] as t_2 on t.ProviderId = t_2.ProviderId left join [Organisations] as t_3 on t_2.ProviderId = t_3.ProviderId where (t.[PersonId] = @l_1)) as i order by i.[ApplicationIdt]", sql.Sql);
+        }
+
+        [Fact]
         public void MultipleManyToMany() {
             var query = this.GetSelectQuery<Post>().FetchMany(p => p.Tags).ThenFetch(p => p.ElTag).FetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag);
             var selectQuery = query as SelectQuery<Post>;
@@ -543,6 +562,12 @@
             }
 
             return new CustomConfig();
+        }
+
+        private class MultipleFetchManyWithThenFetchConfig : MockConfiguration {
+            public MultipleFetchManyWithThenFetchConfig() {
+                this.AddNamespaceOf<Application>();
+            }
         }
 
         private class CustomConfig : MockConfiguration {

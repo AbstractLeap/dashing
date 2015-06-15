@@ -577,27 +577,7 @@
                 query.Append(" left join ");
                 this.Dialect.AppendQuotedTableName(query, map);
                 query.Append(" as ").Append(node.Alias);
-
-                if (node.Column.Relationship == RelationshipType.ManyToOne) {
-                    query.Append(" on ")
-                         .Append(node.Parent.Alias)
-                         .Append(".")
-                         .Append(node.Column.DbName)
-                         .Append(" = ")
-                         .Append(node.Alias)
-                         .Append(".")
-                         .Append(node.Column.ParentMap.PrimaryKey.DbName);
-                }
-                else {
-                    query.Append(" on ")
-                         .Append(node.Parent.Alias)
-                         .Append(".")
-                         .Append(node.Column.Map.PrimaryKey.DbName)
-                         .Append(" = ")
-                         .Append(node.Alias)
-                         .Append(".")
-                         .Append(node.Column.ChildColumn.DbName);
-                }
+                AppendPagedUnionJoin(node, query);
             }
             else {
                 // add these joins to all queries
@@ -605,27 +585,7 @@
                     subQuery.Append(" left join ");
                     this.Dialect.AppendQuotedTableName(subQuery, map);
                     subQuery.Append(" as ").Append(node.Alias);
-
-                    if (node.Column.Relationship == RelationshipType.ManyToOne) {
-                        subQuery.Append(" on ")
-                                .Append(node.Parent.Alias)
-                                .Append(".")
-                                .Append(node.Column.DbName)
-                                .Append(" = ")
-                                .Append(node.Alias)
-                                .Append(".")
-                                .Append(node.Column.ParentMap.PrimaryKey.DbName);
-                    }
-                    else {
-                        subQuery.Append(" on ")
-                                .Append(node.Parent.Alias)
-                                .Append(".")
-                                .Append(node.Column.Map.PrimaryKey.DbName)
-                                .Append(" = ")
-                                .Append(node.Alias)
-                                .Append(".")
-                                .Append(node.Column.ChildColumn.DbName);
-                    }
+                    AppendPagedUnionJoin(node, subQuery);
                 }
             }
 
@@ -904,10 +864,43 @@
             }
         }
 
+        private static void AppendPagedUnionJoin(FetchNode node, StringBuilder subQuery) {
+            if (node.Column.Relationship == RelationshipType.ManyToOne) {
+                subQuery.Append(" on ")
+                        .Append(node.Parent.Alias)
+                        .Append(".")
+                        .Append(node.Column.DbName)
+                        .Append(" = ")
+                        .Append(node.Alias)
+                        .Append(".")
+                        .Append(node.Column.ParentMap.PrimaryKey.DbName);
+            }
+            else if (node.Column.Relationship == RelationshipType.OneToOne) {
+                subQuery.Append(" on ")
+                        .Append(node.Parent.Alias)
+                        .Append(".")
+                        .Append(node.Column.Map.PrimaryKey.DbName)
+                        .Append(" = ")
+                        .Append(node.Alias)
+                        .Append(".")
+                        .Append(node.Column.OppositeColumn.DbName);
+            }
+            else {
+                subQuery.Append(" on ")
+                        .Append(node.Parent.Alias)
+                        .Append(".")
+                        .Append(node.Column.Map.PrimaryKey.DbName)
+                        .Append(" = ")
+                        .Append(node.Alias)
+                        .Append(".")
+                        .Append(node.Column.ChildColumn.DbName);
+            }
+        }
+
         private class AddNodeResult {
             public string Signature { get; set; }
 
             public IList<string> SplitOn { get; set; }
         }
     }
-}
+    }
