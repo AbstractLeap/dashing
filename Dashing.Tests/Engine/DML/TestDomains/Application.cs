@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tests.Engine.DML.TestDomains {
+﻿namespace Dashing.Tests.Engine.DML.TestDomains.MultipleFetchManyWithThenFetchAndOneToOne {
     using System.Collections.Generic;
 
     //patient.Applications = await session.Query<Application>().Fetch(a => a.Patient).Fetch(a => a.Provider.Organisation)

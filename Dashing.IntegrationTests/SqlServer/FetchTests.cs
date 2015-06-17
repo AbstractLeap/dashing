@@ -3,14 +3,18 @@
 
     using Dashing.IntegrationTests.SqlServer.Fixtures;
     using Dashing.IntegrationTests.TestDomain;
+    using Dashing.IntegrationTests.TestDomain.More.MultipleFetchManyWithNonRootAndThenFetchDomain;
 
     using Xunit;
 
-    public class FetchTests : IClassFixture<SqlServerFixture> {
+    public class FetchTests : IClassFixture<SqlServerFixture>, IClassFixture<MultipleFetchManyWithNonRootAndThenFetchSqlServerFixture> {
         private readonly SqlServerFixture fixture;
 
-        public FetchTests(SqlServerFixture data) {
+        private readonly MultipleFetchManyWithNonRootAndThenFetchSqlServerFixture multipleFetchManyWithNonRootAndThenFetchSqlServerFixture;
+
+        public FetchTests(SqlServerFixture data, MultipleFetchManyWithNonRootAndThenFetchSqlServerFixture multipleFetchManyWithNonRootAndThenFetchSqlServerFixture) {
             this.fixture = data;
+            this.multipleFetchManyWithNonRootAndThenFetchSqlServerFixture = multipleFetchManyWithNonRootAndThenFetchSqlServerFixture;
         }
 
         [Fact]
@@ -61,6 +65,21 @@
         public void FetchWithNonFetchedWhere() {
             var comment = this.fixture.Session.Query<Comment>().Fetch(c => c.Post.Blog).Where(c => c.User.EmailAddress == "foo");
             Assert.Null(comment.FirstOrDefault());
+        }
+
+        [Fact]
+        public void MultipleFetchManyWithNonRootAndThenFetchWorks() {
+            var responses =
+                this.multipleFetchManyWithNonRootAndThenFetchSqlServerFixture.Session.Query<QuestionnaireResponse>()
+                    .Where(qr => qr.Questionnaire.QuestionnaireId == 1)
+                    .Fetch(qr => qr.Questionnaire)
+                    .FetchMany(qr => qr.Responses)
+                    .ThenFetch(qrr => qrr.Question)
+                    .FetchMany(qr => qr.Booking.Beds)
+                    .ThenFetch(b => b.RoomSlot.Room)
+                    .ToArray();
+            Assert.Equal(1, responses.Length);
+            Assert.Equal(1, responses.First().Booking.Beds.Count);
         }
     }
 }
