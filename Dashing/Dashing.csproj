@@ -38,6 +38,23 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -70,6 +87,9 @@
     <Compile Include="CodeGeneration\ProxyGeneratorResult.cs" />
     <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
+    <Compile Include="CodeGeneration\Weaving\AssemblyLocation.cs" />
+    <Compile Include="CodeGeneration\Weaving\ConfigurationMapResolver.cs" />
+    <Compile Include="CodeGeneration\Weaving\ExtendDomainTask.cs" />
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
     <Compile Include="Configuration\ConfigurationHelper.cs" />
