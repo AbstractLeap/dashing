@@ -11,6 +11,15 @@
 
         private readonly ITrackedEntity trackedEntity;
 
+        private static IDictionary<string, Func<T, object>> propertyAccessorCache = new Dictionary<string, Func<T, object>>();
+
+        static TrackedEntityInspector() {
+            // fill in the property accessor cache
+            foreach (var property in typeof(T).GetProperties()) {
+                propertyAccessorCache.Add(property.Name, Expression.Lambda<Func<T, object>>(Expression.Property(Expression.Parameter(typeof(T)), property.Name), Expression.Parameter(typeof(T))).Compile());
+            }
+        }
+
         public TrackedEntityInspector(T entity) {
             if (!TryGetAsTracked(entity, out this.trackedEntity)) {
                 throw new ArgumentException("This entity is not an ITrackedEntity");
@@ -31,54 +40,32 @@
 
         public bool IsTracking {
             get {
-                return this.trackedEntity.IsTracking;
+                return this.trackedEntity.IsTrackingEnabled();
             }
         }
 
-        public ISet<string> DirtyProperties {
+        public IEnumerable<string> DirtyProperties {
             get {
-                return this.trackedEntity.DirtyProperties;
+                return this.trackedEntity.GetDirtyProperties();
             }
         }
 
         public IDictionary<string, object> OldValues {
             get {
-                return this.trackedEntity.OldValues;
+                return this.trackedEntity.GetDirtyProperties().ToDictionary(p => p, p => this.trackedEntity.GetOldValue(p));
             }
         }
 
-        public IDictionary<string, object> NewValues {
-            get {
-                return this.trackedEntity.NewValues;
-            }
+        public void EnableTracking() {
+            this.trackedEntity.EnableTracking();
         }
 
-        public IDictionary<string, IList<object>> AddedEntities {
-            get {
-                return this.trackedEntity.AddedEntities;
-            }
-        }
-
-        public IDictionary<string, IList<object>> DeletedEntities {
-            get {
-                return this.trackedEntity.DeletedEntities;
-            }
-        }
-
-        public void SuspendTracking() {
-            this.trackedEntity.IsTracking = false;
-        }
-
-        public void ResumeTracking() {
-            this.trackedEntity.IsTracking = true;
+        public void DisabledTracking() {
+            this.trackedEntity.DisableTracking();
         }
 
         public bool IsDirty() {
-            return this.DirtyProperties.Any() || this.AddedEntities.SelectMany(e => e.Value).Any() || this.DeletedEntities.SelectMany(e => e.Value).Any();
-        }
-
-        public bool HasOnlyDirtyCollections() {
-            return this.IsDirty() && this.DirtyProperties.IsEmpty();
+            return this.DirtyProperties.Any();
         }
 
         public bool IsPropertyDirty<TResult>(Expression<Func<T, TResult>> propertyExpression) {
@@ -87,12 +74,11 @@
                 throw new ArgumentException("The propertyExpression must be a MemberExpression", "propertyExpression");
             }
 
-            return this.IsDirtySimple(memberExpr.Member.Name) || (this.AddedEntities.ContainsKey(memberExpr.Member.Name) && this.AddedEntities[memberExpr.Member.Name].Any())
-                   || (this.DeletedEntities.ContainsKey(memberExpr.Member.Name) && this.DeletedEntities[memberExpr.Member.Name].Any());
+            return this.trackedEntity.GetDirtyProperties().Any(p => p == memberExpr.Member.Name);
         }
 
-        private bool IsDirtySimple(string name) {
-            return this.DirtyProperties.Contains(name);
+        public bool IsPropertyDirty(string propertyName) {
+            return this.trackedEntity.GetDirtyProperties().Any(p => p == propertyName);
         }
 
         public TResult OldValueFor<TResult>(Expression<Func<T, TResult>> propertyExpression) {
@@ -101,42 +87,16 @@
                 throw new ArgumentException("The propertyExpression must be a MemberExpression", "propertyExpression");
             }
 
-            if (!this.IsDirtySimple(memberExpr.Member.Name)) {
+            if (!this.trackedEntity.GetDirtyProperties().Any(p => p == memberExpr.Member.Name)) {
                 throw new ArgumentException("This property is not dirty. Please check IsDirty before asking for old value");
             }
 
             return (TResult)this.OldValues[memberExpr.Member.Name];
         }
 
-        public TResult NewValueFor<TResult>(Expression<Func<T, TResult>> propertyExpression) {
-            var memberExpr = propertyExpression.Body as MemberExpression;
-            if (memberExpr == null) {
-                throw new ArgumentException("The propertyExpression must be a MemberExpression", "propertyExpression");
-            }
 
-            if (!this.IsDirtySimple(memberExpr.Member.Name)) {
-                throw new ArgumentException("This property is not dirty. Please check IsDirty before asking for new value");
-            }
-
-            return (TResult)this.NewValues[memberExpr.Member.Name];
-        }
-
-        public IEnumerable<TResult> AddedEntitiesFor<TResult>(Expression<Func<T, IEnumerable<TResult>>> propertyExpression) {
-            var memberExpr = propertyExpression.Body as MemberExpression;
-            if (memberExpr == null) {
-                throw new ArgumentException("The propertyExpression must be a MemberExpression", "propertyExpression");
-            }
-
-            return (IEnumerable<TResult>)this.AddedEntities[memberExpr.Member.Name];
-        }
-
-        public IEnumerable<TResult> DeletedEntitiesFor<TResult>(Expression<Func<T, IEnumerable<TResult>>> propertyExpression) {
-            var memberExpr = propertyExpression.Body as MemberExpression;
-            if (memberExpr == null) {
-                throw new ArgumentException("The propertyExpression must be a MemberExpression", "propertyExpression");
-            }
-
-            return (IEnumerable<TResult>)this.AddedEntities[memberExpr.Member.Name];
+        public object NewValueFor(string propertyName) {
+            return propertyAccessorCache[propertyName](this.entity);
         }
     }
 }

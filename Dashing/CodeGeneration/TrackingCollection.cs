@@ -18,24 +18,20 @@
             : base(collection) {
             this.entity = entity;
             this.propertyName = propertyName;
-
-            this.entity.AddedEntities.Add(this.propertyName, new List<object>());
-            this.entity.DeletedEntities.Add(this.propertyName, new List<object>());
-
             this.CollectionChanged += this.TrackingCollection_CollectionChanged;
         }
 
         private void TrackingCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
-            if (this.entity.IsTracking) {
+            if (this.entity.IsTrackingEnabled()) {
                 if (e.OldItems != null) {
                     foreach (var entity in e.OldItems) {
-                        this.entity.DeletedEntities[this.propertyName].Add(entity);
+                        //this.entity.DeletedEntities[this.propertyName].Add(entity);
                     }
                 }
 
                 if (e.NewItems != null) {
                     foreach (var entity in e.NewItems) {
-                        this.entity.AddedEntities[this.propertyName].Add(entity);
+                        //this.entity.AddedEntities[this.propertyName].Add(entity);
                     }
                 }
             }

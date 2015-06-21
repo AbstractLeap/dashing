@@ -37,11 +37,11 @@
             // establish the dirty properties, either using a TrackedEntityInspector, or just assume everything is dirty
             if (TrackedEntityInspector<T>.IsTracked(entity)) {
                 var inspector = new TrackedEntityInspector<T>(entity);
-                if (!inspector.IsDirty() || inspector.HasOnlyDirtyCollections()) {
+                if (!inspector.IsDirty()) {
                     return;
                 }
 
-                dirtyProperties = inspector.DirtyProperties.ToDictionary(p => p, p => inspector.NewValues[p]);
+                dirtyProperties = inspector.DirtyProperties.ToDictionary(p => p, p => inspector.NewValueFor(p));
             }
             else {
                 throw new InvalidOperationException("In order to Save entities you must fetch Tracked entities");

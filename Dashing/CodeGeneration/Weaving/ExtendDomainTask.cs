@@ -101,12 +101,13 @@
             }
 
             typeDef.Interfaces.Add(assemblyDefinition.MainModule.Import(typeof(ITrackedEntity)));
-            AddAutoProperty(typeDef, "IsTracking", typeof(bool));
-            AddAutoProperty(typeDef, "DirtyProperties", typeof(ISet<>).MakeGenericType(typeof(string)));
-            AddAutoProperty(typeDef, "OldValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)));
-            AddAutoProperty(typeDef, "NewValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)));
-            AddAutoProperty(typeDef, "AddedEntities", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))));
-            AddAutoProperty(typeDef, "DeletedEntities", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))));
+            typeDef.Fields.Add(new FieldDefinition("isTracking", FieldAttributes.Private, typeDef.Module.Import(typeof(bool))));
+            //AddAutoProperty(typeDef, "IsTracking", typeof(bool));
+            //AddAutoProperty(typeDef, "DirtyProperties", typeof(ISet<>).MakeGenericType(typeof(string)));
+            //AddAutoProperty(typeDef, "OldValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)));
+            //AddAutoProperty(typeDef, "NewValues", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(object)));
+            //AddAutoProperty(typeDef, "AddedEntities", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))));
+            //AddAutoProperty(typeDef, "DeletedEntities", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))));
         }
 
         private static void AddAutoProperty(TypeDefinition typeDefinition, string name, Type propertyType) {

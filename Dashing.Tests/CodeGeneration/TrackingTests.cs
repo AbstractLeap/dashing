@@ -32,7 +32,7 @@
         public void AddTrackingDoesNotMakeDirty() {
             var post = new Post { PostId = 1, Author = new User { UserId = 1 }, Title = "Blah" };
             var trackedPost = this.codeManager.CreateTrackingInstance(post);
-            Assert.Empty(((ITrackedEntity)trackedPost).DirtyProperties);
+            Assert.Empty(((ITrackedEntity)trackedPost).GetDirtyProperties());
         }
 
         [Fact]
@@ -48,7 +48,7 @@
         public void AddTrackingStartsTracking() {
             var post = new Post { PostId = 1, Author = new User { UserId = 1 }, Title = "Blah" };
             var trackedPost = this.codeManager.CreateTrackingInstance(post);
-            Assert.True(((ITrackedEntity)trackedPost).IsTracking);
+            Assert.True(((ITrackedEntity)trackedPost).IsTrackingEnabled());
         }
 
         [Fact]
@@ -163,7 +163,7 @@
             var inspector = new TrackedEntityInspector<Post>(post);
             post.Title = "Boo";
 
-            Assert.Equal("Boo", inspector.NewValueFor(p => p.Title));
+            Assert.Equal("Boo", inspector.NewValueFor("Title"));
         }
 
         [Fact]
@@ -175,17 +175,6 @@
             post.Title = "Boo";
 
             Assert.Equal("Foo", inspector.OldValues.First().Value);
-        }
-
-        [Fact]
-        public void NewValuesWorks() {
-            var post = this.codeManager.CreateTrackingInstance<Post>();
-            post.Title = "Foo";
-            this.codeManager.TrackInstance(post);
-            var inspector = new TrackedEntityInspector<Post>(post);
-            post.Title = "Boo";
-
-            Assert.Equal("Boo", inspector.NewValues.First().Value);
         }
     }
 }
