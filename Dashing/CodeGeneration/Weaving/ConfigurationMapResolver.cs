@@ -2,6 +2,7 @@ namespace Dashing.CodeGeneration.Weaving {
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Data;
     using System.Linq;
     using System.Reflection;
 
@@ -27,10 +28,27 @@ namespace Dashing.CodeGeneration.Weaving {
                 assembly.GetTypes().Where(t => typeof(IConfiguration).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract && t.IsPublic);
             if (configurationTypes.Any()) {
                 foreach (var configurationType in configurationTypes) {
-                    this.InjectConnectionStringIntoConfiguration(assemblyDefinition.MainModule.Types.Single(t => t.FullName == configurationType.FullName));
+                    this.InjectConnectionStringIntoConfiguration(
+                        assemblyDefinition.MainModule.Types.Single(t => t.FullName == configurationType.FullName));
                     var config = Activator.CreateInstance(configurationType) as IConfiguration;
                     foreach (var map in config.Maps) {
-                        mapDefinitions.Add(new MapDefinition { AssemblyFullName = map.Type.Assembly.FullName, TypeFullName = map.Type.FullName });
+                        mapDefinitions.Add(
+                            new MapDefinition {
+                                                  AssemblyFullName = map.Type.Assembly.FullName,
+                                                  TypeFullName = map.Type.FullName,
+                                                  ColumnDefinitions =
+                                                      map.OwnedColumns(true)
+                                                         .Select(
+                                                             c =>
+                                                             new ColumnDefinition {
+                                                                                      Name = c.Name,
+                                                                                      TypeFullName = c.Type.FullName,
+                                                                                      Relationship = c.Relationship,
+                                                                                      DbName = c.DbName,
+                                                                                      DbType = c.DbType,
+                                                                                      IsPrimaryKey = c.IsPrimaryKey
+                                                                                  })
+                                              });
                     }
                 }
             }
@@ -76,7 +94,6 @@ namespace Dashing.CodeGeneration.Weaving {
         }
     }
 
-
     public class ConfigurationMapResolverArgs : MarshalByRefObject {
         public string AssemblyFilePath { get; set; }
 
@@ -89,5 +106,21 @@ namespace Dashing.CodeGeneration.Weaving {
         public string AssemblyFullName { get; set; }
 
         public string TypeFullName { get; set; }
+
+        public IEnumerable<ColumnDefinition> ColumnDefinitions { get; set; }
+    }
+
+    public class ColumnDefinition {
+        public string Name { get; set; }
+
+        public string TypeFullName { get; set; }
+
+        public RelationshipType Relationship { get; set; }
+
+        public string DbName { get; set; }
+
+        public bool IsPrimaryKey { get; set; }
+
+        public DbType DbType { get; set; }
     }
 }
