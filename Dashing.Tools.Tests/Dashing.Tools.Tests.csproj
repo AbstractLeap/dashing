@@ -142,8 +142,8 @@
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
-  </Target>
+  </Target>-->
   <Target Name="AfterBuild">
+    <Exec Command="$(SolutionDir)Dashing.Dev.Weaver\bin\$(Configuration)\Dashing.Dev.Weaver.exe Dashing.Tools.Tests" />
   </Target>
-  -->
 </Project>

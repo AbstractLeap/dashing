@@ -1,4 +1,6 @@
 ﻿namespace Dashing.Weaving.Sample.Domain {
+    using System;
+
     public class Foo {
         public int FooId { get; set; }
 
@@ -15,6 +17,10 @@
         public string Name { get; set; }
 
         public Foo Foo { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+
+        public int? SomethingOrTother { get; set; }
     }
 
     public class IveGotMethods {

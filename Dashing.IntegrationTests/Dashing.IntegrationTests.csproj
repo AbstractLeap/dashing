@@ -121,7 +121,8 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
   -->
+  <Target Name="AfterBuild">
+    <Exec Command="$(SolutionDir)Dashing.Dev.Weaver\bin\$(Configuration)\Dashing.Dev.Weaver.exe Dashing.IntegrationTests" />
+  </Target>
 </Project>

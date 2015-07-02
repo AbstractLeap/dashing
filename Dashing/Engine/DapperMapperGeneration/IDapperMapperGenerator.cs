@@ -10,9 +10,9 @@
         /// <typeparam name="T">The base type of the tree</typeparam>
         /// <param name="fetchTree">The fetch tree to generate the mapper for</param>
         /// <returns>A factory for generating mappers</returns>
-        Tuple<Delegate, Type[]> GenerateCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
+        Tuple<Delegate, Type[]> GenerateCollectionMapper<T>(FetchNode fetchTree);
 
-        Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
+        Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(FetchNode fetchTree);
 
         /// <summary>
         /// Generates a multi collection mapper
@@ -21,6 +21,6 @@
         /// <param name="fetchTree"></param>
         /// <param name="isTracked"></param>
         /// <returns>The mapper, the list of types fetched, the list of collection types</returns>
-        Tuple<Delegate, Type[], Type[]> GenerateMultiCollectionMapper<T>(FetchNode fetchTree, bool isTracked);
+        Tuple<Delegate, Type[], Type[]> GenerateMultiCollectionMapper<T>(FetchNode fetchTree);
     }
 }

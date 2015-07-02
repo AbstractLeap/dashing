@@ -14,6 +14,7 @@ namespace Dashing.Tools.ReverseEngineering {
     /// <summary>
     /// This configuration pretty much only exists to support fetching of different maps within reverse engineering
     /// </summary>
+    [DoNotWeave]
     internal class Configuration : IReverseEngineeringConfiguration {
         private IDictionary<Type, IMap> maps;
 
@@ -64,10 +65,6 @@ namespace Dashing.Tools.ReverseEngineering {
 
         public ISession BeginTransactionLessSession(IDbConnection connection) {
             throw new NotImplementedException();
-        }
-
-        public CodeGeneration.IGeneratedCodeManager CodeManager {
-            get { throw new NotImplementedException(); }
         }
 
         public Engine.IEngine Engine { get; set; }

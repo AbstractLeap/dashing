@@ -9,29 +9,19 @@
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
-    using Dashing.Tests.CodeGeneration.Fixtures;
     using Dashing.Tests.TestDomain;
 
     using Moq;
 
     using Xunit;
 
-    public class ConfigurationBaseTests : IClassFixture<GenerateCodeFixture> {
+    public class ConfigurationBaseTests{
         private static readonly ConnectionStringSettings DummyConnectionString = new ConnectionStringSettings {
             ConnectionString = "Data Source=dummy.local",
             ProviderName = "System.Data.SqlClient"
         };
 
         private const string ExampleTableName = "foo";
-
-        private readonly ICodeGenerator codeGenerator;
-
-        private readonly IGeneratedCodeManager codeManager;
-
-        public ConfigurationBaseTests(GenerateCodeFixture data) {
-            this.codeGenerator = data.CodeGenerator;
-            this.codeManager = data.CodeManager;
-        }
 
         [Fact]
         public void EmptyConfigurationReturnsEmptyMaps() {
@@ -220,7 +210,7 @@
         [Fact]
         public void HasMapReturnsFalseForUnmappedEntity() {
             // assemble
-            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
+            var target = new BasicConfigurationWithCodeManager();
 
             // act
             var actual = target.HasMap(typeof(Blog));
@@ -232,8 +222,8 @@
         [Fact]
         public void HasMapReturnsTrueForMappedTrackedEntity() {
             // assemble
-            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
-            var post = this.codeManager.CreateTrackingInstance<Post>();
+            var target = new BasicConfigurationWithCodeManager();
+            var post = new Post();
 
             // act
             var actual = target.HasMap(post.GetType());
@@ -258,8 +248,8 @@
         [Fact]
         public void GetMapReturnsMapForMappedTrackedEntity() {
             // assemble
-            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
-            var post = this.codeManager.CreateTrackingInstance<Post>();
+            var target = new BasicConfigurationWithCodeManager();
+            var post = new Post();
 
             // act
             var actual = target.GetMap(post.GetType());
@@ -272,7 +262,7 @@
         [Fact]
         public void GetMapThrowsForUnmappedEntity() {
             // assemble
-            var target = new BasicConfigurationWithCodeManager(this.codeGenerator);
+            var target = new BasicConfigurationWithCodeManager();
 
             // assert
             Assert.Throws(typeof(ArgumentException), () => { target.GetMap(typeof(Blog)); });
@@ -319,19 +309,11 @@
             return mock;
         }
 
-        private static Mock<ICodeGenerator> SetupCodeGenerator() {
-            var mock = new Mock<ICodeGenerator>(MockBehavior.Strict);
-            var mock2 = new Mock<IGeneratedCodeManager>(MockBehavior.Strict);
-            mock.Setup(m => m.Generate(It.IsAny<IConfiguration>())).Returns(mock2.Object);
-            var config = new CodeGeneratorConfig();
-            mock.Setup(m => m.Configuration).Returns(config);
-            return mock;
-        }
-
+        [DoNotWeave]
         private class CustomConfiguration : ConfigurationBase {
             public CustomConfiguration(
                 IEngine engine, ConnectionStringSettings connectionString, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory)
-                : base(engine, connectionString, dbProviderFactory, mapper, sessionFactory, SetupCodeGenerator().Object) {}
+                : base(engine, connectionString, dbProviderFactory, mapper, sessionFactory) {}
 
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfiguration(IEngine engine, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory)
@@ -344,10 +326,11 @@
                     DummyConnectionString,
                     MakeMockDbProviderFactory().Object,
                     mapper,
-                    MakeMockSf().Object,
-                    SetupCodeGenerator().Object) {}
+                    MakeMockSf().Object
+                    ) {}
         }
 
+        [DoNotWeave]
         private class CustomConfigurationWithIndividualAdds : CustomConfiguration {
             public CustomConfigurationWithIndividualAdds(IMapper mapper)
                 : base(mapper) {
@@ -356,6 +339,7 @@
             }
         }
 
+        [DoNotWeave]
         private class CustomConfigurationWithAddEnumerable : CustomConfiguration {
             public CustomConfigurationWithAddEnumerable(IMapper mapper)
                 : base(mapper) {
@@ -363,6 +347,7 @@
             }
         }
 
+        [DoNotWeave]
         private class CustomConfigurationWithAddNamespace : CustomConfiguration {
             public CustomConfigurationWithAddNamespace(IMapper mapper)
                 : base(mapper) {
@@ -370,6 +355,7 @@
             }
         }
 
+        [DoNotWeave]
         private class CustomConfigurationWithAddAndSetup : CustomConfiguration {
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfigurationWithAddAndSetup(IMapper mapper)
@@ -379,6 +365,7 @@
             }
         }
 
+        [DoNotWeave]
         private class CustomConfigurationWithSetup : CustomConfiguration {
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfigurationWithSetup(IMapper mapper)
@@ -395,15 +382,14 @@
         }
 
         private class BasicConfigurationWithCodeManager : ConfigurationBase {
-            public BasicConfigurationWithCodeManager(ICodeGenerator codeGenerator)
+            public BasicConfigurationWithCodeManager()
                 // ReSharper disable once RedundantNameQualifier - StyleCope and R# can't decide who is right on this one
                 : base(
                     MakeMockEngine().Object,
                     DummyConnectionString,
                     MakeMockDbProviderFactory().Object,
                     new DefaultMapper(new DefaultConvention()),
-                    MakeMockSf().Object,
-                    codeGenerator) {
+                    MakeMockSf().Object) {
                 this.Add<Post>();
             }
         }

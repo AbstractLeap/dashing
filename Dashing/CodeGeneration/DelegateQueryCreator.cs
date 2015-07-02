@@ -18,135 +18,102 @@
     internal class DelegateQueryCreator {
         private readonly DapperMapperGenerator dapperMapperGenerator;
 
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[]>> trackingMapperFactories;
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[]>> mapperFactories;
 
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[]>> foreignKeyMapperFactories;
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[], Type[]>> multiCollectionMapperFactories;
 
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[], Type[]>> multiCollectionTrackingMapperFactories;
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> collectionQueries;
 
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[], Type[]>> multiCollectionForeignKeyMapperFactories;
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncCollectionQueries;
 
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> trackingCollectionQueries;
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> noCollectionQueries;
 
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncTrackingCollectionQueries;
-
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> foreignKeyCollectionQueries;
-
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncForeignKeyCollectionQueries;
-
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> trackingNoCollectionQueries;
-
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncTrackingNoCollectionQueries;
-
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> foreignKeyNoCollectionQueries;
-
-        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncForeignKeyNoCollectionQueries;
-
-        private readonly IGeneratedCodeManager generatedCodeManager;
+        private readonly ConcurrentDictionary<Tuple<Type, string>, Delegate> asyncNoCollectionQueries;
 
         private readonly IConfiguration configuration;
 
         public delegate FetchCollectionAwaiter<T> CollectionAsyncDelegate<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction);
 
-        public DelegateQueryCreator(IGeneratedCodeManager codeManager, IConfiguration configuration) {
-            this.dapperMapperGenerator = new DapperMapperGenerator(codeManager, configuration);
-            this.generatedCodeManager = codeManager;
+        public DelegateQueryCreator(IConfiguration configuration) {
+            this.dapperMapperGenerator = new DapperMapperGenerator(configuration);
             this.configuration = configuration;
-            this.trackingMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[]>>();
-            this.foreignKeyMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[]>>();
-            this.multiCollectionTrackingMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[], Type[]>>();
-            this.multiCollectionForeignKeyMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[], Type[]>>();
-            this.trackingCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.asyncTrackingCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.foreignKeyCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.asyncForeignKeyCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.trackingNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.asyncTrackingNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.foreignKeyNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
-            this.asyncForeignKeyNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.mapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[]>>();
+            this.multiCollectionMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[], Type[]>>();
+            this.collectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.asyncCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.noCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
+            this.asyncNoCollectionQueries = new ConcurrentDictionary<Tuple<Type, string>, Delegate>();
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetCollectionFunction<T>(
-            SelectWriterResult result,
-            bool isTracked) {
+            SelectWriterResult result) {
             Delegate func;
-            var mapperFactory = this.GetCollectionFunction<T>(result, isTracked, false, out func);
+            var mapperFactory = this.GetCollectionFunction<T>(result, false, out func);
 
             return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>)func.DynamicInvoke(mapperFactory);
         }
 
         public CollectionAsyncDelegate<T> GetAsyncCollectionFunction<T>(
-            SelectWriterResult result,
-            bool isTracked) {
+            SelectWriterResult result) {
             Delegate func;
-            var mapperFactory = this.GetCollectionFunction<T>(result, isTracked, true, out func);
+            var mapperFactory = this.GetCollectionFunction<T>(result, true, out func);
 
             return (CollectionAsyncDelegate<T>)func.DynamicInvoke(mapperFactory);
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetNoCollectionFunction<T>(
-            SelectWriterResult result,
-            bool isTracked) {
+            SelectWriterResult result) {
             Delegate func;
-            var mapper = this.GetNoCollectionFunction<T>(result, isTracked, false, out func);
+            var mapper = this.GetNoCollectionFunction<T>(result, false, out func);
 
             return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>)func.DynamicInvoke(mapper);
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>> GetAsyncNoCollectionFunction<T>(
-            SelectWriterResult result,
-            bool isTracked) {
+            SelectWriterResult result) {
             Delegate func;
-            var mapper = this.GetNoCollectionFunction<T>(result, isTracked, true, out func);
+            var mapper = this.GetNoCollectionFunction<T>(result, true, out func);
 
             return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>>)func.DynamicInvoke(mapper);
         }
 
-        private Delegate GetNoCollectionFunction<T>(SelectWriterResult result, bool isTracked, bool isAsync, out Delegate func) {
+        private Delegate GetNoCollectionFunction<T>(SelectWriterResult result, bool isAsync, out Delegate func) {
             var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
-            var factoryDictionary = isTracked ? this.trackingMapperFactories : this.foreignKeyMapperFactories;
-            var queries = isAsync
-                              ? (isTracked ? this.asyncTrackingNoCollectionQueries : this.asyncForeignKeyNoCollectionQueries)
-                              : (isTracked ? this.trackingNoCollectionQueries : this.foreignKeyNoCollectionQueries);
-            var mapper = factoryDictionary.GetOrAdd(
+            var queries = isAsync? this.asyncNoCollectionQueries : this.noCollectionQueries;
+            var mapper = this.mapperFactories.GetOrAdd(
                 key,
-                t => this.dapperMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree, isTracked));
-            func = queries.GetOrAdd(key, t => this.GenerateQuery<T>(mapper.Item1, isTracked, isAsync, mapper.Item2));
+                t => this.dapperMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree));
+            func = queries.GetOrAdd(key, t => this.GenerateQuery<T>(mapper.Item1, isAsync, mapper.Item2));
             return mapper.Item1;
         }
 
-        private Delegate GetCollectionFunction<T>(SelectWriterResult result, bool isTracked, bool isAsync, out Delegate func) {
+        private Delegate GetCollectionFunction<T>(SelectWriterResult result, bool isAsync, out Delegate func) {
             var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
-            var collectionQueries = isAsync
-                                            ? (isTracked ? this.asyncTrackingCollectionQueries : this.asyncForeignKeyCollectionQueries)
-                                            : (isTracked ? this.trackingCollectionQueries : this.foreignKeyCollectionQueries);
+            var collectionQueries = isAsync? this.asyncCollectionQueries:this.collectionQueries;
             if (result.NumberCollectionsFetched == 1) {
-                var factoryDictionary = isTracked ? this.trackingMapperFactories : this.foreignKeyMapperFactories;
-                Tuple<Delegate, Type[]> mapperFactory = factoryDictionary.GetOrAdd(
+                Tuple<Delegate, Type[]> mapperFactory = this.mapperFactories.GetOrAdd(
                         key,
-                        t => this.dapperMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree, isTracked));
+                        t => this.dapperMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree));
                 func = collectionQueries.GetOrAdd(
                     key,
-                    t => this.GenerateCollectionFactory<T>(isTracked, result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, null));
+                    t => this.GenerateCollectionFactory<T>(result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, null));
 
 
                 return mapperFactory.Item1;
             }
             else {
-                var factoryDictionary = isTracked ? this.multiCollectionTrackingMapperFactories : this.multiCollectionForeignKeyMapperFactories;
-
-                Tuple<Delegate, Type[], Type[]> mapperFactory = factoryDictionary.GetOrAdd(
+                Tuple<Delegate, Type[], Type[]> mapperFactory = this.multiCollectionMapperFactories.GetOrAdd(
                         key,
-                        t => this.dapperMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree, isTracked));
+                        t => this.dapperMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree));
                 func = collectionQueries.GetOrAdd(
                     key,
-                    t => this.GenerateCollectionFactory<T>(isTracked, result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, mapperFactory.Item3));
+                    t => this.GenerateCollectionFactory<T>(result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, mapperFactory.Item3));
 
                 return mapperFactory.Item1;
             }
         }
 
-        private Delegate GenerateQuery<T>(Delegate mapper, bool isTracked, bool isAsync, Type[] mappedTypes) {
+        private Delegate GenerateQuery<T>(Delegate mapper, bool isAsync, Type[] mappedTypes) {
             var tt = typeof(T);
 
             // Func<SelectWriterResult, SelectQuery<T>, IDbTransaction, IEnumerable<T>>
@@ -201,7 +168,7 @@
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines",
             Justification = "This is hard to read the StyleCop way")]
-        private Delegate GenerateCollectionFactory<T>(bool isTracked, int numberCollectionFetches, bool isAsync, Type[] mappedTypes, Type[] mapperClosureTypes) {
+        private Delegate GenerateCollectionFactory<T>(int numberCollectionFetches, bool isAsync, Type[] mappedTypes, Type[] mapperClosureTypes) {
             var tt = typeof(T);
             var statements = new List<Expression>();
             var variableExpressions = new List<ParameterExpression>();
@@ -213,12 +180,11 @@
             var transactionParam = Expression.Parameter(typeof(IDbTransaction));
 
             // figure out the parameters for the middle func
-            var returnType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
-            var resultsType = typeof(IList<>).MakeGenericType(returnType);
+            var resultsType = typeof(IList<>).MakeGenericType(tt);
             ParameterExpression funcFactoryParam;
             if (numberCollectionFetches == 1) {
                 // Func<T, IList<T>, Delegate> first param is the current root, second param will contain the results
-                funcFactoryParam = Expression.Parameter(typeof(Func<,,>).MakeGenericType(returnType, resultsType, typeof(Delegate)));
+                funcFactoryParam = Expression.Parameter(typeof(Func<,,>).MakeGenericType(tt, resultsType, typeof(Delegate)));
             }
             else if (numberCollectionFetches > 1) {
                 if (mapperClosureTypes == null) {
@@ -227,7 +193,7 @@
 
                 // Func<T, IList<T>, [IDictionary<Col1PkType, Col1Type>, Hashset<Tuple<ParentPkType, Col1PkType>>, .... ], typeof(Delegate)> first param is the current root, second param is results, 3rd to N-1 contains look ups for the collections
                 var nonGenericFuncType = this.GetFuncTypeFor(3 + (numberCollectionFetches * 2));
-                var typeParams = new List<Type> { returnType, resultsType };
+                var typeParams = new List<Type> { tt, resultsType };
                 foreach (var type in mapperClosureTypes) {
                     typeParams.Add(type);
                 }
@@ -240,14 +206,14 @@
             }
 
             // T currentRoot = null;
-            var currentRootVarible = Expression.Variable(returnType, "currentRoot");
-            var currentRootInit = Expression.Assign(currentRootVarible, Expression.Constant(null, returnType));
+            var currentRootVarible = Expression.Variable(tt, "currentRoot");
+            var currentRootInit = Expression.Assign(currentRootVarible, Expression.Constant(null, tt));
             variableExpressions.Add(currentRootVarible);
             statements.Add(currentRootInit);
 
             // IEnumerable<T> results = new List<T>();
-            var resultVariable = Expression.Variable(typeof(IList<>).MakeGenericType(returnType), "results");
-            var resultInit = Expression.New(typeof(List<>).MakeGenericType(returnType));
+            var resultVariable = Expression.Variable(typeof(IList<>).MakeGenericType(tt), "results");
+            var resultInit = Expression.New(typeof(List<>).MakeGenericType(tt));
             var resultExpr = Expression.Assign(resultVariable, resultInit);
             variableExpressions.Add(resultVariable);
             statements.Add(resultExpr);
@@ -276,7 +242,7 @@
             }
 
             // Func<A,...,Z> mapper = (Func<A,...,Z>)funcFactory(dict)
-            var mapperType = typeof(Func<,>).MakeGenericType(typeof(object[]), returnType);
+            var mapperType = typeof(Func<,>).MakeGenericType(typeof(object[]), tt);
             var mapperVariable = Expression.Variable(mapperType, "mapper");
             BinaryExpression mapperExpr = Expression.Assign(
                     mapperVariable,
@@ -314,6 +280,7 @@
                 variableExpressions.Add(queryResultVariable);
 
                 // now add statements to create FetchCollectionAwaiter and return that
+                // TODO we don't need the FetchCollectionAwaiter any more??
                 var fetchCollectionAwaiterType = typeof(FetchCollectionAwaiter<>).MakeGenericType(tt);
                 var awaiterResultVariable = Expression.Variable(fetchCollectionAwaiterType);
                 variableExpressions.Add(awaiterResultVariable);

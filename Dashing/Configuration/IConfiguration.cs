@@ -73,13 +73,7 @@ using Dashing.Events;
         /// <returns></returns>
         /// <remarks>All queries are executed without an explicit transaction.</remarks>
         ISession BeginTransactionLessSession(IDbConnection connection);
-
-        /// <summary>
-        ///     The code manager for this configuration
-        /// </summary>
-        /// <returns></returns>
-        IGeneratedCodeManager CodeManager { get; }
-
+        
         ICollection<IEventListener> EventListeners { get; }
 
         EventHandlers EventHandlers { get; }

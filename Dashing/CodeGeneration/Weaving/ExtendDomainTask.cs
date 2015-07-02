@@ -16,6 +16,7 @@
 
     using Mono.Cecil;
     using Mono.Cecil.Cil;
+    using Mono.Cecil.Pdb;
     using Mono.Cecil.Rocks;
 
     using Newtonsoft.Json;
@@ -44,7 +45,7 @@
             var assemblyMapDefinitions = new Dictionary<string, List<MapDefinition>>();
             foreach (var file in Directory.GetFiles(AssemblyLocation.Directory)) {
                 try {
-                    var assembly = AssemblyDefinition.ReadAssembly(file);
+                    var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { ReadSymbols = true });
                     assemblyDefinitions.Add(file, assembly);
                     if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == me.GetName().Name)) {
                         // references dashing, use our other app domain to find the IConfig and instantiate it
@@ -80,17 +81,36 @@
                 "Found the following assemblies that reference dashing: " + string.Join(", ", assemblyMapDefinitions.Select(a => a.Key)));
 
             // now go through each assembly and re-write the types
+            var visitedTypes = new HashSet<string>();
             foreach (var assemblyMapDefinition in assemblyMapDefinitions) {
                 var assemblyDefinitionLookup = assemblyDefinitions.Single(a => a.Value.FullName == assemblyMapDefinition.Key);
                 var assemblyDefinition = assemblyDefinitionLookup.Value;
                 foreach (var mapDefinition in assemblyMapDefinition.Value) {
-                    var typeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == mapDefinition.TypeFullName);
+                    if (visitedTypes.Contains(mapDefinition.TypeFullName)) {
+                        continue;
+                    }
+
+                    var typeDef = GetTypeDefFromFullName(mapDefinition.TypeFullName, assemblyDefinition);
                     ImplementITrackedEntity(typeDef, assemblyDefinition, mapDefinition);
                     AddForeignKeyBehaviour(typeDef, assemblyDefinition, mapDefinition, assemblyMapDefinitions, assemblyDefinitions);
                     OverrideEqualsAndGetHashCode(typeDef, mapDefinition);
+                    visitedTypes.Add(mapDefinition.TypeFullName);
                 }
 
-                assemblyDefinition.Write(assemblyDefinitionLookup.Key);
+                try {
+                    assemblyDefinition.Write(
+                        assemblyDefinitionLookup.Key,
+                        new WriterParameters { WriteSymbols = true, SymbolWriterProvider = new PdbWriterProvider() });
+                }
+                catch (UnauthorizedAccessException) {
+                    this.Log.LogMessage(MessageImportance.High, "Unable to write the pdb for assembly " + assemblyDefinition.FullName + " due to an UnauthorizedAccessException");
+                    try {
+                        assemblyDefinition.Write(assemblyDefinitionLookup.Key);
+                    }
+                    catch (Exception) {
+                        return false; // bugger it's broke
+                    }
+                }
 
                 // verify assembly
                 if (!peVerifier.Verify(assemblyDefinitionLookup.Key)) {
@@ -99,6 +119,22 @@
             }
 
             return true;
+        }
+
+        private static TypeDefinition GetTypeDefFromFullName(string typeFullName, AssemblyDefinition assemblyDefinition) {
+            TypeDefinition typeDef;
+            if (typeFullName.Contains('+')) {
+                var types = typeFullName.Split('+');
+                typeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == types.First());
+                for (var i = 1; i < types.Length; i++) {
+                    typeDef = typeDef.NestedTypes.Single(t => t.Name == types.ElementAt(i));
+                }
+            }
+            else {
+                typeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == typeFullName);
+            }
+
+            return typeDef;
         }
 
         private void OverrideEqualsAndGetHashCode(TypeDefinition typeDef, MapDefinition mapDefinition) {
@@ -140,14 +176,14 @@
                 il.Add(Instruction.Create(OpCodes.Stloc_1));
                 il.Add(Instruction.Create(OpCodes.Ldloc_1));
                 var getIdInstr = Instruction.Create(OpCodes.Ldarg_0);
-                il.Add(Instruction.Create(OpCodes.Brtrue_S, getIdInstr));
+                il.Add(Instruction.Create(OpCodes.Brtrue, getIdInstr));
                 il.Add(Instruction.Create(OpCodes.Nop));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldflda, hashCodeBackingField));
                 il.Add(Instruction.Create(OpCodes.Call, getValueMethodRef));
                 il.Add(Instruction.Create(OpCodes.Stloc_0));
                 var endInstr = Instruction.Create(OpCodes.Ldloc_0);
-                il.Add(Instruction.Create(OpCodes.Br_S, endInstr));
+                il.Add(Instruction.Create(OpCodes.Br, endInstr));
                 il.Add(getIdInstr);
                 il.Add(Instruction.Create(OpCodes.Call, pkColDef.GetMethod));
                 il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
@@ -157,7 +193,7 @@
                 il.Add(Instruction.Create(OpCodes.Stloc_1));
                 il.Add(Instruction.Create(OpCodes.Ldloc_1));
                 var getIdInstr2 = Instruction.Create(OpCodes.Nop);
-                il.Add(Instruction.Create(OpCodes.Brtrue_S, getIdInstr2));
+                il.Add(Instruction.Create(OpCodes.Brtrue, getIdInstr2));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
@@ -167,14 +203,14 @@
                 il.Add(Instruction.Create(OpCodes.Ldflda, hashCodeBackingField));
                 il.Add(Instruction.Create(OpCodes.Call, getValueMethodRef));
                 il.Add(Instruction.Create(OpCodes.Stloc_0));
-                il.Add(Instruction.Create(OpCodes.Br_S, endInstr));
+                il.Add(Instruction.Create(OpCodes.Br, endInstr));
                 il.Add(getIdInstr2);
                 il.Add(Instruction.Create(OpCodes.Ldc_I4, 17 * 29));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Call, pkColDef.GetMethod));
                 il.Add(Instruction.Create(OpCodes.Add));
                 il.Add(Instruction.Create(OpCodes.Stloc_0));
-                il.Add(Instruction.Create(OpCodes.Br_S, endInstr));
+                il.Add(Instruction.Create(OpCodes.Br, endInstr));
                 il.Add(endInstr);
                 il.Add(Instruction.Create(OpCodes.Ret));
                 typeDef.Methods.Add(method);
@@ -201,11 +237,11 @@
                 il.Add(Instruction.Create(OpCodes.Stloc_2));
                 il.Add(Instruction.Create(OpCodes.Ldloc_2));
                 var isInstInstr = Instruction.Create(OpCodes.Ldarg_1);
-                il.Add(Instruction.Create(OpCodes.Brtrue_S, isInstInstr));
+                il.Add(Instruction.Create(OpCodes.Brtrue, isInstInstr));
                 il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
                 il.Add(Instruction.Create(OpCodes.Stloc_1));
                 var ret = Instruction.Create(OpCodes.Ldloc_1);
-                il.Add(Instruction.Create(OpCodes.Br_S, ret));
+                il.Add(Instruction.Create(OpCodes.Br, ret));
                 il.Add(isInstInstr);
                 il.Add(Instruction.Create(OpCodes.Isinst, typeDef));
                 il.Add(Instruction.Create(OpCodes.Stloc_0));
@@ -217,10 +253,10 @@
                 il.Add(Instruction.Create(OpCodes.Stloc_2));
                 il.Add(Instruction.Create(OpCodes.Ldloc_2));
                 var getIdInstr = Instruction.Create(OpCodes.Ldarg_0);
-                il.Add(Instruction.Create(OpCodes.Brtrue_S, getIdInstr));
+                il.Add(Instruction.Create(OpCodes.Brtrue, getIdInstr));
                 il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
                 il.Add(Instruction.Create(OpCodes.Stloc_1));
-                il.Add(Instruction.Create(OpCodes.Br_S, ret));
+                il.Add(Instruction.Create(OpCodes.Br, ret));
                 il.Add(getIdInstr);
                 il.Add(Instruction.Create(OpCodes.Call, pkColDef.GetMethod));
                 il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
@@ -230,17 +266,17 @@
                 il.Add(Instruction.Create(OpCodes.Stloc_2));
                 il.Add(Instruction.Create(OpCodes.Ldloc_2));
                 var getIdInstr2 = Instruction.Create(OpCodes.Ldarg_0);
-                il.Add(Instruction.Create(OpCodes.Brtrue_S, getIdInstr2));
+                il.Add(Instruction.Create(OpCodes.Brtrue, getIdInstr2));
                 il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
                 il.Add(Instruction.Create(OpCodes.Stloc_1));
-                il.Add(Instruction.Create(OpCodes.Br_S, ret));
+                il.Add(Instruction.Create(OpCodes.Br, ret));
                 il.Add(getIdInstr2);
                 il.Add(Instruction.Create(OpCodes.Call, pkColDef.GetMethod));
                 il.Add(Instruction.Create(OpCodes.Ldloc_0));
                 il.Add(Instruction.Create(OpCodes.Callvirt, pkColDef.GetMethod));
                 il.Add(Instruction.Create(OpCodes.Ceq));
                 il.Add(Instruction.Create(OpCodes.Stloc_1));
-                il.Add(Instruction.Create(OpCodes.Br_S, ret));
+                il.Add(Instruction.Create(OpCodes.Br, ret));
                 il.Add(ret);
                 il.Add(Instruction.Create(OpCodes.Ret));
                 typeDef.Methods.Add(equals);
@@ -291,7 +327,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldfld, backingField));
                 var skipToEnd = Instruction.Create(OpCodes.Ldc_I4_1);
-                il.Add(Instruction.Create(OpCodes.Brtrue_S, skipToEnd));
+                il.Add(Instruction.Create(OpCodes.Brtrue, skipToEnd));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 if (fkPkType.IsValueType) {
                     il.Add(Instruction.Create(OpCodes.Ldflda, fkField));
@@ -304,13 +340,13 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
                 il.Add(Instruction.Create(OpCodes.Ceq));
                 var nopInstr = Instruction.Create(OpCodes.Nop);
-                il.Add(Instruction.Create(OpCodes.Br_S, nopInstr));
+                il.Add(Instruction.Create(OpCodes.Br, nopInstr));
                 il.Add(skipToEnd);
                 il.Add(nopInstr);
                 il.Add(Instruction.Create(OpCodes.Stloc_2));
                 il.Add(Instruction.Create(OpCodes.Ldloc_2));
                 var returnThis = Instruction.Create(OpCodes.Ldarg_0);
-                il.Add(Instruction.Create(OpCodes.Brtrue_S, returnThis));
+                il.Add(Instruction.Create(OpCodes.Brtrue, returnThis));
                 il.Add(Instruction.Create(OpCodes.Nop));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Newobj, propDef.PropertyType.Resolve().GetConstructors().First()));
@@ -319,9 +355,9 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldflda, fkField));
                 il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(MakeGeneric(fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"), typeDef.Module.Import(fkPkType)))));
-                var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).Single(m => m.TypeFullName == columnDef.TypeFullName);
+                var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
                 var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
-                var fkMapTypeRef = assemblyDef.MainModule.Types.Single(t => t.FullName == columnDef.TypeFullName);
+                var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
                 il.Add(Instruction.Create(OpCodes.Callvirt, fkMapTypeRef.Properties.Single(c => c.Name == fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod));
                 il.Add(Instruction.Create(OpCodes.Ldloc_0));
                 il.Add(Instruction.Create(OpCodes.Stfld, backingField));
@@ -329,7 +365,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 il.Add(Instruction.Create(OpCodes.Ldfld, backingField));
                 il.Add(Instruction.Create(OpCodes.Stloc_1));
                 var ldLoc = Instruction.Create(OpCodes.Ldloc_1);
-                il.Add(Instruction.Create(OpCodes.Br_S, ldLoc));
+                il.Add(Instruction.Create(OpCodes.Br, ldLoc));
                 il.Add(ldLoc);
                 il.Add(Instruction.Create(OpCodes.Ret));
             }
@@ -391,13 +427,13 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));
                 var endNopInstr = Instruction.Create(OpCodes.Nop);
                 var endLdArgInstr = setIl.First();
-                setIntructions.Add(Instruction.Create(OpCodes.Brtrue_S, endLdArgInstr));
+                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endLdArgInstr));
                 setIntructions.Add(Instruction.Create(OpCodes.Nop));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsDirty", columnDefinition.Name))));
                 setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));
-                setIntructions.Add(Instruction.Create(OpCodes.Brtrue_S, endNopInstr));
+                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr));
                 setIntructions.Add(Instruction.Create(OpCodes.Nop));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
 
@@ -411,24 +447,24 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                         setIntructions.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(objectTypeDef.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
                     }
                     else {
-                        setIntructions.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(boolTypeDef.Resolve().Methods.Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() != "object"))));
+                        setIntructions.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(propertyDef.PropertyType.Resolve().Methods.Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() != "object"))));
                     }
 
                     setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
                     setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));
-                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue_S, endNopInstr));
+                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr));
                 }
                 else {
                     setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
                     var orInstr = Instruction.Create(OpCodes.Ldarg_0);
                     var hmmInstr = Instruction.Create(OpCodes.Ldc_I4_0);
                     var hmmInstr2 = Instruction.Create(OpCodes.Ldc_I4_1);
-                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue_S, orInstr));
+                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr));
                     setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
-                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue_S, hmmInstr));
+                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
                     setIntructions.Add(orInstr);
                     setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
-                    setIntructions.Add(Instruction.Create(OpCodes.Brfalse_S, hmmInstr2));
+                    setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr2));
                     setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                     setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
                     setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
@@ -440,16 +476,16 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                     }
 
                     var nopInstr = Instruction.Create(OpCodes.Nop);
-                    setIntructions.Add(Instruction.Create(OpCodes.Br_S, nopInstr));
+                    setIntructions.Add(Instruction.Create(OpCodes.Br, nopInstr));
                     setIntructions.Add(hmmInstr2);
                     setIntructions.Add(nopInstr);
                     var nopInstr2 = Instruction.Create(OpCodes.Nop);
-                    setIntructions.Add(Instruction.Create(OpCodes.Br_S, nopInstr2));
+                    setIntructions.Add(Instruction.Create(OpCodes.Br, nopInstr2));
                     setIntructions.Add(hmmInstr);
                     setIntructions.Add(nopInstr2);
                     setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
                     setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));
-                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue_S, endNopInstr));
+                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr));
                     setIntructions.Add(Instruction.Create(OpCodes.Nop));
                 }
 
@@ -531,7 +567,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
             isTrackingEnabled.Body.Instructions.Add(Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == isTrackingName)));
             isTrackingEnabled.Body.Instructions.Add(Instruction.Create(OpCodes.Stloc_0));
             var loadInstr = Instruction.Create(OpCodes.Ldloc_0);
-            isTrackingEnabled.Body.Instructions.Add(Instruction.Create(OpCodes.Br_S, loadInstr));
+            isTrackingEnabled.Body.Instructions.Add(Instruction.Create(OpCodes.Br, loadInstr));
             isTrackingEnabled.Body.Instructions.Add(loadInstr);
             isTrackingEnabled.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
             isTrackingEnabled.Body.InitLocals = true;
@@ -571,7 +607,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 instructions.Add(Instruction.Create(OpCodes.Ceq));
                 instructions.Add(Instruction.Create(OpCodes.Stloc_2));
                 instructions.Add(Instruction.Create(OpCodes.Ldloc_2));
-                instructions.Add(Instruction.Create(OpCodes.Brtrue_S, breakToInstruction));
+                instructions.Add(Instruction.Create(OpCodes.Brtrue, breakToInstruction));
                 instructions.Add(Instruction.Create(OpCodes.Nop));
                 instructions.Add(Instruction.Create(OpCodes.Ldloc_0));
                 instructions.Add(Instruction.Create(OpCodes.Ldstr, nonPkCols.ElementAt(i).Name));
@@ -584,7 +620,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
 
             instructions.Add(Instruction.Create(OpCodes.Stloc_1));
             var retInstr = Instruction.Create(OpCodes.Ldloc_1);
-            instructions.Add(Instruction.Create(OpCodes.Br_S, retInstr));
+            instructions.Add(Instruction.Create(OpCodes.Br, retInstr));
             instructions.Add(retInstr);
             instructions.Add(Instruction.Create(OpCodes.Ret));
             typeDef.Methods.Add(getDirtyProperties);
@@ -607,7 +643,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
 
             var throwExceptionTarget = Instruction.Create(OpCodes.Ldstr, "propertyName");
             var returnTarget = Instruction.Create(OpCodes.Ldloc_0);
-            getBodyInstructions.Add(Instruction.Create(OpCodes.Brfalse_S, throwExceptionTarget));
+            getBodyInstructions.Add(Instruction.Create(OpCodes.Brfalse, throwExceptionTarget));
 
             var switchInstructions = new List<Instruction>();
             var opEqualityRef = typeDef.Module.Import(typeof(string).GetMethods().Single(m => m.Name == "op_Equality"));
@@ -619,7 +655,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
 
                 // generate the if bit
                 var targetInstr = Instruction.Create(OpCodes.Ldarg_0);
-                getBodyInstructions.Add(Instruction.Create(OpCodes.Brtrue_S, targetInstr));
+                getBodyInstructions.Add(Instruction.Create(OpCodes.Brtrue, targetInstr));
                 switchInstructions.Add(targetInstr);
                 switchInstructions.Add(Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == String.Format("__{0}_IsDirty", nonPkCols.ElementAt(i).Name))));
                 switchInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
@@ -628,8 +664,8 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 switchInstructions.Add(Instruction.Create(OpCodes.Ldloc_2));
 
                 // generate the return bit
-                var breakInstruction = Instruction.Create(OpCodes.Br_S, throwExceptionTarget);
-                switchInstructions.Add(Instruction.Create(OpCodes.Brtrue_S, breakInstruction));
+                var breakInstruction = Instruction.Create(OpCodes.Br, throwExceptionTarget);
+                switchInstructions.Add(Instruction.Create(OpCodes.Brtrue, breakInstruction));
                 switchInstructions.Add(Instruction.Create(OpCodes.Nop));
                 switchInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                 switchInstructions.Add(Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == String.Format("__{0}_OldValue", nonPkCols.ElementAt(i).Name))));
@@ -638,12 +674,12 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 }
 
                 switchInstructions.Add(Instruction.Create(OpCodes.Stloc_0));
-                switchInstructions.Add(Instruction.Create(OpCodes.Br_S, returnTarget));
+                switchInstructions.Add(Instruction.Create(OpCodes.Br, returnTarget));
                 switchInstructions.Add(breakInstruction);
             }
 
             // add a br
-            getBodyInstructions.Add(Instruction.Create(OpCodes.Br_S, throwExceptionTarget));
+            getBodyInstructions.Add(Instruction.Create(OpCodes.Br, throwExceptionTarget));
 
             // run them
             foreach (var instruction in switchInstructions) {
@@ -651,6 +687,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
             }
 
             // handle the exception
+            getBodyInstructions.Add(Instruction.Create(OpCodes.Nop));
             getBodyInstructions.Add(throwExceptionTarget);
             getBodyInstructions.Add(Instruction.Create(OpCodes.Ldstr, "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first"));
             getBodyInstructions.Add(Instruction.Create(OpCodes.Newobj, typeDef.Module.Import(typeof(ArgumentOutOfRangeException).GetConstructors().First(c => c.GetParameters().All(p => p.ParameterType == typeof(string)) && c.GetParameters().Count() == 2))));
@@ -711,7 +748,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
             get.Body.Instructions.Add(Instruction.Create(OpCodes.Ldfld, fieldDefinition));
             get.Body.Instructions.Add(Instruction.Create(OpCodes.Stloc_0));
             var inst = Instruction.Create(OpCodes.Ldloc_0);
-            get.Body.Instructions.Add(Instruction.Create(OpCodes.Br_S, inst));
+            get.Body.Instructions.Add(Instruction.Create(OpCodes.Br, inst));
             get.Body.Instructions.Add(inst);
             get.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
             get.Body.Variables.Add(new VariableDefinition(fieldDefinition.FieldType));

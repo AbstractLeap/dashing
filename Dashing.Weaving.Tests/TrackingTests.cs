@@ -7,6 +7,7 @@ namespace Dashing.Weaving.Tests {
 
     using Xunit;
 
+    [Collection("Weaving Tests")]
     public class TrackingTests : IClassFixture<WeavingFixture> {
         [Fact]
         public void ImplementsITrackedEntity() {

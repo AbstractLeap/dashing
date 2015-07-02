@@ -6,6 +6,7 @@ namespace Dashing.Weaving.Tests {
 
     using Xunit;
 
+    [Collection("Weaving Tests")]
     public class EqualityTests : IClassFixture<WeavingFixture> {
         [Fact]
         public void GetHashCodeReturnsIdFactor() {

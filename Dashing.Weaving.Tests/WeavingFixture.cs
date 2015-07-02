@@ -9,6 +9,7 @@
 
     using Xunit;
 
+    [Collection("Weaving Tests")]
     public class WeavingFixture {
         public WeavingFixture() {
             // do the re-writing

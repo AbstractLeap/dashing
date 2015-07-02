@@ -38,23 +38,9 @@
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mockCodeManager = GetMockCodeManager();
-            var mapper = new DapperMapperGenerator(mockCodeManager.Object, config);
-            var func = mapper.GenerateNonCollectionMapper<Post>(result.FetchTree, false);
+            var mapper = new DapperMapperGenerator(config);
+            var func = mapper.GenerateNonCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
-        }
-
-        private static Mock<IGeneratedCodeManager> GetMockCodeManager() {
-            var mockCodeManager = new Mock<IGeneratedCodeManager>();
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Post))).Returns(typeof(Post));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Blog))).Returns(typeof(Blog));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Comment))).Returns(typeof(Comment));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(User))).Returns(typeof(User));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Post)))).Returns(typeof(Post));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Blog)))).Returns(typeof(Blog));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Comment)))).Returns(typeof(Comment));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(User)))).Returns(typeof(User));
-            return mockCodeManager;
         }
 
         [Fact]
@@ -83,9 +69,8 @@
             var selectQuery = new SelectQuery<Comment>(new Mock<ISelectQueryExecutor>().Object).Fetch(c => c.Post.Author) as SelectQuery<Comment>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mockCodeManager = GetMockCodeManager();
-            var mapper = new DapperMapperGenerator(mockCodeManager.Object, config);
-            var func = mapper.GenerateNonCollectionMapper<Comment>(result.FetchTree, false);
+            var mapper = new DapperMapperGenerator(config);
+            var func = mapper.GenerateNonCollectionMapper<Comment>(result.FetchTree);
             return func.Item1;
         }
 

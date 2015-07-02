@@ -34,7 +34,7 @@ namespace Dashing.Configuration {
             }
         }
 
-        public static IMap GetMap(Type type, IDictionary<Type, IMap> mappedTypes, CodeGeneratorConfig config) {
+        public static IMap GetMap(Type type, IDictionary<Type, IMap> mappedTypes) {
             IMap map;
 
             // shortcut for simplest case
@@ -42,27 +42,13 @@ namespace Dashing.Configuration {
                 return map;
             }
 
-            // if the type is a generated type
-            if (type.Namespace == config.Namespace) {
-                if (type.BaseType == null) {
-                    throw new ArgumentException("That type is generated but does not have a BaseType");
-                }
-
-                return GetMap(type.BaseType, mappedTypes, config);
-            }
-
             // definitely not mapped
             throw new ArgumentException(string.Format("Type {0} is not mapped", type.Name));
         }
 
-        public static bool HasMap(Type type, IDictionary<Type, IMap> mappedTypes, CodeGeneratorConfig config) {
+        public static bool HasMap(Type type, IDictionary<Type, IMap> mappedTypes) {
             if (mappedTypes.ContainsKey(type)) {
                 return true;
-            }
-
-            // if the type is a generated type
-            if (type.Namespace == config.Namespace) {
-                return type.BaseType != null && HasMap(type.BaseType, mappedTypes, config);
             }
 
             return false;

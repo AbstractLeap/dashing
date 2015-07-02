@@ -19,12 +19,6 @@ namespace Dashing.Tests {
             throw new NotImplementedException();
         }
 
-        public IGeneratedCodeManager CodeManager {
-            get {
-                return this.MockCodeManager.Object;
-            }
-        }
-
         public IEngine Engine {
             get {
                 return this.MockEngine.Object;
@@ -41,19 +35,13 @@ namespace Dashing.Tests {
 
         public Mock<IEngine> MockEngine { get; set; }
 
-        public Mock<IGeneratedCodeManager> MockCodeManager { get; set; }
-
         private readonly Dictionary<Type, IMap> mappedTypes;
-
-        private readonly CodeGeneratorConfig codeGeneratorConfig;
 
         public MockConfiguration() {
             this.MockSession = new Mock<ISession>(MockBehavior.Loose);
             this.MockEngine = new Mock<IEngine>(MockBehavior.Loose);
-            this.MockCodeManager = new Mock<IGeneratedCodeManager>(MockBehavior.Loose);
             this.Mapper = new DefaultMapper(new DefaultConvention());
             this.mappedTypes = new Dictionary<Type, IMap>();
-            this.codeGeneratorConfig = new CodeGeneratorConfig();
         }
 
         public IMap<T> GetMap<T>() {
@@ -63,11 +51,11 @@ namespace Dashing.Tests {
         }
 
         public IMap GetMap(Type type) {
-            return ConfigurationHelper.GetMap(type, this.mappedTypes, this.codeGeneratorConfig);
+            return ConfigurationHelper.GetMap(type, this.mappedTypes);
         }
 
         public bool HasMap(Type type) {
-            return ConfigurationHelper.HasMap(type, this.mappedTypes, this.codeGeneratorConfig);
+            return ConfigurationHelper.HasMap(type, this.mappedTypes);
         }
 
         public ISession BeginSession() {

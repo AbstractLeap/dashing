@@ -77,13 +77,6 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="CodeGeneration\Fixtures\GenerateAndOutputCodeFixture.cs" />
-    <Compile Include="CodeGeneration\Fixtures\GenerateCodeFixture.cs" />
-    <Compile Include="CodeGeneration\ForeignKeyTests.cs" />
-    <Compile Include="CodeGeneration\CodeGeneratorTests.cs" />
-    <Compile Include="CodeGeneration\ProxyGeneratorTests.cs" />
-    <Compile Include="CodeGeneration\UpdateTests.cs" />
-    <Compile Include="CodeGeneration\TrackingTests.cs" />
     <Compile Include="Configuration\ColumnExtensionTests.cs" />
     <Compile Include="Engine\DapperMapperGeneration\CollectionTests.cs" />
     <Compile Include="Engine\DapperMapperGeneration\NonCollectionTests.cs" />
@@ -132,6 +125,7 @@
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />
+    <Compile Include="TestConfig.cs" />
     <Compile Include="TestDomain\User.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +141,9 @@
       <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
       <Name>Dashing</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CodeGeneration\Fixtures\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
@@ -179,8 +176,8 @@
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
-  </Target>
+  </Target>-->
   <Target Name="AfterBuild">
+    <Exec Command="$(SolutionDir)Dashing.Dev.Weaver\bin\$(Configuration)\Dashing.Dev.Weaver.exe Dashing.Tests" />
   </Target>
-  -->
 </Project>

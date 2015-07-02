@@ -117,51 +117,56 @@
             }
         }
 
-        public SqlWriterResult GenerateBulkSql<T>(T updateClass, IEnumerable<Expression<Func<T, bool>>> predicates) {
-            var sql = new StringBuilder();
-            var parameters = new DynamicParameters();
-            var map = this.Configuration.GetMap<T>();
+        public SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            // perform the update - generate a couple of instances of T with different instantiations of T's properties so that we can see which properties actually get changed
+            // we have to use 2 instances in order 
+            throw new NotImplementedException();
 
-            var interfaceUpdateClass = updateClass as IUpdateClass;
-            if (interfaceUpdateClass.UpdatedProperties.IsEmpty()) {
-                return new SqlWriterResult(string.Empty, parameters);
-            }
 
-            sql.Append("update ");
-            this.Dialect.AppendQuotedTableName(sql, map);
-            sql.Append(" set ");
+            //var sql = new StringBuilder();
+            //var parameters = new DynamicParameters();
+            //var map = this.Configuration.GetMap<T>();
 
-            foreach (var updatedProp in interfaceUpdateClass.UpdatedProperties) {
-                var column = map.Columns[updatedProp];
-                this.Dialect.AppendQuotedName(sql, column.DbName);
-                var paramName = "@" + updatedProp;
-                var propertyValue = map.GetColumnValue(updateClass, column);
-                if (propertyValue == null) {
-                    parameters.Add(paramName, null);
-                }
-                else {
-                    parameters.Add(paramName, this.GetValueOrPrimaryKey(column, propertyValue));
-                }
+            //var interfaceUpdateClass = updateClass as IUpdateClass;
+            //if (interfaceUpdateClass.UpdatedProperties.IsEmpty()) {
+            //    return new SqlWriterResult(string.Empty, parameters);
+            //}
 
-                sql.Append(" = ");
-                sql.Append(paramName);
-                sql.Append(", ");
-            }
+            //sql.Append("update ");
+            //this.Dialect.AppendQuotedTableName(sql, map);
+            //sql.Append(" set ");
 
-            sql.Remove(sql.Length - 2, 2);
+            //foreach (var updatedProp in interfaceUpdateClass.UpdatedProperties) {
+            //    var column = map.Columns[updatedProp];
+            //    this.Dialect.AppendQuotedName(sql, column.DbName);
+            //    var paramName = "@" + updatedProp;
+            //    var propertyValue = map.GetColumnValue(updateClass, column);
+            //    if (propertyValue == null) {
+            //        parameters.Add(paramName, null);
+            //    }
+            //    else {
+            //        parameters.Add(paramName, this.GetValueOrPrimaryKey(column, propertyValue));
+            //    }
 
-            if (predicates != null && predicates.Any()) {
-                var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
-                var whereResult = whereClauseWriter.GenerateSql(predicates, null);
-                if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
-                    throw new NotImplementedException("Dashing does not currently support where clause across tables in an update");
-                }
+            //    sql.Append(" = ");
+            //    sql.Append(paramName);
+            //    sql.Append(", ");
+            //}
 
-                parameters.AddDynamicParams(whereResult.Parameters);
-                sql.Append(whereResult.Sql);
-            }
+            //sql.Remove(sql.Length - 2, 2);
 
-            return new SqlWriterResult(sql.ToString(), parameters);
+            //if (predicates != null && predicates.Any()) {
+            //    var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
+            //    var whereResult = whereClauseWriter.GenerateSql(predicates, null);
+            //    if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
+            //        throw new NotImplementedException("Dashing does not currently support where clause across tables in an update");
+            //    }
+
+            //    parameters.AddDynamicParams(whereResult.Parameters);
+            //    sql.Append(whereResult.Sql);
+            //}
+
+            //return new SqlWriterResult(sql.ToString(), parameters);
         }
     }
 }

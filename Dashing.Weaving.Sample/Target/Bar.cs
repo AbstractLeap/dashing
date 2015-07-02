@@ -19,6 +19,18 @@
 
         private Foo __foo;
 
+        private DateTime __createdDate;
+
+        private bool __CreatedDate_IsDirty;
+
+        private DateTime? __CreatedDate_OldValue;
+
+        private int? __somethingOrTother;
+
+        private bool __SomethingOrTother_IsDirty;
+
+        private int? __SomethingOrTother_OldValue;
+
         public int Id { get; set; }
 
         public override bool Equals(object obj) {
@@ -74,6 +86,44 @@
             }
         }
 
+        public DateTime CreatedDate {
+            get {
+                return this.__createdDate;
+            }
+
+            set {
+                if (this.isTracking) {
+                    if (!this.__CreatedDate_IsDirty) {
+                        if (!this.__createdDate.Equals(value)) {
+                            this.__CreatedDate_OldValue = this.__createdDate;
+                            this.__CreatedDate_IsDirty = true;
+                        }
+                    }
+                }
+
+                this.__createdDate = value;
+            }
+        }
+
+        public int? SomethingOrTother {
+            get {
+                return this.__somethingOrTother;
+            }
+
+            set {
+                if (this.isTracking) {
+                    if (!this.__SomethingOrTother_IsDirty) {
+                        if (!this.__somethingOrTother.Equals(value)) {
+                            this.__SomethingOrTother_OldValue = this.__somethingOrTother;
+                            this.__SomethingOrTother_IsDirty = true;
+                        }
+                    }
+                }
+
+                this.__somethingOrTother = value;
+            }
+        }
+
         public int? FooId;
 
         public Foo Foo {
@@ -109,6 +159,10 @@
             this.__Foo_OldValue = null;
             this.__Name_IsDirty = false;
             this.__Name_OldValue = null;
+            this.__CreatedDate_IsDirty = false;
+            this.__CreatedDate_OldValue = null;
+            this.__SomethingOrTother_IsDirty = false;
+            this.__SomethingOrTother_OldValue = null;
         }
 
         public bool IsTrackingEnabled() {
@@ -123,6 +177,14 @@
 
             if (__Foo_IsDirty) {
                 dirtyProps.Add("Foo");
+            }
+
+            if (__CreatedDate_IsDirty) {
+                dirtyProps.Add("CreatedDate");
+            }
+
+            if (__SomethingOrTother_IsDirty) {
+                dirtyProps.Add("SomethingOrTother");
             }
 
             return dirtyProps;
@@ -140,6 +202,20 @@
                 case "IsRah":
                     if (this.__Foo_IsDirty) {
                         return this.__Foo_OldValue;
+                    }
+
+                    break;
+
+                case "CreatedDate":
+                    if (this.__CreatedDate_IsDirty) {
+                        return this.__CreatedDate_OldValue;
+                    }
+
+                    break;
+
+                case "SomethingOrTother":
+                    if (this.__SomethingOrTother_IsDirty) {
+                        return this.__SomethingOrTother_OldValue;
                     }
 
                     break;

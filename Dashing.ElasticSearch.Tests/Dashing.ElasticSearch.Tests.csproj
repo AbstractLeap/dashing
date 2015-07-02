@@ -83,10 +83,6 @@
       <Project>{bd5dbf9d-a794-4588-8ce4-72e65bf32520}</Project>
       <Name>Dashing.ElasticSearch</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Dashing.Tests\Dashing.Tests.csproj">
-      <Project>{ca614821-7e80-4745-b513-64d11a394a34}</Project>
-      <Name>Dashing.Tests</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Dashing\Dashing.csproj">
       <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
       <Name>Dashing</Name>
@@ -108,6 +104,6 @@
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
-  </Target>
-  -->
+    <Exec Command="$(SolutionDir)Dashing.Dev.Weaver\bin\$(Configuration)\Dashing.Dev.Weaver.exe Dashing.ElasticSearch.Tests" />
+  </Target>-->
 </Project>

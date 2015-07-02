@@ -96,8 +96,8 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
-            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
+            var mapper = new DapperMapperGenerator(config);
+            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
 
@@ -148,8 +148,8 @@
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Tags).ThenFetch(p => p.ElTag).FetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
-            var funcFac = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree, false).Item1;
+            var mapper = new DapperMapperGenerator(config);
+            var funcFac = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree).Item1;
 
             // setup the scenario
             var post1 = new Post { PostId = 1 };
@@ -187,8 +187,8 @@
             var selectQuery = new SelectQuery<Blog>(new Mock<ISelectQueryExecutor>().Object).FetchMany(b => b.Posts).ThenFetchMany(p => p.Tags).ThenFetch(t => t.ElTag).FetchMany(b => b.Posts).ThenFetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag).FetchMany(p => p.Posts).ThenFetch(p => p.Author) as SelectQuery<Blog>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
-            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree, false).Item1;
+            var mapper = new DapperMapperGenerator(config);
+            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree).Item1;
 
             // setup the scenario
             var blog1 = new Blog { BlogId = 1 };
@@ -267,8 +267,8 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
-            var func = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree, false);
+            var mapper = new DapperMapperGenerator(config);
+            var func = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
 
@@ -278,8 +278,8 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
-            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
+            var mapper = new DapperMapperGenerator(config);
+            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
 
@@ -289,8 +289,8 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
-            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree, false);
+            var mapper = new DapperMapperGenerator(config);
+            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
 
@@ -302,33 +302,9 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(GetMockCodeManager().Object, config);
-            var func = mapper.GenerateCollectionMapper<PostWithoutCollectionInitializerInConstructor>(result.FetchTree, false);
+            var mapper = new DapperMapperGenerator(config);
+            var func = mapper.GenerateCollectionMapper<PostWithoutCollectionInitializerInConstructor>(result.FetchTree);
             return func.Item1;
-        }
-
-        private static Mock<IGeneratedCodeManager> GetMockCodeManager() {
-            var mockCodeManager = new Mock<IGeneratedCodeManager>(MockBehavior.Strict);
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Post))).Returns(typeof(Post));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Blog))).Returns(typeof(Blog));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Comment))).Returns(typeof(Comment));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(User))).Returns(typeof(User));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Tag))).Returns(typeof(Tag));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(PostTag))).Returns(typeof(PostTag));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(PostWithoutCollectionInitializerInConstructor)))
-                           .Returns(typeof(PostWithoutCollectionInitializerInConstructor));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(CommentTwo))).Returns(typeof(CommentTwo));
-
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Post)))).Returns(typeof(Post));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Blog)))).Returns(typeof(Blog));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Comment)))).Returns(typeof(Comment));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(User)))).Returns(typeof(User));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Tag)))).Returns(typeof(Tag));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(PostTag)))).Returns(typeof(PostTag));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(PostWithoutCollectionInitializerInConstructor))))
-                           .Returns(typeof(PostWithoutCollectionInitializerInConstructor));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(CommentTwo)))).Returns(typeof(CommentTwo));
-            return mockCodeManager;
         }
 
         private class CustomConfig : DefaultConfiguration {
@@ -342,6 +318,8 @@
 
         private class PostWithoutCollectionInitializerInConstructor {
             public virtual int PostWithoutCollectionInitializerInConstructorId { get; set; }
+
+            public virtual string Name { get; set; }
 
             public virtual ICollection<CommentTwo> Comments { get; set; }
         }

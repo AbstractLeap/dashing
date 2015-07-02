@@ -66,25 +66,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeGeneration\CodeGenerator.cs" />
-    <Compile Include="CodeGeneration\CodeGeneratorConfig.cs" />
-    <Compile Include="CodeGeneration\CodeHelpers.cs" />
-    <Compile Include="CodeGeneration\DapperWrapperGenerator.cs" />
     <Compile Include="CodeGeneration\DelegateQueryCreator.cs" />
-    <Compile Include="CodeGeneration\EnumerableAwaiter.cs" />
     <Compile Include="CodeGeneration\FetchCollectionAwaiter.cs" />
-    <Compile Include="CodeGeneration\GeneratedCodeManager.cs" />
-    <Compile Include="CodeGeneration\ICodeGenerator.cs" />
-    <Compile Include="CodeGeneration\IDapperWrapperGenerator.cs" />
-    <Compile Include="CodeGeneration\IDictionaryAwaiter.cs" />
     <Compile Include="CodeGeneration\IEnumerableAwaiter.cs" />
-    <Compile Include="CodeGeneration\IGeneratedCodeManager.cs" />
-    <Compile Include="CodeGeneration\IProxyGenerator.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
     <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
-    <Compile Include="CodeGeneration\IUpdateClass.cs" />
-    <Compile Include="CodeGeneration\ProxyGenerator.cs" />
-    <Compile Include="CodeGeneration\ProxyGeneratorResult.cs" />
     <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="CodeGeneration\Weaving\AssemblyLocation.cs" />
@@ -117,6 +103,7 @@
     <Compile Include="Configuration\MutableConfiguration.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DapperWrapper.cs" />
+    <Compile Include="DoNotWeaveAttribute.cs" />
     <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
     <Compile Include="Engine\DapperMapperGeneration\IDapperMapperGenerator.cs" />
     <Compile Include="Engine\DDL\AlterTableWriter.cs" />

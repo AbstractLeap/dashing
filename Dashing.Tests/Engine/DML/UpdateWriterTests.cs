@@ -7,25 +7,18 @@
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
-    using Dashing.Tests.CodeGeneration.Fixtures;
     using Dashing.Tests.Extensions;
     using Dashing.Tests.TestDomain;
 
     using Xunit;
 
-    public class UpdateWriterTests : IClassFixture<GenerateCodeFixture> {
-        private readonly IGeneratedCodeManager codeManager;
-
-        public UpdateWriterTests(GenerateCodeFixture data) {
-            this.codeManager = data.CodeManager;
-        }
-
+    public class UpdateWriterTests {
         [Fact]
         public void UpdateSinglePropertyWorks() {
-            var post = this.codeManager.CreateTrackingInstance<Post>();
+            var post = new Post();
             post.PostId = 1;
             post.Title = "Boo";
-            this.codeManager.TrackInstance(post);
+            ((ITrackedEntity)post).EnableTracking();
             post.Title = "New Boo";
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
             var result = updateWriter.GenerateSql(new[] { post });
@@ -36,10 +29,10 @@
         [Fact]
         public void UpdateManyToOneProperty() {
             // assemble
-            var post = this.codeManager.CreateTrackingInstance<Post>();
+            var post = new Post();
             post.PostId = 1;
             post.Blog = new Blog { BlogId = 1 };
-            this.codeManager.TrackInstance(post);
+            ((ITrackedEntity)post).EnableTracking();
             post.Blog = new Blog { BlogId = 2 };
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
 
@@ -59,30 +52,32 @@
 
         [Fact]
         public void UpdateSinglePropertyTwoTimes() {
-            var postOne = this.codeManager.CreateTrackingInstance<Post>();
+            var postOne = new Post();
             postOne.PostId = 1;
             postOne.Title = "Boo";
-            this.codeManager.TrackInstance(postOne);
+            ((ITrackedEntity)postOne).EnableTracking();
             postOne.Title = "New Boo";
 
-            var postTwo = this.codeManager.CreateTrackingInstance<Post>();
+            var postTwo = new Post();
             postTwo.PostId = 1;
             postTwo.Title = "Boo";
-            this.codeManager.TrackInstance(postTwo);
+            ((ITrackedEntity)postTwo).EnableTracking();
             postTwo.Title = "New Boo";
 
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
             var result = updateWriter.GenerateSql(new[] { postOne, postTwo });
             Debug.Write(result.Sql);
-            Assert.Equal("update [Posts] set [Title] = @p_1 where [PostId] = @p_2;update [Posts] set [Title] = @p_3 where [PostId] = @p_4;", result.Sql);
+            Assert.Equal(
+                "update [Posts] set [Title] = @p_1 where [PostId] = @p_2;update [Posts] set [Title] = @p_3 where [PostId] = @p_4;",
+                result.Sql);
         }
 
         [Fact]
         public void UpdateTwoPropertiesWorks() {
             var target = MakeTarget();
-            var post = this.codeManager.CreateTrackingInstance<Post>();
+            var post = new Post();
             post.PostId = 1;
-            this.codeManager.TrackInstance(post);
+            ((ITrackedEntity)post).EnableTracking();
             post.Title = "New Boo";
             post.Content = "New Content";
 
@@ -115,12 +110,10 @@
         public void BuldUpdateManyOneNullAddsNull() {
             // assemble
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
-            var updateClass = this.codeManager.CreateUpdateInstance<Post>();
-            updateClass.Blog = null;
 
             // act
             Expression<Func<Post, bool>> predicate = p => p.PostId == 1;
-            var result = updateWriter.GenerateBulkSql(updateClass, new[] { predicate });
+            var result = updateWriter.GenerateBulkSql(p => p.Blog = null, new[] { predicate });
 
             // assert
             Debug.Write(result.Sql);
@@ -134,12 +127,10 @@
         public void BulkUpdateManyToOnePropertyResolvesForeignKeyId() {
             // assemble
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
-            var updateClass = this.codeManager.CreateUpdateInstance<Post>();
-            updateClass.Blog = new Blog { BlogId = 1 };
 
             // act
             Expression<Func<Post, bool>> predicate = p => p.PostId == 1;
-            var result = updateWriter.GenerateBulkSql(updateClass, new[] { predicate });
+            var result = updateWriter.GenerateBulkSql(p => p.Blog = new Blog { BlogId = 1 }, new[] { predicate });
 
             // assert
             Debug.Write(result.Sql);

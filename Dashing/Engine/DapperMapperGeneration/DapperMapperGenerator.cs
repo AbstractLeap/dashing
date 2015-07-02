@@ -12,12 +12,10 @@
     using Dashing.Extensions;
 
     internal class DapperMapperGenerator : IDapperMapperGenerator {
-        private readonly IGeneratedCodeManager generatedCodeManager;
 
         private readonly IConfiguration configuration;
 
-        public DapperMapperGenerator(IGeneratedCodeManager generatedCodeManager, IConfiguration configuration) {
-            this.generatedCodeManager = generatedCodeManager;
+        public DapperMapperGenerator(IConfiguration configuration) {
             this.configuration = configuration;
         }
 
@@ -27,23 +25,22 @@
         /// <typeparam name="T">The base type of the tree</typeparam>
         /// <param name="fetchTree">The fetch tree to generate the mapper for</param>
         /// <returns>A factory for generating mappers</returns>
-        public Tuple<Delegate, Type[]> GenerateCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
+        public Tuple<Delegate, Type[]> GenerateCollectionMapper<T>(FetchNode fetchTree) {
             // note that we can only fetch one collection at a time
             // so, if there's more than one in the SelectQuery they should be split out prior to calling this
             var tt = typeof(T);
-            var rootType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
-            var currentRootParam = Expression.Parameter(rootType, "currentRoot");
-            var resultsParam = Expression.Parameter(typeof(IList<>).MakeGenericType(rootType), "results");
+            var currentRootParam = Expression.Parameter(tt, "currentRoot");
+            var resultsParam = Expression.Parameter(typeof(IList<>).MakeGenericType(tt), "results");
 
             //var dictionaryParam = Expression.Parameter(typeof(IDictionary<,>).MakeGenericType(typeof(object), rootType), "dict");
             var objectsParam = Expression.Parameter(typeof(object[]));
-            var rootVar = Expression.Variable(rootType);
+            var rootVar = Expression.Variable(tt);
             var newRoot = Expression.Variable(typeof(bool), "newRoot");
             var statements = new List<Expression>();
-            var mappedTypes = new List<Type> { rootType };
+            var mappedTypes = new List<Type> { tt };
 
             // var rootVar = (RootType)objects[0];
-            GetRootAssignment<T>(statements, rootVar, objectsParam, rootType);
+            GetRootAssignment<T>(statements, rootVar, objectsParam, tt);
 
             // var newRoot = false;
             statements.Add(Expression.Assign(newRoot, Expression.Constant(false)));
@@ -53,7 +50,7 @@
             var pkName = this.configuration.GetMap<T>().PrimaryKey.Name;
             statements.Add(Expression.IfThen(Expression.OrElse(Expression.Equal(currentRootParam, Expression.Constant(null)), Expression.NotEqual(Expression.Property(currentRootParam, pkName), Expression.Property(rootVar, pkName))),
                 Expression.Block(
-                    Expression.Call(resultsParam, typeof(ICollection<>).MakeGenericType(rootType).GetMethod("Add"), rootVar),
+                    Expression.Call(resultsParam, typeof(ICollection<>).MakeGenericType(tt).GetMethod("Add"), rootVar),
                     Expression.Assign(currentRootParam, rootVar),
                     Expression.Assign(newRoot, Expression.Constant(true))
                 )));
@@ -86,11 +83,10 @@
                         childType = childNode.Value.Column.Type;
                     }
 
-                    var mappedType = this.generatedCodeManager.GetForeignKeyType(childType);
-                    mappedTypes.Add(mappedType);
+                    mappedTypes.Add(childType);
                     var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
                     var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
-                    var convertExpr = Expression.Convert(arrayIndexExpr, mappedType);
+                    var convertExpr = Expression.Convert(arrayIndexExpr, childType);
                     var propExpr = Expression.Property(parentExpression, childNode.Value.Column.Name);
 
                     Expression ex;
@@ -149,17 +145,16 @@
                             new Expression[] { mappedType }));
         }
 
-        public Tuple<Delegate, Type[], Type[]> GenerateMultiCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
+        public Tuple<Delegate, Type[], Type[]> GenerateMultiCollectionMapper<T>(FetchNode fetchTree) {
             var tt = typeof(T);
-            var rootType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
-            var currentRootParam = Expression.Parameter(rootType, "currentRoot");
-            var resultsParam = Expression.Parameter(typeof(IList<>).MakeGenericType(rootType), "results");
+            var currentRootParam = Expression.Parameter(tt, "currentRoot");
+            var resultsParam = Expression.Parameter(typeof(IList<>).MakeGenericType(tt), "results");
 
             var objectsParam = Expression.Parameter(typeof(object[]));
-            var rootVar = Expression.Variable(rootType, tt.Name);
+            var rootVar = Expression.Variable(tt, tt.Name);
             var newRoot = Expression.Variable(typeof(bool), "newRoot");
             var statements = new List<Expression>();
-            var mappedTypes = new List<Type> { rootType };
+            var mappedTypes = new List<Type> { tt };
             var mapperClosureTypes = new List<Type>();
             var collectionVariables = new List<ParameterExpression>();
             var newVariables = new List<ParameterExpression>();
@@ -175,7 +170,7 @@
             //            typeof(IDictionary<,>).MakeGenericType(typeof(object), typeof(object))));
 
             // var rootVar = (RootType)objects[0];
-            GetRootAssignment<T>(statements, rootVar, objectsParam, rootType);
+            GetRootAssignment<T>(statements, rootVar, objectsParam, tt);
 
             // var newRoot = false;
             statements.Add(Expression.Assign(newRoot, Expression.Constant(false)));
@@ -187,7 +182,7 @@
             var currentRootPrimaryKeyExpr = Expression.Property(currentRootParam, pkName);
             statements.Add(Expression.IfThen(Expression.OrElse(Expression.Equal(currentRootParam, Expression.Constant(null)), Expression.NotEqual(currentRootPrimaryKeyExpr, Expression.Property(rootVar, pkName))),
                 Expression.Block(
-                    Expression.Call(resultsParam, typeof(ICollection<>).MakeGenericType(rootType).GetMethod("Add"), rootVar),
+                    Expression.Call(resultsParam, typeof(ICollection<>).MakeGenericType(tt).GetMethod("Add"), rootVar),
                     Expression.Assign(currentRootParam, rootVar),
                     Expression.Assign(newRoot, Expression.Constant(true))
                 )));
@@ -212,13 +207,12 @@
                     Type childType = child.Value.Column.Relationship == RelationshipType.OneToMany
                                          ? child.Value.Column.Type.GetGenericArguments().First()
                                          : child.Value.Column.Type;
-                    var mappedType = this.generatedCodeManager.GetForeignKeyType(childType);
-                    mappedTypes.Add(mappedType);
+                    mappedTypes.Add(childType);
                     var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
                     var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
-                    var thisVar = Expression.Parameter(mappedType, childType.Name + i);
+                    var thisVar = Expression.Parameter(childType, childType.Name + i);
                     newVariables.Add(thisVar);
-                    var convertExpr = Expression.Convert(arrayIndexExpr, mappedType);
+                    var convertExpr = Expression.Convert(arrayIndexExpr, childType);
                     var thisInit = Expression.Assign(thisVar, convertExpr);
                     var propExpr = Expression.Property(parentExpression, child.Value.Column.Name);
 
@@ -236,7 +230,7 @@
                         var primaryKeyProperty = Expression.Property(thisVar, pk.Name);
                         
                         // dictionary for storing entities by id for this type
-                        var dictType = typeof(IDictionary<,>).MakeGenericType(pkType, mappedType);
+                        var dictType = typeof(IDictionary<,>).MakeGenericType(pkType, childType);
                         mapperClosureTypes.Add(dictType);
                         var dictVar = Expression.Variable(dictType, "dict" + collectionVariableIdx);
                         collectionVariables.Add(dictVar);
@@ -327,18 +321,17 @@
             return statements;
         }
 
-        public Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(FetchNode fetchTree, bool isTracked) {
+        public Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(FetchNode fetchTree) {
             // this is simple, just take the arguments, map them
             // params go in order of fetch tree
             var tt = typeof(T);
-            var rootType = isTracked ? this.generatedCodeManager.GetTrackingType(tt) : this.generatedCodeManager.GetForeignKeyType(tt);
             var objectsParam = Expression.Parameter(typeof(object[]));
-            var rootVar = Expression.Variable(rootType);
+            var rootVar = Expression.Variable(tt);
             var statements = new List<Expression>();
-            var mappedTypes = new List<Type> { rootType };
+            var mappedTypes = new List<Type> { tt };
 
             // var rootVar = (RootType)objects[0];
-            GetRootAssignment<T>(statements, rootVar, objectsParam, rootType);
+            GetRootAssignment<T>(statements, rootVar, objectsParam, tt);
 
             // go through the tree
             int i = 1;
@@ -360,7 +353,7 @@
                     var propExpr = Expression.Property(parent, child.Value.Column.Name);
                     var indexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
                     var ifExpr = Expression.NotEqual(indexExpr, Expression.Constant(null));
-                    var mappedType = this.generatedCodeManager.GetForeignKeyType(child.Value.Column.Type);
+                    var mappedType = child.Value.Column.Type;
                     var assignExpr = Expression.Assign(propExpr, Expression.Convert(indexExpr, mappedType));
                     ++i;
                     mappedTypes.Add(mappedType);

@@ -21,11 +21,7 @@
 
         private readonly ISessionFactory sessionFactory;
 
-        private readonly ICodeGenerator codeGenerator;
-
         private readonly DbProviderFactory dbProviderFactory;
-
-        private IGeneratedCodeManager codeManager;
 
         public IMapper Mapper {
             get {
@@ -41,12 +37,6 @@
 
         public IEngine Engine { get; private set; }
 
-        public IGeneratedCodeManager CodeManager {
-            get {
-                return this.codeManager ?? (this.codeManager = this.codeGenerator.Generate(this));
-            }
-        }
-
         public ICollection<IEventListener> EventListeners {
             get;
             private set;
@@ -56,7 +46,7 @@
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
-        protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
+        protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -76,18 +66,13 @@
             if (sessionFactory == null) {
                 throw new ArgumentNullException("sessionFactory");
             }
-
-            if (codeGenerator == null) {
-                throw new ArgumentNullException("codeGenerator");
-            }
-
+            
             this.Engine = engine;
             this.Engine.Configuration = this;
             this.connectionStringSettings = connectionStringSettings;
             this.dbProviderFactory = dbProviderFactory;
             this.mapper = mapper;
             this.sessionFactory = sessionFactory;
-            this.codeGenerator = codeGenerator;
             this.mappedTypes = new Dictionary<Type, IMap>();
             
             var eventListeners = new ObservableCollection<IEventListener>();
@@ -109,15 +94,14 @@
         }
 
         public IMap GetMap(Type type) {
-            return ConfigurationHelper.GetMap(type, this.mappedTypes, this.codeGenerator.Configuration);
+            return ConfigurationHelper.GetMap(type, this.mappedTypes);
         }
 
         public bool HasMap(Type type) {
-            return ConfigurationHelper.HasMap(type, this.mappedTypes, this.codeGenerator.Configuration);
+            return ConfigurationHelper.HasMap(type, this.mappedTypes);
         }
 
         private void Dirty() {
-            this.codeManager = null;
         }
 
         public ISession BeginSession() {

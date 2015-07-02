@@ -10,17 +10,11 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Extensions;
-    using Dashing.Tests.CodeGeneration.Fixtures;
     using Dashing.Tests.TestDomain;
 
     using Xunit;
 
-    public class WhereClauseWriterTests : IClassFixture<GenerateCodeFixture> {
-        private readonly IGeneratedCodeManager codeManager;
-
-        public WhereClauseWriterTests(GenerateCodeFixture data) {
-            this.codeManager = data.CodeManager;
-        }
+    public class WhereClauseWriterTests {
 
         [Fact]
         public void NullLeftHandSideGetsGoodSql() {
@@ -215,9 +209,9 @@
         public void WhereEntityEqualsTrackedEntity() {
             // assemble
             var target = MakeTarget();
-            var post = this.codeManager.CreateTrackingInstance<Post>();
+            var post = new Post();
             post.PostId = 1;
-            this.codeManager.TrackInstance(post);
+            ((ITrackedEntity)post).EnableTracking();
             Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
@@ -232,7 +226,7 @@
         public void WhereEntityEqualsGeneratedEntity() {
             // assemble
             var target = MakeTarget();
-            var post = this.codeManager.CreateForeignKeyInstance<Post>();
+            var post = new Post();
             post.PostId = 1;
             Expression<Func<Post, bool>> whereClause = p => p == post;
 

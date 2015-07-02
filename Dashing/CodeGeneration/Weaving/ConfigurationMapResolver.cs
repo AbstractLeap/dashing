@@ -3,6 +3,7 @@ namespace Dashing.CodeGeneration.Weaving {
     using System.Collections.Generic;
     using System.Configuration;
     using System.Data;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
 
@@ -15,6 +16,27 @@ namespace Dashing.CodeGeneration.Weaving {
 
     public class ConfigurationMapResolver : MarshalByRefObject {
         public void Resolve(ConfigurationMapResolverArgs args) {
+            // assembly resolution
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) => {
+                var assemblyName = new AssemblyName(eventArgs.Name);
+
+                // look in app domain
+                var loaded = AppDomain.CurrentDomain.GetAssemblies()
+                                      .SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                if (loaded != null) {
+                    return loaded;
+                }
+
+                // we couldn't find it, look on disk
+                var path = Path.GetDirectoryName(args.AssemblyFilePath) + @"\" + assemblyName.Name + ".dll";
+                if (File.Exists(path)) {
+                    var assemblyData = File.ReadAllBytes(path);
+                    return Assembly.Load(assemblyData);
+                }
+
+                return null;
+            };
+
             // load the assembly if necessary
             var assembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == args.AssemblyFullName);
             var assemblyDefinition = AssemblyDefinition.ReadAssembly(args.AssemblyFilePath);
@@ -25,11 +47,22 @@ namespace Dashing.CodeGeneration.Weaving {
             // find any IConfigs, instantiate and return map definitions
             var mapDefinitions = new List<MapDefinition>();
             var configurationTypes =
-                assembly.GetTypes().Where(t => typeof(IConfiguration).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract && t.IsPublic);
+                assembly.GetTypes().Where(t => typeof(IConfiguration).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract && t.CustomAttributes.All(a => a.AttributeType != typeof(DoNotWeaveAttribute)));
             if (configurationTypes.Any()) {
                 foreach (var configurationType in configurationTypes) {
-                    this.InjectConnectionStringIntoConfiguration(
-                        assemblyDefinition.MainModule.Types.Single(t => t.FullName == configurationType.FullName));
+                    TypeDefinition configTypeDef;
+                    if (configurationType.FullName.Contains("+")) {
+                        var types = configurationType.FullName.Split('+');
+                        configTypeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == types.First());
+                        for (var i = 1; i < types.Length; i++) {
+                            configTypeDef = configTypeDef.NestedTypes.Single(t => t.Name == types.ElementAt(i));
+                        }
+                    }
+                    else {
+                        configTypeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == configurationType.FullName);
+                    }
+
+                    this.InjectConnectionStringIntoConfiguration(configTypeDef);
                     var config = Activator.CreateInstance(configurationType) as IConfiguration;
                     foreach (var map in config.Maps) {
                         mapDefinitions.Add(

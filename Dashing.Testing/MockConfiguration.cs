@@ -9,11 +9,6 @@ namespace Dashing.Testing {
     using Dashing.Events;
 
     public class MockConfiguration : IConfiguration {
-        public MockConfiguration() {
-            this.CodeManager = new MockGeneratedCodeManager();
-        }
-
-        public IGeneratedCodeManager CodeManager { get; private set; }
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
