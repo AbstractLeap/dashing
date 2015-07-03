@@ -92,6 +92,7 @@
 
                     var typeDef = GetTypeDefFromFullName(mapDefinition.TypeFullName, assemblyDefinition);
                     ImplementITrackedEntity(typeDef, assemblyDefinition, mapDefinition);
+                    ImplementISetLogger(typeDef, assemblyDefinition, mapDefinition);
                     AddForeignKeyBehaviour(typeDef, assemblyDefinition, mapDefinition, assemblyMapDefinitions, assemblyDefinitions);
                     OverrideEqualsAndGetHashCode(typeDef, mapDefinition);
                     visitedTypes.Add(mapDefinition.TypeFullName);
@@ -119,6 +120,84 @@
             }
 
             return true;
+        }
+
+        private void ImplementISetLogger(TypeDefinition typeDef, AssemblyDefinition assemblyDefinition, MapDefinition mapDefinition) {
+            if (typeDef.Interfaces.Any(i => i.FullName == typeof(ISetLogger).FullName)) {
+                return;
+            }
+
+            typeDef.Interfaces.Add(assemblyDefinition.MainModule.Import(typeof(ISetLogger)));
+            
+            // some common type definitions
+            var boolTypeDef = typeDef.Module.Import(typeof(bool));
+            var stringTypeDef = typeDef.Module.Import(typeof(string));
+            var listStringTypeDef = typeDef.Module.Import(typeof(List<>)).MakeGenericInstanceType(stringTypeDef);
+            var nonPkCols = mapDefinition.ColumnDefinitions.Where(c => !c.IsPrimaryKey).ToList();
+
+            // add the fields for tracking which properties are set
+            // and insert the code in to the setter
+            foreach (var columnDefinition in nonPkCols) {
+                var isSetFieldDef = new FieldDefinition(string.Format("__{0}_IsSet", columnDefinition.Name), FieldAttributes.Private, boolTypeDef);
+                typeDef.Fields.Add(isSetFieldDef);
+
+                // assign true to this field
+                var il = typeDef.Properties.Single(p => p.Name == columnDefinition.Name).SetMethod.Body.Instructions;
+                il.Insert(0, Instruction.Create(OpCodes.Stfld, isSetFieldDef));
+                il.Insert(0, Instruction.Create(OpCodes.Ldc_I4_1));
+                il.Insert(0, Instruction.Create(OpCodes.Ldarg_0));
+            }
+
+            // implement the interface
+            var getSetProperties = new MethodDefinition(
+                "GetSetProperties",
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final,
+                typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
+            getSetProperties.Body.Variables.Add(new VariableDefinition("setProps", listStringTypeDef));
+            getSetProperties.Body.Variables.Add(
+                new VariableDefinition(typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
+            getSetProperties.Body.Variables.Add(new VariableDefinition(boolTypeDef));
+            getSetProperties.Body.InitLocals = true;
+            var instructions = getSetProperties.Body.Instructions;
+            instructions.Add(Instruction.Create(OpCodes.Nop));
+            var listStringContruictor =
+                MakeGeneric(typeDef.Module.Import(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)), stringTypeDef);
+            instructions.Add(Instruction.Create(OpCodes.Newobj, listStringContruictor));
+            instructions.Add(Instruction.Create(OpCodes.Stloc_0));
+
+            var breakToInstruction = Instruction.Create(nonPkCols.Count == 1 ? OpCodes.Ldloc_0 : OpCodes.Ldarg_0);
+            var addMethod = typeDef.Module.Import(listStringTypeDef.Resolve().Methods.Single(m => m.Name == "Add"));
+            addMethod = MakeGeneric(addMethod, stringTypeDef);
+            for (var i = 0; i < nonPkCols.Count; i++) {
+                if (i == 0) {
+                    instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                }
+
+                instructions.Add(
+                    Instruction.Create(
+                        OpCodes.Ldfld,
+                        typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsSet", nonPkCols.ElementAt(i).Name))));
+                instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+                instructions.Add(Instruction.Create(OpCodes.Ceq));
+                instructions.Add(Instruction.Create(OpCodes.Stloc_2));
+                instructions.Add(Instruction.Create(OpCodes.Ldloc_2));
+                instructions.Add(Instruction.Create(OpCodes.Brtrue, breakToInstruction));
+                instructions.Add(Instruction.Create(OpCodes.Nop));
+                instructions.Add(Instruction.Create(OpCodes.Ldloc_0));
+                instructions.Add(Instruction.Create(OpCodes.Ldstr, nonPkCols.ElementAt(i).Name));
+                instructions.Add(Instruction.Create(OpCodes.Callvirt, addMethod));
+                instructions.Add(Instruction.Create(OpCodes.Nop));
+                instructions.Add(Instruction.Create(OpCodes.Nop));
+                instructions.Add(breakToInstruction);
+                breakToInstruction = Instruction.Create(i == nonPkCols.Count - 2 ? OpCodes.Ldloc_0 : OpCodes.Ldarg_0);
+            }
+
+            instructions.Add(Instruction.Create(OpCodes.Stloc_1));
+            var retInstr = Instruction.Create(OpCodes.Ldloc_1);
+            instructions.Add(Instruction.Create(OpCodes.Br, retInstr));
+            instructions.Add(retInstr);
+            instructions.Add(Instruction.Create(OpCodes.Ret));
+            typeDef.Methods.Add(getSetProperties);
         }
 
         private static TypeDefinition GetTypeDefFromFullName(string typeFullName, AssemblyDefinition assemblyDefinition) {
@@ -320,6 +399,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
                 propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
                 propDef.GetMethod.Body.Variables.Add(new VariableDefinition(boolTypeDef));
+                propDef.GetMethod.Body.InitLocals = true;
                 propDef.GetMethod.Body.Instructions.Clear();
 
                 var backingField = typeDef.Fields.Single(f => f.Name == string.Format("<{0}>k__BackingField", columnDef.Name));

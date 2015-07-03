@@ -6,6 +6,6 @@
     public interface IUpdateWriter {
         SqlWriterResult GenerateSql<T>(IEnumerable<T> entities);
 
-        SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates);
+        SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
     }
 }

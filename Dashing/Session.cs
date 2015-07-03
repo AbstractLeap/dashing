@@ -274,7 +274,7 @@
             return updatedRows;
         }
 
-        public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             return this.engine.Execute(this.GetConnection(), this.GetTransaction(), update, predicates);
         }
 
@@ -303,7 +303,7 @@
             return this.engine.ExecuteBulkDelete(this.GetConnection(), this.GetTransaction(), predicates);
         }
 
-        public int UpdateAll<T>(Action<T> update) {
+        public int UpdateAll<T>(Action<T> update) where T : class, new() {
             return this.engine.Execute(this.GetConnection(), this.GetTransaction(), update, null);
         }
 
@@ -381,7 +381,7 @@
             return updatedRows;
         }
 
-        public async Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public async Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             return await this.engine.ExecuteAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), update, predicates);
         }
 
@@ -410,7 +410,7 @@
             return await this.engine.ExecuteBulkDeleteAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), predicates);
         }
 
-        public async Task<int> UpdateAllAsync<T>(Action<T> update) {
+        public async Task<int> UpdateAllAsync<T>(Action<T> update) where T : class, new() {
             return await this.engine.ExecuteAsync(await this.GetConnectionAsync(), await this.GetTransactionAsync(), update, null);
         }
 

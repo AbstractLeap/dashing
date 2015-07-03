@@ -5,6 +5,7 @@ namespace Dashing {
     using System.Linq.Expressions;
     using System.Threading.Tasks;
 
+    using Dashing.CodeGeneration;
     using Dashing.Configuration;
 
     public static class SessionExtensions {
@@ -184,7 +185,7 @@ namespace Dashing {
         /// <param name="predicates">A list of predicates that will be applied to each entity to determine if the entity should be updated</param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes an UPDATE query and executes it i.e. no data is fetched from the server</remarks>
-        public static int Update<T>(this ISession session, Action<T> update, params Expression<Func<T, bool>>[] predicates) {
+        public static int Update<T>(this ISession session, Action<T> update, params Expression<Func<T, bool>>[] predicates) where T : class, new() {
             return session.Update(update, predicates);
         }
 
@@ -407,7 +408,7 @@ namespace Dashing {
         /// <param name="predicates">A list of predicates that will be applied to each entity to determine if the entity should be updated</param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes an UPDATE query and executes it i.e. no data is fetched from the server</remarks>
-        public static async Task<int> UpdateAsync<T>(this ISession session, Action<T> update, params Expression<Func<T, bool>>[] predicates) {
+        public static async Task<int> UpdateAsync<T>(this ISession session, Action<T> update, params Expression<Func<T, bool>>[] predicates) where T : class, new() {
             return await session.UpdateAsync(update, predicates);
         }
 
@@ -452,6 +453,16 @@ namespace Dashing {
             }
 
             return await session.SaveAsync(existingEntity);
+        }
+
+        /// <summary>
+        /// Casts the entity to an ITrackedEntity for inspecting the changes since EnableTracking was called
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static ITrackedEntity Inspect<T>(T entity) {
+            return (ITrackedEntity)entity;
         }
     }
 }

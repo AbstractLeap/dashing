@@ -98,7 +98,7 @@ namespace Dashing {
         /// <param name="predicates">A list of predicates that will be applied to each entity to determine if the entity should be updated</param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes an UPDATE query and executes it i.e. no data is fetched from the server</remarks>
-        int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
+        int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
 
         /// <summary>
         /// Deletes a collection of entities
@@ -122,7 +122,7 @@ namespace Dashing {
         /// <param name="update">The updates you wish to perform against the entities</param>
         /// <returns></returns>
         /// <remarks>This performs an UPDATE query with no where clause. Use with caution!</remarks>
-        int UpdateAll<T>(Action<T> update);
+        int UpdateAll<T>(Action<T> update) where T : class, new();
 
         /// <summary>
         /// Deletes all entities of a particular type
@@ -194,7 +194,7 @@ namespace Dashing {
         /// <param name="predicates">A list of predicates that will be applied to each entity to determine if the entity should be updated</param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes an UPDATE query and executes it i.e. no data is fetched from the server</remarks>
-        Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates);
+        Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
 
         /// <summary>
         /// Deletes a collection of entities
@@ -218,7 +218,7 @@ namespace Dashing {
         /// <param name="update">The updates you wish to perform against the entities</param>
         /// <returns></returns>
         /// <remarks>This performs an UPDATE query with no where clause. Use with caution!</remarks>
-        Task<int> UpdateAllAsync<T>(Action<T> update);
+        Task<int> UpdateAllAsync<T>(Action<T> update) where T : class, new();
 
         /// <summary>
         /// Deletes all entities of a particular type

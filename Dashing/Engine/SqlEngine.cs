@@ -5,6 +5,7 @@ namespace Dashing.Engine {
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Runtime.InteropServices;
     using System.Threading.Tasks;
 
     using Dapper;
@@ -194,7 +195,7 @@ namespace Dashing.Engine {
             return connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public int Execute<T>(IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public int Execute<T>(IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.EnsureConfigurationLoaded();
            var sqlQuery = this.updateWriter.GenerateBulkSql(update, predicates);
            return sqlQuery.Sql.Length == 0 ? 0 : connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
@@ -310,7 +311,7 @@ namespace Dashing.Engine {
         }
 
         public Task<int> ExecuteAsync<T>(
-            IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+            IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateBulkSql(update, predicates);
             return sqlQuery.Sql.Length == 0 ? Task.FromResult<int>(0) : connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);

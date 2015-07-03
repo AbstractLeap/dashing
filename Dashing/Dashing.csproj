@@ -69,9 +69,8 @@
     <Compile Include="CodeGeneration\DelegateQueryCreator.cs" />
     <Compile Include="CodeGeneration\FetchCollectionAwaiter.cs" />
     <Compile Include="CodeGeneration\IEnumerableAwaiter.cs" />
+    <Compile Include="CodeGeneration\ISetLogger.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
-    <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
-    <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="CodeGeneration\Weaving\AssemblyLocation.cs" />
     <Compile Include="CodeGeneration\Weaving\ConfigurationMapResolver.cs" />

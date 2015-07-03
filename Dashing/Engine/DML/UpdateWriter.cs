@@ -12,6 +12,8 @@
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;
 
+    using Mono.Cecil.Cil;
+
     internal class UpdateWriter : BaseWriter, IUpdateWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
             : base(dialect, config) {
@@ -35,13 +37,15 @@
             Dictionary<string, object> dirtyProperties;
 
             // establish the dirty properties, either using a TrackedEntityInspector, or just assume everything is dirty
-            if (TrackedEntityInspector<T>.IsTracked(entity)) {
-                var inspector = new TrackedEntityInspector<T>(entity);
-                if (!inspector.IsDirty()) {
+            var trackedEntity = entity as ITrackedEntity; // this should never fail?!
+            if (trackedEntity != null) {
+                var dirtyProps = trackedEntity.GetDirtyProperties();
+                if (!dirtyProps.Any()) {
                     return;
                 }
 
-                dirtyProperties = inspector.DirtyProperties.ToDictionary(p => p, p => inspector.NewValueFor(p));
+                // TODO cache the property accessors
+                dirtyProperties = dirtyProps.ToDictionary(p => p, p => typeof(T).GetProperty(p).GetValue(entity));
             }
             else {
                 throw new InvalidOperationException("In order to Save entities you must fetch Tracked entities");
@@ -117,56 +121,57 @@
             }
         }
 
-        public SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates) {
-            // perform the update - generate a couple of instances of T with different instantiations of T's properties so that we can see which properties actually get changed
-            // we have to use 2 instances in order 
-            throw new NotImplementedException();
+        public SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
+            var sql = new StringBuilder();
+            var parameters = new DynamicParameters();
+            var map = this.Configuration.GetMap<T>();
 
+            // run the update
+            var entity = new T();
+            updateAction(entity);
 
-            //var sql = new StringBuilder();
-            //var parameters = new DynamicParameters();
-            //var map = this.Configuration.GetMap<T>();
+            // find the set properties
+            var setLogger = (ISetLogger)entity;
+            var setProps = setLogger.GetSetProperties();
+            if (!setProps.Any()) {
+                return new SqlWriterResult(string.Empty, parameters);
+            }
 
-            //var interfaceUpdateClass = updateClass as IUpdateClass;
-            //if (interfaceUpdateClass.UpdatedProperties.IsEmpty()) {
-            //    return new SqlWriterResult(string.Empty, parameters);
-            //}
+            sql.Append("update ");
+            this.Dialect.AppendQuotedTableName(sql, map);
+            sql.Append(" set ");
 
-            //sql.Append("update ");
-            //this.Dialect.AppendQuotedTableName(sql, map);
-            //sql.Append(" set ");
+            foreach (var updatedProp in setProps) {
+                var column = map.Columns[updatedProp];
+                this.Dialect.AppendQuotedName(sql, column.DbName);
+                var paramName = "@" + updatedProp;
+                var propertyValue = map.GetColumnValue(entity, column);
+                if (propertyValue == null) {
+                    parameters.Add(paramName, null);
+                }
+                else {
+                    parameters.Add(paramName, this.GetValueOrPrimaryKey(column, propertyValue));
+                }
 
-            //foreach (var updatedProp in interfaceUpdateClass.UpdatedProperties) {
-            //    var column = map.Columns[updatedProp];
-            //    this.Dialect.AppendQuotedName(sql, column.DbName);
-            //    var paramName = "@" + updatedProp;
-            //    var propertyValue = map.GetColumnValue(updateClass, column);
-            //    if (propertyValue == null) {
-            //        parameters.Add(paramName, null);
-            //    }
-            //    else {
-            //        parameters.Add(paramName, this.GetValueOrPrimaryKey(column, propertyValue));
-            //    }
+                sql.Append(" = ");
+                sql.Append(paramName);
+                sql.Append(", ");
+            }
 
-            //    sql.Append(" = ");
-            //    sql.Append(paramName);
-            //    sql.Append(", ");
-            //}
+            sql.Remove(sql.Length - 2, 2);
 
-            //sql.Remove(sql.Length - 2, 2);
+            if (predicates != null && predicates.Any()) {
+                var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
+                var whereResult = whereClauseWriter.GenerateSql(predicates, null);
+                if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
+                    throw new NotImplementedException("Dashing does not currently support where clause across tables in an update");
+                }
 
-            //if (predicates != null && predicates.Any()) {
-            //    var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
-            //    var whereResult = whereClauseWriter.GenerateSql(predicates, null);
-            //    if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
-            //        throw new NotImplementedException("Dashing does not currently support where clause across tables in an update");
-            //    }
+                parameters.AddDynamicParams(whereResult.Parameters);
+                sql.Append(whereResult.Sql);
+            }
 
-            //    parameters.AddDynamicParams(whereResult.Parameters);
-            //    sql.Append(whereResult.Sql);
-            //}
-
-            //return new SqlWriterResult(sql.ToString(), parameters);
+            return new SqlWriterResult(sql.ToString(), parameters);
         }
     }
 }

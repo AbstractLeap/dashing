@@ -59,6 +59,7 @@
     <Compile Include="EqualityTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ForeignKeyTests.cs" />
+    <Compile Include="SetLoggerTests.cs" />
     <Compile Include="WeavingFixture.cs" />
     <Compile Include="TrackingTests.cs" />
   </ItemGroup>

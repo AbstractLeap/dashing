@@ -58,7 +58,7 @@
         private static IEnumerable<System.Tuple<string, long>> RunTestGroup(IEnumerable<Test> tests) {
             var random = new Random();
 
-            foreach (var test in tests.OrderBy(t => random.Next())) {
+            foreach (var test in tests.OrderBy(t => random.Next()).Where(t => t.Provider != Providers.NHibernate)) {
                 // warm up
                 test.TestFunc(1);
 
@@ -75,7 +75,7 @@
             }
         }
 
-        private static readonly IConfiguration dashingConfig = new DashingConfiguration(ConnectionString);
+        private static readonly IConfiguration dashingConfig = new DashingConfiguration();
 
         private static readonly OrmLiteConnectionFactory connectionFactory = new OrmLiteConnectionFactory(ConnectionString.ConnectionString, SqlServerDialect.Provider);
 

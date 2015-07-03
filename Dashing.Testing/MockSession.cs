@@ -113,7 +113,7 @@
             return entities.Count();
         }
 
-        public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public int Update<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             if (!this.BulkUpdates.ContainsKey(typeof(T))) {
                 this.BulkUpdates.Add(typeof(T), new List<Tuple<Action<T>, IEnumerable<Expression<Func<T, bool>>>>>());
             }
@@ -152,7 +152,7 @@
             return this.Delete(this.GetOrInitTestList<T>().Where(this.CombineExpressions(predicates).Compile()).ToArray());
         }
 
-        public int UpdateAll<T>(Action<T> update) {
+        public int UpdateAll<T>(Action<T> update) where T : class, new() {
             throw new NotImplementedException();
         }
 
@@ -184,7 +184,7 @@
             return Task.FromResult(this.Save(entities));
         }
 
-        public Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public Task<int> UpdateAsync<T>(Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             return Task.FromResult(this.Update(update, predicates));
         }
 
@@ -196,7 +196,7 @@
             return Task.FromResult(this.Delete(predicates));
         }
 
-        public Task<int> UpdateAllAsync<T>(Action<T> update) {
+        public Task<int> UpdateAllAsync<T>(Action<T> update) where T : class, new() {
             throw new NotImplementedException();
         }
 
