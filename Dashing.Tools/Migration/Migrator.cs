@@ -207,6 +207,7 @@
 
                 // go through existing columns and handle modifications
                 foreach (var fromProp in pair.From.Columns) {
+                    traceWriter.Trace("Examining {1}.{0}", fromProp.Value.Name, pair.From.Table);
                     var matchingToProp = pair.To.Columns.Select(p => p.Value).FirstOrDefault(p => p.Name == fromProp.Key);
                     if (matchingToProp != null) {
                         if (this.RequiresColumnSpecificationChange(fromProp.Value, matchingToProp)) {

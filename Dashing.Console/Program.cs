@@ -475,7 +475,8 @@
                     script = migrator.GenerateSqlDiff(
                         fromMaps,
                         configuration.Maps,
-                        consoleAnswerProvider, new ConsoleTraceWriter(isVerbose),
+                        consoleAnswerProvider, 
+                        new ConsoleTraceWriter(isVerbose),
                         reverseEngineerSettings.GetIndexesToIgnore(),
                         out warnings,
                         out errors);
