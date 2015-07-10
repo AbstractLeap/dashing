@@ -8,7 +8,7 @@ namespace Dashing.Weaving.Tests {
     using Xunit;
 
     [Collection("Weaving Tests")]
-    public class TrackingTests : IClassFixture<WeavingFixture> {
+    public class TrackingTests {
         [Fact]
         public void ImplementsITrackedEntity() {
             var foo = new Foo();
@@ -127,6 +127,25 @@ namespace Dashing.Weaving.Tests {
             fooAsTracked.DisableTracking();
             Assert.Empty(fooAsTracked.GetDirtyProperties());
             Assert.Throws<ArgumentOutOfRangeException>(() => fooAsTracked.GetOldValue("Name"));
+        }
+
+        [Fact]
+        public void SettingEnumMakesPropDirty() {
+            var foo = new Foo();
+            var fooAsTracked = (ITrackedEntity)foo;
+            fooAsTracked.EnableTracking();
+            foo.Type = FooType.Two;
+            Assert.Equal(new[] { "Type" }, fooAsTracked.GetDirtyProperties());
+        }
+
+        [Fact]
+        public void NotChangingEnumDoesNotSetDirty() {
+            var foo = new Foo();
+            var fooAsTracked = (ITrackedEntity)foo;
+            foo.Type = FooType.Two;
+            fooAsTracked.EnableTracking();
+            foo.Type = FooType.Two;
+            Assert.Empty(fooAsTracked.GetDirtyProperties());
         }
     }
 }

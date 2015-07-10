@@ -8,7 +8,7 @@ namespace Dashing.Weaving.Tests {
     using Xunit;
 
     [Collection("Weaving Tests")]
-    public class ForeignKeyTests : IClassFixture<WeavingFixture> {
+    public class ForeignKeyTests {
         [Fact]
         public void NullReturnsNull() {
             var bar = new Bar();

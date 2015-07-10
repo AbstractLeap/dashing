@@ -2,6 +2,7 @@
     using System;
     using System.Collections.Generic;
     using Dashing.CodeGeneration;
+    using Dashing.Weaving.Sample.Domain;
 
     public class Foo : ITrackedEntity {
         private bool isTracking;
@@ -18,6 +19,10 @@
 
         private bool? __IsRah_OldValue;
 
+        private bool __Type_IsDirty;
+
+        private FooType? __Type_OldValue;
+
         public int FooId { get; set; }
 
         private string __name;
@@ -25,6 +30,8 @@
         private bool __isBar;
 
         private bool? __IsRah;
+
+        private FooType __type;
 
         public string Name {
             get {
@@ -79,6 +86,25 @@
                 }
 
                 this.__IsRah = value;
+            }
+        }
+
+        public FooType Type {
+            get {
+                return this.__type;
+            }
+
+            set {
+                if (this.isTracking) {
+                    if (!this.__Type_IsDirty) {
+                        if (!this.__type.Equals(value)) {
+                            this.__Type_OldValue = this.__type;
+                            this.__Type_IsDirty = true;
+                        }
+                    }
+                }
+
+                this.__type = value;
             }
         }
 

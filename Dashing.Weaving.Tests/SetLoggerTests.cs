@@ -8,7 +8,7 @@ namespace Dashing.Weaving.Tests {
     using Xunit;
 
     [Collection("Weaving Tests")]
-    public class SetLoggerTests : IClassFixture<WeavingFixture> {
+    public class SetLoggerTests {
         [Fact]
         public void EntityIsSetLogger() {
             var bar = new Bar();

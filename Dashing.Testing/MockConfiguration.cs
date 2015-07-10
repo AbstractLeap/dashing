@@ -8,6 +8,7 @@ namespace Dashing.Testing {
     using Dashing.Engine;
     using Dashing.Events;
 
+    [DoNotWeave]
     public class MockConfiguration : IConfiguration {
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }

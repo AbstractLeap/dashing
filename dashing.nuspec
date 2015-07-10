@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.0.78</version>
+        <version>0.1.1-alpha</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,87 +11,15 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.0.78 - CodeGenerator not ignoring columns
-* 0.0.77 - Migrator 2.0
-* 0.0.76 - Added new NeedToDash methods
-* 0.0.75 - Not Binary Bug Fix
-* 0.0.74 - Collection fetching improvements, fixes to dbm index regeneration
-* 0.0.73 - Ordering across Fetches
-* 0.0.72 - Back to dapper!
-* 0.0.71 - Bugfix
-* 0.0.70 - Bugfix
-* 0.0.69 - Migration SQL prettify
-* 0.0.68 - Bugfix
-* 0.0.67 - Bugfix
-* 0.0.66 - Parentheses on defaults and more reliable InsertOrUpdate
-* 0.0.65 - Added support for Count()
-* 0.0.64 - Bulk update null fix
-* 0.0.63 - Added setting of OppositeColumn
-* 0.0.61 - FK One to One Fix
-* 0.0.60 - One to One Support
-* 0.0.59 - Mapper Fix
-* 0.0.58 - Any in Where Clause
-* 0.0.57 - Fixes for threads and !
-* 0.0.56 - nullity sql writing
-* 0.0.55 - value missed
-* 0.0.54 - Fixed string methods closure access
-* 0.0.53 - New Where Clause Writer
-* 0.0.52 - Async IDapper
-* 0.0.51 - Session.Reject
-* 0.0.50 - Prevented fetching of Ignored Columns
-* 0.0.49 - Switched AddNamespace to use equals
-* 0.0.48 - Fixed constant access issue
-* 0.0.47 - Fixed issues with non-deterministic ordering of FetchTree
-* 0.0.46 - Max Length fix
-* 0.0.45 - Max length handling and default constraint dropping in sql server
-* 0.0.44 - Fixed boolean comparisons
-* 0.0.43 - Fixed issue with where clauses on related entities
-* 0.0.42 - Fixed bug with accessing static properties in where clause
-* 0.0.41 - Fixed bug in Whereclausewriter
-* 0.0.40 - Switched identity fetching to SCOPE_IDENTITY in Sql Server
-* 0.0.39 - Fixed issue with dbm modifying enumeration
-* 0.0.38 - ToArrayAsync and fixed ToListAsync
-* 0.0.37 - Concurrent multiple open connections
-* 0.0.36 - Async now supports fetching collections
-* 0.0.35 - Switched internal queries to use Arbitrary Query
-* 0.0.34 - More DefaultConfiguration overloads
-* 0.0.33 - Non collection delegate creation
-* 0.0.32 - Fix issue with collection mappers not having correct parameter order
-* 0.0.30 - Fix for non acccessible setter
-* 0.0.29 - Ability to add tracking to existing entity
-* 0.0.28 - Enumerable contains support
-* 0.0.27 - fixed missing null check on mapper generation
-* 0.0.26 - outputting dll :-(
-* 0.0.25 - Fixed missing recursion in code generation
-* 0.0.24 - Removed generated output
-* 0.0.23 - Migrations, async support, transactionless sessions
-* 0.0.22 - Fixed a bug in SQL count statement writing
-* 0.0.21 - Improved LINQ support for certain types of where clause
-* 0.0.20 - Improved LINQ support for certain types of where clause
-* 0.0.19 - Added support for varchar(max)
-* 0.0.18 - Added events for insert, save and delete
-* 0.0.17 - Count and Paging support
-* 0.0.16 - Fixed bug when fetching empty collection
-* 0.0.15 - Fixed bug with uninitialised collections
-* 0.0.14 - Fixed a bug with primary key resolution precedence
-* 0.0.13 - Fixed up skip and take on SQL Azure
-* 0.0.12 - Added support for fetching beyond Dapper's seven type limit
-* 0.0.11 - Infinite collection fetching, save detached objects, and bugfixes with automatic entity id resolution
-* 0.0.10 - Access all of Dapper from within Dashing
-* 0.0.9 - Performance improvements, collections support, bugfixes and switched back to using Dapper from NuGet 
-* 0.0.8 - Fixed a bug where columns ere not being ignored
-* 0.0.7 - Fixed a bug in code generation of read-only properties
-* 0.0.6 - Now called Dashing. Added bulk update methods
-* 0.0.5 - Added support for TimeSpan
-* 0.0.4 - Added GetById methods
-* 0.0.3 - Don't try to proxy things that aren't proxiable
-* 0.0.2 - Improved where clause handling for constant expressions
-* 0.0.1 - Our very first release. Be gentle.</releaseNotes>
-        <copyright>© Polylytics Limited, 2014</copyright>
+        <releaseNotes>* 0.1.1-alpha AssemblyResolve fix
+* 0.1.0-alpha Switched to IL Weaving</releaseNotes>
+        <copyright>© Polylytics Limited, 2015</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>
         <dependencies>
             <dependency id="Dapper" version="1.38" />
+            <dependency id="Newtonsoft.Json" version="6.0.8" />
+            <dependency id="Mono.Cecil" version="0.9.6.1" />
         </dependencies>
         <frameworkAssemblies>
             <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
@@ -103,9 +31,12 @@
             <frameworkAssembly assemblyName="System.Data.Linq" targetFramework="" />
             <frameworkAssembly assemblyName="System.Xml" targetFramework="" />
             <frameworkAssembly assemblyName="System.Configuration" targetFramework="" />
+            <frameworkAssembly assemblyName="Microsoft.Build.Framework" targetFramework="" />
+            <frameworkAssembly assemblyName="Microsoft.Build.Utilities.v4.0" targetFramework="" />
         </frameworkAssemblies>
     </metadata>
     <files>
+        <file src="build\Dashing.targets" target="build\Dashing.targets" />
         <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
         <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
         <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />

@@ -9,6 +9,14 @@
         public bool IsBar { get; set; }
 
         public bool? IsRah { get; set; }
+
+        public FooType Type { get; set; }
+    }
+
+    public enum FooType {
+        One,
+        Two,
+        Three
     }
 
     public class Bar {

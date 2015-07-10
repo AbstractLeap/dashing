@@ -32,20 +32,37 @@
             var me = Assembly.GetExecutingAssembly();
             var peVerifier = new PEVerifier();
 
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, args) => {
+                var assemblyName = new AssemblyName(args.Name);
+                var loaded = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                if (loaded != null) {
+                    return loaded;
+                }
+
+                // we couldn't find it, look on disk
+                var path = Path.GetDirectoryName(new Uri(me.CodeBase).LocalPath) + @"\" + assemblyName.Name + ".dll";
+                if (File.Exists(path)) {
+                    var assemblyData = File.ReadAllBytes(path);
+                    return Assembly.Load(assemblyData);
+                }
+
+                return null;
+            };
+
             // load me in to a new app domain for creating IConfigurations
             var configAppDomain = AppDomain.CreateDomain(
                 "ConfigAppDomain",
                 null,
-                new AppDomainSetup { ApplicationBase = AppDomain.CurrentDomain.SetupInformation.ApplicationBase });
-            var configurationMapResolver =
-                (ConfigurationMapResolver)configAppDomain.CreateInstanceFromAndUnwrap(me.CodeBase, typeof(ConfigurationMapResolver).FullName);
+                new AppDomainSetup { ApplicationBase = Path.GetDirectoryName(new Uri(me.CodeBase).LocalPath) });
+            var configurationMapResolver = (ConfigurationMapResolver)configAppDomain.CreateInstanceFromAndUnwrap(new Uri(me.CodeBase).LocalPath, typeof(ConfigurationMapResolver).FullName);
 
             // locate all dlls
             var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
             var assemblyMapDefinitions = new Dictionary<string, List<MapDefinition>>();
             foreach (var file in Directory.GetFiles(AssemblyLocation.Directory)) {
                 try {
-                    var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { ReadSymbols = true });
+                    var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
+                    var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { ReadSymbols = readSymbols });
                     assemblyDefinitions.Add(file, assembly);
                     if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == me.GetName().Name)) {
                         // references dashing, use our other app domain to find the IConfig and instantiate it
@@ -63,7 +80,7 @@
                         }
                     }
                 }
-                catch {
+                catch (BadImageFormatException) {
                     // swallow and carry on - prob not a managed file
                 }
             }
@@ -99,9 +116,14 @@
                 }
 
                 try {
-                    assemblyDefinition.Write(
-                        assemblyDefinitionLookup.Key,
-                        new WriterParameters { WriteSymbols = true, SymbolWriterProvider = new PdbWriterProvider() });
+                    if (File.Exists(assemblyDefinitionLookup.Key.Substring(0, assemblyDefinitionLookup.Key.Length - 3) + "pdb")) {
+                        assemblyDefinition.Write(
+                            assemblyDefinitionLookup.Key,
+                            new WriterParameters { WriteSymbols = true, SymbolWriterProvider = new PdbWriterProvider() });
+                    }
+                    else {
+                        assemblyDefinition.Write(assemblyDefinitionLookup.Key);
+                    }
                 }
                 catch (UnauthorizedAccessException) {
                     this.Log.LogMessage(MessageImportance.High, "Unable to write the pdb for assembly " + assemblyDefinition.FullName + " due to an UnauthorizedAccessException");
@@ -519,9 +541,21 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
 
                 var backingField = typeDef.Fields.Single(f => f.Name == string.Format("<{0}>k__BackingField", columnDefinition.Name));
                 if (propertyDef.PropertyType.IsValueType) {
-                    setIntructions.Add(Instruction.Create(OpCodes.Ldflda, backingField));
+                    var isEnum = propertyDef.PropertyType.Resolve().IsEnum;
+                    if (isEnum) {
+                        setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
+                        setIntructions.Add(Instruction.Create(OpCodes.Box, propertyDef.PropertyType));
+                    }
+                    else {
+                        setIntructions.Add(Instruction.Create(OpCodes.Ldflda, backingField));
+                    }
+
                     setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
-                    if (propertyDef.PropertyType.Name == "Nullable`1") {
+                    if (isEnum) {
+                        setIntructions.Add(Instruction.Create(OpCodes.Box, propertyDef.PropertyType));
+                        setIntructions.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(objectTypeDef.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
+                    }
+                    else if (propertyDef.PropertyType.Name == "Nullable`1") {
                         setIntructions.Add(Instruction.Create(OpCodes.Box, backingField.FieldType));
                         setIntructions.Add(Instruction.Create(OpCodes.Constrained, backingField.FieldType));
                         setIntructions.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(objectTypeDef.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
