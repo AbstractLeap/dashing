@@ -452,7 +452,7 @@
                        && this.DoesNotUseObjectMethod(typeDefinition.BaseType.Resolve(), methodName));
         }
 
-        private static void AddForeignKeyBehaviour(
+        private void AddForeignKeyBehaviour(
             TypeDefinition typeDef,
             AssemblyDefinition assemblyDefinition,
             MapDefinition mapDefinition,
@@ -488,7 +488,10 @@
 
                 // override the get method to access this field if null and create a new instance
                 // TODO solve for non auto properties
-                //propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
+                if (!propDef.GetMethod.Body.Variables.Any()) { // Release code is different to debug code!
+                    propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
+                }
+
                 propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
                 propDef.GetMethod.Body.Variables.Add(new VariableDefinition(boolTypeDef));
                 propDef.GetMethod.Body.InitLocals = true;
@@ -549,7 +552,7 @@
             }
         }
 
-        private static void ImplementITrackedEntity(TypeDefinition typeDef, AssemblyDefinition assemblyDefinition, MapDefinition mapDefinition) {
+        private void ImplementITrackedEntity(TypeDefinition typeDef, AssemblyDefinition assemblyDefinition, MapDefinition mapDefinition) {
             if (typeDef.Interfaces.Any(i => i.FullName == typeof(ITrackedEntity).FullName)) {
                 // already processed
                 return;
@@ -989,6 +992,7 @@
             }
 
             this.Log.LogError("Unable to determine backing field for property " + propertyDef.FullName);
+            return null;
         }
 
         public static TypeReference MakeGenericType(TypeReference self, params TypeReference[] arguments) {
