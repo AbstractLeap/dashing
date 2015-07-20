@@ -178,8 +178,7 @@
             if (constructors.Length > 1) {
                 constructor = constructors.SingleOrDefault(s => !s.HasParameters);
                 if (constructor == null) {
-                    this.Log.LogMessage(
-                        MessageImportance.High,
+                    this.Log.LogError(
                         "Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
                 }
             }
@@ -972,7 +971,7 @@
             //AddAutoProperty(typeDef, "DeletedEntities", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))));
         }
 
-        private static FieldDefinition GetBackingField(PropertyDefinition propertyDef) {
+        private FieldDefinition GetBackingField(PropertyDefinition propertyDef) {
             // have a look for a field matching the standard format
             var fieldDef = propertyDef.DeclaringType.Fields.SingleOrDefault(f => f.Name == string.Format(BackingFieldTemplate, propertyDef.Name));
             if (fieldDef != null) {
@@ -989,7 +988,7 @@
                 return (FieldDefinition)candidates.First().Operand;
             }
 
-            throw new InvalidProgramException("Unable to determine backing field for property " + propertyDef.FullName);
+            this.Log.LogError("Unable to determine backing field for property " + propertyDef.FullName);
         }
 
         public static TypeReference MakeGenericType(TypeReference self, params TypeReference[] arguments) {
