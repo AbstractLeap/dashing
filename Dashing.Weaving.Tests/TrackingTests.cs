@@ -147,5 +147,12 @@ namespace Dashing.Weaving.Tests {
             foo.Type = FooType.Two;
             Assert.Empty(fooAsTracked.GetDirtyProperties());
         }
+
+        [Fact]
+        public void SetMethodNotOverridden() {
+            var starship = new Starship();
+            starship.Foo = true;
+            Assert.True(starship.GetBar());
+        }
     }
 }

@@ -70,7 +70,8 @@ namespace Dashing.CodeGeneration.Weaving {
                                                   AssemblyFullName = map.Type.Assembly.FullName,
                                                   TypeFullName = map.Type.FullName,
                                                   ColumnDefinitions =
-                                                      map.OwnedColumns(true)
+                                                      map.Columns.Where(c => !c.Value.IsIgnored)
+                                                      .Select(c => c.Value)
                                                          .Select(
                                                              c =>
                                                              new ColumnDefinition {

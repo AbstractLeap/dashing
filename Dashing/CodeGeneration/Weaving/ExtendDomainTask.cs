@@ -6,6 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
     using System.Security.Policy;
 
     using Dashing.Configuration;
@@ -112,6 +113,7 @@
                     ImplementISetLogger(typeDef, assemblyDefinition, mapDefinition);
                     AddForeignKeyBehaviour(typeDef, assemblyDefinition, mapDefinition, assemblyMapDefinitions, assemblyDefinitions);
                     OverrideEqualsAndGetHashCode(typeDef, mapDefinition);
+                    InstantiateCollections(typeDef, assemblyDefinition, mapDefinition);
                     visitedTypes.Add(mapDefinition.TypeFullName);
                 }
 
@@ -144,6 +146,35 @@
             return true;
         }
 
+        private void InstantiateCollections(TypeDefinition typeDef, AssemblyDefinition assemblyDefinition, MapDefinition mapDefinition) {
+            var constructors = typeDef.GetConstructors().ToArray();
+            foreach (var oneToManyColumnDefinition in mapDefinition.ColumnDefinitions.Where(c => c.Relationship == RelationshipType.OneToMany)) {
+                var propDef = typeDef.Properties.Single(p => p.Name == oneToManyColumnDefinition.Name);
+                if (propDef.SetMethod.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName)) {
+                    // auto prop - see if the prop set method is called in any of the constructors
+                    if (!constructors.Any(c => c.Body.Instructions.Any(i => i.Operand != null && i.Operand.Equals(propDef.SetMethod)))) {
+                        var constructor = constructors.First();
+                        if (constructors.Length > 1) {
+                            constructor = constructors.SingleOrDefault(s => !s.HasParameters);
+                            if (constructor == null) {
+                                this.Log.LogMessage(MessageImportance.High, "Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
+                            }
+                        }
+
+                        var insertIdx = constructor.Body.Instructions.Count - 1;
+                        constructor.Body.Instructions.Insert(insertIdx++, Instruction.Create(OpCodes.Nop));
+                        constructor.Body.Instructions.Insert(insertIdx++, Instruction.Create(OpCodes.Ldarg_0));
+                        constructor.Body.Instructions.Insert(insertIdx++, Instruction.Create(OpCodes.Newobj, MakeGeneric(typeDef.Module.Import(typeDef.Module.Import(typeof(List<>)).MakeGenericInstanceType(propDef.PropertyType).Resolve().GetConstructors().First(c => !c.HasParameters)), ((GenericInstanceType)propDef.PropertyType).GenericArguments.First())));
+                        constructor.Body.Instructions.Insert(insertIdx, Instruction.Create(OpCodes.Call, propDef.SetMethod));
+                    }
+                }
+                else {
+                    // not an auto prop
+                    throw new NotImplementedException();
+                }
+            }
+        }
+
         private void ImplementISetLogger(TypeDefinition typeDef, AssemblyDefinition assemblyDefinition, MapDefinition mapDefinition) {
             if (typeDef.Interfaces.Any(i => i.FullName == typeof(ISetLogger).FullName)) {
                 return;
@@ -155,7 +186,7 @@
             var boolTypeDef = typeDef.Module.Import(typeof(bool));
             var stringTypeDef = typeDef.Module.Import(typeof(string));
             var listStringTypeDef = typeDef.Module.Import(typeof(List<>)).MakeGenericInstanceType(stringTypeDef);
-            var nonPkCols = mapDefinition.ColumnDefinitions.Where(c => !c.IsPrimaryKey).ToList();
+            var nonPkCols = mapDefinition.ColumnDefinitions.Where(c => !c.IsPrimaryKey && c.Relationship != RelationshipType.OneToMany).ToList();
 
             // add the fields for tracking which properties are set
             // and insert the code in to the setter
@@ -494,7 +525,7 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
             // add the fields
             var isTrackingField = new FieldDefinition(isTrackingName, FieldAttributes.Private, boolTypeDef);
             typeDef.Fields.Add(isTrackingField);
-            var nonPkCols = mapDefinition.ColumnDefinitions.Where(c => !c.IsPrimaryKey).ToList();
+            var nonPkCols = mapDefinition.ColumnDefinitions.Where(c => !c.IsPrimaryKey && c.Relationship != RelationshipType.OneToMany).ToList();
             foreach (var columnDefinition in nonPkCols) {
                 var propertyDefinition = typeDef.Properties.Single(p => p.Name == columnDefinition.Name);
                 typeDef.Fields.Add(new FieldDefinition(string.Format("__{0}_IsDirty", columnDefinition.Name), FieldAttributes.Private, boolTypeDef));

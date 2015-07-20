@@ -62,6 +62,7 @@
     <Compile Include="SetLoggerTests.cs" />
     <Compile Include="WeavingFixture.cs" />
     <Compile Include="TrackingTests.cs" />
+    <Compile Include="WeavingTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
