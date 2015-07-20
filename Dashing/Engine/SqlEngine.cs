@@ -170,6 +170,7 @@ namespace Dashing.Engine {
                     connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
                 }
 
+                ((ITrackedEntity)entity).EnableTracking(); // turn on tracking
                 ++i;
             }
 
@@ -285,6 +286,7 @@ namespace Dashing.Engine {
                     await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
                 }
 
+                ((ITrackedEntity)entity).EnableTracking(); // turn on tracking
                 ++i;
             }
 

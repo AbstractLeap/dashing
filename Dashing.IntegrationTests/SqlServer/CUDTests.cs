@@ -1,6 +1,8 @@
 ﻿namespace Dashing.IntegrationTests.SqlServer {
     using System;
+    using System.Threading.Tasks;
 
+    using Dashing.CodeGeneration;
     using Dashing.IntegrationTests.SqlServer.Fixtures;
     using Dashing.IntegrationTests.TestDomain;
 
@@ -11,6 +13,20 @@
 
         public CUDTests(SqlServerFixture data) {
             this.fixture = data;
+        }
+
+        [Fact]
+        public void InsertEnablesTracking() {
+            var user = new User { Username = "Joe", EmailAddress = Guid.NewGuid().ToString(), Password = "blah" };
+            this.fixture.Session.Insert(user);
+            Assert.True(((ITrackedEntity)user).IsTrackingEnabled());
+        }
+
+        [Fact]
+        public async Task InsertAsyncEnablesTracking() {
+            var user = new User { Username = "Joe", EmailAddress = Guid.NewGuid().ToString(), Password = "blah" };
+            await this.fixture.Session.InsertAsync(user);
+            Assert.True(((ITrackedEntity)user).IsTrackingEnabled());
         }
 
         [Fact]
