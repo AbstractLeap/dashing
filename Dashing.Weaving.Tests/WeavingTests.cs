@@ -15,5 +15,12 @@
             var bar = new Bar();
             Assert.NotEmpty(bar.Ducks);
         }
+
+        [Fact]
+        public void NonAutoOneToManyGetsInstantiated() {
+            var whopper = new Whopper();
+            Assert.NotNull(whopper.Ducks);
+            Assert.Equal("Burger", whopper.GetFilling());
+        }
     }
 }

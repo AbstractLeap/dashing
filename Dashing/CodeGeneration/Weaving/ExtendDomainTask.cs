@@ -1,13 +1,11 @@
 ﻿namespace Dashing.CodeGeneration.Weaving {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
-    using System.Security.Policy;
 
     using Dashing.Configuration;
     using Dashing.Extensions;
@@ -29,6 +27,8 @@
 
     [LoadInSeparateAppDomain]
     public class ExtendDomain : AppDomainIsolatedTask {
+        private const string BackingFieldTemplate = "<{0}>k__BackingField";
+
         public override bool Execute() {
             var me = Assembly.GetExecutingAssembly();
             var peVerifier = new PEVerifier();
@@ -55,7 +55,9 @@
                 "ConfigAppDomain",
                 null,
                 new AppDomainSetup { ApplicationBase = Path.GetDirectoryName(new Uri(me.CodeBase).LocalPath) });
-            var configurationMapResolver = (ConfigurationMapResolver)configAppDomain.CreateInstanceFromAndUnwrap(new Uri(me.CodeBase).LocalPath, typeof(ConfigurationMapResolver).FullName);
+            var configurationMapResolver =
+                (ConfigurationMapResolver)
+                configAppDomain.CreateInstanceFromAndUnwrap(new Uri(me.CodeBase).LocalPath, typeof(ConfigurationMapResolver).FullName);
 
             // locate all dlls
             var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
@@ -110,10 +112,10 @@
 
                     var typeDef = GetTypeDefFromFullName(mapDefinition.TypeFullName, assemblyDefinition);
                     ImplementITrackedEntity(typeDef, assemblyDefinition, mapDefinition);
-                    ImplementISetLogger(typeDef, assemblyDefinition, mapDefinition);
+                    this.ImplementISetLogger(typeDef, assemblyDefinition, mapDefinition);
                     AddForeignKeyBehaviour(typeDef, assemblyDefinition, mapDefinition, assemblyMapDefinitions, assemblyDefinitions);
-                    OverrideEqualsAndGetHashCode(typeDef, mapDefinition);
-                    InstantiateCollections(typeDef, assemblyDefinition, mapDefinition);
+                    this.OverrideEqualsAndGetHashCode(typeDef, mapDefinition);
+                    this.InstantiateCollections(typeDef, assemblyDefinition, mapDefinition);
                     visitedTypes.Add(mapDefinition.TypeFullName);
                 }
 
@@ -128,7 +130,9 @@
                     }
                 }
                 catch (UnauthorizedAccessException) {
-                    this.Log.LogMessage(MessageImportance.High, "Unable to write the pdb for assembly " + assemblyDefinition.FullName + " due to an UnauthorizedAccessException");
+                    this.Log.LogMessage(
+                        MessageImportance.High,
+                        "Unable to write the pdb for assembly " + assemblyDefinition.FullName + " due to an UnauthorizedAccessException");
                     try {
                         assemblyDefinition.Write(assemblyDefinitionLookup.Key);
                     }
@@ -153,26 +157,49 @@
                 if (propDef.SetMethod.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName)) {
                     // auto prop - see if the prop set method is called in any of the constructors
                     if (!constructors.Any(c => c.Body.Instructions.Any(i => i.Operand != null && i.Operand.Equals(propDef.SetMethod)))) {
-                        var constructor = constructors.First();
-                        if (constructors.Length > 1) {
-                            constructor = constructors.SingleOrDefault(s => !s.HasParameters);
-                            if (constructor == null) {
-                                this.Log.LogMessage(MessageImportance.High, "Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
-                            }
-                        }
-
-                        var insertIdx = constructor.Body.Instructions.Count - 1;
-                        constructor.Body.Instructions.Insert(insertIdx++, Instruction.Create(OpCodes.Nop));
-                        constructor.Body.Instructions.Insert(insertIdx++, Instruction.Create(OpCodes.Ldarg_0));
-                        constructor.Body.Instructions.Insert(insertIdx++, Instruction.Create(OpCodes.Newobj, MakeGeneric(typeDef.Module.Import(typeDef.Module.Import(typeof(List<>)).MakeGenericInstanceType(propDef.PropertyType).Resolve().GetConstructors().First(c => !c.HasParameters)), ((GenericInstanceType)propDef.PropertyType).GenericArguments.First())));
-                        constructor.Body.Instructions.Insert(insertIdx, Instruction.Create(OpCodes.Call, propDef.SetMethod));
+                        this.InstantiateCollection(typeDef, constructors, propDef);
                     }
                 }
                 else {
                     // not an auto prop
-                    throw new NotImplementedException();
+                    var backingField = GetBackingField(propDef);
+                    if (
+                        !constructors.Any(
+                            c =>
+                            c.Body.Instructions.Any(i => i.Operand != null && (i.Operand.Equals(propDef.SetMethod) || i.Operand.Equals(backingField))))) {
+                        this.InstantiateCollection(typeDef, constructors, propDef);
+                    }
                 }
             }
+        }
+
+        private void InstantiateCollection(TypeDefinition typeDef, MethodDefinition[] constructors, PropertyDefinition propDef) {
+            var constructor = constructors.First();
+            if (constructors.Length > 1) {
+                constructor = constructors.SingleOrDefault(s => !s.HasParameters);
+                if (constructor == null) {
+                    this.Log.LogMessage(
+                        MessageImportance.High,
+                        "Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
+                }
+            }
+
+            var insertIdx = constructor.Body.Instructions.Count - 1;
+            constructor.Body.Instructions.Insert(insertIdx++, Instruction.Create(OpCodes.Nop));
+            constructor.Body.Instructions.Insert(insertIdx++, Instruction.Create(OpCodes.Ldarg_0));
+            constructor.Body.Instructions.Insert(
+                insertIdx++,
+                Instruction.Create(
+                    OpCodes.Newobj,
+                    MakeGeneric(
+                        typeDef.Module.Import(
+                            typeDef.Module.Import(typeof(List<>))
+                                   .MakeGenericInstanceType(propDef.PropertyType)
+                                   .Resolve()
+                                   .GetConstructors()
+                                   .First(c => !c.HasParameters)),
+                        ((GenericInstanceType)propDef.PropertyType).GenericArguments.First())));
+            constructor.Body.Instructions.Insert(insertIdx, Instruction.Create(OpCodes.Call, propDef.SetMethod));
         }
 
         private void ImplementISetLogger(TypeDefinition typeDef, AssemblyDefinition assemblyDefinition, MapDefinition mapDefinition) {
@@ -181,7 +208,7 @@
             }
 
             typeDef.Interfaces.Add(assemblyDefinition.MainModule.Import(typeof(ISetLogger)));
-            
+
             // some common type definitions
             var boolTypeDef = typeDef.Module.Import(typeof(bool));
             var stringTypeDef = typeDef.Module.Import(typeof(string));
@@ -214,7 +241,9 @@
             var instructions = getSetProperties.Body.Instructions;
             instructions.Add(Instruction.Create(OpCodes.Nop));
             var listStringContruictor =
-                MakeGeneric(typeDef.Module.Import(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)), stringTypeDef);
+                MakeGeneric(
+                    typeDef.Module.Import(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)),
+                    stringTypeDef);
             instructions.Add(Instruction.Create(OpCodes.Newobj, listStringContruictor));
             instructions.Add(Instruction.Create(OpCodes.Stloc_0));
 
@@ -227,9 +256,7 @@
                 }
 
                 instructions.Add(
-                    Instruction.Create(
-                        OpCodes.Ldfld,
-                        typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsSet", nonPkCols.ElementAt(i).Name))));
+                    Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsSet", nonPkCols.ElementAt(i).Name))));
                 instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
                 instructions.Add(Instruction.Create(OpCodes.Ceq));
                 instructions.Add(Instruction.Create(OpCodes.Stloc_2));
@@ -270,11 +297,11 @@
         }
 
         private void OverrideEqualsAndGetHashCode(TypeDefinition typeDef, MapDefinition mapDefinition) {
-                var intTypeDef = typeDef.Module.Import(typeof(int));
-                var boolTypeDef = typeDef.Module.Import(typeof(bool));
+            var intTypeDef = typeDef.Module.Import(typeof(int));
+            var boolTypeDef = typeDef.Module.Import(typeof(bool));
             var objectTypeDef = typeDef.Module.Import(typeof(object));
-                var pkColDef = typeDef.Properties.Single(p => p.Name == mapDefinition.ColumnDefinitions.Single(d => d.IsPrimaryKey).Name);
-                
+            var pkColDef = typeDef.Properties.Single(p => p.Name == mapDefinition.ColumnDefinitions.Single(d => d.IsPrimaryKey).Name);
+
             if (!this.DoesNotUseObjectMethod(typeDef, "GetHashCode")) {
                 // override gethashcode
                 var hashCodeBackingField = new FieldDefinition(
@@ -329,7 +356,12 @@
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
-                il.Add(Instruction.Create(OpCodes.Newobj, MakeGeneric(typeDef.Module.Import(hashCodeBackingField.FieldType.Resolve().GetConstructors().First()), typeDef.Module.Import(typeof(int)))));
+                il.Add(
+                    Instruction.Create(
+                        OpCodes.Newobj,
+                        MakeGeneric(
+                            typeDef.Module.Import(hashCodeBackingField.FieldType.Resolve().GetConstructors().First()),
+                            typeDef.Module.Import(typeof(int)))));
                 il.Add(Instruction.Create(OpCodes.Stfld, hashCodeBackingField));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldflda, hashCodeBackingField));
@@ -421,9 +453,17 @@
                        && this.DoesNotUseObjectMethod(typeDefinition.BaseType.Resolve(), methodName));
         }
 
-        private static void AddForeignKeyBehaviour(TypeDefinition typeDef, AssemblyDefinition assemblyDefinition, MapDefinition mapDefinition, Dictionary<string, List<MapDefinition>> assemblyMapDefinitions, Dictionary<string, AssemblyDefinition> assemblyDefinitions) {
+        private static void AddForeignKeyBehaviour(
+            TypeDefinition typeDef,
+            AssemblyDefinition assemblyDefinition,
+            MapDefinition mapDefinition,
+            Dictionary<string, List<MapDefinition>> assemblyMapDefinitions,
+            Dictionary<string, AssemblyDefinition> assemblyDefinitions) {
             var boolTypeDef = typeDef.Module.Import(typeof(bool));
-            foreach (var columnDef in mapDefinition.ColumnDefinitions.Where(c => c.Relationship == RelationshipType.ManyToOne || c.Relationship == RelationshipType.OneToOne)) {
+            foreach (
+                var columnDef in
+                    mapDefinition.ColumnDefinitions.Where(
+                        c => c.Relationship == RelationshipType.ManyToOne || c.Relationship == RelationshipType.OneToOne)) {
                 // add a field with DbType and DbName 
                 TypeReference fkTypeReference;
                 var fkPkType = columnDef.DbType.GetCLRType();
@@ -440,67 +480,73 @@
                 }
 
                 typeDef.Fields.Add(fkField);
-var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
-                
+                var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
+
                 // override the set method to set to null
                 propDef.SetMethod.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Initobj, fkTypeReference));
                 propDef.SetMethod.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Ldflda, fkField));
                 propDef.SetMethod.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Ldarg_0));
 
                 // override the get method to access this field if null and create a new instance
-                propDef.GetMethod.Body.Variables.Clear();
-                propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
+                // TODO solve for non auto properties
+                //propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
                 propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
                 propDef.GetMethod.Body.Variables.Add(new VariableDefinition(boolTypeDef));
                 propDef.GetMethod.Body.InitLocals = true;
-                propDef.GetMethod.Body.Instructions.Clear();
+                //propDef.GetMethod.Body.Instructions.Clear();
 
-                var backingField = typeDef.Fields.Single(f => f.Name == string.Format("<{0}>k__BackingField", columnDef.Name));
+                var backingField = GetBackingField(propDef);
                 var il = propDef.GetMethod.Body.Instructions;
-                il.Add(Instruction.Create(OpCodes.Ldarg_0));
-                il.Add(Instruction.Create(OpCodes.Ldfld, backingField));
+                var lastInstr = il[0];
+                var index = 0;
+                il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldfld, backingField));
                 var skipToEnd = Instruction.Create(OpCodes.Ldc_I4_1);
-                il.Add(Instruction.Create(OpCodes.Brtrue, skipToEnd));
-                il.Add(Instruction.Create(OpCodes.Ldarg_0));
+                il.Insert(index++, Instruction.Create(OpCodes.Brtrue, skipToEnd));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
                 if (fkPkType.IsValueType) {
-                    il.Add(Instruction.Create(OpCodes.Ldflda, fkField));
-                    il.Add(Instruction.Create(OpCodes.Call, MakeGeneric(typeDef.Module.Import(fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")), typeDef.Module.Import(fkPkType))));
+                    il.Insert(index++, Instruction.Create(OpCodes.Ldflda, fkField));
+                    il.Insert(index++, 
+                        Instruction.Create(
+                            OpCodes.Call,
+                            MakeGeneric(
+                                typeDef.Module.Import(fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
+                                typeDef.Module.Import(fkPkType))));
                 }
                 else {
                     throw new NotImplementedException(); // need to do a null check
                 }
 
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Ceq));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldc_I4_0));
+                il.Insert(index++, Instruction.Create(OpCodes.Ceq));
                 var nopInstr = Instruction.Create(OpCodes.Nop);
-                il.Add(Instruction.Create(OpCodes.Br, nopInstr));
-                il.Add(skipToEnd);
-                il.Add(nopInstr);
-                il.Add(Instruction.Create(OpCodes.Stloc_2));
-                il.Add(Instruction.Create(OpCodes.Ldloc_2));
-                var returnThis = Instruction.Create(OpCodes.Ldarg_0);
-                il.Add(Instruction.Create(OpCodes.Brtrue, returnThis));
-                il.Add(Instruction.Create(OpCodes.Nop));
-                il.Add(Instruction.Create(OpCodes.Ldarg_0));
-                il.Add(Instruction.Create(OpCodes.Newobj, propDef.PropertyType.Resolve().GetConstructors().First()));
-                il.Add(Instruction.Create(OpCodes.Stloc_0));
-                il.Add(Instruction.Create(OpCodes.Ldloc_0));
-                il.Add(Instruction.Create(OpCodes.Ldarg_0));
-                il.Add(Instruction.Create(OpCodes.Ldflda, fkField));
-                il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(MakeGeneric(fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"), typeDef.Module.Import(fkPkType)))));
+                il.Insert(index++, Instruction.Create(OpCodes.Br, nopInstr));
+                il.Insert(index++, skipToEnd);
+                il.Insert(index++, nopInstr);
+                il.Insert(index++, Instruction.Create(OpCodes.Stloc_2));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldloc_2));
+                il.Insert(index++, Instruction.Create(OpCodes.Brtrue, lastInstr));
+                il.Insert(index++, Instruction.Create(OpCodes.Nop));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
+                il.Insert(index++, Instruction.Create(OpCodes.Newobj, propDef.PropertyType.Resolve().GetConstructors().First()));
+                il.Insert(index++, Instruction.Create(OpCodes.Stloc_0));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldflda, fkField));
+                il.Insert(index++, 
+                    Instruction.Create(
+                        OpCodes.Call,
+                        typeDef.Module.Import(
+                            MakeGeneric(fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"), typeDef.Module.Import(fkPkType)))));
                 var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
                 var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
                 var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
-                il.Add(Instruction.Create(OpCodes.Callvirt, fkMapTypeRef.Properties.Single(c => c.Name == fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod));
-                il.Add(Instruction.Create(OpCodes.Ldloc_0));
-                il.Add(Instruction.Create(OpCodes.Stfld, backingField));
-                il.Add(returnThis);
-                il.Add(Instruction.Create(OpCodes.Ldfld, backingField));
-                il.Add(Instruction.Create(OpCodes.Stloc_1));
-                var ldLoc = Instruction.Create(OpCodes.Ldloc_1);
-                il.Add(Instruction.Create(OpCodes.Br, ldLoc));
-                il.Add(ldLoc);
-                il.Add(Instruction.Create(OpCodes.Ret));
+                il.Insert(index++, 
+                    Instruction.Create(
+                        OpCodes.Callvirt,
+                        fkMapTypeRef.Properties.Single(c => c.Name == fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
+                il.Insert(index, Instruction.Create(OpCodes.Stfld, backingField));
             }
         }
 
@@ -535,17 +581,17 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 if (columnDefinition.Relationship == RelationshipType.None && propertyDefinition.PropertyType.IsValueType
                     && propertyDefinition.PropertyType.Name != "Nullable`1") {
                     oldValuePropType = typeDef.Module.Import(typeof(Nullable<>)).MakeGenericInstanceType(oldValuePropType);
-                        // use nullable value types
+                    // use nullable value types
                 }
 
                 typeDef.Fields.Add(
                     new FieldDefinition(string.Format("__{0}_OldValue", columnDefinition.Name), FieldAttributes.Private, oldValuePropType));
             }
 
-            
             // insert the instructions in to the setter
             foreach (var columnDefinition in nonPkCols) {
                 var propertyDef = typeDef.Properties.Single(p => p.Name == columnDefinition.Name);
+                var backingField = GetBackingField(propertyDef);
                 var setter = typeDef.Methods.Single(m => m.Name == "set_" + columnDefinition.Name);
                 setter.Body.Variables.Add(new VariableDefinition(boolTypeDef)); // we need a local bool
                 setter.Body.InitLocals = true;
@@ -563,14 +609,14 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endLdArgInstr));
                 setIntructions.Add(Instruction.Create(OpCodes.Nop));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-                setIntructions.Add(Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsDirty", columnDefinition.Name))));
+                setIntructions.Add(
+                    Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsDirty", columnDefinition.Name))));
                 setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));
                 setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr));
                 setIntructions.Add(Instruction.Create(OpCodes.Nop));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
 
-                var backingField = typeDef.Fields.Single(f => f.Name == string.Format("<{0}>k__BackingField", columnDefinition.Name));
                 if (propertyDef.PropertyType.IsValueType) {
                     var isEnum = propertyDef.PropertyType.Resolve().IsEnum;
                     if (isEnum) {
@@ -584,15 +630,41 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                     setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
                     if (isEnum) {
                         setIntructions.Add(Instruction.Create(OpCodes.Box, propertyDef.PropertyType));
-                        setIntructions.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(objectTypeDef.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
+                        setIntructions.Add(
+                            Instruction.Create(
+                                OpCodes.Callvirt,
+                                typeDef.Module.Import(
+                                    objectTypeDef.Resolve()
+                                                 .GetMethods()
+                                                 .Single(
+                                                     m =>
+                                                     m.Name == "Equals" && m.Parameters.Count == 1
+                                                     && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
                     }
                     else if (propertyDef.PropertyType.Name == "Nullable`1") {
                         setIntructions.Add(Instruction.Create(OpCodes.Box, backingField.FieldType));
                         setIntructions.Add(Instruction.Create(OpCodes.Constrained, backingField.FieldType));
-                        setIntructions.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(objectTypeDef.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
+                        setIntructions.Add(
+                            Instruction.Create(
+                                OpCodes.Callvirt,
+                                typeDef.Module.Import(
+                                    objectTypeDef.Resolve()
+                                                 .GetMethods()
+                                                 .Single(
+                                                     m =>
+                                                     m.Name == "Equals" && m.Parameters.Count == 1
+                                                     && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
                     }
                     else {
-                        setIntructions.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(propertyDef.PropertyType.Resolve().Methods.Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() != "object"))));
+                        setIntructions.Add(
+                            Instruction.Create(
+                                OpCodes.Call,
+                                typeDef.Module.Import(
+                                    propertyDef.PropertyType.Resolve()
+                                               .Methods.Single(
+                                                   m =>
+                                                   m.Name == "Equals" && m.Parameters.Count == 1
+                                                   && m.Parameters.First().ParameterType.Name.ToLowerInvariant() != "object"))));
                     }
 
                     setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
@@ -614,10 +686,28 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                     setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
                     setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
                     if (propertyDef.PropertyType.Name.ToLowerInvariant() == "string") {
-                        setIntructions.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(propertyDef.PropertyType.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "string"))));
+                        setIntructions.Add(
+                            Instruction.Create(
+                                OpCodes.Callvirt,
+                                typeDef.Module.Import(
+                                    propertyDef.PropertyType.Resolve()
+                                               .GetMethods()
+                                               .Single(
+                                                   m =>
+                                                   m.Name == "Equals" && m.Parameters.Count == 1
+                                                   && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "string"))));
                     }
                     else {
-                        setIntructions.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(objectTypeDef.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.Parameters.Count == 1 && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
+                        setIntructions.Add(
+                            Instruction.Create(
+                                OpCodes.Callvirt,
+                                typeDef.Module.Import(
+                                    objectTypeDef.Resolve()
+                                                 .GetMethods()
+                                                 .Single(
+                                                     m =>
+                                                     m.Name == "Equals" && m.Parameters.Count == 1
+                                                     && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "object"))));
                     }
 
                     var nopInstr = Instruction.Create(OpCodes.Nop);
@@ -639,14 +729,26 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
-                if (columnDefinition.Relationship == RelationshipType.None && propertyDef.PropertyType.IsValueType && propertyDef.PropertyType.Name != "Nullable`1") {
-                    setIntructions.Add(Instruction.Create(OpCodes.Newobj, MakeGeneric(typeDef.Module.Import(typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name)).FieldType.Resolve().GetConstructors().First()), propertyDef.PropertyType)));
+                if (columnDefinition.Relationship == RelationshipType.None && propertyDef.PropertyType.IsValueType
+                    && propertyDef.PropertyType.Name != "Nullable`1") {
+                    setIntructions.Add(
+                        Instruction.Create(
+                            OpCodes.Newobj,
+                            MakeGeneric(
+                                typeDef.Module.Import(
+                                    typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))
+                                           .FieldType.Resolve()
+                                           .GetConstructors()
+                                           .First()),
+                                propertyDef.PropertyType)));
                 }
 
-                setIntructions.Add(Instruction.Create(OpCodes.Stfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))));
+                setIntructions.Add(
+                    Instruction.Create(OpCodes.Stfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                 setIntructions.Add(Instruction.Create(OpCodes.Ldc_I4_1));
-                setIntructions.Add(Instruction.Create(OpCodes.Stfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsDirty", columnDefinition.Name))));
+                setIntructions.Add(
+                    Instruction.Create(OpCodes.Stfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsDirty", columnDefinition.Name))));
                 setIntructions.Add(Instruction.Create(OpCodes.Nop));
                 setIntructions.Add(endNopInstr);
                 setIntructions.Reverse();
@@ -684,7 +786,8 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 // reset isdirty
                 disableInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                 disableInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                disableInstructions.Add(Instruction.Create(OpCodes.Stfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsDirty", col.Name))));
+                disableInstructions.Add(
+                    Instruction.Create(OpCodes.Stfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_IsDirty", col.Name))));
 
                 // reset oldvalue
                 disableInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
@@ -732,7 +835,9 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
             var instructions = getDirtyProperties.Body.Instructions;
             instructions.Add(Instruction.Create(OpCodes.Nop));
             var listStringContruictor =
-                MakeGeneric(typeDef.Module.Import(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)), stringTypeDef);
+                MakeGeneric(
+                    typeDef.Module.Import(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)),
+                    stringTypeDef);
             instructions.Add(Instruction.Create(OpCodes.Newobj, listStringContruictor));
             instructions.Add(Instruction.Create(OpCodes.Stloc_0));
 
@@ -802,7 +907,10 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 var targetInstr = Instruction.Create(OpCodes.Ldarg_0);
                 getBodyInstructions.Add(Instruction.Create(OpCodes.Brtrue, targetInstr));
                 switchInstructions.Add(targetInstr);
-                switchInstructions.Add(Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == String.Format("__{0}_IsDirty", nonPkCols.ElementAt(i).Name))));
+                switchInstructions.Add(
+                    Instruction.Create(
+                        OpCodes.Ldfld,
+                        typeDef.Fields.Single(f => f.Name == String.Format("__{0}_IsDirty", nonPkCols.ElementAt(i).Name))));
                 switchInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
                 switchInstructions.Add(Instruction.Create(OpCodes.Ceq));
                 switchInstructions.Add(Instruction.Create(OpCodes.Stloc_2));
@@ -813,9 +921,15 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
                 switchInstructions.Add(Instruction.Create(OpCodes.Brtrue, breakInstruction));
                 switchInstructions.Add(Instruction.Create(OpCodes.Nop));
                 switchInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-                switchInstructions.Add(Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == String.Format("__{0}_OldValue", nonPkCols.ElementAt(i).Name))));
+                switchInstructions.Add(
+                    Instruction.Create(
+                        OpCodes.Ldfld,
+                        typeDef.Fields.Single(f => f.Name == String.Format("__{0}_OldValue", nonPkCols.ElementAt(i).Name))));
                 if (typeDef.Properties.Single(p => p.Name == nonPkCols.ElementAt(i).Name).PropertyType.IsValueType) {
-                    switchInstructions.Add(Instruction.Create(OpCodes.Box, typeDef.Fields.Single(f => f.Name == String.Format("__{0}_OldValue", nonPkCols.ElementAt(i).Name)).FieldType));
+                    switchInstructions.Add(
+                        Instruction.Create(
+                            OpCodes.Box,
+                            typeDef.Fields.Single(f => f.Name == String.Format("__{0}_OldValue", nonPkCols.ElementAt(i).Name)).FieldType));
                 }
 
                 switchInstructions.Add(Instruction.Create(OpCodes.Stloc_0));
@@ -834,8 +948,17 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
             // handle the exception
             getBodyInstructions.Add(Instruction.Create(OpCodes.Nop));
             getBodyInstructions.Add(throwExceptionTarget);
-            getBodyInstructions.Add(Instruction.Create(OpCodes.Ldstr, "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first"));
-            getBodyInstructions.Add(Instruction.Create(OpCodes.Newobj, typeDef.Module.Import(typeof(ArgumentOutOfRangeException).GetConstructors().First(c => c.GetParameters().All(p => p.ParameterType == typeof(string)) && c.GetParameters().Count() == 2))));
+            getBodyInstructions.Add(
+                Instruction.Create(OpCodes.Ldstr, "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first"));
+            getBodyInstructions.Add(
+                Instruction.Create(
+                    OpCodes.Newobj,
+                    typeDef.Module.Import(
+                        typeof(ArgumentOutOfRangeException).GetConstructors()
+                                                           .First(
+                                                               c =>
+                                                               c.GetParameters().All(p => p.ParameterType == typeof(string))
+                                                               && c.GetParameters().Count() == 2))));
             getBodyInstructions.Add(Instruction.Create(OpCodes.Throw));
             getBodyInstructions.Add(returnTarget);
             getBodyInstructions.Add(Instruction.Create(OpCodes.Ret));
@@ -849,79 +972,56 @@ var propDef = typeDef.Properties.Single(p => p.Name == columnDef.Name);
             //AddAutoProperty(typeDef, "DeletedEntities", typeof(IDictionary<,>).MakeGenericType(typeof(string), typeof(IList<>).MakeGenericType(typeof(object))));
         }
 
+        private static FieldDefinition GetBackingField(PropertyDefinition propertyDef) {
+            // have a look for a field matching the standard format
+            var fieldDef = propertyDef.DeclaringType.Fields.SingleOrDefault(f => f.Name == string.Format(BackingFieldTemplate, propertyDef.Name));
+            if (fieldDef != null) {
+                return fieldDef;
+            }
+
+            // look for fields of this type loaded on to the stack
+            var candidates =
+                propertyDef.GetMethod.Body.Instructions.Where(
+                    i =>
+                    i.OpCode == OpCodes.Ldfld && i.Operand is FieldDefinition && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName)
+                           .ToArray();
+            if (candidates.Length == 1) {
+                return (FieldDefinition)candidates.First().Operand;
+            }
+
+            throw new InvalidProgramException("Unable to determine backing field for property " + propertyDef.FullName);
+        }
+
         public static TypeReference MakeGenericType(TypeReference self, params TypeReference[] arguments) {
-            if (self.GenericParameters.Count != arguments.Length)
+            if (self.GenericParameters.Count != arguments.Length) {
                 throw new ArgumentException();
+            }
 
             var instance = new GenericInstanceType(self);
-            foreach (var argument in arguments)
+            foreach (var argument in arguments) {
                 instance.GenericArguments.Add(argument);
+            }
 
             return instance;
         }
 
         public static MethodReference MakeGeneric(MethodReference self, params TypeReference[] arguments) {
             var reference = new MethodReference(self.Name, self.ReturnType) {
-                DeclaringType = MakeGenericType(self.DeclaringType, arguments),
-                HasThis = self.HasThis,
-                ExplicitThis = self.ExplicitThis,
-                CallingConvention = self.CallingConvention,
-            };
+                                                                                DeclaringType = MakeGenericType(self.DeclaringType, arguments),
+                                                                                HasThis = self.HasThis,
+                                                                                ExplicitThis = self.ExplicitThis,
+                                                                                CallingConvention = self.CallingConvention,
+                                                                            };
 
-            foreach (var parameter in self.Parameters)
+            foreach (var parameter in self.Parameters) {
                 reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
+            }
 
-            foreach (var generic_parameter in self.GenericParameters)
+            foreach (var generic_parameter in self.GenericParameters) {
                 reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
+            }
 
             return reference;
-        }
-
-        private static void AddAutoProperty(TypeDefinition typeDefinition, string name, Type propertyType) {
-            var propertyTypeReference = typeDefinition.Module.Import(propertyType);
-            var voidTypeReference = typeDefinition.Module.Import(typeof(void));
-            var propertyDefinition = new PropertyDefinition(name, PropertyAttributes.None, propertyTypeReference);
-            var fieldDefinition = new FieldDefinition(string.Format("<{0}>k_BackingField", name), FieldAttributes.Private, propertyTypeReference);
-
-            // getter
-            var get = new MethodDefinition(
-                "get_" + name,
-                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.NewSlot
-                | MethodAttributes.Virtual | MethodAttributes.Final,
-                propertyTypeReference);
-            get.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-            get.Body.Instructions.Add(Instruction.Create(OpCodes.Ldfld, fieldDefinition));
-            get.Body.Instructions.Add(Instruction.Create(OpCodes.Stloc_0));
-            var inst = Instruction.Create(OpCodes.Ldloc_0);
-            get.Body.Instructions.Add(Instruction.Create(OpCodes.Br, inst));
-            get.Body.Instructions.Add(inst);
-            get.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
-            get.Body.Variables.Add(new VariableDefinition(fieldDefinition.FieldType));
-            get.Body.InitLocals = true;
-            get.SemanticsAttributes = MethodSemanticsAttributes.Getter;
-            typeDefinition.Methods.Add(get);
-            propertyDefinition.GetMethod = get;
-
-            // setter
-            var set = new MethodDefinition(
-                "set_" + name,
-                MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig | MethodAttributes.NewSlot
-                | MethodAttributes.Virtual | MethodAttributes.Final,
-                voidTypeReference);
-            var instructions = set.Body.Instructions;
-            instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-            instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
-            instructions.Add(Instruction.Create(OpCodes.Stfld, fieldDefinition));
-            instructions.Add(Instruction.Create(OpCodes.Ret));
-            set.Parameters.Add(new ParameterDefinition("value", ParameterAttributes.None, fieldDefinition.FieldType));
-            set.SemanticsAttributes = MethodSemanticsAttributes.Setter;
-            //set.CustomAttributes.Add(new CustomAttribute(msCoreReferenceFinder.CompilerGeneratedReference));
-            typeDefinition.Methods.Add(set);
-            propertyDefinition.SetMethod = set;
-
-            // add to type
-            typeDefinition.Fields.Add(fieldDefinition);
-            typeDefinition.Properties.Add(propertyDefinition);
         }
     }
 
