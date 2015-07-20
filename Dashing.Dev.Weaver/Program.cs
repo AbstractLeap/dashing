@@ -1,5 +1,4 @@
 ﻿namespace Dashing.Dev.Weaver {
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Reflection;

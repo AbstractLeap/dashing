@@ -75,6 +75,15 @@
     <Compile Include="CodeGeneration\Weaving\AssemblyLocation.cs" />
     <Compile Include="CodeGeneration\Weaving\ConfigurationMapResolver.cs" />
     <Compile Include="CodeGeneration\Weaving\ExtendDomainTask.cs" />
+    <Compile Include="CodeGeneration\Weaving\PEVerifier.cs" />
+    <Compile Include="CodeGeneration\Weaving\Weavers\BaseWeaver.cs" />
+    <Compile Include="CodeGeneration\Weaving\Weavers\CollectionInstantiationWeaver.cs" />
+    <Compile Include="CodeGeneration\Weaving\Weavers\EqualityWeaver.cs" />
+    <Compile Include="CodeGeneration\Weaving\Weavers\ForeignKeyWeaver.cs" />
+    <Compile Include="CodeGeneration\Weaving\Weavers\ITaskLogHelper.cs" />
+    <Compile Include="CodeGeneration\Weaving\Weavers\SetLoggerWeaver.cs" />
+    <Compile Include="CodeGeneration\Weaving\Weavers\TrackedEntityWeaver.cs" />
+    <Compile Include="CodeGeneration\Weaving\Weavers\IWeaver.cs" />
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
     <Compile Include="Configuration\ConfigurationHelper.cs" />

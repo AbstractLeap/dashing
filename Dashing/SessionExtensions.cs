@@ -461,7 +461,7 @@ namespace Dashing {
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public static ITrackedEntity Inspect<T>(T entity) {
+        public static ITrackedEntity Inspect<T>(this ISession session, T entity) {
             return (ITrackedEntity)entity;
         }
     }
