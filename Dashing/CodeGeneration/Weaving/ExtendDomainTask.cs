@@ -1,12 +1,14 @@
 ﻿namespace Dashing.CodeGeneration.Weaving {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Reflection;
 
     using Dashing.CodeGeneration.Weaving.Weavers;
 
+    using Microsoft.Build.Evaluation;
     using Microsoft.Build.Framework;
     using Microsoft.Build.Utilities;
 
@@ -17,9 +19,17 @@
 
     [LoadInSeparateAppDomain]
     public class ExtendDomain : AppDomainIsolatedTask {
+        public string ProjectPath { get; set; }
+
+        public bool LaunchDebugger { get; set; }
+
         public override bool Execute() {
+            if (this.LaunchDebugger) {
+                Debugger.Launch();
+            }
+
             var me = Assembly.GetExecutingAssembly();
-            var peVerifier = new PEVerifier();
+            var peVerifier = new PEVerifier(this.Log);
 
             AppDomain.CurrentDomain.AssemblyResolve += (sender, args) => {
                 var assemblyName = new AssemblyName(args.Name);
@@ -39,13 +49,15 @@
             };
 
             // load me in to a new app domain for creating IConfigurations
+            var pathToBin = new Uri(me.CodeBase).LocalPath;
+            this.Log.LogMessage(MessageImportance.Normal, "Finding assemblies to weave in " + pathToBin);
             var configAppDomain = AppDomain.CreateDomain(
                 "ConfigAppDomain",
                 null,
-                new AppDomainSetup { ApplicationBase = Path.GetDirectoryName(new Uri(me.CodeBase).LocalPath) });
+                new AppDomainSetup { ApplicationBase = Path.GetDirectoryName(pathToBin) });
             var configurationMapResolver =
                 (ConfigurationMapResolver)
-                configAppDomain.CreateInstanceFromAndUnwrap(new Uri(me.CodeBase).LocalPath, typeof(ConfigurationMapResolver).FullName);
+                configAppDomain.CreateInstanceFromAndUnwrap(pathToBin, typeof(ConfigurationMapResolver).FullName);
 
             // locate all dlls
             var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
@@ -53,9 +65,13 @@
             foreach (var file in Directory.GetFiles(AssemblyLocation.Directory)) {
                 try {
                     var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
-                    var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { ReadSymbols = readSymbols });
+                    var assemblyResolver = new DefaultAssemblyResolver();
+                    assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(file));
+                    var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver});
                     assemblyDefinitions.Add(file, assembly);
                     if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == me.GetName().Name)) {
+                        this.Log.LogMessage(MessageImportance.Normal, "Probing " + assembly.FullName + " for IConfigurations");
+
                         // references dashing, use our other app domain to find the IConfig and instantiate it
                         var args = new ConfigurationMapResolverArgs { AssemblyFilePath = file };
                         configurationMapResolver.Resolve(args);
@@ -96,6 +112,8 @@
                     ((ITaskLogHelper)weaver).Log = this.Log;
                     return weaver;
                 }).ToArray();
+
+            this.Log.LogMessage(MessageImportance.Normal, "Found the following weavers: " + string.Join(", ", weavers.Select(w => w.GetType().Name)));
 
             foreach (var assemblyMapDefinition in assemblyMapDefinitions) {
                 var assemblyDefinitionLookup = assemblyDefinitions.Single(a => a.Value.FullName == assemblyMapDefinition.Key);
@@ -142,9 +160,70 @@
                 if (!peVerifier.Verify(assemblyDefinitionLookup.Key)) {
                     return false;
                 }
+
+                // copy assembly back to its project location (for subsequent copies)
+                var projectFileLocations = new Queue<string>(new[] { this.BuildEngine.ProjectFileOfTaskNode, this.ProjectPath }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                var processedFileLocations = new HashSet<string>();
+                while (projectFileLocations.Count > 0) {
+                    var projectFile = projectFileLocations.Dequeue();
+                    if (!processedFileLocations.Contains(projectFile)) {
+                        this.Log.LogMessage(
+                            MessageImportance.Normal,
+                            string.Format("Processing project file {0} and looking for referenced projects", projectFile));
+
+                        var csProj = this.GetProject(projectFile);
+                        if (csProj.GetPropertyValue("AssemblyName") != assemblyDefinition.Name.Name) {
+                            // if equal then this assembly is the one for this project so ignore
+                            var foundProject = FindProjectAndCopy(csProj, assemblyDefinition, assemblyDefinitionLookup.Key);
+                            if (foundProject) {
+                                break;
+                            }
+
+                            this.Log.LogMessage(
+                                MessageImportance.Normal,
+                                string.Format("Unable to find Project for {0} in {1}", assemblyDefinitionLookup.Key, projectFile));
+                            
+                            var parentProjectFile = csProj.GetPropertyValue("MSBuildThisFileFullPath"); // MSBUILD 4.0 only
+                            if (!string.IsNullOrWhiteSpace(parentProjectFile)) {
+                                projectFileLocations.Enqueue(parentProjectFile);
+                            }
+                        }
+
+                        processedFileLocations.Add(projectFile);
+                    }
+                }
             }
 
             return true;
+        }
+
+        private Project GetProject(string projectFilePath) {
+            var loadedProjects = ProjectCollection.GlobalProjectCollection.GetLoadedProjects(Path.GetFullPath(projectFilePath));
+            if (loadedProjects.Any()) {
+                return loadedProjects.First();
+            }
+
+            return new Project(projectFilePath);
+        }
+
+        private bool FindProjectAndCopy(Project csProj, AssemblyDefinition assemblyDefinition, string filePath) {
+            var projectReferences = csProj.Items.Where(i => i.ItemType == "ProjectReference").ToArray();
+
+            // traverse down the project references until we find this dll or reach the bottom!
+            foreach (var projectReference in projectReferences) {
+                var thisProj = this.GetProject(Path.Combine(Path.GetDirectoryName(csProj.FullPath), projectReference.EvaluatedInclude));
+                if (thisProj.GetPropertyValue("AssemblyName") == assemblyDefinition.Name.Name || FindProjectAndCopy(thisProj, assemblyDefinition, filePath)) {
+                    // bingo, it's this project, copy here
+                    var outputPath = thisProj.GetPropertyValue("OutputPath");
+                    var copyPath = Path.Combine(Path.GetDirectoryName(thisProj.FullPath), outputPath, Path.GetFileName(filePath));
+                    this.Log.LogMessage(MessageImportance.Normal, string.Format("Copying {0} to {1}", filePath, copyPath));
+                    File.Copy(filePath, copyPath, true);
+                    thisProj.ProjectCollection.UnloadProject(thisProj);
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

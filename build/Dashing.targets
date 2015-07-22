@@ -3,6 +3,6 @@
 <UsingTask TaskName="ExtendDomain" AssemblyFile="$(ProjectDir)\$(OutputPath)\Dashing.dll">
   </UsingTask>
   <Target AfterTargets="AfterBuild" Name="DashingDomainExtension">
-    <ExtendDomain />
+    <ExtendDomain ProjectPath="$(DashingParentProjectPath)" LaunchDebugger="false" />
   </Target>
 </Project>

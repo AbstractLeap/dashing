@@ -11,12 +11,16 @@
 
     internal class Program {
         private static int Main(string[] args) {
+            var projectName = args[0];
             var currentDir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             var config = currentDir.Split(Path.DirectorySeparatorChar).Last();
-            var binPath = Path.Combine(currentDir, @"..\..\..\" + args[0] + @"\bin\" + config);
+            var binPath = Path.Combine(currentDir, @"..\..\..\" + projectName + @"\bin\" + config);
             AssemblyLocation.Directory = binPath;
             var task = new ExtendDomain();
-            task.BuildEngine = new Mock<IBuildEngine>().Object;
+            var buildEngine = new Mock<IBuildEngine>();
+            buildEngine.SetupGet(b => b.ProjectFileOfTaskNode)
+                       .Returns(Path.Combine(currentDir, @"..\..\..\" + projectName + "\\" + projectName + ".csproj"));
+            task.BuildEngine = buildEngine.Object;
             if (!task.Execute()) {
                 return -1;
             }

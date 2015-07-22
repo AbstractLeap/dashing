@@ -31,7 +31,7 @@
         }
 
         private void ImplementISetLoggerForTypeDefinition(TypeDefinition typeDef, MapDefinition mapDefinition, bool notInInheritance) {
-            if (typeDef.Fields.Any(f => f.Name.EndsWith("_IsSet") && f.Name.StartsWith("__"))) {
+            if (typeDef.Methods.Any(m => m.Name == "GetSetProperties")) {
                 return; // this type has already been woven, exit
             }
 

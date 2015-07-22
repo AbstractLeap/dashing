@@ -92,7 +92,7 @@
                 il.Insert(index++, Instruction.Create(OpCodes.Brtrue, lastInstr));
                 il.Insert(index++, Instruction.Create(OpCodes.Nop));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
-                il.Insert(index++, Instruction.Create(OpCodes.Newobj, propDef.PropertyType.Resolve().GetConstructors().First()));
+                il.Insert(index++, Instruction.Create(OpCodes.Newobj, typeDef.Module.Import(propDef.PropertyType.Resolve().GetConstructors().First())));
                 il.Insert(index++, Instruction.Create(OpCodes.Stloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
@@ -108,7 +108,7 @@
                 il.Insert(index++,
                     Instruction.Create(
                         OpCodes.Callvirt,
-                        this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod));
+                        typeDef.Module.Import(this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod)));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
                 il.Insert(index, Instruction.Create(OpCodes.Stfld, backingField));
             }

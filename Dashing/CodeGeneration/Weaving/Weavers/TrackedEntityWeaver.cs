@@ -34,7 +34,7 @@
         }
 
         private void ImplementITrackedEntityForTypeDefinition(TypeDefinition typeDef, MapDefinition mapDefinition, bool notInInheritance) {
-            if (typeDef.Fields.Any(f => f.Name.StartsWith("__") && f.Name.EndsWith("_OldValue"))) {
+            if (typeDef.Methods.Any(m => m.Name == "GetDirtyProperties")) {
                 return; // type already woven
             }
 

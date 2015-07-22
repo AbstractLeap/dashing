@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.1.7-alpha</version>
+        <version>0.1.14-alpha</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,14 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.1.7-alpha Nuget updates
+        <releaseNotes>* 0.1.14-alpha Stuff
+* 0.1.13-alpha Debugger
+* 0.1.12-alpha Bug Fixes
+* 0.1.11-alpha Fix bug with multi weaving of TrackedEntity
+* 0.1.10-alpha Logging
+* 0.1.9-alpha Assembly Copying
+* 0.1.8-alpha Assembly Resolution Bug Fix
+* 0.1.7-alpha Nuget updates
 * 0.1.6-alpha Supports Inheritance
 * 0.1.5-alpha Allow Extending Classes
 * 0.1.4-alpha Bit more logging
@@ -42,6 +49,7 @@
         </frameworkAssemblies>
     </metadata>
     <files>
+        <file src="build\Dashing.props" target="build\Dashing.props" />
         <file src="build\Dashing.targets" target="build\Dashing.targets" />
         <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
         <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />

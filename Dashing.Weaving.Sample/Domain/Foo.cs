@@ -3,6 +3,8 @@
     using System.Collections;
     using System.Collections.Generic;
 
+    using Dashing.Weaving.Sample2;
+
     public class Foo {
         public int FooId { get; set; }
 
@@ -105,6 +107,14 @@
         public int Id { get; set; }
 
         public string Name { get; set; }
+    }
+
+    public class ReferencesAnotherAssembly {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public AnotherAssembliesClass TotherClass { get; set; }
     }
 
     public class IveGotMethods {

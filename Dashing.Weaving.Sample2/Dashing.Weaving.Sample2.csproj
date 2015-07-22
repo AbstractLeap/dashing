@@ -4,17 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C5462009-DF07-4DB4-A472-40E4B2B19351}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{2F25E2C1-EE19-4068-8D59-907D3C54C3B7}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Dashing.Weaving.Sample</RootNamespace>
-    <AssemblyName>Dashing.Weaving.Sample</AssemblyName>
+    <RootNamespace>Dashing.Weaving.Sample2</RootNamespace>
+    <AssemblyName>Dashing.Weaving.Sample2</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <NuGetPackageImportStamp>a2e81114</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,12 +29,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <GenerateResourceNeverLockTypeAssemblies>true</GenerateResourceNeverLockTypeAssemblies>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -46,28 +39,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config.cs" />
-    <Compile Include="Domain\Foo.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="AnotherAssembliesClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Target\Bar.cs" />
-    <Compile Include="Target\Foo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Dashing.Weaving.Sample2\Dashing.Weaving.Sample2.csproj">
-      <Project>{2f25e2c1-ee19-4068-8d59-907d3c54c3b7}</Project>
-      <Name>Dashing.Weaving.Sample2</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Dashing\Dashing.csproj">
-      <Project>{9f337c75-5bb7-4678-a761-bbc371e7fc86}</Project>
-      <Name>Dashing</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -77,9 +50,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <!--<UsingTask TaskName="ExtendDomain" AssemblyFile="$(ProjectDir)\$(OutputPath)\Dashing.dll">
-  </UsingTask>
-  <Target AfterTargets="AfterBuild" Name="DashingDomainExtension">
-    <ExtendDomain />
-  </Target>-->
 </Project>
