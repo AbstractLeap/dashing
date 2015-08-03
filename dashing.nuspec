@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.1.14-alpha</version>
+        <version>0.1.15-alpha</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.1.14-alpha Stuff
+        <releaseNotes>* 0.1.15-alpha Switch to after Compile
+* 0.1.14-alpha Stuff
 * 0.1.13-alpha Debugger
 * 0.1.12-alpha Bug Fixes
 * 0.1.11-alpha Fix bug with multi weaving of TrackedEntity

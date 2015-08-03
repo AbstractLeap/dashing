@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 <UsingTask TaskName="ExtendDomain" AssemblyFile="$(ProjectDir)\$(OutputPath)\Dashing.dll">
   </UsingTask>
-  <Target AfterTargets="AfterBuild" Name="DashingDomainExtension">
+  <Target AfterTargets="AfterCompile" Name="DashingDomainExtension">
     <ExtendDomain ProjectPath="$(DashingParentProjectPath)" LaunchDebugger="false" />
   </Target>
 </Project>
