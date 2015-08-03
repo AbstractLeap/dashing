@@ -63,7 +63,7 @@ namespace Dashing.CodeGeneration {
             foreach (var map in maps) {
                 // TODO: Support fetching collections
                 var rootNode = new FetchNode();
-                var signatures = this.TraverseAndGenerateMappersAndQueries(dapperWrapperClass, rootNode, rootNode, map.Type, map.Type, getMap, 0, generatorConfig.MapperGenerationMaxRecursion, generatorConfig);
+                var signatures = generatorConfig.GenerateMappers ? this.TraverseAndGenerateMappersAndQueries(dapperWrapperClass, rootNode, rootNode, map.Type, map.Type, getMap, 0, generatorConfig.MapperGenerationMaxRecursion, generatorConfig) : new List<Tuple<string, string>>();
 
                 // now add in the dictionary statement
                 GenerateMapDelegatesDictionary(map, dapperWrapperClass, map.Type.Name + "Delegates");
