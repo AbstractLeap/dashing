@@ -12,8 +12,6 @@
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;
 
-    using Mono.Cecil.Cil;
-
     internal class UpdateWriter : BaseWriter, IUpdateWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
             : base(dialect, config) {

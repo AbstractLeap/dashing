@@ -4,12 +4,12 @@
     using System.Linq;
     using System.Text;
 
-    public class ConsoleTraceWriter : ITraceWriter {
+    public class ConsoleLogger : ILogger {
         private readonly bool isVerbose;
 
         private readonly ConsoleColor color;
 
-        public ConsoleTraceWriter(bool isVerbose, ConsoleColor color = ConsoleColor.Gray) {
+        public ConsoleLogger(bool isVerbose, ConsoleColor color = ConsoleColor.Gray) {
             this.isVerbose = isVerbose;
             this.color = color;
         }
@@ -56,6 +56,21 @@
 
             var message = this.ToStringTable(arrValues);
             this.InternalTrace(message);
+        }
+
+        public void Error(string message) {
+            this.InternalError(message);
+        }
+
+        public void Error(string message, params object[] args) {
+            this.InternalError(string.Format(message, args));
+        }
+
+        private void InternalError(string message) {
+            var original = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(message);
+            Console.ForegroundColor = original;
         }
 
         private void InternalTrace(string message) {
