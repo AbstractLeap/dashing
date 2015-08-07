@@ -30,7 +30,7 @@
             var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
 
             var dropColIdx = script.IndexOf("alter table [OneToOneRights] drop column [LeftId];", System.StringComparison.Ordinal);
             var dropTableIdx = script.IndexOf("drop table [OneToOneLefts];", System.StringComparison.Ordinal);
@@ -53,7 +53,7 @@
             var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
 
             var dropColIdx = script.IndexOf("alter table [OneToOneLefts] drop column [RightId];", System.StringComparison.Ordinal);
             var dropTableIdx = script.IndexOf("drop table [OneToOneRights];", System.StringComparison.Ordinal);
@@ -75,7 +75,7 @@
             var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
 
             Assert.Equal(@"drop table [Pairs];
 ", script);

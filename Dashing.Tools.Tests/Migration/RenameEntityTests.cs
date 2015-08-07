@@ -28,7 +28,7 @@
                           .Returns(new MultipleChoice<string> { Choice = "Entry", DisplayString = "Entry" });
 
 
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
             Assert.Equal(@"EXEC sp_RENAME [Posts], [Entries];
 alter table [PostComments] drop constraint [fk_PostComment_Post_Post];
 alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key ([PostId]) references [Entries]([Id]);
@@ -50,7 +50,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
             to.GetMap<Entry>().PrimaryKey.Name = "EntryId";
             to.GetMap<Entry>().PrimaryKey.DbName = "EntryId";
 
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
             Assert.Equal(@"EXEC sp_RENAME [Posts], [Entries];
 EXEC sp_RENAME 'Entries.Id', 'EntryId', 'COLUMN';
 alter table [PostComments] drop constraint [fk_PostComment_Post_Post];
@@ -74,7 +74,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
             to.GetMap<RenamePkTypeChange.Entry>().PrimaryKey.Name = "EntryId";
             to.GetMap<RenamePkTypeChange.Entry>().PrimaryKey.DbName = "EntryId";
 
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
             Assert.Equal(@"EXEC sp_RENAME [Posts], [Entries];
 EXEC sp_RENAME 'Entries.Id', 'EntryId', 'COLUMN';
 alter table [Entries] alter column [EntryId] uniqueidentifier not null NEWSEQUENTIALID() primary key;
@@ -102,7 +102,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
             to.GetMap<RenamePkTypeChange.Entry>().PrimaryKey.Name = "EntryId";
             to.GetMap<RenamePkTypeChange.Entry>().PrimaryKey.DbName = "EntryId";
 
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
             Assert.Equal(Regex.Replace(@"EXEC sp_RENAME [Posts], [Entries];
 declare @OBDCommande51728c6d92c4851aa3b01e8a5a12adb nvarchar(1000);
 select @OBDCommande51728c6d92c4851aa3b01e8a5a12adb = 'ALTER TABLE [Posts] drop constraint ' + d.name from sys.tables t   
@@ -143,7 +143,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                           .Returns(new MultipleChoice<string> { Choice = "__NOTRENAMED", DisplayString = "Foo" });
 
 
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
             Assert.Equal(@"alter table [PostComments] drop constraint [fk_PostComment_Post_Post];
 drop table [Posts];
 create table [Entries] ([Id] int not null identity(1,1) primary key, [Content] nvarchar(255) null);
@@ -163,7 +163,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                           .Returns(new MultipleChoice<string> { Choice = "__NOTRENAMED", DisplayString = "Foo" });
 
 
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
             Assert.Equal(@"alter table [PostComments] drop constraint [fk_PostComment_Post_Post];
 drop table [Posts];
 create table [Entries] ([Id] int not null identity(1,1) primary key, [Content] nvarchar(255) null);
@@ -188,7 +188,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
             answerProvider.Setup(a => a.GetMultipleChoiceAnswer<string>(It.Is<string>(s => s.StartsWith("The property")), It.IsAny<IEnumerable<MultipleChoice<string>>>()))
                           .Returns(new MultipleChoice<string> { Choice = "Comments", DisplayString = "Comments" });
 
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
             Assert.Equal(@"EXEC sp_RENAME [Posts], [Entries];
 alter table [PostComments] drop constraint [fk_PostComment_Post_Post];
 EXEC sp_RENAME 'PostComments.Content', 'Comments', 'COLUMN';
