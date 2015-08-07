@@ -1,4 +1,4 @@
-﻿namespace Dashing.CodeGeneration.Weaving.Weavers {
+﻿namespace Dashing.Console.Weaving.Weavers {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -15,10 +15,12 @@
             Dictionary<string, List<MapDefinition>> assemblyMapDefinitions,
             Dictionary<string, AssemblyDefinition> assemblyDefinitions) {
             var intTypeDef = typeDef.Module.Import(typeof(int));
+            var guidTypeDef = typeDef.Module.Import(typeof(Guid));
             var boolTypeDef = typeDef.Module.Import(typeof(bool));
             var objectTypeDef = typeDef.Module.Import(typeof(object));
             var pkColDef = this.GetProperty(typeDef, mapDefinition.ColumnDefinitions.Single(d => d.IsPrimaryKey).Name);
-
+            var isGuidPk = pkColDef.PropertyType.Name == "Guid";
+                
             if (!this.DoesNotUseObjectMethod(typeDef, "GetHashCode")) {
                 // override gethashcode
                 var hashCodeBackingField = new FieldDefinition(
@@ -31,8 +33,16 @@
                     "GetHashCode",
                     MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual,
                     intTypeDef);
+
+                var variableType = isGuidPk ? guidTypeDef : intTypeDef;
                 method.Body.Variables.Add(new VariableDefinition(intTypeDef));
-                method.Body.Variables.Add(new VariableDefinition(boolTypeDef));
+                var var1 = new VariableDefinition("CS$0$0000", variableType);
+                var var2 = new VariableDefinition("CS$0$0001", variableType);
+                method.Body.Variables.Add(var1);
+                if (isGuidPk) {
+                    method.Body.Variables.Add(var2);
+                }
+
                 method.Body.InitLocals = true;
 
                 var il = method.Body.Instructions;
@@ -47,29 +57,29 @@
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldflda, hashCodeBackingField));
                 il.Add(Instruction.Create(OpCodes.Call, getHasValueMethodRef));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Stloc_1));
-                il.Add(Instruction.Create(OpCodes.Ldloc_1));
-                var getIdInstr = Instruction.Create(OpCodes.Ldarg_0);
-                il.Add(Instruction.Create(OpCodes.Brtrue, getIdInstr));
-                il.Add(Instruction.Create(OpCodes.Nop));
+                var noValueOnBackingInstr = Instruction.Create(OpCodes.Ldarg_0);
+                il.Add(Instruction.Create(OpCodes.Brfalse, noValueOnBackingInstr));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldflda, hashCodeBackingField));
                 il.Add(Instruction.Create(OpCodes.Call, getValueMethodRef));
                 il.Add(Instruction.Create(OpCodes.Stloc_0));
                 var endInstr = Instruction.Create(OpCodes.Ldloc_0);
                 il.Add(Instruction.Create(OpCodes.Br, endInstr));
-                il.Add(getIdInstr);
+                il.Add(noValueOnBackingInstr);
                 il.Add(Instruction.Create(OpCodes.Call, pkColDef.GetMethod));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Stloc_1));
-                il.Add(Instruction.Create(OpCodes.Ldloc_1));
-                var getIdInstr2 = Instruction.Create(OpCodes.Nop);
-                il.Add(Instruction.Create(OpCodes.Brtrue, getIdInstr2));
+                var useIdInstr = Instruction.Create(OpCodes.Ldarg_0);
+                if (isGuidPk) {
+                    il.Add(Instruction.Create(OpCodes.Ldloca_S, var1));
+                    il.Add(Instruction.Create(OpCodes.Initobj, guidTypeDef));
+                    il.Add(Instruction.Create(OpCodes.Ldloc_1));
+                    il.Add(
+                        Instruction.Create(OpCodes.Call, typeDef.Module.Import(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Equality"))));
+                    il.Add(Instruction.Create(OpCodes.Brfalse_S, useIdInstr));
+                }
+                else {
+                    il.Add(Instruction.Create(OpCodes.Brtrue_S, useIdInstr));
+                }
+
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
@@ -84,14 +94,25 @@
                 il.Add(Instruction.Create(OpCodes.Ldflda, hashCodeBackingField));
                 il.Add(Instruction.Create(OpCodes.Call, getValueMethodRef));
                 il.Add(Instruction.Create(OpCodes.Stloc_0));
-                il.Add(Instruction.Create(OpCodes.Br, endInstr));
-                il.Add(getIdInstr2);
-                il.Add(Instruction.Create(OpCodes.Ldc_I4, 17 * 29));
-                il.Add(Instruction.Create(OpCodes.Ldarg_0));
+                il.Add(Instruction.Create(OpCodes.Br_S, endInstr));
+                il.Add(useIdInstr);
                 il.Add(Instruction.Create(OpCodes.Call, pkColDef.GetMethod));
-                il.Add(Instruction.Create(OpCodes.Add));
+                if (isGuidPk) {
+                    il.Add(Instruction.Create(OpCodes.Stloc_2));
+                    il.Add(Instruction.Create(OpCodes.Ldloca_S, var2));
+                    il.Add(Instruction.Create(OpCodes.Constrained, guidTypeDef));
+                    il.Add(
+                        Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
+                }
+                else {
+                    il.Add(Instruction.Create(OpCodes.Stloc_1));
+                    il.Add(Instruction.Create(OpCodes.Ldloca_S, var1));
+                    il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(intTypeDef.Resolve().Methods.Single(m => m.Name == "GetHashCode"))));
+                    il.Add(Instruction.Create(OpCodes.Ldc_I4, 17));
+                    il.Add(Instruction.Create(OpCodes.Mul));
+                }
+
                 il.Add(Instruction.Create(OpCodes.Stloc_0));
-                il.Add(Instruction.Create(OpCodes.Br, endInstr));
                 il.Add(endInstr);
                 il.Add(Instruction.Create(OpCodes.Ret));
                 typeDef.Methods.Add(method);
@@ -105,60 +126,55 @@
                     boolTypeDef);
                 equals.Parameters.Add(new ParameterDefinition(objectTypeDef));
                 equals.Body.InitLocals = true;
+                equals.Body.Variables.Add(new VariableDefinition(boolTypeDef));
                 equals.Body.Variables.Add(new VariableDefinition(typeDef));
-                equals.Body.Variables.Add(new VariableDefinition(boolTypeDef));
-                equals.Body.Variables.Add(new VariableDefinition(boolTypeDef));
+                var guidVar = new VariableDefinition("CS$0$0000", guidTypeDef);
+                if (isGuidPk) {
+                    equals.Body.Variables.Add(guidVar);
+                }
 
                 var il = equals.Body.Instructions;
                 il.Add(Instruction.Create(OpCodes.Ldarg_1));
-                il.Add(Instruction.Create(OpCodes.Ldnull));
-                il.Add(Instruction.Create(OpCodes.Ceq));
+                var notNullInstr = Instruction.Create(OpCodes.Ldarg_1);
+                il.Add(Instruction.Create(OpCodes.Brtrue_S, notNullInstr));
                 il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Stloc_2));
-                il.Add(Instruction.Create(OpCodes.Ldloc_2));
-                var isInstInstr = Instruction.Create(OpCodes.Ldarg_1);
-                il.Add(Instruction.Create(OpCodes.Brtrue, isInstInstr));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Stloc_1));
-                var ret = Instruction.Create(OpCodes.Ldloc_1);
-                il.Add(Instruction.Create(OpCodes.Br, ret));
-                il.Add(isInstInstr);
-                il.Add(Instruction.Create(OpCodes.Isinst, typeDef));
                 il.Add(Instruction.Create(OpCodes.Stloc_0));
-                il.Add(Instruction.Create(OpCodes.Ldloc_0));
-                il.Add(Instruction.Create(OpCodes.Ldnull));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Stloc_2));
-                il.Add(Instruction.Create(OpCodes.Ldloc_2));
-                var getIdInstr = Instruction.Create(OpCodes.Ldarg_0);
-                il.Add(Instruction.Create(OpCodes.Brtrue, getIdInstr));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+                var endInstr = Instruction.Create(OpCodes.Ldloc_0);
+                il.Add(Instruction.Create(OpCodes.Br_S, endInstr));
+                il.Add(notNullInstr);
+                il.Add(Instruction.Create(OpCodes.Isinst, typeDef));
                 il.Add(Instruction.Create(OpCodes.Stloc_1));
-                il.Add(Instruction.Create(OpCodes.Br, ret));
-                il.Add(getIdInstr);
+                il.Add(Instruction.Create(OpCodes.Ldloc_1));
+                var nearlyTheEndInstr = Instruction.Create(OpCodes.Ldc_I4_0); // !!
+                il.Add(Instruction.Create(OpCodes.Brfalse_S, nearlyTheEndInstr));
+                il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Call, pkColDef.GetMethod));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Stloc_2));
-                il.Add(Instruction.Create(OpCodes.Ldloc_2));
-                var getIdInstr2 = Instruction.Create(OpCodes.Ldarg_0);
-                il.Add(Instruction.Create(OpCodes.Brtrue, getIdInstr2));
-                il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Add(Instruction.Create(OpCodes.Stloc_1));
-                il.Add(Instruction.Create(OpCodes.Br, ret));
-                il.Add(getIdInstr2);
+                if (isGuidPk) {
+                    il.Add(Instruction.Create(OpCodes.Ldloca_S, guidVar));
+                    il.Add(Instruction.Create(OpCodes.Initobj, guidTypeDef));
+                    il.Add(Instruction.Create(OpCodes.Ldloc_2));
+                    il.Add(
+                        Instruction.Create(OpCodes.Call, typeDef.Module.Import(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Inequality"))));
+                }
+
+                il.Add(Instruction.Create(OpCodes.Brfalse_S, nearlyTheEndInstr));
+                il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Call, pkColDef.GetMethod));
-                il.Add(Instruction.Create(OpCodes.Ldloc_0));
+                il.Add(Instruction.Create(OpCodes.Ldloc_1));
                 il.Add(Instruction.Create(OpCodes.Callvirt, pkColDef.GetMethod));
-                il.Add(Instruction.Create(OpCodes.Ceq));
-                il.Add(Instruction.Create(OpCodes.Stloc_1));
-                il.Add(Instruction.Create(OpCodes.Br, ret));
-                il.Add(ret);
+                var veryNearlyTheEndInstr = Instruction.Create(OpCodes.Stloc_0); // !!!
+                if (isGuidPk) {
+                    il.Add(
+                        Instruction.Create(OpCodes.Call, typeDef.Module.Import(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Equality"))));
+                }
+                else {
+                    il.Add(Instruction.Create(OpCodes.Ceq));
+                }
+
+                il.Add(Instruction.Create(OpCodes.Br_S, veryNearlyTheEndInstr));
+                il.Add(nearlyTheEndInstr);
+                il.Add(veryNearlyTheEndInstr);
+                il.Add(endInstr);
                 il.Add(Instruction.Create(OpCodes.Ret));
                 typeDef.Methods.Add(equals);
             }

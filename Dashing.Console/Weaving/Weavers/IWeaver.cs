@@ -1,4 +1,4 @@
-﻿namespace Dashing.CodeGeneration.Weaving.Weavers {
+﻿namespace Dashing.Console.Weaving.Weavers {
     using System.Collections.Generic;
 
     using Mono.Cecil;

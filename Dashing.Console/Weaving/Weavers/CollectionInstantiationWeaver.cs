@@ -1,4 +1,4 @@
-﻿namespace Dashing.CodeGeneration.Weaving.Weavers {
+﻿namespace Dashing.Console.Weaving.Weavers {
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.CompilerServices;
@@ -27,7 +27,7 @@
                 }
                 else {
                     // not an auto prop
-                    var backingField = GetBackingField(propDef);
+                    var backingField = this.GetBackingField(propDef);
                     if (
                         !constructors.Any(
                             c =>
@@ -43,7 +43,7 @@
             if (constructors.Length > 1) {
                 constructor = constructors.SingleOrDefault(s => !s.HasParameters);
                 if (constructor == null) {
-                    this.Log.LogError(
+                    this.Log.Error(
                         "Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
                 }
             }

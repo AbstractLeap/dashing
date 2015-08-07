@@ -1,7 +1,9 @@
-﻿namespace Dashing.CodeGeneration.Weaving.Weavers {
+﻿namespace Dashing.Console.Weaving.Weavers {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+
+    using Dashing.Tools;
 
     using Microsoft.Build.Utilities;
 
@@ -11,7 +13,7 @@
     public abstract class BaseWeaver : ITaskLogHelper, IWeaver {
         private const string BackingFieldTemplate = "<{0}>k__BackingField";
 
-        public TaskLoggingHelper Log { get; set; }
+        public ILogger Log { get; set; }
 
         protected FieldDefinition GetBackingField(PropertyDefinition propertyDef) {
             // have a look for a field matching the standard format
@@ -30,7 +32,7 @@
                 return (FieldDefinition)candidates.First().Operand;
             }
 
-            this.Log.LogError("Unable to determine backing field for property " + propertyDef.FullName);
+            this.Log.Error("Unable to determine backing field for property " + propertyDef.FullName);
             return null;
         }
 
@@ -41,7 +43,7 @@
             }
 
             if (typeDefinition.BaseType.FullName == typeof(object).FullName) {
-                this.Log.LogError("Unable to find Field " + name);
+                this.Log.Error("Unable to find Field " + name);
                 return null;
             }
 
@@ -55,7 +57,7 @@
             }
 
             if (typeDef.BaseType.FullName == typeof(object).FullName) {
-                this.Log.LogError("Unable to find Property " + name);
+                this.Log.Error("Unable to find Property " + name);
                 return null;
             }
 

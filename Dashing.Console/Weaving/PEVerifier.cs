@@ -1,14 +1,13 @@
-namespace Dashing.CodeGeneration.Weaving {
+namespace Dashing.Console.Weaving {
     using System;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
 
-    using Microsoft.Build.Framework;
-    using Microsoft.Build.Utilities;
+    using Dashing.Tools;
 
     public class PEVerifier {
-        private readonly TaskLoggingHelper log;
+        private readonly ILogger logger;
 
         private string windowsSdkDirectory;
 
@@ -16,13 +15,13 @@ namespace Dashing.CodeGeneration.Weaving {
 
         private readonly string peVerifyPath;
 
-        public PEVerifier(TaskLoggingHelper log) {
-            this.log = log;
+        public PEVerifier(ILogger logger) {
+            this.logger = logger;
             var programFilesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
             this.windowsSdkDirectory = Path.Combine(programFilesPath, @"Microsoft SDKs\Windows");
             if (!Directory.Exists(this.windowsSdkDirectory)) {
                 this.foundPeVerify = false;
-                this.log.LogMessage(MessageImportance.High, "Unable to find Peverify.exe");
+                this.logger.Trace("Unable to find Peverify.exe");
                 return;
             }
 
@@ -34,11 +33,11 @@ namespace Dashing.CodeGeneration.Weaving {
 
             if (this.peVerifyPath == null) {
                 this.foundPeVerify = false;
-                this.log.LogMessage(MessageImportance.High, "Unable to find Peverify.exe");
+                this.logger.Trace("Unable to find Peverify.exe");
                 return;
             }
 
-            this.log.LogMessage(MessageImportance.Normal, "Found Peverify.exe!");
+            this.logger.Trace("Found Peverify.exe!");
             this.foundPeVerify = true;
         }
 
@@ -57,7 +56,7 @@ namespace Dashing.CodeGeneration.Weaving {
 
                 process.WaitForExit();
 
-                this.log.LogMessage(MessageImportance.Normal, output);
+                this.logger.Trace(output);
                 if (process.ExitCode != 0) {
                     return false;
                 }

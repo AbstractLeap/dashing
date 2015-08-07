@@ -34,38 +34,36 @@
         public int Id { get; set; }
 
         public override bool Equals(object obj) {
+            bool result;
             if (obj == null) {
-                return false;
+                result = false;
+            }
+            else {
+                Bar otherBar = obj as Bar;
+                result = (otherBar != null && this.Id != default(int) && this.Id == otherBar.Id);
             }
 
-            var otherBar = obj as Bar;
-            if (otherBar == null) {
-                return false;
-            }
-
-            if (this.Id == default(int)) {
-                return false;
-            }
-
-            return this.Id == otherBar.Id;
+            return result;
         }
 
         private int? __hashCode;
 
         public override int GetHashCode() {
+            int result;
             if (this.__hashCode.HasValue) {
-                return this.__hashCode.Value;
-            }
-
-            if (this.Id == default(int)) {
-                this.__hashCode = base.GetHashCode();
-                return this.__hashCode.Value;
+                result = this.__hashCode.Value;
             }
             else {
-                unchecked {
-                    return 17 * 29 + this.Id;
+                if (this.Id == default(int)) {
+                    this.__hashCode = new int?(base.GetHashCode());
+                    result = this.__hashCode.Value;
+                }
+                else {
+                    result = this.Id.GetHashCode() * 17;
                 }
             }
+
+            return result;
         }
 
         public string Name {

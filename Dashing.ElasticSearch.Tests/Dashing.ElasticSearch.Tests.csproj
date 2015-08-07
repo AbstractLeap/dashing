@@ -105,6 +105,6 @@
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
-    <Exec Command="$(SolutionDir)Dashing.Dev.Weaver\bin\$(Configuration)\Dashing.Dev.Weaver.exe Dashing.ElasticSearch.Tests" />
+    <Exec Command="$(SolutionDir)Dashing.Console\bin\$(Configuration)\dbm.exe -w -d $(SolutionDir)Dashing.ElasticSearch.Tests\bin\$(Configuration)\" />
   </Target>-->
 </Project>

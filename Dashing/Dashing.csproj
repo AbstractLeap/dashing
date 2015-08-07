@@ -38,26 +38,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Build" />
-    <Reference Include="Microsoft.Build.Framework" />
-    <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Mdb">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Mdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Pdb">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Pdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks">
-      <HintPath>..\packages\Mono.Cecil.0.9.6.1\lib\net45\Mono.Cecil.Rocks.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -75,18 +55,6 @@
     <Compile Include="CodeGeneration\ISetLogger.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
-    <Compile Include="CodeGeneration\Weaving\AssemblyLocation.cs" />
-    <Compile Include="CodeGeneration\Weaving\ConfigurationMapResolver.cs" />
-    <Compile Include="CodeGeneration\Weaving\ExtendDomainTask.cs" />
-    <Compile Include="CodeGeneration\Weaving\PEVerifier.cs" />
-    <Compile Include="CodeGeneration\Weaving\Weavers\BaseWeaver.cs" />
-    <Compile Include="CodeGeneration\Weaving\Weavers\CollectionInstantiationWeaver.cs" />
-    <Compile Include="CodeGeneration\Weaving\Weavers\EqualityWeaver.cs" />
-    <Compile Include="CodeGeneration\Weaving\Weavers\ForeignKeyWeaver.cs" />
-    <Compile Include="CodeGeneration\Weaving\Weavers\ITaskLogHelper.cs" />
-    <Compile Include="CodeGeneration\Weaving\Weavers\SetLoggerWeaver.cs" />
-    <Compile Include="CodeGeneration\Weaving\Weavers\TrackedEntityWeaver.cs" />
-    <Compile Include="CodeGeneration\Weaving\Weavers\IWeaver.cs" />
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
     <Compile Include="Configuration\ConfigurationHelper.cs" />

@@ -1,77 +1,72 @@
-namespace Dashing.Weaving.Tests {
+﻿namespace Dashing.Weaving.Tests {
+    using System;
     using System.Runtime.CompilerServices;
-    using System.Runtime.Remoting;
 
+    using Dashing.CodeGeneration;
     using Dashing.Weaving.Sample.Domain;
 
     using Xunit;
 
-    [Collection("Weaving Tests")]
-    public class EqualityTests {
+    public class GuidTests {
+        [Fact]
+        public void GuidPrimaryKeyWorks() {
+            var thing = new EntityWithGuidPrimaryKey { Id = Guid.NewGuid(), Name = "Foo" };
+            Assert.IsAssignableFrom(typeof(ITrackedEntity), thing);
+        }
+
         [Fact]
         public void GetHashCodeReturnsIdFactor() {
-            var bar = new Bar { Id = 3 };
-            Assert.Equal(17 *  3, bar.GetHashCode());
+            var bar = new EntityWithGuidPrimaryKey { Id = Guid.NewGuid() };
+            Assert.Equal(bar.Id.GetHashCode(), bar.GetHashCode());
         }
 
         [Fact]
         public void NoIdReturnsBaseHashCode() {
-            var bar = new Bar();
+            var bar = new EntityWithGuidPrimaryKey();
             Assert.Equal(RuntimeHelpers.GetHashCode(bar), bar.GetHashCode());
         }
 
         [Fact]
         public void SettingIdReturnsPrevIfGetHashCodeAlreadyCalled() {
-            var bar = new Bar();
+            var bar = new EntityWithGuidPrimaryKey();
             var hash = bar.GetHashCode();
-            bar.Id = 3;
+            bar.Id = Guid.NewGuid();
             Assert.Equal(hash, bar.GetHashCode());
         }
 
         [Fact]
         public void EqualsNullIsFalse() {
-            var bar = new Bar();
+            var bar = new EntityWithGuidPrimaryKey();
             Assert.False(bar.Equals(null));
         }
 
         [Fact]
         public void EqualsNonBarIsFalse() {
-            var bar = new Bar();
+            var bar = new EntityWithGuidPrimaryKey();
             Assert.False(bar.Equals(new Foo()));
         }
 
         [Fact]
         public void NonSamePrimaryKeyNotEqual() {
-            var bar = new Bar { Id = 1 };
-            var otherBar = new Bar { Id = 2 };
+            var bar = new EntityWithGuidPrimaryKey { Id = Guid.NewGuid() };
+            var otherBar = new EntityWithGuidPrimaryKey { Id = Guid.NewGuid() };
             Assert.False(bar.Equals(otherBar));
             Assert.False(otherBar.Equals(bar));
         }
 
         [Fact]
         public void SamePrimaryKeyEqual() {
-            var bar = new Bar { Id = 2 };
-            var otherBar = new Bar { Id = 2 };
+            var guid = Guid.NewGuid();
+            var bar = new EntityWithGuidPrimaryKey { Id = guid };
+            var otherBar = new EntityWithGuidPrimaryKey { Id = guid };
             Assert.True(bar.Equals(otherBar));
             Assert.True(otherBar.Equals(bar));
         }
 
         [Fact]
         public void SameInstanceIsEqual() {
-            var bar = new Bar { Id = 3 };
+            var bar = new EntityWithGuidPrimaryKey { Id = Guid.NewGuid() };
             Assert.True(bar.Equals(bar));
-        }
-
-        [Fact]
-        public void GetHashCodeNotOverwrittenIfSupplied() {
-            var thing = new IveGotMethods();
-            Assert.Equal(42, thing.GetHashCode());
-        }
-
-        [Fact]
-        public void GetEqualsNotOverriddenIfSupplied() {
-            var thing = new IveGotMethods();
-            Assert.True(thing.Equals(null));
         }
     }
 }

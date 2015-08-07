@@ -10,9 +10,6 @@
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
-    using Dashing.Extensions;
-
-    using Mono.Cecil.Cil;
 
     internal class UpdateWriter : BaseWriter, IUpdateWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
@@ -96,7 +93,7 @@
         }
 
         /// <summary>
-        /// look up the column type and decide where to get the value from
+        ///     look up the column type and decide where to get the value from
         /// </summary>
         /// <param name="mappedColumn"></param>
         /// <param name="propertyValue"></param>

@@ -105,6 +105,8 @@
   <Target Name="BeforeBuild">
   </Target>-->
   <Target Name="AfterBuild">
-    <Exec Command="$(SolutionDir)Dashing.Dev.Weaver\bin\$(Configuration)\Dashing.Dev.Weaver.exe Dashing.Testing.Tests" />
+    <Exec Command="$(SolutionDir)Dashing.Console\bin\$(Configuration)\dbm.exe -w -d $(SolutionDir)$(ProjectName)\bin\$(ConfigurationName)" ConsoleToMSBuild="true">
+<Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+	</Exec>
   </Target>
 </Project>

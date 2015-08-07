@@ -12,6 +12,7 @@
 
     using Dashing.Configuration;
     using Dashing.Console.Settings;
+    using Dashing.Console.Weaving;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
     using Dashing.Tools;
@@ -34,7 +35,7 @@
 
         private static bool isVerbose;
 
-        private static void Main(string[] args) {
+        private static int Main(string[] args) {
             ConfigureAssemblyResolution();
 
             try {
@@ -44,11 +45,15 @@
                 using (Color(ConsoleColor.Red)) {
                     Console.WriteLine(e.Message);
                 }
+
+                return -1;
             }
             catch (ReflectionTypeLoadException rtle) {
                 foreach (var le in rtle.LoaderExceptions) {
                     Console.WriteLine(le.Message);
                 }
+
+                return -1;
             }
             catch (TargetInvocationException e) {
                 using (Color(ConsoleColor.Red)) {
@@ -62,6 +67,8 @@
                         Console.WriteLine(le.Message);
                     }
                 }
+
+                return -1;
             }
             catch (Exception e) {
                 using (Color(ConsoleColor.Red)) {
@@ -77,7 +84,11 @@
                 using (Color(ConsoleColor.Gray)) {
                     Console.WriteLine(e.StackTrace);
                 }
+
+                return -1;
             }
+
+            return 0;
         }
 
         private static void ConfigureAssemblyResolution() { // http://blogs.msdn.com/b/microsoft_press/archive/2010/02/03/jeffrey-richter-excerpt-2-from-clr-via-c-third-edition.aspx
@@ -125,6 +136,20 @@
             }
 
             isVerbose = options.Verbose;
+
+            // weaving
+            if (options.Weave) {
+                if (string.IsNullOrWhiteSpace(options.WeaveDir)) {
+                    throw new CatchyException("You must specify the directory to weave");
+                }
+
+                var task = new ExtendDomainTask { LaunchDebugger = options.LaunchDebugger, WeaveDir = options.WeaveDir, Logger = new ConsoleLogger(options.Verbose), IgnorePEVerify = options.IgnorePeVerify };
+                if (!task.Execute()) {
+                    throw new CatchyException("Weaving failed");
+                }
+
+                return;
+            }
 
             // prevalidation
             if (string.IsNullOrWhiteSpace(options.ConfigPath)) {
@@ -475,7 +500,7 @@
                     script = migrator.GenerateSqlDiff(
                         fromMaps,
                         configuration.Maps,
-                        consoleAnswerProvider, new ConsoleTraceWriter(isVerbose),
+                        consoleAnswerProvider, new ConsoleLogger(isVerbose),
                         reverseEngineerSettings.GetIndexesToIgnore(),
                         out warnings,
                         out errors);

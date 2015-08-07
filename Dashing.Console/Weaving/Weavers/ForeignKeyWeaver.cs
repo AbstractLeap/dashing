@@ -1,4 +1,4 @@
-﻿namespace Dashing.CodeGeneration.Weaving.Weavers {
+﻿namespace Dashing.Console.Weaving.Weavers {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -59,7 +59,7 @@
                 propDef.GetMethod.Body.InitLocals = true;
                 //propDef.GetMethod.Body.Instructions.Clear();
 
-                var backingField = GetBackingField(propDef);
+                var backingField = this.GetBackingField(propDef);
                 var il = propDef.GetMethod.Body.Instructions;
                 var lastInstr = il[0];
                 var index = 0;

@@ -1,5 +1,4 @@
 ﻿namespace Dashing.Weaving.Tests {
-    using Dashing.CodeGeneration.Weaving;
 
     using Microsoft.Build.Framework;
 

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.1.15-alpha</version>
+        <version>0.1.21-alpha</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,12 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.1.15-alpha Switch to after Compile
+        <releaseNotes>* 0.1.21-alpha ignore peverify
+* 0.1.20-alpha guid id
+* 0.1.19-alpha remove dependencies
+* 0.1.17-alpha assembly resolution in task
+* 0.1.16-alpha dbm
+* 0.1.15-alpha Switch to after Compile
 * 0.1.14-alpha Stuff
 * 0.1.13-alpha Debugger
 * 0.1.12-alpha Bug Fixes
@@ -32,8 +37,6 @@
         <tags>dashing dapper orm sql mini-orm</tags>
         <dependencies>
             <dependency id="Dapper" version="1.38" />
-            <dependency id="Newtonsoft.Json" version="6.0.8" />
-            <dependency id="Mono.Cecil" version="0.9.6.1" />
         </dependencies>
         <frameworkAssemblies>
             <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
@@ -45,15 +48,14 @@
             <frameworkAssembly assemblyName="System.Data.Linq" targetFramework="" />
             <frameworkAssembly assemblyName="System.Xml" targetFramework="" />
             <frameworkAssembly assemblyName="System.Configuration" targetFramework="" />
-            <frameworkAssembly assemblyName="Microsoft.Build.Framework" targetFramework="" />
-            <frameworkAssembly assemblyName="Microsoft.Build.Utilities.v4.0" targetFramework="" />
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="build\Dashing.props" target="build\Dashing.props" />
         <file src="build\Dashing.targets" target="build\Dashing.targets" />
         <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
         <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
         <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
+        <file src="tools\dbm.exe" target="tools\dbm.exe" />
+        <file src="tools\dev-db.ini" target="tools\dev-db.ini" />
     </files>
 </package>
