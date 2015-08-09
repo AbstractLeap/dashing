@@ -1,6 +1,8 @@
 ﻿namespace Dashing.Configuration {
     using System;
+    using System.Collections.Generic;
     using System.Data;
+    using System.Data.Linq.Mapping;
     using System.Linq;
     using System.Reflection;
 
@@ -63,7 +65,7 @@
             map.Configuration = configuration;
             map.Table = this.convention.TableFor(entity);
             map.Schema = this.convention.SchemaFor(entity);
-            map.Columns = entity.GetProperties().Select(property => this.BuildColumn(map, entity, property, configuration)).ToDictionary(c => c.Name, c => c);
+            entity.GetProperties().Select(property => this.BuildColumn(map, entity, property, configuration)).ToList().ForEach(c => map.Columns.Add(c.Name, c));
             this.ResolvePrimaryKey(entity, map);
             this.AssignFetchIds(map);
         }
@@ -213,6 +215,10 @@
             if (map.PrimaryKey == null) {
                 return;
             }
+
+            // ensure primary key comes first in columns
+            map.Columns.Remove(map.PrimaryKey.Name);
+            ((OrderedDictionary<string, IColumn>)map.Columns).Insert(0, new KeyValuePair<string, IColumn>(map.PrimaryKey.Name, map.PrimaryKey));
 
             // enforce some column properties
             map.PrimaryKey.IsPrimaryKey = true;

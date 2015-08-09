@@ -40,7 +40,9 @@
 
         private static IMap MakeMap(params IColumn[] columns) {
             var cols = new[] { new Column<int> { Name = "DummyId", IsPrimaryKey = true } }.Union(columns).ToArray();
-            return new Map<User> { Table = "Dummies", Columns = cols.ToDictionary(c => c.Name, c => c), PrimaryKey = cols.First() };
+            var map = new Map<User> { Table = "Dummies", PrimaryKey = cols.First() };
+            cols.ToList().ForEach(c => map.Columns.Add(c.Name, c));
+            return map;
         }
 
         [Fact]

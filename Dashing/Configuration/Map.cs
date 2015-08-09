@@ -4,6 +4,8 @@ namespace Dashing.Configuration {
     using System.Linq;
     using System.Reflection;
 
+    using Dashing.Extensions;
+
     public class Map : IMap {
         private MethodInfo nonGenericPrimaryKeyGetter;
 
@@ -23,7 +25,7 @@ namespace Dashing.Configuration {
 
         public Map(Type type) {
             this.Type = type;
-            this.Columns = new Dictionary<string, IColumn>();
+            this.Columns = new OrderedDictionary<string, IColumn>();
             this.indexes = new List<Index>();
         }
 
@@ -52,7 +54,7 @@ namespace Dashing.Configuration {
         /// <summary>
         ///     Gets or sets the columns.
         /// </summary>
-        public IDictionary<string, IColumn> Columns { get; set; }
+        public IDictionary<string, IColumn> Columns { get; private set; }
 
         public IEnumerable<Index> Indexes {
             get {

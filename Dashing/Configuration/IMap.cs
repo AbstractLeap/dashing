@@ -31,7 +31,7 @@ namespace Dashing.Configuration {
         /// <summary>
         ///     Gets or sets the columns.
         /// </summary>
-        IDictionary<string, IColumn> Columns { get; set; }
+        IDictionary<string, IColumn> Columns { get; }
 
         /// <summary>
         /// Gets or sets the indexes specified for this map
