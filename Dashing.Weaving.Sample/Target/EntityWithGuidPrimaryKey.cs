@@ -63,6 +63,23 @@ namespace Dashing.Weaving.Sample.Target {
             }
             return result;
         }
+
+        public static bool operator ==(EntityWithGuidPrimaryKey left, EntityWithGuidPrimaryKey right) {
+            if (Object.ReferenceEquals(left, right)) {
+                return true;
+            }
+
+            if ((object)left == null || (object)right == null) {
+                return false;
+            }
+
+            return left.Id == right.Id;
+        }
+
+        public static bool operator !=(EntityWithGuidPrimaryKey left, EntityWithGuidPrimaryKey right) {
+            return !(left == right);
+        }
+
         public IEnumerable<string> GetSetProperties() {
             List<string> list = new List<string>();
             if (this.__Name_IsSet) {

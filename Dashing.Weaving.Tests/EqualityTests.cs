@@ -1,4 +1,5 @@
 namespace Dashing.Weaving.Tests {
+    using System;
     using System.Runtime.CompilerServices;
     using System.Runtime.Remoting;
 
@@ -73,5 +74,78 @@ namespace Dashing.Weaving.Tests {
             var thing = new IveGotMethods();
             Assert.True(thing.Equals(null));
         }
+
+        [Fact(Skip = "Need to re-write all instances of == and != in calling dlls for this to work")]
+        public void EqualityGetsOverridden() {
+            var bar = new Bar() { Id = 1 };
+            var bar2 = new Bar() { Id = 2 };
+            var anotherBar1 = new Bar() { Id = 1 };
+            Bar nullBar1 = null;
+            Bar nullBar2 = null;
+
+            Assert.True(nullBar1 == nullBar2);
+            Assert.False(nullBar1 != nullBar2);
+            Assert.False(bar == nullBar1);
+            Assert.True(bar != nullBar1);
+            Assert.False(nullBar2 == bar);
+            Assert.True(nullBar2 != bar);
+            Assert.True(bar == anotherBar1);
+            Assert.False(bar != anotherBar1);
+            Assert.False(bar == bar2);
+            Assert.True(bar != bar2);
+            Assert.True(bar == bar);
+            Assert.False(bar != bar);
+        }
+
+        [Fact]
+        public void OpEqualityTests() {
+            var c = new C();
+            Assert.True(c == c);
+
+            var c2 = new C();
+            Assert.False(c == c2);
+
+            var b = new B { Id = 1 };
+            Assert.True(b == b);
+
+            var b2 = new B { Id = 2 };
+            var bAnother1 = new B { Id = 1 };
+            Assert.False(b == b2);
+            Assert.True(b == bAnother1);
+
+            var a = new A { Id = 1 };
+            Assert.True(a == a);
+
+            var a2 = new A { Id = 2 };
+            var aAnother1 = new A() { Id = 1 };
+            Assert.False(a == a2);
+            Assert.True(a == aAnother1);
+        }
+    }
+
+    public class C {
+        public int Id { get; set; }
+    }
+
+    public class B : C {
+        public static bool operator ==(B left, B right) {
+            if (Object.ReferenceEquals(left, right)) {
+                return true;
+            }
+
+            if ((object)left == null || (object)right == null) {
+                return false;
+            }
+
+            return left.Id == right.Id;
+        }
+
+        public static bool operator !=(B left, B right) {
+            return !(left == right);
+        }
+    }
+
+    public class A : B {
+        
     }
 }

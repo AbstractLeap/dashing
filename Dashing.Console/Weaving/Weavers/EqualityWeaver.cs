@@ -178,6 +178,56 @@
                 il.Add(Instruction.Create(OpCodes.Ret));
                 typeDef.Methods.Add(equals);
             }
+
+            //// NOTE: See Dashing.Weaving.Test.EqualityTests.EqualityGetsOverridden
+
+            //if (!this.DoesNotUseObjectMethod(typeDef, "op_Equality")) {
+            //    var opEquality = new MethodDefinition("op_Equality", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Static, boolTypeDef);
+            //    opEquality.Parameters.Add(new ParameterDefinition(typeDef));
+            //    opEquality.Parameters.Add(new ParameterDefinition(typeDef));
+            //    var il = opEquality.Body.Instructions;
+            //    il.Add(Instruction.Create(OpCodes.Ldarg_0));
+            //    il.Add(Instruction.Create(OpCodes.Ldarg_1));
+            //    il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(objectTypeDef.Resolve().Methods.Single(m => m.Name == "ReferenceEquals"))));
+            //    var nullCheck = Instruction.Create(OpCodes.Ldarg_0);
+            //    il.Add(Instruction.Create(OpCodes.Brfalse_S, nullCheck));
+            //    il.Add(Instruction.Create(OpCodes.Ldc_I4_1));
+            //    il.Add(Instruction.Create(OpCodes.Ret));
+            //    il.Add(nullCheck);
+            //    var isNull = Instruction.Create(OpCodes.Ldc_I4_0);
+            //    il.Add(Instruction.Create(OpCodes.Brfalse_S, isNull));
+            //    il.Add(Instruction.Create(OpCodes.Ldarg_1));
+            //    var checkIds = Instruction.Create(OpCodes.Ldarg_0);
+            //    il.Add(Instruction.Create(OpCodes.Brtrue_S, checkIds));
+            //    il.Add(isNull);
+            //    il.Add(Instruction.Create(OpCodes.Ret));
+            //    il.Add(checkIds);
+            //    il.Add(Instruction.Create(OpCodes.Callvirt, pkColDef.GetMethod));
+            //    il.Add(Instruction.Create(OpCodes.Ldarg_1));
+            //    il.Add(Instruction.Create(OpCodes.Callvirt, pkColDef.GetMethod));
+            //    if (isGuidPk) {
+            //        il.Add(
+            //            Instruction.Create(OpCodes.Call, typeDef.Module.Import(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Equality"))));
+            //    }
+            //    else {
+            //        il.Add(Instruction.Create(OpCodes.Ceq));
+            //    }
+
+            //    il.Add(Instruction.Create(OpCodes.Ret));
+            //    typeDef.Methods.Add(opEquality);
+
+            //    var opInequality = new MethodDefinition("op_Inequality", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Static, boolTypeDef);
+            //    opInequality.Parameters.Add(new ParameterDefinition(typeDef));
+            //    opInequality.Parameters.Add(new ParameterDefinition(typeDef));
+            //    il = opInequality.Body.Instructions;
+            //    il.Add(Instruction.Create(OpCodes.Ldarg_0));
+            //    il.Add(Instruction.Create(OpCodes.Ldarg_1));
+            //    il.Add(Instruction.Create(OpCodes.Call, opEquality));
+            //    il.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+            //    il.Add(Instruction.Create(OpCodes.Ceq));
+            //    il.Add(Instruction.Create(OpCodes.Ret));
+            //    typeDef.Methods.Add(opInequality);
+            //}
         }
     }
 }

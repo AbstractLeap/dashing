@@ -6,32 +6,70 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing", "Dashing\Dashing.csproj", "{9F337C75-5BB7-4678-A761-BBC371E7FC86}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Tests", "Dashing.Tests\Dashing.Tests.csproj", "{CA614821-7E80-4745-B513-64D11A394A34}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC074CCB-0934-46C4-BBCC-B306459FC95E} = {EC074CCB-0934-46C4-BBCC-B306459FC95E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{91CDA75F-D19C-48B2-B6CF-7C3ED4592B39}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC074CCB-0934-46C4-BBCC-B306459FC95E} = {EC074CCB-0934-46C4-BBCC-B306459FC95E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Tools", "Dashing.Tools\Dashing.Tools.csproj", "{414968D7-E94C-404B-8831-35AA54A656F1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Console", "Dashing.Console\Dashing.Console.csproj", "{EC074CCB-0934-46C4-BBCC-B306459FC95E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Tools.Tests", "Dashing.Tools.Tests\Dashing.Tools.Tests.csproj", "{740AB264-1DBA-41F8-B39D-E7C989F3B42B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC074CCB-0934-46C4-BBCC-B306459FC95E} = {EC074CCB-0934-46C4-BBCC-B306459FC95E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.ElasticSearch", "Dashing.ElasticSearch\Dashing.ElasticSearch.csproj", "{BD5DBF9D-A794-4588-8CE4-72E65BF32520}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.ElasticSearch.Tests", "Dashing.ElasticSearch.Tests\Dashing.ElasticSearch.Tests.csproj", "{625C86A8-5298-41B8-B40F-85FA88E678BF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC074CCB-0934-46C4-BBCC-B306459FC95E} = {EC074CCB-0934-46C4-BBCC-B306459FC95E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Annotations", "Dashing.Annotations\Dashing.Annotations.csproj", "{EC6B7D59-2A0D-45B9-99A3-0D0A3070A943}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.IntegrationTests", "Dashing.IntegrationTests\Dashing.IntegrationTests.csproj", "{62186CA2-59A3-480E-BEC9-BAA168054190}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC074CCB-0934-46C4-BBCC-B306459FC95E} = {EC074CCB-0934-46C4-BBCC-B306459FC95E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Testing", "Dashing.Testing\Dashing.Testing.csproj", "{184E1B51-AEF4-47CB-A4A3-FDD2E90B3EED}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Testing.Tests", "Dashing.Testing.Tests\Dashing.Testing.Tests.csproj", "{D3615AE1-9A75-4F37-9F28-49F905B8E793}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC074CCB-0934-46C4-BBCC-B306459FC95E} = {EC074CCB-0934-46C4-BBCC-B306459FC95E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Weaving.Sample", "Dashing.Weaving.Sample\Dashing.Weaving.Sample.csproj", "{C5462009-DF07-4DB4-A472-40E4B2B19351}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Weaving.Tests", "Dashing.Weaving.Tests\Dashing.Weaving.Tests.csproj", "{BD396537-036F-4C2E-9D8A-E40B291DDBA0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EC074CCB-0934-46C4-BBCC-B306459FC95E} = {EC074CCB-0934-46C4-BBCC-B306459FC95E}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Weaving.Sample2", "Dashing.Weaving.Sample2\Dashing.Weaving.Sample2.csproj", "{2F25E2C1-EE19-4068-8D59-907D3C54C3B7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{F2F696FA-D258-47AD-A0FB-4AC859C2F384}"
+	ProjectSection(SolutionItems) = preProject
+		nuspec\readme.txt = nuspec\readme.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{E8CE1831-4CF9-4E5F-BA8B-07FD2E5936FF}"
+	ProjectSection(SolutionItems) = preProject
+		nuspec\tools\dbm.exe = nuspec\tools\dbm.exe
+		nuspec\tools\dev-db.ini = nuspec\tools\dev-db.ini
+		nuspec\tools\Init.ps1 = nuspec\tools\Init.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{766468B7-4901-4C9D-9E0A-ED9B0DF9232E}"
+	ProjectSection(SolutionItems) = preProject
+		nuspec\build\Dashing.targets = nuspec\build\Dashing.targets
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -474,5 +512,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E8CE1831-4CF9-4E5F-BA8B-07FD2E5936FF} = {F2F696FA-D258-47AD-A0FB-4AC859C2F384}
+		{766468B7-4901-4C9D-9E0A-ED9B0DF9232E} = {F2F696FA-D258-47AD-A0FB-4AC859C2F384}
 	EndGlobalSection
 EndGlobal
