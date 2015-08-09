@@ -83,7 +83,6 @@
     <Compile Include="Configuration\DefaultConventionTests.cs" />
     <Compile Include="Configuration\DefaultSessionFactoryTests.cs" />
     <Compile Include="Configuration\IndexTests.cs" />
-    <Compile Include="Configuration\LicenseManagerTests.cs" />
     <Compile Include="Configuration\MapExtensionsTests.cs" />
     <Compile Include="Configuration\MapTests.cs" />
     <Compile Include="Configuration\DefaultMapperTests.cs" />

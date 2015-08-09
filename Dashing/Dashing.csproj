@@ -74,7 +74,6 @@
     <Compile Include="Configuration\DefaultConvention.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IConvention.cs" />
-    <Compile Include="Configuration\LicenseManager.cs" />
     <Compile Include="Configuration\MapExtensions.cs" />
     <Compile Include="Configuration\DefaultMapper.cs" />
     <Compile Include="Configuration\Map.cs" />
