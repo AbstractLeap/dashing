@@ -1,6 +1,8 @@
 namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Data.Linq.Mapping;
+    using System.Linq;
     using System.Linq.Expressions;
 
     /// <summary>
@@ -128,15 +130,16 @@ namespace Dashing.Configuration {
                 throw new ArgumentException("The argument does not represent a map of the correct generic type");
             }
 
-            return new Map<T> {
+            var result = new Map<T> {
                                   Table = map.Table,
                                   Schema = map.Schema,
                                   PrimaryKey = map.PrimaryKey,
-                                  Columns = map.Columns,
                                   Configuration = map.Configuration
 
                                   //// Indexes = map.Indexes
                               };
+            map.Columns.ToList().ForEach(c => result.Columns.Add(c.Key, c.Value));
+            return result;
         }
     }
 }
