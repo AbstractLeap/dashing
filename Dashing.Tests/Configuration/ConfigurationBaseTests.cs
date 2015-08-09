@@ -220,39 +220,12 @@
         }
 
         [Fact]
-        public void HasMapReturnsTrueForMappedTrackedEntity() {
-            // assemble
-            var target = new BasicConfigurationWithCodeManager();
-            var post = new Post();
-
-            // act
-            var actual = target.HasMap(post.GetType());
-
-            // assert
-            Assert.True(actual);
-        }
-
-        [Fact]
         public void GetMapReturnsMapForMappedEntity() {
             // assemble
             var target = new BasicConfiguration();
 
             // act
             var actual = target.GetMap(typeof(Post));
-
-            // assert
-            Assert.NotNull(actual);
-            Assert.Equal(typeof(Post), actual.Type);
-        }
-
-        [Fact]
-        public void GetMapReturnsMapForMappedTrackedEntity() {
-            // assemble
-            var target = new BasicConfigurationWithCodeManager();
-            var post = new Post();
-
-            // act
-            var actual = target.GetMap(post.GetType());
 
             // assert
             Assert.NotNull(actual);

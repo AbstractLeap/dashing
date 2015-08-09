@@ -201,19 +201,11 @@
         }
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id) {
-            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), id, true);
-        }
-
-        public T GetNonTracked<T, TPrimaryKey>(TPrimaryKey id) {
-            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), new[] { id }, false).SingleOrDefault();
+            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), id);
         }
 
         public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids, true);
-        }
-
-        public IEnumerable<T> GetNonTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids, false);
+            return this.engine.Query<T, TPrimaryKey>(this.GetConnection(), this.GetTransaction(), ids);
         }
 
         public ISelectQuery<T> Query<T>() {
@@ -312,19 +304,11 @@
         }
 
         public async Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id) {
-            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id, true);
-        }
-
-        public async Task<T> GetNonTrackedAsync<T, TPrimaryKey>(TPrimaryKey id) {
-            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id, false);
+            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), id);
         }
 
         public async Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids, true);
-        }
-
-        public async Task<IEnumerable<T>> GetNonTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids, false);
+            return await this.engine.QueryAsync<T, TPrimaryKey>(await this.GetConnectionAsync(), await this.GetTransactionAsync(), ids);
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(SelectQuery<T> query) {

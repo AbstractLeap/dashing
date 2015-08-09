@@ -41,6 +41,7 @@
 
             // var rootVar = (RootType)objects[0];
             GetRootAssignment<T>(statements, rootVar, objectsParam, tt);
+            statements.Add(Expression.Call(rootVar, tt.GetMethod("EnableTracking")));
 
             // var newRoot = false;
             statements.Add(Expression.Assign(newRoot, Expression.Constant(false)));
@@ -86,6 +87,7 @@
                     mappedTypes.Add(childType);
                     var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));
                     var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
+                    var enableTrackingExpr = Expression.Call(Expression.Convert(arrayIndexExpr, typeof(ITrackedEntity)), typeof(ITrackedEntity).GetMethod("EnableTracking"));
                     var convertExpr = Expression.Convert(arrayIndexExpr, childType);
                     var propExpr = Expression.Property(parentExpression, childNode.Value.Column.Name);
 
@@ -109,7 +111,7 @@
                     // now visit the next fetch
                     ++i;
                     var innerStatements = this.VisitTree(childNode.Value, convertExpr, newRoot, objectsParam, visitedCollection, insideCollection || childNode.Value.Column.Relationship == RelationshipType.OneToMany, mappedTypes, ref i);
-                    var thenExpr = new List<Expression> { ex };
+                    var thenExpr = new List<Expression> { enableTrackingExpr, ex };
                     thenExpr.AddRange(innerStatements);
                     statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                 }
@@ -171,6 +173,7 @@
 
             // var rootVar = (RootType)objects[0];
             GetRootAssignment<T>(statements, rootVar, objectsParam, tt);
+            statements.Add(Expression.Call(rootVar, tt.GetMethod("EnableTracking")));
 
             // var newRoot = false;
             statements.Add(Expression.Assign(newRoot, Expression.Constant(false)));
@@ -221,7 +224,9 @@
                     var thisChildNewRootPrimaryKeyExpr = newRootPrimaryKeyExpr;
 
                     // add the member assign expression
-                    var thenExpr = new List<Expression> { thisInit };
+                    var thenExpr = new List<Expression> {
+                        Expression.Call(Expression.Convert(arrayIndexExpr, typeof(ITrackedEntity)), typeof(ITrackedEntity).GetMethod("EnableTracking")),
+                        thisInit };
                     if (child.Value.Column.Relationship == RelationshipType.OneToMany) {
                         // check dictionary for existing instance
                         var pk = child.Value.Column.ChildColumn.Map.PrimaryKey;
@@ -332,6 +337,7 @@
 
             // var rootVar = (RootType)objects[0];
             GetRootAssignment<T>(statements, rootVar, objectsParam, tt);
+            statements.Add(Expression.Call(rootVar, tt.GetMethod("EnableTracking")));
 
             // go through the tree
             int i = 1;
@@ -359,7 +365,10 @@
                     mappedTypes.Add(mappedType);
                     var innerStatements = this.VisitNonCollectionTree<T>(child.Value, objectsParam, propExpr, ref i, mappedTypes);
 
-                    var thenExpr = new List<Expression> { assignExpr };
+                    var thenExpr = new List<Expression> {
+                        Expression.Call(Expression.Convert(indexExpr, typeof(ITrackedEntity)), typeof(ITrackedEntity).GetMethod("EnableTracking")),
+                                                            assignExpr
+                                                        };
                     thenExpr.AddRange(innerStatements);
                     statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                 }

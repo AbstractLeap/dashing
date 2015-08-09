@@ -73,16 +73,6 @@ namespace Dashing.Tools.ReverseEngineering {
             get { throw new NotImplementedException(); }
         }
 
-        public bool GetIsTrackedByDefault {
-            get {
-                throw new NotImplementedException();
-            }
-
-            set {
-                throw new NotImplementedException();
-            }
-        }
-
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
         public ICollection<Events.IEventListener> EventListeners {

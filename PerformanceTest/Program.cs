@@ -438,7 +438,7 @@ select * from Comments where PostId = @id";
                     i => {
                         using (var dashingSession = dashingConfig.BeginSession()) {
                             var post =
-                                dashingSession.Query<Post>().AsTracked().First(p => p.PostId == i);
+                                dashingSession.Query<Post>().First(p => p.PostId == i);
                             post.Title = Providers.Dashing + "_" + i + r.Next(100000);
                             dashingSession.Save(post);
                             var thatPost = dashingSession.Query<Post>().First(p => p.PostId == i);

@@ -50,6 +50,27 @@
         }
 
         [Fact]
+        public void SingleCollectionHasTrackingEnabled() {
+            var funcFac = GenerateSingleMapper();
+            var post1 = new Post { PostId = 1 };
+            var post2 = new Post { PostId = 2 };
+            var comment1 = new Comment { CommentId = 1 };
+            var comment2 = new Comment { CommentId = 2 };
+            var comment3 = new Comment { CommentId = 3 };
+            Post currentRoot = null;
+            IList<Post> results = new List<Post>();
+            var func = (Func<object[], Post>)funcFac.DynamicInvoke(currentRoot, results);
+            func(new object[] { post1, comment1 });
+            func(new object[] { post1, comment2 });
+            func(new object[] { post2, comment3 });
+            Assert.True(((ITrackedEntity)results[0]).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)results[0].Comments.First()).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)results[0].Comments.ElementAt(1)).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)results[1]).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)results[1].Comments.First()).IsTrackingEnabled());
+        }
+
+        [Fact]
         public void SingleCollectionAwkwardObjectWorks() {
             var funcFac = GenerateSingleAwkwardMapper();
             var post1 = new PostWithoutCollectionInitializerInConstructor { PostWithoutCollectionInitializerInConstructorId = 1 };

@@ -61,16 +61,8 @@
             return this.GetQuery<T>().Where(this.GetPrimaryKeyWhereClause<T, TPrimaryKey>(id)).Single();
         }
 
-        public T GetNonTracked<T, TPrimaryKey>(TPrimaryKey id) {
-            throw new NotImplementedException();
-        }
-
         public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
             return this.GetQuery<T>().Where(this.GetPrimaryKeysWhereClause<T, TPrimaryKey>(ids)).ToArray();
-        }
-
-        public IEnumerable<T> GetNonTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            throw new NotImplementedException();
         }
 
         public ISelectQuery<T> Query<T>() {
@@ -164,16 +156,8 @@
             return Task.FromResult(this.Get<T, TPrimaryKey>(id));
         }
 
-        public Task<T> GetNonTrackedAsync<T, TPrimaryKey>(TPrimaryKey id) {
-            throw new NotImplementedException();
-        }
-
         public Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
             return Task.FromResult(this.Get<T, TPrimaryKey>(ids));
-        }
-
-        public Task<IEnumerable<T>> GetNonTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            throw new NotImplementedException();
         }
 
         public Task<int> InsertAsync<T>(IEnumerable<T> entities) {
@@ -211,18 +195,10 @@
             }
         }
 
-        public T GetTracked<T, TPrimaryKey>(TPrimaryKey id) {
-            return this.GetQuery<T>().Where(this.GetPrimaryKeyWhereClause<T, TPrimaryKey>(id)).AsTracked().Single();
-        }
-
         private Expression<Func<T, bool>> GetPrimaryKeyWhereClause<T, TPrimaryKey>(TPrimaryKey id) {
             var param = Expression.Parameter(typeof(T));
             var compare = Expression.Equal(Expression.Property(param, typeof(T).Name + "Id"), Expression.Constant(id));
             return Expression.Lambda<Func<T, bool>>(compare, param);
-        }
-
-        public IEnumerable<T> GetTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return this.GetQuery<T>().Where(this.GetPrimaryKeysWhereClause<T, TPrimaryKey>(ids)).AsTracked().ToArray();
         }
 
         private Expression<Func<T, bool>> GetPrimaryKeysWhereClause<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
@@ -271,14 +247,6 @@
             }
 
             return this.Deletes[typeof(T)];
-        }
-
-        public Task<T> GetTrackedAsync<T, TPrimaryKey>(TPrimaryKey id) {
-            return Task.FromResult(this.GetTracked<T, TPrimaryKey>(id));
-        }
-
-        public Task<IEnumerable<T>> GetTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
-            return Task.FromResult(this.GetTracked<T, TPrimaryKey>(ids));
         }
     }
 }

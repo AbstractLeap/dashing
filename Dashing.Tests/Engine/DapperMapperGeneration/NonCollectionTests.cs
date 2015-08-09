@@ -33,6 +33,16 @@
             Assert.Null(post.Blog);
         }
 
+        [Fact]
+        public void FetchedEntitiesHaveTrackingEnabled() {
+            var func = GenerateSingleMapper();
+            var post = new Post() { PostId = 1 };
+            var blog = new Blog() { BlogId = 2 };
+            var result = ((Func<object[], Post>)func)(new object[] { post, blog });
+            Assert.True(((ITrackedEntity)result).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)result.Blog).IsTrackingEnabled());
+        }
+
         private static Delegate GenerateSingleMapper() {
             var config = new CustomConfig();
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
@@ -51,6 +61,18 @@
             var author = new User { UserId = 3 };
             var resultComment = ((Func<object[], Comment>)func)(new object[] { comment, post, author });
             Assert.Equal(3, resultComment.Post.Author.UserId);
+        }
+
+        [Fact]
+        public void MultiFetchNoCollectionHasTrackingEnabled() {
+            var func = GenerateMultipleNoCollectionMapper();
+            var comment = new Comment();
+            var post = new Post { PostId = 1 };
+            var author = new User { UserId = 3 };
+            var resultComment = ((Func<object[], Comment>)func)(new object[] { comment, post, author });
+            Assert.True(((ITrackedEntity)resultComment).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)resultComment.Post).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)resultComment.Post.Author).IsTrackingEnabled());
         }
 
         [Fact]

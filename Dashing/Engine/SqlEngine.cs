@@ -30,18 +30,6 @@ namespace Dashing.Engine {
 
         private IDeleteWriter deleteWriter;
 
-        private readonly IDictionary<Type, Delegate> queryCalls;
-
-        private readonly IDictionary<Type, Delegate> asyncQueryCalls;
-
-        private readonly IDictionary<Type, Delegate> noFetchFkCalls;
-
-        private readonly IDictionary<Type, Delegate> noFetchTrackingCalls;
-
-        private readonly IDictionary<Type, Delegate> asyncNoFetchFkCalls;
-
-        private readonly IDictionary<Type, Delegate> asyncNoFetchTrackingCalls;
-
         private DelegateQueryCreator delegateQueryCreator;
 
         private delegate IEnumerable<T> DelegateQuery<T>(
@@ -81,26 +69,25 @@ namespace Dashing.Engine {
             this.dialect = dialect;
         }
 
-        public T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id, bool isTracked) {
+        public T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
-            var queryResult = connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
-            if (isTracked) {
-                return this.WithTrackingEnabled(queryResult).SingleOrDefault();
+            var entity = connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).SingleOrDefault();
+            if (entity != null) {
+                ((ITrackedEntity)entity).EnableTracking();
             }
 
-            return queryResult.SingleOrDefault();
+            return entity;
         }
 
-        public IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids, bool isTracked) {
+        public IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            var queryResult = connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
-            if (isTracked) {
-                return this.WithTrackingEnabled(queryResult);
-            }
-
-            return queryResult;
+            return connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).Select(
+                t => {
+                    ((ITrackedEntity)t).EnableTracking();
+                    return t;
+                });
         }
 
         public virtual IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {
@@ -115,20 +102,14 @@ namespace Dashing.Engine {
                     queryFunc = this.delegateQueryCreator.GetNoCollectionFunction<T>(sqlQuery);
                 }
 
-                var result = queryFunc(sqlQuery, query, connection, transaction);
-                if (query.IsTracked) {
-                    return this.WithTrackingEnabled(result);
-                }
-
-                return result;
+                return queryFunc(sqlQuery, query, connection, transaction);
             }
 
-            var queryResult = connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
-            if (query.IsTracked) {
-                return this.WithTrackingEnabled(queryResult);
-            }
-
-            return queryResult;
+            return connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).Select(
+                t => {
+                    ((ITrackedEntity)t).EnableTracking();
+                    return t;
+                }); ;
         }
 
         public Page<T> QueryPaged<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {
@@ -208,26 +189,27 @@ namespace Dashing.Engine {
             return connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public async Task<T> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id, bool isTracked) {
+        public async Task<T> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
             var queryResult = await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
-            if (isTracked) {
-                return this.WithTrackingEnabled(queryResult).SingleOrDefault();
+            var entity = queryResult.SingleOrDefault();
+            if (entity != null) {
+                ((ITrackedEntity)entity).EnableTracking();
             }
 
-            return queryResult.SingleOrDefault();
+            return entity;
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids, bool isTracked) {
+        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            var queryResult = await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
-            if (isTracked) {
-                return this.WithTrackingEnabled(queryResult);
-            }
-
-            return queryResult;
+            var result = await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
+            return result.Select(
+                t => {
+                    ((ITrackedEntity)t).EnableTracking();
+                    return t;
+                });
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) {
@@ -243,11 +225,11 @@ namespace Dashing.Engine {
                 }
             }
             else {
-                queryResults = await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
-            }
-
-            if (query.IsTracked) {
-                return this.WithTrackingEnabled(queryResults);
+                queryResults = (await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction)).Select(
+                t => {
+                    ((ITrackedEntity)t).EnableTracking();
+                    return t;
+                }); ;
             }
 
             return queryResults;
@@ -333,13 +315,6 @@ namespace Dashing.Engine {
 
             if (this.delegateQueryCreator == null) {
                 this.delegateQueryCreator = new DelegateQueryCreator(this.configuration);
-            }
-        }
-
-        private IEnumerable<T> WithTrackingEnabled<T>(IEnumerable<T> entities) {
-            foreach (var entity in entities) {
-                ((ITrackedEntity)entity).EnableTracking();
-                yield return entity;
             }
         }
     }

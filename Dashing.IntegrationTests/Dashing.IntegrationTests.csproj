@@ -81,6 +81,7 @@
     <Compile Include="SqlServer\DapperWrapperTests.cs" />
     <Compile Include="SqlServer\EnumeratingTests.cs" />
     <Compile Include="SqlServer\FetchTests.cs" />
+    <Compile Include="SqlServer\Fixtures\MultipleFetchManyWithNonRootAndThenFetchSqlServerFixture.cs" />
     <Compile Include="SqlServer\Fixtures\SqlServerFixture.cs" />
     <Compile Include="SqlServer\ForUpdateTests.cs" />
     <Compile Include="SqlServer\SelectTests.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="SqlServer\TransactionTests.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
+    <Compile Include="TestDomain\More\MultipleFetchManyWithNonRootAndThenFetchDomain.cs" />
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />

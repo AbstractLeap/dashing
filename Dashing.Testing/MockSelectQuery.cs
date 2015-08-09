@@ -38,8 +38,6 @@ namespace Dashing.Testing {
 
         public bool IsForUpdate { get; set; }
 
-        public bool IsTracked { get; set; }
-
         public bool IsIncludingAll { get; set; }
 
         public int? TakeN { get; set; }
@@ -109,16 +107,6 @@ namespace Dashing.Testing {
 
         public ISelectQuery<T> ForUpdate() {
             this.IsForUpdate = true;
-            return this;
-        }
-
-        public ISelectQuery<T> AsTracked() {
-            this.IsTracked = true;
-            return this;
-        }
-
-        public ISelectQuery<T> AsNonTracked() {
-            this.IsTracked = false;
             return this;
         }
 

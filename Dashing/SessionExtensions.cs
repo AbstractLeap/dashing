@@ -76,72 +76,6 @@ namespace Dashing {
         }
 
         /// <summary>
-        /// Get a non-tracked entity by integer primary key
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="id">The primary key of the entity</param>
-        /// <returns></returns>
-        public static T GetNonTracked<T>(this ISession session, int id) {
-            return session.GetNonTracked<T, int>(id);
-        }
-
-        /// <summary>
-        /// Get a non-tracked entity by Guid primary key
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="id">The primary key of the entity</param>
-        /// <returns></returns>
-        public static T GetNonTracked<T>(this ISession session, Guid id) {
-            return session.GetNonTracked<T, Guid>(id);
-        }
-
-        /// <summary>
-        /// Get a collection of non-tracked entities using their integer primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="ids">The primary keys of the entities</param>
-        /// <returns></returns>
-        public static IEnumerable<T> GetNonTracked<T>(this ISession session, params int[] ids) {
-            return session.GetNonTracked<T>(ids as IEnumerable<int>);
-        }
-
-        /// <summary>
-        /// Get a collection of non-tracked entities using their integer primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="ids">The primary keys of the entities</param>
-        /// <returns></returns>
-        public static IEnumerable<T> GetNonTracked<T>(this ISession session, IEnumerable<int> ids) {
-            return session.GetNonTracked<T, int>(ids);
-        }
-
-        /// <summary>
-        /// Get a collection of non-tracked entities using their Guid primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="ids">The primary keys of the entities</param>
-        /// <returns></returns>
-        public static IEnumerable<T> GetNonTracked<T>(this ISession session, params Guid[] ids) {
-            return session.GetNonTracked<T>(ids as IEnumerable<Guid>);
-        }
-
-        /// <summary>
-        /// Get a collection of non-tracked entities using their Guid primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="ids">The primary keys of the entities</param>
-        /// <returns></returns>
-        public static IEnumerable<T> GetNonTracked<T>(this ISession session, IEnumerable<Guid> ids) {
-            return session.GetNonTracked<T, Guid>(ids);
-        }
-
-        /// <summary>
         /// Inserts a collection of entities in to the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -160,7 +94,6 @@ namespace Dashing {
         /// <param name="session"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        /// <remarks>This will not work on associations on non-tracked entities</remarks>
         public static int Save<T>(this ISession session, params T[] entities) {
             return session.Save(entities);
         }
@@ -218,7 +151,7 @@ namespace Dashing {
             }
             
             // we support different equalityComparers so we can cope with e.g. username 
-            var existingEntity = session.Query<T>().AsTracked().FirstOrDefault(equalityComparer);
+            var existingEntity = session.Query<T>().FirstOrDefault(equalityComparer);
             if (existingEntity == null) {
                 return session.Insert(entity);
             }
@@ -299,72 +232,6 @@ namespace Dashing {
         }
 
         /// <summary>
-        /// Get a non-tracked entity by integer primary key
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="id">The primary key of the entity</param>
-        /// <returns></returns>
-        public static async Task<T> GetNonTrackedAsync<T>(this ISession session, int id) {
-            return await session.GetNonTrackedAsync<T, int>(id);
-        }
-
-        /// <summary>
-        /// Get a non-tracked entity by Guid primary key
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="id">The primary key of the entity</param>
-        /// <returns></returns>
-        public static async Task<T> GetNonTrackedAsync<T>(this ISession session, Guid id) {
-            return await session.GetNonTrackedAsync<T, Guid>(id);
-        }
-
-        /// <summary>
-        /// Get a collection of non-tracked entities using their integer primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="ids">The primary keys of the entities</param>
-        /// <returns></returns>
-        public static async Task<IEnumerable<T>> GetNonTrackedAsync<T>(this ISession session, params int[] ids) {
-            return await session.GetNonTrackedAsync<T>(ids as IEnumerable<int>);
-        }
-
-        /// <summary>
-        /// Get a collection of non-tracked entities using their integer primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="ids">The primary keys of the entities</param>
-        /// <returns></returns>
-        public static async Task<IEnumerable<T>> GetNonTrackedAsync<T>(this ISession session, IEnumerable<int> ids) {
-            return await session.GetNonTrackedAsync<T, int>(ids);
-        }
-
-        /// <summary>
-        /// Get a collection of non-tracked entities using their Guid primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="ids">The primary keys of the entities</param>
-        /// <returns></returns>
-        public static async Task<IEnumerable<T>> GetNonTrackedAsync<T>(this ISession session, params Guid[] ids) {
-            return await session.GetNonTrackedAsync<T>(ids as IEnumerable<Guid>);
-        }
-
-        /// <summary>
-        /// Get a collection of non-tracked entities using their Guid primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get</typeparam>
-        /// <param name="session">The Session to use</param>
-        /// <param name="ids">The primary keys of the entities</param>
-        /// <returns></returns>
-        public static async Task<IEnumerable<T>> GetNonTrackedAsync<T>(this ISession session, IEnumerable<Guid> ids) {
-            return await session.GetNonTrackedAsync<T, Guid>(ids);
-        }
-
-        /// <summary>
         /// Inserts a collection of entities in to the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -383,7 +250,6 @@ namespace Dashing {
         /// <param name="session"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        /// <remarks>This will not work on associations on non-tracked entities</remarks>
         public static async Task<int> SaveAsync<T>(this ISession session, params T[] entities) {
             return await session.SaveAsync(entities);
         }
@@ -441,7 +307,7 @@ namespace Dashing {
             }
 
             // we support different equalityComparers so we can cope with e.g. username 
-            var existingEntity = await session.Query<T>().AsTracked().FirstOrDefaultAsync(equalityComparer);
+            var existingEntity = await session.Query<T>().FirstOrDefaultAsync(equalityComparer);
             if (existingEntity == null) {
                 return await session.InsertAsync(entity);
             }

@@ -39,15 +39,6 @@ namespace Dashing {
         T Get<T, TPrimaryKey>(TPrimaryKey id);
 
         /// <summary>
-        /// Get an untracked entity by primary key
-        /// </summary>
-        /// <typeparam name="T">The type of entity</typeparam>
-        /// <typeparam name="TPrimaryKey">The type of the primary key</typeparam>
-        /// <param name="id">The primary key of the entity to return</param>
-        /// <returns></returns>
-        T GetNonTracked<T, TPrimaryKey>(TPrimaryKey id);
-
-        /// <summary>
         /// Get an enumerable of entities by their primary keys
         /// </summary>
         /// <typeparam name="T">The type of entity</typeparam>
@@ -55,15 +46,6 @@ namespace Dashing {
         /// <param name="ids">The primary keys of the entities you wish to return</param>
         /// <returns></returns>
         IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids);
-
-        /// <summary>
-        /// Get an enumerable of untracked entities by their primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity</typeparam>
-        /// <typeparam name="TPrimaryKey">The type of the primary key</typeparam>
-        /// <param name="ids">The primary keys of the entities you wish to return</param>
-        /// <returns></returns>
-        IEnumerable<T> GetNonTracked<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids);
 
         /// <summary>
         /// Perform a query against a type of entity
@@ -87,7 +69,6 @@ namespace Dashing {
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        /// <remarks>This will not work on associations on non-tracked entities</remarks>
         int Save<T>(IEnumerable<T> entities);
 
         /// <summary>
@@ -142,15 +123,6 @@ namespace Dashing {
         Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id);
 
         /// <summary>
-        /// Get an untracked entity by primary key
-        /// </summary>
-        /// <typeparam name="T">The type of entity</typeparam>
-        /// <typeparam name="TPrimaryKey">The type of the primary key</typeparam>
-        /// <param name="id">The primary key of the entity to return</param>
-        /// <returns></returns>
-        Task<T> GetNonTrackedAsync<T, TPrimaryKey>(TPrimaryKey id);
-
-        /// <summary>
         /// Get an enumerable of entities by their primary keys
         /// </summary>
         /// <typeparam name="T">The type of entity</typeparam>
@@ -158,15 +130,6 @@ namespace Dashing {
         /// <param name="ids">The primary keys of the entities you wish to return</param>
         /// <returns></returns>
         Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids);
-
-        /// <summary>
-        /// Get an enumerable of untracked entities by their primary keys
-        /// </summary>
-        /// <typeparam name="T">The type of entity</typeparam>
-        /// <typeparam name="TPrimaryKey">The type of the primary key</typeparam>
-        /// <param name="ids">The primary keys of the entities you wish to return</param>
-        /// <returns></returns>
-        Task<IEnumerable<T>> GetNonTrackedAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids);
 
         /// <summary>
         /// Inserts a collection of entities in to the database
@@ -183,7 +146,6 @@ namespace Dashing {
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        /// <remarks>This will not work on associations on non-tracked entities</remarks>
         Task<int> SaveAsync<T>(IEnumerable<T> entities);
 
         /// <summary>
