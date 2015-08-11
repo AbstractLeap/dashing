@@ -48,7 +48,7 @@
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new NonCollectionMapperGenerator(config);
             var func = mapper.GenerateNonCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
@@ -91,7 +91,7 @@
             var selectQuery = new SelectQuery<Comment>(new Mock<ISelectQueryExecutor>().Object).Fetch(c => c.Post.Author) as SelectQuery<Comment>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new NonCollectionMapperGenerator(config);
             var func = mapper.GenerateNonCollectionMapper<Comment>(result.FetchTree);
             return func.Item1;
         }

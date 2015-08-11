@@ -175,8 +175,7 @@ del Mono.Cecil.Rocks.dll
 del Newtonsoft.Json.dll
 del *.pdb
 del *.xml
-del ..\..\..\nuspec\tools\dbm.exe
-xcopy dbm.exe ..\..\..\nuspec\tools\</PostBuildEvent>
+xcopy dbm.exe ..\..\..\nuspec\tools\ /d /y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>del ..\..\lib\* /q

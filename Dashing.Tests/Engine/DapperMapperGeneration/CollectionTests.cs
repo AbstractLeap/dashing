@@ -117,7 +117,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new SingleCollectionMapperGenerator(config);
             var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
@@ -163,13 +163,76 @@
         }
 
         [Fact]
+        public void FetchManyNonRootWorks() {
+            var config = new CustomConfig();
+            var selectQuery =
+                new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
+                SelectQuery<PostTag>;
+            var writer = new SelectWriter(new SqlServer2012Dialect(), config);
+            var result = writer.GenerateSql(selectQuery);
+            var mapper = new SingleCollectionMapperGenerator(config);
+            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
+
+            // setup the scenario
+            var tag1 = new PostTag() { PostTagId = 1 };
+            var tag2 = new PostTag() { PostTagId = 2 };
+            var tag3 = new PostTag() { PostTagId = 3 };
+            var post1 = new Post() { PostId = 1, Title = "Foo" };
+            var anotherPost1 = new Post() { PostId = 1, Title = "Foo" };
+            var post2 = new Post() { PostId = 2, Title = "Foo" };
+            var post3 = new Post() { PostId = 3, Title = "Foo" };
+            var post4 = new Post() { PostId = 4, Title = "Foo" };
+            var comment1 = new Comment() { CommentId = 1 };
+            var comment2 = new Comment() { CommentId = 2 };
+            var comment3 = new Comment() { CommentId = 3 };
+            var comment4 = new Comment() { CommentId = 4 };
+            var comment5 = new Comment() { CommentId = 5 };
+            var comment6 = new Comment() { CommentId = 6 };
+            var user1 = new User() { UserId = 1 };
+            var user2 = new User() { UserId = 2 };
+            var user3 = new User() { UserId = 3 };
+            var user4 = new User() { UserId = 4 };
+            var user5 = new User() { UserId = 5 };
+
+            PostTag currentRoot = null;
+            IList<PostTag> results = new List<PostTag>();
+            var func = (Func<object[], PostTag>)funcFac.DynamicInvoke(currentRoot, results);
+            func(new object[] { tag1, post1, comment1, user1 });
+            func(new object[] { tag1, post1, comment2, user1 });
+            func(new object[] { tag1, post1, comment3, user2 });
+            func(new object[] { tag2, anotherPost1, comment1, user1 });
+            func(new object[] { tag2, anotherPost1, comment2, user1 });
+            func(new object[] { tag2, anotherPost1, comment3, user2 });
+            func(new object[] { tag3, post2, comment4, user3 });
+            func(new object[] { tag3, post2, comment5, user4 });
+            func(new object[] { tag3, post2, comment6, user5 });
+
+            Assert.Equal(3, results.Count);
+            Assert.Equal(3, results.First().Post.Comments.Count);
+            Assert.Equal(1, results.First().Post.PostId);
+            Assert.Equal(1, results.First().Post.Comments.First().User.UserId);
+            Assert.Equal(1, results.First().Post.Comments.ElementAt(1).User.UserId);
+            Assert.Equal(2, results.First().Post.Comments.ElementAt(2).User.UserId);
+            Assert.Equal(3, results.ElementAt(1).Post.Comments.Count);
+            Assert.Equal(1, results.ElementAt(1).Post.PostId);
+            Assert.Equal(1, results.ElementAt(1).Post.Comments.First().User.UserId);
+            Assert.Equal(1, results.ElementAt(1).Post.Comments.ElementAt(1).User.UserId);
+            Assert.Equal(2, results.ElementAt(1).Post.Comments.ElementAt(2).User.UserId);
+            Assert.Equal(3, results.ElementAt(2).Post.Comments.Count);
+            Assert.Equal(2, results.ElementAt(2).Post.PostId);
+            Assert.Equal(4, results.ElementAt(2).Post.Comments.First().CommentId);
+            Assert.Equal(5, results.ElementAt(2).Post.Comments.ElementAt(1).CommentId);
+            Assert.Equal(6, results.ElementAt(2).Post.Comments.ElementAt(2).CommentId);
+        }
+
+        [Fact]
         public void MultipleManyToManyFetchingWorks() {
             // setup the factory
             var config = new CustomConfig();
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Tags).ThenFetch(p => p.ElTag).FetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new MultiCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree).Item1;
 
             // setup the scenario
@@ -208,7 +271,7 @@
             var selectQuery = new SelectQuery<Blog>(new Mock<ISelectQueryExecutor>().Object).FetchMany(b => b.Posts).ThenFetchMany(p => p.Tags).ThenFetch(t => t.ElTag).FetchMany(b => b.Posts).ThenFetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag).FetchMany(p => p.Posts).ThenFetch(p => p.Author) as SelectQuery<Blog>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new MultiCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree).Item1;
 
             // setup the scenario
@@ -288,7 +351,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new MultiCollectionMapperGenerator(config);
             var func = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
@@ -299,7 +362,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new SingleCollectionMapperGenerator(config);
             var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
@@ -310,7 +373,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new SingleCollectionMapperGenerator(config);
             var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
         }
@@ -323,7 +386,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
-            var mapper = new DapperMapperGenerator(config);
+            var mapper = new SingleCollectionMapperGenerator(config);
             var func = mapper.GenerateCollectionMapper<PostWithoutCollectionInitializerInConstructor>(result.FetchTree);
             return func.Item1;
         }

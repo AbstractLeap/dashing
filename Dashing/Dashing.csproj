@@ -82,8 +82,12 @@
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DapperWrapper.cs" />
     <Compile Include="DoNotWeaveAttribute.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\IDapperMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\NonCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\INonCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\IMultiCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\ISingleCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\MultiCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\SingleCollectionMapperGenerator.cs" />
     <Compile Include="Engine\DDL\AlterTableWriter.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />

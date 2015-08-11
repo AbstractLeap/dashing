@@ -16,8 +16,6 @@
     using Dashing.Engine.DML;
 
     internal class DelegateQueryCreator {
-        private readonly DapperMapperGenerator dapperMapperGenerator;
-
         private readonly ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[]>> mapperFactories;
 
         private readonly ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[], Type[]>> multiCollectionMapperFactories;
@@ -32,10 +30,18 @@
 
         private readonly IConfiguration configuration;
 
+        private NonCollectionMapperGenerator nonCollectionMapperGenerator;
+
+        private SingleCollectionMapperGenerator singleCollectionMapperGenerator;
+
+        private MultiCollectionMapperGenerator multiCollectionMapperGenerator;
+
         public delegate FetchCollectionAwaiter<T> CollectionAsyncDelegate<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction);
 
         public DelegateQueryCreator(IConfiguration configuration) {
-            this.dapperMapperGenerator = new DapperMapperGenerator(configuration);
+            this.nonCollectionMapperGenerator = new NonCollectionMapperGenerator(configuration);
+            this.singleCollectionMapperGenerator = new SingleCollectionMapperGenerator(configuration);
+            this.multiCollectionMapperGenerator = new MultiCollectionMapperGenerator(configuration);
             this.configuration = configuration;
             this.mapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[]>>();
             this.multiCollectionMapperFactories = new ConcurrentDictionary<Tuple<Type, string>, Tuple<Delegate, Type[], Type[]>>();
@@ -82,7 +88,7 @@
             var queries = isAsync? this.asyncNoCollectionQueries : this.noCollectionQueries;
             var mapper = this.mapperFactories.GetOrAdd(
                 key,
-                t => this.dapperMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree));
+                t => this.nonCollectionMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree));
             func = queries.GetOrAdd(key, t => this.GenerateQuery<T>(mapper.Item1, isAsync, mapper.Item2));
             return mapper.Item1;
         }
@@ -93,7 +99,7 @@
             if (result.NumberCollectionsFetched == 1) {
                 Tuple<Delegate, Type[]> mapperFactory = this.mapperFactories.GetOrAdd(
                         key,
-                        t => this.dapperMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree));
+                        t => this.singleCollectionMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree));
                 func = collectionQueries.GetOrAdd(
                     key,
                     t => this.GenerateCollectionFactory<T>(result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, null));
@@ -104,7 +110,7 @@
             else {
                 Tuple<Delegate, Type[], Type[]> mapperFactory = this.multiCollectionMapperFactories.GetOrAdd(
                         key,
-                        t => this.dapperMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree));
+                        t => this.multiCollectionMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree));
                 func = collectionQueries.GetOrAdd(
                     key,
                     t => this.GenerateCollectionFactory<T>(result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, mapperFactory.Item3));
