@@ -593,7 +593,7 @@
             if (node.IsFetched) {
                 if (isNowInsideCollection) {
                     // add columns to subquery, nulls to others and cols to outer
-                    foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name))) {
+                    foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)) {
                         for (var i = 0; i < subQueryColumnSqls.Length; i++) {
                             var subQuery = subQueryColumnSqls[i];
                             subQuery.Append(", ");
@@ -618,7 +618,7 @@
                 }
                 else {
                     // add columns to all queries
-                    foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name))) {
+                    foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)) {
                         for (var i = 0; i < subQueryColumnSqls.Length; i++) {
                             var subQuery = subQueryColumnSqls[i];
                             subQuery.Append(", ");
@@ -741,7 +741,7 @@
 
             // add the columns
             if (node.IsFetched) {
-                foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name))) {
+                foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)) {
                     if (isNowAlongCollectionBranch) {
                         outerColumnSql.Append(", ");
                         this.AddColumn(outerColumnSql, column, node.Alias);
@@ -805,7 +805,7 @@
 
             // add the columns
             if (node.IsFetched) {
-                foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name))) {
+                foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)) {
                     columnSql.Append(", ");
                     this.AddColumn(columnSql, column, node.Alias);
                 }
