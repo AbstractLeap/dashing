@@ -11,6 +11,7 @@
     using Dashing.Tools.Migration;
     using Dashing.Tools.Tests.Migration.Rename1;
     using Dashing.Tools.Tests.Migration.Rename2;
+    using Dashing.Tools.Tests.Migration.Rename3;
 
     using Moq;
 
@@ -190,6 +191,33 @@ EXEC sp_RENAME 'PostComments.Content', 'Comments', 'COLUMN';
 alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key ([PostId]) references [Entries]([Id]);", @"(?<!\r)\n", Environment.NewLine), script.Trim());
         }
 
+        [Fact]
+        public void RenameAndChangeWorks() {
+            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
+            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Port>();
+            var migrater = MakeMigrator(from);
+            IEnumerable<string> warnings;
+            IEnumerable<string> errors;
+            var answerProvider = new Mock<IAnswerProvider>();
+            answerProvider.Setup(a => a.GetMultipleChoiceAnswer<string>(It.IsAny<string>(), It.IsAny<IEnumerable<MultipleChoice<string>>>()))
+                          .Returns(new MultipleChoice<string> { Choice = "Port", DisplayString = "Port" });
+            var script = migrater.GenerateSqlDiff(
+                from.Maps,
+                to.Maps,
+                answerProvider.Object,
+                new Mock<ILogger>().Object,
+                new String[0],
+                out warnings,
+                out errors);
+            Assert.Equal(Regex.Replace(@"EXEC sp_RENAME [Posts], [Ports];
+alter table [PostComments] drop constraint [fk_PostComment_Post_Post];
+drop index [idx_PostComment_Post] on [PostComments];
+EXEC sp_RENAME 'PostComments.PostId', 'PortId', 'COLUMN';
+alter table [Ports] add [Foo] nvarchar(255) null;
+alter table [PostComments] add constraint fk_PostComment_Port_Port foreign key ([PortId]) references [Ports]([Id]);
+create index [idx_PostComment_Port] on [PostComments] ([PortId]);", @"(?<!\r)\n", Environment.NewLine), script.Trim());
+        }
+
         private static Migrator MakeMigrator(IConfiguration config, bool hasRows = false) {
             var mockStatisticsProvider = new Mock<IStatisticsProvider>();
             mockStatisticsProvider.Setup(s => s.GetStatistics(It.IsAny<IEnumerable<IMap>>()))
@@ -240,6 +268,24 @@ namespace Dashing.Tools.Tests.Migration.Rename2 {
         public virtual string Content { get; set; }
 
         public virtual Entry Post { get; set; }
+    }
+}
+
+namespace Dashing.Tools.Tests.Migration.Rename3 {
+    public class Port {
+        public virtual int Id { get; set; }
+
+        public virtual string Content { get; set; }
+
+        public virtual string Foo { get; set; }
+    }
+
+    public class PostComment {
+        public virtual int Id { get; set; }
+
+        public virtual string Content { get; set; }
+
+        public virtual Port Port { get; set; }
     }
 }
 
