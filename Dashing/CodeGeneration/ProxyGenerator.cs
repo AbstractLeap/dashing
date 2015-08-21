@@ -363,7 +363,8 @@ namespace Dashing.CodeGeneration {
             foreach (
                 var column in
                     map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne || c.Value.Relationship == RelationshipType.OneToOne)) {
-                if (!column.Value.Map.Type.GetProperty(column.Value.Name).GetGetMethod().IsVirtual) {
+                if (!column.Value.Map.Type.GetProperty(column.Value.Name).GetGetMethod().IsVirtual
+                    || !column.Value.Map.Type.GetProperty(column.Value.Name).CanWrite) {
                     // TODO: send a warning back to the programmer, did they mean to do this?
                     continue;
                 }

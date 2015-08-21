@@ -44,6 +44,62 @@
         }
 
         [Fact]
+        public void IgnoreNonVirtualPropertiesInFkProxy() {
+            // assemble
+            var target = MakeTarget();
+            var maps = MakeMaps(typeof(ClassWithGetOnlyProperty), typeof(ClassWithNonVirtualProperty));
+            var config = new CodeGeneratorConfig();
+
+            // act
+            var results = target.GenerateProxies(config, maps);
+
+            // assert
+            Assert.NotNull(results);
+            var fkProxy = results.ProxyTypes.Single(ctd => ctd.Name == typeof(ClassWithNonVirtualProperty).Name + config.ForeignKeyAccessClassSuffix);
+            var members = new CodeTypeMember[fkProxy.Members.Count];
+            fkProxy.Members.CopyTo(members, 0);
+            Assert.False(members.Any(m => m.Name == "Id"));
+        }
+
+        [Fact]
+        public void IgnoreNonVirtualEntityPropertiesInFkProxy() {
+            // assemble
+            var target = MakeTarget();
+            var maps = MakeMaps(typeof(ClassWithGetOnlyProperty), typeof(ClassWithNonVirtualProperty));
+            var config = new CodeGeneratorConfig();
+
+            // act
+            var results = target.GenerateProxies(config, maps);
+
+            // assert
+            Assert.NotNull(results);
+            var fkProxy = results.ProxyTypes.Single(ctd => ctd.Name == typeof(ClassWithNonVirtualProperty).Name + config.ForeignKeyAccessClassSuffix);
+            var members = new CodeTypeMember[fkProxy.Members.Count];
+            fkProxy.Members.CopyTo(members, 0);
+            Assert.False(members.Any(m => m.Name == "NonVirtualProperty"));
+        }
+
+        [Fact]
+        public void IgnoreGetOnlyPropertiesInFkProxy() {
+            // assemble
+            var target = MakeTarget();
+            var maps = MakeMaps(typeof(ClassWithGetOnlyProperty), typeof(ClassWithNonVirtualProperty));
+            var config = new CodeGeneratorConfig();
+
+            // act
+            var results = target.GenerateProxies(config, maps);
+
+            // assert
+            Assert.NotNull(results);
+            var fkProxy = results.ProxyTypes.Single(ctd => ctd.Name == typeof(ClassWithNonVirtualProperty).Name + config.ForeignKeyAccessClassSuffix);
+            var members = new CodeTypeMember[fkProxy.Members.Count];
+            fkProxy.Members.CopyTo(members, 0);
+            Assert.False(members.Any(m => m.Name == "NonVirtualGetOnlyProperty"));
+            Assert.False(members.Any(m => m.Name == "VirtualGetOnlyProperty"));
+
+        }
+
+        [Fact]
         public void IgnoreGetOnlyPropertiesInChangeTrackingProxy() {
             // assemble
             var target = MakeTarget();
@@ -100,16 +156,39 @@
             public string UserName { get; set; }
         }
 
-        // make R# relax!
-        // ReSharper disable once ClassWithVirtualMembersNeverInherited.Local
-        // ReSharper disable once MemberCanBeProtected.Global
         private class ClassWithGetOnlyProperty {
-            public virtual int UserId { get; [UsedImplicitly] set; }
+            public virtual int ClassWithGetOnlyPropertyId { get; set; }
 
             [UsedImplicitly]
             public virtual int Id {
                 get {
-                    return this.UserId;
+                    return this.ClassWithGetOnlyPropertyId;
+                }
+            }
+        }
+
+        private class ClassWithNonVirtualProperty {
+            public virtual int ClassWithNonVirtualPropertyId { get; set; }
+
+            public virtual ClassWithGetOnlyProperty VirtualProperty { get; set; }
+
+            public ClassWithGetOnlyProperty NonVirtualProperty { get; set; }
+
+            public virtual ClassWithGetOnlyProperty VirtualGetOnlyProperty {
+                get {
+                    return null;
+                }
+            }
+
+            public ClassWithGetOnlyProperty NonVirtualGetOnlyProperty {
+                get {
+                    return null;
+                }
+            }
+
+            public int Id {
+                get {
+                    return this.ClassWithNonVirtualPropertyId;
                 }
             }
         }
