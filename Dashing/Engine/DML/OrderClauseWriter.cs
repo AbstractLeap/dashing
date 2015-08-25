@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Engine.DML {
     using System;
+    using System.Data.SqlClient;
     using System.Linq.Expressions;
     using System.Text;
 
@@ -54,7 +55,16 @@
                     isRootPrimaryKeyClause = column.IsPrimaryKey;
                 }
                 else {
-                    column = node.Column.ParentMap.Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
+                    if (node.Column.Relationship == RelationshipType.ManyToOne) {
+                        column = node.Column.ParentMap.Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
+                    }
+                    else if (node.Column.Relationship == RelationshipType.OneToOne) {
+                        column = node.Column.OppositeColumn.Map.Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
+                    }
+                    else {
+                        throw new NotSupportedException();
+                    }
+
                     isRootPrimaryKeyClause = false;
                 }
                 

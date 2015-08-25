@@ -8,6 +8,7 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Tests.TestDomain;
+    using Dashing.Tests.TestDomain.OneToOne;
 
     using Xunit;
 
@@ -180,6 +181,21 @@
             Assert.Throws<InvalidOperationException>(() => writer.GetOrderClause(((SelectQuery<Comment>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query), out containsPrimaryKeyClause));
         }
 
+        [Fact]
+        public void OrderAcrossOneToOneWorks() {
+            var query = new SelectQuery<OneToOneLeft>(new NonExecutingSelectQueryExecutor()).Fetch(o => o.Right).OrderBy(o => o.Right.Name);
+            var config = new OneToOneConfig();
+            var dialect = new SqlServer2012Dialect();
+            var writer = new OrderClauseWriter(config, dialect);
+            var fetchTreeWriter = new FetchTreeWriter(dialect, config);
+            var containsPrimaryKeyClause = false;
+            var result = writer.GetOrderClause(
+                ((SelectQuery<OneToOneLeft>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<OneToOneLeft>)query),
+                out containsPrimaryKeyClause);
+            Assert.Equal("t_1.[Name] asc", result);
+        }
+
         private class CustomConfig : MockConfiguration {
             public CustomConfig() {
                 this.AddNamespaceOf<Post>();
@@ -195,6 +211,12 @@
                 int aliasCounter;
                 int numberCollectionFetches;
                 return base.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
+            }
+        }
+
+        private class OneToOneConfig : MockConfiguration {
+            public OneToOneConfig() {
+                this.AddNamespaceOf<OneToOneLeft>();
             }
         }
     }
