@@ -1,0 +1,6 @@
+﻿<?xml version="1.0"?>
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+    <connectionStrings xdt:Transform="InsertIfMissing">
+            <add name="DashingConnectionString" connectionString="Data Source=.;Initial Catalog=mydatabasename;Integrated Security=True;MultipleActiveResultSets=True" providerName="System.Data.SqlClient" xdt:Transform="Insert" />
+    </connectionStrings>
+</configuration>

@@ -61,6 +61,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ForeignKeyTests.cs" />
     <Compile Include="SetLoggerTests.cs" />
+    <Compile Include="StringTests.cs" />
     <Compile Include="WeavingFixture.cs" />
     <Compile Include="TrackingTests.cs" />
     <Compile Include="WeavingTests.cs" />

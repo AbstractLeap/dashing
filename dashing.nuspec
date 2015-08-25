@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.1.25-alpha</version>
+        <version>0.1.35-alpha</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,9 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.1.25-alpha better nuget experience
+        <releaseNotes>* 0.1.35-alpha nuget
+* 0.1.26-alpha string PK support
+* 0.1.25-alpha better nuget experience
 * 0.1.21-alpha ignore peverify
 * 0.1.20-alpha guid id
 * 0.1.19-alpha remove dependencies
@@ -53,12 +55,14 @@
     </metadata>
     <files>
         <file src="nuspec\build\Dashing.targets" target="build\Dashing.targets" />
+        <file src="nuspec\content\app.config.install.xdt" target="content\app.config.install.xdt" />
+        <file src="nuspec\content\web.config.install.xdt" target="content\web.config.install.xdt" />
         <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
         <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
         <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
         <file src="nuspec\tools\dbm.exe" target="tools\dbm.exe" />
         <file src="nuspec\tools\dev-db.ini" target="tools\dev-db.ini" />
-        <file src="nuspec\tools\Init.ps1" target="tools\Init.ps1" />
+        <file src="nuspec\tools\Init.ps1" target="tools\init.ps1" />
         <file src="nuspec\readme.txt" target="readme.txt" />
     </files>
 </package>

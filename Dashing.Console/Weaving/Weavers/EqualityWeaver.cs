@@ -20,6 +20,7 @@
             var objectTypeDef = typeDef.Module.Import(typeof(object));
             var pkColDef = this.GetProperty(typeDef, mapDefinition.ColumnDefinitions.Single(d => d.IsPrimaryKey).Name);
             var isGuidPk = pkColDef.PropertyType.Name == "Guid";
+            var isStringPk = !isGuidPk && pkColDef.PropertyType.Name.Equals("string", StringComparison.InvariantCultureIgnoreCase);
                 
             if (!this.DoesNotUseObjectMethod(typeDef, "GetHashCode")) {
                 // override gethashcode
@@ -38,7 +39,10 @@
                 method.Body.Variables.Add(new VariableDefinition(intTypeDef));
                 var var1 = new VariableDefinition("CS$0$0000", variableType);
                 var var2 = new VariableDefinition("CS$0$0001", variableType);
-                method.Body.Variables.Add(var1);
+                if (!isStringPk) {
+                    method.Body.Variables.Add(var1);
+                }
+
                 if (isGuidPk) {
                     method.Body.Variables.Add(var2);
                 }
@@ -103,6 +107,9 @@
                     il.Add(Instruction.Create(OpCodes.Constrained, guidTypeDef));
                     il.Add(
                         Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
+                }
+                else if (isStringPk) {
+                    il.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
                 }
                 else {
                     il.Add(Instruction.Create(OpCodes.Stloc_1));

@@ -1,20 +1,32 @@
 param($installPath, $toolsPath, $package, $project)
 
+Write-Host "Installing Dashing"
+Write-Host "Install Path: " -nonewline; Write-Host $installPath
+Write-Host "Tools Path: " -nonewline; Write-Host $toolsPath
+Write-Host "Package: " -nonewline; Write-Host $package
+Write-Host "Project: " -nonewline; Write-Host $project
+
+
 # find out where to put the files, we're going to create a deploy directory
 # at the same level as the solution.
 
 $rootDir = (Get-Item $installPath).parent.parent.fullname
 $deployTarget = "$rootDir\Dashing"
+Write-Host "Deploy Target: " -nonewline; Write-Host $deployTarget
 
 # create our deploy support directory if it doesn't exist yet
-if (!(test-path $deployTarget)) {
+if (!(Test-Path $deployTarget)) {
 	mkdir $deployTarget
 }
 
 # copy everything in there
-if (!(Test-Path $toolsPath\dev-db.ini)) {
+if (!(Test-Path $deployTarget\dev-db.ini)) {
+    Write-Host "Copying dev-db.ini"
 	Copy-Item $toolsPath\dev-db.ini $deployTarget -Recurse -Force
 }
+
+Write-Host "Copying dbm.exe"
+Copy-Item $toolsPath\dbm.exe $deployTarget -Recurse -Force
 
 # get the active solution
 $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])

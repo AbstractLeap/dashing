@@ -43,17 +43,21 @@ Dashing is code first so simply create your domain models using POCOs e.g.
 and then create your configuration (you'll need to put the connection string in your web.config or app.config):
 
 	class DashingConfiguration: DefaultConfiguration {
-		public DashingConfiguration() : base(ConfigurationManager.ConnectionStrings["MyConnectionString"]) {
+		public DashingConfiguration() : base(ConfigurationManager.ConnectionStrings["DashingConnectionString"]) {
 			
 			this.AddNamespaceOf<Post>();	
-		})
+		}
 	}
 
-Next, you'll want to generate the database to use with your domain model. A folder called "Dashing" should have been added to this solution. Go ahead and open the dev-db.ini file and update the connection string to match your database, then update the path to the dll that contains your IConfiguration and finally specify the full name of the Configuration class.
+Next, you'll want to generate the schema to use with your domain model. First make sure the database is created on the server. 
+Then, a folder called "Dashing" should have been added to this solution. 
+Go ahead and open the dev-db.ini file and update the connection string to match your database, 
+then update the path to the dll that contains your IConfiguration 
+and finally specify the full name of the Configuration class.
 
-Once that's done you can run:
+Once that's done you'll need to build your project and then you can run:
 	
-	dbm -m -c ./Dashing/dev-db.ini
+	dbm -m -c .\Dashing\dev-db.ini
 
 Ok, you're all set up. To use the database you just grab a session from the configuration:
 
