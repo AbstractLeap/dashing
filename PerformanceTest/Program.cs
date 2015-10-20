@@ -159,11 +159,12 @@
                     TestName,
                     i => {
                         using (var dashingSession = dashingConfig.BeginTransactionLessSession()) {
+                            var j = i + 3;
                             return
                                 dashingSession.Query<Post>()
                                               .Fetch(p => p.Comments)
                                               .Fetch(p => p.Tags)
-                                              .Where(p => p.PostId > i && p.PostId < i + 3)
+                                              .Where(p => p.PostId > i && p.PostId < j)
                                               .ToList();
 
                         }
@@ -177,7 +178,8 @@
                     TestName,
                     i => {
                         using (var EfDb = new EfContext()) {
-                            return EfDb.Posts.Include(p => p.Comments).Include(p => p.Tags).Where(p => p.PostId > i && p.PostId < i + 3).ToList();
+                            var j = i + 3;
+                            return EfDb.Posts.Include(p => p.Comments).Include(p => p.Tags).Where(p => p.PostId > i && p.PostId < j).ToList();
                         }
                     }));
 
@@ -190,19 +192,20 @@
                         using (var nhSession = Nh.SessionFactory.OpenSession()) {
                             // First(p => p.PostId == i) doesn't work?
                             // ok, nHIbernate linq broken (now I remember the pain!)
+                            var j = i + 3;
                             var posts =
                                 nhSession.QueryOver<Post>()
-                                         .Where(p => p.PostId > i && p.PostId < i + 3)
+                                         .Where(p => p.PostId > i && p.PostId < j)
                                          .Future<Post>();
                             var comments =
                                 nhSession.QueryOver<Post>()
                                          .Fetch(p => p.Comments)
-                                         .Eager.Where(p => p.PostId > i && p.PostId < i + 3)
+                                         .Eager.Where(p => p.PostId > i && p.PostId < j)
                                          .Future<Post>();
                             var tags =
                                 nhSession.QueryOver<Post>()
                                          .Fetch(p => p.Tags)
-                                         .Eager.Where(p => p.PostId > i && p.PostId < i + 3)
+                                         .Eager.Where(p => p.PostId > i && p.PostId < j)
                                          .Future<Post>();
                             return posts.ToList();
                         }
