@@ -145,7 +145,21 @@
         }
 
         public int UpdateAll<T>(Action<T> update) where T : class, new() {
-            throw new NotImplementedException();
+            if (!this.BulkUpdates.ContainsKey(typeof(T))) {
+                this.BulkUpdates.Add(typeof(T), new List<Tuple<Action<T>, IEnumerable<Expression<Func<T, bool>>>>>());
+            }
+
+            var list = this.BulkUpdates[typeof(T)] as IList<Tuple<Action<T>, IEnumerable<Expression<Func<T, bool>>>>>;
+            list.Add(Tuple.Create(update, new List<Expression<Func<T, bool>>>()));
+            
+            var entities = this.GetOrInitTestList<T>();
+            var updates = 0;
+            foreach(var entity in entities) {
+                update(entity);
+                updates++;
+            }
+            
+            return updates;
         }
 
         public int DeleteAll<T>() {
@@ -181,11 +195,11 @@
         }
 
         public Task<int> UpdateAllAsync<T>(Action<T> update) where T : class, new() {
-            throw new NotImplementedException();
+            return Task.FromResult(this.UpdateAll(update));
         }
 
         public Task<int> DeleteAllAsync<T>() {
-            throw new NotImplementedException();
+            return Task.FromResult(this.DeleteAll());
         }
 
         public void AddTestEntities<T>(params T[] entities) {
