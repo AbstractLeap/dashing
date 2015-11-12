@@ -6,5 +6,11 @@
         bool IsPropertyDirty<TResult>(Expression<Func<T, TResult>> propertyExpression);
 
         TResult GetOldValue<TResult>(Expression<Func<T, TResult>> propertyExpression);
+
+        TResult GetNewValue<TResult>(Expression<Func<T, TResult>> propertyExpression);
+
+        object GetNewValue(string propertyName);
+
+        bool IsDirty();
     }
 }
