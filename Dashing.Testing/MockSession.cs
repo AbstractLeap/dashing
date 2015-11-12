@@ -34,7 +34,6 @@
             this.Saves = new Dictionary<Type, IList>();
             this.Deletes = new Dictionary<Type, IList>();
             this.BulkUpdates = new Dictionary<Type, IList>();
-            this.Configuration = new MockConfiguration();
         }
 
         public IDictionary<Type, IList> Inserts { get; set; }
@@ -150,7 +149,7 @@
             }
 
             var list = this.BulkUpdates[typeof(T)] as IList<Tuple<Action<T>, IEnumerable<Expression<Func<T, bool>>>>>;
-            list.Add(Tuple.Create(update, new List<Expression<Func<T, bool>>>()));
+            list.Add(Tuple.Create(update, new List<Expression<Func<T, bool>>>() as IEnumerable<Expression<Func<T, bool>>>));
             
             var entities = this.GetOrInitTestList<T>();
             var updates = 0;
@@ -199,7 +198,7 @@
         }
 
         public Task<int> DeleteAllAsync<T>() {
-            return Task.FromResult(this.DeleteAll());
+            return Task.FromResult(this.DeleteAll<T>());
         }
 
         public void AddTestEntities<T>(params T[] entities) {
