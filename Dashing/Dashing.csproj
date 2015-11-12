@@ -54,6 +54,8 @@
     <Compile Include="CodeGeneration\IEnumerableAwaiter.cs" />
     <Compile Include="CodeGeneration\ISetLogger.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
+    <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
+    <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="Configuration\Column.cs" />
     <Compile Include="Configuration\ConfigurationBase.cs" />
@@ -110,6 +112,7 @@
     <Compile Include="Engine\DML\CountWriter.cs" />
     <Compile Include="Engine\DML\DeleteWriter.cs" />
     <Compile Include="Engine\DML\FetchNode.cs" />
+    <Compile Include="Engine\DML\FetchTreeParser.cs" />
     <Compile Include="Engine\DML\ICountWriter.cs" />
     <Compile Include="Engine\DML\IDeleteWriter.cs" />
     <Compile Include="Engine\DML\IInsertWriter.cs" />

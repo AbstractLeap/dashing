@@ -47,7 +47,7 @@
 
         public IDictionary<Type, IList> BulkUpdates { get; set; }
 
-        public IConfiguration Configuration { get; private set; }
+        public IConfiguration Configuration { get; set; }
 
         public IDapper Dapper { get; private set; }
 

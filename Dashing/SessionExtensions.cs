@@ -3,10 +3,13 @@ namespace Dashing {
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Threading.Tasks;
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
+
+    using Binder = Microsoft.CSharp.RuntimeBinder.Binder;
 
     public static class SessionExtensions {
         /// <summary>
@@ -327,8 +330,8 @@ namespace Dashing {
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public static ITrackedEntity Inspect<T>(this ISession session, T entity) {
-            return (ITrackedEntity)entity;
+        public static ITrackedEntityInspector<T> Inspect<T>(this ISession session, T entity) {
+            return (ITrackedEntityInspector<T>)Activator.CreateInstance(typeof(TrackedEntityInspector<>).MakeGenericType(typeof(T)), new object[] { entity });
         }
     }
 }

@@ -210,7 +210,7 @@
             public FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery) {
                 int aliasCounter;
                 int numberCollectionFetches;
-                return base.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
+                return base.fetchTreeParser.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
             }
         }
 
