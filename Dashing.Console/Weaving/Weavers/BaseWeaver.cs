@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Console.Weaving.Weavers {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
     using Dashing.Tools;
@@ -9,6 +10,7 @@
 
     using Mono.Cecil;
     using Mono.Cecil.Cil;
+    using Mono.Cecil.Rocks;
 
     public abstract class BaseWeaver : ITaskLogHelper, IWeaver {
         private const string BackingFieldTemplate = "<{0}>k__BackingField";
@@ -129,6 +131,13 @@
             }
 
             return reference;
+        }
+
+        protected void MakeNotDebuggerBrowsable(ModuleDefinition module, FieldDefinition field) {
+            var debuggerBrowsableConstructor = module.Import(typeof(DebuggerBrowsableAttribute).GetConstructors().First());
+            var debuggerBrowsableAttr = new CustomAttribute(debuggerBrowsableConstructor);
+            debuggerBrowsableAttr.ConstructorArguments.Add(new CustomAttributeArgument(module.Import(typeof(DebuggerBrowsableState)), DebuggerBrowsableState.Never));
+            field.CustomAttributes.Add(debuggerBrowsableAttr);
         }
 
         protected bool DoesNotUseObjectMethod(TypeDefinition typeDefinition, string methodName) {

@@ -56,6 +56,7 @@
                             string.Format("__{0}_IsSet", columnDefinition.Name),
                             FieldAttributes.Family,
                             boolTypeDef);
+                        this.MakeNotDebuggerBrowsable(typeDef.Module, isSetFieldDef);
                         propDef.DeclaringType.Fields.Add(isSetFieldDef);
 
                         // assign true to this field

@@ -63,8 +63,9 @@
                 if (this.HasPropertyInInheritanceChain(typeDef, columnDefinition.Name)) {
                     var propertyDefinition = this.GetProperty(typeDef, columnDefinition.Name);
                     if (propertyDefinition.DeclaringType.FullName == typeDef.FullName) {
-                        typeDef.Fields.Add(
-                            new FieldDefinition(string.Format("__{0}_IsDirty", columnDefinition.Name), FieldAttributes.Family, boolTypeDef));
+                        var dirtyField = new FieldDefinition(string.Format("__{0}_IsDirty", columnDefinition.Name), FieldAttributes.Family, boolTypeDef);
+                        this.MakeNotDebuggerBrowsable(typeDef.Module, dirtyField);
+                        typeDef.Fields.Add(dirtyField);
 
                         // handle other maps, strings, valuetype, valuetype?
                         var oldValuePropType = propertyDefinition.PropertyType;
@@ -74,8 +75,9 @@
                             // use nullable value types
                         }
 
-                        typeDef.Fields.Add(
-                            new FieldDefinition(string.Format("__{0}_OldValue", columnDefinition.Name), FieldAttributes.Family, oldValuePropType));
+                        var oldValueField = new FieldDefinition(string.Format("__{0}_OldValue", columnDefinition.Name), FieldAttributes.Family, oldValuePropType);
+                        this.MakeNotDebuggerBrowsable(typeDef.Module, oldValueField);
+                        typeDef.Fields.Add(oldValueField);
                     }
                 }
             }
