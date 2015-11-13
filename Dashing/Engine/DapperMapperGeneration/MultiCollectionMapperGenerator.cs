@@ -49,13 +49,13 @@ namespace Dashing.Engine.DapperMapperGeneration {
 
             var newRootStatements = new List<Expression> {
                                                              Expression.Assign(currentRootParam, rootVar),
-                                                             Expression.Call(currentRootParam, rootType.GetMethod("EnableTracking")),
                                                              Expression.Call(
                                                                  resultsParam,
                                                                  typeof(ICollection<>).MakeGenericType(rootType).GetMethod("Add"),
                                                                  currentRootParam)
                                                          };
             newRootStatements.AddRange(innerStatements.Item1);
+            newRootStatements.Add(Expression.Call(currentRootParam, rootType.GetMethod("EnableTracking")));
 
             // check to see if rootVar different to currentRoot
             // if currentRoomParam == null || currentRootParam.Pk != rootVar.Pk { results.Add(rootVar); currentRootParam = rootVar; }
@@ -163,13 +163,12 @@ namespace Dashing.Engine.DapperMapperGeneration {
                                     Expression.Assign(thisVar, Expression.Property(dictVar, "Item", pkExpr)),
                                     Expression.Block(
                                         new[] {
-                                            Expression.Call(thisVar, typeof(ITrackedEntity).GetMethod("EnableTracking")),
-                                                  Expression.Call(
+                                            Expression.Call(
                                                       dictVar,
                                                       dictType.GetMethods().First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
                                                       pkExpr,
                                                       thisVar)
-                                              }.Union(innerStatements.Item1))),
+                                              }.Union(innerStatements.Item1).Union(new[] { Expression.Call(thisVar, typeof(ITrackedEntity).GetMethod("EnableTracking")) }))),
                                 Expression.Assign(
                                     tupleVar,
                                     Expression.New(
@@ -204,10 +203,10 @@ namespace Dashing.Engine.DapperMapperGeneration {
 
                         var thisStatements = new List<Expression> {
                                                                       thisInit,
-                                                                      Expression.Call(thisVar, typeof(ITrackedEntity).GetMethod("EnableTracking")),
                                                                       Expression.Assign(propExpr, thisVar)
                                                                   };
                         thisStatements.AddRange(innerStatements.Item1);
+                        thisStatements.Add(Expression.Call(thisVar, typeof(ITrackedEntity).GetMethod("EnableTracking")));
                         var expr = Expression.IfThen(ifExpr, Expression.Block(thisStatements));
                         rootStatements.Add(expr);
                         collectionStatements.AddRange(innerStatements.Item2);
@@ -216,14 +215,6 @@ namespace Dashing.Engine.DapperMapperGeneration {
             }
 
             return Tuple.Create<IEnumerable<Expression>, IEnumerable<Expression>>(rootStatements, collectionStatements);
-        }
-
-        private static void GetRootAssignment<T>(
-            List<Expression> statements,
-            ParameterExpression rootVar,
-            ParameterExpression objectsParam,
-            Type rootType) {
-            statements.Add(Expression.Assign(rootVar, Expression.Convert(Expression.ArrayIndex(objectsParam, Expression.Constant(0)), rootType)));
         }
     }
 }

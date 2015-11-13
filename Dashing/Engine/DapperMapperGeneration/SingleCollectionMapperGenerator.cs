@@ -29,7 +29,6 @@ namespace Dashing.Engine.DapperMapperGeneration {
             var statements = new List<Expression>();
             var newRootStatements = new List<Expression> {
                                                              Expression.Assign(currentRootParam, rootVar),
-                                                             Expression.Call(currentRootParam, rootType.GetMethod("EnableTracking")),
                                                              Expression.Call(
                                                                  resultsParam,
                                                                  typeof(ICollection<>).MakeGenericType(rootType).GetMethod("Add"),
@@ -52,6 +51,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
                 mappedTypes,
                 ref objectParamArrayIdx);
             newRootStatements.AddRange(innerStatements.Item1);
+            newRootStatements.Add(Expression.Call(currentRootParam, rootType.GetMethod("EnableTracking")));
             insideCollectionStatements.AddRange(innerStatements.Item2);
             
             // if currentRoomParam == null || currentRootParam.Pk != rootVar.Pk { currentRootParam = rootVar; currentRootParam.EnabledTracking(); results.Add(currentRootParam);  }
@@ -115,26 +115,28 @@ namespace Dashing.Engine.DapperMapperGeneration {
                     ++objectParamArrayIdx;
                     var innerStatements = this.VisitTree(childNode.Value, isOneToMany ? (Expression)convertExpr : propExpr,  objectsParam, ref hasVisitedCollection, isInsideCollection || isOneToMany, mappedTypes, ref objectParamArrayIdx);
                     if (isInsideCollection) {
-                        var thenExpr = new List<Expression> { enableTrackingExpr, ex };
+                        var thenExpr = new List<Expression> { ex };
                         thenExpr.AddRange(innerStatements.Item2);
+                        thenExpr.Add(enableTrackingExpr);
                         insideCollectionStatements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                     }
                     else if (isOneToMany) {
                         var thenExpr = new List<Expression> { ex };
-                        var topOfInsideCollectionStatements = new List<Expression> { enableTrackingExpr,
-                                                                                     Expression.Call(
+                        var topOfInsideCollectionStatements = new List<Expression> { Expression.Call(
                                                                                          propExpr,
                                                                                          typeof(ICollection<>).MakeGenericType(childType)
                                                                                                               .GetMethod("Add"),
                                                                                          new Expression[] { convertExpr })
                                                                                    };
                         topOfInsideCollectionStatements.AddRange(innerStatements.Item2);
+                        topOfInsideCollectionStatements.Add(enableTrackingExpr);
                         insideCollectionStatements.Add(Expression.IfThen(ifExpr, Expression.Block(topOfInsideCollectionStatements)));
                         newRootStatements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                     }
                     else {
-                        var thenExpr = new List<Expression> { enableTrackingExpr, ex };
+                        var thenExpr = new List<Expression> { ex };
                         thenExpr.AddRange(innerStatements.Item1);
+                        thenExpr.Add(enableTrackingExpr);
                         newRootStatements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                         insideCollectionStatements.AddRange(innerStatements.Item2);
                     }
@@ -142,32 +144,6 @@ namespace Dashing.Engine.DapperMapperGeneration {
             }
 
             return new Tuple<IEnumerable<Expression>, IEnumerable<Expression>>(newRootStatements, insideCollectionStatements);
-        }
-
-        private static Expression InitialiseCollectionAndAddChild(
-            Expression propExpr,
-            FetchNode childNode,
-            Expression mappedType) {
-            // potentially initialize and then add the member assign expression, check for null first
-            return Expression.Block(
-                // if the collection property is null, initialise it to a list
-                Expression.IfThen(
-                    // if (parent.Property == null) {
-                    Expression.Equal(
-                        propExpr,
-                        Expression.Constant(null)),
-                    Expression.Assign(
-                        // parent.Property = new List<T>();
-                        propExpr,
-                        Expression.New(
-                            typeof(List<>).MakeGenericType(
-                                childNode.Column.Type.GetGenericArguments().First())))),
-                Expression.Call(
-                    // parent.Property.Add(child);
-                    propExpr,
-                    typeof(ICollection<>).MakeGenericType(
-                        childNode.Column.Type.GetGenericArguments().First()).GetMethod("Add"),
-                    new Expression[] { mappedType }));
         }
     }
 }

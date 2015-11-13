@@ -25,13 +25,13 @@
 
             // var rootVar = (RootType)objects[0];
             GetRootAssignment<T>(statements, rootVar, objectsParam, tt);
-            statements.Add(Expression.Call(rootVar, tt.GetMethod("EnableTracking")));
 
             // go through the tree
             int i = 1;
             statements.AddRange(this.VisitNonCollectionTree<T>(fetchTree, objectsParam, rootVar, ref i, mappedTypes));
 
             // add in the return statement and parameter
+            statements.Add(Expression.Call(rootVar, tt.GetMethod("EnableTracking")));
             statements.Add(rootVar);
             return Tuple.Create(Expression.Lambda(Expression.Block(new[] { rootVar }, statements), objectsParam).Compile(), mappedTypes.ToArray());
         }
@@ -62,13 +62,11 @@
                     mappedTypes.Add(mappedType);
                     var innerStatements = this.VisitNonCollectionTree<T>(child.Value, objectsParam, propExpr, ref i, mappedTypes);
 
-                    var thenExpr = new List<Expression> {
-                                                            Expression.Call(
-                                                                Expression.Convert(indexExpr, typeof(ITrackedEntity)),
-                                                                typeof(ITrackedEntity).GetMethod("EnableTracking")),
-                                                            assignExpr
-                                                        };
+                    var thenExpr = new List<Expression>{assignExpr};
                     thenExpr.AddRange(innerStatements);
+                    thenExpr.Add(Expression.Call(
+                                                                Expression.Convert(indexExpr, typeof(ITrackedEntity)),
+                                                                typeof(ITrackedEntity).GetMethod("EnableTracking")));
                     statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                 }
             }

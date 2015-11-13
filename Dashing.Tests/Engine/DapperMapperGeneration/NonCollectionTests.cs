@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tests.Engine.DapperMapperGeneration {
     using System;
     using System.Configuration;
+    using System.Linq;
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
@@ -43,6 +44,15 @@
             Assert.True(((ITrackedEntity)result.Blog).IsTrackingEnabled());
         }
 
+        [Fact]
+        public void EnableTrackingCalledLast() {
+            var func = GenerateSingleMapper();
+            var post1 = new Post { PostId = 1 };
+            var blog1 = new Blog { BlogId = 2 };
+            var post = ((Func<object[], Post>)func)(new object[] { post1, blog1 });
+            Assert.False(((ITrackedEntity)post).GetDirtyProperties().Any());
+        }
+
         private static Delegate GenerateSingleMapper() {
             var config = new CustomConfig();
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
@@ -73,6 +83,18 @@
             Assert.True(((ITrackedEntity)resultComment).IsTrackingEnabled());
             Assert.True(((ITrackedEntity)resultComment.Post).IsTrackingEnabled());
             Assert.True(((ITrackedEntity)resultComment.Post.Author).IsTrackingEnabled());
+        }
+
+        [Fact]
+        public void MultiFetchNoCollectionHasTrackingEnabledLast() {
+            var func = GenerateMultipleNoCollectionMapper();
+            var comment = new Comment();
+            var post = new Post { PostId = 1 };
+            var author = new User { UserId = 3 };
+            var resultComment = ((Func<object[], Comment>)func)(new object[] { comment, post, author });
+            Assert.False(((ITrackedEntity)resultComment).GetDirtyProperties().Any());
+            Assert.False(((ITrackedEntity)resultComment.Post).GetDirtyProperties().Any());
+            Assert.False(((ITrackedEntity)resultComment.Post.Author).GetDirtyProperties().Any());
         }
 
         [Fact]
