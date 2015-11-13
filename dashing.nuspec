@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.1.39-alpha</version>
+        <version>0.1.41-alpha</version>
         <title>Dashing ORM</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
         <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.1.39-alpha More Tracked Entity Inspector
+        <releaseNotes>* 0.1.41-alpha xdt up
+* 0.1.39-alpha More Tracked Entity Inspector
 * 0.1.37-alpha MockSessionFactory
 * 0.1.36-alpha tracked entity inspector
 * 0.1.35-alpha nuget
@@ -58,8 +59,7 @@
     </metadata>
     <files>
         <file src="nuspec\build\Dashing.targets" target="build\Dashing.targets" />
-        <file src="nuspec\content\app.config.install.xdt" target="content\app.config.install.xdt" />
-        <file src="nuspec\content\web.config.install.xdt" target="content\web.config.install.xdt" />
+        <file src="content\_._" target="content\_._" />
         <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
         <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
         <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
