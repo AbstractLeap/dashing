@@ -54,7 +54,9 @@
 
             // add isTracking field if base class
             if (this.IsBaseClass(typeDef)) {
-                typeDef.Fields.Add(new FieldDefinition(isTrackingName, FieldAttributes.Family, boolTypeDef));
+                var _isTrackingField = new FieldDefinition(isTrackingName, FieldAttributes.Family, boolTypeDef);
+                this.MakeNotDebuggerBrowsable(typeDef.Module, _isTrackingField);
+                typeDef.Fields.Add(_isTrackingField);
             }
 
             // fields for tracking state of properties on this class only
