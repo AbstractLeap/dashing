@@ -11,12 +11,20 @@
         }
 
         public DefaultConfiguration(ConnectionStringSettings connectionStringSettings, IConvention mappingConvention)
+            : this(connectionStringSettings, mappingConvention, new DefaultSessionFactory()) {
+        }
+
+        public DefaultConfiguration(ConnectionStringSettings connectionStringSettings, ISessionFactory sessionFactory)
+            : this(connectionStringSettings, new DefaultConvention(), sessionFactory) {
+        }
+
+        public DefaultConfiguration(ConnectionStringSettings connectionStringSettings, IConvention mappingConvention, ISessionFactory sessionFactory)
             : base(
                 new SqlEngine(new DialectFactory().Create(connectionStringSettings)),
                 connectionStringSettings,
                 DbProviderFactories.GetFactory(connectionStringSettings.ProviderName),
                 new DefaultMapper(mappingConvention),
-                new DefaultSessionFactory()) {
+                sessionFactory) {
         }
     }
 }

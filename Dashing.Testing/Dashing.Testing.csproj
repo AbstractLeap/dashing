@@ -41,6 +41,7 @@
     <Compile Include="FetchCloner.cs" />
     <Compile Include="MockDapper.cs" />
     <Compile Include="MockFetchMany.cs" />
+    <Compile Include="MockSessionFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MockSelectQuery.cs" />
     <Compile Include="MockSession.cs" />

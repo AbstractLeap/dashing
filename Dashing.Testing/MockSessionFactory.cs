@@ -1,6 +1,7 @@
 namespace Dashing.Testing
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Data;
 	
