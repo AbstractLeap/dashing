@@ -82,6 +82,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CodeGeneration\TrackedEntityInspectorTests.cs" />
+    <Compile Include="Configuration\AddNamespaceDomain\AddNamespaceConfiguration.cs" />
+    <Compile Include="Configuration\AddNamespaceTests.cs" />
     <Compile Include="Configuration\ColumnExtensionTests.cs" />
     <Compile Include="Engine\DapperMapperGeneration\CollectionTests.cs" />
     <Compile Include="Engine\DapperMapperGeneration\NonCollectionTests.cs" />

@@ -2,9 +2,6 @@ namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
-
-    using Dashing.CodeGeneration;
 
     public static class ConfigurationHelper {
         public static void Add<T>(IConfiguration configuration, IDictionary<Type, IMap> mappedTypes) {
@@ -19,13 +16,19 @@ namespace Dashing.Configuration {
                 throw new ArgumentException("Namespace of the indicator type is null");
             }
 
-            Add(configuration, mappedTypes, type.Assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsVisible && t.Namespace != null && t.Namespace == ns));
+            Add(
+                configuration,
+                mappedTypes,
+                type.Assembly.GetTypes()
+                    .Where(
+                        t =>
+                        t.IsClass && !t.IsAbstract && t.IsVisible && t.Namespace != null && t.Namespace == ns
+                        && !typeof(IConfiguration).IsAssignableFrom(t)));
         }
 
         public static void Add(IConfiguration configuration, IDictionary<Type, IMap> mappedTypes, IEnumerable<Type> types) {
-            var maps = types.Distinct()
-                            .Where(t => !mappedTypes.ContainsKey(t))
-                            //.AsParallel() // don't do parallel, we want sequential processing as the mapper will attempt to recognise (and post-fix) one-to-one mappings
+            var maps = types.Distinct().Where(t => !mappedTypes.ContainsKey(t))
+                //.AsParallel() // don't do parallel, we want sequential processing as the mapper will attempt to recognise (and post-fix) one-to-one mappings
                             .Select(t => configuration.Mapper.MapFor(t, configuration));
 
             // force sequential evaluation (not thread safe?)
