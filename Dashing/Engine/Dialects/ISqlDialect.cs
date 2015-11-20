@@ -29,10 +29,6 @@ namespace Dashing.Engine.Dialects {
         /// </remarks>
         void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip);
 
-        bool TypeTakesLength(DbType type);
-
-        bool TypeTakesPrecisionAndScale(DbType type);
-
         /// <summary>
         /// Changes the name of the column from the name in fromColumn to the name in toColumn
         /// </summary>

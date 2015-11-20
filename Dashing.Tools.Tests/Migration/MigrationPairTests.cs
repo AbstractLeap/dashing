@@ -64,7 +64,6 @@
         private IMap<Post> GenerateMap() {
             var dialect = new SqlServerDialect();
             var config = new Mock<IConfiguration>(MockBehavior.Strict);
-            config.Setup(m => m.Engine.SqlDialect).Returns(dialect);
 
             var map = new Map<Post> { Table = "Posts", Schema = null, Configuration = config.Object };
 

@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FetchCloner.cs" />
+    <Compile Include="InMemoryDatabase.cs" />
     <Compile Include="MockDapper.cs" />
     <Compile Include="MockFetchMany.cs" />
     <Compile Include="MockSessionFactory.cs" />

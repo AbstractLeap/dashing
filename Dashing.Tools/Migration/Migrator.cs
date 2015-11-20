@@ -8,6 +8,7 @@
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
+    using Dashing.Extensions;
 
     public class Migrator : IMigrator {
         private readonly ISqlDialect dialect;
@@ -96,9 +97,9 @@
                         var toPrimaryKey = renameTo.PrimaryKey;
                         if (!AreColumnDefinitionsEqual(fromPrimaryKey, toPrimaryKey)) {
                             if (fromPrimaryKey.DbName != toPrimaryKey.DbName && fromPrimaryKey.DbType == toPrimaryKey.DbType
-                                && (!this.dialect.TypeTakesLength(fromPrimaryKey.DbType) || (fromPrimaryKey.MaxLength && toPrimaryKey.MaxLength)
+                                && (!fromPrimaryKey.DbType.TypeTakesLength() || (fromPrimaryKey.MaxLength && toPrimaryKey.MaxLength)
                                     || (fromPrimaryKey.Length == toPrimaryKey.Length))
-                                && (!this.dialect.TypeTakesPrecisionAndScale(fromPrimaryKey.DbType)
+                                && (!fromPrimaryKey.DbType.TypeTakesPrecisionAndScale()
                                     || (fromPrimaryKey.Precision == toPrimaryKey.Precision && fromPrimaryKey.Scale == toPrimaryKey.Scale))) {
                                 // just a change in name
                                 sql.AppendSql(this.alterTableWriter.ChangeColumnName(fromPrimaryKey, toPrimaryKey));
@@ -379,11 +380,11 @@
         }
 
         private bool RequiresLengthChange(IColumn from, IColumn to) {
-            return this.dialect.TypeTakesLength(from.DbType) && (from.MaxLength != to.MaxLength || (!to.MaxLength && from.Length != to.Length));
+            return from.DbType.TypeTakesLength() && (from.MaxLength != to.MaxLength || (!to.MaxLength && from.Length != to.Length));
         }
 
         private bool RequiresPrecisionOrScaleChange(IColumn from, IColumn to) {
-            return this.dialect.TypeTakesPrecisionAndScale(from.DbType) && (from.Precision != to.Precision || from.Scale != to.Scale);
+            return from.DbType.TypeTakesPrecisionAndScale() && (from.Precision != to.Precision || from.Scale != to.Scale);
         }
     }
 }

@@ -233,5 +233,29 @@
                 currentBaseType = currentBaseType.BaseType;
             }
         }
+
+        public static bool TypeTakesLength(this DbType type) {
+            switch (type) {
+                case DbType.AnsiString:
+                case DbType.AnsiStringFixedLength:
+                case DbType.Binary:
+                case DbType.String:
+                case DbType.StringFixedLength:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        public static bool TypeTakesPrecisionAndScale(this DbType type) {
+            switch (type) {
+                case DbType.Decimal:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
     }
 }

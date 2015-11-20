@@ -152,6 +152,7 @@
     <Compile Include="IFetchMany.cs" />
     <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
+    <Compile Include="ISessionState.cs" />
     <Compile Include="OrderClause.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="Session.cs" />
     <Compile Include="NeedToDash.cs" />
     <Compile Include="SessionExtensions.cs" />
+    <Compile Include="SessionState.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Generator\" />

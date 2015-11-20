@@ -3,6 +3,8 @@ namespace Dashing.Tools.Migration {
     using System.Linq;
 
     using Dashing.Configuration;
+    using Dashing.Engine;
+    using Dashing.Extensions;
 
     public class MigrationPair {
         public IMap From { get; private set; }
@@ -54,13 +56,13 @@ namespace Dashing.Tools.Migration {
                     return true;
                 }
 
-                if (this.To.Configuration.Engine.SqlDialect.TypeTakesLength(fromColumn.DbType)
+                if (fromColumn.DbType.TypeTakesLength()
                     && (fromColumn.MaxLength != toColumn.MaxLength || (!fromColumn.MaxLength && fromColumn.Length != toColumn.Length))) {
                     message = string.Format("{0} has changed length", fromColumn.Name);
                     return true;
                 }
 
-                if (this.To.Configuration.Engine.SqlDialect.TypeTakesPrecisionAndScale(fromColumn.DbType)
+                if (fromColumn.DbType.TypeTakesPrecisionAndScale()
                     && (fromColumn.Scale != toColumn.Scale || fromColumn.Precision != toColumn.Precision)) {
                     message = string.Format("{0} has changed scale or precision", fromColumn.Name);
                     return true;
