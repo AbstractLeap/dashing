@@ -60,7 +60,7 @@
             return sql.ToString();
         }
 
-        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, bool enforceAlias = false) {
+        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, bool enforceAlias = false) where T : class, new() {
             // TODO: one StringBuilder to rule them all - Good luck with that ;-) (insertions are expensive)
             var sql = new StringBuilder();
             DynamicParameters parameters = new DynamicParameters();
@@ -108,7 +108,7 @@
             FetchNode rootNode,
             StringBuilder sql,
             int numberCollectionFetches,
-            ref DynamicParameters parameters) {
+            ref DynamicParameters parameters) where T : class, new() {
             var numQueries =
                 rootNode.Children.Count(c => c.Value.Column.Relationship == RelationshipType.OneToMany || c.Value.ContainedCollectionfetchesCount > 0);
             var whereSql = new StringBuilder();
@@ -193,7 +193,7 @@
             FetchNode rootNode,
             StringBuilder sql,
             int numberCollectionFetches,
-            ref DynamicParameters parameters) {
+            ref DynamicParameters parameters) where T : class, new() {
             // we write a subquery for the root type and all Many-to-One coming off it, we apply paging to that
             // we then left join to all of the collection columns
             // we need to apply the order by outside of the join as well
@@ -282,7 +282,7 @@
             FetchNode rootNode,
             StringBuilder sql,
             int numberCollectionFetches,
-            ref DynamicParameters parameters) {
+            ref DynamicParameters parameters) where T : class, new() {
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
             var whereSql = new StringBuilder();
@@ -354,7 +354,7 @@
             this.Dialect.AppendQuotedName(orderSql, name ?? this.Configuration.GetMap<T>().PrimaryKey.DbName);
         }
 
-        protected void AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) {
+        protected void AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) where T : class, new() {
             // separate string builder for the tables as we use the sql builder for fetch columns
             tableSql.Append(" from ");
             this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap<T>());
@@ -393,7 +393,7 @@
             StringBuilder outerQueryColumnSql,
             StringBuilder[] subQueryColumnSqls,
             StringBuilder[] subQueryTableSqls,
-            FetchNode rootNode) {
+            FetchNode rootNode) where T : class, new() {
             foreach (var subQuery in subQueryTableSqls) {
                 subQuery.Append(" from ");
                 this.Dialect.AppendQuotedTableName(subQuery, this.Configuration.GetMap<T>());
@@ -434,7 +434,7 @@
             StringBuilder outerTableSql,
             StringBuilder innerColumnSql,
             StringBuilder outerColumnSql,
-            FetchNode rootNode) {
+            FetchNode rootNode) where T : class, new() {
             innerTableSql.Append(" from ");
             this.Dialect.AppendQuotedTableName(innerTableSql, this.Configuration.GetMap<T>());
             innerTableSql.Append(" as t");
@@ -757,7 +757,7 @@
             return new AddNodeResult { Signature = actualSignature, SplitOn = splitOns };
         }
 
-        private void AddRootColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode, bool removeTrailingComma = true) {
+        private void AddRootColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode, bool removeTrailingComma = true) where T : class, new() {
             var alias = rootNode != null ? rootNode.Alias : null;
 
             if (selectQuery.Projection == null) {

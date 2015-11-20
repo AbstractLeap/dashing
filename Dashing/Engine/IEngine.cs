@@ -9,45 +9,45 @@ namespace Dashing.Engine {
     public interface IEngine {
         IConfiguration Configuration { get; set; }
 
-        T Query<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id);
+        T Query<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id) where T : class, new();
 
-        IEnumerable<T> Query<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids);
+        IEnumerable<T> Query<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) where T : class, new();
 
-        IEnumerable<T> Query<T>(ISessionState sessionState, SelectQuery<T> query);
+        IEnumerable<T> Query<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new();
 
-        Page<T> QueryPaged<T>(ISessionState sessionState, SelectQuery<T> query);
+        Page<T> QueryPaged<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new();
 
-        int Count<T>(ISessionState sessionState, SelectQuery<T> query);
+        int Count<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new();
 
-        int Insert<T>(ISessionState sessionState, IEnumerable<T> entities);
+        int Insert<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new();
 
-        int Save<T>(ISessionState sessionState, IEnumerable<T> entities);
+        int Save<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new();
 
-        int Delete<T>(ISessionState sessionState, IEnumerable<T> entities);
+        int Delete<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new();
 
         int Execute<T>(ISessionState sessionState, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
 
-        int ExecuteBulkDelete<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates);
+        int ExecuteBulkDelete<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
 
-        Task<T> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id);
+        Task<T> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id) where T : class, new();
 
-        Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids);
+        Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) where T : class, new();
 
-        Task<IEnumerable<T>> QueryAsync<T>(ISessionState sessionState, SelectQuery<T> query);
+        Task<IEnumerable<T>> QueryAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new();
 
-        Task<Page<T>> QueryPagedAsync<T>(ISessionState sessionState, SelectQuery<T> query);
+        Task<Page<T>> QueryPagedAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new();
 
-        Task<int> CountAsync<T>(ISessionState sessionState, SelectQuery<T> query);
+        Task<int> CountAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new();
 
-        Task<int> InsertAsync<T>(ISessionState sessionState, IEnumerable<T> entities);
+        Task<int> InsertAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new();
 
-        Task<int> SaveAsync<T>(ISessionState sessionState, IEnumerable<T> entities);
+        Task<int> SaveAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new();
 
-        Task<int> DeleteAsync<T>(ISessionState sessionState, IEnumerable<T> entities);
+        Task<int> DeleteAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new();
 
         Task<int> ExecuteAsync<T>(ISessionState sessionState, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates)
             where T : class, new();
 
-        Task<int> ExecuteBulkDeleteAsync<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates);
+        Task<int> ExecuteBulkDeleteAsync<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
     }
 }

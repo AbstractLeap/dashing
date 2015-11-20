@@ -9,7 +9,8 @@ namespace Dashing {
 
     using Dashing.Extensions;
 
-    public class SelectQuery<T> : ISelectQuery<T> {
+    public class SelectQuery<T> : ISelectQuery<T>
+        where T : class, new() {
         private readonly ISelectQueryExecutor executor;
 
         public SelectQuery(ISelectQueryExecutor selectQueryExecutor) {
@@ -19,7 +20,7 @@ namespace Dashing {
             this.Fetches = new List<Expression>();
             this.OrderClauses = new Queue<OrderClause<T>>();
             this.WhereClauses = new List<Expression<Func<T, bool>>>();
-            this.CollectionFetches = new List<KeyValuePair<Expression, Stack<Expression>>>();
+            this.CollectionFetches = new List<KeyValuePair<Expression, List<Expression>>>();
         }
 
         public Expression<Func<T, dynamic>> Projection { get; private set; }
@@ -30,7 +31,7 @@ namespace Dashing {
 
         public IList<Expression> Fetches { get; private set; }
 
-        public IList<KeyValuePair<Expression, Stack<Expression>>> CollectionFetches { get; private set; }
+        public IList<KeyValuePair<Expression, List<Expression>>> CollectionFetches { get; private set; }
 
         public Queue<OrderClause<T>> OrderClauses { get; private set; }
 

@@ -7,7 +7,7 @@ namespace Dashing {
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface ISelectQuery<T> : IEnumerable<T> {
+    public interface ISelectQuery<T> : IEnumerable<T> where T : class, new() {
         /// <summary>
         ///     The select.
         /// </summary>

@@ -242,7 +242,7 @@
                 : base(dialect, config) {
             }
 
-            public FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery) {
+            public FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery) where T : class, new() {
                 int aliasCounter;
                 int numberCollectionFetches;
                 return this.fetchTreeParser.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);

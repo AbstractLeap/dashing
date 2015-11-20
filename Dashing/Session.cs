@@ -45,31 +45,31 @@
             this.sessionState.Reject();
         }
 
-        public T Get<T, TPrimaryKey>(TPrimaryKey id) {
+        public T Get<T, TPrimaryKey>(TPrimaryKey id) where T : class, new() {
             return this.engine.Query<T, TPrimaryKey>(this.sessionState, id);
         }
 
-        public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+        public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) where T : class, new() {
             return this.engine.Query<T, TPrimaryKey>(this.sessionState, ids);
         }
 
-        public ISelectQuery<T> Query<T>() {
+        public ISelectQuery<T> Query<T>() where T : class, new() {
             return new SelectQuery<T>(this);
         }
 
-        public IEnumerable<T> Query<T>(SelectQuery<T> query) {
+        public IEnumerable<T> Query<T>(SelectQuery<T> query) where T : class, new() {
             return this.engine.Query(this.sessionState, query);
         }
 
-        public Page<T> QueryPaged<T>(SelectQuery<T> query) {
+        public Page<T> QueryPaged<T>(SelectQuery<T> query) where T : class, new() {
             return this.engine.QueryPaged(this.sessionState, query);
         }
 
-        public int Count<T>(SelectQuery<T> query) {
+        public int Count<T>(SelectQuery<T> query) where T : class, new() {
             return this.engine.Count(this.sessionState, query);
         }
 
-        public int Insert<T>(IEnumerable<T> entities) {
+        public int Insert<T>(IEnumerable<T> entities) where T : class, new() {
             if (this.Configuration.EventHandlers.PreInsertListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PreInsertListeners) {
@@ -90,7 +90,7 @@
             return insertedRows;
         }
 
-        public int Save<T>(IEnumerable<T> entities) {
+        public int Save<T>(IEnumerable<T> entities) where T : class, new() {
             if (this.Configuration.EventHandlers.PreSaveListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PreSaveListeners) {
@@ -115,7 +115,7 @@
             return this.engine.Execute(this.sessionState, update, predicates);
         }
 
-        public int Delete<T>(IEnumerable<T> entities) {
+        public int Delete<T>(IEnumerable<T> entities) where T : class, new() {
             if (this.Configuration.EventHandlers.PreDeleteListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PreDeleteListeners) {
@@ -136,7 +136,7 @@
             return deletedRows;
         }
 
-        public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             return this.engine.ExecuteBulkDelete(this.sessionState, predicates);
         }
 
@@ -144,31 +144,31 @@
             return this.engine.Execute(this.sessionState, update, null);
         }
 
-        public int DeleteAll<T>() {
+        public int DeleteAll<T>() where T : class, new() {
             return this.engine.ExecuteBulkDelete<T>(this.sessionState, null);
         }
 
-        public async Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id) {
+        public async Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id) where T : class, new() {
             return await this.engine.QueryAsync<T, TPrimaryKey>(this.sessionState, id);
         }
 
-        public async Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
+        public async Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) where T : class, new() {
             return await this.engine.QueryAsync<T, TPrimaryKey>(this.sessionState, ids);
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T>(SelectQuery<T> query) {
+        public async Task<IEnumerable<T>> QueryAsync<T>(SelectQuery<T> query) where T : class, new() {
             return await this.engine.QueryAsync(this.sessionState, query);
         }
 
-        public async Task<Page<T>> QueryPagedAsync<T>(SelectQuery<T> query) {
+        public async Task<Page<T>> QueryPagedAsync<T>(SelectQuery<T> query) where T : class, new() {
             return await this.engine.QueryPagedAsync(this.sessionState, query);
         }
 
-        public async Task<int> CountAsync<T>(SelectQuery<T> query) {
+        public async Task<int> CountAsync<T>(SelectQuery<T> query) where T : class, new() {
             return await this.engine.CountAsync(this.sessionState, query);
         }
 
-        public async Task<int> InsertAsync<T>(IEnumerable<T> entities) {
+        public async Task<int> InsertAsync<T>(IEnumerable<T> entities) where T : class, new() {
             if (this.Configuration.EventHandlers.PreInsertListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PreInsertListeners) {
@@ -189,7 +189,7 @@
             return insertedRows;
         }
 
-        public async Task<int> SaveAsync<T>(IEnumerable<T> entities) {
+        public async Task<int> SaveAsync<T>(IEnumerable<T> entities) where T : class, new() {
             if (this.Configuration.EventHandlers.PreSaveListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PreSaveListeners) {
@@ -214,7 +214,7 @@
             return await this.engine.ExecuteAsync(this.sessionState, update, predicates);
         }
 
-        public async Task<int> DeleteAsync<T>(IEnumerable<T> entities) {
+        public async Task<int> DeleteAsync<T>(IEnumerable<T> entities) where T : class, new() {
             if (this.Configuration.EventHandlers.PreDeleteListeners.Any()) {
                 foreach (var entity in entities) {
                     foreach (var handler in this.Configuration.EventHandlers.PreDeleteListeners) {
@@ -235,7 +235,7 @@
             return deletedRows;
         }
 
-        public async Task<int> DeleteAsync<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public async Task<int> DeleteAsync<T>(IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             return await this.engine.ExecuteBulkDeleteAsync(this.sessionState, predicates);
         }
 
@@ -243,7 +243,7 @@
             return await this.engine.ExecuteAsync(this.sessionState, update, null);
         }
 
-        public async Task<int> DeleteAllAsync<T>() {
+        public async Task<int> DeleteAllAsync<T>() where T : class, new() {
             return await this.engine.ExecuteBulkDeleteAsync<T>(this.sessionState, null);
         }
     }

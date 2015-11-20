@@ -11,20 +11,20 @@
         }
 
         public DefaultConfiguration(ConnectionStringSettings connectionStringSettings, IConvention mappingConvention)
-            : this(connectionStringSettings, mappingConvention, new DefaultSessionFactory()) {
+            : this(connectionStringSettings, mappingConvention, new SqlEngine(new DialectFactory().Create(connectionStringSettings))) {
         }
 
-        public DefaultConfiguration(ConnectionStringSettings connectionStringSettings, ISessionFactory sessionFactory)
-            : this(connectionStringSettings, new DefaultConvention(), sessionFactory) {
+        public DefaultConfiguration(ConnectionStringSettings connectionStringSettings, IEngine engine)
+            : this(connectionStringSettings, new DefaultConvention(), engine) {
         }
 
-        public DefaultConfiguration(ConnectionStringSettings connectionStringSettings, IConvention mappingConvention, ISessionFactory sessionFactory)
+        public DefaultConfiguration(ConnectionStringSettings connectionStringSettings, IConvention mappingConvention, IEngine engine)
             : base(
-                new SqlEngine(new DialectFactory().Create(connectionStringSettings)),
+                engine,
                 connectionStringSettings,
                 DbProviderFactories.GetFactory(connectionStringSettings.ProviderName),
                 new DefaultMapper(mappingConvention),
-                sessionFactory) {
+                new DefaultSessionFactory()) {
         }
     }
 }

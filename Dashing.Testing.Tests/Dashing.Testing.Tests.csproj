@@ -36,6 +36,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Moq, Version=4.2.1502.911, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\packages\Moq.4.2.1502.0911\lib\net40\Moq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="xunit.abstractions">
@@ -64,9 +68,11 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="EntityClonerTests.cs" />
     <Compile Include="FetchClonerTests.cs" />
+    <Compile Include="InMemoryEngineTests.cs" />
+    <Compile Include="InMemoryTableTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MockSelectQueryResults.cs" />
     <Compile Include="TestConfiguration.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\BoolClass.cs" />
@@ -79,6 +85,7 @@
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />
+    <Compile Include="TestDomain\ThingWithStringPrimaryKey.cs" />
     <Compile Include="TestDomain\User.cs" />
     <Compile Include="WhereClauseCaseInsensitiveRewriterTests.cs" />
     <Compile Include="WhereClauseNullCheckRewriterTests.cs" />

@@ -12,7 +12,7 @@
             this.configuration = configuration;
         }
 
-        public FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out int numberCollectionFetches) {
+        public FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out int numberCollectionFetches) where T : class, new() {
             FetchNode rootNode = null;
             numberCollectionFetches = 0;
             aliasCounter = 0;
@@ -45,8 +45,8 @@
                     var currentNode = rootNode;
 
                     // start at the top of the stack, pop the expression off and do as above
-                    while (collectionFetch.Value.Count > 0) {
-                        var lambdaExpr = collectionFetch.Value.Pop() as LambdaExpression;
+                    for (var i = collectionFetch.Value.Count - 1; i >= 0; i--) {
+                        var lambdaExpr = collectionFetch.Value[i] as LambdaExpression;
                         if (lambdaExpr != null) {
                             var expr = lambdaExpr.Body as MemberExpression;
                             while (expr != null) {

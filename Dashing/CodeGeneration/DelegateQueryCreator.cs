@@ -40,7 +40,7 @@
             SelectWriterResult result,
             SelectQuery<T> query,
             IDbConnection connection,
-            IDbTransaction transaction);
+            IDbTransaction transaction) where T : class, new();
 
         public DelegateQueryCreator(IConfiguration configuration) {
             this.nonCollectionMapperGenerator = new NonCollectionMapperGenerator(configuration);
@@ -56,14 +56,14 @@
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetCollectionFunction<T>(
-            SelectWriterResult result) {
+            SelectWriterResult result) where T : class, new() {
             Delegate func;
             var mapperFactory = this.GetCollectionFunction<T>(result, false, out func);
 
             return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>)func.DynamicInvoke(mapperFactory);
         }
 
-        public CollectionAsyncDelegate<T> GetAsyncCollectionFunction<T>(SelectWriterResult result) {
+        public CollectionAsyncDelegate<T> GetAsyncCollectionFunction<T>(SelectWriterResult result) where T : class, new() {
             Delegate func;
             var mapperFactory = this.GetCollectionFunction<T>(result, true, out func);
 
@@ -71,7 +71,7 @@
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> GetNoCollectionFunction<T>(
-            SelectWriterResult result) {
+            SelectWriterResult result) where T : class, new() {
             Delegate func;
             var mapper = this.GetNoCollectionFunction<T>(result, false, out func);
 
@@ -79,7 +79,7 @@
         }
 
         public Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, Task<IEnumerable<T>>> GetAsyncNoCollectionFunction<T>(
-            SelectWriterResult result) {
+            SelectWriterResult result) where T : class, new() {
             Delegate func;
             var mapper = this.GetNoCollectionFunction<T>(result, true, out func);
 

@@ -34,13 +34,13 @@ namespace Dashing.Engine {
             SelectWriterResult result,
             SelectQuery<T> query,
             IDbConnection connection,
-            IDbTransaction transaction);
+            IDbTransaction transaction) where T : class, new();
 
         private delegate Task<IEnumerable<T>> DelegateQueryAsync<T>(
             SelectWriterResult result,
             SelectQuery<T> query,
             IDbConnection connection,
-            IDbTransaction transaction);
+            IDbTransaction transaction) where T : class, new();
 
         public ISqlDialect SqlDialect
         {
@@ -72,7 +72,7 @@ namespace Dashing.Engine {
             this.dialect = dialect;
         }
 
-        public T Query<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id) {
+        public T Query<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id)where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
             var entity = sessionState.GetConnection().Query<T>(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction()).SingleOrDefault();
@@ -83,7 +83,7 @@ namespace Dashing.Engine {
             return entity;
         }
 
-        public IEnumerable<T> Query<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) {
+        public IEnumerable<T> Query<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
             return sessionState.GetConnection().Query<T>(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction()).Select(
@@ -93,7 +93,7 @@ namespace Dashing.Engine {
                 });
         }
 
-        public virtual IEnumerable<T> Query<T>(ISessionState sessionState, SelectQuery<T> query) {
+        public virtual IEnumerable<T> Query<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
             if (query.HasFetches()) {
@@ -116,7 +116,7 @@ namespace Dashing.Engine {
             ;
         }
 
-        public Page<T> QueryPaged<T>(ISessionState sessionState, SelectQuery<T> query) {
+        public Page<T> QueryPaged<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
             var totalResults =
@@ -130,13 +130,13 @@ namespace Dashing.Engine {
                                };
         }
 
-        public int Count<T>(ISessionState sessionState, SelectQuery<T> query) {
+        public int Count<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
             return sessionState.GetConnection().Query<int>(countQuery.Sql, countQuery.Parameters, sessionState.GetTransaction()).SingleOrDefault();
         }
 
-        public virtual int Insert<T>(ISessionState sessionState, IEnumerable<T> entities) {
+        public virtual int Insert<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
             this.EnsureConfigurationLoaded();
 
             var i = 0;
@@ -161,7 +161,7 @@ namespace Dashing.Engine {
             return i;
         }
 
-        public virtual int Save<T>(ISessionState sessionState, IEnumerable<T> entities) {
+        public virtual int Save<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateSql(entities);
             return sqlQuery.Sql.Length == 0
@@ -169,7 +169,7 @@ namespace Dashing.Engine {
                        : sessionState.GetConnection().Execute(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction());
         }
 
-        public virtual int Delete<T>(ISessionState sessionState, IEnumerable<T> entities) {
+        public virtual int Delete<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
             var entityArray = entities as T[] ?? entities.ToArray();
 
             // take the short path
@@ -190,13 +190,13 @@ namespace Dashing.Engine {
                        : sessionState.GetConnection().Execute(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction());
         }
 
-        public int ExecuteBulkDelete<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public int ExecuteBulkDelete<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
             return sessionState.GetConnection().Execute(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction());
         }
 
-        public async Task<T> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id) {
+        public async Task<T> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
             var queryResult =
@@ -210,7 +210,7 @@ namespace Dashing.Engine {
             return entity;
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) {
+        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
             var result =
@@ -223,7 +223,7 @@ namespace Dashing.Engine {
                 });
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T>(ISessionState sessionState, SelectQuery<T> query) {
+        public async Task<IEnumerable<T>> QueryAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
             IEnumerable<T> queryResults;
@@ -264,7 +264,7 @@ namespace Dashing.Engine {
             return queryResults;
         }
 
-        public async Task<Page<T>> QueryPagedAsync<T>(ISessionState sessionState, SelectQuery<T> query) {
+        public async Task<Page<T>> QueryPagedAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
             var totalResults =
@@ -278,7 +278,7 @@ namespace Dashing.Engine {
             return new Page<T> { TotalResults = totalResults, Items = results.ToArray(), Skipped = query.SkipN, Taken = query.TakeN };
         }
 
-        public async Task<int> CountAsync<T>(ISessionState sessionState, SelectQuery<T> query) {
+        public async Task<int> CountAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
             return
@@ -289,7 +289,7 @@ namespace Dashing.Engine {
                      await sessionState.GetTransactionAsync())).SingleOrDefault();
         }
 
-        public async Task<int> InsertAsync<T>(ISessionState sessionState, IEnumerable<T> entities) {
+        public async Task<int> InsertAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
             this.EnsureConfigurationLoaded();
 
             var i = 0;
@@ -323,7 +323,7 @@ namespace Dashing.Engine {
             return i;
         }
 
-        public async Task<int> SaveAsync<T>(ISessionState sessionState, IEnumerable<T> entities) {
+        public async Task<int> SaveAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateSql(entities);
             return sqlQuery.Sql.Length == 0
@@ -335,7 +335,7 @@ namespace Dashing.Engine {
                              await sessionState.GetTransactionAsync());
         }
 
-        public async Task<int> DeleteAsync<T>(ISessionState sessionState, IEnumerable<T> entities) {
+        public async Task<int> DeleteAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
             var entityArray = entities as T[] ?? entities.ToArray();
 
             // take the short path
@@ -363,7 +363,7 @@ namespace Dashing.Engine {
                              await sessionState.GetTransactionAsync());
         }
 
-        public async Task<int> ExecuteBulkDeleteAsync<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public async Task<int> ExecuteBulkDeleteAsync<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
             return

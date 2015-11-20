@@ -16,7 +16,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="id">The primary key of the entity</param>
         /// <returns></returns>
-        public static T Get<T>(this ISession session, int id) {
+        public static T Get<T>(this ISession session, int id) where T : class, new() {
             return session.Get<T, int>(id);
         }
 
@@ -27,7 +27,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="id">The primary key of the entity</param>
         /// <returns></returns>
-        public static T Get<T>(this ISession session, Guid id) {
+        public static T Get<T>(this ISession session, Guid id) where T : class, new() {
             return session.Get<T, Guid>(id);
         }
 
@@ -38,7 +38,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public static IEnumerable<T> Get<T>(this ISession session, params int[] ids) {
+        public static IEnumerable<T> Get<T>(this ISession session, params int[] ids) where T : class, new() {
             return session.Get<T>(ids as IEnumerable<int>);
         }
 
@@ -49,7 +49,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public static IEnumerable<T> Get<T>(this ISession session, IEnumerable<int> ids) {
+        public static IEnumerable<T> Get<T>(this ISession session, IEnumerable<int> ids) where T : class, new() {
             return session.Get<T, int>(ids);
         }
 
@@ -60,7 +60,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public static IEnumerable<T> Get<T>(this ISession session, params Guid[] ids) {
+        public static IEnumerable<T> Get<T>(this ISession session, params Guid[] ids) where T : class, new() {
             return session.Get<T>(ids as IEnumerable<Guid>);
         }
 
@@ -71,7 +71,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public static IEnumerable<T> Get<T>(this ISession session, IEnumerable<Guid> ids) {
+        public static IEnumerable<T> Get<T>(this ISession session, IEnumerable<Guid> ids) where T : class, new() {
             return session.Get<T, Guid>(ids);
         }
 
@@ -83,7 +83,7 @@ namespace Dashing {
         /// <param name="entities"></param>
         /// <returns></returns>
         /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        public static int Insert<T>(this ISession session, params T[] entities) {
+        public static int Insert<T>(this ISession session, params T[] entities) where T : class, new() {
             return session.Insert(entities);
         }
 
@@ -94,7 +94,7 @@ namespace Dashing {
         /// <param name="session"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public static int Save<T>(this ISession session, params T[] entities) {
+        public static int Save<T>(this ISession session, params T[] entities) where T : class, new() {
             return session.Save(entities);
         }
 
@@ -105,7 +105,7 @@ namespace Dashing {
         /// <param name="session"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public static int Delete<T>(this ISession session, params T[] entities) {
+        public static int Delete<T>(this ISession session, params T[] entities) where T : class, new() {
             return session.Delete(entities);
         }
 
@@ -136,7 +136,7 @@ namespace Dashing {
         /// </param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes a DELETE query and executes it i.e. no data is fetched from the server</remarks>
-        public static int Delete<T>(this ISession session, params Expression<Func<T, bool>>[] predicates) {
+        public static int Delete<T>(this ISession session, params Expression<Func<T, bool>>[] predicates) where T : class, new() {
             return session.Delete(predicates);
         }
 
@@ -152,7 +152,7 @@ namespace Dashing {
         ///     If you do not specify an equalityComparer this function will simply attempt a Save then an Insert. If you do
         ///     provide an equalityComparer this will fetch the entity and then update it
         /// </remarks>
-        public static int InsertOrUpdate<T>(this ISession session, T entity, Expression<Func<T, bool>> equalityComparer = null) where T : class {
+        public static int InsertOrUpdate<T>(this ISession session, T entity, Expression<Func<T, bool>> equalityComparer = null) where T : class, new() {
             if (equalityComparer == null) {
                 // if the equality comparer is null then they should be passing us a valid PK value in the entity so call update
                 var updated = session.Save(entity);
@@ -181,7 +181,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="id">The primary key of the entity</param>
         /// <returns></returns>
-        public static async Task<T> GetAsync<T>(this ISession session, int id) {
+        public static async Task<T> GetAsync<T>(this ISession session, int id) where T : class, new() {
             return await session.GetAsync<T, int>(id);
         }
 
@@ -192,7 +192,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="id">The primary key of the entity</param>
         /// <returns></returns>
-        public static async Task<T> GetAsync<T>(this ISession session, Guid id) {
+        public static async Task<T> GetAsync<T>(this ISession session, Guid id) where T : class, new() {
             return await session.GetAsync<T, Guid>(id);
         }
 
@@ -203,7 +203,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<T>> GetAsync<T>(this ISession session, params int[] ids) {
+        public static async Task<IEnumerable<T>> GetAsync<T>(this ISession session, params int[] ids) where T : class, new() {
             return await session.GetAsync<T>(ids as IEnumerable<int>);
         }
 
@@ -214,7 +214,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<T>> GetAsync<T>(this ISession session, IEnumerable<int> ids) {
+        public static async Task<IEnumerable<T>> GetAsync<T>(this ISession session, IEnumerable<int> ids) where T : class, new() {
             return await session.GetAsync<T, int>(ids);
         }
 
@@ -225,7 +225,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<T>> GetAsync<T>(this ISession session, params Guid[] ids) {
+        public static async Task<IEnumerable<T>> GetAsync<T>(this ISession session, params Guid[] ids) where T : class, new() {
             return await session.GetAsync<T>(ids as IEnumerable<Guid>);
         }
 
@@ -236,7 +236,7 @@ namespace Dashing {
         /// <param name="session">The Session to use</param>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public static async Task<IEnumerable<T>> GetAsync<T>(this ISession session, IEnumerable<Guid> ids) {
+        public static async Task<IEnumerable<T>> GetAsync<T>(this ISession session, IEnumerable<Guid> ids) where T : class, new() {
             return await session.GetAsync<T, Guid>(ids);
         }
 
@@ -248,7 +248,7 @@ namespace Dashing {
         /// <param name="entities"></param>
         /// <returns></returns>
         /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        public static async Task<int> InsertAsync<T>(this ISession session, params T[] entities) {
+        public static async Task<int> InsertAsync<T>(this ISession session, params T[] entities) where T : class, new() {
             return await session.InsertAsync(entities);
         }
 
@@ -259,7 +259,7 @@ namespace Dashing {
         /// <param name="session"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public static async Task<int> SaveAsync<T>(this ISession session, params T[] entities) {
+        public static async Task<int> SaveAsync<T>(this ISession session, params T[] entities) where T : class, new() {
             return await session.SaveAsync(entities);
         }
 
@@ -270,7 +270,7 @@ namespace Dashing {
         /// <param name="session"></param>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public static async Task<int> DeleteAsync<T>(this ISession session, params T[] entities) {
+        public static async Task<int> DeleteAsync<T>(this ISession session, params T[] entities) where T : class, new() {
             return await session.DeleteAsync(entities);
         }
 
@@ -302,7 +302,7 @@ namespace Dashing {
         /// </param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes a DELETE query and executes it i.e. no data is fetched from the server</remarks>
-        public static async Task<int> DeleteAsync<T>(this ISession session, params Expression<Func<T, bool>>[] predicates) {
+        public static async Task<int> DeleteAsync<T>(this ISession session, params Expression<Func<T, bool>>[] predicates) where T : class, new() {
             return await session.DeleteAsync(predicates);
         }
 
@@ -319,7 +319,7 @@ namespace Dashing {
         ///     provide an equalityComparer this will fetch the entity and then update it
         /// </remarks>
         public static async Task<int> InsertOrUpdateAsync<T>(this ISession session, T entity, Expression<Func<T, bool>> equalityComparer = null)
-            where T : class {
+            where T : class, new() {
             if (equalityComparer == null) {
                 // if the equality comparer is null then they should be passing us a valid PK value in the entity so call update
                 var updated = await session.SaveAsync(entity);

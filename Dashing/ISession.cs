@@ -35,7 +35,7 @@ namespace Dashing {
         /// <typeparam name="TPrimaryKey">The type of the primary key</typeparam>
         /// <param name="id">The primary key of the entity to return</param>
         /// <returns></returns>
-        T Get<T, TPrimaryKey>(TPrimaryKey id);
+        T Get<T, TPrimaryKey>(TPrimaryKey id) where T : class, new();
 
         /// <summary>
         ///     Get an enumerable of entities by their primary keys
@@ -44,14 +44,14 @@ namespace Dashing {
         /// <typeparam name="TPrimaryKey">The type of the primary key</typeparam>
         /// <param name="ids">The primary keys of the entities you wish to return</param>
         /// <returns></returns>
-        IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids);
+        IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) where T : class, new();
 
         /// <summary>
         ///     Perform a query against a type of entity
         /// </summary>
         /// <typeparam name="T">The type of the root entity in the query</typeparam>
         /// <returns></returns>
-        ISelectQuery<T> Query<T>();
+        ISelectQuery<T> Query<T>() where T : class, new();
 
         /// <summary>
         ///     Inserts a collection of entities in to the database
@@ -60,7 +60,7 @@ namespace Dashing {
         /// <param name="entities"></param>
         /// <returns></returns>
         /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        int Insert<T>(IEnumerable<T> entities);
+        int Insert<T>(IEnumerable<T> entities) where T : class, new();
 
         /// <summary>
         ///     Saves all changes on a collection of entities
@@ -68,7 +68,7 @@ namespace Dashing {
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        int Save<T>(IEnumerable<T> entities);
+        int Save<T>(IEnumerable<T> entities) where T : class, new();
 
         /// <summary>
         ///     Execute an update query against a collection of entities as defined by the predicates
@@ -87,7 +87,7 @@ namespace Dashing {
         ///     Deletes a collection of entities
         /// </summary>
         /// <returns></returns>
-        int Delete<T>(IEnumerable<T> entities);
+        int Delete<T>(IEnumerable<T> entities) where T : class, new();
 
         /// <summary>
         ///     Deletes a collection of entities based on a group of predicates
@@ -99,7 +99,7 @@ namespace Dashing {
         /// </param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes a DELETE query and executes it i.e. no data is fetched from the server</remarks>
-        int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates);
+        int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
 
         /// <summary>
         ///     Updates all entities of a particular type
@@ -116,7 +116,7 @@ namespace Dashing {
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <remarks>This performs a DELETE query with no where clause. Use with caution!</remarks>
-        int DeleteAll<T>();
+        int DeleteAll<T>() where T : class, new();
 
         /// <summary>
         ///     Get an entity by primary key
@@ -125,7 +125,7 @@ namespace Dashing {
         /// <typeparam name="TPrimaryKey">The type of the primary key</typeparam>
         /// <param name="id">The primary key of the entity to return</param>
         /// <returns></returns>
-        Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id);
+        Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id) where T : class, new();
 
         /// <summary>
         ///     Get an enumerable of entities by their primary keys
@@ -134,7 +134,7 @@ namespace Dashing {
         /// <typeparam name="TPrimaryKey">The type of the primary key</typeparam>
         /// <param name="ids">The primary keys of the entities you wish to return</param>
         /// <returns></returns>
-        Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids);
+        Task<IEnumerable<T>> GetAsync<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) where T : class, new();
 
         /// <summary>
         ///     Inserts a collection of entities in to the database
@@ -143,7 +143,7 @@ namespace Dashing {
         /// <param name="entities"></param>
         /// <returns></returns>
         /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        Task<int> InsertAsync<T>(IEnumerable<T> entities);
+        Task<int> InsertAsync<T>(IEnumerable<T> entities) where T : class, new();
 
         /// <summary>
         ///     Saves all changes on a collection of entities
@@ -151,7 +151,7 @@ namespace Dashing {
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        Task<int> SaveAsync<T>(IEnumerable<T> entities);
+        Task<int> SaveAsync<T>(IEnumerable<T> entities) where T : class, new();
 
         /// <summary>
         ///     Execute an update query against a collection of entities as defined by the predicates
@@ -170,7 +170,7 @@ namespace Dashing {
         ///     Deletes a collection of entities
         /// </summary>
         /// <returns></returns>
-        Task<int> DeleteAsync<T>(IEnumerable<T> entities);
+        Task<int> DeleteAsync<T>(IEnumerable<T> entities) where T : class, new();
 
         /// <summary>
         ///     Deletes a collection of entities based on a group of predicates
@@ -182,7 +182,7 @@ namespace Dashing {
         /// </param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes a DELETE query and executes it i.e. no data is fetched from the server</remarks>
-        Task<int> DeleteAsync<T>(IEnumerable<Expression<Func<T, bool>>> predicates);
+        Task<int> DeleteAsync<T>(IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
 
         /// <summary>
         ///     Updates all entities of a particular type
@@ -199,6 +199,6 @@ namespace Dashing {
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         /// <remarks>This performs a DELETE query with no where clause. Use with caution!</remarks>
-        Task<int> DeleteAllAsync<T>();
+        Task<int> DeleteAllAsync<T>() where T : class, new();
     }
 }

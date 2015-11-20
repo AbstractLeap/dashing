@@ -675,7 +675,7 @@
             return new SelectWriter(new SqlServer2012Dialect(), MakeConfig(withIgnore));
         }
 
-        private SelectQuery<T> GetSelectQuery<T>() {
+        private SelectQuery<T> GetSelectQuery<T>() where T : class, new() {
             return new SelectQuery<T>(new Mock<ISelectQueryExecutor>().Object);
         }
 

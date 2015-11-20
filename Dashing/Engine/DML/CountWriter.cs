@@ -9,7 +9,7 @@ namespace Dashing.Engine.DML {
             : base(dialect, configuration) {
         }
 
-        public SqlWriterResult GenerateCountSql<T>(SelectQuery<T> selectQuery) {
+        public SqlWriterResult GenerateCountSql<T>(SelectQuery<T> selectQuery) where T : class, new() {
             // get fetch tree structure
             int aliasCounter;
             int numberCollectionFetches;

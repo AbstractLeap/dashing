@@ -11,5 +11,12 @@
                 ) {
             this.AddNamespaceOf<Post>();
         }
+
+        public TestConfiguration(bool useInMemoryEngine)
+            : base(
+                new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=dashingtest;Integrated Security=True", "System.Data.SqlClient"),
+                new InMemoryEngine()) {
+            this.AddNamespaceOf<Post>();
+        }
     }
 }
