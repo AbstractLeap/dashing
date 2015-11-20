@@ -26,8 +26,9 @@ if (!(Test-Path $deployTarget\dev-db.ini)) {
 }
 
 # don't need to do this as tools folder added to path?
-#Write-Host "Copying dbm.exe"
-#Copy-Item $toolsPath\dbm.exe $deployTarget -Recurse -Force
+# Do need to do this where the end user wants to overwrite the call to dbm as having to have package manager console open is a pita
+Write-Host "Copying dbm.exe"
+Copy-Item $toolsPath\dbm.exe $deployTarget -Recurse -Force
 
 # get the active solution
 $solution = Get-Interface $dte.Solution ([EnvDTE80.Solution2])
