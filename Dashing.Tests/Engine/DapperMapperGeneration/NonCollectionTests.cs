@@ -37,8 +37,8 @@
         [Fact]
         public void FetchedEntitiesHaveTrackingEnabled() {
             var func = GenerateSingleMapper();
-            var post = new Post() { PostId = 1 };
-            var blog = new Blog() { BlogId = 2 };
+            var post = new Post { PostId = 1 };
+            var blog = new Blog { BlogId = 2 };
             var result = ((Func<object[], Post>)func)(new object[] { post, blog });
             Assert.True(((ITrackedEntity)result).IsTrackingEnabled());
             Assert.True(((ITrackedEntity)result.Blog).IsTrackingEnabled());

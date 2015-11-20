@@ -34,18 +34,18 @@ namespace Dashing.Configuration {
         IDictionary<string, IColumn> Columns { get; }
 
         /// <summary>
-        /// Gets or sets the indexes specified for this map
+        ///     Gets or sets the indexes specified for this map
         /// </summary>
         IEnumerable<Index> Indexes { get; set; }
 
         /// <summary>
-        /// Add a new index to the map
+        ///     Add a new index to the map
         /// </summary>
         /// <param name="index"></param>
         void AddIndex(Index index);
 
         /// <summary>
-        /// Gets or sets the foreign keys specified for this map
+        ///     Gets or sets the foreign keys specified for this map
         /// </summary>
         IEnumerable<ForeignKey> ForeignKeys { get; set; }
 

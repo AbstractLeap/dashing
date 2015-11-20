@@ -72,7 +72,7 @@ namespace Dashing.Weaving.Tests {
             var fooAsTracked = (ITrackedEntity)foo;
             fooAsTracked.EnableTracking();
             foo.IsBar = true;
-            Assert.Equal(new[] { "IsBar"}, fooAsTracked.GetDirtyProperties());
+            Assert.Equal(new[] { "IsBar" }, fooAsTracked.GetDirtyProperties());
             Assert.Equal(false, fooAsTracked.GetOldValue("IsBar"));
         }
 

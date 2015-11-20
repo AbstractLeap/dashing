@@ -51,8 +51,7 @@ namespace Dashing.Engine.Dialects {
         }
 
         public override string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {
-            return "EXEC sp_RENAME '" + toColumn.Map.Table + "." + fromColumn.DbName + "', '"
-                   + toColumn.DbName + "', 'COLUMN'";
+            return "EXEC sp_RENAME '" + toColumn.Map.Table + "." + fromColumn.DbName + "', '" + toColumn.DbName + "', 'COLUMN'";
         }
 
         public override string ModifyColumn(IColumn fromColumn, IColumn toColumn) {
@@ -112,7 +111,9 @@ namespace Dashing.Engine.Dialects {
             sql.Insert(0, "select * from (");
 
             // see MySqlDialect for explanation of the crazy number 18446744073709551615
-            sql.Append(") as pagetable where pagetable.RowNum between @skip + 1 and " + (take > 0 ? "@skip + @take" : "18446744073709551615") + " order by pagetable.RowNum");
+            sql.Append(
+                ") as pagetable where pagetable.RowNum between @skip + 1 and " + (take > 0 ? "@skip + @take" : "18446744073709551615")
+                + " order by pagetable.RowNum");
         }
 
         public override string CreateIndex(Index index) {
@@ -153,12 +154,16 @@ namespace Dashing.Engine.Dialects {
         }
 
         public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
-            return;
         }
 
         public override string OnBeforeDropColumn(IColumn column) {
             var commandName = "@OBDCommand" + Guid.NewGuid().ToString("N");
-            var sb = new StringBuilder("declare ").Append(commandName).AppendLine(" nvarchar(1000);").Append("select ").Append(commandName).Append(" = 'ALTER TABLE ");
+            var sb =
+                new StringBuilder("declare ").Append(commandName)
+                                             .AppendLine(" nvarchar(1000);")
+                                             .Append("select ")
+                                             .Append(commandName)
+                                             .Append(" = 'ALTER TABLE ");
             this.AppendQuotedTableName(sb, column.Map);
             sb.Append(" drop constraint ' + d.name ").Append(@"from sys.tables t   
                           join    sys.default_constraints d       

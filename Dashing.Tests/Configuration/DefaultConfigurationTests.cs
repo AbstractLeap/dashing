@@ -10,9 +10,9 @@
 
     public class DefaultConfigurationTests {
         private readonly ConnectionStringSettings connectionString = new ConnectionStringSettings {
-            ConnectionString = "Data Source=dummy.local",
-            ProviderName = "System.Data.SqlClient"
-        };
+                                                                                                      ConnectionString = "Data Source=dummy.local",
+                                                                                                      ProviderName = "System.Data.SqlClient"
+                                                                                                  };
 
         [Fact]
         public void Constructs() {

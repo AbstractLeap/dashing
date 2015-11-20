@@ -72,8 +72,7 @@
             }
             catch (Exception e) {
                 using (Color(ConsoleColor.Red)) {
-                    Console.WriteLine("Caught unhandled {0}", e.GetType()
-                                                               .Name);
+                    Console.WriteLine("Caught unhandled {0}", e.GetType().Name);
                     Console.WriteLine(e.Message);
                     var ee = e;
                     while ((ee = ee.InnerException) != null) {
@@ -91,13 +90,13 @@
             return 0;
         }
 
-        private static void ConfigureAssemblyResolution() { // http://blogs.msdn.com/b/microsoft_press/archive/2010/02/03/jeffrey-richter-excerpt-2-from-clr-via-c-third-edition.aspx
+        private static void ConfigureAssemblyResolution() {
+            // http://blogs.msdn.com/b/microsoft_press/archive/2010/02/03/jeffrey-richter-excerpt-2-from-clr-via-c-third-edition.aspx
             AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) => {
                 var assemblyName = new AssemblyName(iargs.Name);
 
                 // look in app domain
-                var loaded = AppDomain.CurrentDomain.GetAssemblies()
-                                      .SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                var loaded = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == assemblyName.FullName);
                 if (loaded != null) {
                     Trace("Loaded assembly {0} from existing AppDomain, {1}", assemblyName, loaded.Location);
                     return loaded;
@@ -105,8 +104,7 @@
 
                 // look in embedded resources
                 var resourceName = "Dashing.Console.lib." + assemblyName.Name + ".dll";
-                using (var stream = Assembly.GetExecutingAssembly()
-                                            .GetManifestResourceStream(resourceName)) {
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)) {
                     if (stream != null) {
                         Trace("Loaded assembly {0} from embedded resources", assemblyName);
                         var assemblyData = new byte[stream.Length];
@@ -143,7 +141,12 @@
                     throw new CatchyException("You must specify the directory to weave");
                 }
 
-                var task = new ExtendDomainTask { LaunchDebugger = options.LaunchDebugger, WeaveDir = options.WeaveDir, Logger = new ConsoleLogger(options.Verbose), IgnorePEVerify = options.IgnorePeVerify };
+                var task = new ExtendDomainTask {
+                                                    LaunchDebugger = options.LaunchDebugger,
+                                                    WeaveDir = options.WeaveDir,
+                                                    Logger = new ConsoleLogger(options.Verbose),
+                                                    IgnorePEVerify = options.IgnorePeVerify
+                                                };
                 if (!task.Execute()) {
                     throw new CatchyException("Weaving failed");
                 }
@@ -197,7 +200,11 @@
             }
         }
 
-        private static void ParseIni(CommandLineOptions options, out ConnectionStringSettings connectionStringSettings, out DashingSettings dashingSettings, out ReverseEngineerSettings reverseEngineerSettings) {
+        private static void ParseIni(
+            CommandLineOptions options,
+            out ConnectionStringSettings connectionStringSettings,
+            out DashingSettings dashingSettings,
+            out ReverseEngineerSettings reverseEngineerSettings) {
             var config = IniParser.Parse(options.ConfigPath);
 
             connectionStringSettings = new ConnectionStringSettings();
@@ -215,16 +222,21 @@
             reverseEngineerSettings = IniParser.AssignTo(config["ReverseEngineer"], reverseEngineerSettings);
         }
 
-        private static object LoadConfiguration(Assembly configAssembly, DashingSettings dashingSettings, ConnectionStringSettings connectionStringSettings) {
+        private static object LoadConfiguration(
+            Assembly configAssembly,
+            DashingSettings dashingSettings,
+            ConnectionStringSettings connectionStringSettings) {
             // fetch the to state
             var configType = configAssembly.DefinedTypes.SingleOrDefault(t => t.FullName == dashingSettings.ConfigurationName);
 
             if (configType == null) {
                 using (Color(ConsoleColor.Red)) {
-                    var candidates = configAssembly.DefinedTypes.Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null)
-                                                   .ToArray();
+                    var candidates = configAssembly.DefinedTypes.Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null).ToArray();
                     if (candidates.Any()) {
-                        throw new CatchyException("Could not locate {0}, but found candidates: {1}", dashingSettings.ConfigurationName, string.Join(", ", candidates.Select(c => c.FullName)));
+                        throw new CatchyException(
+                            "Could not locate {0}, but found candidates: {1}",
+                            dashingSettings.ConfigurationName,
+                            string.Join(", ", candidates.Select(c => c.FullName)));
                     }
 
                     throw new CatchyException("Could not locate {0}, and found no candidate configurations", dashingSettings.ConfigurationName);
@@ -248,7 +260,12 @@
                 }
             }
 
-            var getConnectionStringCall = constructor.Body.Instructions.FirstOrDefault(i => i.OpCode.Code == Code.Call && i.Operand.ToString() == "System.Configuration.ConnectionStringSettingsCollection System.Configuration.ConfigurationManager::get_ConnectionStrings()");
+            var getConnectionStringCall =
+                constructor.Body.Instructions.FirstOrDefault(
+                    i =>
+                    i.OpCode.Code == Code.Call
+                    && i.Operand.ToString()
+                    == "System.Configuration.ConnectionStringSettingsCollection System.Configuration.ConfigurationManager::get_ConnectionStrings()");
             if (getConnectionStringCall == null) {
                 using (Color(ConsoleColor.Red)) {
                     throw new CatchyException("Unable to find the ConnectionStrings call in the constructor");
@@ -269,17 +286,25 @@
             }
 
             // and add in the one from our ini
-            ConfigurationManager.ConnectionStrings.Add(new System.Configuration.ConnectionStringSettings(connectionStringKey, connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName));
+            ConfigurationManager.ConnectionStrings.Add(
+                new System.Configuration.ConnectionStringSettings(
+                    connectionStringKey,
+                    connectionStringSettings.ConnectionString,
+                    connectionStringSettings.ProviderName));
         }
 
-        private static void DoScript(string pathOrNull, bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings) {
+        private static void DoScript(
+            string pathOrNull,
+            bool naive,
+            ConnectionStringSettings connectionStringSettings,
+            DashingSettings dashingSettings,
+            ReverseEngineerSettings reverseEngineerSettings) {
             DisplayMigrationHeader(naive, dashingSettings);
 
             // fetch the to state
             var config = (IConfiguration)configObject;
 
-            IEnumerable<string> warnings,
-                                errors;
+            IEnumerable<string> warnings, errors;
             var migrationScript = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
 
             // report errors
@@ -290,9 +315,7 @@
             }
 
             // write it
-            using (var writer = string.IsNullOrEmpty(pathOrNull)
-                                    ? Console.Out
-                                    : new StreamWriter(File.OpenWrite(pathOrNull))) {
+            using (var writer = string.IsNullOrEmpty(pathOrNull) ? Console.Out : new StreamWriter(File.OpenWrite(pathOrNull))) {
                 writer.WriteLine(migrationScript);
             }
         }
@@ -338,14 +361,17 @@
             return shouldExit;
         }
 
-        private static void DoMigrate(bool naive, ConnectionStringSettings connectionStringSettings, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings) {
+        private static void DoMigrate(
+            bool naive,
+            ConnectionStringSettings connectionStringSettings,
+            DashingSettings dashingSettings,
+            ReverseEngineerSettings reverseEngineerSettings) {
             DisplayMigrationHeader(naive, dashingSettings);
 
             // fetch the to state
             var config = (IConfiguration)configObject;
 
-            IEnumerable<string> warnings,
-                                errors;
+            IEnumerable<string> warnings, errors;
             var script = GenerateMigrationScript(connectionStringSettings, reverseEngineerSettings, config, naive, out warnings, out errors);
 
             if (DisplayMigrationWarningsAndErrors(errors, warnings)) {
@@ -424,7 +450,11 @@
             }
         }
 
-        private static void DoReverseEngineer(CommandLineOptions options, DashingSettings dashingSettings, ReverseEngineerSettings reverseEngineerSettings, ConnectionStringSettings connectionString) {
+        private static void DoReverseEngineer(
+            CommandLineOptions options,
+            DashingSettings dashingSettings,
+            ReverseEngineerSettings reverseEngineerSettings,
+            ConnectionStringSettings connectionString) {
             // overwrite the path with the default if necessary
             if (string.IsNullOrEmpty(options.Location)) {
                 options.Location = dashingSettings.DefaultSavePath;
@@ -445,7 +475,12 @@
 
             var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
             schema = databaseReader.ReadAll();
-            var maps = engineer.ReverseEngineer(schema, new DialectFactory().Create(connectionString.ToSystem()), reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider, true);
+            var maps = engineer.ReverseEngineer(
+                schema,
+                new DialectFactory().Create(connectionString.ToSystem()),
+                reverseEngineerSettings.GetTablesToIgnore(),
+                consoleAnswerProvider,
+                true);
             var reverseEngineer = new ModelGenerator();
             var sources = reverseEngineer.GenerateFiles(maps, schema, reverseEngineerSettings.GeneratedNamespace, consoleAnswerProvider);
 
@@ -458,7 +493,13 @@
             Console.Write(HelpText.AutoBuild(options));
         }
 
-        private static string GenerateMigrationScript(ConnectionStringSettings connectionStringSettings, ReverseEngineerSettings reverseEngineerSettings, IConfiguration configuration, bool naive, out IEnumerable<string> warnings, out IEnumerable<string> errors) {
+        private static string GenerateMigrationScript(
+            ConnectionStringSettings connectionStringSettings,
+            ReverseEngineerSettings reverseEngineerSettings,
+            IConfiguration configuration,
+            bool naive,
+            out IEnumerable<string> warnings,
+            out IEnumerable<string> errors) {
             // fetch the from state
             var dialectFactory = new DialectFactory();
             var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
@@ -485,14 +526,12 @@
                 if (naive) {
                     throw new NotSupportedException("The Naive Migrator is no longer supported");
                 }
-                else {
-                    migrator = new Migrator(
-                        dialect,
-                        new CreateTableWriter(dialect),
-                        new AlterTableWriter(dialect),
-                        new DropTableWriter(dialect),
-                        new StatisticsProvider(connection, dialect));
-                }
+                migrator = new Migrator(
+                    dialect,
+                    new CreateTableWriter(dialect),
+                    new AlterTableWriter(dialect),
+                    new DropTableWriter(dialect),
+                    new StatisticsProvider(connection, dialect));
 
                 // run the migrator
                 string script;
@@ -500,7 +539,8 @@
                     script = migrator.GenerateSqlDiff(
                         fromMaps,
                         configuration.Maps,
-                        consoleAnswerProvider, new ConsoleLogger(isVerbose),
+                        consoleAnswerProvider,
+                        new ConsoleLogger(isVerbose),
                         reverseEngineerSettings.GetIndexesToIgnore(),
                         out warnings,
                         out errors);

@@ -5,8 +5,10 @@
     using Xunit;
 
     public class MockSelectQueryTests {
-        public IEnumerable<TestClass> Examples {
-            get {
+        public IEnumerable<TestClass> Examples
+        {
+            get
+            {
                 yield return new TestClass(1, "Foo", false);
                 yield return new TestClass(2, "Bar", false);
                 yield return new TestClass(3, "Ape", true);

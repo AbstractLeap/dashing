@@ -25,7 +25,7 @@
             this.dialect.AppendQuotedTableName(sql, column.Map);
             sql.Append(" drop column ");
             this.dialect.AppendQuotedName(sql, column.DbName);
-            return beforeSql + sql.ToString();
+            return beforeSql + sql;
         }
 
         public string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {

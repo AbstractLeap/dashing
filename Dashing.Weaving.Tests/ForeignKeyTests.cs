@@ -2,7 +2,6 @@ namespace Dashing.Weaving.Tests {
     using System;
     using System.Linq;
 
-    using Dashing.CodeGeneration;
     using Dashing.Weaving.Sample.Domain;
 
     using Xunit;

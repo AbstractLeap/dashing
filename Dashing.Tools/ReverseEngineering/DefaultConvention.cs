@@ -7,19 +7,19 @@
         private readonly PluralizationService pluralizer;
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="extraPluralizationWords">A string containing extra pluralization words
-        /// in the form Singular1,Plural1|Singular2,Plural2|Singular3,Plural3 ...</param>
+        /// <param name="extraPluralizationWords">
+        ///     A string containing extra pluralization words
+        ///     in the form Singular1,Plural1|Singular2,Plural2|Singular3,Plural3 ...
+        /// </param>
         public DefaultConvention(string extraPluralizationWords) {
             this.pluralizer = PluralizationService.CreateService(new CultureInfo("en-GB"));
 
             // ok, damned EnglishPluralizationService is an internal class so bit of reflection...
             var addWordMethod =
-                typeof(PluralizationService).Assembly.GetType(
-                    "System.Data.Entity.Design.PluralizationServices.EnglishPluralizationService")
-                    .GetMethod("AddWord");
-            
+                typeof(PluralizationService).Assembly.GetType("System.Data.Entity.Design.PluralizationServices.EnglishPluralizationService")
+                                            .GetMethod("AddWord");
+
             if (!string.IsNullOrWhiteSpace(extraPluralizationWords)) {
                 try {
                     var pairs = extraPluralizationWords.Split('|');
@@ -27,9 +27,7 @@
                     foreach (var pair in pairs) {
                         var words = pair.Split(',');
                         if (words.Length == 2) {
-                            addWordMethod.Invoke(
-                                this.pluralizer,
-                                new object[] { words[0], words[1] });
+                            addWordMethod.Invoke(this.pluralizer, new object[] { words[0], words[1] });
                         }
                     }
                 }

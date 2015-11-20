@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dashing.Configuration;
-
-namespace Dashing.Tools.ReverseEngineering {
+﻿namespace Dashing.Tools.ReverseEngineering {
+    using System;
+    using System.Collections.Generic;
     using System.Data;
+    using System.Linq;
 
+    using Dashing.Configuration;
     using Dashing.Engine;
     using Dashing.Engine.Dialects;
+    using Dashing.Events;
 
     /// <summary>
-    /// This configuration pretty much only exists to support fetching of different maps within reverse engineering
+    ///     This configuration pretty much only exists to support fetching of different maps within reverse engineering
     /// </summary>
     [DoNotWeave]
     internal class Configuration : IReverseEngineeringConfiguration {
-        private IDictionary<Type, IMap> maps;
+        private readonly IDictionary<Type, IMap> maps;
 
         public Configuration(ISqlDialect sqlDialect) {
             this.maps = new Dictionary<Type, IMap>();
@@ -27,8 +25,12 @@ namespace Dashing.Tools.ReverseEngineering {
             this.maps.Add(type, map);
         }
 
-        public IEnumerable<IMap> Maps {
-            get { return this.maps.Select(k => k.Value); }
+        public IEnumerable<IMap> Maps
+        {
+            get
+            {
+                return this.maps.Select(k => k.Value);
+            }
         }
 
         public IMap<T> GetMap<T>() {
@@ -51,11 +53,11 @@ namespace Dashing.Tools.ReverseEngineering {
             throw new NotImplementedException();
         }
 
-        public ISession BeginSession(System.Data.IDbConnection connection) {
+        public ISession BeginSession(IDbConnection connection) {
             throw new NotImplementedException();
         }
 
-        public ISession BeginSession(System.Data.IDbConnection connection, System.Data.IDbTransaction transaction) {
+        public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
             throw new NotImplementedException();
         }
 
@@ -67,20 +69,32 @@ namespace Dashing.Tools.ReverseEngineering {
             throw new NotImplementedException();
         }
 
-        public Engine.IEngine Engine { get; set; }
+        public IEngine Engine { get; set; }
 
-        public IMapper Mapper {
-            get { throw new NotImplementedException(); }
+        public IMapper Mapper
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
-        public ICollection<Events.IEventListener> EventListeners {
-            get { throw new NotImplementedException(); }
+        public ICollection<IEventListener> EventListeners
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
 
-        public Events.EventHandlers EventHandlers {
-            get { throw new NotImplementedException(); }
+        public EventHandlers EventHandlers
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

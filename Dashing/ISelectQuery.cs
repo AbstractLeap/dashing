@@ -162,7 +162,7 @@ namespace Dashing {
         int Count();
 
         int Count(Expression<Func<T, bool>> predicate);
-        
+
         Page<T> AsPaged(int skip, int take);
 
         bool Any();

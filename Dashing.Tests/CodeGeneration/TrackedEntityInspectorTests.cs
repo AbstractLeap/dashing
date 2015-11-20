@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Tests.CodeGeneration {
+    using System;
     using System.Collections.Generic;
 
     using Dashing.CodeGeneration;
@@ -10,7 +11,7 @@
     public class TrackedEntityInspectorTests {
         [Fact]
         public void IsPropertyDirtyIs() {
-            var foo = new Foo(new []{ "Name" }, new Dictionary<string, object>{ { "Name", "Mark" }});
+            var foo = new Foo(new[] { "Name" }, new Dictionary<string, object> { { "Name", "Mark" } });
             var inspector = new TrackedEntityInspector<Foo>(foo);
             Assert.True(inspector.IsPropertyDirty(f => f.Name));
         }
@@ -32,28 +33,28 @@
         [Fact]
         public void SessionExtensionWorks() {
             var foo = new Foo(new[] { "Name" }, new Dictionary<string, object> { { "Name", "Mark" } });
-            var inspector = SessionExtensions.Inspect(new Mock<ISession>().Object, foo);
+            var inspector = new Mock<ISession>().Object.Inspect(foo);
             Assert.True(inspector.IsPropertyDirty(f => f.Name));
         }
 
         [Fact]
         public void GetNewValueWorks() {
             var foo = new Foo(new[] { "Name" }, new Dictionary<string, object> { { "Name", "Mark" } }) { Name = "James" };
-            var inspector = SessionExtensions.Inspect(new Mock<ISession>().Object, foo);
+            var inspector = new Mock<ISession>().Object.Inspect(foo);
             Assert.Equal("James", inspector.GetNewValue(f => f.Name));
         }
 
         [Fact]
         public void IsDirtyIfHasDirtyProps() {
             var foo = new Foo(new[] { "Name" }, new Dictionary<string, object> { { "Name", "Mark" } }) { Name = "James" };
-            var inspector = SessionExtensions.Inspect(new Mock<ISession>().Object, foo);
+            var inspector = new Mock<ISession>().Object.Inspect(foo);
             Assert.True(inspector.IsDirty());
         }
 
         [Fact]
         public void IsNotDirtyIfDoesNotHaveDirtyProps() {
-            var foo = new Foo(new string[0], new Dictionary<string, object> ()) { Name = "James" };
-            var inspector = SessionExtensions.Inspect(new Mock<ISession>().Object, foo);
+            var foo = new Foo(new string[0], new Dictionary<string, object>()) { Name = "James" };
+            var inspector = new Mock<ISession>().Object.Inspect(foo);
             Assert.False(inspector.IsDirty());
         }
     }
@@ -75,15 +76,15 @@
         }
 
         public void EnableTracking() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void DisableTracking() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool IsTrackingEnabled() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IEnumerable<string> GetDirtyProperties() {

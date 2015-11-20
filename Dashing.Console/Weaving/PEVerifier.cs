@@ -9,7 +9,7 @@ namespace Dashing.Console.Weaving {
     public class PEVerifier {
         private readonly ILogger logger;
 
-        private string windowsSdkDirectory;
+        private readonly string windowsSdkDirectory;
 
         private bool foundPeVerify;
 

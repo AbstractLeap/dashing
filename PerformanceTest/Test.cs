@@ -11,7 +11,8 @@ namespace PerformanceTest {
 
         /// <remarks>Prevents 'return value of pure method is not used' warnings</remarks>
         public Test(string provider, string name, Func<int, object> func, string method = null)
-            : this(provider, name, i => { var forceEvaluation = func(i) != null; }, method) { }
+            : this(provider, name, i => { var forceEvaluation = func(i) != null; }, method) {
+        }
 
         public string Provider { get; private set; }
 
@@ -21,8 +22,10 @@ namespace PerformanceTest {
 
         public Action<int> TestFunc { get; private set; }
 
-        public string FriendlyName {
-            get {
+        public string FriendlyName
+        {
+            get
+            {
                 return this.Method == null ? this.Provider : string.Format("{0} ({1})", this.Provider, this.Method);
             }
         }

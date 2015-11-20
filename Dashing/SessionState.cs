@@ -10,15 +10,15 @@ namespace Dashing {
     public class SessionState : ISessionState, IDisposable {
         private readonly IConfiguration configuration;
 
-        private IDbConnection connection;
+        private readonly IDbConnection connection;
 
         private IDbTransaction transaction;
 
-        private bool shouldDisposeConnection;
+        private readonly bool shouldDisposeConnection;
 
         private bool shouldCommitAndDisposeTransaction;
 
-        private bool isTransactionLess;
+        private readonly bool isTransactionLess;
 
         private bool isComplete;
 

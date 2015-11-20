@@ -6,9 +6,7 @@
 
     using Nest;
 
-    public class ElasticSearchEventListener : IOnPostInsertEventListener, 
-                                              IOnPostSaveEventListener, 
-                                              IOnPostDeleteEventListener {
+    public class ElasticSearchEventListener : IOnPostInsertEventListener, IOnPostSaveEventListener, IOnPostDeleteEventListener {
         private readonly IElasticClientFactory factory;
 
         private readonly HashSet<Type> indexedTypes;

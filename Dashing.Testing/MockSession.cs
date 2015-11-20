@@ -50,11 +50,14 @@
 
         public IDapper Dapper { get; private set; }
 
-        public void Dispose() {}
+        public void Dispose() {
+        }
 
-        public void Complete() {}
+        public void Complete() {
+        }
 
-        public void Reject() {}
+        public void Reject() {
+        }
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id) {
             return this.GetQuery<T>().Where(this.GetPrimaryKeyWhereClause<T, TPrimaryKey>(id)).Single();
@@ -150,14 +153,14 @@
 
             var list = this.BulkUpdates[typeof(T)] as IList<Tuple<Action<T>, IEnumerable<Expression<Func<T, bool>>>>>;
             list.Add(Tuple.Create(update, new List<Expression<Func<T, bool>>>() as IEnumerable<Expression<Func<T, bool>>>));
-            
+
             var entities = this.GetOrInitTestList<T>();
             var updates = 0;
-            foreach(var entity in entities) {
+            foreach (var entity in entities) {
                 update(entity);
                 updates++;
             }
-            
+
             return updates;
         }
 
@@ -218,7 +221,9 @@
             var param = Expression.Parameter(typeof(T));
             var compare = Expression.Call(
                 null,
-                typeof(Enumerable).GetMethods().First(m => m.Name == "Contains" && m.GetParameters().Count() == 2).MakeGenericMethod(typeof(TPrimaryKey)),
+                typeof(Enumerable).GetMethods()
+                                  .First(m => m.Name == "Contains" && m.GetParameters().Count() == 2)
+                                  .MakeGenericMethod(typeof(TPrimaryKey)),
                 Expression.Constant(ids),
                 Expression.Property(param, typeof(T).Name + "Id"));
             return Expression.Lambda<Func<T, bool>>(compare, param);

@@ -104,9 +104,7 @@
                 case DbType.Object:
                     return null;
                 default:
-                    throw new ArgumentOutOfRangeException(
-                        "dbType",
-                        "Unknown Db Type for Default value resolution");
+                    throw new ArgumentOutOfRangeException("dbType", "Unknown Db Type for Default value resolution");
             }
         }
 

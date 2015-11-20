@@ -15,7 +15,6 @@
     using Xunit;
 
     public class WhereClauseWriterTests {
-
         [Fact]
         public void NullLeftHandSideGetsGoodSql() {
             var target = MakeTarget();
@@ -414,7 +413,7 @@
         [Fact]
         public void WhereContainsRelatedEntity() {
             var target = MakeTarget();
-            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2} };
+            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
             Expression<Func<Post, bool>> pred = p => blogs.Contains(p.Blog);
             var actual = target.GenerateSql(new[] { pred }, null);
             Assert.Equal(" where [BlogId] in @l_1", actual.Sql);
@@ -672,7 +671,7 @@
             var target = MakeTarget();
             var dict = new Dictionary<string, string> { { "Foo", "Bar" } };
             Expression<Func<Post, bool>> pred = p => p.Content == dict["Foo"];
-            var actual = target.GenerateSql(new[] { pred}, null);
+            var actual = target.GenerateSql(new[] { pred }, null);
             Assert.Equal(" where ([Content] = @l_1)", actual.Sql);
         }
 

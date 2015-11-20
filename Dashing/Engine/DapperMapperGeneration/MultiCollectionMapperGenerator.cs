@@ -149,9 +149,9 @@ namespace Dashing.Engine.DapperMapperGeneration {
 
                         // instantiate the collection if necessary
                         rootStatements.Add(
-                                Expression.IfThen(
-                                    Expression.Equal(propExpr, Expression.Constant(null)),
-                                    Expression.Assign(propExpr, Expression.New(typeof(List<>).MakeGenericType(childType)))));
+                            Expression.IfThen(
+                                Expression.Equal(propExpr, Expression.Constant(null)),
+                                Expression.Assign(propExpr, Expression.New(typeof(List<>).MakeGenericType(childType)))));
 
                         // create the many to one code
                         var initRootExpr = Expression.IfThen(
@@ -159,16 +159,18 @@ namespace Dashing.Engine.DapperMapperGeneration {
                             Expression.Block(
                                 thisInit,
                                 Expression.IfThenElse(
-                                    Expression.Call(dictVar, dictType.GetMethod("ContainsKey"), new Expression[] { pkExpr }),
+                                    Expression.Call(dictVar, dictType.GetMethod("ContainsKey"), pkExpr),
                                     Expression.Assign(thisVar, Expression.Property(dictVar, "Item", pkExpr)),
                                     Expression.Block(
                                         new[] {
-                                            Expression.Call(
+                                                  Expression.Call(
                                                       dictVar,
                                                       dictType.GetMethods().First(m => m.Name == "Add" && m.GetParameters().Count() == 2),
                                                       pkExpr,
                                                       thisVar)
-                                              }.Union(innerStatements.Item1).Union(new[] { Expression.Call(thisVar, typeof(ITrackedEntity).GetMethod("EnableTracking")) }))),
+                                              }.Union(innerStatements.Item1)
+                                               .Union(
+                                                   new[] { Expression.Call(thisVar, typeof(ITrackedEntity).GetMethod("EnableTracking")) }))),
                                 Expression.Assign(
                                     tupleVar,
                                     Expression.New(
@@ -178,10 +180,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
                                 Expression.IfThen(
                                     Expression.Not(Expression.Call(hashsetPairVar, hashsetPairType.GetMethod("Contains"), tupleVar)),
                                     Expression.Block(
-                                        Expression.Call(
-                                            propExpr,
-                                            typeof(ICollection<>).MakeGenericType(childType).GetMethod("Add"),
-                                            new Expression[] { thisVar }),
+                                        Expression.Call(propExpr, typeof(ICollection<>).MakeGenericType(childType).GetMethod("Add"), thisVar),
                                         Expression.Call(hashsetPairVar, hashsetPairType.GetMethod("Add"), tupleVar)))));
                         collectionStatements.Add(initRootExpr);
                         collectionStatements.AddRange(innerStatements.Item2);
@@ -201,10 +200,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
                             newVariables,
                             ref objectParamArrayIdx);
 
-                        var thisStatements = new List<Expression> {
-                                                                      thisInit,
-                                                                      Expression.Assign(propExpr, thisVar)
-                                                                  };
+                        var thisStatements = new List<Expression> { thisInit, Expression.Assign(propExpr, thisVar) };
                         thisStatements.AddRange(innerStatements.Item1);
                         thisStatements.Add(Expression.Call(thisVar, typeof(ITrackedEntity).GetMethod("EnableTracking")));
                         var expr = Expression.IfThen(ifExpr, Expression.Block(thisStatements));

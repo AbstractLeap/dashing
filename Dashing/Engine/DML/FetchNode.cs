@@ -1,6 +1,4 @@
 ﻿namespace Dashing.Engine.DML {
-    using System.Collections.Generic;
-
     using Dashing.Configuration;
     using Dashing.Extensions;
 

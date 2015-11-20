@@ -3,9 +3,8 @@
     using System.Collections.Generic;
     using System.Data;
 
-    using Dashing.CodeGeneration;
     using Dashing.Engine;
-using Dashing.Events;
+    using Dashing.Events;
 
     public interface IConfiguration {
         /// <summary>
@@ -35,14 +34,14 @@ using Dashing.Events;
         bool HasMap(Type type);
 
         /// <summary>
-        /// Begins a new Dashing Session
+        ///     Begins a new Dashing Session
         /// </summary>
         /// <returns></returns>
         /// <remarks>This will instantiate a new DbConnection and a begin a new DbTransaction when it needs to</remarks>
         ISession BeginSession();
 
         /// <summary>
-        /// Begins a new Dashing Session using the provided connection
+        ///     Begins a new Dashing Session using the provided connection
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
@@ -50,30 +49,35 @@ using Dashing.Events;
         ISession BeginSession(IDbConnection connection);
 
         /// <summary>
-        /// Begins a new Dashing session using the provided connection and transaction
+        ///     Begins a new Dashing session using the provided connection and transaction
         /// </summary>
         /// <param name="connection"></param>
         /// <param name="transaction"></param>
         /// <returns></returns>
-        /// <remarks>All connection and transaction management should be performed by the caller. Calling Complete() on the Session will do nothing</remarks>
+        /// <remarks>
+        ///     All connection and transaction management should be performed by the caller. Calling Complete() on the Session
+        ///     will do nothing
+        /// </remarks>
         ISession BeginSession(IDbConnection connection, IDbTransaction transaction);
 
         /// <summary>
-        /// Begins a new transaction-less Session
+        ///     Begins a new transaction-less Session
         /// </summary>
         /// <returns></returns>
-        /// <remarks>All queries are executed without an explicit transaction.
-        /// A connection is created when needed</remarks>
+        /// <remarks>
+        ///     All queries are executed without an explicit transaction.
+        ///     A connection is created when needed
+        /// </remarks>
         ISession BeginTransactionLessSession();
 
         /// <summary>
-        /// Begins a new transaction-less Session using the provided connection
+        ///     Begins a new transaction-less Session using the provided connection
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
         /// <remarks>All queries are executed without an explicit transaction.</remarks>
         ISession BeginTransactionLessSession(IDbConnection connection);
-        
+
         ICollection<IEventListener> EventListeners { get; }
 
         EventHandlers EventHandlers { get; }
@@ -91,7 +95,7 @@ using Dashing.Events;
         IMapper Mapper { get; }
 
         /// <summary>
-        /// Indicates if calling Complete on an ISession that's been rejected should not throw an exception
+        ///     Indicates if calling Complete on an ISession that's been rejected should not throw an exception
         /// </summary>
         bool CompleteFailsSilentlyIfRejected { get; set; }
     }

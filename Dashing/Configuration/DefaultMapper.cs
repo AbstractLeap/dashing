@@ -2,7 +2,6 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Data.Linq.Mapping;
     using System.Linq;
     using System.Reflection;
 
@@ -65,7 +64,10 @@
             map.Configuration = configuration;
             map.Table = this.convention.TableFor(entity);
             map.Schema = this.convention.SchemaFor(entity);
-            entity.GetProperties().Select(property => this.BuildColumn(map, entity, property, configuration)).ToList().ForEach(c => map.Columns.Add(c.Name, c));
+            entity.GetProperties()
+                  .Select(property => this.BuildColumn(map, entity, property, configuration))
+                  .ToList()
+                  .ForEach(c => map.Columns.Add(c.Name, c));
             this.ResolvePrimaryKey(entity, map);
             this.AssignFetchIds(map);
         }
@@ -140,7 +142,7 @@
                                  .Columns.Where(
                                      c =>
                                      (c.Value.Type == column.Map.Type
-                                     || (c.Value.Type.IsCollection() && c.Value.Type.GetGenericArguments().First() == column.Map.Type))
+                                      || (c.Value.Type.IsCollection() && c.Value.Type.GetGenericArguments().First() == column.Map.Type))
                                      && !c.Value.IsIgnored)
                                  .ToArray();
                 if (candidateColumns.Length == 0) {

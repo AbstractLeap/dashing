@@ -5,33 +5,40 @@
     using System.Runtime;
 
     public class OrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>,
-                                                     IList<KeyValuePair<TKey, TValue>>,
-                                                     ICollection<KeyValuePair<TKey, TValue>>,
-                                                     IEnumerable<KeyValuePair<TKey, TValue>>,
-                                                     IEnumerable {
+                                                   IList<KeyValuePair<TKey, TValue>>,
+                                                   ICollection<KeyValuePair<TKey, TValue>>,
+                                                   IEnumerable<KeyValuePair<TKey, TValue>>,
+                                                   IEnumerable {
         private readonly Dictionary<TKey, TValue> _dictionary;
 
         private readonly List<TKey> _keys;
 
         private readonly List<TValue> _values;
 
-        public int Count {
-            get {
+        public int Count
+        {
+            get
+            {
                 return this._dictionary.Count;
             }
         }
 
-        public ICollection<TKey> Keys {
-            get {
+        public ICollection<TKey> Keys
+        {
+            get
+            {
                 return this._keys.AsReadOnly();
             }
         }
 
-        public TValue this[TKey key] {
-            get {
+        public TValue this[TKey key]
+        {
+            get
+            {
                 return this._dictionary[key];
             }
-            set {
+            set
+            {
                 this.RemoveFromLists(key);
                 this._dictionary[key] = value;
                 this._keys.Add(key);
@@ -39,21 +46,26 @@
             }
         }
 
-        public ICollection<TValue> Values {
-            get {
+        public ICollection<TValue> Values
+        {
+            get
+            {
                 return this._values.AsReadOnly();
             }
         }
 
-        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly {
-            get {
+        bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
+        {
+            get
+            {
                 return ((ICollection<KeyValuePair<TKey, TValue>>)this._dictionary).IsReadOnly;
             }
         }
 
         [TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
         public OrderedDictionary()
-            : this(0) {}
+            : this(0) {
+        }
 
         public OrderedDictionary(int capacity) {
             this._dictionary = new Dictionary<TKey, TValue>(capacity);
@@ -155,15 +167,18 @@
             this._values.RemoveAt(index);
         }
 
-        KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[int index] {
-            get {
+        KeyValuePair<TKey, TValue> IList<KeyValuePair<TKey, TValue>>.this[int index]
+        {
+            get
+            {
                 if (index >= this.Count || index < 0) {
                     throw new ArgumentOutOfRangeException("index");
                 }
 
                 return new KeyValuePair<TKey, TValue>(this._keys[index], this._values[index]);
             }
-            set {
+            set
+            {
                 if (index >= this.Count || index < 0) {
                     throw new ArgumentOutOfRangeException("index");
                 }

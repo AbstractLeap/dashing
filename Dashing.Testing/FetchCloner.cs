@@ -81,7 +81,7 @@
                                 collectionEntity,
                                 collectionResult,
                                 fetchNode != null && fetchNode.Children.ContainsKey(column.Key) ? fetchNode.Children[column.Key] : null);
-                            listType.GetMethod("Add").Invoke(listResult, new object[] { collectionResult });
+                            listType.GetMethod("Add").Invoke(listResult, new[] { collectionResult });
                         }
                         prop.SetValue(result, listResult);
                     }

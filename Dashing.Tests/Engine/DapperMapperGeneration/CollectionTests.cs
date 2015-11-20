@@ -237,25 +237,25 @@
             var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
 
             // setup the scenario
-            var tag1 = new PostTag() { PostTagId = 1 };
-            var tag2 = new PostTag() { PostTagId = 2 };
-            var tag3 = new PostTag() { PostTagId = 3 };
-            var post1 = new Post() { PostId = 1, Title = "Foo" };
-            var anotherPost1 = new Post() { PostId = 1, Title = "Foo" };
-            var post2 = new Post() { PostId = 2, Title = "Foo" };
-            var post3 = new Post() { PostId = 3, Title = "Foo" };
-            var post4 = new Post() { PostId = 4, Title = "Foo" };
-            var comment1 = new Comment() { CommentId = 1 };
-            var comment2 = new Comment() { CommentId = 2 };
-            var comment3 = new Comment() { CommentId = 3 };
-            var comment4 = new Comment() { CommentId = 4 };
-            var comment5 = new Comment() { CommentId = 5 };
-            var comment6 = new Comment() { CommentId = 6 };
-            var user1 = new User() { UserId = 1 };
-            var user2 = new User() { UserId = 2 };
-            var user3 = new User() { UserId = 3 };
-            var user4 = new User() { UserId = 4 };
-            var user5 = new User() { UserId = 5 };
+            var tag1 = new PostTag { PostTagId = 1 };
+            var tag2 = new PostTag { PostTagId = 2 };
+            var tag3 = new PostTag { PostTagId = 3 };
+            var post1 = new Post { PostId = 1, Title = "Foo" };
+            var anotherPost1 = new Post { PostId = 1, Title = "Foo" };
+            var post2 = new Post { PostId = 2, Title = "Foo" };
+            var post3 = new Post { PostId = 3, Title = "Foo" };
+            var post4 = new Post { PostId = 4, Title = "Foo" };
+            var comment1 = new Comment { CommentId = 1 };
+            var comment2 = new Comment { CommentId = 2 };
+            var comment3 = new Comment { CommentId = 3 };
+            var comment4 = new Comment { CommentId = 4 };
+            var comment5 = new Comment { CommentId = 5 };
+            var comment6 = new Comment { CommentId = 6 };
+            var user1 = new User { UserId = 1 };
+            var user2 = new User { UserId = 2 };
+            var user3 = new User { UserId = 3 };
+            var user4 = new User { UserId = 4 };
+            var user5 = new User { UserId = 5 };
 
             PostTag currentRoot = null;
             IList<PostTag> results = new List<PostTag>();
@@ -300,25 +300,25 @@
             var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
 
             // setup the scenario
-            var tag1 = new PostTag() { PostTagId = 1 };
-            var tag2 = new PostTag() { PostTagId = 2 };
-            var tag3 = new PostTag() { PostTagId = 3 };
-            var post1 = new Post() { PostId = 1, Title = "Foo" };
-            var anotherPost1 = new Post() { PostId = 1, Title = "Foo" };
-            var post2 = new Post() { PostId = 2, Title = "Foo" };
-            var post3 = new Post() { PostId = 3, Title = "Foo" };
-            var post4 = new Post() { PostId = 4, Title = "Foo" };
-            var comment1 = new Comment() { CommentId = 1 };
-            var comment2 = new Comment() { CommentId = 2 };
-            var comment3 = new Comment() { CommentId = 3 };
-            var comment4 = new Comment() { CommentId = 4 };
-            var comment5 = new Comment() { CommentId = 5 };
-            var comment6 = new Comment() { CommentId = 6 };
-            var user1 = new User() { UserId = 1 };
-            var user2 = new User() { UserId = 2 };
-            var user3 = new User() { UserId = 3 };
-            var user4 = new User() { UserId = 4 };
-            var user5 = new User() { UserId = 5 };
+            var tag1 = new PostTag { PostTagId = 1 };
+            var tag2 = new PostTag { PostTagId = 2 };
+            var tag3 = new PostTag { PostTagId = 3 };
+            var post1 = new Post { PostId = 1, Title = "Foo" };
+            var anotherPost1 = new Post { PostId = 1, Title = "Foo" };
+            var post2 = new Post { PostId = 2, Title = "Foo" };
+            var post3 = new Post { PostId = 3, Title = "Foo" };
+            var post4 = new Post { PostId = 4, Title = "Foo" };
+            var comment1 = new Comment { CommentId = 1 };
+            var comment2 = new Comment { CommentId = 2 };
+            var comment3 = new Comment { CommentId = 3 };
+            var comment4 = new Comment { CommentId = 4 };
+            var comment5 = new Comment { CommentId = 5 };
+            var comment6 = new Comment { CommentId = 6 };
+            var user1 = new User { UserId = 1 };
+            var user2 = new User { UserId = 2 };
+            var user3 = new User { UserId = 3 };
+            var user4 = new User { UserId = 4 };
+            var user5 = new User { UserId = 5 };
 
             PostTag currentRoot = null;
             IList<PostTag> results = new List<PostTag>();
@@ -351,25 +351,25 @@
             var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
 
             // setup the scenario
-            var tag1 = new PostTag() { PostTagId = 1 };
-            var tag2 = new PostTag() { PostTagId = 2 };
-            var tag3 = new PostTag() { PostTagId = 3 };
-            var post1 = new Post() { PostId = 1, Title = "Foo" };
-            var anotherPost1 = new Post() { PostId = 1, Title = "Foo" };
-            var post2 = new Post() { PostId = 2, Title = "Foo" };
-            var post3 = new Post() { PostId = 3, Title = "Foo" };
-            var post4 = new Post() { PostId = 4, Title = "Foo" };
-            var comment1 = new Comment() { CommentId = 1 };
-            var comment2 = new Comment() { CommentId = 2 };
-            var comment3 = new Comment() { CommentId = 3 };
-            var comment4 = new Comment() { CommentId = 4 };
-            var comment5 = new Comment() { CommentId = 5 };
-            var comment6 = new Comment() { CommentId = 6 };
-            var user1 = new User() { UserId = 1 };
-            var user2 = new User() { UserId = 2 };
-            var user3 = new User() { UserId = 3 };
-            var user4 = new User() { UserId = 4 };
-            var user5 = new User() { UserId = 5 };
+            var tag1 = new PostTag { PostTagId = 1 };
+            var tag2 = new PostTag { PostTagId = 2 };
+            var tag3 = new PostTag { PostTagId = 3 };
+            var post1 = new Post { PostId = 1, Title = "Foo" };
+            var anotherPost1 = new Post { PostId = 1, Title = "Foo" };
+            var post2 = new Post { PostId = 2, Title = "Foo" };
+            var post3 = new Post { PostId = 3, Title = "Foo" };
+            var post4 = new Post { PostId = 4, Title = "Foo" };
+            var comment1 = new Comment { CommentId = 1 };
+            var comment2 = new Comment { CommentId = 2 };
+            var comment3 = new Comment { CommentId = 3 };
+            var comment4 = new Comment { CommentId = 4 };
+            var comment5 = new Comment { CommentId = 5 };
+            var comment6 = new Comment { CommentId = 6 };
+            var user1 = new User { UserId = 1 };
+            var user2 = new User { UserId = 2 };
+            var user3 = new User { UserId = 3 };
+            var user4 = new User { UserId = 4 };
+            var user5 = new User { UserId = 5 };
 
             PostTag currentRoot = null;
             IList<PostTag> results = new List<PostTag>();
@@ -394,7 +394,11 @@
         public void MultipleManyToManyFetchingWorks() {
             // setup the factory
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Tags).ThenFetch(p => p.ElTag).FetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag) as SelectQuery<Post>;
+            var selectQuery =
+                new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Tags)
+                                                                              .ThenFetch(p => p.ElTag)
+                                                                              .FetchMany(p => p.DeletedTags)
+                                                                              .ThenFetch(t => t.ElTag) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
             var mapper = new MultiCollectionMapperGenerator(config);
@@ -408,7 +412,7 @@
             var postTag1 = new PostTag { PostTagId = 1 };
             var postTag2 = new PostTag { PostTagId = 2 };
             var postTag3 = new PostTag { PostTagId = 3 };
-            
+
             // act
             Post currentRoot = null;
             IList<Post> results = new List<Post>();
@@ -433,7 +437,15 @@
         public void NestedMultipleOneToManyFetchingWorks() {
             // setup the factory
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Blog>(new Mock<ISelectQueryExecutor>().Object).FetchMany(b => b.Posts).ThenFetchMany(p => p.Tags).ThenFetch(t => t.ElTag).FetchMany(b => b.Posts).ThenFetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag).FetchMany(p => p.Posts).ThenFetch(p => p.Author) as SelectQuery<Blog>;
+            var selectQuery =
+                new SelectQuery<Blog>(new Mock<ISelectQueryExecutor>().Object).FetchMany(b => b.Posts)
+                                                                              .ThenFetchMany(p => p.Tags)
+                                                                              .ThenFetch(t => t.ElTag)
+                                                                              .FetchMany(b => b.Posts)
+                                                                              .ThenFetchMany(p => p.DeletedTags)
+                                                                              .ThenFetch(t => t.ElTag)
+                                                                              .FetchMany(p => p.Posts)
+                                                                              .ThenFetch(p => p.Author) as SelectQuery<Blog>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
             var mapper = new MultiCollectionMapperGenerator(config);
@@ -468,7 +480,8 @@
             var dict2 = new Dictionary<int, PostTag>();
             var hashsetPair2 = new HashSet<Tuple<int, int>>();
 
-            var func = (Func<object[], Blog>)funcFac.DynamicInvoke(currentRoot, results, dict0, hashsetPair0, dict1, hashsetPair1, dict2, hashsetPair2);
+            var func =
+                (Func<object[], Blog>)funcFac.DynamicInvoke(currentRoot, results, dict0, hashsetPair0, dict1, hashsetPair1, dict2, hashsetPair2);
             func(new object[] { blog1, post1, author1, null, null, posttag1, tag1 });
             func(new object[] { blog1, post1, author1, null, null, posttag2, tag2 });
             func(new object[] { blog1, post2, author2, delPostTag1, tag3, null, null });
@@ -652,7 +665,8 @@
 
         private static Delegate GenerateMultiMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Tags) as SelectQuery<Post>;
+            var selectQuery =
+                new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Tags) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 
@@ -663,7 +677,8 @@
 
         private static Delegate GenerateSingleMapperWithFetch() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Blog) as SelectQuery<Post>;
+            var selectQuery =
+                new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
 

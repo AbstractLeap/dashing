@@ -19,7 +19,11 @@
             this.convention = convention;
         }
 
-        public IDictionary<string, string> GenerateFiles(IEnumerable<IMap> maps, DatabaseSchema schema, string domainNamespace, IAnswerProvider answerProvider) {
+        public IDictionary<string, string> GenerateFiles(
+            IEnumerable<IMap> maps,
+            DatabaseSchema schema,
+            string domainNamespace,
+            IAnswerProvider answerProvider) {
             // note that we're just doing string building here
             // simple POCOs and CodeDom does not support auto-properties
             // and frankly I wouldn't want these things to have backing fields in the source code
@@ -73,7 +77,8 @@
             else if (column.Relationship == RelationshipType.ManyToOne) {
                 this.AddProperty(
                     sourceFile,
-                    this.convention.ClassNameForTable(schema.Tables.First(t => t.Name == column.Map.Table).FindColumn(column.DbName).ForeignKeyTableName),
+                    this.convention.ClassNameForTable(
+                        schema.Tables.First(t => t.Name == column.Map.Table).FindColumn(column.DbName).ForeignKeyTableName),
                     column.Name);
             }
             else if (column.Relationship == RelationshipType.OneToMany) {

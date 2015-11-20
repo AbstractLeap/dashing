@@ -64,8 +64,7 @@
 
                 // look in embedded resources
                 var resourceName = "Dashing.Console.lib." + assemblyName.Name + ".dll";
-                using (var stream = Assembly.GetExecutingAssembly()
-                                            .GetManifestResourceStream(resourceName)) {
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)) {
                     if (stream != null) {
                         var assemblyData = new byte[stream.Length];
                         stream.Read(assemblyData, 0, assemblyData.Length);
@@ -84,8 +83,7 @@
             };
 
             var configurationMapResolver =
-                (ConfigurationMapResolver)
-                configAppDomain.CreateInstanceFromAndUnwrap(me.CodeBase, typeof(ConfigurationMapResolver).FullName);
+                (ConfigurationMapResolver)configAppDomain.CreateInstanceFromAndUnwrap(me.CodeBase, typeof(ConfigurationMapResolver).FullName);
 
             // locate all dlls
             var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
@@ -95,7 +93,9 @@
                     var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
                     var assemblyResolver = new DefaultAssemblyResolver();
                     assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(file));
-                    var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver});
+                    var assembly = AssemblyDefinition.ReadAssembly(
+                        file,
+                        new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver });
                     assemblyDefinitions.Add(file, assembly);
                     if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == "Dashing")) {
                         this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
@@ -128,7 +128,8 @@
                 assemblyDefinitions.Where(k => assemblyMapDefinitions.Select(mk => mk.Key).Contains(k.Value.FullName))
                                    .ToDictionary(k => k.Key, k => k.Value);
 
-            this.Logger.Trace("Found the following assemblies that reference dashing: " + string.Join(", ", assemblyMapDefinitions.Select(a => a.Key)));
+            this.Logger.Trace(
+                "Found the following assemblies that reference dashing: " + string.Join(", ", assemblyMapDefinitions.Select(a => a.Key)));
 
             // now go through each assembly and re-write the types
             var visitedTypes = new HashSet<string>();
@@ -169,7 +170,8 @@
                     }
                 }
                 catch (UnauthorizedAccessException) {
-                    this.Logger.Trace("Unable to write the pdb for assembly " + assemblyDefinition.FullName + " due to an UnauthorizedAccessException");
+                    this.Logger.Trace(
+                        "Unable to write the pdb for assembly " + assemblyDefinition.FullName + " due to an UnauthorizedAccessException");
                     try {
                         assemblyDefinition.Write(assemblyDefinitionLookup.Key);
                     }
@@ -206,7 +208,7 @@
                 //            this.Log.LogMessage(
                 //                MessageImportance.Normal,
                 //                string.Format("Unable to find Project for {0} in {1}", assemblyDefinitionLookup.Key, projectFile));
-                            
+
                 //            var parentProjectFile = csProj.GetPropertyValue("MSBuildThisFileFullPath"); // MSBUILD 4.0 only
                 //            if (!string.IsNullOrWhiteSpace(parentProjectFile)) {
                 //                projectFileLocations.Enqueue(parentProjectFile);
@@ -231,8 +233,7 @@
 
                 // look in embedded resources
                 var resourceName = "Dashing.Console.lib." + assemblyName.Name + ".dll";
-                using (var stream = Assembly.GetExecutingAssembly()
-                                            .GetManifestResourceStream(resourceName)) {
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)) {
                     if (stream != null) {
                         var assemblyData = new byte[stream.Length];
                         stream.Read(assemblyData, 0, assemblyData.Length);

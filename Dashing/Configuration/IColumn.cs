@@ -39,7 +39,7 @@
         byte Scale { get; set; }
 
         /// <summary>
-        /// Indicates whether the column should have it's length set to Max
+        ///     Indicates whether the column should have it's length set to Max
         /// </summary>
         bool MaxLength { get; set; }
 
@@ -49,7 +49,7 @@
         ushort Length { get; set; }
 
         /// <summary>
-        /// Gets or sets the default value for this column
+        ///     Gets or sets the default value for this column
         /// </summary>
         string Default { get; set; }
 
@@ -96,12 +96,12 @@
         IColumn ChildColumn { get; set; }
 
         /// <summary>
-        /// References the parent map in a ManyToOne relationship
+        ///     References the parent map in a ManyToOne relationship
         /// </summary>
         IMap ParentMap { get; }
 
         /// <summary>
-        /// References the opposite column in a one-to-one relationship
+        ///     References the opposite column in a one-to-one relationship
         /// </summary>
         IColumn OppositeColumn { get; set; }
     }

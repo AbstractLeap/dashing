@@ -5,7 +5,9 @@
 
     public class DialectFactory {
         public ISqlDialect Create(ConnectionStringSettings connectionString) {
-            if (connectionString == null) { throw new ArgumentNullException("connectionString"); }
+            if (connectionString == null) {
+                throw new ArgumentNullException("connectionString");
+            }
 
             if (string.IsNullOrEmpty(connectionString.ProviderName)) {
                 throw new ArgumentException(
@@ -31,8 +33,7 @@
                         return new SqlServer2012Dialect();
                     }
 
-                    if (connectionString.ConnectionString.Contains("SQLNCLI10")
-                        || connectionString.ConnectionString.Contains("SQLNCLI;")) {
+                    if (connectionString.ConnectionString.Contains("SQLNCLI10") || connectionString.ConnectionString.Contains("SQLNCLI;")) {
                         return new SqlServerDialect();
                     }
 
@@ -40,8 +41,7 @@
                         return new MySqlDialect();
                     }
 
-                    throw new NotImplementedException(
-                        "For OleDb we only recognise Sql Server Native Client and MySQL provider");
+                    throw new NotImplementedException("For OleDb we only recognise Sql Server Native Client and MySQL provider");
 
                 default:
                     throw new NotImplementedException("Sorry, we don't support the \"" + connectionString.ProviderName + "\" provider just yet");

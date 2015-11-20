@@ -1,7 +1,5 @@
 namespace Dashing.Weaving.Tests {
-    using System;
     using System.Runtime.CompilerServices;
-    using System.Runtime.Remoting;
 
     using Dashing.Weaving.Sample.Domain;
 
@@ -12,7 +10,7 @@ namespace Dashing.Weaving.Tests {
         [Fact]
         public void GetHashCodeReturnsIdFactor() {
             var bar = new Bar { Id = 3 };
-            Assert.Equal(17 *  3, bar.GetHashCode());
+            Assert.Equal(17 * 3, bar.GetHashCode());
         }
 
         [Fact]
@@ -77,9 +75,9 @@ namespace Dashing.Weaving.Tests {
 
         [Fact(Skip = "Need to re-write all instances of == and != in calling dlls for this to work")]
         public void EqualityGetsOverridden() {
-            var bar = new Bar() { Id = 1 };
-            var bar2 = new Bar() { Id = 2 };
-            var anotherBar1 = new Bar() { Id = 1 };
+            var bar = new Bar { Id = 1 };
+            var bar2 = new Bar { Id = 2 };
+            var anotherBar1 = new Bar { Id = 1 };
             Bar nullBar1 = null;
             Bar nullBar2 = null;
 
@@ -117,7 +115,7 @@ namespace Dashing.Weaving.Tests {
             Assert.True(a == a);
 
             var a2 = new A { Id = 2 };
-            var aAnother1 = new A() { Id = 1 };
+            var aAnother1 = new A { Id = 1 };
             Assert.False(a == a2);
             Assert.True(a == aAnother1);
         }
@@ -129,7 +127,7 @@ namespace Dashing.Weaving.Tests {
 
     public class B : C {
         public static bool operator ==(B left, B right) {
-            if (Object.ReferenceEquals(left, right)) {
+            if (ReferenceEquals(left, right)) {
                 return true;
             }
 
@@ -146,6 +144,5 @@ namespace Dashing.Weaving.Tests {
     }
 
     public class A : B {
-        
     }
 }

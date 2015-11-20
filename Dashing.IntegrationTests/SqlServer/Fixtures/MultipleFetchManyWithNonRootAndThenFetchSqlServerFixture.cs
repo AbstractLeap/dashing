@@ -3,7 +3,6 @@
     using System.Collections.Generic;
     using System.Configuration;
 
-    using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
@@ -27,14 +26,21 @@
             // load the data
             using (var transactionLessSession = this.config.BeginTransactionLessSession()) {
                 var dialect = new SqlServer2012Dialect();
-            var migrator = new Migrator(
-                dialect,
-                new CreateTableWriter(dialect),
-                new AlterTableWriter(dialect),
-                new DropTableWriter(dialect),
-                new StatisticsProvider(null, dialect));
-            IEnumerable<string> warnings, errors;
-            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), this.config.Maps, null, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+                var migrator = new Migrator(
+                    dialect,
+                    new CreateTableWriter(dialect),
+                    new AlterTableWriter(dialect),
+                    new DropTableWriter(dialect),
+                    new StatisticsProvider(null, dialect));
+                IEnumerable<string> warnings, errors;
+                var createStatement = migrator.GenerateSqlDiff(
+                    new List<IMap>(),
+                    this.config.Maps,
+                    null,
+                    new Mock<ILogger>().Object,
+                    new string[0],
+                    out warnings,
+                    out errors);
                 transactionLessSession.Dapper.Execute("create database " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute("use " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute(createStatement);
@@ -48,10 +54,10 @@
         private void InsertData() {
             this.Session.Insert(new Questionnaire { Name = "Foo" });
             this.Session.Insert(new Question { Questionnaire = new Questionnaire { QuestionnaireId = 1 }, Name = "Bar" });
-            this.Session.Insert(new Booking { });
+            this.Session.Insert(new Booking());
             this.Session.Insert(new Room { Name = "Room 1" });
             this.Session.Insert(new RoomSlot { Room = new Room { RoomId = 1 } });
-            this.Session.Insert(new Bed { RoomSlot = new RoomSlot { RoomSlotId = 1 }, Booking = new Booking { BookingId = 1}});
+            this.Session.Insert(new Bed { RoomSlot = new RoomSlot { RoomSlotId = 1 }, Booking = new Booking { BookingId = 1 } });
             this.Session.Insert(
                 new QuestionnaireResponse { Booking = new Booking { BookingId = 1 }, Questionnaire = new Questionnaire { QuestionnaireId = 1 } });
             this.Session.Insert(
@@ -59,7 +65,6 @@
                                          Question = new Question { QuestionId = 1 },
                                          QuestionnaireResponse = new QuestionnaireResponse { QuestionnaireResponseId = 1 }
                                      });
-
         }
 
         public void Dispose() {
@@ -72,8 +77,7 @@
 
     public class MultipleFetchManyWithNonRootAndThenFetchConfig : DefaultConfiguration {
         public MultipleFetchManyWithNonRootAndThenFetchConfig()
-            : base(
-                new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true", "System.Data.SqlClient")) {
+            : base(new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true", "System.Data.SqlClient")) {
             this.AddNamespaceOf<Questionnaire>();
         }
     }

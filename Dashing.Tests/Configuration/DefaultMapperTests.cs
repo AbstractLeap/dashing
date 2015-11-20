@@ -102,15 +102,19 @@
             public User GoodButNotTheId { get; set; }
 
             [UsedImplicitly]
-            public int Id {
-                get {
+            public int Id
+            {
+                get
+                {
                     return 0;
                 }
             }
 
             [UsedImplicitly]
-            public int DropBox {
-                set {
+            public int DropBox
+            {
+                set
+                {
                     this.backingDropBox = value;
                 }
             }
@@ -286,10 +290,9 @@
             var mapper = this.MakeTarget();
             var mapResult = new Map<OneToOneRight>();
             mapResult.Columns.Add("OneToOneRightId", new Column<int> { Name = "OneToOneRightId" });
-             mapResult.Columns.Add("Left", new Column<OneToOneLeft> { Name = "Left", Relationship = RelationshipType.ManyToOne });
+            mapResult.Columns.Add("Left", new Column<OneToOneLeft> { Name = "Left", Relationship = RelationshipType.ManyToOne });
             this.mockConfiguration.Setup(c => c.HasMap(typeof(OneToOneRight))).Returns(true);
-            this.mockConfiguration.Setup(c => c.GetMap(typeof(OneToOneRight)))
-                .Returns(mapResult);
+            this.mockConfiguration.Setup(c => c.GetMap(typeof(OneToOneRight))).Returns(mapResult);
             var map = mapper.MapFor<OneToOneLeft>(this.mockConfiguration.Object);
             Assert.Equal(RelationshipType.OneToOne, map.Columns.First(c => c.Key == "Right").Value.Relationship);
         }
@@ -298,12 +301,11 @@
         public void EntityOneToOneFixedIfMappedFirst() {
             var mapper = this.MakeTarget();
             var manyToOneColumnToFix = new Column<OneToOneLeft> { Name = "Left", Relationship = RelationshipType.ManyToOne };
-            var mapResult = new Map<OneToOneRight> ();
+            var mapResult = new Map<OneToOneRight>();
             mapResult.Columns.Add("OneToOneRightId", new Column<int> { Name = "OneToOneRightId" });
             mapResult.Columns.Add("Left", manyToOneColumnToFix);
             this.mockConfiguration.Setup(c => c.HasMap(typeof(OneToOneRight))).Returns(true);
-            this.mockConfiguration.Setup(c => c.GetMap(typeof(OneToOneRight)))
-                .Returns(mapResult);
+            this.mockConfiguration.Setup(c => c.GetMap(typeof(OneToOneRight))).Returns(mapResult);
 
             var map = mapper.MapFor<OneToOneLeft>(this.mockConfiguration.Object);
             Assert.Equal(RelationshipType.OneToOne, manyToOneColumnToFix.Relationship);

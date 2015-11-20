@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
-    using System.Data;
 
     /// <summary>
     ///     The Convention interface.

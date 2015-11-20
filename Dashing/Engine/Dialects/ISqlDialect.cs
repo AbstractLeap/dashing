@@ -1,5 +1,4 @@
 namespace Dashing.Engine.Dialects {
-    using System.Data;
     using System.Text;
 
     using Dashing.Configuration;
@@ -30,17 +29,19 @@ namespace Dashing.Engine.Dialects {
         void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip);
 
         /// <summary>
-        /// Changes the name of the column from the name in fromColumn to the name in toColumn
+        ///     Changes the name of the column from the name in fromColumn to the name in toColumn
         /// </summary>
         /// <param name="fromColumn"></param>
         /// <param name="toColumn"></param>
         /// <returns></returns>
-        /// <remarks>Assumes the table name given by toColumn and assumes the column structure given by fromColumn
-        /// i.e. if the column specs are different they should not be changed by this statement</remarks>
+        /// <remarks>
+        ///     Assumes the table name given by toColumn and assumes the column structure given by fromColumn
+        ///     i.e. if the column specs are different they should not be changed by this statement
+        /// </remarks>
         string ChangeColumnName(IColumn fromColumn, IColumn toColumn);
 
         /// <summary>
-        /// Changes the column specification for a particular column
+        ///     Changes the column specification for a particular column
         /// </summary>
         /// <param name="fromColumn"></param>
         /// <param name="toColumn"></param>
@@ -55,19 +56,19 @@ namespace Dashing.Engine.Dialects {
         string CreateIndex(Index index);
 
         /// <summary>
-        /// Applies "for update" sql using table hints i.e. like SQL Server
+        ///     Applies "for update" sql using table hints i.e. like SQL Server
         /// </summary>
         /// <param name="tableSql"></param>
         void AppendForUpdateUsingTableHint(StringBuilder tableSql);
 
         /// <summary>
-        /// Applies "for update" sql using a query modifier at the end of the query i.e. like MySql
+        ///     Applies "for update" sql using a query modifier at the end of the query i.e. like MySql
         /// </summary>
         /// <param name="sql"></param>
         void AppendForUpdateOnQueryFinish(StringBuilder sql);
 
         /// <summary>
-        /// Called before a column is dropped
+        ///     Called before a column is dropped
         /// </summary>
         /// <param name="column"></param>
         /// <returns></returns>

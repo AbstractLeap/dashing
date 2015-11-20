@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Data.Entity.Design.PluralizationServices;
     using System.Globalization;
     using System.Linq;
@@ -91,10 +90,12 @@
         ///     The <see cref="string" />.
         /// </returns>
         public virtual string PrimaryKeyFor(Type entity, IEnumerable<string> propertyNames) {
-            return propertyNames.Select(pn => this.ScorePrimaryKeyCandidate(pn, entity.Name + "Id", "Id"))
-                                .Where(c => c.Score > 0)
-                                .OrderBy(c => c.Score)
-                                .FirstOrDefault().PropertyName;
+            return
+                propertyNames.Select(pn => this.ScorePrimaryKeyCandidate(pn, entity.Name + "Id", "Id"))
+                             .Where(c => c.Score > 0)
+                             .OrderBy(c => c.Score)
+                             .FirstOrDefault()
+                             .PropertyName;
         }
 
         private PrimaryKeyCandidate ScorePrimaryKeyCandidate(string propertyName, params string[] orderedMatches) {
@@ -132,7 +133,7 @@
             if (primaryKeyColumn.Type == typeof(int) || primaryKeyColumn.Type == typeof(long) || primaryKeyColumn.Type == typeof(Guid)) {
                 return true;
             }
-                
+
             return false;
         }
 

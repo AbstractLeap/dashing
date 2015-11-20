@@ -5,11 +5,12 @@ namespace Dashing.CodeGeneration {
     using System.Linq.Expressions;
 
     /// <summary>
-    /// Some helper methods for inspecting entities
+    ///     Some helper methods for inspecting entities
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <remarks>TODO needs speeding up, reflection in here</remarks>
-    public class TrackedEntityInspector<T> : ITrackedEntityInspector<T> where T : ITrackedEntity {
+    public class TrackedEntityInspector<T> : ITrackedEntityInspector<T>
+        where T : ITrackedEntity {
         private readonly T trackedEntity;
 
         public TrackedEntityInspector(T trackedEntity) {

@@ -9,8 +9,7 @@
     public class BasicallyAuthenticatedHttpConnection : HttpConnection {
         private readonly string authorizationHeader;
 
-        public BasicallyAuthenticatedHttpConnection(
-            string username, string password, IConnectionConfigurationValues settings)
+        public BasicallyAuthenticatedHttpConnection(string username, string password, IConnectionConfigurationValues settings)
             : base(settings) {
             this.authorizationHeader = string.Format("Basic {0}", Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + password)));
         }

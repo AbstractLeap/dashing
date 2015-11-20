@@ -62,11 +62,10 @@
                     mappedTypes.Add(mappedType);
                     var innerStatements = this.VisitNonCollectionTree<T>(child.Value, objectsParam, propExpr, ref i, mappedTypes);
 
-                    var thenExpr = new List<Expression>{assignExpr};
+                    var thenExpr = new List<Expression> { assignExpr };
                     thenExpr.AddRange(innerStatements);
-                    thenExpr.Add(Expression.Call(
-                                                                Expression.Convert(indexExpr, typeof(ITrackedEntity)),
-                                                                typeof(ITrackedEntity).GetMethod("EnableTracking")));
+                    thenExpr.Add(
+                        Expression.Call(Expression.Convert(indexExpr, typeof(ITrackedEntity)), typeof(ITrackedEntity).GetMethod("EnableTracking")));
                     statements.Add(Expression.IfThen(ifExpr, Expression.Block(thenExpr)));
                 }
             }

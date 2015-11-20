@@ -43,24 +43,30 @@
         ////public bool Force { get; set; }
 
         [Option('c', HelpText = "Specify the configuration file (e.g. -c config.ini)", Required = false)]
-        public string ConfigPath {
-            get {
+        public string ConfigPath
+        {
+            get
+            {
                 return this.configPath;
             }
 
-            set {
+            set
+            {
                 this.configPath = Path.GetFullPath(value);
                 this.projectName = Path.GetFileNameWithoutExtension(value);
             }
         }
 
         [Option('p', HelpText = "Specify the project name (equivalent to -c projectname.ini)", Required = false)]
-        public string ProjectName {
-            get {
+        public string ProjectName
+        {
+            get
+            {
                 return this.projectName;
             }
 
-            set {
+            set
+            {
                 this.projectName = value;
                 this.configPath = value + ".ini";
             }

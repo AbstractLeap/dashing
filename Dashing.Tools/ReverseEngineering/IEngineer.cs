@@ -7,6 +7,11 @@
     using DatabaseSchemaReader.DataSchema;
 
     public interface IEngineer {
-        IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect, IEnumerable<string> tablesToIgnore, IAnswerProvider answerProvider, bool fixOneToOnes);
+        IEnumerable<IMap> ReverseEngineer(
+            DatabaseSchema schema,
+            ISqlDialect sqlDialect,
+            IEnumerable<string> tablesToIgnore,
+            IAnswerProvider answerProvider,
+            bool fixOneToOnes);
     }
 }

@@ -1,6 +1,5 @@
 ﻿namespace Dashing.CodeGeneration {
     using System;
-    using System.Collections;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
@@ -9,6 +8,7 @@
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Threading.Tasks;
+
     using Dapper;
 
     using Dashing.Configuration;
@@ -30,13 +30,17 @@
 
         private readonly IConfiguration configuration;
 
-        private NonCollectionMapperGenerator nonCollectionMapperGenerator;
+        private readonly NonCollectionMapperGenerator nonCollectionMapperGenerator;
 
-        private SingleCollectionMapperGenerator singleCollectionMapperGenerator;
+        private readonly SingleCollectionMapperGenerator singleCollectionMapperGenerator;
 
-        private MultiCollectionMapperGenerator multiCollectionMapperGenerator;
+        private readonly MultiCollectionMapperGenerator multiCollectionMapperGenerator;
 
-        public delegate FetchCollectionAwaiter<T> CollectionAsyncDelegate<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction);
+        public delegate FetchCollectionAwaiter<T> CollectionAsyncDelegate<T>(
+            SelectWriterResult result,
+            SelectQuery<T> query,
+            IDbConnection connection,
+            IDbTransaction transaction);
 
         public DelegateQueryCreator(IConfiguration configuration) {
             this.nonCollectionMapperGenerator = new NonCollectionMapperGenerator(configuration);
@@ -59,8 +63,7 @@
             return (Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>>)func.DynamicInvoke(mapperFactory);
         }
 
-        public CollectionAsyncDelegate<T> GetAsyncCollectionFunction<T>(
-            SelectWriterResult result) {
+        public CollectionAsyncDelegate<T> GetAsyncCollectionFunction<T>(SelectWriterResult result) {
             Delegate func;
             var mapperFactory = this.GetCollectionFunction<T>(result, true, out func);
 
@@ -85,32 +88,29 @@
 
         private Delegate GetNoCollectionFunction<T>(SelectWriterResult result, bool isAsync, out Delegate func) {
             var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
-            var queries = isAsync? this.asyncNoCollectionQueries : this.noCollectionQueries;
-            var mapper = this.mapperFactories.GetOrAdd(
-                key,
-                t => this.nonCollectionMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree));
+            var queries = isAsync ? this.asyncNoCollectionQueries : this.noCollectionQueries;
+            var mapper = this.mapperFactories.GetOrAdd(key, t => this.nonCollectionMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree));
             func = queries.GetOrAdd(key, t => this.GenerateQuery<T>(mapper.Item1, isAsync, mapper.Item2));
             return mapper.Item1;
         }
 
         private Delegate GetCollectionFunction<T>(SelectWriterResult result, bool isAsync, out Delegate func) {
             var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
-            var collectionQueries = isAsync? this.asyncCollectionQueries:this.collectionQueries;
+            var collectionQueries = isAsync ? this.asyncCollectionQueries : this.collectionQueries;
             if (result.NumberCollectionsFetched == 1) {
                 Tuple<Delegate, Type[]> mapperFactory = this.mapperFactories.GetOrAdd(
-                        key,
-                        t => this.singleCollectionMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree));
+                    key,
+                    t => this.singleCollectionMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree));
                 func = collectionQueries.GetOrAdd(
                     key,
                     t => this.GenerateCollectionFactory<T>(result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, null));
-
 
                 return mapperFactory.Item1;
             }
             else {
                 Tuple<Delegate, Type[], Type[]> mapperFactory = this.multiCollectionMapperFactories.GetOrAdd(
-                        key,
-                        t => this.multiCollectionMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree));
+                    key,
+                    t => this.multiCollectionMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree));
                 func = collectionQueries.GetOrAdd(
                     key,
                     t => this.GenerateCollectionFactory<T>(result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, mapperFactory.Item3));
@@ -131,7 +131,13 @@
 
             // call query function
             var sqlMapperQuery = GetArbitraryQueryMethod<T>(tt, mappedTypes, isAsync);
-            var callQueryExpression = GetArbitraryCallQueryExpression<T>(sqlMapperQuery, connectionParam, resultParam, mapperParam, transactionParam, mappedTypes);
+            var callQueryExpression = GetArbitraryCallQueryExpression<T>(
+                sqlMapperQuery,
+                connectionParam,
+                resultParam,
+                mapperParam,
+                transactionParam,
+                mappedTypes);
 
             // generate lambda (mapper) => ((result, query, connection, transaction) => SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
             var expr = Expression.Lambda(
@@ -140,25 +146,25 @@
             return expr.Compile();
         }
 
-        private Expression GetArbitraryCallQueryExpression<T>(MethodInfo sqlMapperQuery, ParameterExpression connectionParam, ParameterExpression resultParam, ParameterExpression mapperParam, ParameterExpression transactionParam, Type[] mappedTypes) {
+        private Expression GetArbitraryCallQueryExpression<T>(
+            MethodInfo sqlMapperQuery,
+            ParameterExpression connectionParam,
+            ParameterExpression resultParam,
+            ParameterExpression mapperParam,
+            ParameterExpression transactionParam,
+            Type[] mappedTypes) {
             return Expression.Call(
                 sqlMapperQuery,
-                new Expression[] {
-                                     connectionParam, Expression.Property(resultParam, "Sql"),
-                                     Expression.NewArrayInit(
-                                         typeof(Type),
-                                         mappedTypes.Select(t => Expression.Constant(t))),
-                                     mapperParam,
-                                     Expression.Property(resultParam, "Parameters"), transactionParam,
-                                     Expression.Constant(true),
-                                     Expression.Property(Expression.Property(resultParam, "FetchTree"), "SplitOn"),
-                                     Expression.Convert(
-                                         Expression.Constant(null),
-                                         typeof(Nullable<>).MakeGenericType(typeof(int))),
-                                     Expression.Convert(
-                                         Expression.Constant(null),
-                                         typeof(Nullable<>).MakeGenericType(typeof(CommandType)))
-                                 });
+                connectionParam,
+                Expression.Property(resultParam, "Sql"),
+                Expression.NewArrayInit(typeof(Type), mappedTypes.Select(t => Expression.Constant(t))),
+                mapperParam,
+                Expression.Property(resultParam, "Parameters"),
+                transactionParam,
+                Expression.Constant(true),
+                Expression.Property(Expression.Property(resultParam, "FetchTree"), "SplitOn"),
+                Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(int))),
+                Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(CommandType))));
         }
 
         private MethodInfo GetArbitraryQueryMethod<T>(Type type, IEnumerable<Type> mappedTypes, bool isAsync) {
@@ -166,10 +172,9 @@
                 typeof(SqlMapper).GetMethods()
                                  .First(
                                      m =>
-                                     m.Name == (isAsync ? "QueryAsync" : "Query")
-                                     && m.GetParameters().Count() > 2
-                                     && m.GetParameters().ElementAt(2).ParameterType
-                                     == typeof(Type[])).MakeGenericMethod(type);
+                                     m.Name == (isAsync ? "QueryAsync" : "Query") && m.GetParameters().Count() > 2
+                                     && m.GetParameters().ElementAt(2).ParameterType == typeof(Type[]))
+                                 .MakeGenericMethod(type);
         }
 
         [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines",
@@ -251,10 +256,8 @@
             var mapperType = typeof(Func<,>).MakeGenericType(typeof(object[]), tt);
             var mapperVariable = Expression.Variable(mapperType, "mapper");
             BinaryExpression mapperExpr = Expression.Assign(
-                    mapperVariable,
-                    Expression.Convert(
-                        Expression.Invoke(funcFactoryParam, variableExpressions),
-                        mapperType));
+                mapperVariable,
+                Expression.Convert(Expression.Invoke(funcFactoryParam, variableExpressions), mapperType));
 
             variableExpressions.Add(mapperVariable);
             statements.Add(mapperExpr);
@@ -263,7 +266,13 @@
             var sqlMapperQuery = this.GetArbitraryQueryMethod<T>(tt, mappedTypes, isAsync);
 
             if (!isAsync) {
-                var queryExpr = GetArbitraryCallQueryExpression<T>(sqlMapperQuery, connectionParam, resultParam, mapperVariable, transactionParam, mappedTypes);
+                var queryExpr = GetArbitraryCallQueryExpression<T>(
+                    sqlMapperQuery,
+                    connectionParam,
+                    resultParam,
+                    mapperVariable,
+                    transactionParam,
+                    mappedTypes);
                 statements.Add(queryExpr);
 
                 // return results
@@ -276,13 +285,27 @@
                 // funcFactory => ((results, sql, connection, transaction) => /* above */ )
                 var lambdaExpression =
                     Expression.Lambda(
-                        Expression.Lambda(Expression.Block(variableExpressions, statements), resultParam, queryParam, connectionParam, transactionParam),
+                        Expression.Lambda(
+                            Expression.Block(variableExpressions, statements),
+                            resultParam,
+                            queryParam,
+                            connectionParam,
+                            transactionParam),
                         funcFactoryParam);
                 return lambdaExpression.Compile();
             }
             else {
                 var queryResultVariable = Expression.Variable(typeof(Task<>).MakeGenericType(typeof(IEnumerable<>).MakeGenericType(tt)));
-                statements.Add(Expression.Assign(queryResultVariable, GetArbitraryCallQueryExpression<T>(sqlMapperQuery, connectionParam, resultParam, mapperVariable, transactionParam, mappedTypes)));
+                statements.Add(
+                    Expression.Assign(
+                        queryResultVariable,
+                        GetArbitraryCallQueryExpression<T>(
+                            sqlMapperQuery,
+                            connectionParam,
+                            resultParam,
+                            mapperVariable,
+                            transactionParam,
+                            mappedTypes)));
                 variableExpressions.Add(queryResultVariable);
 
                 // now add statements to create FetchCollectionAwaiter and return that
@@ -291,11 +314,25 @@
                 var awaiterResultVariable = Expression.Variable(fetchCollectionAwaiterType);
                 variableExpressions.Add(awaiterResultVariable);
                 statements.Add(Expression.Assign(awaiterResultVariable, Expression.New(fetchCollectionAwaiterType)));
-                statements.Add(Expression.Assign(Expression.Property(awaiterResultVariable, "Awaiter"), Expression.Call(queryResultVariable, typeof(Task<>).MakeGenericType(typeof(IEnumerable<>).MakeGenericType(tt)).GetMethod("GetAwaiter"))));
+                statements.Add(
+                    Expression.Assign(
+                        Expression.Property(awaiterResultVariable, "Awaiter"),
+                        Expression.Call(
+                            queryResultVariable,
+                            typeof(Task<>).MakeGenericType(typeof(IEnumerable<>).MakeGenericType(tt)).GetMethod("GetAwaiter"))));
                 statements.Add(Expression.Assign(Expression.Property(awaiterResultVariable, "Results"), resultVariable));
                 statements.Add(awaiterResultVariable);
 
-                var lambdaExpression = Expression.Lambda(Expression.Lambda(typeof(CollectionAsyncDelegate<>).MakeGenericType(tt), Expression.Block(variableExpressions, statements), resultParam, queryParam, connectionParam, transactionParam), funcFactoryParam);
+                var lambdaExpression =
+                    Expression.Lambda(
+                        Expression.Lambda(
+                            typeof(CollectionAsyncDelegate<>).MakeGenericType(tt),
+                            Expression.Block(variableExpressions, statements),
+                            resultParam,
+                            queryParam,
+                            connectionParam,
+                            transactionParam),
+                        funcFactoryParam);
                 return lambdaExpression.Compile();
             }
         }

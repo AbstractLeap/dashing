@@ -1,7 +1,4 @@
-﻿// ReSharper disable CollectionNeverQueried.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-namespace Dashing.Testing {
+﻿namespace Dashing.Testing {
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -27,7 +24,7 @@ namespace Dashing.Testing {
         public IList<Expression> Includes { get; set; }
 
         public IList<Expression> Excludes { get; set; }
-        
+
         public IList<Expression> Fetches { get; set; }
 
         public IList<KeyValuePair<Expression, Stack<Expression>>> CollectionFetches { get; private set; }
@@ -41,11 +38,13 @@ namespace Dashing.Testing {
         public bool IsIncludingAll { get; set; }
 
         public int? TakeN { get; set; }
-        
+
         public int? SkipN { get; set; }
 
-        private IEnumerable<T> Results {
-            get {
+        private IEnumerable<T> Results
+        {
+            get
+            {
                 var q = this.allRecords.ToArray() as IEnumerable<T>;
 
                 foreach (var predicate in this.WhereClauses) {
@@ -59,7 +58,7 @@ namespace Dashing.Testing {
                 if (this.SkipN.HasValue) {
                     q = q.Skip(this.SkipN.Value);
                 }
-                
+
                 if (this.TakeN.HasValue) {
                     q = q.Take(this.TakeN.Value);
                 }
@@ -84,7 +83,7 @@ namespace Dashing.Testing {
             this.IsIncludingAll = true;
             return this;
         }
-        
+
         public ISelectQuery<T> Include<TResult>(Expression<Func<T, TResult>> includeExpression) {
             this.Includes.Add(includeExpression);
             return this;
@@ -126,12 +125,20 @@ namespace Dashing.Testing {
         }
 
         public ISelectQuery<T> OrderBy<TResult>(Expression<Func<T, TResult>> keySelector) {
-            this.OrderClauses.Add(Tuple.Create<Expression, ListSortDirection, Func<IEnumerable<T>, IEnumerable<T>>>(keySelector, ListSortDirection.Ascending, q => q.OrderBy(keySelector.Compile())));
+            this.OrderClauses.Add(
+                Tuple.Create<Expression, ListSortDirection, Func<IEnumerable<T>, IEnumerable<T>>>(
+                    keySelector,
+                    ListSortDirection.Ascending,
+                    q => q.OrderBy(keySelector.Compile())));
             return this;
         }
 
         public ISelectQuery<T> OrderByDescending<TResult>(Expression<Func<T, TResult>> keySelector) {
-            this.OrderClauses.Add(Tuple.Create<Expression, ListSortDirection, Func<IEnumerable<T>, IEnumerable<T>>>(keySelector, ListSortDirection.Descending, q => q.OrderByDescending(keySelector.Compile())));
+            this.OrderClauses.Add(
+                Tuple.Create<Expression, ListSortDirection, Func<IEnumerable<T>, IEnumerable<T>>>(
+                    keySelector,
+                    ListSortDirection.Descending,
+                    q => q.OrderByDescending(keySelector.Compile())));
             return this;
         }
 
@@ -204,12 +211,7 @@ namespace Dashing.Testing {
             this.SkipN = skip;
             this.TakeN = take;
 
-            return new Page<T> {
-                Items = this.Results.ToArray(),
-                Skipped = skip,
-                Taken = take,
-                TotalResults = totalResults
-            };
+            return new Page<T> { Items = this.Results.ToArray(), Skipped = skip, Taken = take, TotalResults = totalResults };
         }
 
         public bool Any() {

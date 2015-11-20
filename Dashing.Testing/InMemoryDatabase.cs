@@ -10,7 +10,5 @@
 
         public InMemoryDatabase(IDictionary<Type, IList> testLists) {
         }
-
-
     }
 }

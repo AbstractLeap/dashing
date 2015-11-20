@@ -9,6 +9,6 @@
             }
 
             builder.AppendLine();
-        } 
+        }
     }
 }

@@ -21,8 +21,7 @@ namespace Dashing.Console.Weaving {
                 var assemblyName = new AssemblyName(eventArgs.Name);
 
                 // look in app domain
-                var loaded = AppDomain.CurrentDomain.GetAssemblies()
-                                      .SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                var loaded = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == assemblyName.FullName);
                 if (loaded != null) {
                     return loaded;
                 }
@@ -47,7 +46,11 @@ namespace Dashing.Console.Weaving {
             // find any IConfigs, instantiate and return map definitions
             var mapDefinitions = new List<MapDefinition>();
             var configurationTypes =
-                assembly.GetTypes().Where(t => typeof(IConfiguration).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract && t.CustomAttributes.All(a => a.AttributeType != typeof(DoNotWeaveAttribute)));
+                assembly.GetTypes()
+                        .Where(
+                            t =>
+                            typeof(IConfiguration).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract
+                            && t.CustomAttributes.All(a => a.AttributeType != typeof(DoNotWeaveAttribute)));
             if (configurationTypes.Any()) {
                 foreach (var configurationType in configurationTypes) {
                     TypeDefinition configTypeDef;
@@ -71,7 +74,7 @@ namespace Dashing.Console.Weaving {
                                                   TypeFullName = map.Type.FullName,
                                                   ColumnDefinitions =
                                                       map.Columns.Where(c => !c.Value.IsIgnored)
-                                                      .Select(c => c.Value)
+                                                         .Select(c => c.Value)
                                                          .Select(
                                                              c =>
                                                              new ColumnDefinition {

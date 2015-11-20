@@ -1,5 +1,4 @@
 ﻿namespace Dashing.Testing.Tests {
-    using System;
     using System.Collections.Generic;
 
     using Dashing.Engine;
@@ -12,12 +11,12 @@
         public void NoFetchReturnsEntityWithOnlyPrimaryKey() {
             var cloner = new FetchCloner(new TestConfiguration());
             var query = (new SelectQuery<Post>(new NonExecutingSelectQueryExecutor()));
-            var post = new Post() { PostId = 1, Title = "Bar", Blog = new Blog { BlogId = 2, Description = "Foo" } };
+            var post = new Post { PostId = 1, Title = "Bar", Blog = new Blog { BlogId = 2, Description = "Foo" } };
             var clone = cloner.Clone(query, post);
-        
-            Assert.False(Object.ReferenceEquals(post, clone));
-            Assert.False(Object.ReferenceEquals(post.Blog, clone.Blog));
-            Assert.False(Object.ReferenceEquals(post.Title, clone.Title));
+
+            Assert.False(ReferenceEquals(post, clone));
+            Assert.False(ReferenceEquals(post.Blog, clone.Blog));
+            Assert.False(ReferenceEquals(post.Title, clone.Title));
             Assert.Equal(1, clone.PostId);
             Assert.Equal("Bar", clone.Title);
             Assert.Equal(2, clone.Blog.BlogId);
@@ -28,13 +27,13 @@
         public void FetchedEntityIsReturned() {
             var cloner = new FetchCloner(new TestConfiguration());
             var query = new SelectQuery<Post>(new NonExecutingSelectQueryExecutor()).Fetch(p => p.Blog) as SelectQuery<Post>;
-            var post = new Post() { PostId = 1, Title = "Bar", Blog = new Blog { BlogId = 2, Description = "Foo" } };
+            var post = new Post { PostId = 1, Title = "Bar", Blog = new Blog { BlogId = 2, Description = "Foo" } };
             var clone = cloner.Clone(query, post);
 
-            Assert.False(Object.ReferenceEquals(post, clone));
-            Assert.False(Object.ReferenceEquals(post.Blog, clone.Blog));
-            Assert.False(Object.ReferenceEquals(post.Title, clone.Title));
-            Assert.False(Object.ReferenceEquals(post.Blog.Description, clone.Blog.Description));
+            Assert.False(ReferenceEquals(post, clone));
+            Assert.False(ReferenceEquals(post.Blog, clone.Blog));
+            Assert.False(ReferenceEquals(post.Title, clone.Title));
+            Assert.False(ReferenceEquals(post.Blog.Description, clone.Blog.Description));
             Assert.Equal(1, clone.PostId);
             Assert.Equal("Bar", clone.Title);
             Assert.Equal(2, clone.Blog.BlogId);
@@ -45,14 +44,18 @@
         public void ParentOfParentNotReturnedIfNotFetched() {
             var cloner = new FetchCloner(new TestConfiguration());
             var query = new SelectQuery<Post>(new NonExecutingSelectQueryExecutor()).Fetch(p => p.Blog) as SelectQuery<Post>;
-            var post = new Post() { PostId = 1, Title = "Bar", Blog = new Blog { BlogId = 2, Description = "Foo", Owner = new User { UserId = 4, Username = "joe"} }};
+            var post = new Post {
+                                    PostId = 1,
+                                    Title = "Bar",
+                                    Blog = new Blog { BlogId = 2, Description = "Foo", Owner = new User { UserId = 4, Username = "joe" } }
+                                };
             var clone = cloner.Clone(query, post);
 
-            Assert.False(Object.ReferenceEquals(post, clone));
-            Assert.False(Object.ReferenceEquals(post.Blog, clone.Blog));
-            Assert.False(Object.ReferenceEquals(post.Title, clone.Title));
-            Assert.False(Object.ReferenceEquals(post.Blog.Description, clone.Blog.Description));
-            Assert.False(Object.ReferenceEquals(post.Blog.Owner, clone.Blog.Owner));
+            Assert.False(ReferenceEquals(post, clone));
+            Assert.False(ReferenceEquals(post.Blog, clone.Blog));
+            Assert.False(ReferenceEquals(post.Title, clone.Title));
+            Assert.False(ReferenceEquals(post.Blog.Description, clone.Blog.Description));
+            Assert.False(ReferenceEquals(post.Blog.Owner, clone.Blog.Owner));
             Assert.Equal(1, clone.PostId);
             Assert.Equal("Bar", clone.Title);
             Assert.Equal(2, clone.Blog.BlogId);
@@ -71,10 +74,10 @@
                                 };
             var clone = cloner.Clone(query, blog);
 
-            Assert.False(Object.ReferenceEquals(blog, clone));
-            Assert.False(Object.ReferenceEquals(blog.Posts, clone.Posts));
-            Assert.False(Object.ReferenceEquals(blog.Posts[0], clone.Posts[0]));
-            Assert.False(Object.ReferenceEquals(blog.Posts[1], clone.Posts[1]));
+            Assert.False(ReferenceEquals(blog, clone));
+            Assert.False(ReferenceEquals(blog.Posts, clone.Posts));
+            Assert.False(ReferenceEquals(blog.Posts[0], clone.Posts[0]));
+            Assert.False(ReferenceEquals(blog.Posts[1], clone.Posts[1]));
             Assert.Equal("Foo", clone.Posts[0].Title);
             Assert.Equal("Boo", clone.Posts[1].Title);
         }
@@ -82,21 +85,24 @@
         [Fact]
         public void FetchedCollectionThenFetchWorks() {
             var cloner = new FetchCloner(new TestConfiguration());
-            var query = new SelectQuery<Blog>(new NonExecutingSelectQueryExecutor()).FetchMany(p => p.Posts).ThenFetch(p => p.Author) as SelectQuery<Blog>;
+            var query =
+                new SelectQuery<Blog>(new NonExecutingSelectQueryExecutor()).FetchMany(p => p.Posts).ThenFetch(p => p.Author) as SelectQuery<Blog>;
             var blog = new Blog {
-                BlogId = 1,
-                Posts = new List<Post> { 
-                    new Post { PostId = 2, Title = "Foo", Author = new User { UserId = 5, Username = "james" } }, 
-                    new Post { PostId = 3, Title = "Boo", Author = new User { UserId = 7, Username = "mark" } } }
-            };
+                                    BlogId = 1,
+                                    Posts =
+                                        new List<Post> {
+                                                           new Post { PostId = 2, Title = "Foo", Author = new User { UserId = 5, Username = "james" } },
+                                                           new Post { PostId = 3, Title = "Boo", Author = new User { UserId = 7, Username = "mark" } }
+                                                       }
+                                };
             var clone = cloner.Clone(query, blog);
 
-            Assert.False(Object.ReferenceEquals(blog, clone));
-            Assert.False(Object.ReferenceEquals(blog.Posts, clone.Posts));
-            Assert.False(Object.ReferenceEquals(blog.Posts[0], clone.Posts[0]));
-            Assert.False(Object.ReferenceEquals(blog.Posts[1], clone.Posts[1]));
-            Assert.False(Object.ReferenceEquals(blog.Posts[0].Author, clone.Posts[0].Author));
-            Assert.False(Object.ReferenceEquals(blog.Posts[1].Author, clone.Posts[1].Author));
+            Assert.False(ReferenceEquals(blog, clone));
+            Assert.False(ReferenceEquals(blog.Posts, clone.Posts));
+            Assert.False(ReferenceEquals(blog.Posts[0], clone.Posts[0]));
+            Assert.False(ReferenceEquals(blog.Posts[1], clone.Posts[1]));
+            Assert.False(ReferenceEquals(blog.Posts[0].Author, clone.Posts[0].Author));
+            Assert.False(ReferenceEquals(blog.Posts[1].Author, clone.Posts[1].Author));
             Assert.Equal("Foo", clone.Posts[0].Title);
             Assert.Equal("Boo", clone.Posts[1].Title);
             Assert.Equal("james", clone.Posts[0].Author.Username);
@@ -108,19 +114,21 @@
             var cloner = new FetchCloner(new TestConfiguration());
             var query = new SelectQuery<Blog>(new NonExecutingSelectQueryExecutor()).Fetch(p => p.Posts) as SelectQuery<Blog>;
             var blog = new Blog {
-                BlogId = 1,
-                Posts = new List<Post> { 
-                    new Post { PostId = 2, Title = "Foo", Author = new User { UserId = 5, Username = "james" } }, 
-                    new Post { PostId = 3, Title = "Boo", Author = new User { UserId = 7, Username = "mark" } } }
-            };
+                                    BlogId = 1,
+                                    Posts =
+                                        new List<Post> {
+                                                           new Post { PostId = 2, Title = "Foo", Author = new User { UserId = 5, Username = "james" } },
+                                                           new Post { PostId = 3, Title = "Boo", Author = new User { UserId = 7, Username = "mark" } }
+                                                       }
+                                };
             var clone = cloner.Clone(query, blog);
 
-            Assert.False(Object.ReferenceEquals(blog, clone));
-            Assert.False(Object.ReferenceEquals(blog.Posts, clone.Posts));
-            Assert.False(Object.ReferenceEquals(blog.Posts[0], clone.Posts[0]));
-            Assert.False(Object.ReferenceEquals(blog.Posts[1], clone.Posts[1]));
-            Assert.False(Object.ReferenceEquals(blog.Posts[0].Author, clone.Posts[0].Author));
-            Assert.False(Object.ReferenceEquals(blog.Posts[1].Author, clone.Posts[1].Author));
+            Assert.False(ReferenceEquals(blog, clone));
+            Assert.False(ReferenceEquals(blog.Posts, clone.Posts));
+            Assert.False(ReferenceEquals(blog.Posts[0], clone.Posts[0]));
+            Assert.False(ReferenceEquals(blog.Posts[1], clone.Posts[1]));
+            Assert.False(ReferenceEquals(blog.Posts[0].Author, clone.Posts[0].Author));
+            Assert.False(ReferenceEquals(blog.Posts[1].Author, clone.Posts[1].Author));
             Assert.Equal("Foo", clone.Posts[0].Title);
             Assert.Equal("Boo", clone.Posts[1].Title);
             Assert.Equal(5, clone.Posts[0].Author.UserId);

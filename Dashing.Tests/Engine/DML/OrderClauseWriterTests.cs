@@ -71,7 +71,10 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            var result = writer.GetOrderClause(((SelectQuery<Post>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Post>)query), out containsPrimaryKeyClause);
+            var result = writer.GetOrderClause(
+                ((SelectQuery<Post>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<Post>)query),
+                out containsPrimaryKeyClause);
             Assert.Equal("t_1.[CreateDate] asc", result);
         }
 
@@ -83,7 +86,10 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            var result = writer.GetOrderClause(((SelectQuery<Post>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Post>)query), out containsPrimaryKeyClause);
+            var result = writer.GetOrderClause(
+                ((SelectQuery<Post>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<Post>)query),
+                out containsPrimaryKeyClause);
             Assert.Equal("t_1.[CreateDate] desc", result);
         }
 
@@ -95,7 +101,10 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            var result = writer.GetOrderClause(((SelectQuery<Post>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Post>)query), out containsPrimaryKeyClause);
+            var result = writer.GetOrderClause(
+                ((SelectQuery<Post>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<Post>)query),
+                out containsPrimaryKeyClause);
             Assert.Equal("t.[Title] asc", result);
         }
 
@@ -107,7 +116,10 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            var result = writer.GetOrderClause(((SelectQuery<Post>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Post>)query), out containsPrimaryKeyClause);
+            var result = writer.GetOrderClause(
+                ((SelectQuery<Post>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<Post>)query),
+                out containsPrimaryKeyClause);
             Assert.Equal("t.[Title] desc", result);
         }
 
@@ -119,7 +131,10 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            var result = writer.GetOrderClause(((SelectQuery<Comment>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query), out containsPrimaryKeyClause);
+            var result = writer.GetOrderClause(
+                ((SelectQuery<Comment>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query),
+                out containsPrimaryKeyClause);
             Assert.Equal("t_1.[BlogId] asc", result);
         }
 
@@ -131,7 +146,10 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            var result = writer.GetOrderClause(((SelectQuery<Comment>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query), out containsPrimaryKeyClause);
+            var result = writer.GetOrderClause(
+                ((SelectQuery<Comment>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query),
+                out containsPrimaryKeyClause);
             Assert.Equal("t_1.[BlogId] desc", result);
         }
 
@@ -143,19 +161,26 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            var result = writer.GetOrderClause(((SelectQuery<Comment>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query), out containsPrimaryKeyClause);
+            var result = writer.GetOrderClause(
+                ((SelectQuery<Comment>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query),
+                out containsPrimaryKeyClause);
             Assert.Equal("t_2.[Title] asc", result);
         }
 
         [Fact]
         public void OrderByNestedNestedPropDesc() {
-            var query = new SelectQuery<Comment>(new NonExecutingSelectQueryExecutor()).Fetch(c => c.Post.Blog).OrderByDescending(c => c.Post.Blog.Title);
+            var query =
+                new SelectQuery<Comment>(new NonExecutingSelectQueryExecutor()).Fetch(c => c.Post.Blog).OrderByDescending(c => c.Post.Blog.Title);
             var config = new CustomConfig();
             var dialect = new SqlServerDialect();
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            var result = writer.GetOrderClause(((SelectQuery<Comment>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query), out containsPrimaryKeyClause);
+            var result = writer.GetOrderClause(
+                ((SelectQuery<Comment>)query).OrderClauses.Dequeue(),
+                fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query),
+                out containsPrimaryKeyClause);
             Assert.Equal("t_2.[Title] desc", result);
         }
 
@@ -167,7 +192,12 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            Assert.Throws<InvalidOperationException>(() => writer.GetOrderClause(((SelectQuery<Comment>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query), out containsPrimaryKeyClause));
+            Assert.Throws<InvalidOperationException>(
+                () =>
+                writer.GetOrderClause(
+                    ((SelectQuery<Comment>)query).OrderClauses.Dequeue(),
+                    fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query),
+                    out containsPrimaryKeyClause));
         }
 
         [Fact]
@@ -178,7 +208,12 @@
             var writer = new OrderClauseWriter(config, dialect);
             var fetchTreeWriter = new FetchTreeWriter(dialect, config);
             bool containsPrimaryKeyClause = false;
-            Assert.Throws<InvalidOperationException>(() => writer.GetOrderClause(((SelectQuery<Comment>)query).OrderClauses.Dequeue(), fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query), out containsPrimaryKeyClause));
+            Assert.Throws<InvalidOperationException>(
+                () =>
+                writer.GetOrderClause(
+                    ((SelectQuery<Comment>)query).OrderClauses.Dequeue(),
+                    fetchTreeWriter.GetFetchTree((SelectQuery<Comment>)query),
+                    out containsPrimaryKeyClause));
         }
 
         [Fact]
@@ -210,7 +245,7 @@
             public FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery) {
                 int aliasCounter;
                 int numberCollectionFetches;
-                return base.fetchTreeParser.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
+                return this.fetchTreeParser.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
             }
         }
 

@@ -37,7 +37,10 @@
             var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, null, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
             Assert.Equal(Regex.Replace(@"create table [PostComments] ([Id] int not null identity(1,1) primary key, [Content] nvarchar(255) null, [PostId] int null);
 alter table [PostComments] add constraint fk_PostComment_Post_Post foreign key ([PostId]) references [Posts]([Id]);
-create index [idx_PostComment_Post] on [PostComments] ([PostId]);", @"(?<!\r)\n", Environment.NewLine), script.Trim());
+create index [idx_PostComment_Post] on [PostComments] ([PostId]);",
+                @"(?<!\r)\n",
+                Environment.NewLine),
+                script.Trim());
         }
 
         [Fact]
@@ -59,7 +62,8 @@ create index [idx_PostComment_Post] on [PostComments] ([PostId]);", @"(?<!\r)\n"
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
             var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, null, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
-            Assert.Equal(Regex.Replace(Regex.Replace(@"declare @OBDCommandca45edee90bb4cc68430f8540d28aa99 nvarchar(1000);
+            Assert.Equal(
+                Regex.Replace(Regex.Replace(@"declare @OBDCommandca45edee90bb4cc68430f8540d28aa99 nvarchar(1000);
 select @OBDCommandca45edee90bb4cc68430f8540d28aa99 = 'ALTER TABLE [PostComments] drop constraint ' + d.name from sys.tables t   
                           join    sys.default_constraints d       
                            on d.parent_object_id = t.object_id  
@@ -68,7 +72,8 @@ select @OBDCommandca45edee90bb4cc68430f8540d28aa99 = 'ALTER TABLE [PostComments]
                             and c.column_id = d.parent_column_id
                          where t.name = 'PostComments' and c.name = 'Rating';
 execute(@OBDCommandca45edee90bb4cc68430f8540d28aa99);
-alter table [PostComments] drop column [Rating];", @"@\w+\b", "@Foo"), @"(?<!\r)\n", Environment.NewLine), Regex.Replace(script.Trim(), @"@\w+\b", "@Foo"));
+alter table [PostComments] drop column [Rating];", @"@\w+\b", "@Foo"), @"(?<!\r)\n", Environment.NewLine),
+                Regex.Replace(script.Trim(), @"@\w+\b", "@Foo"));
         }
 
         [Fact]
@@ -80,7 +85,14 @@ alter table [PostComments] drop column [Rating];", @"@\w+\b", "@Foo"), @"(?<!\r)
             answerProvider.Setup(a => a.GetAnswer<int>(It.IsAny<string>())).Returns(99);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                @from.Maps,
+                to.Maps,
+                answerProvider.Object,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
             Assert.Equal(Regex.Replace(@"create table [Blogs] ([Id] int not null identity(1,1) primary key, [Title] nvarchar(255) null);
 alter table [Posts] add [BlogId] int null;
 alter table [Posts] add constraint fk_Post_Blog_Blog foreign key ([BlogId]) references [Blogs]([Id]);
@@ -98,7 +110,14 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
             answerProvider.Setup(a => a.GetAnswer<int>(It.IsAny<string>())).Returns(99);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                @from.Maps,
+                to.Maps,
+                answerProvider.Object,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
             Assert.Equal(Regex.Replace(@"create table [Blogs] ([Id] int not null identity(1,1) primary key, [Title] nvarchar(255) null);
 alter table [Posts] add [BlogId] int not null;
 alter table [Posts] add constraint fk_Post_Blog_Blog foreign key ([BlogId]) references [Blogs]([Id]);
@@ -114,7 +133,14 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
             answerProvider.Setup(a => a.GetAnswer<int>(It.IsAny<string>())).Returns(99);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                @from.Maps,
+                to.Maps,
+                answerProvider.Object,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
             Assert.Equal(Regex.Replace(@"create table [Blogs] ([Id] int not null identity(1,1) primary key, [Title] nvarchar(255) null);
 alter table [Posts] add [BlogId] int null;
 alter table [Posts] add constraint fk_Post_Blog_Blog foreign key ([BlogId]) references [Blogs]([Id]);
@@ -132,7 +158,14 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
             answerProvider.Setup(a => a.GetAnswer<int>(It.IsAny<string>())).Returns(99);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(@from.Maps, to.Maps, answerProvider.Object, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                @from.Maps,
+                to.Maps,
+                answerProvider.Object,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
             Assert.Equal(Regex.Replace(@"create table [Blogs] ([Id] int not null identity(1,1) primary key, [Title] nvarchar(255) null);
 alter table [Posts] add [BlogId] int not null default (99);
 alter table [Posts] add constraint fk_Post_Blog_Blog foreign key ([BlogId]) references [Blogs]([Id]);
@@ -152,8 +185,10 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
             return migrator;
         }
 
-        private static ConnectionStringSettings ConnectionString {
-            get {
+        private static ConnectionStringSettings ConnectionString
+        {
+            get
+            {
                 return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
             }
         }

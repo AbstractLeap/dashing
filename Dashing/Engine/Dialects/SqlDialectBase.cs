@@ -44,7 +44,6 @@ namespace Dashing.Engine.Dialects {
                     sql.Append(column.Length);
                 }
 
-
                 sql.Append(")");
             }
 

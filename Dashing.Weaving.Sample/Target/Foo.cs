@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Weaving.Sample.Target {
     using System;
     using System.Collections.Generic;
+
     using Dashing.CodeGeneration;
     using Dashing.Weaving.Sample.Domain;
 
@@ -11,11 +12,11 @@
 
         private string __Name_OldValue;
 
-        private bool __IsBar_IsDirty = false;
+        private bool __IsBar_IsDirty;
 
         private bool? __IsBar_OldValue;
 
-        private bool __IsRah_IsDirty = false;
+        private bool __IsRah_IsDirty;
 
         private bool? __IsRah_OldValue;
 
@@ -33,12 +34,15 @@
 
         private FooType __type;
 
-        public string Name {
-            get {
+        public string Name
+        {
+            get
+            {
                 return this.__name;
             }
 
-            set {
+            set
+            {
                 if (this.isTracking) {
                     if (!this.__Name_IsDirty) {
                         if ((this.__name == null && value != null) || (this.__name != null && !this.__name.Equals(value))) {
@@ -52,11 +56,14 @@
             }
         }
 
-        public bool IsBar {
-            get {
+        public bool IsBar
+        {
+            get
+            {
                 return this.__isBar;
             }
-            set {
+            set
+            {
                 if (this.isTracking) {
                     if (!this.__IsBar_IsDirty) {
                         if (!this.__isBar.Equals(value)) {
@@ -70,12 +77,15 @@
             }
         }
 
-        public bool? IsRah {
-            get {
+        public bool? IsRah
+        {
+            get
+            {
                 return this.__IsRah;
             }
 
-            set {
+            set
+            {
                 if (this.isTracking) {
                     if (!this.__IsRah_IsDirty) {
                         if (!this.__IsRah.Equals(value)) {
@@ -89,12 +99,15 @@
             }
         }
 
-        public FooType Type {
-            get {
+        public FooType Type
+        {
+            get
+            {
                 return this.__type;
             }
 
-            set {
+            set
+            {
                 if (this.isTracking) {
                     if (!this.__Type_IsDirty) {
                         if (!this.__type.Equals(value)) {
@@ -167,7 +180,9 @@
                     break;
             }
 
-            throw new ArgumentOutOfRangeException("propertyName", "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first");
+            throw new ArgumentOutOfRangeException(
+                "propertyName",
+                "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first");
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Tools.Migration {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Text;
 
@@ -21,9 +20,14 @@
 
         private readonly IAlterTableWriter alterTableWriter;
 
-        const string NoRename = "__NOTRENAMED";
+        private const string NoRename = "__NOTRENAMED";
 
-        public Migrator(ISqlDialect dialect, ICreateTableWriter createTableWriter, IAlterTableWriter alterTableWriter, IDropTableWriter dropTableWriter, IStatisticsProvider statisticsProvider) {
+        public Migrator(
+            ISqlDialect dialect,
+            ICreateTableWriter createTableWriter,
+            IAlterTableWriter alterTableWriter,
+            IDropTableWriter dropTableWriter,
+            IStatisticsProvider statisticsProvider) {
             this.dialect = dialect;
             this.statisticsProvider = statisticsProvider;
             this.createTableWriter = createTableWriter;
@@ -39,7 +43,6 @@
             IEnumerable<string> indexesToIgnore,
             out IEnumerable<string> warnings,
             out IEnumerable<string> errors) {
-
             // fetch data for current database
             IDictionary<string, Statistics> currentData = new Dictionary<string, Statistics>();
             if (fromMaps.Any()) {
@@ -62,20 +65,23 @@
             // trace output
             logger.Trace("Additions:");
             logger.Trace("");
-            logger.Trace(additions.Select(a => new { a.Table, a.Type.Name }), new string[] { "Table", "Map Name" });
+            logger.Trace(additions.Select(a => new { a.Table, a.Type.Name }), new[] { "Table", "Map Name" });
             logger.Trace("Removals:");
             logger.Trace("");
-            logger.Trace(removals.Select(r => new { r.Table, r.Type.Name }), new string[] { "Table", "Map Name" });
+            logger.Trace(removals.Select(r => new { r.Table, r.Type.Name }), new[] { "Table", "Map Name" });
             logger.Trace("Matches:");
             logger.Trace("");
-            logger.Trace(matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }), new string[] { "From Table", "From Map", "To Table", "To Map" });
+            logger.Trace(
+                matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }),
+                new[] { "From Table", "From Map", "To Table", "To Map" });
 
             // look for possible entity name changes
             if (additions.Any() && removals.Any()) {
                 // TODO do something a bit more sensible with regards to likelihood of rename
-                foreach (var removed in removals.Select(r => r).ToArray()) { // copy the array as we'll update
+                foreach (var removed in removals.Select(r => r).ToArray()) {
+                    // copy the array as we'll update
                     var answer =
-                        answerProvider.GetMultipleChoiceAnswer<string>(
+                        answerProvider.GetMultipleChoiceAnswer(
                             string.Format("The entity {0} has been removed. If it has been renamed please specify what to:", removed.Type.Name),
                             new[] { new MultipleChoice<string> { DisplayString = "Not renamed - please delete", Choice = NoRename } }.Union(
                                 additions.Select(a => new MultipleChoice<string> { Choice = a.Type.Name, DisplayString = a.Type.Name })));
@@ -167,7 +173,7 @@
 
                         if (addedColumns.Any()) {
                             var answer =
-                                answerProvider.GetMultipleChoiceAnswer<string>(
+                                answerProvider.GetMultipleChoiceAnswer(
                                     string.Format(
                                         "The property {0} has been removed. If it has been renamed please specify what to:",
                                         removal.Value.Name),
@@ -224,8 +230,10 @@
                                         matchingToProp.Relationship == RelationshipType.ManyToOne
                                             ? matchingToProp.ParentMap.Type.Name
                                             : matchingToProp.OppositeColumn.Map.Type.Name);
-                                if ((fromProp.Value.Relationship == RelationshipType.OneToOne || fromProp.Value.Relationship == RelationshipType.ManyToOne)
-                                    && (matchingToProp.Relationship == RelationshipType.ManyToOne || matchingToProp.Relationship == RelationshipType.OneToOne)
+                                if ((fromProp.Value.Relationship == RelationshipType.OneToOne
+                                     || fromProp.Value.Relationship == RelationshipType.ManyToOne)
+                                    && (matchingToProp.Relationship == RelationshipType.ManyToOne
+                                        || matchingToProp.Relationship == RelationshipType.OneToOne)
                                     && renamePrimaryKeyModifications.ContainsKey(renamePrimaryKeyModificationsKey)) {
                                     // skip the question as we've already attempted the modify for the pk so may as well here as well!
                                     skipQuestion = true;
@@ -274,8 +282,7 @@
                             if ((matchingToProp.Relationship == RelationshipType.ManyToOne || matchingToProp.Relationship == RelationshipType.OneToOne)
                                 && (fromProp.Value.Relationship == RelationshipType.ManyToOne
                                     || fromProp.Value.Relationship == RelationshipType.OneToOne)
-                                && fromProp.Value.Type.Name != matchingToProp.Type.Name
-                                && currentData != null
+                                && fromProp.Value.Type.Name != matchingToProp.Type.Name && currentData != null
                                 && currentData[matchingToProp.Map.Type.Name].HasRows) {
                                 warningList.Add(
                                     string.Format(
@@ -304,8 +311,9 @@
             // do additions of properties
             foreach (var newProp in addedProperties) {
                 // check for relationships where the related table is not empty and the prop is not null
-                if ((newProp.Relationship == RelationshipType.ManyToOne || newProp.Relationship == RelationshipType.OneToOne) && !newProp.IsNullable && string.IsNullOrWhiteSpace(newProp.Default)
-                    && currentData.ContainsKey(newProp.Map.Type.Name) && currentData[newProp.Map.Type.Name].HasRows) {
+                if ((newProp.Relationship == RelationshipType.ManyToOne || newProp.Relationship == RelationshipType.OneToOne) && !newProp.IsNullable
+                    && string.IsNullOrWhiteSpace(newProp.Default) && currentData.ContainsKey(newProp.Map.Type.Name)
+                    && currentData[newProp.Map.Type.Name].HasRows) {
                     var foreignKeyPrimaryKeyType = newProp.Relationship == RelationshipType.ManyToOne
                                                        ? newProp.ParentMap.PrimaryKey.Type
                                                        : newProp.OppositeColumn.Map.PrimaryKey.Type;
@@ -373,9 +381,7 @@
         }
 
         private bool RequiresColumnSpecificationChange(IColumn from, IColumn to) {
-            return from.DbType != to.DbType
-                   || this.RequiresLengthChange(from, to)
-                   || this.RequiresPrecisionOrScaleChange(from, to)
+            return from.DbType != to.DbType || this.RequiresLengthChange(from, to) || this.RequiresPrecisionOrScaleChange(from, to)
                    || from.IsNullable != to.IsNullable || from.Default != to.Default || from.IsAutoGenerated != to.IsAutoGenerated;
         }
 

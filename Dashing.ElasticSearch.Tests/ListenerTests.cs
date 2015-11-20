@@ -1,7 +1,4 @@
 ﻿namespace Dashing.ElasticSearch.Tests {
-
-    using Moq;
-
     using Xunit;
 
     public class ListenerTests {

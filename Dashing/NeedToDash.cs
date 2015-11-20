@@ -15,7 +15,9 @@
         /// <param name="connectionStringName">name of the connection string to be used</param>
         /// <returns>Mutable configuration object</returns>
         public static MutableConfiguration Configure(string connectionStringName) {
-            if (connectionStringName == null) { throw new ArgumentNullException("connectionStringName"); }
+            if (connectionStringName == null) {
+                throw new ArgumentNullException("connectionStringName");
+            }
 
             var connectionStringSettings = ConfigurationManager.ConnectionStrings[connectionStringName];
             if (connectionStringSettings == null) {
@@ -32,8 +34,12 @@
         /// <param name="types">Enumerable of types to be mapped</param>
         /// <returns>Mutable configuration object</returns>
         public static MutableConfiguration Configure(string connectionStringName, IEnumerable<Type> types) {
-            if (connectionStringName == null) { throw new ArgumentNullException("connectionStringName"); }
-            if (types == null) { throw new ArgumentNullException("types"); }
+            if (connectionStringName == null) {
+                throw new ArgumentNullException("connectionStringName");
+            }
+            if (types == null) {
+                throw new ArgumentNullException("types");
+            }
 
             var connectionStringSettings = ConfigurationManager.ConnectionStrings[connectionStringName];
             if (connectionStringSettings == null) {
@@ -49,7 +55,9 @@
         /// <param name="connectionStringSettings">connection string settings for the database to be used</param>
         /// <returns>Mutable configuration object</returns>
         public static MutableConfiguration Configure(ConnectionStringSettings connectionStringSettings) {
-            if (connectionStringSettings == null) { throw new ArgumentNullException("connectionStringSettings"); }
+            if (connectionStringSettings == null) {
+                throw new ArgumentNullException("connectionStringSettings");
+            }
 
             return new MutableConfiguration(connectionStringSettings);
         }
@@ -61,7 +69,9 @@
         /// <param name="types">Enumerable of types to be mapped</param>
         /// <returns>Mutable configuration object</returns>
         public static MutableConfiguration Configure(ConnectionStringSettings connectionStringSettings, IEnumerable<Type> types) {
-            if (connectionStringSettings == null) { throw new ArgumentNullException("connectionStringSettings"); }
+            if (connectionStringSettings == null) {
+                throw new ArgumentNullException("connectionStringSettings");
+            }
 
             var configuration = new MutableConfiguration(connectionStringSettings);
             configuration.Add(types);

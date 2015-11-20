@@ -55,7 +55,7 @@
             }
             else {
                 if (this.Id == default(int)) {
-                    this.__hashCode = new int?(base.GetHashCode());
+                    this.__hashCode = base.GetHashCode();
                     result = this.__hashCode.Value;
                 }
                 else {
@@ -66,11 +66,14 @@
             return result;
         }
 
-        public string Name {
-            get {
+        public string Name
+        {
+            get
+            {
                 return this.__name;
             }
-            set {
+            set
+            {
                 if (this.isTracking) {
                     if (!this.__Name_IsDirty) {
                         if ((this.__name == null && value != null) || (this.__name != null && !this.__name.Equals(value))) {
@@ -84,12 +87,15 @@
             }
         }
 
-        public DateTime CreatedDate {
-            get {
+        public DateTime CreatedDate
+        {
+            get
+            {
                 return this.__createdDate;
             }
 
-            set {
+            set
+            {
                 if (this.isTracking) {
                     if (!this.__CreatedDate_IsDirty) {
                         if (!this.__createdDate.Equals(value)) {
@@ -103,12 +109,15 @@
             }
         }
 
-        public int? SomethingOrTother {
-            get {
+        public int? SomethingOrTother
+        {
+            get
+            {
                 return this.__somethingOrTother;
             }
 
-            set {
+            set
+            {
                 if (this.isTracking) {
                     if (!this.__SomethingOrTother_IsDirty) {
                         if (!this.__somethingOrTother.Equals(value)) {
@@ -124,15 +133,18 @@
 
         public int? FooId;
 
-        public Foo Foo {
-            get {
+        public Foo Foo
+        {
+            get
+            {
                 if (this.__foo == null && this.FooId.HasValue) {
                     this.__foo = new Foo { FooId = this.FooId.Value };
                 }
 
                 return this.__foo;
             }
-            set {
+            set
+            {
                 this.FooId = null;
                 if (this.isTracking) {
                     if (!this.__Foo_IsDirty) {
@@ -219,7 +231,9 @@
                     break;
             }
 
-            throw new ArgumentOutOfRangeException("propertyName", "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first");
+            throw new ArgumentOutOfRangeException(
+                "propertyName",
+                "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first");
         }
     }
 }

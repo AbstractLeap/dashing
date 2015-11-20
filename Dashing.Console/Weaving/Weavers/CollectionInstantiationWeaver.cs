@@ -43,8 +43,7 @@
             if (constructors.Length > 1) {
                 constructor = constructors.SingleOrDefault(s => !s.HasParameters);
                 if (constructor == null) {
-                    this.Log.Error(
-                        "Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
+                    this.Log.Error("Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
                 }
             }
 

@@ -3,7 +3,6 @@ namespace Dashing.Tests {
     using System.Collections.Generic;
     using System.Data;
 
-    using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine;
     using Dashing.Events;
@@ -19,14 +18,18 @@ namespace Dashing.Tests {
             throw new NotImplementedException();
         }
 
-        public IEngine Engine {
-            get {
+        public IEngine Engine
+        {
+            get
+            {
                 return this.MockEngine.Object;
             }
         }
 
-        public IEnumerable<IMap> Maps {
-            get {
+        public IEnumerable<IMap> Maps
+        {
+            get
+            {
                 return this.mappedTypes.Values;
             }
         }
@@ -93,14 +96,18 @@ namespace Dashing.Tests {
             return ConfigurationHelper.Setup<T>(this, this.mappedTypes);
         }
 
-        public ICollection<IEventListener> EventListeners {
-            get {
+        public ICollection<IEventListener> EventListeners
+        {
+            get
+            {
                 throw new NotImplementedException();
             }
         }
 
-        public EventHandlers EventHandlers {
-            get {
+        public EventHandlers EventHandlers
+        {
+            get
+            {
                 throw new NotImplementedException();
             }
         }

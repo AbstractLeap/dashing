@@ -25,7 +25,8 @@
             // if there's only one class and that class is not extended elsewhere we'll use non-virtual methods
             var notInInheritance = totalInChain == 1
                                    && !assemblyDefinitions.Any(
-                                       a => a.Value.MainModule.Types.Any(t => t.IsClass && t.BaseType != null && t.BaseType.FullName == typeDef.FullName));
+                                       a =>
+                                       a.Value.MainModule.Types.Any(t => t.IsClass && t.BaseType != null && t.BaseType.FullName == typeDef.FullName));
             while (classHierarchy.Count > 0) {
                 this.ImplementISetLoggerForTypeDefinition(classHierarchy.Pop(), mapDefinition, notInInheritance);
             }
@@ -51,7 +52,8 @@
             foreach (var columnDefinition in nonPkCols) {
                 if (this.HasPropertyInInheritanceChain(typeDef, columnDefinition.Name)) {
                     var propDef = this.GetProperty(typeDef, columnDefinition.Name);
-                    if (propDef.DeclaringType.FullName == typeDef.FullName) { // columns in parent classes will have been taken care of
+                    if (propDef.DeclaringType.FullName == typeDef.FullName) {
+                        // columns in parent classes will have been taken care of
                         var isSetFieldDef = new FieldDefinition(
                             string.Format("__{0}_IsSet", columnDefinition.Name),
                             FieldAttributes.Family,
@@ -79,7 +81,8 @@
                 methodAttrs,
                 typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
             getSetProperties.Body.Variables.Add(new VariableDefinition("setProps", listStringTypeDef));
-            getSetProperties.Body.Variables.Add(new VariableDefinition(typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
+            getSetProperties.Body.Variables.Add(
+                new VariableDefinition(typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
             getSetProperties.Body.Variables.Add(new VariableDefinition(boolTypeDef));
             getSetProperties.Body.InitLocals = true;
             var instructions = getSetProperties.Body.Instructions;

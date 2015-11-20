@@ -1,6 +1,5 @@
 ﻿namespace Dashing.Weaving.Sample.Domain {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
 
     using Dashing.Weaving.Sample2;
@@ -21,7 +20,9 @@
 
     public enum FooType {
         One,
+
         Two,
+
         Three
     }
 
@@ -56,12 +57,15 @@
 
         public int Id { get; set; }
 
-        public bool Foo {
-            get {
+        public bool Foo
+        {
+            get
+            {
                 return this.__foo;
             }
 
-            set {
+            set
+            {
                 this.__bar = true;
                 this.__foo = value;
             }
@@ -81,12 +85,15 @@
 
         private string filling;
 
-        public IEnumerable<Duck> Ducks {
-            get {
+        public IEnumerable<Duck> Ducks
+        {
+            get
+            {
                 return this.__ducks;
             }
 
-            set {
+            set
+            {
                 this.filling = "Burger";
                 this.__ducks = value;
             }

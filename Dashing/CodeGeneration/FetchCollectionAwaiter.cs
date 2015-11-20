@@ -12,8 +12,10 @@
             return this;
         }
 
-        public bool IsCompleted {
-            get {
+        public bool IsCompleted
+        {
+            get
+            {
                 return this.Awaiter.IsCompleted;
             }
         }

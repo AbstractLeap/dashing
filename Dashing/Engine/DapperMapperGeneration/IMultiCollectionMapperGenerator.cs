@@ -5,7 +5,7 @@
 
     internal interface IMultiCollectionMapperGenerator {
         /// <summary>
-        /// Generates a multi collection mapper
+        ///     Generates a multi collection mapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="fetchTree"></param>

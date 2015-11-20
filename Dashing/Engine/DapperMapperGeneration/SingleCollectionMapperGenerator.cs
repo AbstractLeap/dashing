@@ -8,7 +8,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
     using Dashing.Configuration;
     using Dashing.Engine.DML;
 
-    class SingleCollectionMapperGenerator : ISingleCollectionMapperGenerator {
+    internal class SingleCollectionMapperGenerator : ISingleCollectionMapperGenerator {
         private readonly IConfiguration configuration;
 
         public SingleCollectionMapperGenerator(IConfiguration configuration) {
@@ -17,7 +17,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
 
         public Tuple<Delegate, Type[]> GenerateCollectionMapper<T>(FetchNode fetchTree) {
             var rootType = typeof(T);
-            
+
             // closure variables
             var currentRootParam = Expression.Parameter(rootType, "currentRoot");
             var resultsParam = Expression.Parameter(typeof(IList<>).MakeGenericType(rootType), "results");
@@ -53,22 +53,31 @@ namespace Dashing.Engine.DapperMapperGeneration {
             newRootStatements.AddRange(innerStatements.Item1);
             newRootStatements.Add(Expression.Call(currentRootParam, rootType.GetMethod("EnableTracking")));
             insideCollectionStatements.AddRange(innerStatements.Item2);
-            
+
             // if currentRoomParam == null || currentRootParam.Pk != rootVar.Pk { currentRootParam = rootVar; currentRootParam.EnabledTracking(); results.Add(currentRootParam);  }
             var primaryKeyName = this.configuration.GetMap<T>().PrimaryKey.Name;
-            statements.Add(Expression.IfThen(Expression.OrElse(Expression.Equal(currentRootParam, Expression.Constant(null)), Expression.NotEqual(Expression.Property(currentRootParam, primaryKeyName), Expression.Property(rootVar, primaryKeyName))),
-                Expression.Block(
-                    newRootStatements
-                    )));
+            statements.Add(
+                Expression.IfThen(
+                    Expression.OrElse(
+                        Expression.Equal(currentRootParam, Expression.Constant(null)),
+                        Expression.NotEqual(Expression.Property(currentRootParam, primaryKeyName), Expression.Property(rootVar, primaryKeyName))),
+                    Expression.Block(newRootStatements)));
 
             statements.AddRange(insideCollectionStatements);
             statements.Add(rootVar);
 
-            var innerLambda = Expression.Lambda(Expression.Block(new ParameterExpression[] { rootVar }, statements), objectsParam);
+            var innerLambda = Expression.Lambda(Expression.Block(new[] { rootVar }, statements), objectsParam);
             return Tuple.Create(Expression.Lambda(innerLambda, currentRootParam, resultsParam).Compile(), mappedTypes.ToArray());
         }
 
-        private Tuple<IEnumerable<Expression>, IEnumerable<Expression>> VisitTree(FetchNode node, Expression currentBranchExpression, ParameterExpression objectsParam, ref bool hasVisitedCollection, bool isInsideCollection, List<Type> mappedTypes, ref int objectParamArrayIdx) {
+        private Tuple<IEnumerable<Expression>, IEnumerable<Expression>> VisitTree(
+            FetchNode node,
+            Expression currentBranchExpression,
+            ParameterExpression objectsParam,
+            ref bool hasVisitedCollection,
+            bool isInsideCollection,
+            List<Type> mappedTypes,
+            ref int objectParamArrayIdx) {
             var newRootStatements = new List<Expression>();
             var insideCollectionStatements = new List<Expression>();
             foreach (var childNode in node.Children) {
@@ -91,7 +100,9 @@ namespace Dashing.Engine.DapperMapperGeneration {
                     mappedTypes.Add(childType);
                     var arrayIndexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(objectParamArrayIdx));
                     var ifExpr = Expression.NotEqual(arrayIndexExpr, Expression.Constant(null));
-                    var enableTrackingExpr = Expression.Call(Expression.Convert(arrayIndexExpr, typeof(ITrackedEntity)), typeof(ITrackedEntity).GetMethod("EnableTracking"));
+                    var enableTrackingExpr = Expression.Call(
+                        Expression.Convert(arrayIndexExpr, typeof(ITrackedEntity)),
+                        typeof(ITrackedEntity).GetMethod("EnableTracking"));
                     var convertExpr = Expression.Convert(arrayIndexExpr, childType);
                     var propExpr = Expression.Property(currentBranchExpression, childNode.Value.Column.Name);
 
@@ -113,7 +124,14 @@ namespace Dashing.Engine.DapperMapperGeneration {
 
                     // now visit the next fetch
                     ++objectParamArrayIdx;
-                    var innerStatements = this.VisitTree(childNode.Value, isOneToMany ? (Expression)convertExpr : propExpr,  objectsParam, ref hasVisitedCollection, isInsideCollection || isOneToMany, mappedTypes, ref objectParamArrayIdx);
+                    var innerStatements = this.VisitTree(
+                        childNode.Value,
+                        isOneToMany ? (Expression)convertExpr : propExpr,
+                        objectsParam,
+                        ref hasVisitedCollection,
+                        isInsideCollection || isOneToMany,
+                        mappedTypes,
+                        ref objectParamArrayIdx);
                     if (isInsideCollection) {
                         var thenExpr = new List<Expression> { ex };
                         thenExpr.AddRange(innerStatements.Item2);
@@ -122,11 +140,12 @@ namespace Dashing.Engine.DapperMapperGeneration {
                     }
                     else if (isOneToMany) {
                         var thenExpr = new List<Expression> { ex };
-                        var topOfInsideCollectionStatements = new List<Expression> { Expression.Call(
-                                                                                         propExpr,
-                                                                                         typeof(ICollection<>).MakeGenericType(childType)
-                                                                                                              .GetMethod("Add"),
-                                                                                         new Expression[] { convertExpr })
+                        var topOfInsideCollectionStatements = new List<Expression> {
+                                                                                       Expression.Call(
+                                                                                           propExpr,
+                                                                                           typeof(ICollection<>).MakeGenericType(childType)
+                                                                                                                .GetMethod("Add"),
+                                                                                           convertExpr)
                                                                                    };
                         topOfInsideCollectionStatements.AddRange(innerStatements.Item2);
                         topOfInsideCollectionStatements.Add(enableTrackingExpr);

@@ -28,19 +28,15 @@ namespace Dashing.Console {
                     }
 
                     if (result.Count == 0) {
-                        throw new InvalidDataException(
-                            "The ini file must enclose all values in categories i.e. put a [Category] above");
+                        throw new InvalidDataException("The ini file must enclose all values in categories i.e. put a [Category] above");
                     }
 
                     var splitPos = line.IndexOf('=');
                     if (splitPos == -1) {
-                        throw new InvalidDataException(
-                            "All settings must be of the form \"key = value\"");
+                        throw new InvalidDataException("All settings must be of the form \"key = value\"");
                     }
 
-                    lastDic.Add(
-                        line.Substring(0, splitPos).Trim(),
-                        GetValue(line.Substring(splitPos + 1).Trim()));
+                    lastDic.Add(line.Substring(0, splitPos).Trim(), GetValue(line.Substring(splitPos + 1).Trim()));
                 }
             }
 
@@ -51,8 +47,7 @@ namespace Dashing.Console {
             foreach (var kvp in configSection) {
                 var prop = typeof(T).GetProperty(kvp.Key);
                 if (prop == null) {
-                    throw new InvalidDataException(
-                        "For using AssignTo the properties in the ini file must match the properties in the class");
+                    throw new InvalidDataException("For using AssignTo the properties in the ini file must match the properties in the class");
                 }
 
                 prop.SetValue(entity, kvp.Value);

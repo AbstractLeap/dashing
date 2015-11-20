@@ -18,9 +18,7 @@
             return map;
         }
 
-        public static IMap<T> PrimaryKey<T, TResult>(
-            this IMap<T> map,
-            Expression<Func<T, TResult>> expression) {
+        public static IMap<T> PrimaryKey<T, TResult>(this IMap<T> map, Expression<Func<T, TResult>> expression) {
             foreach (var column in map.Columns.Values) {
                 column.IsPrimaryKey = false;
             }
@@ -30,16 +28,12 @@
             return map;
         }
 
-        public static IMap<T> Index<T, TResult>(
-            this IMap<T> map,
-            Expression<Func<T, TResult>> indexExpression,
-            bool isUnique = false) {
+        public static IMap<T> Index<T, TResult>(this IMap<T> map, Expression<Func<T, TResult>> indexExpression, bool isUnique = false) {
             var columnNames = typeof(TResult).GetProperties();
             var columns = new List<IColumn>();
             foreach (var columnName in columnNames.Select(p => p.Name)) {
                 if (!map.Columns.ContainsKey(columnName)) {
-                    throw new InvalidOperationException(
-                        "The index must be on a property in the entity");
+                    throw new InvalidOperationException("The index must be on a property in the entity");
                 }
 
                 var column = map.Columns[columnName];
@@ -76,9 +70,7 @@
         ////  throw new NotImplementedException();
         ////}
 
-        public static Column<TProperty> Property<T, TProperty>(
-            this IMap<T> map,
-            Expression<Func<T, TProperty>> expression) {
+        public static Column<TProperty> Property<T, TProperty>(this IMap<T> map, Expression<Func<T, TProperty>> expression) {
             var columnName = NameFromMemberExpression(expression);
 
             IColumn column;
@@ -90,14 +82,13 @@
 
             if (columnT == null) {
                 // lift the Column into a Column<T>
-                map.Columns[columnName] = columnT = Column<TProperty>.From(column); 
+                map.Columns[columnName] = columnT = Column<TProperty>.From(column);
             }
 
             return columnT;
         }
 
-        private static string NameFromMemberExpression<T, TResult>(
-            Expression<Func<T, TResult>> expression) {
+        private static string NameFromMemberExpression<T, TResult>(Expression<Func<T, TResult>> expression) {
             var memberExpression = expression.Body as MemberExpression;
             if (memberExpression == null) {
                 throw new ArgumentException("expression must be a MemberExpression");
@@ -106,15 +97,12 @@
             return memberExpression.Member.Name;
         }
 
-        public static IEnumerable<IColumn> OwnedColumns(
-            this IMap map,
-            bool includeExcludedByDefault = false) {
+        public static IEnumerable<IColumn> OwnedColumns(this IMap map, bool includeExcludedByDefault = false) {
             return
                 map.Columns.Values.Where(
                     c =>
                     !c.IsIgnored && (includeExcludedByDefault || !c.IsExcludedByDefault)
-                    && (c.Relationship == RelationshipType.None
-                        || c.Relationship == RelationshipType.ManyToOne
+                    && (c.Relationship == RelationshipType.None || c.Relationship == RelationshipType.ManyToOne
                         || c.Relationship == RelationshipType.OneToOne));
         }
     }

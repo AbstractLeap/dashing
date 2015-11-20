@@ -1,5 +1,4 @@
 ﻿namespace Dashing.IntegrationTests.SqlServer {
-    using System.Linq;
     using System.Threading.Tasks;
 
     using Dashing.IntegrationTests.SqlServer.Fixtures;
@@ -35,22 +34,22 @@
         }
 
         [Fact]
-        public  void AnyTrueWorks() {
+        public void AnyTrueWorks() {
             Assert.True(this.fixture.Session.Query<User>().Where(u => u.UserId == 8).Any());
         }
 
         [Fact]
-        public  void AnyFalseWorks() {
+        public void AnyFalseWorks() {
             Assert.False(this.fixture.Session.Query<User>().Where(u => u.UserId == 15).Any());
         }
 
         [Fact]
-        public  void AnyWhereTrueWorks() {
+        public void AnyWhereTrueWorks() {
             Assert.True(this.fixture.Session.Query<User>().Any(u => u.UserId == 8));
         }
 
         [Fact]
-        public  void AnyWhereFalseWorks() {
+        public void AnyWhereFalseWorks() {
             Assert.False(this.fixture.Session.Query<User>().Any(u => u.UserId == 15));
         }
     }

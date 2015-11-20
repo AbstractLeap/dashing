@@ -66,12 +66,7 @@
                         }
                     }
 
-                    this.AddPropertiesToFetchTree<T>(
-                        ref aliasCounter,
-                        ref numberCollectionFetches,
-                        entityNames,
-                        currentNode,
-                        rootNode);
+                    this.AddPropertiesToFetchTree<T>(ref aliasCounter, ref numberCollectionFetches, entityNames, currentNode, rootNode);
                 }
             }
 
@@ -91,7 +86,11 @@
                 if (!currentNode.Children.ContainsKey(propName)) {
                     var column =
                         this.configuration.GetMap(
-                        currentNode == rootNode ? typeof(T) : (currentNode.Column.Relationship == RelationshipType.OneToMany ? currentNode.Column.Type.GetGenericArguments().First() : currentNode.Column.Type)).Columns[propName];
+                            currentNode == rootNode
+                                ? typeof(T)
+                                : (currentNode.Column.Relationship == RelationshipType.OneToMany
+                                       ? currentNode.Column.Type.GetGenericArguments().First()
+                                       : currentNode.Column.Type)).Columns[propName];
                     if (column.IsIgnored) {
                         //TODO we should probably warn at this point
                         continue;
@@ -102,12 +101,7 @@
                     }
 
                     // add to tree
-                    var node = new FetchNode {
-                        Parent = currentNode,
-                        Column = column,
-                        Alias = "t_" + ++aliasCounter,
-                        IsFetched = true
-                    };
+                    var node = new FetchNode { Parent = currentNode, Column = column, Alias = "t_" + ++aliasCounter, IsFetched = true };
                     if (column.Relationship == RelationshipType.OneToMany) {
                         // go through and increase the number of contained collections in each parent node
                         var parent = node.Parent;
@@ -146,6 +140,6 @@
                     currentNode = currentNode.Children[propName];
                 }
             }
-        } 
+        }
     }
 }

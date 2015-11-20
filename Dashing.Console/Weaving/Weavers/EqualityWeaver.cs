@@ -21,7 +21,7 @@
             var pkColDef = this.GetProperty(typeDef, mapDefinition.ColumnDefinitions.Single(d => d.IsPrimaryKey).Name);
             var isGuidPk = pkColDef.PropertyType.Name == "Guid";
             var isStringPk = !isGuidPk && pkColDef.PropertyType.Name.Equals("string", StringComparison.InvariantCultureIgnoreCase);
-                
+
             if (!this.DoesNotUseObjectMethod(typeDef, "GetHashCode")) {
                 // override gethashcode
                 var hashCodeBackingField = new FieldDefinition(
@@ -109,7 +109,8 @@
                         Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
                 }
                 else if (isStringPk) {
-                    il.Add(Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
+                    il.Add(
+                        Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
                 }
                 else {
                     il.Add(Instruction.Create(OpCodes.Stloc_1));

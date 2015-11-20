@@ -10,9 +10,7 @@
 
         public FetchMany(Expression<Func<TOriginal, IEnumerable<TQueried>>> selector, SelectQuery<TOriginal> query) {
             this.query = query;
-            this.fetchExpression = new KeyValuePair<Expression, Stack<Expression>>(
-                selector,
-                new Stack<Expression>());
+            this.fetchExpression = new KeyValuePair<Expression, Stack<Expression>>(selector, new Stack<Expression>());
             this.query.CollectionFetches.Add(this.fetchExpression);
         }
 

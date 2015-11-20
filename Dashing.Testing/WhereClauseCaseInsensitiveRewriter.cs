@@ -21,20 +21,19 @@
                         return Expression.Call(
                             memberExpr,
                             "Contains",
-                            new Type[] { typeof(string), typeof(StringComparison) },
-                            new Expression[] { valuesExpr, Expression.Constant(StringComparison.CurrentCultureIgnoreCase) });
+                            new[] { typeof(string), typeof(StringComparison) },
+                            valuesExpr,
+                            Expression.Constant(StringComparison.CurrentCultureIgnoreCase));
+                    }
+                    if (node.Method.DeclaringType == typeof(Enumerable)) {
+                        // static method
+                        memberExpr = node.Arguments[1] as MemberExpression;
+                        valuesExpr = node.Arguments[0];
                     }
                     else {
-                        if (node.Method.DeclaringType == typeof(Enumerable)) {
-                            // static method
-                            memberExpr = node.Arguments[1] as MemberExpression;
-                            valuesExpr = node.Arguments[0];
-                        }
-                        else {
-                            // contains on IList
-                            memberExpr = node.Arguments[0] as MemberExpression;
-                            valuesExpr = node.Object;
-                        }
+                        // contains on IList
+                        memberExpr = node.Arguments[0] as MemberExpression;
+                        valuesExpr = node.Object;
                     }
                     break;
 

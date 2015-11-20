@@ -8,7 +8,7 @@
     using Dashing.Tools;
 
     internal class ConsoleAnswerProvider : IAnswerProvider {
-        private string persistenceFilePath;
+        private readonly string persistenceFilePath;
 
         public ConsoleAnswerProvider(string persistenceFilePath = null) {
             this.persistenceFilePath = persistenceFilePath;
@@ -77,7 +77,7 @@
             string answer;
             if (this.TryGetAnswer(question, out answer)) {
                 if (int.TryParse(answer, out number)) {
-                    if (0 <= number && number < multipleChoices.Length) {                        
+                    if (0 <= number && number < multipleChoices.Length) {
                         var multipleChoiceAnswer = multipleChoices.ElementAt(number);
 
                         // print a little reminder
@@ -104,7 +104,8 @@
             }
 
             // prompt
-            var prompt = "Enter " + string.Join(", ", Enumerable.Range(0, multipleChoices.Count() - 1)) + " or " + (multipleChoices.Count() - 1) + ": ";
+            var prompt = "Enter " + string.Join(", ", Enumerable.Range(0, multipleChoices.Count() - 1)) + " or " + (multipleChoices.Count() - 1)
+                         + ": ";
             Console.WriteLine(prompt);
 
             // first attempt

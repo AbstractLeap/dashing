@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dashing.Tools.ReverseEngineering {
+    using System;
+    using System.Collections.Generic;
 
-namespace Dashing.Tools.ReverseEngineering {
-    class Column<T> : Dashing.Configuration.Column<T>, IReverseEngineeringColumn {
-        private object typeLock = new object();
+    internal class Column<T> : Dashing.Configuration.Column<T>, IReverseEngineeringColumn {
+        private readonly object typeLock = new object();
 
         private Type actualType;
 
-        public override Type Type {
-            get {
+        public override Type Type
+        {
+            get
+            {
                 if (this.actualType == null) {
                     lock (typeLock) {
                         if (this.actualType == null) {
                             if (string.IsNullOrEmpty(this.ForeignKeyTableName)) {
                                 this.actualType = base.Type;
-                            } else {
+                            }
+                            else {
                                 this.actualType = this.TypeMap[this.ForeignKeyTableName];
                             }
                         }
@@ -29,7 +29,6 @@ namespace Dashing.Tools.ReverseEngineering {
         }
 
         public string ForeignKeyTableName { get; set; }
-
 
         public IDictionary<string, Type> TypeMap { get; set; }
     }

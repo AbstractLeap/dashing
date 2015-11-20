@@ -19,10 +19,18 @@
             var migrator = MakeMigrator();
             var config = new SimpleClassConfig();
             var config2 = new SimpleClassConfig();
-            config.Maps.ElementAt(0).AddIndex(new Index(config.Maps.ElementAt(0), new[] { config.Maps.ElementAt(0).Columns.First().Value }, "Foo", false));
+            config.Maps.ElementAt(0)
+                  .AddIndex(new Index(config.Maps.ElementAt(0), new[] { config.Maps.ElementAt(0).Columns.First().Value }, "Foo", false));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(config.Maps, config2.Maps, null, new Mock<ILogger>().Object, new[] { "Foo" }, out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                config.Maps,
+                config2.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new[] { "Foo" },
+                out warnings,
+                out errors);
             Assert.Empty(script);
         }
 
@@ -31,10 +39,18 @@
             var migrator = MakeMigrator();
             var config = new SimpleClassConfig();
             var config2 = new SimpleClassConfig();
-            config.Maps.ElementAt(0).AddIndex(new Index(config.Maps.ElementAt(0), new[] { config.Maps.ElementAt(0).Columns.First().Value }, "Foo", false));
+            config.Maps.ElementAt(0)
+                  .AddIndex(new Index(config.Maps.ElementAt(0), new[] { config.Maps.ElementAt(0).Columns.First().Value }, "Foo", false));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(config.Maps, config2.Maps, null, new Mock<ILogger>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                config.Maps,
+                config2.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
             Assert.Equal(@"drop index [Foo] on [SimpleClasses];", script.Trim());
         }
 
@@ -51,8 +67,10 @@
             return migrator;
         }
 
-        private static ConnectionStringSettings ConnectionString {
-            get {
+        private static ConnectionStringSettings ConnectionString
+        {
+            get
+            {
                 return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
             }
         }

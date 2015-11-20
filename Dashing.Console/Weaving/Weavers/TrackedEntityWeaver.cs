@@ -26,7 +26,8 @@
             // if there's only one class and that class is not extended elsewhere we'll use non-virtual methods
             var notInInheritance = totalInChain == 1
                                    && !assemblyDefinitions.Any(
-                                       a => a.Value.MainModule.Types.Any(t => t.IsClass && t.BaseType != null && t.BaseType.FullName == typeDef.FullName));
+                                       a =>
+                                       a.Value.MainModule.Types.Any(t => t.IsClass && t.BaseType != null && t.BaseType.FullName == typeDef.FullName));
 
             while (classHierarchy.Count > 0) {
                 this.ImplementITrackedEntityForTypeDefinition(classHierarchy.Pop(), mapDefinition, notInInheritance);
@@ -65,7 +66,10 @@
                 if (this.HasPropertyInInheritanceChain(typeDef, columnDefinition.Name)) {
                     var propertyDefinition = this.GetProperty(typeDef, columnDefinition.Name);
                     if (propertyDefinition.DeclaringType.FullName == typeDef.FullName) {
-                        var dirtyField = new FieldDefinition(string.Format("__{0}_IsDirty", columnDefinition.Name), FieldAttributes.Family, boolTypeDef);
+                        var dirtyField = new FieldDefinition(
+                            string.Format("__{0}_IsDirty", columnDefinition.Name),
+                            FieldAttributes.Family,
+                            boolTypeDef);
                         this.MakeNotDebuggerBrowsable(typeDef.Module, dirtyField);
                         typeDef.Fields.Add(dirtyField);
 
@@ -77,7 +81,10 @@
                             // use nullable value types
                         }
 
-                        var oldValueField = new FieldDefinition(string.Format("__{0}_OldValue", columnDefinition.Name), FieldAttributes.Family, oldValuePropType);
+                        var oldValueField = new FieldDefinition(
+                            string.Format("__{0}_OldValue", columnDefinition.Name),
+                            FieldAttributes.Family,
+                            oldValuePropType);
                         this.MakeNotDebuggerBrowsable(typeDef.Module, oldValueField);
                         typeDef.Fields.Add(oldValueField);
                     }
@@ -162,10 +169,10 @@
                                         OpCodes.Call,
                                         typeDef.Module.Import(
                                             propertyDefinition.PropertyType.Resolve()
-                                                       .Methods.Single(
-                                                           m =>
-                                                           m.Name == "Equals" && m.Parameters.Count == 1
-                                                           && m.Parameters.First().ParameterType.Name.ToLowerInvariant() != "object"))));
+                                                              .Methods.Single(
+                                                                  m =>
+                                                                  m.Name == "Equals" && m.Parameters.Count == 1
+                                                                  && m.Parameters.First().ParameterType.Name.ToLowerInvariant() != "object"))));
                             }
 
                             setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
@@ -192,11 +199,11 @@
                                         OpCodes.Callvirt,
                                         typeDef.Module.Import(
                                             propertyDefinition.PropertyType.Resolve()
-                                                       .GetMethods()
-                                                       .Single(
-                                                           m =>
-                                                           m.Name == "Equals" && m.Parameters.Count == 1
-                                                           && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "string"))));
+                                                              .GetMethods()
+                                                              .Single(
+                                                                  m =>
+                                                                  m.Name == "Equals" && m.Parameters.Count == 1
+                                                                  && m.Parameters.First().ParameterType.Name.ToLowerInvariant() == "string"))));
                             }
                             else {
                                 setIntructions.Add(
@@ -281,15 +288,11 @@
             }
 
             // DisableTracking
-            var disableTrackingMethodAttrs = MethodAttributes.Public | MethodAttributes.HideBySig
-                                             | MethodAttributes.Virtual;
+            var disableTrackingMethodAttrs = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual;
             if (notInInheritance) {
                 disableTrackingMethodAttrs = disableTrackingMethodAttrs | MethodAttributes.NewSlot | MethodAttributes.Final;
             }
-            var disableTracking = new MethodDefinition(
-                "DisableTracking",
-                 disableTrackingMethodAttrs,
-                voidTypeDef);
+            var disableTracking = new MethodDefinition("DisableTracking", disableTrackingMethodAttrs, voidTypeDef);
             var disableInstructions = disableTracking.Body.Instructions;
             disableInstructions.Add(Instruction.Create(OpCodes.Nop));
             disableInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
@@ -302,8 +305,7 @@
                     // reset isdirty
                     disableInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                     disableInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                    disableInstructions.Add(
-                        Instruction.Create(OpCodes.Stfld, this.GetField(typeDef, string.Format("__{0}_IsDirty", col.Name))));
+                    disableInstructions.Add(Instruction.Create(OpCodes.Stfld, this.GetField(typeDef, string.Format("__{0}_IsDirty", col.Name))));
 
                     // reset oldvalue
                     disableInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
@@ -343,8 +345,7 @@
             }
 
             // GetDirtyProperties
-            var getDirtyPropertiesMethodAttrs = MethodAttributes.Public | MethodAttributes.HideBySig
-                                                | MethodAttributes.Virtual;
+            var getDirtyPropertiesMethodAttrs = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual;
             if (notInInheritance) {
                 getDirtyPropertiesMethodAttrs = getDirtyPropertiesMethodAttrs | MethodAttributes.NewSlot | MethodAttributes.Final;
             }
@@ -353,7 +354,8 @@
                 getDirtyPropertiesMethodAttrs,
                 typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
             getDirtyProperties.Body.Variables.Add(new VariableDefinition("dirtyProps", listStringTypeDef));
-            getDirtyProperties.Body.Variables.Add(new VariableDefinition(typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
+            getDirtyProperties.Body.Variables.Add(
+                new VariableDefinition(typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
             getDirtyProperties.Body.Variables.Add(new VariableDefinition(boolTypeDef));
             getDirtyProperties.Body.InitLocals = true;
             var instructions = getDirtyProperties.Body.Instructions;
@@ -404,10 +406,7 @@
                 getOldValueMethodAttrs = getOldValueMethodAttrs | MethodAttributes.NewSlot | MethodAttributes.Final;
             }
 
-            var getOldValue = new MethodDefinition(
-                "GetOldValue",
-                getOldValueMethodAttrs,
-                objectTypeDef);
+            var getOldValue = new MethodDefinition("GetOldValue", getOldValueMethodAttrs, objectTypeDef);
             getOldValue.Parameters.Add(new ParameterDefinition("propertyName", ParameterAttributes.None, stringTypeDef));
             getOldValue.Body.Variables.Add(new VariableDefinition(objectTypeDef));
             getOldValue.Body.Variables.Add(new VariableDefinition(stringTypeDef));
@@ -481,7 +480,8 @@
                         typeof(ArgumentOutOfRangeException).GetConstructors()
                                                            .First(
                                                                c =>
-                                                               c.GetParameters().All(p => p.ParameterType == typeof(string)) && c.GetParameters().Count() == 2))));
+                                                               c.GetParameters().All(p => p.ParameterType == typeof(string))
+                                                               && c.GetParameters().Count() == 2))));
             getBodyInstructions.Add(Instruction.Create(OpCodes.Throw));
             getBodyInstructions.Add(returnTarget);
             getBodyInstructions.Add(Instruction.Create(OpCodes.Ret));

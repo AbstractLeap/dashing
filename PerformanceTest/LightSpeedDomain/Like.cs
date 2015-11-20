@@ -1,79 +1,98 @@
-using System;
+namespace LightSpeed.Domain {
+    using System;
+    using System.CodeDom.Compiler;
+    using System.ComponentModel;
+    using System.Diagnostics;
 
-using Mindscape.LightSpeed;
-using Mindscape.LightSpeed.Validation;
+    using Mindscape.LightSpeed;
 
-namespace LightSpeed.Domain
-{
-  [Serializable]
-  [System.CodeDom.Compiler.GeneratedCode("LightSpeedModelGenerator", "1.0.0.0")]
-  [System.ComponentModel.DataObject]
-  [Table(IdColumnName="LikeId")]
-  public partial class Like : Entity<int>
-  {
-    #region Fields
-  
-    private System.Nullable<int> _userId;
-    private System.Nullable<int> _commentId;
+    [Serializable]
+    [GeneratedCode("LightSpeedModelGenerator", "1.0.0.0")]
+    [DataObject]
+    [Table(IdColumnName = "LikeId")]
+    public class Like : Entity<int> {
+        #region Fields
 
-    #endregion
-    
-    #region Field attribute and view names
-    
-    /// <summary>Identifies the UserId entity attribute.</summary>
-    public const string UserIdField = "UserId";
-    /// <summary>Identifies the CommentId entity attribute.</summary>
-    public const string CommentIdField = "CommentId";
+        private int? _userId;
 
+        private int? _commentId;
 
-    #endregion
-    
-    #region Relationships
+        #endregion
 
-    [ReverseAssociation("Likes")]
-    private readonly EntityHolder<User> _user = new EntityHolder<User>();
-    [ReverseAssociation("Likes")]
-    private readonly EntityHolder<Comment> _comment = new EntityHolder<Comment>();
+        #region Field attribute and view names
 
+        /// <summary>Identifies the UserId entity attribute.</summary>
+        public const string UserIdField = "UserId";
 
-    #endregion
-    
-    #region Properties
+        /// <summary>Identifies the CommentId entity attribute.</summary>
+        public const string CommentIdField = "CommentId";
 
-    [System.Diagnostics.DebuggerNonUserCode]
-    public User User
-    {
-      get { return Get(_user); }
-      set { Set(_user, value); }
+        #endregion
+
+        #region Relationships
+
+        [ReverseAssociation("Likes")]
+        private readonly EntityHolder<User> _user = new EntityHolder<User>();
+
+        [ReverseAssociation("Likes")]
+        private readonly EntityHolder<Comment> _comment = new EntityHolder<Comment>();
+
+        #endregion
+
+        #region Properties
+
+        [DebuggerNonUserCode]
+        public User User
+        {
+            get
+            {
+                return Get(_user);
+            }
+            set
+            {
+                Set(_user, value);
+            }
+        }
+
+        [DebuggerNonUserCode]
+        public Comment Comment
+        {
+            get
+            {
+                return Get(_comment);
+            }
+            set
+            {
+                Set(_comment, value);
+            }
+        }
+
+        [DebuggerNonUserCode]
+        public int? UserId
+        {
+            get
+            {
+                return Get(ref _userId, "UserId");
+            }
+            set
+            {
+                Set(ref _userId, value, "UserId");
+            }
+        }
+
+        [DebuggerNonUserCode]
+        public int? CommentId
+        {
+            get
+            {
+                return Get(ref _commentId, "CommentId");
+            }
+            set
+            {
+                Set(ref _commentId, value, "CommentId");
+            }
+        }
+
+        #endregion
     }
-
-    [System.Diagnostics.DebuggerNonUserCode]
-    public Comment Comment
-    {
-      get { return Get(_comment); }
-      set { Set(_comment, value); }
-    }
-
-
-    [System.Diagnostics.DebuggerNonUserCode]
-    public System.Nullable<int> UserId
-    {
-      get { return Get(ref _userId, "UserId"); }
-      set { Set(ref _userId, value, "UserId"); }
-    }
-
-    [System.Diagnostics.DebuggerNonUserCode]
-    public System.Nullable<int> CommentId
-    {
-      get { return Get(ref _commentId, "CommentId"); }
-      set { Set(ref _commentId, value, "CommentId"); }
-    }
-
-    #endregion
-  }
-
-
-
-
-
 }

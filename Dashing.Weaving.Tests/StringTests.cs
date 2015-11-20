@@ -3,6 +3,7 @@
 
     using Dashing.CodeGeneration;
     using Dashing.Weaving.Sample.Domain;
+
     using Xunit;
 
     public class StringTests {

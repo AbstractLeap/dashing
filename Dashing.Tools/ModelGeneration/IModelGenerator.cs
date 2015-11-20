@@ -6,6 +6,10 @@
     using DatabaseSchemaReader.DataSchema;
 
     internal interface IModelGenerator {
-        IDictionary<string, string> GenerateFiles(IEnumerable<IMap> maps, DatabaseSchema schema, string domainNamespace, IAnswerProvider answerProvider);
+        IDictionary<string, string> GenerateFiles(
+            IEnumerable<IMap> maps,
+            DatabaseSchema schema,
+            string domainNamespace,
+            IAnswerProvider answerProvider);
     }
 }

@@ -6,11 +6,8 @@
 
     using Dashing.Tools;
 
-    using Microsoft.Build.Utilities;
-
     using Mono.Cecil;
     using Mono.Cecil.Cil;
-    using Mono.Cecil.Rocks;
 
     public abstract class BaseWeaver : ITaskLogHelper, IWeaver {
         private const string BackingFieldTemplate = "<{0}>k__BackingField";
@@ -28,8 +25,8 @@
             var candidates =
                 propertyDef.GetMethod.Body.Instructions.Where(
                     i =>
-                    i.OpCode == OpCodes.Ldfld && i.Operand is FieldDefinition && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName)
-                           .ToArray();
+                    i.OpCode == OpCodes.Ldfld && i.Operand is FieldDefinition
+                    && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName).ToArray();
             if (candidates.Length == 1) {
                 return (FieldDefinition)candidates.First().Operand;
             }
@@ -116,11 +113,11 @@
 
         protected static MethodReference MakeGeneric(MethodReference self, params TypeReference[] arguments) {
             var reference = new MethodReference(self.Name, self.ReturnType) {
-                DeclaringType = MakeGenericType(self.DeclaringType, arguments),
-                HasThis = self.HasThis,
-                ExplicitThis = self.ExplicitThis,
-                CallingConvention = self.CallingConvention,
-            };
+                                                                                DeclaringType = MakeGenericType(self.DeclaringType, arguments),
+                                                                                HasThis = self.HasThis,
+                                                                                ExplicitThis = self.ExplicitThis,
+                                                                                CallingConvention = self.CallingConvention
+                                                                            };
 
             foreach (var parameter in self.Parameters) {
                 reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
@@ -136,7 +133,8 @@
         protected void MakeNotDebuggerBrowsable(ModuleDefinition module, FieldDefinition field) {
             var debuggerBrowsableConstructor = module.Import(typeof(DebuggerBrowsableAttribute).GetConstructors().First());
             var debuggerBrowsableAttr = new CustomAttribute(debuggerBrowsableConstructor);
-            debuggerBrowsableAttr.ConstructorArguments.Add(new CustomAttributeArgument(module.Import(typeof(DebuggerBrowsableState)), DebuggerBrowsableState.Never));
+            debuggerBrowsableAttr.ConstructorArguments.Add(
+                new CustomAttributeArgument(module.Import(typeof(DebuggerBrowsableState)), DebuggerBrowsableState.Never));
             field.CustomAttributes.Add(debuggerBrowsableAttr);
         }
 
