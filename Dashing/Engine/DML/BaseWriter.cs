@@ -9,7 +9,7 @@
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
 
-    internal class BaseWriter {
+    public class BaseWriter {
         protected internal ISqlDialect Dialect { get; set; }
 
         protected internal IConfiguration Configuration { get; set; }

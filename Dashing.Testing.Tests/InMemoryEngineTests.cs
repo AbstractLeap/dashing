@@ -35,12 +35,27 @@
         }
 
         [Fact]
+        public void WhereNotFetchedWorks() {
+            var session = this.GetSession();
+            var comments = session.Query<Comment>().Fetch(c => c.Post).Where(c => c.Post.Author.UserId == 1);
+            Assert.True(comments.First().Post.Author.UserId == 1);
+            Assert.True(comments.First().Post.Author.Username == null);
+        }
+
+        [Fact]
         public void TestConfigWorks() {
             var config = new TestConfiguration(true);
             using (var session = config.BeginSession()) {
                 session.Insert(new Post() { Title = "Foo" });
                 Assert.Equal("Foo", session.Get<Post>(1).Title);
             }
+        }
+
+        [Fact]
+        public void WhereWorks() {
+            var session = this.GetSession();
+            var comments = session.Query<Comment>().Where(c => c.Post.Title.Contains("Second"));
+            Assert.Equal(3, comments.Count());
         }
 
         private ISession GetSession() {

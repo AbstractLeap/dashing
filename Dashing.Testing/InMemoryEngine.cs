@@ -5,10 +5,12 @@
     using System.ComponentModel;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Text;
     using System.Threading.Tasks;
 
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
 
     public class InMemoryEngine : IEngine {
@@ -20,14 +22,11 @@
             this.tables = new Dictionary<Type, object>();
         }
 
-        public IConfiguration Configuration
-        {
-            get
-            {
+        public IConfiguration Configuration {
+            get {
                 return this.configuration;
             }
-            set
-            {
+            set {
                 if (this.configuration != null) {
                     throw new Exception("Can only set the configuration once");
                 }
@@ -64,15 +63,17 @@
                                         .GetMethod("Query")
                                         .Invoke(table, new object[0]) as IEnumerable<T>;
 
-            if (query.Fetches.Any() || query.CollectionFetches.Any()) {
+            var fetchParser = new FetchTreeParser(this.Configuration);
+            int numberCollectionFetches;
+            int aliasCounter;
+            var fetchTree = fetchParser.GetFetchTree(query, out aliasCounter, out numberCollectionFetches);
 
+            // we may have to query across non-fetched stuff
+            var baseWriter = new BaseWriter(new SqlServer2012Dialect(), this.configuration);
+            baseWriter.AddWhereClause(query.WhereClauses, new StringBuilder(), ref fetchTree);
 
-                var fetchParser = new FetchTreeParser(this.Configuration);
-                int numberCollectionFetches;
-                int aliasCounter;
-                var fetchTree = fetchParser.GetFetchTree(query, out aliasCounter, out numberCollectionFetches);
-
-                // note that this fetches all the things in the tree as the whereclause may reference things not fetched
+            // note that this fetches all the things in the tree as the whereclause may reference things not fetched
+            if (fetchTree != null) {
                 enumerable = enumerable.Fetch(fetchTree, this.tables);
             }
 
@@ -99,26 +100,19 @@
                 enumerable = enumerable.Take(query.TakeN);
             }
 
-            if (query.Fetches.Any() || query.CollectionFetches.Any()) {
-                foreach (var entity in enumerable) {
-                    yield return fetchCloner.Clone(query, entity);
-                }
-            }
-            else {
-                foreach (var entity in enumerable) {
-                    yield return entity;
-                }
+            foreach (var entity in enumerable) {
+                yield return fetchCloner.Clone(query, entity);
             }
         }
 
         public Page<T> QueryPaged<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
             this.AssertConfigured();
             return new Page<T> {
-                                   Items = this.Query<T>(sessionState, query),
-                                   Skipped = query.SkipN,
-                                   Taken = query.TakeN,
-                                   TotalResults = this.Count(sessionState, query)
-                               };
+                Items = this.Query<T>(sessionState, query),
+                Skipped = query.SkipN,
+                Taken = query.TakeN,
+                TotalResults = this.Count(sessionState, query)
+            };
         }
 
         public int Count<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
@@ -132,7 +126,7 @@
             var insertMethod = typeof(InMemoryTable<,>).MakeGenericType(typeof(T), this.Configuration.GetMap<T>().PrimaryKey.Type).GetMethod("Insert");
             var results = 0;
             foreach (var entity in entities) {
-                results += (int)insertMethod.Invoke(table, new [] { entity });
+                results += (int)insertMethod.Invoke(table, new[] { entity });
             }
 
             return results;
@@ -168,7 +162,7 @@
             foreach (var predicate in predicates) {
                 query.Where(predicate);
             }
-            
+
             var entitiesToUpdate = this.Query<T>(sessionState, query);
             foreach (var entity in entitiesToUpdate) {
                 update(entity);
