@@ -76,5 +76,9 @@ namespace Dashing.Engine.Dialects {
         string OnBeforeDropColumn(IColumn column);
 
         string ChangeTableName(IMap @from, IMap to);
+
+        string CreateDatabase(string databaseName);
+
+        string CheckDatabaseExists(string databaseName);
     }
 }

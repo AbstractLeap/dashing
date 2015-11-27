@@ -68,6 +68,10 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
+        public override string CheckDatabaseExists(string databaseName) {
+            return "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + databaseName + "'";
+        }
+
         public override string GetIdSql() {
             return "SELECT LAST_INSERT_ID() id";
         }

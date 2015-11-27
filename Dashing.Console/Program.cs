@@ -6,9 +6,12 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
 
     using CommandLine;
     using CommandLine.Text;
+
+    using Dapper;
 
     using Dashing.Configuration;
     using Dashing.Console.Settings;
@@ -141,6 +144,10 @@
                     throw new CatchyException("You must specify the directory to weave");
                 }
 
+                if (!options.IgnorePeVerify) {
+                    TryFindIgnoreConfigSetting(options);
+                }
+
                 var task = new ExtendDomainTask {
                                                     LaunchDebugger = options.LaunchDebugger,
                                                     WeaveDir = options.WeaveDir,
@@ -197,6 +204,24 @@
             }
             else {
                 ShowHelpText(options);
+            }
+        }
+
+        private static void TryFindIgnoreConfigSetting(CommandLineOptions options) {
+            foreach (var fileName in Directory.GetFiles(options.WeaveDir).Where(fileName => fileName.EndsWith(".config"))) {
+                try {
+                    var configMap = new ExeConfigurationFileMap();
+                    configMap.ExeConfigFilename = fileName;
+                    var config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+                    if (config.AppSettings.Settings.AllKeys.Contains("dashing:ignorepeverify")) {
+                        if (config.AppSettings.Settings["dashing:ignorepeverify"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase)) {
+                            options.IgnorePeVerify = true;
+                        }
+                    }
+                }
+                catch {
+                    // do nothing ... probably not the type of config file we're expecting
+                }
             }
         }
 
@@ -503,6 +528,10 @@
             // fetch the from state
             var dialectFactory = new DialectFactory();
             var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
+            var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
+            
+            // create database if not exists
+            CreateDatabaseIfNotExists(connectionStringSettings, factory, dialect);
 
             DatabaseSchema schema;
             using (new TimedOperation("-- Reading database contents...")) {
@@ -518,7 +547,6 @@
                 Console.Write("-- ");
             }
 
-            var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
             using (var connection = factory.CreateConnection()) {
                 connection.ConnectionString = connectionStringSettings.ConnectionString;
                 // set up migrator
@@ -547,6 +575,27 @@
 
                     // TODO: do things with warnings and errors
                     return script;
+                }
+            }
+        }
+
+        private static void CreateDatabaseIfNotExists(ConnectionStringSettings connectionStringSettings, DbProviderFactory factory, ISqlDialect dialect) {
+            using (new TimedOperation("-- Checking for Existence of Database...")) {
+                var connectionStringManipulator = new ConnectionStringManipulator(connectionStringSettings.ToSystem());
+                using (var connection = factory.CreateConnection()) {
+                    connection.ConnectionString = connectionStringManipulator.GetRootConnectionString().ConnectionString;
+                    connection.Open();
+                    var databaseName = connectionStringManipulator.GetDatabaseName();
+                    Trace("Looking for {0}", databaseName);
+                    if (!connection.Query(dialect.CheckDatabaseExists(databaseName)).Any()) {
+                        Trace("Not Found");
+                        Trace("Creating");
+                        connection.Execute(dialect.CreateDatabase(databaseName));
+                        Trace("Created");
+                    }
+                    else {
+                        Trace("Found!");
+                    }
                 }
             }
         }

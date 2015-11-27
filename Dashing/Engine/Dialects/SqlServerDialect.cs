@@ -145,6 +145,10 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
+        public override string CheckDatabaseExists(string databaseName) {
+            return "SELECT name FROM master.dbo.sysdatabases WHERE ('[' + name + ']' = '" + databaseName + "' OR name = '" + databaseName + "')";
+        }
+
         public override string GetIdSql() {
             return "SELECT CAST(SCOPE_IDENTITY() as int) id";
         }

@@ -204,6 +204,12 @@ namespace Dashing.Engine.Dialects {
 
         public abstract string ChangeTableName(IMap @from, IMap to);
 
+        public string CreateDatabase(string databaseName) {
+            return "create database " + this.BeginQuoteCharacter + databaseName + this.EndQuoteCharacter;
+        }
+
+        public abstract string CheckDatabaseExists(string databaseName);
+
         public virtual string GetIdSql() {
             return "select @@identity id";
         }

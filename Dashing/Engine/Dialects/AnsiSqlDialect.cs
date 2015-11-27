@@ -60,6 +60,10 @@ namespace Dashing.Engine.Dialects {
             throw new NotImplementedException();
         }
 
+        public override string CheckDatabaseExists(string databaseName) {
+            throw new InvalidOperationException("There is no Ansi-SQL way of creating a database");
+        }
+
         public override void ApplySkipTake(StringBuilder sql, StringBuilder orderClause, int take, int skip) {
             throw new InvalidOperationException("There is no Ansi-SQL way of expressing an offset-limit / skip-take clause.");
         }

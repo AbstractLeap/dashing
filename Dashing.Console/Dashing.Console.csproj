@@ -55,6 +55,10 @@
     <Reference Include="CommandLine">
       <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
     </Reference>
+    <Reference Include="Dapper, Version=1.38.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="DatabaseSchemaReader">
       <HintPath>..\packages\DatabaseSchemaReader-polyfork.1.3.4.3\lib\net40\DatabaseSchemaReader.dll</HintPath>
     </Reference>
