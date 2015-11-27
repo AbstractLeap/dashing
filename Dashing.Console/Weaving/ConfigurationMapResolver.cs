@@ -21,7 +21,7 @@ namespace Dashing.Console.Weaving {
                 var assemblyName = new AssemblyName(eventArgs.Name);
 
                 // look in app domain
-                var loaded = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                var loaded = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName.FullName);
                 if (loaded != null) {
                     return loaded;
                 }
@@ -37,7 +37,7 @@ namespace Dashing.Console.Weaving {
             };
 
             // load the assembly if necessary
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == args.AssemblyFullName);
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == args.AssemblyFullName);
             var assemblyDefinition = AssemblyDefinition.ReadAssembly(args.AssemblyFilePath);
             if (assembly == null) {
                 assembly = Assembly.LoadFile(args.AssemblyFilePath);
@@ -46,7 +46,7 @@ namespace Dashing.Console.Weaving {
             // find any IConfigs, instantiate and return map definitions
             var mapDefinitions = new List<MapDefinition>();
             var configurationTypes =
-                assembly.GetTypes()
+                assembly.GetLoadableTypes()
                         .Where(
                             t =>
                             typeof(IConfiguration).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract

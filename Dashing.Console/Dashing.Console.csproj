@@ -97,6 +97,7 @@
     <Compile Include="Settings\DashingSettings.cs" />
     <Compile Include="Settings\ReverseEngineerSettings.cs" />
     <Compile Include="TimedOperation.cs" />
+    <Compile Include="Weaving\AssemblyExtensions.cs" />
     <Compile Include="Weaving\ConfigurationMapResolver.cs" />
     <Compile Include="Weaving\ExtendDomainTask.cs" />
     <Compile Include="Weaving\NullLogger.cs" />

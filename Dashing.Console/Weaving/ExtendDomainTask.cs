@@ -57,7 +57,7 @@
                 new AppDomainSetup { ApplicationBase = Path.GetDirectoryName(pathToDbm) });
             configAppDomain.AssemblyResolve += (sender, args) => {
                 var assemblyName = new AssemblyName(args.Name);
-                var loaded = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                var loaded = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == assemblyName.FullName);
                 if (loaded != null) {
                     return loaded;
                 }
@@ -88,7 +88,7 @@
             // locate all dlls
             var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
             var assemblyMapDefinitions = new Dictionary<string, List<MapDefinition>>();
-            foreach (var file in Directory.GetFiles(this.WeaveDir)) {
+            foreach (var file in Directory.GetFiles(this.WeaveDir).Where(f => f.EndsWith("dll", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith("exe", StringComparison.InvariantCultureIgnoreCase))) {
                 try {
                     var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
                     var assemblyResolver = new DefaultAssemblyResolver();
@@ -133,7 +133,7 @@
 
             // now go through each assembly and re-write the types
             var visitedTypes = new HashSet<string>();
-            var weavers = me.DefinedTypes.Where(t => typeof(IWeaver).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract).Select(
+            var weavers = me.GetLoadableTypes().Where(t => typeof(IWeaver).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract).Select(
                 t => {
                     var weaver = (IWeaver)Activator.CreateInstance(t);
                     ((ITaskLogHelper)weaver).Log = this.Logger;

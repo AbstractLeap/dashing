@@ -227,11 +227,11 @@
             DashingSettings dashingSettings,
             ConnectionStringSettings connectionStringSettings) {
             // fetch the to state
-            var configType = configAssembly.DefinedTypes.SingleOrDefault(t => t.FullName == dashingSettings.ConfigurationName);
+            var configType = configAssembly.GetLoadableTypes().SingleOrDefault(t => t.FullName == dashingSettings.ConfigurationName);
 
             if (configType == null) {
                 using (Color(ConsoleColor.Red)) {
-                    var candidates = configAssembly.DefinedTypes.Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null).ToArray();
+                    var candidates = configAssembly.GetLoadableTypes().Where(t => t.GetInterface(typeof(IConfiguration).FullName) != null).ToArray();
                     if (candidates.Any()) {
                         throw new CatchyException(
                             "Could not locate {0}, but found candidates: {1}",
