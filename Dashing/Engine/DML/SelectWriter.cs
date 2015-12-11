@@ -671,7 +671,7 @@
                         innerColumnSql.Append(", ");
                         this.AddColumn(innerColumnSql, column, node.Alias, column.Name + node.Alias);
                         outerColumnSql.Append(", ").Append("i.").Append(column.Name).Append(node.Alias).Append(" as ");
-                        this.Dialect.AppendQuotedName(outerColumnSql, column.Name);
+                        this.Dialect.AppendQuotedName(outerColumnSql, column.DbName);
                     }
                 }
             }

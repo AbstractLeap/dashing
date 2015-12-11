@@ -562,6 +562,17 @@
         }
 
         [Fact]
+        public void FetchCollectionNonRootWithTake() {
+            var query = this.GetSelectQuery<PostTag>().Fetch(p => p.Post.Comments).Take(10);
+            var selectQuery = query as SelectQuery<PostTag>;
+            var sql = this.GetSql2012Writer().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select i.[PostTagId], i.[ElTagId], i.PostIdt_1 as [PostId], i.Titlet_1 as [Title], i.Contentt_1 as [Content], i.Ratingt_1 as [Rating], i.Authort_1 as [AuthorId], i.Blogt_1 as [BlogId], i.DoNotMapt_1 as [DoNotMap], t_2.[CommentId], t_2.[Content], t_2.[PostId], t_2.[UserId], t_2.[CommentDate] from (select t.[PostTagId], t.[ElTagId], t_1.[PostId] as [PostIdt_1], t_1.[Title] as [Titlet_1], t_1.[Content] as [Contentt_1], t_1.[Rating] as [Ratingt_1], t_1.[AuthorId] as [Authort_1], t_1.[BlogId] as [Blogt_1], t_1.[DoNotMap] as [DoNotMapt_1] from [PostTags] as t left join [Posts] as t_1 on t.PostId = t_1.PostId order by t.[PostTagId] offset 0 rows fetch next @take rows only) as i left join [Comments] as t_2 on i.PostIdt_1 = t_2.PostId order by i.[PostTagId]",
+                sql.Sql);
+        }
+
+        [Fact]
         public void WhereOnRelationshipWithNoFetchesAliasesAll() {
             var query = this.GetSelectQuery<Post>().Where(p => p.Content == "Foo" && p.Author.EmailAddress == "Foo");
             var selectQuery = query as SelectQuery<Post>;
