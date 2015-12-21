@@ -63,12 +63,15 @@
                 var il = propDef.GetMethod.Body.Instructions;
                 var lastInstr = il[0];
                 var index = 0;
+
+                // first bit does the null/hasValue checks on the backing fields
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldfld, backingField));
-                var skipToEnd = Instruction.Create(OpCodes.Ldc_I4_1);
-                il.Insert(index++, Instruction.Create(OpCodes.Brtrue, skipToEnd));
-                il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
+
+                il.Insert(index++, Instruction.Create(OpCodes.Brtrue, lastInstr));
+
                 if (fkPkType.IsValueType) {
+                    il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
                     il.Insert(index++, Instruction.Create(OpCodes.Ldflda, fkField));
                     il.Insert(
                         index++,
@@ -79,19 +82,13 @@
                                 typeDef.Module.Import(fkPkType))));
                 }
                 else {
-                    throw new NotImplementedException(); // need to do a null check
+                    il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
+                    il.Insert(index++, Instruction.Create(OpCodes.Ldfld, fkField));
                 }
 
-                il.Insert(index++, Instruction.Create(OpCodes.Ldc_I4_0));
-                il.Insert(index++, Instruction.Create(OpCodes.Ceq));
-                var nopInstr = Instruction.Create(OpCodes.Nop);
-                il.Insert(index++, Instruction.Create(OpCodes.Br, nopInstr));
-                il.Insert(index++, skipToEnd);
-                il.Insert(index++, nopInstr);
-                il.Insert(index++, Instruction.Create(OpCodes.Stloc_2));
-                il.Insert(index++, Instruction.Create(OpCodes.Ldloc_2));
-                il.Insert(index++, Instruction.Create(OpCodes.Brtrue, lastInstr));
-                il.Insert(index++, Instruction.Create(OpCodes.Nop));
+                il.Insert(index++, Instruction.Create(OpCodes.Brfalse, lastInstr));
+
+                // if we have a pk but no ref we create a new instance with the primary key set
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
                 il.Insert(
                     index++,
@@ -99,21 +96,40 @@
                 il.Insert(index++, Instruction.Create(OpCodes.Stloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
-                il.Insert(index++, Instruction.Create(OpCodes.Ldflda, fkField));
-                il.Insert(
-                    index++,
-                    Instruction.Create(
-                        OpCodes.Call,
-                        typeDef.Module.Import(
-                            MakeGeneric(fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"), typeDef.Module.Import(fkPkType)))));
-                var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
-                var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
-                var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
-                il.Insert(
-                    index++,
-                    Instruction.Create(
-                        OpCodes.Callvirt,
-                        typeDef.Module.Import(this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod)));
+
+                if (fkPkType.IsValueType) {
+                    il.Insert(index++, Instruction.Create(OpCodes.Ldflda, fkField));
+                    il.Insert(
+                        index++,
+                        Instruction.Create(
+                            OpCodes.Call,
+                            typeDef.Module.Import(
+                                MakeGeneric(
+                                    fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"),
+                                    typeDef.Module.Import(fkPkType)))));
+                    var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
+                    var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
+                    var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
+                    il.Insert(
+                        index++,
+                        Instruction.Create(
+                            OpCodes.Callvirt,
+                            typeDef.Module.Import(
+                                this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod)));
+                }
+                else {
+                    il.Insert(index++, Instruction.Create(OpCodes.Ldfld, fkField));
+                    var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
+                    var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
+                    var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
+                    il.Insert(
+                        index++,
+                        Instruction.Create(
+                            OpCodes.Callvirt,
+                            typeDef.Module.Import(
+                                this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod)));
+                }
+
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
                 il.Insert(index, Instruction.Create(OpCodes.Stfld, backingField));
             }

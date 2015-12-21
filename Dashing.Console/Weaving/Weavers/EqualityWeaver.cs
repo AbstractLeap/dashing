@@ -113,6 +113,10 @@
                         Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
                 }
                 else {
+                    if (pkColDef.PropertyType.Name != typeof(Int32).Name) {
+                        il.Add(Instruction.Create(OpCodes.Conv_I4));
+                    }
+
                     il.Add(Instruction.Create(OpCodes.Stloc_1));
                     il.Add(Instruction.Create(OpCodes.Ldloca_S, var1));
                     il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(intTypeDef.Resolve().Methods.Single(m => m.Name == "GetHashCode"))));

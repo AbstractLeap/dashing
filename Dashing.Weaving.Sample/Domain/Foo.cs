@@ -149,4 +149,12 @@
 
         public string Name { get; set; }
     }
+
+    public class EntityReferencingEntityWithPrimaryKey {
+        public long Id { get; set; }
+
+        public string Name { get; set; }
+
+        public EntityWithStringPrimaryKey EntityWithStringPrimaryKey { get; set; }
+    }
 }

@@ -8,7 +8,7 @@
 
     public class StringTests {
         [Fact]
-        public void GuidPrimaryKeyWorks() {
+        public void StringPrimaryKeyWorks() {
             var thing = new EntityWithStringPrimaryKey { Id = "123", Name = "Foo" };
             Assert.IsAssignableFrom(typeof(ITrackedEntity), thing);
         }
@@ -66,6 +66,13 @@
         public void SameInstanceIsEqual() {
             var bar = new EntityWithStringPrimaryKey { Id = "123" };
             Assert.True(bar.Equals(bar));
+        }
+
+        [Fact]
+        public void StringForeignKeyNotNullWorks() {
+            var ting = new EntityReferencingEntityWithPrimaryKey();
+            ting.GetType().GetField("EntityWithStringPrimaryKeyId").SetValue(ting, "123");
+            Assert.Equal("123", ting.EntityWithStringPrimaryKey.Id);
         }
     }
 }
