@@ -149,11 +149,11 @@
                 }
 
                 var task = new ExtendDomainTask {
-                                                    LaunchDebugger = options.LaunchDebugger,
-                                                    WeaveDir = options.WeaveDir,
-                                                    Logger = new ConsoleLogger(options.Verbose),
-                                                    IgnorePEVerify = options.IgnorePeVerify
-                                                };
+                    LaunchDebugger = options.LaunchDebugger,
+                    WeaveDir = options.WeaveDir,
+                    Logger = new ConsoleLogger(options.Verbose),
+                    IgnorePEVerify = options.IgnorePeVerify
+                };
                 if (!task.Execute()) {
                     throw new CatchyException("Weaving failed");
                 }
@@ -208,19 +208,23 @@
         }
 
         private static void TryFindIgnoreConfigSetting(CommandLineOptions options) {
-            foreach (var fileName in Directory.GetFiles(options.WeaveDir).Where(fileName => fileName.EndsWith(".config"))) {
-                try {
-                    var configMap = new ExeConfigurationFileMap();
-                    configMap.ExeConfigFilename = fileName;
-                    var config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
-                    if (config.AppSettings.Settings.AllKeys.Contains("dashing:ignorepeverify")) {
-                        if (config.AppSettings.Settings["dashing:ignorepeverify"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase)) {
-                            options.IgnorePeVerify = true;
+            var directories = new[] { new DirectoryInfo(options.WeaveDir), new DirectoryInfo(Path.Combine(options.WeaveDir, 
+                options.WeaveDir.LastIndexOf("bin", StringComparison.InvariantCultureIgnoreCase) >= options.WeaveDir.Length - 4 ? "../" : "../../")), };
+            foreach (var directoryInfo in directories) {
+                foreach (var fileInfo in directoryInfo.GetFiles().Where(fileInfo => fileInfo.Name.EndsWith(".config"))) {
+                    try {
+                        var configMap = new ExeConfigurationFileMap();
+                        configMap.ExeConfigFilename = fileInfo.FullName;
+                        var config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+                        if (config.AppSettings.Settings.AllKeys.Contains("dashing:ignorepeverify")) {
+                            if (config.AppSettings.Settings["dashing:ignorepeverify"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase)) {
+                                options.IgnorePeVerify = true;
+                            }
                         }
                     }
-                }
-                catch {
-                    // do nothing ... probably not the type of config file we're expecting
+                    catch {
+                        // do nothing ... probably not the type of config file we're expecting
+                    }
                 }
             }
         }
@@ -529,7 +533,7 @@
             var dialectFactory = new DialectFactory();
             var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
             var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
-            
+
             // create database if not exists
             CreateDatabaseIfNotExists(connectionStringSettings, factory, dialect);
 
