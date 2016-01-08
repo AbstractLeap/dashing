@@ -80,41 +80,4 @@ Ok, that should have created your database as well as the tables. To use the dat
 Tell me more!
 =================
 
-We've designed Dashing with productivity and performance in mind. It attempts to make the regular
-Sql stuff as simple as possible. So, that's [getting data out](https://github.com/Polylytics/dashing/wiki/Selecting-Data), performing [CRUD](https://github.com/Polylytics/dashing/wiki/Saving-And-Deleting) operations as well as
-making code changes as simple as possible - that means strongly typed (for compile time errors and being re-factor friendly) as much
-as possible as well as a [simple tool](https://github.com/Polylytics/dashing/wiki/Dbm) for performing automatic migrations of the schema.
-
-### Some Implementation Details
-
-Nearly every ORM available makes use of some proxying technology in order to inject behaviour in to
-the domain entities. We make use of this type of functionality in several places. Unlike some we, however,
-use IL re-writing at compile time to inject behaviour in to your entities as opposed to proxying them
-at runtime. This lets us do some useful things:
-
-#### Implement Equals and GetHashCode
-
-This is basically a developer convenience as it means you don't have to implement this yourself. The 
-implementations are aware of auto-generated ID properties and, therefore, ensure that 2 entities
-with the same primary key return true for Equals as well as the same hashcode. On top of that, if
-the entity has not yet had its primary key generated the hashcode is generated using the default
-implementation and is not updated when the primary key is i.e. you wouldn't want a hashcode changing 
-for an instance in an IDictionary
-
-#### Strongly type Update queries
-
-See [Bulk Queries](https://github.com/Polylytics/dashing/wiki/Bulk-Queries) for details but this lets you write a strongly typed update query:
-
-	session.UpdateAsync<Post>(p => p.Viewed = true, p => p.PostId == 1);
-	
-#### Change Tracking
-
-We inject each property with change tracking behaviour so that each entity is aware of which properties
-have changed. This means, that when we call SaveAsync on an entity we can quickly determine which
-properties need adding to the Update query. Indeed, if nothing has changed, then a query is not executed 
-at all. 
-
-#### Collection instantiation
-
-As a convenience to developers we instantiate all ICollection properties, inside the constructor, within 
-an entity so that you don't have to!
+Further documentation is available in the (Wiki)[https://github.com/Polylytics/dashing/wiki]
