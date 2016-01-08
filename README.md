@@ -24,6 +24,10 @@ Features
 Getting Started
 =================
 
+Install the package via Nuget:
+
+	Install-Package Dashing
+
 Dashing is code first so simply create your domain models using POCOs e.g.
 
 	class Blog {
@@ -77,9 +81,9 @@ Tell me more!
 =================
 
 We've designed Dashing with productivity and performance in mind. It attempts to make the regular
-Sql stuff as simple as possible. So, that's [getting data out](queries/selecting.html), performing [CRUD](queries/cud.html) operations as well as
+Sql stuff as simple as possible. So, that's [getting data out](wiki/Selecting-Data), performing [CRUD](wiki/Saving-And-Deleting) operations as well as
 making code changes as simple as possible - that means strongly typed (for compile time errors and being re-factor friendly) as much
-as possible as well as a [simple tool](tools/dbm.html) for performing automatic migrations of the schema.
+as possible as well as a [simple tool](wiki/Dbm) for performing automatic migrations of the schema.
 
 ### Some Implementation Details
 
@@ -99,7 +103,7 @@ for an instance in an IDictionary
 
 #### Strongly type Update queries
 
-See [Bulk Queries](queries/bulk.html) for details but this lets you write a strongly typed update query:
+See [Bulk Queries](wiki/Bulk-Queries) for details but this lets you write a strongly typed update query:
 
 	session.UpdateAsync<Post>(p => p.Viewed = true, p => p.PostId == 1);
 	
