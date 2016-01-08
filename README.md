@@ -80,4 +80,4 @@ Ok, that should have created your database as well as the tables. To use the dat
 Tell me more!
 =================
 
-Further documentation is available in the (Wiki)[https://github.com/Polylytics/dashing/wiki]
+Further documentation is available in the [Wiki](https://github.com/Polylytics/dashing/wiki)
