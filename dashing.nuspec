@@ -1,21 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>0.2.23-alpha</version>
-        <title>Dashing ORM</title>
+        <version>1.0.0</version>
+        <title>Dashing</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
-        <projectUrl>http://polylytics.com/dashing</projectUrl>
+        <projectUrl>https://github.com/Polylytics/dashing</projectUrl>
         <iconUrl>http://polylytics.com/dashing/dashing-icon.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
-        <summary>More features than Dapper, less heavy than NHibernate</summary>
-        <releaseNotes>* 0.2.23-alpha ClickOnce
-* 0.2.18-alpha Publish targets
-* 0.2.2-alpha Bug Fix
-* 0.2.1-alpha Creates DB
-* 0.2.0-alpha Dashing over Cecil</releaseNotes>
+        <description>Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity while not sacrificing (too much) performance.</description>
+        <summary>Dashing is a simple to use mini ORM built on top of Dapper</summary>
+        <releaseNotes>* 1.0.0 Initial nuget.org release</releaseNotes>
         <copyright>© Polylytics Limited, 2015</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>

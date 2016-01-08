@@ -1,19 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing.Testing</id>
-        <version>2.0.0-alpha</version>
-        <title>Dashing testing support</title>
+        <version>2.0.0</version>
+        <title>Dashing Testing Support</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
-        <projectUrl>http://polylytics.com/dashing</projectUrl>
+        <projectUrl>https://github.com/Polylytics/dashing</projectUrl>
         <iconUrl>http://polylytics.com/dashing/dashing-icon.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Dashing is an object-relational mapper built on top of Dapper that aims to provide fantastic developer productivity without sacrificing performance</description>
+        <description>Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity while not sacrificing (too much) performance.</description>
         <summary>Provides Dashing-compatible mocks to make testing easier</summary>
-        <releaseNotes>* 2.0.0 - Dashing (cecil) release with in-memory engine
-* 1.1.0 - Added extra query method support
-* 1.0.0 - Our very first release. Be gentle.</releaseNotes>
+        <releaseNotes>* 2.0.0 - Dashing release with in-memory engine</releaseNotes>
         <copyright>© Polylytics Limited, 2015</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>
