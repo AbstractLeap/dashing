@@ -2,13 +2,11 @@
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Collections.Specialized;
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
-    using System.Linq;
-    using System.Reflection;
 
-    using Dashing.CodeGeneration;
     using Dashing.Engine;
     using Dashing.Events;
 
@@ -21,42 +19,38 @@
 
         private readonly ISessionFactory sessionFactory;
 
-        private readonly ICodeGenerator codeGenerator;
-
         private readonly DbProviderFactory dbProviderFactory;
 
-        private IGeneratedCodeManager codeManager;
-
-        public IMapper Mapper {
-            get {
+        public IMapper Mapper
+        {
+            get
+            {
                 return this.mapper;
             }
         }
 
-        public IEnumerable<IMap> Maps {
-            get {
+        public IEnumerable<IMap> Maps
+        {
+            get
+            {
                 return this.mappedTypes.Values;
             }
         }
 
         public IEngine Engine { get; private set; }
 
-        public IGeneratedCodeManager CodeManager {
-            get {
-                return this.codeManager ?? (this.codeManager = this.codeGenerator.Generate(this));
-            }
-        }
-
-        public ICollection<IEventListener> EventListeners {
-            get;
-            private set;
-        }
+        public ICollection<IEventListener> EventListeners { get; private set; }
 
         public EventHandlers EventHandlers { get; private set; }
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
-        protected ConfigurationBase(IEngine engine, ConnectionStringSettings connectionStringSettings, DbProviderFactory dbProviderFactory, IMapper mapper, ISessionFactory sessionFactory, ICodeGenerator codeGenerator) {
+        protected ConfigurationBase(
+            IEngine engine,
+            ConnectionStringSettings connectionStringSettings,
+            DbProviderFactory dbProviderFactory,
+            IMapper mapper,
+            ISessionFactory sessionFactory) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -77,19 +71,14 @@
                 throw new ArgumentNullException("sessionFactory");
             }
 
-            if (codeGenerator == null) {
-                throw new ArgumentNullException("codeGenerator");
-            }
-
             this.Engine = engine;
             this.Engine.Configuration = this;
             this.connectionStringSettings = connectionStringSettings;
             this.dbProviderFactory = dbProviderFactory;
             this.mapper = mapper;
             this.sessionFactory = sessionFactory;
-            this.codeGenerator = codeGenerator;
             this.mappedTypes = new Dictionary<Type, IMap>();
-            
+
             var eventListeners = new ObservableCollection<IEventListener>();
             eventListeners.CollectionChanged += this.EventListenersCollectionChanged;
             this.EventListeners = eventListeners;
@@ -97,7 +86,7 @@
             this.CompleteFailsSilentlyIfRejected = true;
         }
 
-        private void EventListenersCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+        private void EventListenersCollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
             // let's make this real simple, just invalidate the eventhandlers property
             this.EventHandlers.Invalidate(this.EventListeners);
         }
@@ -109,15 +98,14 @@
         }
 
         public IMap GetMap(Type type) {
-            return ConfigurationHelper.GetMap(type, this.mappedTypes, this.codeGenerator.Configuration);
+            return ConfigurationHelper.GetMap(type, this.mappedTypes);
         }
 
         public bool HasMap(Type type) {
-            return ConfigurationHelper.HasMap(type, this.mappedTypes, this.codeGenerator.Configuration);
+            return ConfigurationHelper.HasMap(type, this.mappedTypes);
         }
 
         private void Dirty() {
-            this.codeManager = null;
         }
 
         public ISession BeginSession() {
@@ -136,7 +124,7 @@
         }
 
         public ISession BeginSession(IDbConnection connection, IDbTransaction transaction) {
-            return this.sessionFactory.Create(this.Engine, connection, transaction: transaction, disposeConnection: false);
+            return this.sessionFactory.Create(this.Engine, connection, transaction, false);
         }
 
         public ISession BeginTransactionLessSession() {

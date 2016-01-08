@@ -1,13 +1,10 @@
 ﻿namespace Dashing.Engine.DML {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
 
     using Dapper;
 
@@ -145,7 +142,6 @@
                         }
                     }
                     else {
-
                         // this is IEnumerable.Contains method
                         if (exp.Method.DeclaringType == typeof(Enumerable)) {
                             // static method
@@ -166,7 +162,7 @@
                             else {
                                 memberExpr = exp.Arguments[0] as MemberExpression;
                             }
-                            
+
                             valuesExpr = exp.Object;
                         }
 
@@ -184,13 +180,19 @@
                                         var entityMap = this.config.GetMap(entityFetchType);
                                         var primaryKeyType = entityMap.PrimaryKey.Type;
                                         var param = Expression.Parameter(entityFetchType);
-                                        var selectExpr = Expression.Lambda(Expression.MakeMemberAccess(param, entityFetchType.GetProperty(entityMap.PrimaryKey.Name)), param).Compile();
-                                        var projectionMethod = typeof(Enumerable)
-                                            .GetMethods()
-                                            .First(m => m.Name == "Select" && m.GetParameters().Any(p => p.ParameterType.GetGenericArguments().Length == 2))
-                                            .MakeGenericMethod(entityFetchType, primaryKeyType);
+                                        var selectExpr =
+                                            Expression.Lambda(
+                                                Expression.MakeMemberAccess(param, entityFetchType.GetProperty(entityMap.PrimaryKey.Name)),
+                                                param).Compile();
+                                        var projectionMethod =
+                                            typeof(Enumerable).GetMethods()
+                                                              .First(
+                                                                  m =>
+                                                                  m.Name == "Select"
+                                                                  && m.GetParameters().Any(p => p.ParameterType.GetGenericArguments().Length == 2))
+                                                              .MakeGenericMethod(entityFetchType, primaryKeyType);
                                         //var projectionMethod = typeof(Enumerable).GetMethod("Select", new Type[] { typeof(IEnumerable<>).MakeGenericType(entityFetchType), typeof(Func<,>).MakeGenericType(entityFetchType, primaryKeyType) });
-                                        dynamicValue = projectionMethod.Invoke(null, new object[] { dynamicValue, selectExpr });
+                                        dynamicValue = projectionMethod.Invoke(null, new[] { dynamicValue, selectExpr });
                                     }
 
                                     valuesEl = this.AddParameter(dynamicValue);
@@ -278,16 +280,18 @@
                     memberExpr = exp.Arguments[1]; // c => c.Content == value()
                     var columnWithAnyExpression = exp.Arguments[0] as MemberExpression; // p.Comments
                     if (columnWithAnyExpression != null) {
-                            var columnType = columnWithAnyExpression.Type.GenericTypeArguments.First();
+                        var columnType = columnWithAnyExpression.Type.GenericTypeArguments.First();
 
                         // we use a new whereclausewriter to generate the inner statement
                         var innerSelectWriter = new SelectWriter(this.dialect, this.config);
-                        var selectQuery = Activator.CreateInstance(typeof(SelectQuery<>).MakeGenericType(columnType), new NonExecutingSelectQueryExecutor());
+                        var selectQuery = Activator.CreateInstance(
+                            typeof(SelectQuery<>).MakeGenericType(columnType),
+                            new NonExecutingSelectQueryExecutor());
                         var whereMethod = selectQuery.GetType().GetMethod("Where");
                         whereMethod.Invoke(selectQuery, new object[] { memberExpr });
                         var generateSqlMethod = innerSelectWriter.GetType().GetMethod("GenerateSql").MakeGenericMethod(columnType);
-                        var innerStatement = (SelectWriterResult)generateSqlMethod.Invoke(innerSelectWriter, new object[] { selectQuery, true });
-                    
+                        var innerStatement = (SelectWriterResult)generateSqlMethod.Invoke(innerSelectWriter, new[] { selectQuery, true });
+
                         // remove the columns from the expression
                         // TODO tell the select writer to not do this in the first place
                         var fromIdx = innerStatement.Sql.IndexOf(" from ");
@@ -304,7 +308,7 @@
                         this.ResetVariables();
                         var columnElement = (ColumnElement)this.Visit(columnWithAnyExpression); // this ensures we're joining the correct stuff
                         this.sqlElements.Enqueue(new StringElement("exists ("));
-                    
+
                         // add the reference back to the related column
                         var thisTinyBitOfSql = new StringBuilder(" and ");
                         var mapPrimaryKey = this.config.GetMap(columnWithAnyExpression.Expression.Type).PrimaryKey.DbName;
@@ -313,17 +317,21 @@
                         this.dialect.AppendQuotedName(thisTinyBitOfSql, mapPrimaryKey);
                         thisTinyBitOfSql.Append(" = ");
                         thisTinyBitOfSql.Append("i.");
-                        this.dialect.AppendQuotedName(thisTinyBitOfSql, this.config.GetMap(columnWithAnyExpression.Expression.Type).Columns[columnWithAnyExpression.Member.Name].ChildColumn.DbName);
+                        this.dialect.AppendQuotedName(
+                            thisTinyBitOfSql,
+                            this.config.GetMap(columnWithAnyExpression.Expression.Type).Columns[columnWithAnyExpression.Member.Name].ChildColumn
+                                                                                                                                    .DbName);
 
                         // add the parameters to this dictionary
-                        var paramPrefix = "l" + Guid.NewGuid().ToString("N").Substring(0, 8); // chances of clash inside nested Any queries ??? l is so that first letter is character
+                        var paramPrefix = "l" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                            // chances of clash inside nested Any queries ??? l is so that first letter is character
                         foreach (var param in innerStatement.Parameters.ParameterNames) {
                             // rename it 
                             var newName = paramPrefix + param;
                             innerStatement.Sql = innerStatement.Sql.Replace("@l_", "@" + paramPrefix + "l_");
                             this.parameters.Add(newName, innerStatement.Parameters.GetValue(param));
                         }
-                    
+
                         // finish off the sql
                         this.sqlElements.Enqueue(new StringElement(innerStatement.Sql + thisTinyBitOfSql));
                         this.sqlElements.Enqueue(new StringElement(")"));
@@ -347,11 +355,9 @@
                     if (propInfo != null) {
                         return this.AddParameter(propInfo.GetValue(null));
                     }
-                    else {
-                        var fieldInfo = exp.Member as FieldInfo;
-                        if (fieldInfo != null) {
-                            return this.AddParameter(fieldInfo.GetValue(null));
-                        }
+                    var fieldInfo = exp.Member as FieldInfo;
+                    if (fieldInfo != null) {
+                        return this.AddParameter(fieldInfo.GetValue(null));
                     }
 
                     // slow path
@@ -361,10 +367,11 @@
                 return null;
             }
 
-            var declaringType = exp.Expression.NodeType == ExpressionType.Convert ? ((UnaryExpression)exp.Expression).Operand.Type : exp.Expression.Type;
+            var declaringType = exp.Expression.NodeType == ExpressionType.Convert
+                                    ? ((UnaryExpression)exp.Expression).Operand.Type
+                                    : exp.Expression.Type;
             var isTopOfBinaryOrMethodCopy = this.isTopOfBinaryOrMethod;
-            if (isTopOfBinaryOrMethodCopy && this.config.HasMap(declaringType)
-                && this.config.GetMap(declaringType).PrimaryKey.Name == exp.Member.Name) {
+            if (isTopOfBinaryOrMethodCopy && this.config.HasMap(declaringType) && this.config.GetMap(declaringType).PrimaryKey.Name == exp.Member.Name) {
                 this.isPrimaryKeyAccess = true;
                 this.primaryKeyAccessType = declaringType;
             }
@@ -424,7 +431,7 @@
                     entityFetchType = propInfo.PropertyType;
                     return new ColumnElement(this.currentNode, fkName, exp.Expression.NodeType != ExpressionType.MemberAccess);
                 }
-                else if (this.config.HasMap(declaringType)) {
+                if (this.config.HasMap(declaringType)) {
                     if (this.config.GetMap(declaringType).PrimaryKey.Name == propInfo.Name) {
                         if (exp.Expression.NodeType == ExpressionType.MemberAccess) {
                             // e.Parent.ParentId == blah => get ParentId on e instead
@@ -436,24 +443,15 @@
                                 foreignKeyName,
                                 foreignKeyExpression.Expression.NodeType != ExpressionType.MemberAccess);
                         }
-                        else {
-                            // e.EntityId == blah
-                            return new ColumnElement(
-                                this.modifiedRootNode,
-                                this.config.GetMap(declaringType).Columns[propInfo.Name].DbName,
-                                true);
-                        }
+                        // e.EntityId == blah
+                        return new ColumnElement(this.modifiedRootNode, this.config.GetMap(declaringType).Columns[propInfo.Name].DbName, true);
                     }
-                    else {
-                        return new ColumnElement(
-                            this.currentNode,
-                            this.config.GetMap(declaringType).Columns[propInfo.Name].DbName,
-                            exp.Expression.NodeType != ExpressionType.MemberAccess);
-                    }
+                    return new ColumnElement(
+                        this.currentNode,
+                        this.config.GetMap(declaringType).Columns[propInfo.Name].DbName,
+                        exp.Expression.NodeType != ExpressionType.MemberAccess);
                 }
-                else {
-                    throw new NotImplementedException();
-                }
+                throw new NotImplementedException();
             }
 
             return null;
@@ -463,11 +461,11 @@
             if (!this.currentNode.Children.ContainsKey(propInfo.Name)) {
                 // create the node
                 var newNode = new FetchNode {
-                    Alias = "t_" + ++this.aliasCounter,
-                    IsFetched = false,
-                    Parent = this.currentNode,
-                    Column = this.config.GetMap(declaringType).Columns[propInfo.Name]
-                };
+                                                Alias = "t_" + ++this.aliasCounter,
+                                                IsFetched = false,
+                                                Parent = this.currentNode,
+                                                Column = this.config.GetMap(declaringType).Columns[propInfo.Name]
+                                            };
                 if (this.currentNode.Children.Any()) {
                     var i = 0;
                     var inserted = false;
@@ -605,7 +603,8 @@
                 }
                 else {
                     this.sqlElements.Enqueue(left);
-                    this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, isRightConstantExpression && ((ConstantElement)right).Value == null)));
+                    this.sqlElements.Enqueue(
+                        new StringElement(this.GetOperator(exp.NodeType, isRightConstantExpression && ((ConstantElement)right).Value == null)));
                     this.sqlElements.Enqueue(right);
                 }
 
@@ -679,7 +678,8 @@
 
         private string GetSql() {
             var sql = new StringBuilder();
-            while (this.sqlElements.Count > 1) { // this is one as there's a trailing and that we don't want
+            while (this.sqlElements.Count > 1) {
+                // this is one as there's a trailing and that we don't want
                 this.sqlElements.Dequeue().Append(sql, this.dialect);
             }
 

@@ -38,7 +38,9 @@
             query.Fetch(p => p.Author).Where(p => p.Author.HeightInMeters < 1);
             var sql = target.GenerateCountSql(query);
 
-            Assert.Equal("select count(1) from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where (t_1.[HeightInMeters] < @l_1)", sql.Sql);
+            Assert.Equal(
+                "select count(1) from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where (t_1.[HeightInMeters] < @l_1)",
+                sql.Sql);
         }
 
         [Fact]

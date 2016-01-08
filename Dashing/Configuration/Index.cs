@@ -20,28 +20,27 @@
         }
 
         private string GenerateName() {
-            return "idx_" + this.Map.Type.Name + "_"
-                   + string.Join("_", this.Columns.Select(c => c.Name));
+            return "idx_" + this.Map.Type.Name + "_" + string.Join("_", this.Columns.Select(c => c.Name));
         }
 
         /// <summary>
-        /// The name of the index
+        ///     The name of the index
         /// </summary>
         public string Name { get; private set; }
 
         /// <summary>
-        /// The map that the index belongs to
+        ///     The map that the index belongs to
         /// </summary>
         public IMap Map { get; private set; }
 
         /// <summary>
-        /// The list of columns that this index applies to
+        ///     The list of columns that this index applies to
         /// </summary>
         /// <remarks>This is used in generating the hashcode so be careful when modifying</remarks>
         public ICollection<IColumn> Columns { get; private set; }
 
         /// <summary>
-        /// Indicates if the index is a unique one
+        ///     Indicates if the index is a unique one
         /// </summary>
         public bool IsUnique { get; private set; }
 
@@ -56,8 +55,7 @@
             }
 
             return this.Name == otherIndex.Name && this.IsUnique == otherIndex.IsUnique
-                   && this.Columns.SequenceEqual(otherIndex.Columns, new IndexColumnComparer())
-                   && this.Map.Type.Name == otherIndex.Map.Type.Name;
+                   && this.Columns.SequenceEqual(otherIndex.Columns, new IndexColumnComparer()) && this.Map.Type.Name == otherIndex.Map.Type.Name;
         }
 
         public override int GetHashCode() {
@@ -75,7 +73,7 @@
         }
 
         public static bool operator ==(Index a, Index b) {
-            if (object.ReferenceEquals(a, b)) {
+            if (ReferenceEquals(a, b)) {
                 return true;
             }
 
@@ -83,8 +81,7 @@
                 return false;
             }
 
-            return a.Name == b.Name && a.IsUnique == b.IsUnique
-                   && a.Columns.SequenceEqual(b.Columns, new IndexColumnComparer())
+            return a.Name == b.Name && a.IsUnique == b.IsUnique && a.Columns.SequenceEqual(b.Columns, new IndexColumnComparer())
                    && a.Map.Type.Name == b.Map.Type.Name;
         }
 

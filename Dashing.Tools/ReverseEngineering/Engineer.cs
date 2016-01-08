@@ -4,9 +4,11 @@
     using System.Linq;
     using System.Reflection;
     using System.Reflection.Emit;
+
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;
+
     using DatabaseSchemaReader.DataSchema;
 
     public class Engineer : IEngineer {
@@ -15,12 +17,13 @@
         private ModuleBuilder moduleBuilder;
 
         private readonly IDictionary<string, Type> typeMap;
+
         private IReverseEngineeringConfiguration configuration;
 
         /// <summary>
-        /// maps table name to list of many to one columns
+        ///     maps table name to list of many to one columns
         /// </summary>
-        private IDictionary<string, IList<IColumn>> manyToOneColumns;
+        private readonly IDictionary<string, IList<IColumn>> manyToOneColumns;
 
         public Engineer(string extraPluralizationWords)
             : this(new DefaultConvention(extraPluralizationWords)) {
@@ -35,12 +38,8 @@
 
         private void InitTypeGenerator() {
             var assemblyName = new AssemblyName("Dashing.ReverseEngineering");
-            var assemblyBuilder =
-                AppDomain.CurrentDomain.DefineDynamicAssembly(
-                    assemblyName,
-                    AssemblyBuilderAccess.Run);
-            this.moduleBuilder =
-                assemblyBuilder.DefineDynamicModule(assemblyName.Name);
+            var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            this.moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
         }
 
         private Type GenerateType(string name) {
@@ -51,7 +50,12 @@
             return type;
         }
 
-        public IEnumerable<IMap> ReverseEngineer(DatabaseSchema schema, ISqlDialect sqlDialect, IEnumerable<string> tablesToIgnore, IAnswerProvider answerProvider, bool fixOneToOnes) {
+        public IEnumerable<IMap> ReverseEngineer(
+            DatabaseSchema schema,
+            ISqlDialect sqlDialect,
+            IEnumerable<string> tablesToIgnore,
+            IAnswerProvider answerProvider,
+            bool fixOneToOnes) {
             if (tablesToIgnore == null) {
                 tablesToIgnore = new string[0];
             }
@@ -79,10 +83,11 @@
 
         private void FindOneToOnes(IMap map, IAnswerProvider answerProvider) {
             foreach (var column in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne)) {
-                var otherMapCandidates = column.Value.ParentMap.Columns.Where(c => c.Value.Type == column.Value.Map.Type
-                    && (column.Value.ParentMap != map || c.Key != column.Key)).ToArray();
+                var otherMapCandidates =
+                    column.Value.ParentMap.Columns.Where(
+                        c => c.Value.Type == column.Value.Map.Type && (column.Value.ParentMap != map || c.Key != column.Key)).ToArray();
                 if (otherMapCandidates.Length == 0) {
-                    continue; // assume many to one
+                    continue;
                 }
                 else if (otherMapCandidates.Length == 1) {
                     column.Value.Relationship = RelationshipType.OneToOne; // one relationship coming back, assume one to one
@@ -93,16 +98,8 @@
                     var choices = otherMapCandidates.Select(c => new MultipleChoice<IColumn> { DisplayString = c.Key, Choice = c.Value }).ToList();
                     const string oneToOneText = "No matching column but one-to-one";
                     const string manyToOneText = "No matching column but many-to-one";
-                    choices.Add(
-                        new MultipleChoice<IColumn> {
-                                                        DisplayString = oneToOneText,
-                                                        Choice = new Column<string> { Name = "One to One" }
-                                                    });
-                    choices.Add(
-                        new MultipleChoice<IColumn> {
-                            DisplayString = manyToOneText,
-                            Choice = new Column<string> { Name = "Many to One" }
-                        });
+                    choices.Add(new MultipleChoice<IColumn> { DisplayString = oneToOneText, Choice = new Column<string> { Name = "One to One" } });
+                    choices.Add(new MultipleChoice<IColumn> { DisplayString = manyToOneText, Choice = new Column<string> { Name = "Many to One" } });
                     var oppositeColumn =
                         answerProvider.GetMultipleChoiceAnswer(
                             "The column " + column.Key + " on " + column.Value.Map.Table
@@ -128,8 +125,7 @@
             oneToManyColumn.Relationship = RelationshipType.OneToMany;
             oneToManyColumn.Map =
                 manyToOneColumn.Map.Configuration.GetMap(
-                    manyToOneReverseEngineeredColumn.TypeMap[
-                        manyToOneReverseEngineeredColumn.ForeignKeyTableName]);
+                    manyToOneReverseEngineeredColumn.TypeMap[manyToOneReverseEngineeredColumn.ForeignKeyTableName]);
             oneToManyColumn.ChildColumn = manyToOneColumn;
             return oneToManyColumn;
         }
@@ -152,8 +148,7 @@
             // try to find foreign keys
             var foreignKeys = new List<ForeignKey>();
             foreach (var foreignKey in table.ForeignKeys) {
-                var childColumn =
-                    map.Columns.Select(c => c.Value).First(c => c.DbName == foreignKey.Columns.First());
+                var childColumn = map.Columns.Select(c => c.Value).First(c => c.DbName == foreignKey.Columns.First());
                 foreignKeys.Add(new ForeignKey(childColumn.ParentMap, childColumn, foreignKey.Name));
             }
 
@@ -166,7 +161,12 @@
                     indexes.Add(
                         new Index(
                             map,
-                            index.Columns.Select(c => map.Columns[foreignKeys.Any(f => f.ChildColumn.DbName == c.Name) ? this.convention.PropertyNameForManyToOneColumnName(c.Name) : c.Name]).ToList(),
+                            index.Columns.Select(
+                                c =>
+                                map.Columns[
+                                    foreignKeys.Any(f => f.ChildColumn.DbName == c.Name)
+                                        ? this.convention.PropertyNameForManyToOneColumnName(c.Name)
+                                        : c.Name]).ToList(),
                             index.Name,
                             index.IsUnique));
                 }

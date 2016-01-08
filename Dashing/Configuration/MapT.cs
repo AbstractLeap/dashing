@@ -1,7 +1,6 @@
 namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
-    using System.Data.Linq.Mapping;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -39,7 +38,9 @@ namespace Dashing.Configuration {
 
                         var param = Expression.Parameter(typeof(T));
                         this.primaryKeyGetter =
-                            Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, this.PrimaryKey.Name), typeof(object)), param).Compile();
+                            Expression.Lambda<Func<T, object>>(
+                                Expression.Convert(Expression.Property(param, this.PrimaryKey.Name), typeof(object)),
+                                param).Compile();
                     }
                 }
             }
@@ -60,7 +61,8 @@ namespace Dashing.Configuration {
                         this.primaryKeySetter =
                             Expression.Lambda<Action<T, object>>(
                                 Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), Expression.Convert(valueParam, typeof(int))),
-                                new[] { param, valueParam }).Compile();
+                                param,
+                                valueParam).Compile();
                     }
                 }
             }
@@ -75,7 +77,9 @@ namespace Dashing.Configuration {
                         this.propertyGetters = new Dictionary<IColumn, Func<T, object>>();
                         foreach (var col in this.OwnedColumns(true)) {
                             var param = Expression.Parameter(typeof(T));
-                            var getter = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, col.Name), typeof(object)), param).Compile();
+                            var getter =
+                                Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, col.Name), typeof(object)), param)
+                                          .Compile();
                             this.propertyGetters.Add(col, getter);
                         }
                     }
@@ -95,10 +99,9 @@ namespace Dashing.Configuration {
                             var valueParam = Expression.Parameter(typeof(object));
                             var setter =
                                 Expression.Lambda<Action<T, object>>(
-                                    Expression.Assign(
-                                        Expression.Property(entityParam, col.Name),
-                                        Expression.Convert(valueParam, col.Type)),
-                                    new[] { entityParam, valueParam }).Compile();
+                                    Expression.Assign(Expression.Property(entityParam, col.Name), Expression.Convert(valueParam, col.Type)),
+                                    entityParam,
+                                    valueParam).Compile();
                             this.propertySetters.Add(col, setter);
                         }
                     }
@@ -131,13 +134,13 @@ namespace Dashing.Configuration {
             }
 
             var result = new Map<T> {
-                                  Table = map.Table,
-                                  Schema = map.Schema,
-                                  PrimaryKey = map.PrimaryKey,
-                                  Configuration = map.Configuration
+                                        Table = map.Table,
+                                        Schema = map.Schema,
+                                        PrimaryKey = map.PrimaryKey,
+                                        Configuration = map.Configuration
 
-                                  //// Indexes = map.Indexes
-                              };
+                                        //// Indexes = map.Indexes
+                                    };
             map.Columns.ToList().ForEach(c => result.Columns.Add(c.Key, c.Value));
             return result;
         }

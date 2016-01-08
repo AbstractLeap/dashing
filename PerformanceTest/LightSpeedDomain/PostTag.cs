@@ -1,79 +1,98 @@
-using System;
+namespace LightSpeed.Domain {
+    using System;
+    using System.CodeDom.Compiler;
+    using System.ComponentModel;
+    using System.Diagnostics;
 
-using Mindscape.LightSpeed;
-using Mindscape.LightSpeed.Validation;
+    using Mindscape.LightSpeed;
 
-namespace LightSpeed.Domain
-{
-  [Serializable]
-  [System.CodeDom.Compiler.GeneratedCode("LightSpeedModelGenerator", "1.0.0.0")]
-  [System.ComponentModel.DataObject]
-  [Table(IdColumnName="PostTagId")]
-  public partial class PostTag : Entity<int>
-  {
-    #region Fields
-  
-    private System.Nullable<int> _postId;
-    private System.Nullable<int> _tagId;
+    [Serializable]
+    [GeneratedCode("LightSpeedModelGenerator", "1.0.0.0")]
+    [DataObject]
+    [Table(IdColumnName = "PostTagId")]
+    public class PostTag : Entity<int> {
+        #region Fields
 
-    #endregion
-    
-    #region Field attribute and view names
-    
-    /// <summary>Identifies the PostId entity attribute.</summary>
-    public const string PostIdField = "PostId";
-    /// <summary>Identifies the TagId entity attribute.</summary>
-    public const string TagIdField = "TagId";
+        private int? _postId;
 
+        private int? _tagId;
 
-    #endregion
-    
-    #region Relationships
+        #endregion
 
-    [ReverseAssociation("PostTags")]
-    private readonly EntityHolder<Post> _post = new EntityHolder<Post>();
-    [ReverseAssociation("PostTags")]
-    private readonly EntityHolder<Tag> _tag = new EntityHolder<Tag>();
+        #region Field attribute and view names
 
+        /// <summary>Identifies the PostId entity attribute.</summary>
+        public const string PostIdField = "PostId";
 
-    #endregion
-    
-    #region Properties
+        /// <summary>Identifies the TagId entity attribute.</summary>
+        public const string TagIdField = "TagId";
 
-    [System.Diagnostics.DebuggerNonUserCode]
-    public Post Post
-    {
-      get { return Get(_post); }
-      set { Set(_post, value); }
+        #endregion
+
+        #region Relationships
+
+        [ReverseAssociation("PostTags")]
+        private readonly EntityHolder<Post> _post = new EntityHolder<Post>();
+
+        [ReverseAssociation("PostTags")]
+        private readonly EntityHolder<Tag> _tag = new EntityHolder<Tag>();
+
+        #endregion
+
+        #region Properties
+
+        [DebuggerNonUserCode]
+        public Post Post
+        {
+            get
+            {
+                return Get(_post);
+            }
+            set
+            {
+                Set(_post, value);
+            }
+        }
+
+        [DebuggerNonUserCode]
+        public Tag Tag
+        {
+            get
+            {
+                return Get(_tag);
+            }
+            set
+            {
+                Set(_tag, value);
+            }
+        }
+
+        [DebuggerNonUserCode]
+        public int? PostId
+        {
+            get
+            {
+                return Get(ref _postId, "PostId");
+            }
+            set
+            {
+                Set(ref _postId, value, "PostId");
+            }
+        }
+
+        [DebuggerNonUserCode]
+        public int? TagId
+        {
+            get
+            {
+                return Get(ref _tagId, "TagId");
+            }
+            set
+            {
+                Set(ref _tagId, value, "TagId");
+            }
+        }
+
+        #endregion
     }
-
-    [System.Diagnostics.DebuggerNonUserCode]
-    public Tag Tag
-    {
-      get { return Get(_tag); }
-      set { Set(_tag, value); }
-    }
-
-
-    [System.Diagnostics.DebuggerNonUserCode]
-    public System.Nullable<int> PostId
-    {
-      get { return Get(ref _postId, "PostId"); }
-      set { Set(ref _postId, value, "PostId"); }
-    }
-
-    [System.Diagnostics.DebuggerNonUserCode]
-    public System.Nullable<int> TagId
-    {
-      get { return Get(ref _tagId, "TagId"); }
-      set { Set(ref _tagId, value, "TagId"); }
-    }
-
-    #endregion
-  }
-
-
-
-
-
 }

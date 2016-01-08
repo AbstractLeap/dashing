@@ -4,6 +4,7 @@ namespace Dashing.Engine.Dialects {
     using System.Text;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
 
     public abstract class SqlDialectBase : ISqlDialect {
         protected char BeginQuoteCharacter { get; set; }
@@ -34,7 +35,7 @@ namespace Dashing.Engine.Dialects {
         protected void AppendColumnSpecificationWithoutName(StringBuilder sql, IColumn column, bool scriptDefault = true) {
             sql.Append(this.TypeName(column.DbType));
 
-            if (this.TypeTakesLength(column.DbType)) {
+            if (column.DbType.TypeTakesLength()) {
                 sql.Append("(");
                 if (column.MaxLength) {
                     sql.Append("max");
@@ -43,11 +44,10 @@ namespace Dashing.Engine.Dialects {
                     sql.Append(column.Length);
                 }
 
-
                 sql.Append(")");
             }
 
-            if (this.TypeTakesPrecisionAndScale(column.DbType)) {
+            if (column.DbType.TypeTakesPrecisionAndScale()) {
                 this.AppendPrecisionAndScale(sql, column.Precision, column.Scale);
             }
 
@@ -164,30 +164,6 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
-        public virtual bool TypeTakesLength(DbType type) {
-            switch (type) {
-                case DbType.AnsiString:
-                case DbType.AnsiStringFixedLength:
-                case DbType.Binary:
-                case DbType.String:
-                case DbType.StringFixedLength:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
-        public virtual bool TypeTakesPrecisionAndScale(DbType type) {
-            switch (type) {
-                case DbType.Decimal:
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
         public abstract string ChangeColumnName(IColumn fromColumn, IColumn toColumn);
 
         public abstract string ModifyColumn(IColumn fromColumn, IColumn toColumn);
@@ -227,6 +203,12 @@ namespace Dashing.Engine.Dialects {
         }
 
         public abstract string ChangeTableName(IMap @from, IMap to);
+
+        public string CreateDatabase(string databaseName) {
+            return "create database " + this.BeginQuoteCharacter + databaseName + this.EndQuoteCharacter;
+        }
+
+        public abstract string CheckDatabaseExists(string databaseName);
 
         public virtual string GetIdSql() {
             return "select @@identity id";

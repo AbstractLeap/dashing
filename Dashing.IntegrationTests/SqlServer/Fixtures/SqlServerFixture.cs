@@ -4,6 +4,7 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
+    using Dashing.Engine.Dialects;
     using Dashing.IntegrationTests.TestDomain;
     using Dashing.Tools;
     using Dashing.Tools.Migration;
@@ -23,14 +24,22 @@
 
             // load the data
             using (var transactionLessSession = this.config.BeginTransactionLessSession()) {
-            var migrator = new Migrator(
-                this.config.Engine.SqlDialect,
-                new CreateTableWriter(this.config.Engine.SqlDialect),
-                new AlterTableWriter(this.config.Engine.SqlDialect),
-                new DropTableWriter(this.config.Engine.SqlDialect),
-                new StatisticsProvider(null, this.config.Engine.SqlDialect));
-            IEnumerable<string> warnings, errors;
-            var createStatement = migrator.GenerateSqlDiff(new List<IMap>(), this.config.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
+                var dialect = new SqlServer2012Dialect();
+                var migrator = new Migrator(
+                    dialect,
+                    new CreateTableWriter(dialect),
+                    new AlterTableWriter(dialect),
+                    new DropTableWriter(dialect),
+                    new StatisticsProvider(null, dialect));
+                IEnumerable<string> warnings, errors;
+                var createStatement = migrator.GenerateSqlDiff(
+                    new List<IMap>(),
+                    this.config.Maps,
+                    null,
+                    new Mock<ILogger>().Object,
+                    new string[0],
+                    out warnings,
+                    out errors);
                 transactionLessSession.Dapper.Execute("create database " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute("use " + this.DatabaseName);
                 transactionLessSession.Dapper.Execute(createStatement);

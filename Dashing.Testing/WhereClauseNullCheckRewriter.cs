@@ -137,7 +137,8 @@
                                 Expression.Constant(null)));
                     }
                     else {
-                        this.nullCheckExpressions.Enqueue(Expression.NotEqual(Expression.Property(node.Expression, propInfo), Expression.Constant(null)));
+                        this.nullCheckExpressions.Enqueue(
+                            Expression.NotEqual(Expression.Property(node.Expression, propInfo), Expression.Constant(null)));
                     }
                 }
             }

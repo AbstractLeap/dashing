@@ -12,7 +12,9 @@
 
         private readonly MultipleFetchManyWithNonRootAndThenFetchSqlServerFixture multipleFetchManyWithNonRootAndThenFetchSqlServerFixture;
 
-        public FetchTests(SqlServerFixture data, MultipleFetchManyWithNonRootAndThenFetchSqlServerFixture multipleFetchManyWithNonRootAndThenFetchSqlServerFixture) {
+        public FetchTests(
+            SqlServerFixture data,
+            MultipleFetchManyWithNonRootAndThenFetchSqlServerFixture multipleFetchManyWithNonRootAndThenFetchSqlServerFixture) {
             this.fixture = data;
             this.multipleFetchManyWithNonRootAndThenFetchSqlServerFixture = multipleFetchManyWithNonRootAndThenFetchSqlServerFixture;
         }

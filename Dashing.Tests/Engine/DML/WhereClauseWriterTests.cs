@@ -10,18 +10,11 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Extensions;
-    using Dashing.Tests.CodeGeneration.Fixtures;
     using Dashing.Tests.TestDomain;
 
     using Xunit;
 
-    public class WhereClauseWriterTests : IClassFixture<GenerateCodeFixture> {
-        private readonly IGeneratedCodeManager codeManager;
-
-        public WhereClauseWriterTests(GenerateCodeFixture data) {
-            this.codeManager = data.CodeManager;
-        }
-
+    public class WhereClauseWriterTests {
         [Fact]
         public void NullLeftHandSideGetsGoodSql() {
             var target = MakeTarget();
@@ -215,9 +208,9 @@
         public void WhereEntityEqualsTrackedEntity() {
             // assemble
             var target = MakeTarget();
-            var post = this.codeManager.CreateTrackingInstance<Post>();
+            var post = new Post();
             post.PostId = 1;
-            this.codeManager.TrackInstance(post);
+            ((ITrackedEntity)post).EnableTracking();
             Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
@@ -232,7 +225,7 @@
         public void WhereEntityEqualsGeneratedEntity() {
             // assemble
             var target = MakeTarget();
-            var post = this.codeManager.CreateForeignKeyInstance<Post>();
+            var post = new Post();
             post.PostId = 1;
             Expression<Func<Post, bool>> whereClause = p => p == post;
 
@@ -420,7 +413,7 @@
         [Fact]
         public void WhereContainsRelatedEntity() {
             var target = MakeTarget();
-            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2} };
+            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
             Expression<Func<Post, bool>> pred = p => blogs.Contains(p.Blog);
             var actual = target.GenerateSql(new[] { pred }, null);
             Assert.Equal(" where [BlogId] in @l_1", actual.Sql);
@@ -678,7 +671,7 @@
             var target = MakeTarget();
             var dict = new Dictionary<string, string> { { "Foo", "Bar" } };
             Expression<Func<Post, bool>> pred = p => p.Content == dict["Foo"];
-            var actual = target.GenerateSql(new[] { pred}, null);
+            var actual = target.GenerateSql(new[] { pred }, null);
             Assert.Equal(" where ([Content] = @l_1)", actual.Sql);
         }
 

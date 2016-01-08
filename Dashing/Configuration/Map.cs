@@ -56,8 +56,10 @@ namespace Dashing.Configuration {
         /// </summary>
         public IDictionary<string, IColumn> Columns { get; private set; }
 
-        public IEnumerable<Index> Indexes {
-            get {
+        public IEnumerable<Index> Indexes
+        {
+            get
+            {
                 if (!this.hasSetIndexes && !this.hasAddedForeignKeyIndexes) {
                     // add in any indexes for the foreign keys in this map
                     foreach (var foreignKey in this.ForeignKeys) {
@@ -73,7 +75,8 @@ namespace Dashing.Configuration {
                 return this.indexes;
             }
 
-            set {
+            set
+            {
                 this.indexes = value.ToList();
                 this.hasSetIndexes = true;
             }
@@ -84,16 +87,23 @@ namespace Dashing.Configuration {
         }
 
         /// <summary>
-        /// Returns the foreign keys for this map
+        ///     Returns the foreign keys for this map
         /// </summary>
-        public IEnumerable<ForeignKey> ForeignKeys {
-            get {
+        public IEnumerable<ForeignKey> ForeignKeys
+        {
+            get
+            {
                 if (!this.hasSetForeignKeys && !this.hasCalculatedForeignKeys && this.foreignKeys == null) {
                     this.foreignKeys =
-                        this.Columns.Where(c => (c.Value.Relationship == RelationshipType.ManyToOne || c.Value.Relationship == RelationshipType.OneToOne) && !c.Value.IsIgnored)
+                        this.Columns.Where(
+                            c =>
+                            (c.Value.Relationship == RelationshipType.ManyToOne || c.Value.Relationship == RelationshipType.OneToOne)
+                            && !c.Value.IsIgnored)
                             .Select(
                                 c =>
-                                new ForeignKey(c.Value.Relationship == RelationshipType.ManyToOne ? c.Value.ParentMap : this.Configuration.GetMap(c.Value.Type), c.Value))
+                                new ForeignKey(
+                                    c.Value.Relationship == RelationshipType.ManyToOne ? c.Value.ParentMap : this.Configuration.GetMap(c.Value.Type),
+                                    c.Value))
                             .ToList();
                     hasCalculatedForeignKeys = true;
                 }
@@ -101,7 +111,8 @@ namespace Dashing.Configuration {
                 return this.foreignKeys;
             }
 
-            set {
+            set
+            {
                 this.foreignKeys = value.ToList();
                 this.hasSetForeignKeys = true;
             }

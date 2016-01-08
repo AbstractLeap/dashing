@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Engine.DML {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Linq.Expressions;
     using System.Text;
 
@@ -9,9 +8,8 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
-    using Dashing.Extensions;
 
-    internal class BaseWriter {
+    public class BaseWriter {
         protected internal ISqlDialect Dialect { get; set; }
 
         protected internal IConfiguration Configuration { get; set; }
@@ -32,7 +30,12 @@
             return result.Parameters;
         }
 
-        public bool AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql, FetchNode rootNode, Func<IColumn, FetchNode, string> aliasRewriter = null, Func<IColumn, FetchNode, string> nameRewriter = null) {
+        public bool AddOrderByClause<T>(
+            Queue<OrderClause<T>> orderClauses,
+            StringBuilder sql,
+            FetchNode rootNode,
+            Func<IColumn, FetchNode, string> aliasRewriter = null,
+            Func<IColumn, FetchNode, string> nameRewriter = null) {
             if (orderClauses.Count == 0) {
                 return false;
             }
@@ -46,7 +49,8 @@
                     sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode, out isRootPrimaryKeyClause));
                 }
                 else {
-                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode, aliasRewriter, nameRewriter, out isRootPrimaryKeyClause));
+                    sql.Append(
+                        orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode, aliasRewriter, nameRewriter, out isRootPrimaryKeyClause));
                 }
 
                 if (orderClauses.Count > 0) {

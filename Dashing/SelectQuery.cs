@@ -9,7 +9,8 @@ namespace Dashing {
 
     using Dashing.Extensions;
 
-    public class SelectQuery<T> : ISelectQuery<T> {
+    public class SelectQuery<T> : ISelectQuery<T>
+        where T : class, new() {
         private readonly ISelectQueryExecutor executor;
 
         public SelectQuery(ISelectQueryExecutor selectQueryExecutor) {
@@ -19,8 +20,7 @@ namespace Dashing {
             this.Fetches = new List<Expression>();
             this.OrderClauses = new Queue<OrderClause<T>>();
             this.WhereClauses = new List<Expression<Func<T, bool>>>();
-            this.CollectionFetches = new List<KeyValuePair<Expression, Stack<Expression>>>();
-            this.IsTracked = true;
+            this.CollectionFetches = new List<KeyValuePair<Expression, List<Expression>>>();
         }
 
         public Expression<Func<T, dynamic>> Projection { get; private set; }
@@ -31,7 +31,7 @@ namespace Dashing {
 
         public IList<Expression> Fetches { get; private set; }
 
-        public IList<KeyValuePair<Expression, Stack<Expression>>> CollectionFetches { get; private set; }
+        public IList<KeyValuePair<Expression, List<Expression>>> CollectionFetches { get; private set; }
 
         public Queue<OrderClause<T>> OrderClauses { get; private set; }
 
@@ -44,8 +44,6 @@ namespace Dashing {
         public bool IsForUpdate { get; private set; }
 
         public bool FetchAllProperties { get; private set; }
-
-        public bool IsTracked { get; private set; }
 
         public bool HasFetches() {
             return this.Fetches.Any() || this.CollectionFetches.Any();
@@ -78,16 +76,6 @@ namespace Dashing {
 
         public ISelectQuery<T> ForUpdate() {
             this.IsForUpdate = true;
-            return this;
-        }
-
-        public ISelectQuery<T> AsTracked() {
-            this.IsTracked = true;
-            return this;
-        }
-
-        public ISelectQuery<T> AsNonTracked() {
-            this.IsTracked = false;
             return this;
         }
 

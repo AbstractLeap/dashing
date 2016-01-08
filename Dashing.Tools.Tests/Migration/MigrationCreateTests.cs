@@ -1,7 +1,9 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
+    using System;
     using System.Collections.Generic;
     using System.Configuration;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
@@ -20,10 +22,17 @@
             var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                new IMap[] { },
+                config.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
             Assert.Equal(
-                "create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime not null default (current_timestamp));\r\n",
-                script);
+                "create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime not null default (current_timestamp));",
+                script.Trim());
         }
 
         [Fact]
@@ -33,11 +42,20 @@
             var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
-            Assert.Equal(@"create table [Categories] ([CategoryId] int not null identity(1,1) primary key, [ParentId] int null, [Name] nvarchar(255) null);
+            var script = migrator.GenerateSqlDiff(
+                new IMap[] { },
+                config.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
+            Assert.Equal(Regex.Replace(@"create table [Categories] ([CategoryId] int not null identity(1,1) primary key, [ParentId] int null, [Name] nvarchar(255) null);
 alter table [Categories] add constraint fk_Category_Category_Parent foreign key ([ParentId]) references [Categories]([CategoryId]);
-create index [idx_Category_Parent] on [Categories] ([ParentId]);
-", script);
+create index [idx_Category_Parent] on [Categories] ([ParentId]);",
+                @"(?<!\r)\n",
+                Environment.NewLine),
+                script.Trim());
         }
 
         [Fact]
@@ -47,13 +65,22 @@ create index [idx_Category_Parent] on [Categories] ([ParentId]);
             var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
-            Assert.Equal(@"create table [Pairs] ([PairId] int not null identity(1,1) primary key, [ReferencesId] int null, [ReferencedById] int null);
+            var script = migrator.GenerateSqlDiff(
+                new IMap[] { },
+                config.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
+            Assert.Equal(Regex.Replace(@"create table [Pairs] ([PairId] int not null identity(1,1) primary key, [ReferencesId] int null, [ReferencedById] int null);
 alter table [Pairs] add constraint fk_Pair_Pair_References foreign key ([ReferencesId]) references [Pairs]([PairId]);
 alter table [Pairs] add constraint fk_Pair_Pair_ReferencedBy foreign key ([ReferencedById]) references [Pairs]([PairId]);
 create index [idx_Pair_References] on [Pairs] ([ReferencesId]);
-create index [idx_Pair_ReferencedBy] on [Pairs] ([ReferencedById]);
-", script);
+create index [idx_Pair_ReferencedBy] on [Pairs] ([ReferencedById]);",
+                @"(?<!\r)\n",
+                Environment.NewLine),
+                script.Trim());
         }
 
         [Fact]
@@ -64,15 +91,23 @@ create index [idx_Pair_ReferencedBy] on [Pairs] ([ReferencedById]);
             var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
-            Assert.Equal(@"create table [OneToOneLefts] ([OneToOneLeftId] int not null identity(1,1) primary key, [RightId] int null, [Name] nvarchar(255) null);
+            var script = migrator.GenerateSqlDiff(
+                new IMap[] { },
+                config.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
+            Assert.Equal(Regex.Replace(@"create table [OneToOneLefts] ([OneToOneLeftId] int not null identity(1,1) primary key, [RightId] int null, [Name] nvarchar(255) null);
 create table [OneToOneRights] ([OneToOneRightId] int not null identity(1,1) primary key, [LeftId] int null, [Name] nvarchar(255) null);
 alter table [OneToOneLefts] add constraint fk_OneToOneLeft_OneToOneRight_Right foreign key ([RightId]) references [OneToOneRights]([OneToOneRightId]);
 alter table [OneToOneRights] add constraint fk_OneToOneRight_OneToOneLeft_Left foreign key ([LeftId]) references [OneToOneLefts]([OneToOneLeftId]);
 create index [idx_OneToOneLeft_Right] on [OneToOneLefts] ([RightId]);
-create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);
-",
-                script);
+create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);",
+                @"(?<!\r)\n",
+                Environment.NewLine),
+                script.Trim());
         }
 
         [Fact]
@@ -82,8 +117,15 @@ create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);
             var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
             IEnumerable<string> warnings;
-            var script = migrator.GenerateSqlDiff(new IMap[] { }, config.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
-            Assert.Equal(@"create table [Blogs] ([BlogId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [CreateDate] datetime not null default (current_timestamp), [Description] nvarchar(255) null);
+            var script = migrator.GenerateSqlDiff(
+                new IMap[] { },
+                config.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
+            Assert.Equal(Regex.Replace(@"create table [Blogs] ([BlogId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [CreateDate] datetime not null default (current_timestamp), [Description] nvarchar(255) null);
 create table [Categories] ([CategoryId] int not null identity(1,1) primary key, [ParentId] int null, [Name] nvarchar(255) null);
 create table [Comments] ([CommentId] int not null identity(1,1) primary key, [Content] nvarchar(255) null, [PostId] int null, [UserId] int null, [CommentDate] datetime not null default (current_timestamp));
 create table [Likes] ([LikeId] int not null identity(1,1) primary key, [UserId] int null, [CommentId] int null);
@@ -120,16 +162,18 @@ create index [idx_Pair_ReferencedBy] on [Pairs] ([ReferencedById]);
 create index [idx_Post_Author] on [Posts] ([AuthorId]);
 create index [idx_Post_Blog] on [Posts] ([BlogId]);
 create index [idx_PostTag_Post] on [PostTags] ([PostId]);
-create index [idx_PostTag_Tag] on [PostTags] ([TagId]);
-",
-                script);
+create index [idx_PostTag_Tag] on [PostTags] ([TagId]);",
+                @"(?<!\r)\n",
+                Environment.NewLine),
+                script.Trim());
         }
 
         private static Migrator MakeMigrator(IConfiguration config) {
             var mockStatisticsProvider = new Mock<IStatisticsProvider>();
             mockStatisticsProvider.Setup(s => s.GetStatistics(It.IsAny<IEnumerable<IMap>>()))
                                   .Returns(config.Maps.ToDictionary(m => m.Type.Name, m => new Statistics()));
-            var migrator = new Migrator(new SqlServerDialect(),
+            var migrator = new Migrator(
+                new SqlServerDialect(),
                 new CreateTableWriter(new SqlServerDialect()),
                 new AlterTableWriter(new SqlServerDialect()),
                 new DropTableWriter(new SqlServerDialect()),
@@ -137,8 +181,10 @@ create index [idx_PostTag_Tag] on [PostTags] ([TagId]);
             return migrator;
         }
 
-        private static ConnectionStringSettings ConnectionString {
-            get {
+        private static ConnectionStringSettings ConnectionString
+        {
+            get
+            {
                 return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
             }
         }

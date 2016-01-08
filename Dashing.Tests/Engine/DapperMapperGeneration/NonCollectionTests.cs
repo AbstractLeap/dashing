@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tests.Engine.DapperMapperGeneration {
     using System;
     using System.Configuration;
+    using System.Linq;
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
@@ -33,28 +34,33 @@
             Assert.Null(post.Blog);
         }
 
+        [Fact]
+        public void FetchedEntitiesHaveTrackingEnabled() {
+            var func = GenerateSingleMapper();
+            var post = new Post { PostId = 1 };
+            var blog = new Blog { BlogId = 2 };
+            var result = ((Func<object[], Post>)func)(new object[] { post, blog });
+            Assert.True(((ITrackedEntity)result).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)result.Blog).IsTrackingEnabled());
+        }
+
+        [Fact]
+        public void EnableTrackingCalledLast() {
+            var func = GenerateSingleMapper();
+            var post1 = new Post { PostId = 1 };
+            var blog1 = new Blog { BlogId = 2 };
+            var post = ((Func<object[], Post>)func)(new object[] { post1, blog1 });
+            Assert.False(((ITrackedEntity)post).GetDirtyProperties().Any());
+        }
+
         private static Delegate GenerateSingleMapper() {
             var config = new CustomConfig();
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mockCodeManager = GetMockCodeManager();
-            var mapper = new DapperMapperGenerator(mockCodeManager.Object, config);
-            var func = mapper.GenerateNonCollectionMapper<Post>(result.FetchTree, false);
+            var mapper = new NonCollectionMapperGenerator(config);
+            var func = mapper.GenerateNonCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
-        }
-
-        private static Mock<IGeneratedCodeManager> GetMockCodeManager() {
-            var mockCodeManager = new Mock<IGeneratedCodeManager>();
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Post))).Returns(typeof(Post));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Blog))).Returns(typeof(Blog));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(Comment))).Returns(typeof(Comment));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(typeof(User))).Returns(typeof(User));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Post)))).Returns(typeof(Post));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Blog)))).Returns(typeof(Blog));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(Comment)))).Returns(typeof(Comment));
-            mockCodeManager.Setup(c => c.GetForeignKeyType(It.Is<Type>(t => t == typeof(User)))).Returns(typeof(User));
-            return mockCodeManager;
         }
 
         [Fact]
@@ -65,6 +71,30 @@
             var author = new User { UserId = 3 };
             var resultComment = ((Func<object[], Comment>)func)(new object[] { comment, post, author });
             Assert.Equal(3, resultComment.Post.Author.UserId);
+        }
+
+        [Fact]
+        public void MultiFetchNoCollectionHasTrackingEnabled() {
+            var func = GenerateMultipleNoCollectionMapper();
+            var comment = new Comment();
+            var post = new Post { PostId = 1 };
+            var author = new User { UserId = 3 };
+            var resultComment = ((Func<object[], Comment>)func)(new object[] { comment, post, author });
+            Assert.True(((ITrackedEntity)resultComment).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)resultComment.Post).IsTrackingEnabled());
+            Assert.True(((ITrackedEntity)resultComment.Post.Author).IsTrackingEnabled());
+        }
+
+        [Fact]
+        public void MultiFetchNoCollectionHasTrackingEnabledLast() {
+            var func = GenerateMultipleNoCollectionMapper();
+            var comment = new Comment();
+            var post = new Post { PostId = 1 };
+            var author = new User { UserId = 3 };
+            var resultComment = ((Func<object[], Comment>)func)(new object[] { comment, post, author });
+            Assert.False(((ITrackedEntity)resultComment).GetDirtyProperties().Any());
+            Assert.False(((ITrackedEntity)resultComment.Post).GetDirtyProperties().Any());
+            Assert.False(((ITrackedEntity)resultComment.Post.Author).GetDirtyProperties().Any());
         }
 
         [Fact]
@@ -83,9 +113,8 @@
             var selectQuery = new SelectQuery<Comment>(new Mock<ISelectQueryExecutor>().Object).Fetch(c => c.Post.Author) as SelectQuery<Comment>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
-            var mockCodeManager = GetMockCodeManager();
-            var mapper = new DapperMapperGenerator(mockCodeManager.Object, config);
-            var func = mapper.GenerateNonCollectionMapper<Comment>(result.FetchTree, false);
+            var mapper = new NonCollectionMapperGenerator(config);
+            var func = mapper.GenerateNonCollectionMapper<Comment>(result.FetchTree);
             return func.Item1;
         }
 

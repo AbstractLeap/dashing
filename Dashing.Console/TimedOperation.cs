@@ -12,7 +12,8 @@
         }
 
         public TimedOperation(string format, params object[] args)
-            : this(string.Format(format, args)) { }
+            : this(string.Format(format, args)) {
+        }
 
         public void Dispose() {
             this.Stopwatch.Stop();

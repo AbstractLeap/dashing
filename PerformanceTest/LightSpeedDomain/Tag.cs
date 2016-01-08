@@ -1,60 +1,62 @@
-using System;
+namespace LightSpeed.Domain {
+    using System;
+    using System.CodeDom.Compiler;
+    using System.ComponentModel;
+    using System.Diagnostics;
 
-using Mindscape.LightSpeed;
-using Mindscape.LightSpeed.Validation;
+    using Mindscape.LightSpeed;
+    using Mindscape.LightSpeed.Validation;
 
-namespace LightSpeed.Domain
-{
-  [Serializable]
-  [System.CodeDom.Compiler.GeneratedCode("LightSpeedModelGenerator", "1.0.0.0")]
-  [System.ComponentModel.DataObject]
-  [Table(IdColumnName="TagId")]
-  public partial class Tag : Entity<int>
-  {
-    #region Fields
-  
-    [ValidateLength(0, 255)]
-    private string _content;
+    [Serializable]
+    [GeneratedCode("LightSpeedModelGenerator", "1.0.0.0")]
+    [DataObject]
+    [Table(IdColumnName = "TagId")]
+    public class Tag : Entity<int> {
+        #region Fields
 
-    #endregion
-    
-    #region Field attribute and view names
-    
-    /// <summary>Identifies the Content entity attribute.</summary>
-    public const string ContentField = "Content";
+        [ValidateLength(0, 255)]
+        private string _content;
 
+        #endregion
 
-    #endregion
-    
-    #region Relationships
+        #region Field attribute and view names
 
-    [ReverseAssociation("Tag")]
-    private readonly EntityCollection<PostTag> _postTags = new EntityCollection<PostTag>();
+        /// <summary>Identifies the Content entity attribute.</summary>
+        public const string ContentField = "Content";
 
+        #endregion
 
-    #endregion
-    
-    #region Properties
+        #region Relationships
 
-    [System.Diagnostics.DebuggerNonUserCode]
-    public EntityCollection<PostTag> PostTags
-    {
-      get { return Get(_postTags); }
+        [ReverseAssociation("Tag")]
+        private readonly EntityCollection<PostTag> _postTags = new EntityCollection<PostTag>();
+
+        #endregion
+
+        #region Properties
+
+        [DebuggerNonUserCode]
+        public EntityCollection<PostTag> PostTags
+        {
+            get
+            {
+                return Get(_postTags);
+            }
+        }
+
+        [DebuggerNonUserCode]
+        public string Content
+        {
+            get
+            {
+                return Get(ref _content, "Content");
+            }
+            set
+            {
+                Set(ref _content, value, "Content");
+            }
+        }
+
+        #endregion
     }
-
-
-    [System.Diagnostics.DebuggerNonUserCode]
-    public string Content
-    {
-      get { return Get(ref _content, "Content"); }
-      set { Set(ref _content, value, "Content"); }
-    }
-
-    #endregion
-  }
-
-
-
-
-
 }

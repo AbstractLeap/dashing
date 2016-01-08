@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tests {
     using System.Data;
 
+    using Dashing.Configuration;
     using Dashing.Engine;
     using Dashing.Tests.TestDomain;
 
@@ -23,7 +24,7 @@
         }
 
         private ISession GetDashing() {
-            return new Session(this.mockEngine.Object, this.connection.Object, this.transaction.Object);
+            return new Session(this.mockEngine.Object, new SessionState(new Mock<IConfiguration>().Object, connection.Object, transaction.Object));
         }
 
         [Fact]

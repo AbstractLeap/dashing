@@ -14,7 +14,7 @@
 
         public virtual IList<Plan> Plans { get; set; }
 
-        public virtual IList<Reference> ApplicationReferences { get; set; } 
+        public virtual IList<Reference> ApplicationReferences { get; set; }
     }
 
     public class Reference {
@@ -33,6 +33,8 @@
 
     public class Person {
         public virtual int PersonId { get; set; }
+
+        public string Name { get; set; }
     }
 
     public class Plan {

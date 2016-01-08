@@ -6,8 +6,8 @@ namespace PerformanceTest.Tests.Dashing {
     using PerformanceTest.Domain;
 
     internal class DashingConfiguration : DefaultConfiguration {
-        public DashingConfiguration(ConnectionStringSettings connectionStringSettings)
-            : base(connectionStringSettings) {
+        public DashingConfiguration()
+            : base(new ConnectionStringSettings("Default", "Data Source=.;Initial Catalog=tempdb;Integrated Security=True", "System.Data.SqlClient")) {
             this.AddNamespaceOf<Post>();
         }
     }

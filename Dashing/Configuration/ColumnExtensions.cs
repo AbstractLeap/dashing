@@ -101,7 +101,7 @@
         }
 
         /// <summary>
-        /// Specifies that a column should have it's length set to Max (if true)
+        ///     Specifies that a column should have it's length set to Max (if true)
         /// </summary>
         /// <param name="column"></param>
         /// <param name="isMax"></param>
@@ -140,7 +140,7 @@
         }
 
         /// <summary>
-        /// Sets the db default value for this column
+        ///     Sets the db default value for this column
         /// </summary>
         /// <param name="column"></param>
         /// <param name="defaultValue"></param>
@@ -235,7 +235,7 @@
         }
 
         /// <summary>
-        /// Specifies the child column on a collection property
+        ///     Specifies the child column on a collection property
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TCollection"></typeparam>
@@ -255,7 +255,7 @@
         }
 
         /// <summary>
-        /// Specifies the opposite column on a one to one relationship
+        ///     Specifies the opposite column on a one to one relationship
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TOther"></typeparam>

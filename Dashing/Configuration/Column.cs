@@ -32,15 +32,18 @@
         /// <summary>
         ///     Gets or sets the db type.
         /// </summary>
-        public DbType DbType {
-            get {
+        public DbType DbType
+        {
+            get
+            {
                 return (this.Relationship == RelationshipType.ManyToOne || this.Relationship == RelationshipType.OneToOne)
-                    && this.Map.Configuration.HasMap(this.Type)
-                    ?  this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType 
-                    : this.dbType;
+                       && this.Map.Configuration.HasMap(this.Type)
+                           ? this.Map.Configuration.GetMap(this.Type).PrimaryKey.DbType
+                           : this.dbType;
             }
 
-            set {
+            set
+            {
                 this.dbType = value;
             }
         }
@@ -72,13 +75,16 @@
         /// <summary>
         ///     The default value for the db column
         /// </summary>
-        public string Default {
-            get {
+        public string Default
+        {
+            get
+            {
                 return this.defaultValue
                        ?? (this.IsPrimaryKey || this.Relationship != RelationshipType.None ? null : this.DbType.DefaultFor(this.IsNullable));
             }
 
-            set {
+            set
+            {
                 this.defaultValue = value;
             }
         }
@@ -119,8 +125,10 @@
 
         private readonly object childColumnLock = new object();
 
-        public IColumn ChildColumn {
-            get {
+        public IColumn ChildColumn
+        {
+            get
+            {
                 if (this.Relationship != RelationshipType.OneToMany) {
                     throw new InvalidOperationException("You should only access the ChildColumn on a OneToMany property");
                 }
@@ -139,7 +147,10 @@
                             }
                             else {
                                 // map by convention
-                                var possibleColumns = this.Map.Configuration.GetMap(childType).Columns.Where(c => c.Value.Type == parentType && !c.Value.IsIgnored).ToList();
+                                var possibleColumns =
+                                    this.Map.Configuration.GetMap(childType)
+                                        .Columns.Where(c => c.Value.Type == parentType && !c.Value.IsIgnored)
+                                        .ToList();
                                 if (possibleColumns.Count == 1) {
                                     this.childColumn = possibleColumns.First().Value;
                                 }
@@ -162,7 +173,8 @@
                 return this.childColumn;
             }
 
-            set {
+            set
+            {
                 this.childColumn = value;
             }
         }
@@ -175,8 +187,10 @@
 
         internal string OppositeColumnName { get; set; }
 
-        public IColumn OppositeColumn {
-            get {
+        public IColumn OppositeColumn
+        {
+            get
+            {
                 if (this.Relationship != RelationshipType.OneToOne) {
                     throw new InvalidOperationException("An OppositeColumn only exists on a OneToOne relationship");
                 }
@@ -188,20 +202,21 @@
                                 this.oppositeColumn = this.Map.Configuration.GetMap(this.Type).Columns[this.OppositeColumnName];
                             }
                             else {
-                                var candidates = this.Map.Configuration.GetMap(this.Type).Columns.Where(c => c.Value.Type == this.Map.Type && c.Value != this && !c.Value.IsIgnored).ToArray();
+                                var candidates =
+                                    this.Map.Configuration.GetMap(this.Type)
+                                        .Columns.Where(c => c.Value.Type == this.Map.Type && c.Value != this && !c.Value.IsIgnored)
+                                        .ToArray();
                                 if (candidates.Length == 0) {
                                     throw new InvalidOperationException(
                                         "Column " + this.Name + " on " + this.Map.Type.FullName
                                         + " is set to OneToOne but there is no matching column on type " + this.Type.FullName);
                                 }
-                                else if (candidates.Length > 1) {
+                                if (candidates.Length > 1) {
                                     throw new InvalidOperationException(
                                         "The type \"" + this.Type.FullName + "\" has more than one property of type " + this.Map.Type.FullName
                                         + ". Please specify which property this column maps to using IConfiguration.Setup().Property().MapsTo()");
                                 }
-                                else {
-                                    this.oppositeColumn = candidates.First().Value;
-                                }
+                                this.oppositeColumn = candidates.First().Value;
                             }
                         }
                     }
@@ -210,7 +225,8 @@
                 return this.oppositeColumn;
             }
 
-            set {
+            set
+            {
                 this.oppositeColumn = value;
             }
         }
@@ -249,12 +265,14 @@
                                      IsIgnored = column.IsIgnored,
                                      IsExcludedByDefault = column.IsExcludedByDefault,
                                      FetchId = column.FetchId,
-                                     Relationship = column.Relationship,
+                                     Relationship = column.Relationship
                                  };
         }
 
-        public IMap ParentMap {
-            get {
+        public IMap ParentMap
+        {
+            get
+            {
                 if (this.Relationship != RelationshipType.ManyToOne) {
                     throw new InvalidOperationException("A ParentMap only exists on a ManyToOne relationship");
                 }

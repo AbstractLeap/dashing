@@ -54,7 +54,8 @@
                     prop.SetValue(obj, new Map<string>());
                 }
                 else {
-                    throw new Exception(string.Format("Unexpected type {0} when trying to populate {1}.{2}", prop.PropertyType.Name, typeof(T).Name, prop.Name));
+                    throw new Exception(
+                        string.Format("Unexpected type {0} when trying to populate {1}.{2}", prop.PropertyType.Name, typeof(T).Name, prop.Name));
                 }
             }
 

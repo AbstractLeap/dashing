@@ -55,7 +55,7 @@
         public void AppendColumnSpecificationAppendsNameAndTypeAndNull() {
             var sb = new StringBuilder();
             var col = new Column<int> { DbName = "foo", DbType = DbType.Int32, IsNullable = true };
-                // MJ should this throw an InvalidOperationException - seems nasty to have nullable db col with non nullable CLR type
+            // MJ should this throw an InvalidOperationException - seems nasty to have nullable db col with non nullable CLR type
             var target = this.MakeTarget();
 
             target.AppendColumnSpecification(sb, col);
@@ -113,7 +113,8 @@
 
         private class TestDialect : SqlDialectBase {
             public TestDialect()
-                : base('<', '>') {}
+                : base('<', '>') {
+            }
 
             public override string ChangeColumnName(IColumn fromColumn, IColumn toColumn) {
                 throw new NotImplementedException();
@@ -140,6 +141,10 @@
             }
 
             public override string ChangeTableName(IMap @from, IMap to) {
+                throw new NotImplementedException();
+            }
+
+            public override string CheckDatabaseExists(string databaseName) {
                 throw new NotImplementedException();
             }
 

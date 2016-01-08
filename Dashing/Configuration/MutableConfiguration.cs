@@ -5,7 +5,8 @@ namespace Dashing.Configuration {
 
     public class MutableConfiguration : DefaultConfiguration {
         public MutableConfiguration(ConnectionStringSettings connectionStringSettings)
-            : base(connectionStringSettings) { }
+            : base(connectionStringSettings) {
+        }
 
         public new IConfiguration Add<T>() {
             return base.Add<T>();

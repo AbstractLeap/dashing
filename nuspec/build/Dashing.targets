@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="DashingDomainExtension" AfterTargets="AfterBuild">
+    <Exec Command="dbm.exe -w -d &quot;$(MSBuildProjectDirectory)\$(OutputPath)\&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)../tools" />
+  </Target>
+  
+  <!-- Support Web App Publishing -->
+  <Target Name="DashingDomainPublishExtension" AfterTargets="CopyAllFilesToSingleFolderForPackage">
+      <PropertyGroup>
+        <DashingPublishTempDirectory>$(MSBuildProjectDirectory)\$(OutputPath)\</DashingPublishTempDirectory>
+      </PropertyGroup>
+      <Message Condition="Exists('$(MSBuildProjectDirectory)\obj\$(Configuration)\Package\PackageTmp\bin\')" Text="PackageTmp found with $(MSBuildProjectDirectory)\obj\$(Configuration)\Package\PackageTmp\bin\\" />
+      <PropertyGroup>
+        <DashingPublishTempDirectory Condition="Exists('$(MSBuildProjectDirectory)\obj\$(Configuration)\Package\PackageTmp\bin\')">$(MSBuildProjectDirectory)\obj\$(Configuration)\Package\PackageTmp\bin\\</DashingPublishTempDirectory>
+      </PropertyGroup>
+      <Message Condition="'$(_PackageTempDir)'!='' AND Exists('$(MSBuildProjectDirectory)\$(_PackageTempDir)')" Text="_PackageTempDir found with $(MSBuildProjectDirectory)\$(_PackageTempDir)" />
+      <Message Condition="'$(_PackageTempDir)'!='' AND !Exists('$(MSBuildProjectDirectory)\$(_PackageTempDir)')" Text="_PackageTempDir found with $(_PackageTempDir)" />
+      <PropertyGroup>
+        <DashingPublishTempDirectory Condition="'$(_PackageTempDir)'!='' AND Exists('$(MSBuildProjectDirectory)\$(_PackageTempDir)')">$(MSBuildProjectDirectory)\$(_PackageTempDir)\bin\\</DashingPublishTempDirectory>
+      </PropertyGroup>
+      <PropertyGroup>
+        <DashingPublishTempDirectory Condition="'$(_PackageTempDir)'!='' AND !Exists('$(MSBuildProjectDirectory)\$(_PackageTempDir)')">$(_PackageTempDir)\bin\\</DashingPublishTempDirectory>
+      </PropertyGroup>
+      <Exec Command="dbm.exe -w -d &quot;$(DashingPublishTempDirectory)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)../tools" />
+  </Target>
+  
+  <!-- Support clickonce publishing -->
+  <Target Name="DashingDomainClickOnceExtension" BeforeTargets="GenerateApplicationManifest">
+      <PropertyGroup>
+        <DashingPublishDirectory>$(MSBuildProjectDirectory)\$(PublishDir)\</DashingPublishDirectory>
+      </PropertyGroup>
+      <Exec Command="dbm.exe -w -d &quot;$(DashingPublishDirectory)&quot;" WorkingDirectory="$(MSBuildThisFileDirectory)../tools" />
+  </Target>
+</Project>

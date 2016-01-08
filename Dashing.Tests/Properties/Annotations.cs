@@ -24,8 +24,10 @@ namespace Dashing.Tests.Annotations {
     /// }
     /// </code>
     /// </example>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Delegate | AttributeTargets.Field)]
-    public sealed class CanBeNullAttribute : Attribute {}
+    [AttributeUsage(
+        AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Delegate | AttributeTargets.Field)]
+    public sealed class CanBeNullAttribute : Attribute {
+    }
 
     /// <summary>
     ///     Indicates that the value of the marked element could never be <c>null</c>
@@ -37,8 +39,10 @@ namespace Dashing.Tests.Annotations {
     /// }
     /// </code>
     /// </example>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Delegate | AttributeTargets.Field)]
-    public sealed class NotNullAttribute : Attribute {}
+    [AttributeUsage(
+        AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Delegate | AttributeTargets.Field)]
+    public sealed class NotNullAttribute : Attribute {
+    }
 
     /// <summary>
     ///     Indicates that the marked method builds string by format pattern and (optional) arguments.
@@ -80,7 +84,8 @@ namespace Dashing.Tests.Annotations {
     /// </code>
     /// </example>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class InvokerParameterNameAttribute : Attribute {}
+    public sealed class InvokerParameterNameAttribute : Attribute {
+    }
 
     /// <summary>
     ///     Indicates that the method is contained in a type that implements
@@ -139,7 +144,8 @@ namespace Dashing.Tests.Annotations {
     /// </example>
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class NotifyPropertyChangedInvocatorAttribute : Attribute {
-        public NotifyPropertyChangedInvocatorAttribute() {}
+        public NotifyPropertyChangedInvocatorAttribute() {
+        }
 
         public NotifyPropertyChangedInvocatorAttribute(string parameterName) {
             this.ParameterName = parameterName;
@@ -205,7 +211,8 @@ namespace Dashing.Tests.Annotations {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public sealed class ContractAnnotationAttribute : Attribute {
         public ContractAnnotationAttribute([NotNull] string contract)
-            : this(contract, false) {}
+            : this(contract, false) {
+        }
 
         public ContractAnnotationAttribute([NotNull] string contract, bool forceFullStates) {
             this.Contract = contract;
@@ -231,7 +238,8 @@ namespace Dashing.Tests.Annotations {
     [AttributeUsage(AttributeTargets.All)]
     public sealed class LocalizationRequiredAttribute : Attribute {
         public LocalizationRequiredAttribute()
-            : this(true) {}
+            : this(true) {
+        }
 
         public LocalizationRequiredAttribute(bool required) {
             this.Required = required;
@@ -262,7 +270,8 @@ namespace Dashing.Tests.Annotations {
     /// </code>
     /// </example>
     [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct)]
-    public sealed class CannotApplyEqualityOperatorAttribute : Attribute {}
+    public sealed class CannotApplyEqualityOperatorAttribute : Attribute {
+    }
 
     /// <summary>
     ///     When applied to a target attribute, specifies a requirement for any type marked
@@ -295,13 +304,16 @@ namespace Dashing.Tests.Annotations {
     [AttributeUsage(AttributeTargets.All)]
     public sealed class UsedImplicitlyAttribute : Attribute {
         public UsedImplicitlyAttribute()
-            : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Default) {}
+            : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Default) {
+        }
 
         public UsedImplicitlyAttribute(ImplicitUseKindFlags useKindFlags)
-            : this(useKindFlags, ImplicitUseTargetFlags.Default) {}
+            : this(useKindFlags, ImplicitUseTargetFlags.Default) {
+        }
 
         public UsedImplicitlyAttribute(ImplicitUseTargetFlags targetFlags)
-            : this(ImplicitUseKindFlags.Default, targetFlags) {}
+            : this(ImplicitUseKindFlags.Default, targetFlags) {
+        }
 
         public UsedImplicitlyAttribute(ImplicitUseKindFlags useKindFlags, ImplicitUseTargetFlags targetFlags) {
             this.UseKindFlags = useKindFlags;
@@ -321,13 +333,16 @@ namespace Dashing.Tests.Annotations {
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class MeansImplicitUseAttribute : Attribute {
         public MeansImplicitUseAttribute()
-            : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Default) {}
+            : this(ImplicitUseKindFlags.Default, ImplicitUseTargetFlags.Default) {
+        }
 
         public MeansImplicitUseAttribute(ImplicitUseKindFlags useKindFlags)
-            : this(useKindFlags, ImplicitUseTargetFlags.Default) {}
+            : this(useKindFlags, ImplicitUseTargetFlags.Default) {
+        }
 
         public MeansImplicitUseAttribute(ImplicitUseTargetFlags targetFlags)
-            : this(ImplicitUseKindFlags.Default, targetFlags) {}
+            : this(ImplicitUseKindFlags.Default, targetFlags) {
+        }
 
         public MeansImplicitUseAttribute(ImplicitUseKindFlags useKindFlags, ImplicitUseTargetFlags targetFlags) {
             this.UseKindFlags = useKindFlags;
@@ -385,7 +400,8 @@ namespace Dashing.Tests.Annotations {
     /// </summary>
     [MeansImplicitUse]
     public sealed class PublicAPIAttribute : Attribute {
-        public PublicAPIAttribute() {}
+        public PublicAPIAttribute() {
+        }
 
         public PublicAPIAttribute([NotNull] string comment) {
             this.Comment = comment;
@@ -403,7 +419,8 @@ namespace Dashing.Tests.Annotations {
     ///     while the method is executed
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class InstantHandleAttribute : Attribute {}
+    public sealed class InstantHandleAttribute : Attribute {
+    }
 
     /// <summary>
     ///     Indicates that a method does not make any observable state changes.
@@ -419,7 +436,8 @@ namespace Dashing.Tests.Annotations {
     /// </code>
     /// </example>
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class PureAttribute : Attribute {}
+    public sealed class PureAttribute : Attribute {
+    }
 
     /// <summary>
     ///     Indicates that a parameter is a path to a file or a folder
@@ -428,7 +446,8 @@ namespace Dashing.Tests.Annotations {
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
     public class PathReferenceAttribute : Attribute {
-        public PathReferenceAttribute() {}
+        public PathReferenceAttribute() {
+        }
 
         public PathReferenceAttribute([PathReference] string basePath) {
             this.BasePath = basePath;
@@ -442,32 +461,38 @@ namespace Dashing.Tests.Annotations {
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class AspMvcAreaMasterLocationFormatAttribute : Attribute {
-        public AspMvcAreaMasterLocationFormatAttribute(string format) {}
+        public AspMvcAreaMasterLocationFormatAttribute(string format) {
+        }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class AspMvcAreaPartialViewLocationFormatAttribute : Attribute {
-        public AspMvcAreaPartialViewLocationFormatAttribute(string format) {}
+        public AspMvcAreaPartialViewLocationFormatAttribute(string format) {
+        }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class AspMvcAreaViewLocationFormatAttribute : Attribute {
-        public AspMvcAreaViewLocationFormatAttribute(string format) {}
+        public AspMvcAreaViewLocationFormatAttribute(string format) {
+        }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class AspMvcMasterLocationFormatAttribute : Attribute {
-        public AspMvcMasterLocationFormatAttribute(string format) {}
+        public AspMvcMasterLocationFormatAttribute(string format) {
+        }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class AspMvcPartialViewLocationFormatAttribute : Attribute {
-        public AspMvcPartialViewLocationFormatAttribute(string format) {}
+        public AspMvcPartialViewLocationFormatAttribute(string format) {
+        }
     }
 
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public sealed class AspMvcViewLocationFormatAttribute : Attribute {
-        public AspMvcViewLocationFormatAttribute(string format) {}
+        public AspMvcViewLocationFormatAttribute(string format) {
+        }
     }
 
     /// <summary>
@@ -478,7 +503,8 @@ namespace Dashing.Tests.Annotations {
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Method)]
     public sealed class AspMvcActionAttribute : Attribute {
-        public AspMvcActionAttribute() {}
+        public AspMvcActionAttribute() {
+        }
 
         public AspMvcActionAttribute([NotNull] string anonymousProperty) {
             this.AnonymousProperty = anonymousProperty;
@@ -495,7 +521,8 @@ namespace Dashing.Tests.Annotations {
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
     public sealed class AspMvcAreaAttribute : PathReferenceAttribute {
-        public AspMvcAreaAttribute() {}
+        public AspMvcAreaAttribute() {
+        }
 
         public AspMvcAreaAttribute([NotNull] string anonymousProperty) {
             this.AnonymousProperty = anonymousProperty;
@@ -514,7 +541,8 @@ namespace Dashing.Tests.Annotations {
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Method)]
     public sealed class AspMvcControllerAttribute : Attribute {
-        public AspMvcControllerAttribute() {}
+        public AspMvcControllerAttribute() {
+        }
 
         public AspMvcControllerAttribute([NotNull] string anonymousProperty) {
             this.AnonymousProperty = anonymousProperty;
@@ -530,7 +558,8 @@ namespace Dashing.Tests.Annotations {
     ///     <c>System.Web.Mvc.Controller.View(String, String)</c>
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class AspMvcMasterAttribute : Attribute {}
+    public sealed class AspMvcMasterAttribute : Attribute {
+    }
 
     /// <summary>
     ///     ASP.NET MVC attribute. Indicates that a parameter is an MVC model type.
@@ -538,7 +567,8 @@ namespace Dashing.Tests.Annotations {
     ///     <c>System.Web.Mvc.Controller.View(String, Object)</c>
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class AspMvcModelTypeAttribute : Attribute {}
+    public sealed class AspMvcModelTypeAttribute : Attribute {
+    }
 
     /// <summary>
     ///     ASP.NET MVC attribute. If applied to a parameter, indicates that
@@ -548,14 +578,16 @@ namespace Dashing.Tests.Annotations {
     ///     <c>System.Web.Mvc.Html.RenderPartialExtensions.RenderPartial(HtmlHelper, String)</c>
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Method)]
-    public sealed class AspMvcPartialViewAttribute : PathReferenceAttribute {}
+    public sealed class AspMvcPartialViewAttribute : PathReferenceAttribute {
+    }
 
     /// <summary>
     ///     ASP.NET MVC attribute. Allows disabling all inspections
     ///     for MVC views within a class or a method.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-    public sealed class AspMvcSupressViewErrorAttribute : Attribute {}
+    public sealed class AspMvcSupressViewErrorAttribute : Attribute {
+    }
 
     /// <summary>
     ///     ASP.NET MVC attribute. Indicates that a parameter is an MVC display template.
@@ -563,7 +595,8 @@ namespace Dashing.Tests.Annotations {
     ///     <c>System.Web.Mvc.Html.DisplayExtensions.DisplayForModel(HtmlHelper, String)</c>
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class AspMvcDisplayTemplateAttribute : Attribute {}
+    public sealed class AspMvcDisplayTemplateAttribute : Attribute {
+    }
 
     /// <summary>
     ///     ASP.NET MVC attribute. Indicates that a parameter is an MVC editor template.
@@ -571,7 +604,8 @@ namespace Dashing.Tests.Annotations {
     ///     <c>System.Web.Mvc.Html.EditorExtensions.EditorForModel(HtmlHelper, String)</c>
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class AspMvcEditorTemplateAttribute : Attribute {}
+    public sealed class AspMvcEditorTemplateAttribute : Attribute {
+    }
 
     /// <summary>
     ///     ASP.NET MVC attribute. Indicates that a parameter is an MVC template.
@@ -579,7 +613,8 @@ namespace Dashing.Tests.Annotations {
     ///     <c>System.ComponentModel.DataAnnotations.UIHintAttribute(System.String)</c>
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class AspMvcTemplateAttribute : Attribute {}
+    public sealed class AspMvcTemplateAttribute : Attribute {
+    }
 
     /// <summary>
     ///     ASP.NET MVC attribute. If applied to a parameter, indicates that the parameter
@@ -588,7 +623,8 @@ namespace Dashing.Tests.Annotations {
     ///     <c>System.Web.Mvc.Controller.View(Object)</c>
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Method)]
-    public sealed class AspMvcViewAttribute : PathReferenceAttribute {}
+    public sealed class AspMvcViewAttribute : PathReferenceAttribute {
+    }
 
     /// <summary>
     ///     ASP.NET MVC attribute. When applied to a parameter of an attribute,
@@ -604,11 +640,13 @@ namespace Dashing.Tests.Annotations {
     /// </code>
     /// </example>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Property)]
-    public sealed class AspMvcActionSelectorAttribute : Attribute {}
+    public sealed class AspMvcActionSelectorAttribute : Attribute {
+    }
 
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Field)]
     public sealed class HtmlElementAttributesAttribute : Attribute {
-        public HtmlElementAttributesAttribute() {}
+        public HtmlElementAttributesAttribute() {
+        }
 
         public HtmlElementAttributesAttribute([NotNull] string name) {
             this.Name = name;
@@ -636,5 +674,6 @@ namespace Dashing.Tests.Annotations {
     ///     <c>System.Web.WebPages.WebPageBase.RenderSection(String)</c>
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Method)]
-    public sealed class RazorSectionAttribute : Attribute {}
+    public sealed class RazorSectionAttribute : Attribute {
+    }
 }

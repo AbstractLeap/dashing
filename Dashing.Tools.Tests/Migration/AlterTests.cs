@@ -1,9 +1,8 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.RegularExpressions;
+    using System.Reflection;
 
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
@@ -20,20 +19,34 @@
         public void DropOneToOneLeftTable() {
             var configTo = new CustomConfig();
             var configFrom = new CustomConfig();
-            
+
             // remove onetooneleft from the config
-            var mappedTypes = (IDictionary<Type, IMap>)typeof(ConfigurationBase).GetField("mappedTypes", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(configTo);
+            var mappedTypes =
+                (IDictionary<Type, IMap>)
+                typeof(ConfigurationBase).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
             mappedTypes.Remove(typeof(OneToOneLeft));
             configTo.GetMap<OneToOneRight>().Columns.Remove("Left");
 
             var dialect = new SqlServer2012Dialect();
-            var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
+            var migrator = new Migrator(
+                dialect,
+                new CreateTableWriter(dialect),
+                new AlterTableWriter(dialect),
+                new DropTableWriter(dialect),
+                GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                configFrom.Maps,
+                configTo.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
 
-            var dropColIdx = script.IndexOf("alter table [OneToOneRights] drop column [LeftId];", System.StringComparison.Ordinal);
-            var dropTableIdx = script.IndexOf("drop table [OneToOneLefts];", System.StringComparison.Ordinal);
+            var dropColIdx = script.IndexOf("alter table [OneToOneRights] drop column [LeftId];", StringComparison.Ordinal);
+            var dropTableIdx = script.IndexOf("drop table [OneToOneLefts];", StringComparison.Ordinal);
             Assert.True(dropColIdx > -1);
             Assert.True(dropTableIdx > -1);
             Assert.True(dropColIdx < dropTableIdx);
@@ -45,18 +58,32 @@
             var configFrom = new CustomConfig();
 
             // remove onetooneleft from the config
-            var mappedTypes = (IDictionary<Type, IMap>)typeof(ConfigurationBase).GetField("mappedTypes", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(configTo);
+            var mappedTypes =
+                (IDictionary<Type, IMap>)
+                typeof(ConfigurationBase).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
             mappedTypes.Remove(typeof(OneToOneRight));
             configTo.GetMap<OneToOneLeft>().Columns.Remove("Right");
 
             var dialect = new SqlServer2012Dialect();
-            var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
+            var migrator = new Migrator(
+                dialect,
+                new CreateTableWriter(dialect),
+                new AlterTableWriter(dialect),
+                new DropTableWriter(dialect),
+                GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                configFrom.Maps,
+                configTo.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
 
-            var dropColIdx = script.IndexOf("alter table [OneToOneLefts] drop column [RightId];", System.StringComparison.Ordinal);
-            var dropTableIdx = script.IndexOf("drop table [OneToOneRights];", System.StringComparison.Ordinal);
+            var dropColIdx = script.IndexOf("alter table [OneToOneLefts] drop column [RightId];", StringComparison.Ordinal);
+            var dropTableIdx = script.IndexOf("drop table [OneToOneRights];", StringComparison.Ordinal);
             Assert.True(dropColIdx > -1);
             Assert.True(dropTableIdx > -1);
             Assert.True(dropColIdx < dropTableIdx);
@@ -68,17 +95,30 @@
             var configFrom = new CustomConfig();
 
             // remove onetooneleft from the config
-            var mappedTypes = (IDictionary<Type, IMap>)typeof(ConfigurationBase).GetField("mappedTypes", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(configTo);
+            var mappedTypes =
+                (IDictionary<Type, IMap>)
+                typeof(ConfigurationBase).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
             mappedTypes.Remove(typeof(Pair));
 
             var dialect = new SqlServer2012Dialect();
-            var migrator = new Migrator(dialect, new CreateTableWriter(dialect), new AlterTableWriter(dialect), new DropTableWriter(dialect), GetMockStatisticsProvider(configFrom));
+            var migrator = new Migrator(
+                dialect,
+                new CreateTableWriter(dialect),
+                new AlterTableWriter(dialect),
+                new DropTableWriter(dialect),
+                GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
-            var script = migrator.GenerateSqlDiff(configFrom.Maps, configTo.Maps, null, new Mock<ITraceWriter>().Object, new string[0], out warnings, out errors);
+            var script = migrator.GenerateSqlDiff(
+                configFrom.Maps,
+                configTo.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                out warnings,
+                out errors);
 
-            Assert.Equal(@"drop table [Pairs];
-", script);
+            Assert.Equal(@"drop table [Pairs];", script.Trim());
         }
 
         private IStatisticsProvider GetMockStatisticsProvider(IConfiguration config) {

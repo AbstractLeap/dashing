@@ -1,13 +1,13 @@
 ﻿namespace Dashing.Tools.Migration {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Text;
 
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
+    using Dashing.Extensions;
 
     public class Migrator : IMigrator {
         private readonly ISqlDialect dialect;
@@ -20,9 +20,14 @@
 
         private readonly IAlterTableWriter alterTableWriter;
 
-        const string NoRename = "__NOTRENAMED";
+        private const string NoRename = "__NOTRENAMED";
 
-        public Migrator(ISqlDialect dialect, ICreateTableWriter createTableWriter, IAlterTableWriter alterTableWriter, IDropTableWriter dropTableWriter, IStatisticsProvider statisticsProvider) {
+        public Migrator(
+            ISqlDialect dialect,
+            ICreateTableWriter createTableWriter,
+            IAlterTableWriter alterTableWriter,
+            IDropTableWriter dropTableWriter,
+            IStatisticsProvider statisticsProvider) {
             this.dialect = dialect;
             this.statisticsProvider = statisticsProvider;
             this.createTableWriter = createTableWriter;
@@ -34,11 +39,10 @@
             IEnumerable<IMap> fromMaps,
             IEnumerable<IMap> toMaps,
             IAnswerProvider answerProvider,
-            ITraceWriter traceWriter,
+            ILogger logger,
             IEnumerable<string> indexesToIgnore,
             out IEnumerable<string> warnings,
             out IEnumerable<string> errors) {
-
             // fetch data for current database
             IDictionary<string, Statistics> currentData = new Dictionary<string, Statistics>();
             if (fromMaps.Any()) {
@@ -59,22 +63,25 @@
             var matches = from.Join(to, f => f.Table, t => t.Table, MigrationPair.Of).ToList();
 
             // trace output
-            traceWriter.Trace("Additions:");
-            traceWriter.Trace("");
-            traceWriter.Trace(additions.Select(a => new { a.Table, a.Type.Name }), new string[] { "Table", "Map Name" });
-            traceWriter.Trace("Removals:");
-            traceWriter.Trace("");
-            traceWriter.Trace(removals.Select(r => new { r.Table, r.Type.Name }), new string[] { "Table", "Map Name" });
-            traceWriter.Trace("Matches:");
-            traceWriter.Trace("");
-            traceWriter.Trace(matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }), new string[] { "From Table", "From Map", "To Table", "To Map" });
+            logger.Trace("Additions:");
+            logger.Trace("");
+            logger.Trace(additions.Select(a => new { a.Table, a.Type.Name }), new[] { "Table", "Map Name" });
+            logger.Trace("Removals:");
+            logger.Trace("");
+            logger.Trace(removals.Select(r => new { r.Table, r.Type.Name }), new[] { "Table", "Map Name" });
+            logger.Trace("Matches:");
+            logger.Trace("");
+            logger.Trace(
+                matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }),
+                new[] { "From Table", "From Map", "To Table", "To Map" });
 
             // look for possible entity name changes
             if (additions.Any() && removals.Any()) {
                 // TODO do something a bit more sensible with regards to likelihood of rename
-                foreach (var removed in removals.Select(r => r).ToArray()) { // copy the array as we'll update
+                foreach (var removed in removals.Select(r => r).ToArray()) {
+                    // copy the array as we'll update
                     var answer =
-                        answerProvider.GetMultipleChoiceAnswer<string>(
+                        answerProvider.GetMultipleChoiceAnswer(
                             string.Format("The entity {0} has been removed. If it has been renamed please specify what to:", removed.Type.Name),
                             new[] { new MultipleChoice<string> { DisplayString = "Not renamed - please delete", Choice = NoRename } }.Union(
                                 additions.Select(a => new MultipleChoice<string> { Choice = a.Type.Name, DisplayString = a.Type.Name })));
@@ -96,9 +103,9 @@
                         var toPrimaryKey = renameTo.PrimaryKey;
                         if (!AreColumnDefinitionsEqual(fromPrimaryKey, toPrimaryKey)) {
                             if (fromPrimaryKey.DbName != toPrimaryKey.DbName && fromPrimaryKey.DbType == toPrimaryKey.DbType
-                                && (!this.dialect.TypeTakesLength(fromPrimaryKey.DbType) || (fromPrimaryKey.MaxLength && toPrimaryKey.MaxLength)
+                                && (!fromPrimaryKey.DbType.TypeTakesLength() || (fromPrimaryKey.MaxLength && toPrimaryKey.MaxLength)
                                     || (fromPrimaryKey.Length == toPrimaryKey.Length))
-                                && (!this.dialect.TypeTakesPrecisionAndScale(fromPrimaryKey.DbType)
+                                && (!fromPrimaryKey.DbType.TypeTakesPrecisionAndScale()
                                     || (fromPrimaryKey.Precision == toPrimaryKey.Precision && fromPrimaryKey.Scale == toPrimaryKey.Scale))) {
                                 // just a change in name
                                 sql.AppendSql(this.alterTableWriter.ChangeColumnName(fromPrimaryKey, toPrimaryKey));
@@ -166,7 +173,7 @@
 
                         if (addedColumns.Any()) {
                             var answer =
-                                answerProvider.GetMultipleChoiceAnswer<string>(
+                                answerProvider.GetMultipleChoiceAnswer(
                                     string.Format(
                                         "The property {0} has been removed. If it has been renamed please specify what to:",
                                         removal.Value.Name),
@@ -207,7 +214,7 @@
 
                 // go through existing columns and handle modifications
                 foreach (var fromProp in pair.From.Columns) {
-                    traceWriter.Trace("Examining {1}.{0}", fromProp.Value.Name, pair.From.Table);
+                    logger.Trace("Examining {1}.{0}", fromProp.Value.Name, pair.From.Table);
                     var matchingToProp = pair.To.Columns.Select(p => p.Value).FirstOrDefault(p => p.Name == fromProp.Key);
                     if (matchingToProp != null) {
                         if (this.RequiresColumnSpecificationChange(fromProp.Value, matchingToProp)) {
@@ -223,8 +230,10 @@
                                         matchingToProp.Relationship == RelationshipType.ManyToOne
                                             ? matchingToProp.ParentMap.Type.Name
                                             : matchingToProp.OppositeColumn.Map.Type.Name);
-                                if ((fromProp.Value.Relationship == RelationshipType.OneToOne || fromProp.Value.Relationship == RelationshipType.ManyToOne)
-                                    && (matchingToProp.Relationship == RelationshipType.ManyToOne || matchingToProp.Relationship == RelationshipType.OneToOne)
+                                if ((fromProp.Value.Relationship == RelationshipType.OneToOne
+                                     || fromProp.Value.Relationship == RelationshipType.ManyToOne)
+                                    && (matchingToProp.Relationship == RelationshipType.ManyToOne
+                                        || matchingToProp.Relationship == RelationshipType.OneToOne)
                                     && renamePrimaryKeyModifications.ContainsKey(renamePrimaryKeyModificationsKey)) {
                                     // skip the question as we've already attempted the modify for the pk so may as well here as well!
                                     skipQuestion = true;
@@ -273,8 +282,7 @@
                             if ((matchingToProp.Relationship == RelationshipType.ManyToOne || matchingToProp.Relationship == RelationshipType.OneToOne)
                                 && (fromProp.Value.Relationship == RelationshipType.ManyToOne
                                     || fromProp.Value.Relationship == RelationshipType.OneToOne)
-                                && fromProp.Value.Type.Name != matchingToProp.Type.Name
-                                && currentData != null
+                                && fromProp.Value.Type.Name != matchingToProp.Type.Name && currentData != null
                                 && currentData[matchingToProp.Map.Type.Name].HasRows) {
                                 warningList.Add(
                                     string.Format(
@@ -303,8 +311,9 @@
             // do additions of properties
             foreach (var newProp in addedProperties) {
                 // check for relationships where the related table is not empty and the prop is not null
-                if ((newProp.Relationship == RelationshipType.ManyToOne || newProp.Relationship == RelationshipType.OneToOne) && !newProp.IsNullable && string.IsNullOrWhiteSpace(newProp.Default)
-                    && currentData.ContainsKey(newProp.Map.Type.Name) && currentData[newProp.Map.Type.Name].HasRows) {
+                if ((newProp.Relationship == RelationshipType.ManyToOne || newProp.Relationship == RelationshipType.OneToOne) && !newProp.IsNullable
+                    && string.IsNullOrWhiteSpace(newProp.Default) && currentData.ContainsKey(newProp.Map.Type.Name)
+                    && currentData[newProp.Map.Type.Name].HasRows) {
                     var foreignKeyPrimaryKeyType = newProp.Relationship == RelationshipType.ManyToOne
                                                        ? newProp.ParentMap.PrimaryKey.Type
                                                        : newProp.OppositeColumn.Map.PrimaryKey.Type;
@@ -372,18 +381,16 @@
         }
 
         private bool RequiresColumnSpecificationChange(IColumn from, IColumn to) {
-            return from.DbType != to.DbType
-                   || this.RequiresLengthChange(from, to)
-                   || this.RequiresPrecisionOrScaleChange(from, to)
+            return from.DbType != to.DbType || this.RequiresLengthChange(from, to) || this.RequiresPrecisionOrScaleChange(from, to)
                    || from.IsNullable != to.IsNullable || from.Default != to.Default || from.IsAutoGenerated != to.IsAutoGenerated;
         }
 
         private bool RequiresLengthChange(IColumn from, IColumn to) {
-            return this.dialect.TypeTakesLength(from.DbType) && (from.MaxLength != to.MaxLength || (!to.MaxLength && from.Length != to.Length));
+            return from.DbType.TypeTakesLength() && (from.MaxLength != to.MaxLength || (!to.MaxLength && from.Length != to.Length));
         }
 
         private bool RequiresPrecisionOrScaleChange(IColumn from, IColumn to) {
-            return this.dialect.TypeTakesPrecisionAndScale(from.DbType) && (from.Precision != to.Precision || from.Scale != to.Scale);
+            return from.DbType.TypeTakesPrecisionAndScale() && (from.Precision != to.Precision || from.Scale != to.Scale);
         }
     }
 }

@@ -10,7 +10,6 @@
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
-    using Dashing.Extensions;
 
     internal class UpdateWriter : BaseWriter, IUpdateWriter {
         public UpdateWriter(ISqlDialect dialect, IConfiguration config)
@@ -35,13 +34,15 @@
             Dictionary<string, object> dirtyProperties;
 
             // establish the dirty properties, either using a TrackedEntityInspector, or just assume everything is dirty
-            if (TrackedEntityInspector<T>.IsTracked(entity)) {
-                var inspector = new TrackedEntityInspector<T>(entity);
-                if (!inspector.IsDirty() || inspector.HasOnlyDirtyCollections()) {
+            var trackedEntity = entity as ITrackedEntity; // this should never fail?!
+            if (trackedEntity != null) {
+                var dirtyProps = trackedEntity.GetDirtyProperties();
+                if (!dirtyProps.Any()) {
                     return;
                 }
 
-                dirtyProperties = inspector.DirtyProperties.ToDictionary(p => p, p => inspector.NewValues[p]);
+                // TODO cache the property accessors
+                dirtyProperties = dirtyProps.ToDictionary(p => p, p => typeof(T).GetProperty(p).GetValue(entity));
             }
             else {
                 throw new InvalidOperationException("In order to Save entities you must fetch Tracked entities");
@@ -92,7 +93,7 @@
         }
 
         /// <summary>
-        /// look up the column type and decide where to get the value from
+        ///     look up the column type and decide where to get the value from
         /// </summary>
         /// <param name="mappedColumn"></param>
         /// <param name="propertyValue"></param>
@@ -117,13 +118,19 @@
             }
         }
 
-        public SqlWriterResult GenerateBulkSql<T>(T updateClass, IEnumerable<Expression<Func<T, bool>>> predicates) {
+        public SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             var sql = new StringBuilder();
             var parameters = new DynamicParameters();
             var map = this.Configuration.GetMap<T>();
 
-            var interfaceUpdateClass = updateClass as IUpdateClass;
-            if (interfaceUpdateClass.UpdatedProperties.IsEmpty()) {
+            // run the update
+            var entity = new T();
+            updateAction(entity);
+
+            // find the set properties
+            var setLogger = (ISetLogger)entity;
+            var setProps = setLogger.GetSetProperties();
+            if (!setProps.Any()) {
                 return new SqlWriterResult(string.Empty, parameters);
             }
 
@@ -131,11 +138,11 @@
             this.Dialect.AppendQuotedTableName(sql, map);
             sql.Append(" set ");
 
-            foreach (var updatedProp in interfaceUpdateClass.UpdatedProperties) {
+            foreach (var updatedProp in setProps) {
                 var column = map.Columns[updatedProp];
                 this.Dialect.AppendQuotedName(sql, column.DbName);
                 var paramName = "@" + updatedProp;
-                var propertyValue = map.GetColumnValue(updateClass, column);
+                var propertyValue = map.GetColumnValue(entity, column);
                 if (propertyValue == null) {
                     parameters.Add(paramName, null);
                 }

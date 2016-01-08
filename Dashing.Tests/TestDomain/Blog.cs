@@ -15,6 +15,8 @@
 
         public virtual string Description { get; set; }
 
+        public virtual User Owner { get; set; }
+
         public virtual IList<Post> Posts { get; set; }
     }
 }

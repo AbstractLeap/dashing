@@ -7,7 +7,7 @@ namespace Dashing {
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface ISelectQuery<T> : IEnumerable<T> {
+    public interface ISelectQuery<T> : IEnumerable<T> where T : class, new() {
         /// <summary>
         ///     The select.
         /// </summary>
@@ -75,20 +75,6 @@ namespace Dashing {
         ///     The <see cref="SelectQuery{T}" />.
         /// </returns>
         ISelectQuery<T> ForUpdate();
-
-        /// <summary>
-        ///     The as tracked.
-        /// </summary>
-        /// <returns>
-        ///     The <see cref="SelectQuery{T}" />.
-        /// </returns>
-        ISelectQuery<T> AsTracked();
-
-        /// <summary>
-        /// Fetch the entities as untracked
-        /// </summary>
-        /// <returns></returns>
-        ISelectQuery<T> AsNonTracked();
 
         /// <summary>
         ///     The skip.
@@ -176,7 +162,7 @@ namespace Dashing {
         int Count();
 
         int Count(Expression<Func<T, bool>> predicate);
-        
+
         Page<T> AsPaged(int skip, int take);
 
         bool Any();

@@ -36,8 +36,7 @@
                 return false;
             }
 
-            return this.Name == otherForeignKey.Name
-                   && this.ChildColumn.Name == otherForeignKey.ChildColumn.Name
+            return this.Name == otherForeignKey.Name && this.ChildColumn.Name == otherForeignKey.ChildColumn.Name
                    && this.ChildColumn.Map.Type.Name == otherForeignKey.ChildColumn.Map.Type.Name
                    && this.ParentMap.Type.Name == otherForeignKey.ParentMap.Type.Name;
         }
@@ -54,7 +53,7 @@
         }
 
         public static bool operator ==(ForeignKey a, ForeignKey b) {
-            if (object.ReferenceEquals(a, b)) {
+            if (ReferenceEquals(a, b)) {
                 return true;
             }
 
@@ -62,8 +61,7 @@
                 return false;
             }
 
-            return a.Name == b.Name && a.ChildColumn.Name == b.ChildColumn.Name
-                && a.ChildColumn.Map.Type.Name == b.ChildColumn.Map.Type.Name
+            return a.Name == b.Name && a.ChildColumn.Name == b.ChildColumn.Name && a.ChildColumn.Map.Type.Name == b.ChildColumn.Map.Type.Name
                    && a.ParentMap.Type.Name == b.ParentMap.Type.Name;
         }
 

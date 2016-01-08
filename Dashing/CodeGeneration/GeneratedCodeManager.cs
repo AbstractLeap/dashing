@@ -261,7 +261,7 @@
         private IEnumerable<T> Tracked<T>(IEnumerable<T> rows) {
             foreach (var row in rows) {
                 var trackedEntity = row as ITrackedEntity;
-                trackedEntity.IsTracking = true;
+                trackedEntity.EnableTracking();
                 yield return row;
             }
         }
@@ -300,7 +300,7 @@
 
         public void TrackInstance<T>(T entity) {
             ITrackedEntityInspector<T> inspector = new TrackedEntityInspector<T>(entity);
-            inspector.ResumeTracking();
+            inspector.DisabledTracking();
         }
 
         public IEnumerable<T> Query<T>(SelectWriterResult result, SelectQuery<T> query, IDbConnection connection, IDbTransaction transaction) {

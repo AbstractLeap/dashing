@@ -1,5 +1,4 @@
 namespace Dashing.Engine.DML {
-    using System;
     using System.Text;
 
     using Dashing.Configuration;
@@ -7,13 +6,14 @@ namespace Dashing.Engine.DML {
 
     internal class CountWriter : SelectWriter, ICountWriter {
         public CountWriter(ISqlDialect dialect, IConfiguration configuration)
-            : base(dialect, configuration) { }
+            : base(dialect, configuration) {
+        }
 
-        public SqlWriterResult GenerateCountSql<T>(SelectQuery<T> selectQuery) {
+        public SqlWriterResult GenerateCountSql<T>(SelectQuery<T> selectQuery) where T : class, new() {
             // get fetch tree structure
             int aliasCounter;
             int numberCollectionFetches;
-            var rootNode = this.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
+            var rootNode = this.fetchTreeParser.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
 
             // add where clause
             var whereSql = new StringBuilder();

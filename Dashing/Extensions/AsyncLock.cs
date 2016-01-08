@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
 
     /// <summary>
-    /// see http://www.hanselman.com/blog/ComparingTwoTechniquesInNETAsynchronousCoordinationPrimitives.aspx
+    ///     see http://www.hanselman.com/blog/ComparingTwoTechniquesInNETAsynchronousCoordinationPrimitives.aspx
     /// </summary>
     public sealed class AsyncLock {
         private readonly SemaphoreSlim m_semaphore = new SemaphoreSlim(1, 1);

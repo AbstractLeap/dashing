@@ -2,16 +2,14 @@
     using System.Collections.Generic;
 
     public interface ITrackedEntity {
-        bool IsTracking { get; set; }
+        void EnableTracking();
 
-        ISet<string> DirtyProperties { get; set; }
+        void DisableTracking();
 
-        IDictionary<string, object> OldValues { get; set; }
+        bool IsTrackingEnabled();
 
-        IDictionary<string, object> NewValues { get; set; }
+        IEnumerable<string> GetDirtyProperties();
 
-        IDictionary<string, IList<object>> AddedEntities { get; set; }
-
-        IDictionary<string, IList<object>> DeletedEntities { get; set; }
+        object GetOldValue(string propertyName);
     }
 }

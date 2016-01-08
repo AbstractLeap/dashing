@@ -38,7 +38,7 @@ namespace Dashing.Engine.Dialects {
         }
 
         public override string DropForeignKey(ForeignKey foreignKey) {
-            var sql = new StringBuilder("alter table "); 
+            var sql = new StringBuilder("alter table ");
             this.AppendQuotedTableName(sql, foreignKey.ChildColumn.Map);
             sql.Append(" drop foreign key ");
             this.AppendQuotedName(sql, foreignKey.Name);
@@ -54,7 +54,6 @@ namespace Dashing.Engine.Dialects {
         }
 
         public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
-            return;
         }
 
         public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
@@ -67,6 +66,10 @@ namespace Dashing.Engine.Dialects {
             sql.Append(" to ");
             this.AppendQuotedTableName(sql, to);
             return sql.ToString();
+        }
+
+        public override string CheckDatabaseExists(string databaseName) {
+            return "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '" + databaseName + "'";
         }
 
         public override string GetIdSql() {

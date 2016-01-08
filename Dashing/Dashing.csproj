@@ -49,25 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeGeneration\CodeGenerator.cs" />
-    <Compile Include="CodeGeneration\CodeGeneratorConfig.cs" />
-    <Compile Include="CodeGeneration\CodeHelpers.cs" />
-    <Compile Include="CodeGeneration\DapperWrapperGenerator.cs" />
     <Compile Include="CodeGeneration\DelegateQueryCreator.cs" />
-    <Compile Include="CodeGeneration\EnumerableAwaiter.cs" />
     <Compile Include="CodeGeneration\FetchCollectionAwaiter.cs" />
-    <Compile Include="CodeGeneration\GeneratedCodeManager.cs" />
-    <Compile Include="CodeGeneration\ICodeGenerator.cs" />
-    <Compile Include="CodeGeneration\IDapperWrapperGenerator.cs" />
-    <Compile Include="CodeGeneration\IDictionaryAwaiter.cs" />
     <Compile Include="CodeGeneration\IEnumerableAwaiter.cs" />
-    <Compile Include="CodeGeneration\IGeneratedCodeManager.cs" />
-    <Compile Include="CodeGeneration\IProxyGenerator.cs" />
+    <Compile Include="CodeGeneration\ISetLogger.cs" />
     <Compile Include="CodeGeneration\ITrackedEntity.cs" />
     <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
-    <Compile Include="CodeGeneration\IUpdateClass.cs" />
-    <Compile Include="CodeGeneration\ProxyGenerator.cs" />
-    <Compile Include="CodeGeneration\ProxyGeneratorResult.cs" />
     <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
     <Compile Include="Configuration\Column.cs" />
@@ -89,7 +76,6 @@
     <Compile Include="Configuration\DefaultConvention.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IConvention.cs" />
-    <Compile Include="Configuration\LicenseManager.cs" />
     <Compile Include="Configuration\MapExtensions.cs" />
     <Compile Include="Configuration\DefaultMapper.cs" />
     <Compile Include="Configuration\Map.cs" />
@@ -97,8 +83,13 @@
     <Compile Include="Configuration\MutableConfiguration.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DapperWrapper.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\DapperMapperGenerator.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\IDapperMapperGenerator.cs" />
+    <Compile Include="DoNotWeaveAttribute.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\NonCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\INonCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\IMultiCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\ISingleCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\MultiCollectionMapperGenerator.cs" />
+    <Compile Include="Engine\DapperMapperGeneration\SingleCollectionMapperGenerator.cs" />
     <Compile Include="Engine\DDL\AlterTableWriter.cs" />
     <Compile Include="Engine\DDL\DropTableWriter.cs" />
     <Compile Include="Engine\DDL\CreateTableWriter.cs" />
@@ -121,6 +112,7 @@
     <Compile Include="Engine\DML\CountWriter.cs" />
     <Compile Include="Engine\DML\DeleteWriter.cs" />
     <Compile Include="Engine\DML\FetchNode.cs" />
+    <Compile Include="Engine\DML\FetchTreeParser.cs" />
     <Compile Include="Engine\DML\ICountWriter.cs" />
     <Compile Include="Engine\DML\IDeleteWriter.cs" />
     <Compile Include="Engine\DML\IInsertWriter.cs" />
@@ -160,6 +152,7 @@
     <Compile Include="IFetchMany.cs" />
     <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
+    <Compile Include="ISessionState.cs" />
     <Compile Include="OrderClause.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -167,6 +160,7 @@
     <Compile Include="Session.cs" />
     <Compile Include="NeedToDash.cs" />
     <Compile Include="SessionExtensions.cs" />
+    <Compile Include="SessionState.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Generator\" />
