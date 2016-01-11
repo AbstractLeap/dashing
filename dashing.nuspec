@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <title>Dashing</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,8 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity while not sacrificing (too much) performance.</description>
         <summary>Dashing is a simple to use mini ORM built on top of Dapper</summary>
-        <releaseNotes>* 1.0.0 Initial nuget.org release</releaseNotes>
+        <releaseNotes>* 1.0.1 Equals() support in Where()
+* 1.0.0 Initial nuget.org release</releaseNotes>
         <copyright>© Polylytics Limited, 2015</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>
