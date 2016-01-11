@@ -1,6 +1,8 @@
 Intro
 =================
 
+[![Join the chat at https://gitter.im/Polylytics/dashing](https://badges.gitter.im/Polylytics/dashing.svg)](https://gitter.im/Polylytics/dashing?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Dashing is a simple to use mini ORM built on top of [Dapper](https://github.com/StackExchange/dapper-dot-net). 
 It aims to provide fantastic productivity while not sacrificing (too much) performance.
 
