@@ -702,6 +702,39 @@
             Assert.Equal("Bar", actual.Parameters.GetValue("l_1"));
         }
 
+        [Fact]
+        public void WhereEqualsEntityWorks() {
+            var target = MakeTarget();
+            var blog = new Blog { BlogId = 1 };
+            Expression<Func<Post, bool>> pred = p => p.Blog.Equals(blog);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([BlogId] = @l_1)", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereEqualsIntWorks() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.PostId.Equals(1);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereEqualsStringWorks() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Title.Equals("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Title] = @l_1)", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereEqualsAcrossJoinWorks() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => p.Blog.CreateDate.Equals(DateTime.UtcNow);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where (t_100.[CreateDate] = @l_1)", actual.Sql);
+        }
+
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }

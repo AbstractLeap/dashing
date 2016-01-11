@@ -110,6 +110,10 @@
             var isCurrentlyNegated = this.isNegated;
 
             switch (exp.Method.Name) {
+                case "Equals":
+                    this.VisitBinary(Expression.MakeBinary(ExpressionType.Equal, exp.Object, exp.Arguments[0]));
+                    break;
+
                 case "Contains":
                     if (exp.Method.DeclaringType == typeof(string)) {
                         // this is string.Contains method
