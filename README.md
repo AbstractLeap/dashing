@@ -82,4 +82,7 @@ Tell me more!
 
 Further documentation is available in the [Wiki](https://github.com/Polylytics/dashing/wiki)
 
-[![Join the chat at https://gitter.im/Polylytics/dashing](https://badges.gitter.im/Polylytics/dashing.svg)](https://gitter.im/Polylytics/dashing?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Vote for Feature Requests](http://feathub.com/Polylytics/dashing?format=svg)](http://feathub.com/Polylytics/dashing)
+Feature requests (and voting for them) available at [Feathub](http://feathub.com/Polylytics/dashing)
+
+[![Join the chat at https://gitter.im/Polylytics/dashing](https://badges.gitter.im/Polylytics/dashing.svg)](https://gitter.im/Polylytics/dashing?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
+
