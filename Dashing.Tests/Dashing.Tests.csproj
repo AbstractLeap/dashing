@@ -133,6 +133,7 @@
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />
     <Compile Include="TestConfig.cs" />
+    <Compile Include="TestDomain\ThingWithNullable.cs" />
     <Compile Include="TestDomain\User.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -374,6 +374,16 @@
             var declaringType = exp.Expression.NodeType == ExpressionType.Convert
                                     ? ((UnaryExpression)exp.Expression).Operand.Type
                                     : exp.Expression.Type;
+
+            // redirect for .HasValue expressions on nullables
+            if (declaringType.IsGenericType && declaringType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+                var propInfo = exp.Member as PropertyInfo;
+                if (propInfo != null && propInfo.Name == "HasValue") {
+                    // re-write to binary expression
+                    return this.Visit(Expression.MakeBinary(this.isNegated ? ExpressionType.Equal : ExpressionType.NotEqual, exp.Expression, Expression.Constant(null)));
+                }
+            }
+
             var isTopOfBinaryOrMethodCopy = this.isTopOfBinaryOrMethod;
             if (isTopOfBinaryOrMethodCopy && this.config.HasMap(declaringType) && this.config.GetMap(declaringType).PrimaryKey.Name == exp.Member.Name) {
                 this.isPrimaryKeyAccess = true;
@@ -435,6 +445,7 @@
                     entityFetchType = propInfo.PropertyType;
                     return new ColumnElement(this.currentNode, fkName, exp.Expression.NodeType != ExpressionType.MemberAccess);
                 }
+
                 if (this.config.HasMap(declaringType)) {
                     if (this.config.GetMap(declaringType).PrimaryKey.Name == propInfo.Name) {
                         if (exp.Expression.NodeType == ExpressionType.MemberAccess) {
@@ -455,7 +466,6 @@
                         this.config.GetMap(declaringType).Columns[propInfo.Name].DbName,
                         exp.Expression.NodeType != ExpressionType.MemberAccess);
                 }
-                throw new NotImplementedException();
             }
 
             return null;

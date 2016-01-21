@@ -196,7 +196,7 @@
             var target = new CustomConfigurationWithAddNamespace(mockMapper.Object);
 
             Assert.NotNull(target);
-            Assert.Equal(8, target.Maps.Count());
+            Assert.Equal(10, target.Maps.Count());
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Blog)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Comment)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Like)));
@@ -205,6 +205,8 @@
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Tag)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(User)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(BoolClass)));
+            Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(ThingWithNullable)));
+            Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(ReferencesThingWithNullable)));
             mockMapper.Verify();
         }
 
@@ -294,6 +296,8 @@
             mockMapper.Setup(m => m.MapFor(typeof(PostTag), It.IsAny<IConfiguration>())).Returns(new Map<PostTag>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(Like), It.IsAny<IConfiguration>())).Returns(new Map<Like>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(BoolClass), It.IsAny<IConfiguration>())).Returns(new Map<BoolClass>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(ThingWithNullable), It.IsAny<IConfiguration>())).Returns(new Map<ThingWithNullable>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(ReferencesThingWithNullable), It.IsAny<IConfiguration>())).Returns(new Map<ReferencesThingWithNullable>()).Verifiable();
             return mockMapper;
         }
 

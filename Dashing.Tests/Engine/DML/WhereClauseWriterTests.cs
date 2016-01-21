@@ -735,6 +735,39 @@
             Assert.Equal(" where (t_100.[CreateDate] = @l_1)", actual.Sql);
         }
 
+        [Fact]
+        public void WhereHasNullableHasValue() {
+            var target = MakeTarget();
+            Expression<Func<ThingWithNullable, bool>> pred = p => p.Nullable.HasValue;
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Nullable] is not null)", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereHasNullableDoesNotHasValue() {
+            var target = MakeTarget();
+            Expression<Func<ThingWithNullable, bool>> pred = p => !p.Nullable.HasValue;
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Nullable] is null)", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereEqualsNullable() {
+            var target = MakeTarget();
+            var val = new int?(1);
+            Expression<Func<ThingWithNullable, bool>> pred = p => p.Nullable == val.Value;
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ([Nullable] = @l_1)", actual.Sql);
+        }
+
+        [Fact]
+        public void WhereContainsNullableCheck() {
+            var target = MakeTarget();
+            Expression<Func<ReferencesThingWithNullable, bool>> pred = p => p.Thing.Nullable.HasValue && p.Thing.Name.StartsWith("Foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where ((t_100.[Nullable] is not null) and t_100.[Name] like @l_1)", actual.Sql);
+        }
+
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }
