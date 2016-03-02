@@ -2,6 +2,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Dashing.Configuration;
     using Dashing.Engine.DML;
@@ -27,7 +28,7 @@
 
         private void Clone(object entity, object result, FetchNode fetchNode) {
             var entityType = entity.GetType();
-            foreach (var column in this.configuration.GetMap(entityType).Columns) {
+            foreach (var column in this.configuration.GetMap(entityType).Columns.Where(c => !c.Value.IsIgnored)) {
                 var prop = entityType.GetProperty(column.Key);
                 if (column.Value.Type.IsValueType) {
                     prop.SetValue(result, prop.GetValue(entity));
