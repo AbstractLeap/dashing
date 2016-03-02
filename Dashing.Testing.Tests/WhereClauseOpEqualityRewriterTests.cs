@@ -30,8 +30,34 @@ namespace Dashing.Testing.Tests {
             Assert.Equal(exp.ToString(), rewrittenClause.ToString());
         }
 
+        [Fact]
+        public void DoesNotRewriteNullStringComparisons() {
+            Expression<Func<Course, bool>> exp = c => c.Name == null;
+            var rewriter = new WhereClauseOpEqualityRewriter();
+            var rewrittenClause = rewriter.Rewrite(exp);
+            Assert.Equal(exp.ToString(), rewrittenClause.ToString());
+        }
+
+        [Fact]
+        public void DoesNotRewriteNullEntityComparisons() {
+            Expression<Func<Course, bool>> exp = c => c.Type == null;
+            var rewriter = new WhereClauseOpEqualityRewriter();
+            var rewrittenClause = rewriter.Rewrite(exp);
+            Assert.Equal(exp.ToString(), rewrittenClause.ToString());
+        }
+
+        [Fact]
+        public void DoesNotRewriteLastNullEntityComparisons() {
+            Expression<Func<Course, bool>> exp = c => c.Type.Category == null;
+            var rewriter = new WhereClauseOpEqualityRewriter();
+            var rewrittenClause = rewriter.Rewrite(exp);
+            Assert.Equal(exp.ToString(), rewrittenClause.ToString());
+        }
+
         public class CourseType {
             public virtual int CourseTypeId { get; set; }
+
+            public Category Category { get; set; }
         }
 
         public class Course {
@@ -42,6 +68,10 @@ namespace Dashing.Testing.Tests {
             public virtual decimal Price { get; set; }
 
             public string Name { get; set; }
+        }
+
+        public class Category {
+            public int Id { get; set; }
         }
     }
 }

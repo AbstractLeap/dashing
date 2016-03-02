@@ -9,11 +9,20 @@
         }
 
         protected override Expression VisitBinary(BinaryExpression node) {
-            if (node.NodeType == ExpressionType.Equal && !node.Left.Type.IsValueType && node.Left.Type != typeof(string)) {
+            if (node.NodeType == ExpressionType.Equal 
+                && !node.Left.Type.IsValueType // only change entity expressions
+                && node.Left.Type != typeof(string) // ignore strings as well
+                && !IsNullConstant(node.Left) // don't re-write null checks
+                && !IsNullConstant(node.Right) // don't re-write null checks
+            ) {
                 return Expression.Call(node.Left, "Equals", new Type[0], node.Right);
             }
 
             return base.VisitBinary(node);
+        }
+
+        private static bool IsNullConstant(Expression expression) {
+            return expression.NodeType == ExpressionType.Constant && ((ConstantExpression)expression).Value == null;
         }
     }
 }
