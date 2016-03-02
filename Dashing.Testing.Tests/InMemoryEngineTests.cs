@@ -66,11 +66,29 @@
             Assert.NotNull(postWithBlog1);
         }
 
+        [Fact]
+        public void OrderByWorks() {
+            var session = this.GetSession();
+            var posts = session.Query<Post>().OrderByDescending(p => p.Title).ToList();
+            Assert.Equal(2, posts.Count);
+            Assert.Equal("My Second Post", posts.First().Title);
+        }
+
+        [Fact]
+        public void MultipleOrderByWorks() {
+            var session = this.GetSession();
+            var users = session.Query<User>().OrderBy(u => u.IsEnabled).OrderByDescending(u => u.Username).ToList();
+            Assert.Equal(3, users.Count);
+            Assert.Equal("James", users.ElementAt(0).Username);
+            Assert.Equal("Mark", users.ElementAt(1).Username);
+            Assert.Equal("Bob", users.ElementAt(2).Username);
+        }
+
         private ISession GetSession() {
             var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
             var session = new Session(engine, new Mock<ISessionState>().Object);
-            
-            var authors = new List<User> { new User { Username = "Bob" }, new User { Username = "Mark" }, new User { Username = "James" } };
+
+            var authors = new List<User> { new User { Username = "Bob", IsEnabled = true }, new User { Username = "Mark", IsEnabled = true }, new User { Username = "James", IsEnabled = false } };
             session.Insert(authors);
             
             var blogs = new List<Blog> { new Blog { Owner = authors[0], Title = "Bob's Blog" } };

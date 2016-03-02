@@ -84,15 +84,20 @@
                 enumerable = enumerable.Where(rewrittenWhereClause.Compile());
             }
 
+            var firstOrderClause = true;
             foreach (var orderClause in query.OrderClauses) {
-                var expr = Expression.Lambda(orderClause.Expression, Expression.Parameter(typeof(T))).Compile();
+                var expr = ((LambdaExpression)orderClause.Expression).Compile();
+                var funcName = firstOrderClause
+                                   ? (orderClause.Direction == ListSortDirection.Ascending ? "OrderBy" : "OrderByDescending")
+                                   : (orderClause.Direction == ListSortDirection.Ascending ? "ThenBy" : "ThenByDescending");
                 var orderBy =
                     typeof(Enumerable).GetMethods()
                                       .Single(
                                           m =>
                                           m.GetParameters().Count() == 2
-                                          && m.Name == (orderClause.Direction == ListSortDirection.Ascending ? "OrderBy" : "OrderByDescending"));
-                enumerable = (IEnumerable<T>)orderBy.Invoke(enumerable, new object[] { expr });
+                                          && m.Name == funcName).MakeGenericMethod(typeof(T), ((LambdaExpression)orderClause.Expression).ReturnType);
+                enumerable = (IEnumerable<T>)orderBy.Invoke(null, new object[] {enumerable, expr });
+                firstOrderClause = false;
             }
 
             if (query.SkipN > 0) {
