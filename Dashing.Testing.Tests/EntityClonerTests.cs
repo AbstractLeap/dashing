@@ -32,5 +32,17 @@
             var clone = cloner.Clone(post);
             Assert.True(clone.Comments == null || !clone.Comments.Any());
         }
+
+        [Fact]
+        public void IgnoredPropDoesNotGetCloned() {
+            var cloner = new EntityCloner<Post>(new TestConfiguration());
+            var post = new Post() {
+                PostId = 1,
+                Title = "Foo",
+                DoNotMap = true
+            };
+            var clone = cloner.Clone(post);
+            Assert.False(clone.DoNotMap);
+        }
     }
 }
