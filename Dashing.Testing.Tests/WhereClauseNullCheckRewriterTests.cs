@@ -86,6 +86,15 @@
             Assert.Equal(expectedResult.ToString(), rewrittenClause.ToString());
         }
 
+        [Fact]
+        public void DoesNotRewriteNullCheck3() {
+            Expression<Func<Student, bool>> exp = s => s.Name == null;
+            Expression<Func<Student, bool>> expectedResult = s => s.Name == null;
+            var rewriter = new WhereClauseNullCheckRewriter();
+            var rewrittenClause = rewriter.Rewrite(exp);
+            Assert.Equal(expectedResult.ToString(), rewrittenClause.ToString());
+        }
+
         public class CourseType {
             public virtual int CourseTypeId { get; set; }
         }
@@ -104,6 +113,8 @@
 
         public class Student {
             public virtual bool IsOraAmbassador { get; set; }
+
+            public string Name { get; set; }
 
             public Course Course { get; set; }
         }

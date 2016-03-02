@@ -50,7 +50,9 @@
 
                 if (leftHandSideIsNull || this.isNullCheck) {
                     // we're checking null somewhere (e.g. e.Post == null) so we should remove that last null check
-                    this.nullCheckExpressions.RemoveAt(this.nullCheckExpressions.Count - 1);
+                    if (this.nullCheckExpressions.Count > 0) {
+                        this.nullCheckExpressions.RemoveAt(this.nullCheckExpressions.Count - 1);
+                    }
                 }
 
                 return this.CombineExpressions(node);
