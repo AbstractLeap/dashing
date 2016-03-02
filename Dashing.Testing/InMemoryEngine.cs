@@ -171,7 +171,7 @@
                 query.Where(predicate);
             }
 
-            var entitiesToUpdate = this.Query<T>(sessionState, query);
+            var entitiesToUpdate = this.Query<T>(sessionState, query).ToList();
             foreach (var entity in entitiesToUpdate) {
                 update(entity);
             }
@@ -186,7 +186,7 @@
                 query.Where(predicate);
             }
 
-            var entitiesToDelete = this.Query<T>(sessionState, query);
+            var entitiesToDelete = this.Query<T>(sessionState, query).ToList();
             return this.Delete(sessionState, entitiesToDelete);
         }
 

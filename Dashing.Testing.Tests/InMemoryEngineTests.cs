@@ -84,6 +84,27 @@
             Assert.Equal("Bob", users.ElementAt(2).Username);
         }
 
+        [Fact]
+        public void UpdateWorks() {
+            var session = this.GetSession();
+            session.Update<User>(u => u.EmailAddress = "Hazar", u => u.IsEnabled);
+            var users = session.Query<User>().ToList();
+            
+            Assert.Equal(3, users.Count);
+            Assert.Equal(2, users.Count(u => u.IsEnabled && u.EmailAddress == "Hazar"));
+            Assert.Equal(1, users.Count(u => !u.IsEnabled && u.Username == "James"));
+        }
+
+        [Fact]
+        public void DeleteWorks() {
+            var session = this.GetSession();
+            session.Delete<User>(u => u.IsEnabled);
+            var users = session.Query<User>().ToList();
+
+            Assert.Equal(1, users.Count);
+            Assert.Equal(1, users.Count(u => !u.IsEnabled && u.Username == "James"));
+        }
+
         private ISession GetSession() {
             var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
             var session = new Session(engine, new Mock<ISessionState>().Object);
