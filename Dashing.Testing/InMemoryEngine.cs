@@ -57,6 +57,7 @@
             this.AssertConfigured();
             var table = this.tables[typeof(T)];
             var whereClauseNullCheckRewriter = new WhereClauseNullCheckRewriter();
+            var whereClauseOpEqualityRewriter = new WhereClauseOpEqualityRewriter();
             var fetchCloner = new FetchCloner(this.Configuration);
             var enumerable =
                 typeof(InMemoryTable<,>).MakeGenericType(typeof(T), this.Configuration.GetMap(typeof(T)).PrimaryKey.Type)
@@ -78,7 +79,9 @@
             }
 
             foreach (var whereClause in query.WhereClauses) {
-                enumerable = enumerable.Where(whereClauseNullCheckRewriter.Rewrite(whereClause).Compile());
+                var rewrittenWhereClause = whereClauseNullCheckRewriter.Rewrite(whereClause);
+                rewrittenWhereClause = whereClauseOpEqualityRewriter.Rewrite(rewrittenWhereClause);
+                enumerable = enumerable.Where(rewrittenWhereClause.Compile());
             }
 
             foreach (var orderClause in query.OrderClauses) {

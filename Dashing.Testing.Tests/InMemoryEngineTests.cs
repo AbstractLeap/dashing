@@ -58,6 +58,14 @@
             Assert.Equal(3, comments.Count());
         }
 
+        [Fact]
+        public void WhereOpequalityWorks() {
+            var session = this.GetSession();
+            var blog = new Blog { BlogId = 1 };
+            var postWithBlog1 = session.Query<Post>().FirstOrDefault(p => p.Blog == blog);
+            Assert.NotNull(postWithBlog1);
+        }
+
         private ISession GetSession() {
             var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
             var session = new Session(engine, new Mock<ISessionState>().Object);
