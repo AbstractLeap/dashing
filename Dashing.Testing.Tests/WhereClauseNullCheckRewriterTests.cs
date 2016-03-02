@@ -59,6 +59,33 @@
             Assert.Equal(expectedResult.ToString(), rewrittenClause.ToString());
         }
 
+        [Fact]
+        public void DoesNotRewriteNullCheck() {
+            Expression<Func<Booking, bool>> exp = b => b.Student == null;
+            Expression<Func<Booking, bool>> expectedResult = b => b.Student == null;
+            var rewriter = new WhereClauseNullCheckRewriter();
+            var rewrittenClause = rewriter.Rewrite(exp);
+            Assert.Equal(expectedResult.ToString(), rewrittenClause.ToString());
+        }
+
+        [Fact]
+        public void DoesNotRewriteLastNullCheck() {
+            Expression<Func<Booking, bool>> exp = b => b.Student.Course == null;
+            Expression<Func<Booking, bool>> expectedResult = b => b.Student != null && b.Student.Course == null;
+            var rewriter = new WhereClauseNullCheckRewriter();
+            var rewrittenClause = rewriter.Rewrite(exp);
+            Assert.Equal(expectedResult.ToString(), rewrittenClause.ToString());
+        }
+
+        [Fact]
+        public void DoesNotRewriteNullCheck2() {
+            Expression<Func<Booking, bool>> exp = b => null == b.Student;
+            Expression<Func<Booking, bool>> expectedResult = b => null == b.Student;
+            var rewriter = new WhereClauseNullCheckRewriter();
+            var rewrittenClause = rewriter.Rewrite(exp);
+            Assert.Equal(expectedResult.ToString(), rewrittenClause.ToString());
+        }
+
         public class CourseType {
             public virtual int CourseTypeId { get; set; }
         }
@@ -77,6 +104,8 @@
 
         public class Student {
             public virtual bool IsOraAmbassador { get; set; }
+
+            public Course Course { get; set; }
         }
     }
 }

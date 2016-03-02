@@ -6,9 +6,11 @@
     using System.Reflection;
 
     public class WhereClauseNullCheckRewriter : ExpressionVisitor {
-        private Queue<Expression> nullCheckExpressions;
+        private IList<Expression> nullCheckExpressions;
 
         private bool treeHasParameter;
+
+        private bool isNullCheck;
 
         public Expression<Func<T, bool>> Rewrite<T>(Expression<Func<T, bool>> expression) {
             this.ResetVariables();
@@ -36,7 +38,9 @@
                 }
 
                 // visit right hand side
+                var leftHandSideIsNull = this.isNullCheck;
                 this.treeHasParameter = false;
+                this.isNullCheck = false;
                 if (node.Right.NodeType == ExpressionType.Convert) {
                     this.Visit(((UnaryExpression)node.Right).Operand);
                 }
@@ -44,8 +48,14 @@
                     this.Visit(node.Right);
                 }
 
+                if (leftHandSideIsNull || this.isNullCheck) {
+                    // we're checking null somewhere (e.g. e.Post == null) so we should remove that last null check
+                    this.nullCheckExpressions.RemoveAt(this.nullCheckExpressions.Count - 1);
+                }
+
                 return this.CombineExpressions(node);
             }
+
             if (isInAndOrOrExpression) {
                 var leftExpr = this.Visit(node.Left);
                 var rightExpr = this.Visit(node.Right);
@@ -131,13 +141,13 @@
                 if (propInfo.PropertyType.IsClass && propInfo.PropertyType != typeof(string)) {
                     if (this.nullCheckExpressions.Any()) {
                         // we just use the last null check expression and add to that
-                        this.nullCheckExpressions.Enqueue(
+                        this.nullCheckExpressions.Add(
                             Expression.NotEqual(
                                 Expression.Property(((BinaryExpression)this.nullCheckExpressions.Last()).Left, propInfo),
                                 Expression.Constant(null)));
                     }
                     else {
-                        this.nullCheckExpressions.Enqueue(
+                        this.nullCheckExpressions.Add(
                             Expression.NotEqual(Expression.Property(node.Expression, propInfo), Expression.Constant(null)));
                     }
                 }
@@ -147,9 +157,18 @@
             return node;
         }
 
+        protected override Expression VisitConstant(ConstantExpression node) {
+            if (node.Value == null) {
+                this.isNullCheck = true;
+            }
+
+            return base.VisitConstant(node);
+        }
+
         private void ResetVariables() {
-            this.nullCheckExpressions = new Queue<Expression>();
+            this.nullCheckExpressions = new List<Expression>();
             this.treeHasParameter = false;
+            this.isNullCheck = false;
         }
 
         private Expression ModifyExpression(Expression leftExpr, Expression rightExpr, ExpressionType nodeType) {
@@ -181,12 +200,12 @@
             }
 
             if (this.nullCheckExpressions.Count == 1) {
-                return Expression.AndAlso(this.nullCheckExpressions.Dequeue(), exp);
+                return Expression.AndAlso(this.nullCheckExpressions.First(), exp);
             }
 
-            var combinedExpr = Expression.AndAlso(this.nullCheckExpressions.Dequeue(), this.nullCheckExpressions.Dequeue());
-            while (this.nullCheckExpressions.Any()) {
-                combinedExpr = Expression.AndAlso(combinedExpr, this.nullCheckExpressions.Dequeue());
+            var combinedExpr = Expression.AndAlso(this.nullCheckExpressions.First(), this.nullCheckExpressions.ElementAt(1));
+            for (var i = 2; i < this.nullCheckExpressions.Count; i++) {
+                combinedExpr = Expression.AndAlso(combinedExpr, this.nullCheckExpressions.ElementAt(i));
             }
 
             return Expression.AndAlso(combinedExpr, exp);
