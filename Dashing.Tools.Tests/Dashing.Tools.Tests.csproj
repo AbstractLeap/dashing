@@ -84,6 +84,7 @@
     <Compile Include="Migration\AlterTests.cs" />
     <Compile Include="Migration\RenameEntityTests.cs" />
     <Compile Include="Migration\SimpleTests.cs" />
+    <Compile Include="Migration\TableNameEqualityComparerTests.cs" />
     <Compile Include="ReverseEngineering\EngineerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ModelGeneration\SourceTests.cs" />

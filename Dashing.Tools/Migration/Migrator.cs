@@ -60,7 +60,7 @@
             var mapComparer = new TableNameEqualityComparer();
             var additions = to.Except(from, mapComparer).ToList();
             var removals = from.Except(to, mapComparer).ToList();
-            var matches = from.Join(to, f => f.Table, t => t.Table, MigrationPair.Of).ToList();
+            var matches = from.Join(to, f => f.Table.ToLowerInvariant(), t => t.Table.ToLowerInvariant(), MigrationPair.Of).ToList();
 
             // trace output
             logger.Trace("Additions:");
