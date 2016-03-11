@@ -21,8 +21,23 @@
                 return fieldDef;
             }
 
-            // look for fields of this type loaded on to the stack
+            // look for stfld il in the setter
             var candidates =
+                propertyDef.SetMethod.Body.Instructions.Where(
+                    i =>
+                    i.OpCode == OpCodes.Stfld && i.Operand is FieldDefinition
+                    && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName).ToArray();
+            if (candidates.Length == 1) {
+                // they only store one thing in a field
+                return (FieldDefinition)candidates.First().Operand;
+            }
+            else if (candidates.Count(i => i.Previous != null && i.Previous.OpCode == OpCodes.Ldarg_1) == 1) {
+                // they only store one thing in a field by the previous instruction is to load the "value" on to the stack
+                return (FieldDefinition)candidates.Single(i => i.Previous != null && i.Previous.OpCode == OpCodes.Ldarg_1).Operand;
+            }
+
+            // look for fields of this type loaded on to the stack
+            candidates =
                 propertyDef.GetMethod.Body.Instructions.Where(
                     i =>
                     i.OpCode == OpCodes.Ldfld && i.Operand is FieldDefinition
