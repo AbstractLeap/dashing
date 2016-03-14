@@ -60,6 +60,10 @@ namespace Dashing.Engine.Dialects {
             sql.Append(" for update");
         }
 
+        protected override void AppendDefault(StringBuilder sql, IColumn column) {
+            sql.Append(" default ").Append(column.Default);
+        }
+
         public override string ChangeTableName(IMap @from, IMap to) {
             var sql = new StringBuilder("rename table ");
             this.AppendQuotedTableName(sql, from);
