@@ -35,6 +35,7 @@
                 answerProvider.Object,
                 new Mock<ILogger>().Object,
                 new string[0],
+                new string[0],
                 out warnings,
                 out errors);
             Assert.Equal(
@@ -67,6 +68,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                 to.Maps,
                 answerProvider.Object,
                 new Mock<ILogger>().Object,
+                new string[0],
                 new string[0],
                 out warnings,
                 out errors);
@@ -102,6 +104,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                 to.Maps,
                 answerProvider.Object,
                 new Mock<ILogger>().Object,
+                new string[0],
                 new string[0],
                 out warnings,
                 out errors);
@@ -141,6 +144,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                 to.Maps,
                 answerProvider.Object,
                 new Mock<ILogger>().Object,
+                new string[0],
                 new string[0],
                 out warnings,
                 out errors);
@@ -193,6 +197,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                 answerProvider.Object,
                 new Mock<ILogger>().Object,
                 new string[0],
+                new string[0],
                 out warnings,
                 out errors);
             Assert.Equal(
@@ -222,6 +227,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                 to.Maps,
                 answerProvider.Object,
                 new Mock<ILogger>().Object,
+                new string[0],
                 new string[0],
                 out warnings,
                 out errors);
@@ -261,6 +267,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                 answerProvider.Object,
                 new Mock<ILogger>().Object,
                 new string[0],
+                new string[0],
                 out warnings,
                 out errors);
             Assert.Equal(
@@ -290,6 +297,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                 answerProvider.Object,
                 new Mock<ILogger>().Object,
                 new String[0],
+                new string[0],
                 out warnings,
                 out errors);
             Assert.Equal(Regex.Replace(@"EXEC sp_RENAME [Posts], [Ports];
@@ -314,10 +322,8 @@ create index [idx_PostComment_Port] on [PostComments] ([PortId]);", @"(?<!\r)\n"
             return migrator;
         }
 
-        private static ConnectionStringSettings ConnectionString
-        {
-            get
-            {
+        private static ConnectionStringSettings ConnectionString {
+            get {
                 return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
             }
         }

@@ -42,6 +42,7 @@
                 null,
                 new Mock<ILogger>().Object,
                 new string[0],
+                new string[0],
                 out warnings,
                 out errors);
 
@@ -79,6 +80,7 @@
                 null,
                 new Mock<ILogger>().Object,
                 new string[0],
+                new string[0],
                 out warnings,
                 out errors);
 
@@ -114,6 +116,7 @@
                 configTo.Maps,
                 null,
                 new Mock<ILogger>().Object,
+                new string[0],
                 new string[0],
                 out warnings,
                 out errors);

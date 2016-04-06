@@ -10,6 +10,7 @@
             IAnswerProvider answerProvider,
             ILogger logger,
             IEnumerable<string> indexesToIgnore,
+            IEnumerable<string> tablesToIgnore,
             out IEnumerable<string> warnings,
             out IEnumerable<string> errors);
     }

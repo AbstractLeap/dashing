@@ -28,6 +28,7 @@
                 null,
                 new Mock<ILogger>().Object,
                 new string[0],
+                new string[0],
                 out warnings,
                 out errors);
             Assert.Equal(
@@ -47,6 +48,7 @@
                 config.Maps,
                 null,
                 new Mock<ILogger>().Object,
+                new string[0],
                 new string[0],
                 out warnings,
                 out errors);
@@ -70,6 +72,7 @@ create index [idx_Category_Parent] on [Categories] ([ParentId]);",
                 config.Maps,
                 null,
                 new Mock<ILogger>().Object,
+                new string[0],
                 new string[0],
                 out warnings,
                 out errors);
@@ -97,6 +100,7 @@ create index [idx_Pair_ReferencedBy] on [Pairs] ([ReferencedById]);",
                 null,
                 new Mock<ILogger>().Object,
                 new string[0],
+                new string[0],
                 out warnings,
                 out errors);
             Assert.Equal(Regex.Replace(@"create table [OneToOneLefts] ([OneToOneLeftId] int not null identity(1,1) primary key, [RightId] int null, [Name] nvarchar(255) null);
@@ -122,6 +126,7 @@ create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);",
                 config.Maps,
                 null,
                 new Mock<ILogger>().Object,
+                new string[0],
                 new string[0],
                 out warnings,
                 out errors);
@@ -181,10 +186,8 @@ create index [idx_PostTag_Tag] on [PostTags] ([TagId]);",
             return migrator;
         }
 
-        private static ConnectionStringSettings ConnectionString
-        {
-            get
-            {
+        private static ConnectionStringSettings ConnectionString {
+            get {
                 return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
             }
         }

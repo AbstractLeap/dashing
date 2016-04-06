@@ -46,14 +46,19 @@
             }
             catch (CatchyException e) {
                 using (Color(ConsoleColor.Red)) {
-                    Console.WriteLine(e.Message);
+                    WriteExceptionMessage(e);
+                    WriteExceptionStackTrace(e);
                 }
 
                 return -1;
             }
             catch (ReflectionTypeLoadException rtle) {
-                foreach (var le in rtle.LoaderExceptions) {
-                    Console.WriteLine(le.Message);
+                using (Color(ConsoleColor.Red)) {
+                    WriteExceptionMessage(rtle);
+                    WriteExceptionStackTrace(rtle);
+                    foreach (var le in rtle.LoaderExceptions) {
+                        Console.WriteLine(le.Message);
+                    }
                 }
 
                 return -1;
@@ -62,12 +67,14 @@
                 using (Color(ConsoleColor.Red)) {
                     Console.WriteLine();
                     Console.WriteLine("Encountered a problem instantiating the configuration object");
+                    WriteExceptionMessage(e);
+                    WriteExceptionStackTrace(e);
                 }
 
                 var rtle = e.InnerException as ReflectionTypeLoadException;
                 if (rtle != null) {
                     foreach (var le in rtle.LoaderExceptions) {
-                        Console.WriteLine(le.Message);
+                        WriteExceptionMessage(le);
                     }
                 }
 
@@ -76,21 +83,28 @@
             catch (Exception e) {
                 using (Color(ConsoleColor.Red)) {
                     Console.WriteLine("Caught unhandled {0}", e.GetType().Name);
-                    Console.WriteLine(e.Message);
-                    var ee = e;
-                    while ((ee = ee.InnerException) != null) {
-                        Console.WriteLine(ee.Message);
-                    }
+                    WriteExceptionMessage(e);
                 }
-
-                using (Color(ConsoleColor.Gray)) {
-                    Console.WriteLine(e.StackTrace);
-                }
-
+                
+                WriteExceptionStackTrace(e);
                 return -1;
             }
 
             return 0;
+        }
+
+        private static void WriteExceptionStackTrace(Exception e) {
+            using (Color(ConsoleColor.Gray)) {
+                Console.WriteLine(e.StackTrace);
+            }
+        }
+
+        private static void WriteExceptionMessage(Exception e) {
+            Console.WriteLine(e.Message);
+            var ee = e;
+            while ((ee = ee.InnerException) != null) {
+                Console.WriteLine(ee.Message);
+            }
         }
 
         private static void ConfigureAssemblyResolution() {
@@ -574,6 +588,7 @@
                         consoleAnswerProvider,
                         new ConsoleLogger(isVerbose),
                         reverseEngineerSettings.GetIndexesToIgnore(),
+                        reverseEngineerSettings.GetTablesToIgnore(),
                         out warnings,
                         out errors);
 

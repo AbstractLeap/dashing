@@ -39,6 +39,7 @@
                     null,
                     new Mock<ILogger>().Object,
                     new string[0],
+                    new string[0], 
                     out warnings,
                     out errors);
                 transactionLessSession.Dapper.Execute("create database " + this.DatabaseName);

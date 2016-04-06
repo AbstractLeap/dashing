@@ -29,6 +29,7 @@
                 null,
                 new Mock<ILogger>().Object,
                 new[] { "Foo" },
+                new string[0],
                 out warnings,
                 out errors);
             Assert.Empty(script);
@@ -49,6 +50,7 @@
                 null,
                 new Mock<ILogger>().Object,
                 new string[0],
+                new string[0],
                 out warnings,
                 out errors);
             Assert.Equal(@"drop index [Foo] on [SimpleClasses];", script.Trim());
@@ -67,10 +69,8 @@
             return migrator;
         }
 
-        private static ConnectionStringSettings ConnectionString
-        {
-            get
-            {
+        private static ConnectionStringSettings ConnectionString {
+            get {
                 return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
             }
         }
