@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Tools.ReverseEngineering {
     using System;
+    using System.Collections.Generic;
     using System.Data.Entity.Design.PluralizationServices;
     using System.Globalization;
 
@@ -12,7 +13,7 @@
         ///     A string containing extra pluralization words
         ///     in the form Singular1,Plural1|Singular2,Plural2|Singular3,Plural3 ...
         /// </param>
-        public DefaultConvention(string extraPluralizationWords) {
+        public DefaultConvention(IEnumerable<KeyValuePair<string, string>> extraPluralizationWords) {
             this.pluralizer = PluralizationService.CreateService(new CultureInfo("en-GB"));
 
             // ok, damned EnglishPluralizationService is an internal class so bit of reflection...
@@ -20,15 +21,10 @@
                 typeof(PluralizationService).Assembly.GetType("System.Data.Entity.Design.PluralizationServices.EnglishPluralizationService")
                                             .GetMethod("AddWord");
 
-            if (!string.IsNullOrWhiteSpace(extraPluralizationWords)) {
+            if (extraPluralizationWords != null) {
                 try {
-                    var pairs = extraPluralizationWords.Split('|');
-
-                    foreach (var pair in pairs) {
-                        var words = pair.Split(',');
-                        if (words.Length == 2) {
-                            addWordMethod.Invoke(this.pluralizer, new object[] { words[0], words[1] });
-                        }
+                    foreach (var pair in extraPluralizationWords) {
+                        addWordMethod.Invoke(this.pluralizer, new object[] { pair.Key, pair.Value});
                     }
                 }
                 catch (Exception e) {

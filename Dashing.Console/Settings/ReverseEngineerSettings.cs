@@ -23,5 +23,22 @@
 
             return tablesToIgnore.Union(new[] { "sysdiagrams" });
         }
+
+        public IEnumerable<KeyValuePair<string, string>> GetExtraPluralizationWords() {
+            var result = new List<KeyValuePair<string, string>>();
+            if (string.IsNullOrWhiteSpace(this.ExtraPluralizationWords)) {
+                return result;
+            }
+
+            var pairs = this.ExtraPluralizationWords.Split('|');
+            foreach (var pair in pairs) {
+                var words = pair.Split(',');
+                if (words.Length == 2) {
+                    result.Add(new KeyValuePair<string, string>(words[0], words[1]));
+                }
+            }
+
+            return result;
+        }
     }
 }

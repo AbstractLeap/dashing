@@ -25,7 +25,7 @@
         /// </summary>
         private readonly IDictionary<string, IList<IColumn>> manyToOneColumns;
 
-        public Engineer(string extraPluralizationWords)
+        public Engineer(IEnumerable<KeyValuePair<string, string>> extraPluralizationWords)
             : this(new DefaultConvention(extraPluralizationWords)) {
         }
 

@@ -514,7 +514,7 @@
             }
 
             DatabaseSchema schema;
-            var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
+            var engineer = new Engineer(reverseEngineerSettings.GetExtraPluralizationWords());
 
             var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
             schema = databaseReader.ReadAll();
@@ -560,7 +560,7 @@
             IEnumerable<IMap> fromMaps;
             using (new TimedOperation("-- Reverse engineering...")) {
                 Console.WriteLine();
-                var engineer = new Engineer(reverseEngineerSettings.ExtraPluralizationWords);
+                var engineer = new Engineer(reverseEngineerSettings.GetExtraPluralizationWords().Union(configuration.Maps.Select(m => new KeyValuePair<string, string>(m.Type.Name, m.Table)))); // we use our configuration to inform us as to the correct naming of tables
                 fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider, false);
                 Console.Write("-- ");
             }
