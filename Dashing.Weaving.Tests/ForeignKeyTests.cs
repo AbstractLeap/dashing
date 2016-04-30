@@ -46,5 +46,26 @@ namespace Dashing.Weaving.Tests {
             bar.Foo = null;
             Assert.Null(bar.Foo);
         }
+
+        [Fact]
+        public void AccessingNonFetchedThrows() {
+            var bar = new Bar();
+            typeof(Bar).GetField("FooId").SetValue(bar, 3);
+            Assert.Throws<InvalidOperationException>(() => bar.Foo.Name);
+        }
+
+        [Fact]
+        public void AccessingNonFetchedPkDoesNotThrow() {
+            var bar = new Bar();
+            typeof(Bar).GetField("FooId").SetValue(bar, 3);
+            Assert.Equal(3, bar.Foo.FooId);
+        }
+
+        [Fact]
+        public void AccessingInheritedNonFetchedThrows() {
+            var dog = new Dog();
+            typeof(Dog).GetField("BarId").SetValue(dog, 3);
+            Assert.Throws<InvalidOperationException>(() => dog.Bar.Name);
+        }
     }
 }
