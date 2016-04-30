@@ -110,6 +110,7 @@
     <Compile Include="Weaving\Weavers\BaseWeaver.cs" />
     <Compile Include="Weaving\Weavers\CollectionInstantiationWeaver.cs" />
     <Compile Include="Weaving\Weavers\EqualityWeaver.cs" />
+    <Compile Include="Weaving\Weavers\ForeignKeyGeneratedWeaver.cs" />
     <Compile Include="Weaving\Weavers\ForeignKeyWeaver.cs" />
     <Compile Include="Weaving\Weavers\ITaskLogHelper.cs" />
     <Compile Include="Weaving\Weavers\IWeaver.cs" />

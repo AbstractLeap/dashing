@@ -18,6 +18,7 @@
             Dictionary<string, List<MapDefinition>> assemblyMapDefinitions,
             Dictionary<string, AssemblyDefinition> assemblyDefinitions) {
             var boolTypeDef = typeDef.Module.Import(typeof(bool));
+
             foreach (var columnDef in
                 mapDefinition.ColumnDefinitions.Where(
                     c => c.Relationship == RelationshipType.ManyToOne || c.Relationship == RelationshipType.OneToOne)) {
@@ -97,6 +98,9 @@
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
 
+                    var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
+                    var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
+                    var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
                 if (fkPkType.IsValueType) {
                     il.Insert(index++, Instruction.Create(OpCodes.Ldflda, fkField));
                     il.Insert(
@@ -107,9 +111,6 @@
                                 MakeGeneric(
                                     fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"),
                                     typeDef.Module.Import(fkPkType)))));
-                    var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
-                    var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
-                    var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
                     il.Insert(
                         index++,
                         Instruction.Create(
@@ -119,9 +120,6 @@
                 }
                 else {
                     il.Insert(index++, Instruction.Create(OpCodes.Ldfld, fkField));
-                    var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
-                    var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
-                    var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
                     il.Insert(
                         index++,
                         Instruction.Create(
@@ -131,7 +129,13 @@
                 }
 
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
-                il.Insert(index, Instruction.Create(OpCodes.Stfld, backingField));
+                il.Insert(index++, Instruction.Create(OpCodes.Stfld, backingField));
+
+                // set the IsGeneratedViaForeignKey true
+                il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldfld, backingField));
+                il.Insert(index++, Instruction.Create(OpCodes.Ldc_I4_1));
+                il.Insert(index, Instruction.Create(OpCodes.Stfld, typeDef.Module.Import(this.GetField(fkMapTypeRef, IsGeneratedViaForeignKeyFieldName))));
             }
         }
     }
