@@ -12,8 +12,6 @@
     public abstract class BaseWeaver : ITaskLogHelper, IWeaver {
         private const string BackingFieldTemplate = "<{0}>k__BackingField";
 
-        protected const string IsGeneratedViaForeignKeyFieldName = "__IsGeneratedViaForeignKeyField";
-
         public ILogger Log { get; set; }
 
         protected FieldDefinition GetBackingField(PropertyDefinition propertyDef) {
@@ -188,12 +186,6 @@
             }
 
             return typeDef;
-        }
-
-        public virtual int Precedence {
-            get {
-                return 1000000; // by default a weaver is run last
-            }
         }
 
         public abstract void Weave(

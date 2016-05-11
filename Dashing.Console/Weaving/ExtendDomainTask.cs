@@ -132,7 +132,7 @@
                 "Found the following assemblies that reference dashing: " + string.Join(", ", assemblyMapDefinitions.Select(a => a.Key)));
 
             // now go through each assembly and re-write the types
-            var wovenTypes = new HashSet<Tuple<string, Type>>();
+            var visitedTypes = new HashSet<string>();
             var weavers = me.GetLoadableTypes().Where(t => typeof(IWeaver).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract).Select(
                 t => {
                     var weaver = (IWeaver)Activator.CreateInstance(t);
@@ -142,29 +142,23 @@
 
             this.Logger.Trace("Found the following weavers: " + string.Join(", ", weavers.Select(w => w.GetType().Name)));
 
-            foreach (var weaver in weavers.OrderBy(w => w.Precedence)) {
-                foreach (var assemblyMapDefinition in assemblyMapDefinitions) {
-                    var assemblyDefinitionLookup = assemblyDefinitions.Single(a => a.Value.FullName == assemblyMapDefinition.Key);
-                    var assemblyDefinition = assemblyDefinitionLookup.Value;
-                    foreach (var mapDefinition in assemblyMapDefinition.Value) {
-                        var wovenTypesEntry = Tuple.Create(mapDefinition.TypeFullName, weaver.GetType());
-                        if (wovenTypes.Contains(wovenTypesEntry)) {
-                            continue;
-                        }
-
-                        this.Logger.Trace("Weaving {0} in {1}", mapDefinition.TypeFullName, mapDefinition.AssemblyFullName);
-                        var typeDef = BaseWeaver.GetTypeDefFromFullName(mapDefinition.TypeFullName, assemblyDefinition);
-                        weaver.Weave(typeDef, assemblyDefinition, mapDefinition, assemblyMapDefinitions, assemblyDefinitions);
-
-                        wovenTypes.Add(wovenTypesEntry);
-                    }
-                }
-            }
-
-            // now write out the assemblies
             foreach (var assemblyMapDefinition in assemblyMapDefinitions) {
                 var assemblyDefinitionLookup = assemblyDefinitions.Single(a => a.Value.FullName == assemblyMapDefinition.Key);
                 var assemblyDefinition = assemblyDefinitionLookup.Value;
+                foreach (var mapDefinition in assemblyMapDefinition.Value) {
+                    if (visitedTypes.Contains(mapDefinition.TypeFullName)) {
+                        continue;
+                    }
+
+                    this.Logger.Trace("Weaving {0} in {1}", mapDefinition.TypeFullName, mapDefinition.AssemblyFullName);
+                    var typeDef = BaseWeaver.GetTypeDefFromFullName(mapDefinition.TypeFullName, assemblyDefinition);
+                    foreach (var weaver in weavers) {
+                        weaver.Weave(typeDef, assemblyDefinition, mapDefinition, assemblyMapDefinitions, assemblyDefinitions);
+                    }
+
+                    visitedTypes.Add(mapDefinition.TypeFullName);
+                }
+
                 try {
                     if (File.Exists(assemblyDefinitionLookup.Key.Substring(0, assemblyDefinitionLookup.Key.Length - 3) + "pdb")) {
                         assemblyDefinition.Write(
@@ -183,6 +177,13 @@
                     }
                     catch (Exception) {
                         return false; // bugger it's broke
+                    }
+                }
+
+                // verify assembly
+                if (!peVerifier.Verify(assemblyDefinitionLookup.Key)) {
+                    if (!IgnorePEVerify) {
+                        return false;
                     }
                 }
 
@@ -217,16 +218,6 @@
                 //        processedFileLocations.Add(projectFile);
                 //    }
                 //}
-            }
-
-            // now check the assembies using PeVerify
-            foreach (var assemblyMapDefinition in assemblyMapDefinitions) {
-                var assemblyDefinitionLookup = assemblyDefinitions.Single(a => a.Value.FullName == assemblyMapDefinition.Key);
-                if (!peVerifier.Verify(assemblyDefinitionLookup.Key)) {
-                    if (!IgnorePEVerify) {
-                        return false;
-                    }
-                }
             }
 
             return true;

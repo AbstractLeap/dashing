@@ -47,19 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
-    <Compile Include="Domain\Animal.cs" />
-    <Compile Include="Domain\Bar.cs" />
-    <Compile Include="Domain\Dog.cs" />
-    <Compile Include="Domain\Duck.cs" />
-    <Compile Include="Domain\EntityReferencingEntityWithPrimaryKey.cs" />
-    <Compile Include="Domain\EntityWithGuidPrimaryKey.cs" />
-    <Compile Include="Domain\EntityWithStringPrimaryKey.cs" />
     <Compile Include="Domain\Foo.cs" />
-    <Compile Include="Domain\FooType.cs" />
-    <Compile Include="Domain\IveGotMethods.cs" />
-    <Compile Include="Domain\ReferencesAnotherAssembly.cs" />
-    <Compile Include="Domain\Starship.cs" />
-    <Compile Include="Domain\Whopper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Target\Bar.cs" />

@@ -1,5 +1,4 @@
 ﻿namespace Dashing.Testing.Tests {
-    using System;
     using System.Collections.Generic;
 
     using Dashing.Engine;
@@ -21,7 +20,7 @@
             Assert.Equal(1, clone.PostId);
             Assert.Equal("Bar", clone.Title);
             Assert.Equal(2, clone.Blog.BlogId);
-            Assert.Throws<InvalidOperationException>(() => clone.Blog.Description);
+            Assert.Null(clone.Blog.Description);
         }
 
         [Fact]
@@ -62,7 +61,7 @@
             Assert.Equal(2, clone.Blog.BlogId);
             Assert.Equal("Foo", clone.Blog.Description);
             Assert.Equal(4, clone.Blog.Owner.UserId);
-            Assert.Throws<InvalidOperationException>(() => clone.Blog.Owner.Username);
+            Assert.Null(clone.Blog.Owner.Username);
         }
 
         [Fact]
@@ -134,8 +133,8 @@
             Assert.Equal("Boo", clone.Posts[1].Title);
             Assert.Equal(5, clone.Posts[0].Author.UserId);
             Assert.Equal(7, clone.Posts[1].Author.UserId);
-            Assert.Throws<InvalidOperationException>(() => clone.Posts[0].Author.Username);
-            Assert.Throws<InvalidOperationException>(() => clone.Posts[1].Author.Username);
+            Assert.Null(clone.Posts[0].Author.Username);
+            Assert.Null(clone.Posts[1].Author.Username);
         }
     }
 }

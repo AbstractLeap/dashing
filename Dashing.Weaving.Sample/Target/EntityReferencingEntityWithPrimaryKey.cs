@@ -34,7 +34,6 @@ namespace Dashing.Weaving.Sample.Target {
             {
                 if (this.__entity == null && this.EntityWithStringPrimaryKeyId != null) {
                     this.__entity = new EntityWithStringPrimaryKey { Id = this.EntityWithStringPrimaryKeyId };
-                    this.__entity.__IsGeneratedViaForeignKey = true;
                 }
 
                 return this.__entity;

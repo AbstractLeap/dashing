@@ -1,5 +1,4 @@
 ﻿namespace Dashing.Testing.Tests {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -20,7 +19,7 @@
             Assert.Equal(post.PostId, clone.PostId);
             Assert.True(post.Blog.Equals(clone.Blog));
             Assert.False(post.Blog == clone.Blog);
-            Assert.Throws<InvalidOperationException>(() => clone.Blog.Title);
+            Assert.Null(clone.Blog.Title);
             Assert.Equal("My Blog", post.Blog.Title);
         }
 

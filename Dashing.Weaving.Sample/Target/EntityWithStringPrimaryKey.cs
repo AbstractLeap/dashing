@@ -17,8 +17,6 @@ namespace Dashing.Weaving.Sample.Target {
 
         private string __name;
 
-        public bool __IsGeneratedViaForeignKey;
-
         public string Id { get; set; }
 
         public string Name

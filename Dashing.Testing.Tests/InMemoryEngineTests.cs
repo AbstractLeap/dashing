@@ -1,5 +1,4 @@
 ﻿namespace Dashing.Testing.Tests {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -18,7 +17,7 @@
             Assert.Equal(1, firstComment.Post.PostId);
             Assert.Equal(1, firstComment.Post.Author.UserId);
             Assert.Equal(2, firstComment.User.UserId);
-            Assert.Throws<InvalidOperationException>(() => firstComment.User.Username);
+            Assert.Null(firstComment.User.Username);
             Assert.Equal("Bob", firstComment.Post.Author.Username);
             Assert.Equal("My First Post", firstComment.Post.Title);
         }
@@ -31,7 +30,7 @@
             Assert.Equal(3, posts.First().Comments.Count);
             Assert.Equal("Mark", posts.First().Comments.First().User.Username);
             Assert.Equal(posts.First().Comments.First().Post.PostId, posts.First().PostId);
-            Assert.Throws<InvalidOperationException>(() => posts.First().Comments.First().Post.Title);
+            Assert.Null(posts.First().Comments.First().Post.Title);
             Assert.NotNull(posts.First().Title);
         }
 
@@ -40,7 +39,7 @@
             var session = this.GetSession();
             var comments = session.Query<Comment>().Fetch(c => c.Post).Where(c => c.Post.Author.UserId == 1);
             Assert.True(comments.First().Post.Author.UserId == 1);
-            Assert.Throws<InvalidOperationException>(() => comments.First().Post.Author.Username);
+            Assert.True(comments.First().Post.Author.Username == null);
         }
 
         [Fact]

@@ -4,8 +4,6 @@
     using Mono.Cecil;
 
     public interface IWeaver {
-        int Precedence { get; }
-
         void Weave(
             TypeDefinition typeDef,
             AssemblyDefinition assemblyDefinition,
