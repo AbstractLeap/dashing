@@ -86,5 +86,16 @@
             wrapper.Session.Delete(user);
             Assert.Empty(wrapper.Session.Query<User>().Where(u => u.Username == "TestDelete"));
         }
+
+        [Theory]
+        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        public void DateTimeInsertedAndSelectedCorrectly(TestSessionWrapper wrapper) {
+            var date = new DateTime(2016, 12, 25, 1, 3, 6, DateTimeKind.Utc);
+            var comment = new Comment { Content = "Foo", CommentDate = date };
+            wrapper.Session.Insert(comment);
+            Assert.Equal(date, comment.CommentDate);
+            var fetchedComment = wrapper.Session.Get<Comment>(comment.CommentId);
+            Assert.Equal(date, fetchedComment.CommentDate);
+        }
     }
 }
