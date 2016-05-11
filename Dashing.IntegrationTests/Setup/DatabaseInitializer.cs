@@ -52,7 +52,10 @@ namespace Dashing.IntegrationTests.Setup {
                     new string[0],
                     out warnings,
                     out errors);
-                transactionLessSession.Dapper.Execute(createStatement);
+                var statements = createStatement.Split(';');
+                foreach (var statement in statements.Where(s => !string.IsNullOrWhiteSpace(s.Trim()))) {
+                    transactionLessSession.Dapper.Execute(statement);
+                }
             }
 
             var session = this.configuration.BeginSession();
