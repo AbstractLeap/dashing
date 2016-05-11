@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tools.ReverseEngineering {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
     using System.Linq;
 
@@ -24,6 +25,8 @@
         public void AddMap(Type type, IMap map) {
             this.maps.Add(type, map);
         }
+
+        public ConnectionStringSettings ConnectionStringSettings { get; private set; }
 
         public IEnumerable<IMap> Maps
         {

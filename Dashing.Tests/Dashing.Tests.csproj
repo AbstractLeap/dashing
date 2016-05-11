@@ -38,9 +38,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper, Version=1.38.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
+    <Reference Include="Dapper, Version=1.50.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.1.50.0-beta9\lib\net45\Dapper.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -55,6 +55,8 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="xunit.abstractions">
       <HintPath>..\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>
       <Private>True</Private>
@@ -85,6 +87,23 @@
     <Compile Include="Configuration\AddNamespaceDomain\AddNamespaceConfiguration.cs" />
     <Compile Include="Configuration\AddNamespaceTests.cs" />
     <Compile Include="Configuration\ColumnExtensionTests.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\ConfigTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Configuration\SelfReferenceTests\Domain\Blog.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\Category.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\Comment.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\Like.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\OneToOneLeft.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\OneToOneRight.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\Pair.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\Post.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\PostTag.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\Tag.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\Domain\User.cs" />
+    <Compile Include="Configuration\SelfReferenceTests\TestConfig.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Engine\DapperMapperGeneration\CollectionTests.cs" />
     <Compile Include="Engine\DapperMapperGeneration\NonCollectionTests.cs" />
     <Compile Include="Configuration\DefaultConventionTests.cs" />

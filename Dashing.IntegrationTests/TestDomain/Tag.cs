@@ -1,7 +1,7 @@
 ﻿namespace Dashing.IntegrationTests.TestDomain {
     public class Tag {
-        public virtual int TagId { get; set; }
+        public long TagId { get; set; }
 
-        public virtual string Content { get; set; }
+        public string Content { get; set; }
     }
 }

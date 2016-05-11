@@ -34,9 +34,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper, Version=1.38.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
+    <Reference Include="Dapper, Version=1.50.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.1.50.0-beta9\lib\net45\Dapper.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -47,6 +47,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGeneration\DelegateQueryCreator.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Engine\Dialects\ISqlDialect.cs" />
     <Compile Include="Engine\Dialects\MySqlDialect.cs" />
     <Compile Include="Engine\Dialects\SqlDialectBase.cs" />
+    <Compile Include="Engine\Dialects\SqliteDialect.cs" />
     <Compile Include="Engine\Dialects\SqlServer2012Dialect.cs" />
     <Compile Include="Engine\Dialects\SqlServerDialect.cs" />
     <Compile Include="Engine\DML\BaseExpressionVisitor.cs" />
@@ -128,6 +130,7 @@
     <Compile Include="Engine\DML\SqlWriterResult.cs" />
     <Compile Include="Engine\DML\UpdateWriter.cs" />
     <Compile Include="Engine\DML\WhereClauseWriter.cs" />
+    <Compile Include="Engine\DML\WriterQueryCacheKey.cs" />
     <Compile Include="Engine\NonExecutingSelectQueryExecutor.cs" />
     <Compile Include="Engine\SqlEngine.cs" />
     <Compile Include="Engine\IEngine.cs" />
@@ -161,9 +164,6 @@
     <Compile Include="NeedToDash.cs" />
     <Compile Include="SessionExtensions.cs" />
     <Compile Include="SessionState.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Generator\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

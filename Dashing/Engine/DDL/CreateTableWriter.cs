@@ -55,7 +55,7 @@ namespace Dashing.Engine.DDL {
         }
 
         public IEnumerable<string> CreateForeignKeys(IEnumerable<ForeignKey> foreignKeys) {
-            return foreignKeys.Select(f => this.CreateForeignKey(f));
+            return foreignKeys.Select(f => this.dialect.CreateForeignKey(f));
         }
 
         public IEnumerable<string> CreateIndexes(IMap map) {

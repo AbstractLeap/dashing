@@ -1,12 +1,15 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
 
     using Dashing.Engine;
     using Dashing.Events;
 
     public interface IConfiguration {
+        ConnectionStringSettings ConnectionStringSettings { get; }
+
         /// <summary>
         ///     Gets the maps.
         /// </summary>

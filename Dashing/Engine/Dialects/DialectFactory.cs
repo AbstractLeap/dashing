@@ -43,6 +43,9 @@
 
                     throw new NotImplementedException("For OleDb we only recognise Sql Server Native Client and MySQL provider");
 
+                case "System.Data.SQLite":
+                    return new SqliteDialect();
+
                 default:
                     throw new NotImplementedException("Sorry, we don't support the \"" + connectionString.ProviderName + "\" provider just yet");
             }

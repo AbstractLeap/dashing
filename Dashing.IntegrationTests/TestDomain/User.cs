@@ -1,15 +1,15 @@
 ﻿namespace Dashing.IntegrationTests.TestDomain {
     public class User {
-        public virtual int UserId { get; set; }
+        public long UserId { get; set; }
 
-        public virtual string Username { get; set; }
+        public string Username { get; set; }
 
-        public virtual string EmailAddress { get; set; }
+        public string EmailAddress { get; set; }
 
-        public virtual string Password { get; set; }
+        public string Password { get; set; }
 
-        public virtual bool IsEnabled { get; set; }
+        public bool IsEnabled { get; set; }
 
-        public virtual decimal HeightInMeters { get; set; }
+        public decimal HeightInMeters { get; set; }
     }
 }

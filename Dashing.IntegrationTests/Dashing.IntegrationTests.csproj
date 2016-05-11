@@ -11,7 +11,7 @@
     <AssemblyName>Dashing.IntegrationTests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <NuGetPackageImportStamp>ea337f08</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>bce82707</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,9 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper, Version=1.38.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
+    <Reference Include="Dapper, Version=1.50.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.1.50.0-beta9\lib\net45\Dapper.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Moq">
       <HintPath>..\packages\Moq.4.2.1502.0911\lib\net40\Moq.dll</HintPath>
@@ -41,6 +41,9 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite">
+      <HintPath>C:\Program Files\System.Data.SQLite\2012\bin\System.Data.SQLite.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -64,40 +67,56 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\ConfigTests.cs" />
-    <Compile Include="Configuration\Domain\Blog.cs" />
-    <Compile Include="Configuration\Domain\Category.cs" />
-    <Compile Include="Configuration\Domain\Comment.cs" />
-    <Compile Include="Configuration\Domain\Like.cs" />
-    <Compile Include="Configuration\Domain\OneToOneLeft.cs" />
-    <Compile Include="Configuration\Domain\OneToOneRight.cs" />
-    <Compile Include="Configuration\Domain\Pair.cs" />
-    <Compile Include="Configuration\Domain\Post.cs" />
-    <Compile Include="Configuration\Domain\PostTag.cs" />
-    <Compile Include="Configuration\Domain\Tag.cs" />
-    <Compile Include="Configuration\Domain\User.cs" />
-    <Compile Include="Configuration\TestConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SqlServer\AnyTests.cs" />
-    <Compile Include="SqlServer\AsyncTests.cs" />
-    <Compile Include="SqlServer\CollectionTests.cs" />
-    <Compile Include="SqlServer\CUDTests.cs" />
-    <Compile Include="SqlServer\DapperWrapperTests.cs" />
-    <Compile Include="SqlServer\EnumeratingTests.cs" />
-    <Compile Include="SqlServer\FetchTests.cs" />
-    <Compile Include="SqlServer\Fixtures\MultipleFetchManyWithNonRootAndThenFetchSqlServerFixture.cs" />
-    <Compile Include="SqlServer\Fixtures\SqlServerFixture.cs" />
-    <Compile Include="SqlServer\ForUpdateTests.cs" />
-    <Compile Include="SqlServer\SelectTests.cs" />
-    <Compile Include="SqlServer\SqlServerConfiguration.cs" />
-    <Compile Include="SqlServer\TransactionTests.cs" />
+    <Compile Include="Setup\DatabaseInitializer.cs" />
+    <Compile Include="Setup\MySqlConfiguration.cs" />
+    <Compile Include="Setup\SessionDataGenerator.cs" />
+    <Compile Include="Setup\TestSessionWrapper.cs" />
+    <Compile Include="Setup\SqlLiteConfiguration.cs" />
+    <Compile Include="Setup\TestDatabaseGenerator.cs" />
+    <Compile Include="TestDomain\More\Bed.cs" />
+    <Compile Include="TestDomain\More\Booking.cs" />
+    <Compile Include="TestDomain\More\Question.cs" />
+    <Compile Include="TestDomain\More\Questionnaire.cs" />
+    <Compile Include="TestDomain\More\QuestionResponse.cs" />
+    <Compile Include="TestDomain\More\Room.cs" />
+    <Compile Include="TestDomain\More\RoomSlot.cs" />
+    <Compile Include="Tests\AnyTests.cs" />
+    <Compile Include="Setup\SqlServerConfiguration.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\Comment.cs" />
-    <Compile Include="TestDomain\More\MultipleFetchManyWithNonRootAndThenFetchDomain.cs" />
+    <Compile Include="TestDomain\More\QuestionnaireResponse.cs" />
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />
     <Compile Include="TestDomain\User.cs" />
+    <Compile Include="Tests\AsyncTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tests\CollectionTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tests\CUDTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tests\DapperWrapperTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tests\EnumeratingTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tests\FetchTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tests\ForUpdateTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tests\SelectTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tests\TransactionTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dashing.Tools\Dashing.Tools.csproj">
@@ -113,6 +132,7 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
