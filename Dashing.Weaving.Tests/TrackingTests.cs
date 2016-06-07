@@ -154,5 +154,37 @@ namespace Dashing.Weaving.Tests {
             starship.Foo = true;
             Assert.True(starship.GetBar());
         }
+
+        [Fact]
+        public void SetToNullOnNonFetchedButNotNullProperty() {
+            var barCheck = new Bar();
+            barCheck.GetType().GetField("FooId").SetValue(barCheck, 1);
+            Assert.Equal(1, barCheck.Foo.FooId);
+
+            var bar = new Bar();
+            var barAsTracked = (ITrackedEntity)bar;
+            bar.GetType().GetField("FooId").SetValue(bar, 2);
+            barAsTracked.EnableTracking();
+            bar.Foo = null;
+            Assert.Equal(1, barAsTracked.GetDirtyProperties().Count());
+            Assert.True(barAsTracked.GetDirtyProperties().First() == "Foo");
+            Assert.Equal(2, ((Foo)barAsTracked.GetOldValue("Foo")).FooId);
+        }
+
+        [Fact]
+        public void SetToNullOnNonFetchedButNotNullStringPkProperty() {
+            var check = new EntityReferencingEntityWithPrimaryKey();
+            check.GetType().GetField("EntityWithStringPrimaryKeyId").SetValue(check, "Foo");
+            Assert.Equal("Foo", check.EntityWithStringPrimaryKey.Id);
+
+            var ting = new EntityReferencingEntityWithPrimaryKey();
+            var tingAsTracked = (ITrackedEntity)ting;
+            ting.GetType().GetField("EntityWithStringPrimaryKeyId").SetValue(ting, "Foo");
+            tingAsTracked.EnableTracking();
+            ting.EntityWithStringPrimaryKey = null;
+            Assert.Equal(1, tingAsTracked.GetDirtyProperties().Count());
+            Assert.True(tingAsTracked.GetDirtyProperties().First() == "EntityWithStringPrimaryKey");
+            Assert.Equal("Foo", ((EntityWithStringPrimaryKey)tingAsTracked.GetOldValue("EntityWithStringPrimaryKey")).Id);
+        }
     }
 }

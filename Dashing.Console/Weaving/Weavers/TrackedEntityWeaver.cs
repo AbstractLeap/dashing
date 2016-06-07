@@ -5,6 +5,7 @@
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
+    using Dashing.Extensions;
 
     using Mono.Cecil;
     using Mono.Cecil.Cil;
@@ -30,11 +31,11 @@
                                        a.Value.MainModule.Types.Any(t => t.IsClass && t.BaseType != null && t.BaseType.FullName == typeDef.FullName));
 
             while (classHierarchy.Count > 0) {
-                this.ImplementITrackedEntityForTypeDefinition(classHierarchy.Pop(), mapDefinition, notInInheritance);
+                this.ImplementITrackedEntityForTypeDefinition(classHierarchy.Pop(), mapDefinition, notInInheritance, assemblyDefinitions, assemblyMapDefinitions);
             }
         }
 
-        private void ImplementITrackedEntityForTypeDefinition(TypeDefinition typeDef, MapDefinition mapDefinition, bool notInInheritance) {
+        private void ImplementITrackedEntityForTypeDefinition(TypeDefinition typeDef, MapDefinition mapDefinition, bool notInInheritance, Dictionary<string, AssemblyDefinition> assemblyDefinitions, Dictionary<string, List<MapDefinition>> assemblyMapDefinitions) {
             if (typeDef.Methods.Any(m => m.Name == "GetDirtyProperties")) {
                 return; // type already woven
             }
@@ -180,14 +181,55 @@
                             setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr));
                         }
                         else {
+                            var fkPkType = columnDefinition.DbType.GetCLRType();
+                            TypeReference fkTypeReference;
+                            if (fkPkType.IsValueType) {
+                                fkTypeReference = typeDef.Module.Import(typeof(Nullable<>).MakeGenericType(fkPkType));
+                            }
+                            else {
+                                fkTypeReference = typeDef.Module.Import(fkPkType);
+                            }
+
                             setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
-                            var orInstr = Instruction.Create(OpCodes.Ldarg_0);
                             var hmmInstr = Instruction.Create(OpCodes.Ldc_I4_0);
                             var hmmInstr2 = Instruction.Create(OpCodes.Ldc_I4_1);
-                            setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr));
-                            setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
-                            setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
-                            setIntructions.Add(orInstr);
+
+                            if (propertyDefinition.PropertyType.Name.ToLowerInvariant() == "string") {
+                                var orInstr = Instruction.Create(OpCodes.Ldarg_0);
+                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr));
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
+                                setIntructions.Add(orInstr);
+                            }
+                            else {
+                                var orInstr = Instruction.Create(OpCodes.Ldarg_1);
+                                var orInstr2 = Instruction.Create(OpCodes.Ldarg_0);
+                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr));
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
+                                setIntructions.Add(orInstr);
+                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr2));
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+
+                                if (fkPkType.IsValueType) {
+                                    // need to call HasValue
+                                    setIntructions.Add(Instruction.Create(OpCodes.Ldflda, typeDef.Fields.Single(f => f.Name == columnDefinition.DbName)));
+                                    setIntructions.Add(Instruction.Create(
+                                        OpCodes.Call,
+                                        MakeGeneric(
+                                            typeDef.Module.Import(fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
+                                            typeDef.Module.Import(fkPkType))));
+                                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
+                                }
+                                else {
+                                    // check for null
+                                    setIntructions.Add(Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == columnDefinition.DbName)));
+                                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
+                                }
+
+                                setIntructions.Add(orInstr2);
+                            }
+
                             setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
                             setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr2));
                             setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
@@ -234,28 +276,117 @@
 
                         // it's now dirty
                         setIntructions.Add(Instruction.Create(OpCodes.Nop));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
-                        if (columnDefinition.Relationship == RelationshipType.None && propertyDefinition.PropertyType.IsValueType
-                            && propertyDefinition.PropertyType.Name != "Nullable`1") {
+
+                        var topOfSetIsDirtyInstr = Instruction.Create(OpCodes.Ldarg_0);
+                        if (columnDefinition.Relationship == RelationshipType.ManyToOne || columnDefinition.Relationship == RelationshipType.OneToOne) {
+                            // we need to check whether the foreign key backing field has a value
+                            var setToBackingFieldInstr = Instruction.Create(OpCodes.Ldarg_0);
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
+                            setIntructions.Add(Instruction.Create(OpCodes.Brtrue, setToBackingFieldInstr));
+                            var fkPkType = columnDefinition.DbType.GetCLRType();
+                            TypeReference fkTypeReference;
+                            if (fkPkType.IsValueType) {
+                                fkTypeReference = typeDef.Module.Import(typeof(Nullable<>).MakeGenericType(fkPkType));
+                            }
+                            else {
+                                fkTypeReference = typeDef.Module.Import(fkPkType);
+                            }
+
+                            var fkField = typeDef.Fields.Single(f => f.Name == columnDefinition.DbName);
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                            if (fkPkType.IsValueType) {
+                                // need to call HasValue
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldflda, fkField));
+                                setIntructions.Add(Instruction.Create(
+                                    OpCodes.Call,
+                                    MakeGeneric(
+                                        typeDef.Module.Import(fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
+                                        typeDef.Module.Import(fkPkType))));
+                                setIntructions.Add(Instruction.Create(OpCodes.Brfalse, setToBackingFieldInstr));
+                            }
+                            else {
+                                // check for null
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldfld, fkField));
+                                setIntructions.Add(Instruction.Create(OpCodes.Brfalse, setToBackingFieldInstr));
+                            }
+
+                            // need to add a variable to hold the new obj
+                            var fkGeneratedVariableDef = new VariableDefinition(propertyDefinition.PropertyType);
+                            propertyDefinition.SetMethod.Body.Variables.Add(fkGeneratedVariableDef);
+
+                            // if we get here then we have an FK value but null in this backing field so we need to create a new instance of the FK and set that as the old value
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                            setIntructions.Add(Instruction.Create(OpCodes.Newobj, typeDef.Module.Import(propertyDefinition.PropertyType.Resolve().GetConstructors().First())));
+                            setIntructions.Add(Instruction.Create(OpCodes.Stloc, fkGeneratedVariableDef));
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldloc, fkGeneratedVariableDef));
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                            if (fkPkType.IsValueType) {
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldflda, typeDef.Fields.Single(f => f.Name == columnDefinition.DbName)));
+                                setIntructions.Add(Instruction.Create(
+                                        OpCodes.Call,
+                                        typeDef.Module.Import(
+                                            MakeGeneric(
+                                                fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"),
+                                                typeDef.Module.Import(fkPkType)))));
+                                var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDefinition.TypeFullName);
+                                var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
+                                var fkMapTypeRef = GetTypeDefFromFullName(columnDefinition.TypeFullName, assemblyDef);
+                                setIntructions.Add(
+                                    Instruction.Create(
+                                        OpCodes.Callvirt,
+                                        typeDef.Module.Import(
+                                            this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod)));
+                            }
+                            else {
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldfld, fkField));
+                                var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDefinition.TypeFullName);
+                                var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
+                                var fkMapTypeRef = GetTypeDefFromFullName(columnDefinition.TypeFullName, assemblyDef);
+                                setIntructions.Add(Instruction.Create(
+                                        OpCodes.Callvirt,
+                                        typeDef.Module.Import(
+                                            this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod)));
+                            }
+
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldloc, fkGeneratedVariableDef));
+                            setIntructions.Add(Instruction.Create(OpCodes.Stfld, typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))));
+                            setIntructions.Add(Instruction.Create(OpCodes.Br, topOfSetIsDirtyInstr));
+
+                            // set using backing field
+                            setIntructions.Add(setToBackingFieldInstr);
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
                             setIntructions.Add(
                                 Instruction.Create(
-                                    OpCodes.Newobj,
-                                    MakeGeneric(
-                                        typeDef.Module.Import(
-                                            typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))
-                                                   .FieldType.Resolve()
-                                                   .GetConstructors()
-                                                   .First()),
-                                        propertyDefinition.PropertyType)));
+                                    OpCodes.Stfld,
+                                    typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))));
+                        }
+                        else { 
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
+                            if (columnDefinition.Relationship == RelationshipType.None && propertyDefinition.PropertyType.IsValueType
+                                && propertyDefinition.PropertyType.Name != "Nullable`1") {
+                                setIntructions.Add(
+                                    Instruction.Create(
+                                        OpCodes.Newobj,
+                                        MakeGeneric(
+                                            typeDef.Module.Import(
+                                                typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))
+                                                       .FieldType.Resolve()
+                                                       .GetConstructors()
+                                                       .First()),
+                                            propertyDefinition.PropertyType)));
+                            }
+
+                            setIntructions.Add(
+                                Instruction.Create(
+                                    OpCodes.Stfld,
+                                    typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))));
                         }
 
-                        setIntructions.Add(
-                            Instruction.Create(
-                                OpCodes.Stfld,
-                                typeDef.Fields.Single(f => f.Name == string.Format("__{0}_OldValue", columnDefinition.Name))));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                        setIntructions.Add(topOfSetIsDirtyInstr);
                         setIntructions.Add(Instruction.Create(OpCodes.Ldc_I4_1));
                         setIntructions.Add(
                             Instruction.Create(

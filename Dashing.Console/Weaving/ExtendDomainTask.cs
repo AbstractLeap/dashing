@@ -133,7 +133,7 @@
 
             // now go through each assembly and re-write the types
             var visitedTypes = new HashSet<string>();
-            var weavers = me.GetLoadableTypes().Where(t => typeof(IWeaver).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract).Select(
+            var weavers = me.GetLoadableTypes().Where(t => typeof(IWeaver).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract).OrderBy(t => t.Name).Select(
                 t => {
                     var weaver = (IWeaver)Activator.CreateInstance(t);
                     ((ITaskLogHelper)weaver).Log = this.Logger;
