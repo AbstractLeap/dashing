@@ -208,6 +208,27 @@ namespace Dashing {
                 commandType);
         }
 
+        public IEnumerable<TReturn> Query<TReturn>(string sql, 
+            Type[] types,
+            Func<object[], TReturn> map,
+            dynamic param = null, 
+            bool buffered = true, 
+            string splitOn = "Id", 
+            int? commandTimeout = null, 
+            CommandType? commandType = null) {
+            return SqlMapper.Query(
+                this.sessionState.GetConnection(),
+                sql,
+                types,
+                map,
+                param,
+                this.sessionState.GetTransaction(),
+                buffered,
+                splitOn,
+                commandTimeout,
+                commandType);
+        } 
+
         public async Task<IEnumerable<dynamic>> QueryAsync(
             string sql,
             dynamic param = null,
@@ -377,6 +398,27 @@ namespace Dashing {
                     commandTimeout,
                     commandType);
         }
+
+        public async Task<IEnumerable<TReturn>> QueryAsync<TReturn>(string sql,
+            Type[] types,
+            Func<object[], TReturn> map,
+            dynamic param = null,
+            bool buffered = true,
+            string splitOn = "Id",
+            int? commandTimeout = null,
+            CommandType? commandType = null) {
+            return SqlMapper.Query(
+                await this.sessionState.GetConnectionAsync(),
+                sql,
+                types,
+                map,
+                param,
+                await this.sessionState.GetTransactionAsync(),
+                buffered,
+                splitOn,
+                commandTimeout,
+                commandType);
+        } 
 
         public SqlMapper.GridReader QueryMultiple(string sql, dynamic param = null, int? commandTimeout = null, CommandType? commandType = null) {
             return SqlMapper.QueryMultiple(

@@ -222,5 +222,14 @@
         public SqlMapper.GridReader QueryMultiple(CommandDefinition command) {
             throw new NotImplementedException();
         }
+
+
+        public IEnumerable<TReturn> Query<TReturn>(string sql, Type[] types, Func<object[], TReturn> map, dynamic param = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null) {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<TReturn>> QueryAsync<TReturn>(string sql, Type[] types, Func<object[], TReturn> map, dynamic param = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null) {
+            throw new NotImplementedException();
+        }
     }
 }

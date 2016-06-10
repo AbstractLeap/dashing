@@ -174,6 +174,18 @@ namespace Dashing {
             CommandType? commandType = null);
 
         /// <summary>
+        /// Perform a multi mapping query with arbitrary input parameters
+        /// </summary>
+        IEnumerable<TReturn> Query<TReturn>(string sql,
+                                                            Type[] types,
+                                                            Func<object[], TReturn> map,
+                                                            dynamic param = null,
+                                                            bool buffered = true,
+                                                            string splitOn = "Id",
+                                                            int? commandTimeout = null,
+                                                            CommandType? commandType = null);
+
+        /// <summary>
         ///     Return a list of dynamic objects, reader is closed after the call
         /// </summary>
         Task<IEnumerable<dynamic>> QueryAsync(
@@ -283,6 +295,18 @@ namespace Dashing {
             string splitOn = "Id",
             int? commandTimeout = null,
             CommandType? commandType = null);
+
+        /// <summary>
+        /// Perform a multi mapping query with arbitrary input parameters
+        /// </summary>
+        Task<IEnumerable<TReturn>> QueryAsync<TReturn>(string sql,
+                                                            Type[] types,
+                                                            Func<object[], TReturn> map,
+                                                            dynamic param = null,
+                                                            bool buffered = true,
+                                                            string splitOn = "Id",
+                                                            int? commandTimeout = null,
+                                                            CommandType? commandType = null);
 
         /// <summary>
         ///     Execute a command that returns multiple result sets, and access each in turn
