@@ -29,6 +29,12 @@
             }
         }
 
+        public ConnectionStringSettings ConnectionStringSettings {
+            get {
+                return this.connectionStringSettings;
+            }
+        }
+
         public IEnumerable<IMap> Maps
         {
             get

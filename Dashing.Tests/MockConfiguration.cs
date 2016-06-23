@@ -1,6 +1,7 @@
 namespace Dashing.Tests {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
 
     using Dashing.Configuration;
@@ -25,6 +26,8 @@ namespace Dashing.Tests {
                 return this.MockEngine.Object;
             }
         }
+
+        public ConnectionStringSettings ConnectionStringSettings { get; private set; }
 
         public IEnumerable<IMap> Maps
         {

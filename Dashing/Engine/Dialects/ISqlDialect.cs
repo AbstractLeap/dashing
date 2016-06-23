@@ -4,6 +4,12 @@ namespace Dashing.Engine.Dialects {
     using Dashing.Configuration;
 
     public interface ISqlDialect {
+        /// <summary>
+        /// Means that use database and create database statements will be ignored
+        /// </summary>
+        /// <remarks>Stems initially from SQLite databases where the file == the database</remarks>
+        bool IgnoreMultipleDatabases { get; }
+
         void AppendQuotedTableName(StringBuilder sql, IMap map);
 
         void AppendQuotedName(StringBuilder sql, string name);
@@ -54,6 +60,8 @@ namespace Dashing.Engine.Dialects {
         string DropIndex(Index index);
 
         string CreateIndex(Index index);
+
+        string CreateForeignKey(ForeignKey foreignKey);
 
         /// <summary>
         ///     Applies "for update" sql using table hints i.e. like SQL Server

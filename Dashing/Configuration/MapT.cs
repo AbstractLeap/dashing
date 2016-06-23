@@ -60,7 +60,7 @@ namespace Dashing.Configuration {
                         var valueParam = Expression.Parameter(typeof(object));
                         this.primaryKeySetter =
                             Expression.Lambda<Action<T, object>>(
-                                Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), Expression.Convert(valueParam, typeof(int))),
+                                Expression.Assign(Expression.Property(param, this.PrimaryKey.Name), Expression.Convert(valueParam, this.PrimaryKey.Type)),
                                 param,
                                 valueParam).Compile();
                     }

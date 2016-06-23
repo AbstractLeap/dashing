@@ -15,7 +15,7 @@
             this.configuration = config;
         }
 
-        private static readonly ConcurrentDictionary<Type, string> QueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<WriterQueryCacheKey, string> QueryCache = new ConcurrentDictionary<WriterQueryCacheKey, string>();
 
         private readonly ISqlDialect dialect;
 
@@ -27,7 +27,7 @@
 
         public SqlWriterResult GenerateSql<T>(T entity) {
             var map = this.configuration.GetMap<T>();
-            var sql = QueryCache.GetOrAdd(typeof(T), t => this.ReallyGenerateSql(map, entity));
+            var sql = QueryCache.GetOrAdd(new WriterQueryCacheKey(this.configuration, typeof(T)), t => this.ReallyGenerateSql(map, entity));
             var parameters = new DynamicParameters();
             this.GenerateValuesSpec(null, parameters, map, entity, false, true);
             return new SqlWriterResult(sql, parameters);

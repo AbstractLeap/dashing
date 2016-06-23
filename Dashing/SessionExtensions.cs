@@ -10,6 +10,17 @@ namespace Dashing {
 
     public static class SessionExtensions {
         /// <summary>
+        ///     Get an entity by Int64 primary key
+        /// </summary>
+        /// <typeparam name="T">The type of entity to get</typeparam>
+        /// <param name="session">The Session to use</param>
+        /// <param name="id">The primary key of the entity</param>
+        /// <returns></returns>
+        public static T Get<T>(this ISession session, long id) where T : class, new() {
+            return session.Get<T, long>(id);
+        }
+
+        /// <summary>
         ///     Get an entity by integer primary key
         /// </summary>
         /// <typeparam name="T">The type of entity to get</typeparam>
@@ -29,6 +40,28 @@ namespace Dashing {
         /// <returns></returns>
         public static T Get<T>(this ISession session, Guid id) where T : class, new() {
             return session.Get<T, Guid>(id);
+        }
+
+        /// <summary>
+        ///     Get a collection of entities using their Int64 primary keys
+        /// </summary>
+        /// <typeparam name="T">The type of entity to get</typeparam>
+        /// <param name="session">The Session to use</param>
+        /// <param name="ids">The primary keys of the entities</param>
+        /// <returns></returns>
+        public static IEnumerable<T> Get<T>(this ISession session, params long[] ids) where T : class, new() {
+            return session.Get<T>(ids as IEnumerable<long>);
+        }
+
+        /// <summary>
+        ///     Get a collection of entities using their Int64 primary keys
+        /// </summary>
+        /// <typeparam name="T">The type of entity to get</typeparam>
+        /// <param name="session">The Session to use</param>
+        /// <param name="ids">The primary keys of the entities</param>
+        /// <returns></returns>
+        public static IEnumerable<T> Get<T>(this ISession session, IEnumerable<long> ids) where T : class, new() {
+            return session.Get<T, long>(ids);
         }
 
         /// <summary>

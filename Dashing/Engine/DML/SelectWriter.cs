@@ -16,13 +16,15 @@
             this.fetchTreeParser = new FetchTreeParser(config);
         }
 
-        private static readonly ConcurrentDictionary<Tuple<Type, string>, string> QueryCache = new ConcurrentDictionary<Tuple<Type, string>, string>();
+        private static readonly ConcurrentDictionary<WriterQueryCacheKey, string> SingleQueryCache = new ConcurrentDictionary<WriterQueryCacheKey, string>();
+
+        private static readonly ConcurrentDictionary<WriterQueryCacheKey, string> MultipleQueryCache = new ConcurrentDictionary<WriterQueryCacheKey, string>();
 
         protected FetchTreeParser fetchTreeParser;
 
         public SqlWriterResult GenerateGetSql<T, TPrimaryKey>(TPrimaryKey id) {
             return new SqlWriterResult(
-                QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false)),
+                SingleQueryCache.GetOrAdd(new WriterQueryCacheKey(this.Configuration, typeof(T)), k => this.GenerateGetSql<T>(false)),
                 new DynamicParameters(new { Id = id }));
         }
 
@@ -31,12 +33,12 @@
 
             if (primaryKeys.Count() == 1) {
                 return new SqlWriterResult(
-                    QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetSingle"), k => this.GenerateGetSql<T>(false)),
+                    SingleQueryCache.GetOrAdd(new WriterQueryCacheKey(this.Configuration, typeof(T)), k => this.GenerateGetSql<T>(false)),
                     new DynamicParameters(new { Id = primaryKeys.Single() }));
             }
 
             return new SqlWriterResult(
-                QueryCache.GetOrAdd(Tuple.Create(typeof(T), "GetMultiple"), k => this.GenerateGetSql<T>(true)),
+                MultipleQueryCache.GetOrAdd(new WriterQueryCacheKey(this.Configuration, typeof(T)), k => this.GenerateGetSql<T>(true)),
                 new DynamicParameters(new { Ids = primaryKeys }));
         }
 

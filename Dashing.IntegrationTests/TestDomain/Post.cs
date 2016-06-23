@@ -7,22 +7,22 @@ namespace Dashing.IntegrationTests.TestDomain {
             this.Tags = new List<PostTag>();
         }
 
-        public virtual int PostId { get; set; }
+        public long PostId { get; set; }
 
-        public virtual string Title { get; set; }
+        public string Title { get; set; }
 
-        public virtual string Content { get; set; }
+        public string Content { get; set; }
 
-        public virtual decimal Rating { get; set; }
+        public decimal Rating { get; set; }
 
-        public virtual User Author { get; set; }
+        public User Author { get; set; }
 
-        public virtual Blog Blog { get; set; }
+        public Blog Blog { get; set; }
 
-        public virtual IList<Comment> Comments { get; set; }
+        public IList<Comment> Comments { get; set; }
 
-        public virtual IList<PostTag> Tags { get; set; }
+        public IList<PostTag> Tags { get; set; }
 
-        public virtual bool DoNotMap { get; set; }
+        public bool DoNotMap { get; set; }
     }
 }

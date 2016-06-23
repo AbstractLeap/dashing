@@ -1,9 +1,9 @@
 ﻿namespace Dashing.IntegrationTests.TestDomain {
     public class PostTag {
-        public virtual int PostTagId { get; set; }
+        public long PostTagId { get; set; }
 
-        public virtual Post Post { get; set; }
+        public Post Post { get; set; }
 
-        public virtual Tag Tag { get; set; }
+        public Tag Tag { get; set; }
     }
 }

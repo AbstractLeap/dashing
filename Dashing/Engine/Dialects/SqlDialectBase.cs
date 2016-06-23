@@ -22,6 +22,12 @@ namespace Dashing.Engine.Dialects {
             sql.Append(this.EndQuoteCharacter);
         }
 
+        public virtual bool IgnoreMultipleDatabases {
+            get {
+                return false;
+            }
+        }
+
         public virtual void AppendQuotedTableName(StringBuilder sql, IMap map) {
             this.AppendQuotedName(sql, map.Table);
         }
@@ -194,6 +200,20 @@ namespace Dashing.Engine.Dialects {
             }
 
             sql.Remove(sql.Length - 2, 2);
+            sql.Append(")");
+            return sql.ToString();
+        }
+
+        public virtual string CreateForeignKey(ForeignKey foreignKey) {
+            var sql = new StringBuilder();
+            sql.Append("alter table ");
+            this.AppendQuotedTableName(sql, foreignKey.ChildColumn.Map);
+            sql.Append(" add constraint ").Append(foreignKey.Name).Append(" foreign key (");
+            this.AppendQuotedName(sql, foreignKey.ChildColumn.DbName);
+            sql.Append(") references ");
+            this.AppendQuotedTableName(sql, foreignKey.ParentMap);
+            sql.Append("(");
+            this.AppendQuotedName(sql, foreignKey.ParentMap.PrimaryKey.DbName);
             sql.Append(")");
             return sql.ToString();
         }
