@@ -26,8 +26,14 @@
         [Option('w', HelpText = "Weave the dlls in a directory", Required = false, MutuallyExclusiveSet = "Script,Migration,ReverseEngineer")]
         public bool Weave { get; set; }
 
-        [Option('d', HelpText = "The directory that contains the dlls to weave", Required = false)]
+        [Option('d', HelpText = "The directory that contains the dlls to weave", Required = false, MutuallyExclusiveSet = "WeaveDir,WeaveAssemblyPath")]
         public string WeaveDir { get; set; }
+
+        [Option('a', HelpText = "The assembly that contains the Configuration to weave", Required = false, MutuallyExclusiveSet = "WeaveDir,WeaveAssemblyPath")]
+        public string WeaveAssemblyPath { get; set; }
+
+        [Option('f', HelpText = "The full name of the configuration class to weave", Required = false, MutuallyExclusiveSet = "WeaveDir,WeaveAssemblyPath")]
+        public string WeaveConfigurationFullName { get; set; }
 
         [Option('b', HelpText = "Launch debugger during weaving")]
         public bool LaunchDebugger { get; set; }

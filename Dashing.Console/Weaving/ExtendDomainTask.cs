@@ -22,6 +22,10 @@
     public class ExtendDomainTask : AppDomainIsolatedTask {
         public string WeaveDir { get; set; }
 
+        public string PathToDll { get; set; }
+
+        public string ConfigurationName { get; set; }
+
         public bool LaunchDebugger { get; set; }
 
         public bool IgnorePEVerify { get; set; }
@@ -47,6 +51,9 @@
             var peVerifier = new PEVerifier(this.Logger);
 
             AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve(me);
+            if (string.IsNullOrWhiteSpace(this.WeaveDir)) {
+                this.WeaveDir = Path.GetDirectoryName(this.PathToDll);
+            }
 
             // load me in to a new app domain for creating IConfigurations
             this.Logger.Trace("Finding assemblies to weave in " + this.WeaveDir);
@@ -98,19 +105,25 @@
                         new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver });
                     assemblyDefinitions.Add(file, assembly);
                     if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == "Dashing")) {
-                        this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
+                        if (string.IsNullOrWhiteSpace(this.PathToDll)
+                            || string.Compare(
+                                Path.GetFullPath(this.PathToDll).TrimEnd(Path.DirectorySeparatorChar),
+                                Path.GetFullPath(file).TrimEnd(Path.DirectorySeparatorChar),
+                                StringComparison.InvariantCultureIgnoreCase) == 0) {
+                            this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
 
-                        // references dashing, use our other app domain to find the IConfig and instantiate it
-                        var args = new ConfigurationMapResolverArgs { AssemblyFilePath = file };
-                        configurationMapResolver.Resolve(args);
-                        var definitions = JsonConvert.DeserializeObject<IEnumerable<MapDefinition>>(args.SerializedConfigurationMapDefinitions);
-                        if (definitions.Any()) {
-                            foreach (var mapDefinition in definitions) {
-                                if (!assemblyMapDefinitions.ContainsKey(mapDefinition.AssemblyFullName)) {
-                                    assemblyMapDefinitions.Add(mapDefinition.AssemblyFullName, new List<MapDefinition>());
+                            // references dashing, use our other app domain to find the IConfig and instantiate it
+                            var args = new ConfigurationMapResolverArgs { AssemblyFilePath = file, ConfigurationName = this.ConfigurationName };
+                            configurationMapResolver.Resolve(args);
+                            var definitions = JsonConvert.DeserializeObject<IEnumerable<MapDefinition>>(args.SerializedConfigurationMapDefinitions);
+                            if (definitions.Any()) {
+                                foreach (var mapDefinition in definitions) {
+                                    if (!assemblyMapDefinitions.ContainsKey(mapDefinition.AssemblyFullName)) {
+                                        assemblyMapDefinitions.Add(mapDefinition.AssemblyFullName, new List<MapDefinition>());
+                                    }
+
+                                    assemblyMapDefinitions[mapDefinition.AssemblyFullName].Add(mapDefinition);
                                 }
-
-                                assemblyMapDefinitions[mapDefinition.AssemblyFullName].Add(mapDefinition);
                             }
                         }
                     }

@@ -54,23 +54,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Weaving.Tests", "Da
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dashing.Weaving.Sample2", "Dashing.Weaving.Sample2\Dashing.Weaving.Sample2.csproj", "{2F25E2C1-EE19-4068-8D59-907D3C54C3B7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{F2F696FA-D258-47AD-A0FB-4AC859C2F384}"
-	ProjectSection(SolutionItems) = preProject
-		nuspec\readme.txt = nuspec\readme.txt
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{E8CE1831-4CF9-4E5F-BA8B-07FD2E5936FF}"
-	ProjectSection(SolutionItems) = preProject
-		nuspec\tools\dbm.exe = nuspec\tools\dbm.exe
-		nuspec\tools\dev-db.ini = nuspec\tools\dev-db.ini
-		nuspec\tools\Init.ps1 = nuspec\tools\Init.ps1
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{766468B7-4901-4C9D-9E0A-ED9B0DF9232E}"
-	ProjectSection(SolutionItems) = preProject
-		nuspec\build\Dashing.targets = nuspec\build\Dashing.targets
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -512,9 +495,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{E8CE1831-4CF9-4E5F-BA8B-07FD2E5936FF} = {F2F696FA-D258-47AD-A0FB-4AC859C2F384}
-		{766468B7-4901-4C9D-9E0A-ED9B0DF9232E} = {F2F696FA-D258-47AD-A0FB-4AC859C2F384}
 	EndGlobalSection
 EndGlobal

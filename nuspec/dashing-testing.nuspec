@@ -30,6 +30,6 @@
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="Dashing.Testing\bin\Release\Dashing.Testing.dll" target="lib\net45\Dashing.Testing.dll" />
+        <file src="..\Dashing.Testing\bin\Release\Dashing.Testing.dll" target="lib\net45\Dashing.Testing.dll" />
     </files>
 </package>

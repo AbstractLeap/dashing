@@ -1,6 +1,6 @@
 param($installPath, $toolsPath, $package, $project)
 
-Write-Host "Installing Dashing"
+Write-Host "Installing Dashing.Core"
 Write-Host "Install Path: " -nonewline; Write-Host $installPath
 Write-Host "Tools Path: " -nonewline; Write-Host $toolsPath
 Write-Host "Package: " -nonewline; Write-Host $package

@@ -154,8 +154,12 @@
 
             // weaving
             if (options.Weave) {
-                if (string.IsNullOrWhiteSpace(options.WeaveDir)) {
-                    throw new CatchyException("You must specify the directory to weave");
+                if (string.IsNullOrWhiteSpace(options.WeaveDir) && string.IsNullOrWhiteSpace(options.WeaveAssemblyPath)) {
+                    throw new CatchyException("You need to either specify the directory to weave or the path of the assembly that contains the configuration");
+                }
+
+                if (!string.IsNullOrWhiteSpace(options.WeaveAssemblyPath) && !File.Exists(options.WeaveAssemblyPath)) {
+                    throw new CatchyException("Could not locate configuration file {0}", options.WeaveAssemblyPath);
                 }
 
                 if (!options.IgnorePeVerify) {
@@ -163,34 +167,64 @@
                 }
 
                 var task = new ExtendDomainTask {
-                    LaunchDebugger = options.LaunchDebugger,
-                    WeaveDir = options.WeaveDir,
-                    Logger = new ConsoleLogger(options.Verbose),
-                    IgnorePEVerify = options.IgnorePeVerify
-                };
+                                                    LaunchDebugger = options.LaunchDebugger,
+                                                    WeaveDir = options.WeaveDir,
+                                                    PathToDll = options.WeaveAssemblyPath,
+                                                    ConfigurationName = options.WeaveConfigurationFullName,
+                                                    Logger = new ConsoleLogger(options.Verbose),
+                                                    IgnorePEVerify = options.IgnorePeVerify
+                                                };
                 if (!task.Execute()) {
                     throw new CatchyException("Weaving failed");
                 }
-
-                return;
             }
+            else {
+                // prevalidation
+                if (string.IsNullOrWhiteSpace(options.ConfigPath)) {
+                    throw new CatchyException("You must specify a configuration path or a project name");
+                }
 
-            // prevalidation
-            if (string.IsNullOrWhiteSpace(options.ConfigPath)) {
-                throw new CatchyException("You must specify a configuration path or a project name");
+                if (!File.Exists(options.ConfigPath)) {
+                    throw new CatchyException("Could not locate configuration file {0}", options.ConfigPath);
+                }
+
+                // dependency init
+                consoleAnswerProvider = new ConsoleAnswerProvider("~" + Path.GetFileNameWithoutExtension(options.ConfigPath) + ".answers");
+
+                DashingSettings dashingSettings;
+                ReverseEngineerSettings reverseEngineerSettings;
+                var connectionStringSettings = GetIniSettings(options, out dashingSettings, out reverseEngineerSettings);
+
+                // load the configuration NOW and try to inherit its version of Dashing, Dapper, etc
+                var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
+                GC.KeepAlive(configAssembly);
+                configObject = LoadConfiguration(configAssembly, dashingSettings, connectionStringSettings);
+
+                // now decide what to do
+                if (options.Script) {
+                    DoScript(options.Location, options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
+                }
+                else if (options.Seed) {
+                    DoSeed(connectionStringSettings);
+                }
+                else if (options.Migration) {
+                    DoMigrate(options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
+                }
+                else if (options.ReverseEngineer) {
+                    DoReverseEngineer(options, dashingSettings, reverseEngineerSettings, connectionStringSettings);
+                }
+                else {
+                    ShowHelpText(options);
+                }
             }
+        }
 
-            if (!File.Exists(options.ConfigPath)) {
-                throw new CatchyException("Could not locate configuration file {0}", options.ConfigPath);
-            }
-
-            // dependency init
-            consoleAnswerProvider = new ConsoleAnswerProvider("~" + Path.GetFileNameWithoutExtension(options.ConfigPath) + ".answers");
-
+        private static ConnectionStringSettings GetIniSettings(
+            CommandLineOptions options,
+            out DashingSettings dashingSettings,
+            out ReverseEngineerSettings reverseEngineerSettings) {
             // parse all of the configuration stuffs
             ConnectionStringSettings connectionStringSettings;
-            DashingSettings dashingSettings;
-            ReverseEngineerSettings reverseEngineerSettings;
             ParseIni(options, out connectionStringSettings, out dashingSettings, out reverseEngineerSettings);
 
             // postvalidation
@@ -198,30 +232,15 @@
                 throw new CatchyException("Could not locate {0}", dashingSettings.PathToDll);
             }
 
-            // load the configuration NOW and try to inherit its version of Dashing, Dapper, etc
-            var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
-            GC.KeepAlive(configAssembly);
-            configObject = LoadConfiguration(configAssembly, dashingSettings, connectionStringSettings);
-
-            // now decide what to do
-            if (options.Script) {
-                DoScript(options.Location, options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
-            }
-            else if (options.Seed) {
-                DoSeed(connectionStringSettings);
-            }
-            else if (options.Migration) {
-                DoMigrate(options.Naive, connectionStringSettings, dashingSettings, reverseEngineerSettings);
-            }
-            else if (options.ReverseEngineer) {
-                DoReverseEngineer(options, dashingSettings, reverseEngineerSettings, connectionStringSettings);
-            }
-            else {
-                ShowHelpText(options);
-            }
+            return connectionStringSettings;
         }
 
         private static void TryFindIgnoreConfigSetting(CommandLineOptions options) {
+            if (!string.IsNullOrWhiteSpace(options.WeaveAssemblyPath)) {
+                // if they've specified the ConfigPath the Configuration is specified so we don't need to check for ignoring peverify
+                return;
+            }
+
             var directories = new[] { new DirectoryInfo(options.WeaveDir), new DirectoryInfo(Path.Combine(options.WeaveDir, 
                 options.WeaveDir.LastIndexOf("bin", StringComparison.InvariantCultureIgnoreCase) >= options.WeaveDir.Length - 4 ? "../" : "../../")), };
             foreach (var directoryInfo in directories) {

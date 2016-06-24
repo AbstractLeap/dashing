@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>Dashing</id>
-        <version>1.0.11</version>
-        <title>Dashing</title>
+        <id>Dashing.Core</id>
+        <version>1.1.0-beta</version>
+        <title>Dashing.Core</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
         <projectUrl>https://github.com/Polylytics/dashing</projectUrl>
@@ -13,12 +13,12 @@
         <summary>Dashing is a simple to use mini ORM built on top of Dapper</summary>
         <releaseNotes>See Git Log at https://github.com/Polylytics/dashing
 
-v1.0.11 exposes the arbitrary Query and QueryAsync methods from dapper</releaseNotes>
-        <copyright>© Polylytics Limited, 2015</copyright>
+v1.1.0 Splits out automagic weaving in to seperate nuget package</releaseNotes>
+        <copyright>© Polylytics Limited, 2016</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>
         <dependencies>
-            <dependency id="Dapper" version="1.38" />
+            <dependency id="Dapper" version="1.50.0-beta9" />
         </dependencies>
         <frameworkAssemblies>
             <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
@@ -33,14 +33,12 @@ v1.0.11 exposes the arbitrary Query and QueryAsync methods from dapper</releaseN
         </frameworkAssemblies>
     </metadata>
     <files>
-        <file src="nuspec\build\Dashing.targets" target="build\Dashing.targets" />
-        <file src="content\_._" target="content\_._" />
-        <file src="Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
-        <file src="Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
-        <file src="Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
-        <file src="nuspec\tools\dbm.exe" target="tools\dbm.exe" />
-        <file src="nuspec\tools\dev-db.ini" target="tools\dev-db.ini" />
-        <file src="nuspec\tools\Init.ps1" target="tools\init.ps1" />
-        <file src="nuspec\readme.txt" target="readme.txt" />
+        <file src="..\Dashing\bin\Release\Dashing.dll" target="lib\net45\Dashing.dll" />
+        <file src="..\Dashing\bin\Release\Dashing.pdb" target="lib\net45\Dashing.pdb" />
+        <file src="..\Dashing\bin\Release\Dashing.xml" target="lib\net45\Dashing.xml" />
+        <file src="Dashing.Core\tools\dbm.exe" target="tools\dbm.exe" />
+        <file src="Dashing.Core\tools\dev-db.ini" target="tools\dev-db.ini" />
+        <file src="Dashing.Core\tools\Init.ps1" target="tools\init.ps1" />
+        <file src="Dashing.Core\readme.txt" target="readme.txt" />
     </files>
 </package>

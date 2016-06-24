@@ -45,12 +45,19 @@ namespace Dashing.Console.Weaving {
 
             // find any IConfigs, instantiate and return map definitions
             var mapDefinitions = new List<MapDefinition>();
-            var configurationTypes =
+            var configurationTypes = string.IsNullOrWhiteSpace(args.ConfigurationName) ?
                 assembly.GetLoadableTypes()
                         .Where(
                             t =>
                             typeof(IConfiguration).IsAssignableFrom(t) && t.IsClass && !t.IsAbstract
-                            && t.CustomAttributes.All(a => a.AttributeType != typeof(DoNotWeaveAttribute)));
+                            && t.CustomAttributes.All(a => a.AttributeType != typeof(DoNotWeaveAttribute))).ToArray()
+                            : assembly.GetLoadableTypes().Where(t => t.FullName == args.ConfigurationName).ToArray();
+
+            // validate in the case of configuration specified
+            if (!string.IsNullOrWhiteSpace(args.ConfigurationName) && configurationTypes.Length != 1) {
+                throw new CatchyException("Unable to find configuration {0} in file {1}", args.ConfigurationName, args.AssemblyFilePath);
+            }
+
             if (configurationTypes.Any()) {
                 foreach (var configurationType in configurationTypes) {
                     TypeDefinition configTypeDef;
@@ -137,6 +144,8 @@ namespace Dashing.Console.Weaving {
         public string AssemblyFullName { get; set; }
 
         public string SerializedConfigurationMapDefinitions { get; set; }
+
+        public string ConfigurationName { get; set; }
     }
 
     public class MapDefinition {

@@ -180,7 +180,8 @@ del Mono.Cecil.Rocks.dll
 del Newtonsoft.Json.dll
 del *.pdb
 del *.xml
-xcopy dbm.exe ..\..\..\nuspec\tools\ /d /y</PostBuildEvent>
+xcopy dbm.exe ..\..\..\nuspec\Dashing.Core\tools\ /d /y
+xcopy dbm.exe ..\..\..\nuspec\Dashing\tools\ /d /y</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>del ..\..\lib\* /q
