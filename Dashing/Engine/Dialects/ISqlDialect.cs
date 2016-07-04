@@ -1,4 +1,5 @@
 namespace Dashing.Engine.Dialects {
+    using System.Data;
     using System.Text;
 
     using Dashing.Configuration;
@@ -15,6 +16,20 @@ namespace Dashing.Engine.Dialects {
         void AppendQuotedName(StringBuilder sql, string name);
 
         void AppendColumnSpecification(StringBuilder sql, IColumn column, bool scriptDefault = true);
+
+        /// <summary>
+        /// Get the Db specific column specification for a column
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        ColumnSpecification GetColumnSpecification(IColumn column);
+
+        /// <summary>
+        /// Reverse engineer the column properties from a Db specific specification
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="specification"></param>
+        void UpdateColumnFromSpecification(IColumn column, ColumnSpecification specification);
 
         void AppendEscaped(StringBuilder sql, string s);
 
@@ -88,5 +103,13 @@ namespace Dashing.Engine.Dialects {
         string CreateDatabase(string databaseName);
 
         string CheckDatabaseExists(string databaseName);
+        
+        DbType GetTypeFromString(string name, int? length, int? precision);
+
+        string DefaultFor(DbType dbType, bool isNullable);
+
+        string GetForeignKeyName(ForeignKey foreignKey);
+
+        string GetIndexName(Index index);
     }
 }

@@ -5,8 +5,7 @@
     using System.Text;
 
     using Dashing.Configuration;
-
-    using DatabaseSchemaReader.DataSchema;
+    using Dashing.Tools.SchemaReading;
 
     public class ModelGenerator : IModelGenerator {
         private readonly IConvention convention;
@@ -21,7 +20,7 @@
 
         public IDictionary<string, string> GenerateFiles(
             IEnumerable<IMap> maps,
-            DatabaseSchema schema,
+            Database schema,
             string domainNamespace,
             IAnswerProvider answerProvider) {
             // note that we're just doing string building here
@@ -37,11 +36,11 @@
             return result;
         }
 
-        private void GenerateClass(IDictionary<string, string> result, IMap map, DatabaseSchema schema, string domainNamespace) {
+        private void GenerateClass(IDictionary<string, string> result, IMap map, Database schema, string domainNamespace) {
             // set up the class and add it in
             var sourceFile = new StringBuilder();
             var constructorStatements = new StringBuilder();
-            var className = this.convention.ClassNameForTable(map.Table);
+            var className = map.Type.Name;
             sourceFile.AppendLine("namespace " + domainNamespace);
             sourceFile.AppendLine("{");
             sourceFile.AppendLine(FourSpaces() + "using System;");
@@ -70,15 +69,14 @@
             result.Add(className, sourceFile.ToString());
         }
 
-        private void AddColumn(IColumn column, StringBuilder sourceFile, StringBuilder constructorStatements, DatabaseSchema schema) {
+        private void AddColumn(IColumn column, StringBuilder sourceFile, StringBuilder constructorStatements, Database schema) {
             if (column.Relationship == RelationshipType.None) {
                 this.AddProperty(sourceFile, column.Type.ToString(), column.Name);
             }
-            else if (column.Relationship == RelationshipType.ManyToOne) {
+            else if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
                 this.AddProperty(
                     sourceFile,
-                    this.convention.ClassNameForTable(
-                        schema.Tables.First(t => t.Name == column.Map.Table).FindColumn(column.DbName).ForeignKeyTableName),
+                    column.Type.Name,
                     column.Name);
             }
             else if (column.Relationship == RelationshipType.OneToMany) {

@@ -3,6 +3,7 @@
     using System.Data;
     using System.Linq;
 
+    using Dashing.Engine.Dialects;
     using Dashing.Extensions;
 
     /// <summary>
@@ -77,16 +78,22 @@
         /// </summary>
         public string Default
         {
-            get
-            {
-                return this.defaultValue
-                       ?? (this.IsPrimaryKey || this.Relationship != RelationshipType.None ? null : this.DbType.DefaultFor(this.IsNullable));
-            }
-
             set
             {
                 this.defaultValue = value;
             }
+        }
+
+        public string GetDefault(ISqlDialect dialect) {
+            if (this.defaultValue != null) {
+                return this.defaultValue;
+            }
+
+            if (this.IsPrimaryKey || this.Relationship != RelationshipType.None) {
+                return null;
+            }
+
+            return dialect.DefaultFor(this.DbType, this.IsNullable);
         }
 
         /// <summary>

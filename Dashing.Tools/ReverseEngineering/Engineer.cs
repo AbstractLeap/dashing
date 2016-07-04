@@ -8,8 +8,7 @@
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;
-
-    using DatabaseSchemaReader.DataSchema;
+    using Dashing.Tools.SchemaReading;
 
     public class Engineer : IEngineer {
         private readonly IConvention convention;
@@ -38,20 +37,28 @@
 
         private void InitTypeGenerator() {
             var assemblyName = new AssemblyName("Dashing.ReverseEngineering");
+#if COREFX
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+#else
             var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+#endif
             this.moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name);
         }
 
         private Type GenerateType(string name) {
             var className = this.convention.ClassNameFor(name);
             var typeBuilder = this.moduleBuilder.DefineType(className, TypeAttributes.Public);
+#if COREFX
+            var type = typeBuilder.CreateTypeInfo().GetType();
+#else
             var type = typeBuilder.CreateType();
+#endif
             this.typeMap.Add(name, type);
             return type;
         }
 
         public IEnumerable<IMap> ReverseEngineer(
-            DatabaseSchema schema,
+            Database schema,
             ISqlDialect sqlDialect,
             IEnumerable<string> tablesToIgnore,
             IAnswerProvider answerProvider,
@@ -63,12 +70,12 @@
             var maps = new List<IMap>();
             this.configuration = new Configuration(sqlDialect);
             foreach (var table in schema.Tables.Where(t => !tablesToIgnore.Contains(t.Name))) {
-                maps.Add(this.MapTable(table));
+                maps.Add(this.MapTable(table, schema, sqlDialect));
             }
 
             // go back through and add indexes and foreign keys
             foreach (var map in maps) {
-                GetIndexesAndForeignKeys(schema.Tables.First(t => t.Name == map.Table), map);
+                GetIndexesAndForeignKeys(map, schema);
             }
 
             // go back through and try to spot one-to-one columns
@@ -130,25 +137,25 @@
             return oneToManyColumn;
         }
 
-        private IMap MapTable(DatabaseTable table) {
+        private IMap MapTable(TableDto table, Database schema, ISqlDialect sqlDialect) {
             var type = this.GenerateType(table.Name);
             var map = Activator.CreateInstance(typeof(Map<>).MakeGenericType(type));
             var iMap = map as IMap;
             iMap.Table = table.Name;
             iMap.Configuration = this.configuration;
-            foreach (var column in table.Columns) {
-                iMap.Columns.Add(this.MapColumn(iMap, column));
+            foreach (var column in schema.Columns.Where(c => c.TableName == table.Name)) {
+                iMap.Columns.Add(this.MapColumn(iMap, column, schema, sqlDialect));
             }
 
             this.configuration.AddMap(type, iMap);
             return iMap;
         }
 
-        private void GetIndexesAndForeignKeys(DatabaseTable table, IMap map) {
+        private void GetIndexesAndForeignKeys(IMap map, Database schema) {
             // try to find foreign keys
             var foreignKeys = new List<ForeignKey>();
-            foreach (var foreignKey in table.ForeignKeys) {
-                var childColumn = map.Columns.Select(c => c.Value).First(c => c.DbName == foreignKey.Columns.First());
+            foreach (var foreignKey in schema.ForeignKeys.Where(fk => fk.TableName == map.Table)) {
+                var childColumn = map.Columns.Select(c => c.Value).First(c => c.DbName == foreignKey.ColumnName);
                 foreignKeys.Add(new ForeignKey(childColumn.ParentMap, childColumn, foreignKey.Name));
             }
 
@@ -156,82 +163,59 @@
 
             // try to find indexes
             var indexes = new List<Index>();
-            foreach (var index in table.Indexes) {
-                if (!index.IsUniqueKeyIndex(table)) {
-                    indexes.Add(
-                        new Index(
-                            map,
-                            index.Columns.Select(
-                                c =>
-                                map.Columns[
-                                    foreignKeys.Any(f => f.ChildColumn.DbName == c.Name)
-                                        ? this.convention.PropertyNameForManyToOneColumnName(c.Name)
-                                        : c.Name]).ToList(),
-                            index.Name,
-                            index.IsUnique));
-                }
+            foreach (var index in schema.Indexes.Where(i => i.TableName == map.Table).GroupBy(i => i.Name)) {
+                indexes.Add(
+                    new Index(
+                        map,
+                        index.OrderBy(i => i.ColumnId).Select(
+                            c =>
+                            map.Columns[
+                                foreignKeys.Any(f => f.ChildColumn.DbName == c.ColumnName)
+                                    ? this.convention.PropertyNameForManyToOneColumnName(c.ColumnName)
+                                    : c.ColumnName]).ToList(),
+                        index.Key,
+                        index.First().IsUnique));
             }
 
             map.Indexes = indexes;
         }
 
-        private KeyValuePair<string, IColumn> MapColumn(IMap map, DatabaseColumn column) {
+        private KeyValuePair<string, IColumn> MapColumn(IMap map, ColumnDto column, Database schema, ISqlDialect sqlDialect) {
             // figure out the type
-            Type type;
-            if (column.DataType == null) {
-                // HACK throw an exception? log out as a warning??
-                type = typeof(string);
-            }
-            else {
-                type = Type.GetType(column.DataType.NetDataType);
-            }
-
-            var col = Activator.CreateInstance(typeof(Column<>).MakeGenericType(type));
-            var mapColumn = col as IColumn;
-
+            Type type = sqlDialect.GetTypeFromString(column.DbTypeName, column.Length, column.Precision).GetCLRType();
+            var col = (IReverseEngineeringColumn)Activator.CreateInstance(typeof(Column<>).MakeGenericType(type));
+            col.ColumnSpecification = column;
+            var mapColumn = (IColumn)col;
             mapColumn.DbName = column.Name;
-            mapColumn.DbType = type.GetDbType();
-            mapColumn.IsAutoGenerated = column.IsAutoNumber;
+            sqlDialect.UpdateColumnFromSpecification(mapColumn, new ColumnSpecification {
+                                                                                            DbTypeName = column.DbTypeName,
+                                                                                            Length = column.Length,
+                                                                                            Precision = (byte?)column.Precision,
+                                                                                            Scale = (byte?)column.Scale
+                                                                                        });
+            mapColumn.IsAutoGenerated = column.IsAutoGenerated;
             mapColumn.IsExcludedByDefault = false;
             mapColumn.IsIgnored = false;
-            mapColumn.IsNullable = column.Nullable;
-            mapColumn.IsPrimaryKey = column.IsPrimaryKey || column.IsPrimaryKey; // HACK - MySql issue with primary keys?
+            mapColumn.IsNullable = column.IsNullable;
+            mapColumn.IsPrimaryKey = column.IsPrimaryKey; // HACK - MySql issue with primary keys?
             if (mapColumn.IsPrimaryKey) {
                 map.PrimaryKey = mapColumn;
-            }
-
-            if (column.Length.HasValue) {
-                if (column.Length == -1) {
-                    // max
-                    mapColumn.MaxLength = true;
-                }
-                else {
-                    mapColumn.Length = (ushort)column.Length.Value;
-                }
-            }
-
-            if (column.Precision.HasValue) {
-                mapColumn.Precision = (byte)column.Precision.Value;
-            }
-
-            if (column.Scale.HasValue) {
-                mapColumn.Scale = (byte)column.Scale.Value;
             }
 
             mapColumn.Map = map;
 
             // figure out the relationship
-            if (column.IsForeignKey) {
+            var foreignKey = schema.ForeignKeys.SingleOrDefault(fk => fk.TableName == map.Table && fk.ColumnName == column.Name);
+            if (foreignKey != null) {
                 mapColumn.Relationship = RelationshipType.ManyToOne;
                 mapColumn.Name = this.convention.PropertyNameForManyToOneColumnName(column.Name);
-                var iReverseEngineeringColumn = col as IReverseEngineeringColumn;
-                iReverseEngineeringColumn.ForeignKeyTableName = column.ForeignKeyTableName;
-                iReverseEngineeringColumn.TypeMap = this.typeMap;
-                if (!this.manyToOneColumns.ContainsKey(column.ForeignKeyTableName)) {
-                    this.manyToOneColumns.Add(column.ForeignKeyTableName, new List<IColumn>());
+                col.ForeignKeyTableName = foreignKey.ReferencedTableName;
+                col.TypeMap = this.typeMap;
+                if (!this.manyToOneColumns.ContainsKey(foreignKey.ReferencedTableName)) {
+                    this.manyToOneColumns.Add(foreignKey.ReferencedTableName, new List<IColumn>());
                 }
 
-                this.manyToOneColumns[column.ForeignKeyTableName].Add(mapColumn);
+                this.manyToOneColumns[foreignKey.ReferencedTableName].Add(mapColumn);
             }
             else {
                 mapColumn.Relationship = RelationshipType.None;

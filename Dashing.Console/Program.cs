@@ -22,9 +22,7 @@
     using Dashing.Tools.Migration;
     using Dashing.Tools.ModelGeneration;
     using Dashing.Tools.ReverseEngineering;
-
-    using DatabaseSchemaReader;
-    using DatabaseSchemaReader.DataSchema;
+    using Dashing.Tools.SchemaReading;
 
     using Mono.Cecil;
     using Mono.Cecil.Cil;
@@ -199,9 +197,11 @@
             }
 
             // load the configuration NOW and try to inherit its version of Dashing, Dapper, etc
-            var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
-            GC.KeepAlive(configAssembly);
-            configObject = LoadConfiguration(configAssembly, dashingSettings, connectionStringSettings);
+            if (!options.ReverseEngineer) {
+                var configAssembly = Assembly.LoadFrom(dashingSettings.PathToDll);
+                GC.KeepAlive(configAssembly);
+                configObject = LoadConfiguration(configAssembly, dashingSettings, connectionStringSettings);
+            }
 
             // now decide what to do
             if (options.Script) {
@@ -448,6 +448,7 @@
                                 }
 
                                 command.CommandText = script;
+                                command.CommandTimeout = 600;
                                 command.ExecuteNonQuery();
                             }
                         }
@@ -513,11 +514,18 @@
                 throw new CatchyException("You must specify a GeneratedNamespace in the Project ini file");
             }
 
-            DatabaseSchema schema;
-            var engineer = new Engineer(reverseEngineerSettings.GetExtraPluralizationWords());
+            Database schema;
+            using (new TimedOperation("-- Reading database contents...")) {
+                var connectionStringManipulator = new ConnectionStringManipulator(connectionString.ToSystem());
+                var factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
+                var connection = factory.CreateConnection();
+                connection.ConnectionString = connectionString.ConnectionString;
+                connection.Open();
+                var schemaReader = SchemaReaderFactory.GetSchemaReader(connectionString.ProviderName);
+                schema = schemaReader.Read(connection, connectionStringManipulator.GetDatabaseName());
+            }
 
-            var databaseReader = new DatabaseReader(connectionString.ConnectionString, connectionString.ProviderName);
-            schema = databaseReader.ReadAll();
+            var engineer = new Engineer(reverseEngineerSettings.GetExtraPluralizationWords().ToDictionary(k => k.Key, k => k.Value));
             var maps = engineer.ReverseEngineer(
                 schema,
                 new DialectFactory().Create(connectionString.ToSystem()),
@@ -547,20 +555,24 @@
             var dialectFactory = new DialectFactory();
             var dialect = dialectFactory.Create(connectionStringSettings.ToSystem());
             var factory = DbProviderFactories.GetFactory(connectionStringSettings.ProviderName);
+            var schemaReader = SchemaReaderFactory.GetSchemaReader(connectionStringSettings.ProviderName);
 
             // create database if not exists
             CreateDatabaseIfNotExists(connectionStringSettings, factory, dialect);
 
-            DatabaseSchema schema;
+            Database schema;
             using (new TimedOperation("-- Reading database contents...")) {
-                var databaseReader = new DatabaseReader(connectionStringSettings.ConnectionString, connectionStringSettings.ProviderName);
-                schema = databaseReader.ReadAll();
+                var connectionStringManipulator = new ConnectionStringManipulator(connectionStringSettings.ToSystem());
+                var connection = factory.CreateConnection();
+                connection.ConnectionString = connectionStringSettings.ConnectionString;
+                connection.Open();
+                schema = schemaReader.Read(connection, connectionStringManipulator.GetDatabaseName());
             }
 
             IEnumerable<IMap> fromMaps;
             using (new TimedOperation("-- Reverse engineering...")) {
                 Console.WriteLine();
-                var engineer = new Engineer(reverseEngineerSettings.GetExtraPluralizationWords().Union(configuration.Maps.Select(m => new KeyValuePair<string, string>(m.Type.Name, m.Table)))); // we use our configuration to inform us as to the correct naming of tables
+                var engineer = new Engineer(reverseEngineerSettings.GetExtraPluralizationWords().Union(configuration.Maps.ToDictionary(m => m.Type.Name, m => m.Table))); // we use our configuration to inform us as to the correct naming of tables
                 fromMaps = engineer.ReverseEngineer(schema, dialect, reverseEngineerSettings.GetTablesToIgnore(), consoleAnswerProvider, false);
                 Console.Write("-- ");
             }

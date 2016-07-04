@@ -9,7 +9,7 @@
     using Dashing.Engine;
     using Dashing.Engine.Dialects;
     using Dashing.Events;
-
+    
     /// <summary>
     ///     This configuration pretty much only exists to support fetching of different maps within reverse engineering
     /// </summary>
@@ -28,10 +28,8 @@
 
         public ConnectionStringSettings ConnectionStringSettings { get; private set; }
 
-        public IEnumerable<IMap> Maps
-        {
-            get
-            {
+        public IEnumerable<IMap> Maps {
+            get {
                 return this.maps.Select(k => k.Value);
             }
         }
@@ -74,28 +72,22 @@
 
         public IEngine Engine { get; set; }
 
-        public IMapper Mapper
-        {
-            get
-            {
+        public IMapper Mapper {
+            get {
                 throw new NotImplementedException();
             }
         }
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
-        public ICollection<IEventListener> EventListeners
-        {
-            get
-            {
+        public ICollection<IEventListener> EventListeners {
+            get {
                 throw new NotImplementedException();
             }
         }
 
-        public EventHandlers EventHandlers
-        {
-            get
-            {
+        public EventHandlers EventHandlers {
+            get {
                 throw new NotImplementedException();
             }
         }

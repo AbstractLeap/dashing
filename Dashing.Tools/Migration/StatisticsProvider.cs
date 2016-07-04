@@ -38,7 +38,7 @@ namespace Dashing.Tools.Migration {
                 takeParam.Value = 1;
                 cmd.Parameters.Add(takeParam);
                 using (var reader = cmd.ExecuteReader()) {
-                    result.Add(map.Type.Name, new Statistics { HasRows = reader.Read() });
+                    result.Add(map.Type.Name.ToLowerInvariant(), new Statistics { HasRows = reader.Read() });
                 }
             }
 

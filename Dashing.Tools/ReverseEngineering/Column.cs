@@ -2,6 +2,8 @@
     using System;
     using System.Collections.Generic;
 
+    using Dashing.Tools.SchemaReading;
+
     internal class Column<T> : Dashing.Configuration.Column<T>, IReverseEngineeringColumn {
         private readonly object typeLock = new object();
 
@@ -31,5 +33,7 @@
         public string ForeignKeyTableName { get; set; }
 
         public IDictionary<string, Type> TypeMap { get; set; }
+
+        public ColumnDto ColumnSpecification { get; set; }
     }
 }

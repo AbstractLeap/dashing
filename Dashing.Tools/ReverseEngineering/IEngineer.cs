@@ -3,12 +3,11 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
-
-    using DatabaseSchemaReader.DataSchema;
+    using Dashing.Tools.SchemaReading;
 
     public interface IEngineer {
         IEnumerable<IMap> ReverseEngineer(
-            DatabaseSchema schema,
+            Database schema,
             ISqlDialect sqlDialect,
             IEnumerable<string> tablesToIgnore,
             IAnswerProvider answerProvider,

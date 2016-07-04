@@ -1,10 +1,10 @@
 namespace Dashing.Tools.Tests.ModelGeneration {
+    using System.Collections.Generic;
     using System.Linq;
 
     using Dashing.Configuration;
     using Dashing.Tools.ModelGeneration;
-
-    using DatabaseSchemaReader.DataSchema;
+    using Dashing.Tools.SchemaReading;
 
     using Xunit;
 
@@ -51,19 +51,22 @@ namespace Dashing.Tools.Tests.ModelGeneration {
             Assert.Contains("this.Comments = new List<Comment>();", results["Post"]);
         }
 
-        private DatabaseSchema MakeSchema(CustomConfig config) {
-            var result = new DatabaseSchema(string.Empty, SqlType.SqlServer);
+        private Database MakeSchema(CustomConfig config) {
+            var tables = new List<TableDto>();
+            var columns = new List<ColumnDto>();
+            var fks = new List<ForeignKeyDto>();
             foreach (var map in config.Maps) {
-                var table = new DatabaseTable();
+                var table = new TableDto();
                 table.Name = map.Table;
                 foreach (var column in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne)) {
-                    table.Columns.Add(new DatabaseColumn { ForeignKeyTableName = config.GetMap(column.Value.Type).Table, Name = column.Value.DbName });
+                    columns.Add(new ColumnDto { Name = column.Value.DbName, TableName = column.Value.Map.Table, DbType = column.Value.DbType });
+                    fks.Add(new ForeignKeyDto { ColumnName = column.Value.DbName, Name = "fk_" + column.Value.DbName, ReferencedColumnName = column.Value.ParentMap.PrimaryKey.DbName, ReferencedTableName = column.Value.ParentMap.Table, TableName = column.Value.Map.Table });
                 }
 
-                result.Tables.Add(table);
+                tables.Add(table);
             }
 
-            return result;
+            return new Database { Tables = tables, Columns = columns, ForeignKeys = fks };
         }
     }
 }

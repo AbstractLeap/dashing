@@ -44,7 +44,7 @@ namespace Dashing.Engine.DDL {
             var sql = new StringBuilder();
             sql.Append("alter table ");
             this.dialect.AppendQuotedTableName(sql, foreignKey.ChildColumn.Map);
-            sql.Append(" add constraint ").Append(foreignKey.Name).Append(" foreign key (");
+            sql.Append(" add constraint ").Append(this.dialect.GetForeignKeyName(foreignKey)).Append(" foreign key (");
             this.dialect.AppendQuotedName(sql, foreignKey.ChildColumn.DbName);
             sql.Append(") references ");
             this.dialect.AppendQuotedTableName(sql, foreignKey.ParentMap);

@@ -98,6 +98,7 @@
     <Compile Include="Engine\DDL\ICreateTableWriter.cs" />
     <Compile Include="Engine\DDL\IDropTableWriter.cs" />
     <Compile Include="Engine\Dialects\AnsiSqlDialect.cs" />
+    <Compile Include="Engine\Dialects\ColumnSpecification.cs" />
     <Compile Include="Engine\Dialects\DialectFactory.cs" />
     <Compile Include="Engine\Dialects\ISqlDialect.cs" />
     <Compile Include="Engine\Dialects\MySqlDialect.cs" />
@@ -147,6 +148,7 @@
     <Compile Include="Extensions\DapperExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\Inflector.cs" />
     <Compile Include="Extensions\OrderedDictionary.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />

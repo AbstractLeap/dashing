@@ -1,4 +1,5 @@
 namespace Dashing.Engine.Dialects {
+    using System.Data;
     using System.Text;
 
     using Dashing.Configuration;
@@ -38,10 +39,11 @@ namespace Dashing.Engine.Dialects {
         }
 
         public override string DropForeignKey(ForeignKey foreignKey) {
+            var name = this.GetForeignKeyName(foreignKey);
             var sql = new StringBuilder("alter table ");
             this.AppendQuotedTableName(sql, foreignKey.ChildColumn.Map);
             sql.Append(" drop foreign key ");
-            this.AppendQuotedName(sql, foreignKey.Name);
+            this.AppendQuotedName(sql, name);
             return sql.ToString();
         }
 
@@ -49,7 +51,7 @@ namespace Dashing.Engine.Dialects {
             var sql = new StringBuilder("alter table ");
             this.AppendQuotedTableName(sql, index.Map);
             sql.Append(" drop index ");
-            this.AppendQuotedName(sql, index.Name);
+            this.AppendQuotedName(sql, this.GetIndexName(index));
             return sql.ToString();
         }
 
@@ -61,7 +63,7 @@ namespace Dashing.Engine.Dialects {
         }
 
         protected override void AppendDefault(StringBuilder sql, IColumn column) {
-            sql.Append(" default ").Append(column.Default);
+            sql.Append(" default ").Append(column.GetDefault(this));
         }
 
         public override string ChangeTableName(IMap @from, IMap to) {
@@ -91,6 +93,72 @@ namespace Dashing.Engine.Dialects {
                 // yikes, limit is not optional so specify massive number 2^64-1
                 sql.Append(" limit @skip, 18446744073709551615");
             }
+        }
+
+        public override string DefaultFor(DbType dbType, bool isNullable) {
+            switch (dbType) {
+                case DbType.Guid:
+                    return null; // not possible to autogenerate a guid in MySql
+
+                case DbType.Time:
+                    return "'00:00'";
+            }
+
+            return base.DefaultFor(dbType, isNullable);
+        }
+
+        public override DbType GetTypeFromString(string name, int? length, int? precision) {
+            switch (name) {
+                case "text":
+                    return DbType.String;
+
+                case "tinyint":
+                    if (precision.HasValue && precision.Value == 1) {
+                        // MySql stores bool as tinyint(1)
+                        return DbType.Boolean;
+                    }
+                    break;
+            }
+
+            return base.GetTypeFromString(name, length, precision);
+        }
+
+        public override ColumnSpecification GetColumnSpecification(IColumn column) {
+            switch (column.DbType) {
+                case DbType.String:
+                    return new ColumnSpecification { DbTypeName = "varchar", Length = this.GetLength(column) };
+
+                case DbType.StringFixedLength:
+                    return new ColumnSpecification { DbTypeName = "char", Length = this.GetLength(column) };
+            }
+
+            return base.GetColumnSpecification(column);
+        }
+
+        public override void UpdateColumnFromSpecification(IColumn column, ColumnSpecification specification) {
+            if (specification.DbTypeName == "text") {
+                specification.Length = -1; // if it's a text column then it comes back with a value of 65536 but actually we want a String with MaxLength
+            }
+
+            base.UpdateColumnFromSpecification(column, specification);
+        }
+
+        public override string GetForeignKeyName(ForeignKey foreignKey) {
+            var name = base.GetForeignKeyName(foreignKey);
+            if (name.Length > 64) {
+                return name.Substring(0, 64);
+            }
+
+            return name;
+        }
+
+        public override string GetIndexName(Index index) {
+            var name = base.GetIndexName(index);
+            if (name.Length > 64) {
+                return name.Substring(0, 64);
+            }
+
+            return name;
         }
     }
 }

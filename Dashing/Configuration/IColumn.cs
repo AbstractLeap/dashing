@@ -2,6 +2,8 @@
     using System;
     using System.Data;
 
+    using Dashing.Engine.Dialects;
+
     public interface IColumn {
         /// <summary>
         ///     Gets the type.
@@ -51,7 +53,14 @@
         /// <summary>
         ///     Gets or sets the default value for this column
         /// </summary>
-        string Default { get; set; }
+        string Default { set; }
+
+        /// <summary>
+        /// Get the default value for this column
+        /// </summary>
+        /// <param name="dialect">The Sql dialect to get the default for</param>
+        /// <returns></returns>
+        string GetDefault(ISqlDialect dialect);
 
         /// <summary>
         ///     Gets or sets whether the column is nullable
