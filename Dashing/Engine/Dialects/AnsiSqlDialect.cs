@@ -9,7 +9,7 @@ namespace Dashing.Engine.Dialects {
         public override ColumnSpecification GetColumnSpecification(IColumn column) {
             switch (column.DbType) {
                 case DbType.Binary:
-                    return new ColumnSpecification { DbTypeName = "bit" };
+                    return new ColumnSpecification { DbTypeName = "bit", Length = this.GetLength(column) };
 
                 case DbType.Boolean:
                     return new ColumnSpecification { DbTypeName = "smallint unsigned" };

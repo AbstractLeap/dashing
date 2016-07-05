@@ -7,12 +7,11 @@ namespace Dashing.Tools.SchemaReading {
     abstract class BaseSchemaReader : ISchemaReader {
         public Database Read(IDbConnection dbConnection, string databaseName) {
             // get the data
-            return new Database {
-                                    Tables = this.ReadTables(dbConnection, databaseName),
-                                    Columns = this.ReadColumns(dbConnection, databaseName),
-                                    Indexes = this.ReadIndexes(dbConnection, databaseName),
-                                    ForeignKeys = this.ReadForeignKeys(dbConnection, databaseName)
-                                };
+            return new Database(
+                this.ReadTables(dbConnection, databaseName),
+                this.ReadColumns(dbConnection, databaseName),
+                this.ReadIndexes(dbConnection, databaseName),
+                this.ReadForeignKeys(dbConnection, databaseName));
         }
 
         protected virtual IEnumerable<ForeignKeyDto> ReadForeignKeys(IDbConnection dbConnection, string databaseName) {

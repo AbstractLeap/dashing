@@ -211,7 +211,7 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
         private static Migrator MakeMigrator(IConfiguration config, bool hasRows = false) {
             var mockStatisticsProvider = new Mock<IStatisticsProvider>();
             mockStatisticsProvider.Setup(s => s.GetStatistics(It.IsAny<IEnumerable<IMap>>()))
-                                  .Returns(config.Maps.ToDictionary(m => m.Type.Name, m => new Statistics { HasRows = hasRows }));
+                                  .Returns(config.Maps.ToDictionary(m => m.Type.Name.ToLowerInvariant(), m => new Statistics { HasRows = hasRows }));
             var migrator = new Migrator(
                 new SqlServerDialect(),
                 new CreateTableWriter(new SqlServerDialect()),

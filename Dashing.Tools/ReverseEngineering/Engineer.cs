@@ -143,7 +143,7 @@
             var iMap = map as IMap;
             iMap.Table = table.Name;
             iMap.Configuration = this.configuration;
-            foreach (var column in schema.Columns.Where(c => c.TableName == table.Name)) {
+            foreach (var column in schema.GetColumnsForTable(table.Name)) {
                 iMap.Columns.Add(this.MapColumn(iMap, column, schema, sqlDialect));
             }
 
@@ -154,7 +154,7 @@
         private void GetIndexesAndForeignKeys(IMap map, Database schema) {
             // try to find foreign keys
             var foreignKeys = new List<ForeignKey>();
-            foreach (var foreignKey in schema.ForeignKeys.Where(fk => fk.TableName == map.Table)) {
+            foreach (var foreignKey in schema.GetForeignKeysForTable(map.Table)) {
                 var childColumn = map.Columns.Select(c => c.Value).First(c => c.DbName == foreignKey.ColumnName);
                 foreignKeys.Add(new ForeignKey(childColumn.ParentMap, childColumn, foreignKey.Name));
             }
@@ -163,7 +163,7 @@
 
             // try to find indexes
             var indexes = new List<Index>();
-            foreach (var index in schema.Indexes.Where(i => i.TableName == map.Table).GroupBy(i => i.Name)) {
+            foreach (var index in schema.GetIndexesForTable(map.Table).GroupBy(i => i.Name)) {
                 indexes.Add(
                     new Index(
                         map,
@@ -205,7 +205,7 @@
             mapColumn.Map = map;
 
             // figure out the relationship
-            var foreignKey = schema.ForeignKeys.SingleOrDefault(fk => fk.TableName == map.Table && fk.ColumnName == column.Name);
+            var foreignKey = schema.GetForeignKeyForColumn(column.Name, map.Table);
             if (foreignKey != null) {
                 mapColumn.Relationship = RelationshipType.ManyToOne;
                 mapColumn.Name = this.convention.PropertyNameForManyToOneColumnName(column.Name);

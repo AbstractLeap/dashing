@@ -66,7 +66,7 @@ namespace Dashing.Tools.Tests.ModelGeneration {
                 tables.Add(table);
             }
 
-            return new Database { Tables = tables, Columns = columns, ForeignKeys = fks };
+            return new Database (tables, columns, null, fks);
         }
     }
 }
