@@ -17,6 +17,8 @@
 
         public virtual DateTime CommentDate { get; set; }
 
+        public virtual DateTime? DeletedDate { get; set; }
+
         public virtual IList<Like> Likes { get; set; }
     }
 }

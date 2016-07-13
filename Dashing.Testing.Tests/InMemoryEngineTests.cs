@@ -26,7 +26,7 @@
         public void CollectionsWork() {
             var session = this.GetSession();
             var posts = session.Query<Post>().FetchMany(p => p.Comments).ThenFetch(c => c.User).ToArray();
-            Assert.Equal(2, posts.Length);
+            Assert.Equal(3, posts.Length);
             Assert.Equal(3, posts.First().Comments.Count);
             Assert.Equal("Mark", posts.First().Comments.First().User.Username);
             Assert.Equal(posts.First().Comments.First().Post.PostId, posts.First().PostId);
@@ -70,7 +70,7 @@
         public void OrderByWorks() {
             var session = this.GetSession();
             var posts = session.Query<Post>().OrderByDescending(p => p.Title).ToList();
-            Assert.Equal(2, posts.Count);
+            Assert.Equal(3, posts.Count);
             Assert.Equal("My Second Post", posts.First().Title);
         }
 
@@ -105,6 +105,32 @@
             Assert.Equal(1, users.Count(u => !u.IsEnabled && u.Username == "James"));
         }
 
+        [Fact]
+        public void EmptyCollectionContainsWorks() {
+            var session = this.GetSession();
+            var blogIds = new List<int>();
+            var posts = session.Query<Post>().Where(p => blogIds.Contains(p.Blog.BlogId));
+            Assert.Equal(0, posts.Count());
+        }
+
+        [Fact]
+        public void OrWithEmptyCollectionWorks() {
+            var session = this.GetSession();
+            var blogIds = new List<int>();
+            var author = new User { UserId = 1 };
+            var posts = session.Query<Post>().Where(p => p.Author == author || blogIds.Contains(p.Blog.BlogId));
+            Assert.Equal(2, posts.Count());
+        }
+
+        [Fact]
+        public void OrWithEmptyCollectionOnNullRelationshipWorks() {
+            var session = this.GetSession();
+            var blogIds = new List<int>();
+            var author = new User { UserId = 2 };
+            var posts = session.Query<Post>().Where(p => p.Author == author || blogIds.Contains(p.Blog.BlogId));
+            Assert.Equal(1, posts.Count());
+        }
+
         private ISession GetSession() {
             var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
             var session = new Session(engine, new Mock<ISessionState>().Object);
@@ -117,7 +143,8 @@
 
             var posts = new List<Post> {
                                            new Post { Author = authors[0], Blog = blogs[0], Title = "My First Post" },
-                                           new Post { Author = authors[0], Blog = blogs[0], Title = "My Second Post" }
+                                           new Post { Author = authors[0], Blog = blogs[0], Title = "My Second Post" },
+                                           new Post { Author = authors[1], Title = "A post without a blog!" } 
                                        };
             session.Insert(posts);
 

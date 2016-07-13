@@ -5,6 +5,8 @@
     using System.Linq.Expressions;
     using System.Reflection;
 
+    using Dashing.Extensions;
+
     public class WhereClauseNullCheckRewriter : ExpressionVisitor {
         private IList<Expression> nullCheckExpressions;
 
@@ -12,11 +14,14 @@
 
         private bool isNullCheck;
 
+        private bool containsNullable;
+
         public Expression<Func<T, bool>> Rewrite<T>(Expression<Func<T, bool>> expression) {
             this.ResetVariables();
             var expr = this.Visit(expression.Body);
             if (this.nullCheckExpressions.Any()) {
-                return Expression.Lambda<Func<T, bool>>(this.CombineExpressions(expression.Body), expression.Parameters.First());
+                 return Expression.Lambda<Func<T, bool>>(this.CombineExpressions(expression.Body), expression.Parameters.First());
+
             }
 
             return Expression.Lambda<Func<T, bool>>(expr, expression.Parameters.First());
@@ -39,8 +44,10 @@
 
                 // visit right hand side
                 var leftHandSideIsNull = this.isNullCheck;
+                var leftHandSideContainsNullable = this.containsNullable;
                 this.treeHasParameter = false;
                 this.isNullCheck = false;
+                this.containsNullable = false;
                 if (node.Right.NodeType == ExpressionType.Convert) {
                     this.Visit(((UnaryExpression)node.Right).Operand);
                 }
@@ -48,8 +55,8 @@
                     this.Visit(node.Right);
                 }
 
-                if (leftHandSideIsNull || this.isNullCheck) {
-                    // we're checking null somewhere (e.g. e.Post == null) so we should remove that last null check
+                if ((leftHandSideIsNull || this.isNullCheck) && !leftHandSideContainsNullable && !this.containsNullable) {
+                    // we're checking null somewhere (e.g. e.Post == null) so we should remove that last null check (unless it's got a nullable inside
                     if (this.nullCheckExpressions.Count > 0) {
                         this.nullCheckExpressions.RemoveAt(this.nullCheckExpressions.Count - 1);
                     }
@@ -59,8 +66,8 @@
             }
 
             if (isInAndOrOrExpression) {
-                var leftExpr = this.Visit(node.Left);
-                var rightExpr = this.Visit(node.Right);
+                var leftExpr = this.CombineExpressions(this.Visit(node.Left));
+                var rightExpr = this.CombineExpressions(this.Visit(node.Right));
                 return this.ModifyExpression(leftExpr, rightExpr, node.NodeType);
             }
             // according to the WhereClauseWriter we're almost certainly inside a constant expression here so just return
@@ -140,6 +147,10 @@
                     throw new NotImplementedException(); // as per WhereClauseWriter
                 }
 
+                if (propInfo.PropertyType.IsNullable()) {
+                    this.containsNullable = true;
+                }
+
                 if (propInfo.PropertyType.IsClass && propInfo.PropertyType != typeof(string)) {
                     if (this.nullCheckExpressions.Any()) {
                         // we just use the last null check expression and add to that
@@ -171,6 +182,7 @@
             this.nullCheckExpressions = new List<Expression>();
             this.treeHasParameter = false;
             this.isNullCheck = false;
+            this.containsNullable = false;
         }
 
         private Expression ModifyExpression(Expression leftExpr, Expression rightExpr, ExpressionType nodeType) {
@@ -202,7 +214,9 @@
             }
 
             if (this.nullCheckExpressions.Count == 1) {
-                return Expression.AndAlso(this.nullCheckExpressions.First(), exp);
+                var expr = Expression.AndAlso(this.nullCheckExpressions.First(), exp);
+                this.nullCheckExpressions.Clear();
+                return expr;
             }
 
             var combinedExpr = Expression.AndAlso(this.nullCheckExpressions.First(), this.nullCheckExpressions.ElementAt(1));
@@ -210,6 +224,7 @@
                 combinedExpr = Expression.AndAlso(combinedExpr, this.nullCheckExpressions.ElementAt(i));
             }
 
+            this.nullCheckExpressions.Clear();
             return Expression.AndAlso(combinedExpr, exp);
         }
 

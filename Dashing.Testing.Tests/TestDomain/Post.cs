@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Testing.Tests.TestDomain {
+    using System;
     using System.Collections.Generic;
 
     public class Post {
@@ -28,5 +29,7 @@
         public virtual IList<PostTag> YetMoreTags { get; set; }
 
         public virtual bool DoNotMap { get; set; }
+
+        public DateTime? DeletedDate { get; set; }
     }
 }

@@ -69,6 +69,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="EntityClonerTests.cs" />
+    <Compile Include="ExpressionExtensions.cs" />
     <Compile Include="FetchClonerTests.cs" />
     <Compile Include="InMemoryEngineTests.cs" />
     <Compile Include="InMemoryTableTests.cs" />
