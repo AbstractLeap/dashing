@@ -131,6 +131,22 @@
             Assert.Equal(1, posts.Count());
         }
 
+        [Fact]
+        public void DeleteAllWorks() {
+            var session = this.GetSession();
+            Assert.Equal(3, session.Query<User>().Count());
+            session.DeleteAll<User>();
+            Assert.Equal(0, session.Query<User>().Count());
+        }
+
+        [Fact]
+        public void UpdateAllWorks() {
+            var session = this.GetSession();
+            Assert.Equal(2, session.Query<User>().Count(u => u.IsEnabled));
+            session.UpdateAll<User>(u => u.IsEnabled = false);
+            Assert.Equal(0, session.Query<User>().Count(u => u.IsEnabled));
+        }
+
         private ISession GetSession() {
             var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
             var session = new Session(engine, new Mock<ISessionState>().Object);

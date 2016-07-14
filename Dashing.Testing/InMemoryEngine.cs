@@ -167,8 +167,10 @@
         public int Execute<T>(ISessionState sessionState, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.AssertConfigured();
             var query = new SelectQuery<T>(new NonExecutingSelectQueryExecutor());
-            foreach (var predicate in predicates) {
-                query.Where(predicate);
+            if (predicates != null) {
+                foreach (var predicate in predicates) {
+                    query.Where(predicate);
+                }
             }
 
             var entitiesToUpdate = this.Query<T>(sessionState, query).ToList();
@@ -182,8 +184,10 @@
         public int ExecuteBulkDelete<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.AssertConfigured();
             var query = new SelectQuery<T>(new NonExecutingSelectQueryExecutor());
-            foreach (var predicate in predicates) {
-                query.Where(predicate);
+            if (predicates != null) {
+                foreach (var predicate in predicates) {
+                    query.Where(predicate);
+                }
             }
 
             var entitiesToDelete = this.Query<T>(sessionState, query).ToList();
