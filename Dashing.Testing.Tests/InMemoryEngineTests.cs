@@ -147,6 +147,22 @@
             Assert.Equal(0, session.Query<User>().Count(u => u.IsEnabled));
         }
 
+        [Fact]
+        public void InsertLongWorks() {
+            var config = new TestConfiguration(true);
+            using (var session = config.BeginSession()) {
+                var thing = new ThingWithLongPrimaryKey { Name = "Foo" };
+                var inserts = session.Insert(thing);
+                Assert.Equal(1, inserts);
+                Assert.Equal(1, thing.Id);
+
+                var secondThing = new ThingWithLongPrimaryKey { Name = "Bar" };
+                var insertsSecond = session.Insert(secondThing);
+                Assert.Equal(1, insertsSecond);
+                Assert.Equal(2, secondThing.Id);
+            }
+        }
+
         private ISession GetSession() {
             var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
             var session = new Session(engine, new Mock<ISessionState>().Object);

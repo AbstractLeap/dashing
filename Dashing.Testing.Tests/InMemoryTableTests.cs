@@ -39,6 +39,18 @@
         }
 
         [Fact]
+        public void InsertWithLongWorks() {
+            var table = new InMemoryTable<ThingWithLongPrimaryKey, long>(new TestConfiguration());
+            var thing = new ThingWithLongPrimaryKey { Name = "Foo" };
+            var pk = table.Insert(thing);
+            Assert.Equal(1, thing.Id);
+
+            var secondThing = new ThingWithLongPrimaryKey { Name = "Bar" };
+            var pk2 = table.Insert(secondThing);
+            Assert.Equal(2, secondThing.Id);
+        }
+
+        [Fact]
         public void GetReturnsNull() {
             var table = new InMemoryTable<Post, int>(new TestConfiguration());
             Assert.Null(table.Get(1));

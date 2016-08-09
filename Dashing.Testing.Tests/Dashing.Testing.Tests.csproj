@@ -86,6 +86,7 @@
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />
+    <Compile Include="TestDomain\ThingWithLongPrimaryKey.cs" />
     <Compile Include="TestDomain\ThingWithStringPrimaryKey.cs" />
     <Compile Include="TestDomain\User.cs" />
     <Compile Include="WhereClauseCaseInsensitiveRewriterTests.cs" />

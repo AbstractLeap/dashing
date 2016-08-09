@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>1.0.11</version>
+        <version>1.0.12</version>
         <title>Dashing</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -13,12 +13,13 @@
         <summary>Dashing is a simple to use mini ORM built on top of Dapper</summary>
         <releaseNotes>See Git Log at https://github.com/Polylytics/dashing
 
-v1.0.11 exposes the arbitrary Query and QueryAsync methods from dapper</releaseNotes>
+v1.0.12 Better Int64 PK Support
+Initial Sqlite engine support</releaseNotes>
         <copyright>© Polylytics Limited, 2015</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>
         <dependencies>
-            <dependency id="Dapper" version="1.38" />
+            <dependency id="Dapper" version="1.50.2" />
         </dependencies>
         <frameworkAssemblies>
             <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework="" />
