@@ -160,7 +160,7 @@
                     (c, n) => "i",
                     (c, n) => c.DbName + n.Alias);
                 if (!containsPrimaryKeyClause) {
-                    this.AppendDefaultOrderBy<T>(rootNode, orderSql, "i", this.Configuration.GetMap<T>().PrimaryKey.DbName + rootNode.Alias);
+                    this.AppendDefaultOrderBy<T>(rootNode, orderSql, "i", this.Configuration.GetMap<T>().PrimaryKey.DbName + rootNode.Alias, false);
                 }
             }
             else {
@@ -226,6 +226,7 @@
 
             // add order by
             var innerOrderSql = new StringBuilder();
+            var orderClauses =  new Queue<OrderClause<T>>(selectQuery.OrderClauses); // clone the queue for use in the outer clause
             if (selectQuery.OrderClauses.Any()) {
                 this.AddOrderByClause(selectQuery.OrderClauses, innerOrderSql, rootNode);
             }
@@ -259,15 +260,15 @@
             // now construct the outer query
             sql.Append("select ").Append(outerColumnSql).Append(" from (").Append(innerSql).Append(") as i").Append(outerTableSql);
             var outerOrderSql = new StringBuilder();
-            if (selectQuery.OrderClauses.Any()) {
+            if (orderClauses.Any()) {
                 var containsPrimaryKeyClause = this.AddOrderByClause(
-                    selectQuery.OrderClauses,
+                    orderClauses,
                     outerOrderSql,
                     rootNode,
                     (c, n) => "i",
-                    (c, n) => n == null ? c.Name + "t" : c.Name + n.Alias);
+                    (c, n) => c.DbName);
                 if (!containsPrimaryKeyClause) {
-                    this.AppendDefaultOrderBy<T>(rootNode, outerOrderSql, "i");
+                    this.AppendDefaultOrderBy<T>(rootNode, outerOrderSql, "i", isFirstOrderClause: false);
                 }
             }
             else {
@@ -306,7 +307,7 @@
             if (selectQuery.OrderClauses.Any()) {
                 var containsPrimaryKeyClause = this.AddOrderByClause(selectQuery.OrderClauses, orderSql, rootNode);
                 if (numberCollectionFetches > 0 && !containsPrimaryKeyClause) {
-                    this.AppendDefaultOrderBy<T>(rootNode, orderSql);
+                    this.AppendDefaultOrderBy<T>(rootNode, orderSql, isFirstOrderClause: false);
                 }
             }
             else if (numberCollectionFetches > 0 || selectQuery.SkipN > 0 || selectQuery.TakeN > 0) {
@@ -346,8 +347,14 @@
             return rootNode;
         }
 
-        private void AppendDefaultOrderBy<T>(FetchNode rootNode, StringBuilder orderSql, string alias = null, string name = null) {
-            orderSql.Append(" order by ");
+        private void AppendDefaultOrderBy<T>(FetchNode rootNode, StringBuilder orderSql, string alias = null, string name = null, bool isFirstOrderClause = true) {
+            if (isFirstOrderClause) {
+                orderSql.Append(" order by ");
+            }
+            else {
+                orderSql.Append(", ");
+            }
+
             if (rootNode != null) {
                 orderSql.Append(alias ?? rootNode.Alias);
                 orderSql.Append('.');

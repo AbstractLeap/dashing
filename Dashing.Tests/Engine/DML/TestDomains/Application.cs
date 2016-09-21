@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Tests.Engine.DML.TestDomains.MultipleFetchManyWithThenFetchAndOneToOne {
+    using System;
     using System.Collections.Generic;
 
     //patient.Applications = await session.Query<Application>().Fetch(a => a.Patient).Fetch(a => a.Provider.Organisation)
@@ -15,6 +16,8 @@
         public virtual IList<Plan> Plans { get; set; }
 
         public virtual IList<Reference> ApplicationReferences { get; set; }
+
+        public DateTime CreatedDate { get; set; }
     }
 
     public class Reference {
