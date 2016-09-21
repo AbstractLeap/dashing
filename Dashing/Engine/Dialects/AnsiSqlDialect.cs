@@ -6,29 +6,48 @@ namespace Dashing.Engine.Dialects {
     using Dashing.Configuration;
 
     public class AnsiSqlDialect : SqlDialectBase {
-        protected override string TypeName(DbType type) {
-            switch (type) {
+        public override ColumnSpecification GetColumnSpecification(IColumn column) {
+            switch (column.DbType) {
                 case DbType.Binary:
-                    return "bit";
+                    return new ColumnSpecification { DbTypeName = "bit", Length = this.GetLength(column) };
 
                 case DbType.Boolean:
-                    return "smallint unsigned";
+                    return new ColumnSpecification { DbTypeName = "smallint unsigned" };
 
                 case DbType.Byte:
-                    return "smallint unsigned";
+                    return new ColumnSpecification { DbTypeName = "smallint unsigned" };
 
                 case DbType.DateTime:
                 case DbType.DateTime2:
-                    return "timestamp";
+                    return new ColumnSpecification { DbTypeName = "timestamp" };
 
                 case DbType.DateTimeOffset:
-                    return "timestamptz";
+                    return new ColumnSpecification { DbTypeName = "timestamptz" };
 
                 case DbType.Double:
-                    return "double precision";
+                    return new ColumnSpecification { DbTypeName = "double precision" };
 
                 default:
-                    return base.TypeName(type);
+                    return base.GetColumnSpecification(column);
+            }
+        }
+
+        public override DbType GetTypeFromString(string name, int? length, int? precision) {
+            switch (name) {
+                case "bit":
+                    return DbType.Binary;
+
+                case "smallint unsigned":
+                    return DbType.Byte;
+
+                case "timestamp":
+                    return DbType.DateTime2;
+
+                case "double precision":
+                    return DbType.Double;
+
+                default:
+                    return base.GetTypeFromString(name, length, precision);
             }
         }
 

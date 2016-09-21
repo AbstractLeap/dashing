@@ -98,6 +98,7 @@
     <Compile Include="Engine\DDL\ICreateTableWriter.cs" />
     <Compile Include="Engine\DDL\IDropTableWriter.cs" />
     <Compile Include="Engine\Dialects\AnsiSqlDialect.cs" />
+    <Compile Include="Engine\Dialects\ColumnSpecification.cs" />
     <Compile Include="Engine\Dialects\DialectFactory.cs" />
     <Compile Include="Engine\Dialects\ISqlDialect.cs" />
     <Compile Include="Engine\Dialects\MySqlDialect.cs" />
@@ -147,6 +148,7 @@
     <Compile Include="Extensions\DapperExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\Inflector.cs" />
     <Compile Include="Extensions\OrderedDictionary.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="FetchMany.cs" />
@@ -169,7 +171,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(ProgramFiles)\MSBuild\StyleCop\v4.7\StyleCop.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

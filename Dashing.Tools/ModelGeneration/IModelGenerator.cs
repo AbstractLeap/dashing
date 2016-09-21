@@ -2,14 +2,9 @@
     using System.Collections.Generic;
 
     using Dashing.Configuration;
-
-    using DatabaseSchemaReader.DataSchema;
+    using Dashing.Tools.SchemaReading;
 
     internal interface IModelGenerator {
-        IDictionary<string, string> GenerateFiles(
-            IEnumerable<IMap> maps,
-            DatabaseSchema schema,
-            string domainNamespace,
-            IAnswerProvider answerProvider);
+        IDictionary<string, string> GenerateFiles(IEnumerable<IMap> maps, Database schema, string domainNamespace, IAnswerProvider answerProvider);
     }
 }

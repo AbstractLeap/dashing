@@ -3,7 +3,11 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Dashing.Engine.Dialects;
+
     public class Index {
+        private readonly string name;
+
         public Index(IMap map, ICollection<IColumn> columns, string name = null, bool isUnique = false) {
             if (map == null) {
                 throw new ArgumentNullException("map");
@@ -16,17 +20,8 @@
             this.Map = map;
             this.Columns = columns;
             this.IsUnique = isUnique;
-            this.Name = !string.IsNullOrWhiteSpace(name) ? name : this.GenerateName();
+            this.name = !string.IsNullOrWhiteSpace(name) ? name : null;
         }
-
-        private string GenerateName() {
-            return "idx_" + this.Map.Type.Name + "_" + string.Join("_", this.Columns.Select(c => c.Name));
-        }
-
-        /// <summary>
-        ///     The name of the index
-        /// </summary>
-        public string Name { get; private set; }
 
         /// <summary>
         ///     The map that the index belongs to
@@ -43,6 +38,12 @@
         ///     Indicates if the index is a unique one
         /// </summary>
         public bool IsUnique { get; private set; }
+        
+        internal string Name {
+            get {
+                return this.name;
+            }
+        }
 
         public override bool Equals(object obj) {
             if (obj == null) {
@@ -54,20 +55,19 @@
                 return false;
             }
 
-            return this.Name == otherIndex.Name && this.IsUnique == otherIndex.IsUnique
-                   && this.Columns.SequenceEqual(otherIndex.Columns, new IndexColumnComparer()) && this.Map.Type.Name == otherIndex.Map.Type.Name;
+            return this.IsUnique == otherIndex.IsUnique
+                   && this.Columns.SequenceEqual(otherIndex.Columns, new IndexColumnComparer()) && this.Map.Type.Name.Equals(otherIndex.Map.Type.Name, StringComparison.InvariantCultureIgnoreCase);
         }
 
         public override int GetHashCode() {
             unchecked {
                 int hash = 17;
-                hash = hash * 23 + this.Name.GetHashCode();
                 hash = hash * 23 + this.IsUnique.GetHashCode();
                 foreach (var column in this.Columns) {
-                    hash = hash * 23 + column.Name.GetHashCode();
+                    hash = hash * 23 + column.Name.ToLowerInvariant().GetHashCode();
                 }
 
-                hash = hash * 23 + this.Map.Type.Name.GetHashCode();
+                hash = hash * 23 + this.Map.Type.Name.ToLowerInvariant().GetHashCode();
                 return hash;
             }
         }
@@ -81,8 +81,7 @@
                 return false;
             }
 
-            return a.Name == b.Name && a.IsUnique == b.IsUnique && a.Columns.SequenceEqual(b.Columns, new IndexColumnComparer())
-                   && a.Map.Type.Name == b.Map.Type.Name;
+            return a.Equals(b);
         }
 
         public static bool operator !=(Index a, Index b) {

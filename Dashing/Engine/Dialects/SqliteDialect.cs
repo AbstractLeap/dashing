@@ -85,14 +85,24 @@
             return sql.ToString();
         }
 
-        protected override string TypeName(DbType type) {
-            switch (type) {
-                case DbType.Int32:
+        public override ColumnSpecification GetColumnSpecification(IColumn column) {
+            switch (column.DbType) {
+                    case DbType.Int32:
                 case DbType.Int64:
-                    return "INTEGER"; // necessary for autoincrements to work properly!
+                    return new ColumnSpecification { DbTypeName = "INTEGER" }; // necessary for autoincrements to work properly!
 
                 default:
-                    return base.TypeName(type);
+                    return base.GetColumnSpecification(column);
+            }
+        }
+
+        public override DbType GetTypeFromString(string name, int? length, int? precision) {
+            switch (name) {
+                case "INTEGER":
+                    return DbType.Int64;
+
+                default:
+                    return base.GetTypeFromString(name, length, precision);
             }
         }
     }

@@ -177,8 +177,6 @@
                                  .MakeGenericMethod(type);
         }
 
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines",
-            Justification = "This is hard to read the StyleCop way")]
         private Delegate GenerateCollectionFactory<T>(int numberCollectionFetches, bool isAsync, Type[] mappedTypes, Type[] mapperClosureTypes) {
             var tt = typeof(T);
             var statements = new List<Expression>();

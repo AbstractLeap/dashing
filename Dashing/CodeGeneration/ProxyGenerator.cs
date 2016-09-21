@@ -120,9 +120,6 @@ namespace Dashing.CodeGeneration {
             return updateClass;
         }
 
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", 
-            "SA1118:ParameterMustNotSpanMultipleLines", 
-            Justification = "This is hard to read the StyleCop way")]
         private CodeTypeDeclaration CreateTrackingClass(
             IMap map, 
             CodeGeneratorConfig codeGeneratorConfig) {
@@ -345,9 +342,6 @@ namespace Dashing.CodeGeneration {
             return trackingClass;
         }
 
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", 
-            "SA1118:ParameterMustNotSpanMultipleLines", 
-            Justification = "This is hard to read the StyleCop way")]
         private CodeTypeDeclaration CreateFkClass(
             IMap map, 
             IDictionary<Type, IMap> maps, 
