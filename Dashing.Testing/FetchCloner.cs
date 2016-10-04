@@ -3,9 +3,13 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dashing.Configuration;
     using Dashing.Engine.DML;
+    using Dashing.Extensions;
 
     public class FetchCloner {
         private readonly IConfiguration configuration;
@@ -30,13 +34,13 @@
             var entityType = entity.GetType();
             foreach (var column in this.configuration.GetMap(entityType).Columns.Where(c => !c.Value.IsIgnored)) {
                 var prop = entityType.GetProperty(column.Key);
-                if (column.Value.Type.IsValueType) {
+                if (column.Value.Type.IsValueType()) {
                     prop.SetValue(result, prop.GetValue(entity));
                 }
                 else if (column.Value.Type == typeof(string)) {
                     var val = prop.GetValue(entity) as string;
                     if (val != null) {
-                        val = string.Copy(val);
+                        val = new string(val.ToCharArray());
                     }
 
                     prop.SetValue(result, val);

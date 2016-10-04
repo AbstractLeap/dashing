@@ -151,7 +151,7 @@
                     this.containsNullable = true;
                 }
 
-                if (propInfo.PropertyType.IsClass && propInfo.PropertyType != typeof(string)) {
+                if (propInfo.PropertyType.IsClass() && propInfo.PropertyType != typeof(string)) {
                     if (this.nullCheckExpressions.Any()) {
                         // we just use the last null check expression and add to that
                         this.nullCheckExpressions.Add(

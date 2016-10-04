@@ -1,12 +1,15 @@
 ﻿namespace Dashing.Testing {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
     using System.Threading.Tasks;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dashing.Configuration;
     using Dashing.Engine;
@@ -43,17 +46,17 @@
             return (InMemoryTable<TEntity, TPrimaryKey>)this.tables[typeof(TEntity)];
         }
 
-        public T Query<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id) where T : class, new() {
+        public T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) where T : class, new() {
             this.AssertConfigured();
             return this.GetTable<T, TPrimaryKey>().Get(id);
         }
 
-        public IEnumerable<T> Query<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) where T : class, new() {
+        public IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) where T : class, new() {
             this.AssertConfigured();
             return ids.Select(i => this.GetTable<T, TPrimaryKey>().Get(i));
         }
 
-        public IEnumerable<T> Query<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.AssertConfigured();
             var table = this.tables[typeof(T)];
             var whereClauseNullCheckRewriter = new WhereClauseNullCheckRewriter();
@@ -113,22 +116,22 @@
             }
         }
 
-        public Page<T> QueryPaged<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public Page<T> QueryPaged<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.AssertConfigured();
             return new Page<T> {
-                Items = this.Query<T>(sessionState, query),
+                Items = this.Query<T>(connection, transaction, query),
                 Skipped = query.SkipN,
                 Taken = query.TakeN,
-                TotalResults = this.Count(sessionState, query)
+                TotalResults = this.Count(connection, transaction, query)
             };
         }
 
-        public int Count<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.AssertConfigured();
-            return this.Query<T>(sessionState, query).Count();
+            return this.Query<T>(connection, transaction, query).Count();
         }
 
-        public int Insert<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public int Insert<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             this.AssertConfigured();
             var table = this.tables[typeof(T)];
             var insertMethod = typeof(InMemoryTable<,>).MakeGenericType(typeof(T), this.Configuration.GetMap<T>().PrimaryKey.Type).GetMethod("Insert");
@@ -140,7 +143,7 @@
             return results;
         }
 
-        public int Save<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public int Save<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             this.AssertConfigured();
             var table = this.tables[typeof(T)];
             var updateMethod = typeof(InMemoryTable<,>).MakeGenericType(typeof(T), this.Configuration.GetMap<T>().PrimaryKey.Type).GetMethod("Update");
@@ -152,7 +155,7 @@
             return results;
         }
 
-        public int Delete<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public int Delete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             this.AssertConfigured();
             var table = this.tables[typeof(T)];
             var deleteMethod = typeof(InMemoryTable<,>).MakeGenericType(typeof(T), this.Configuration.GetMap<T>().PrimaryKey.Type).GetMethod("Delete");
@@ -164,7 +167,7 @@
             return results;
         }
 
-        public int Execute<T>(ISessionState sessionState, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
+        public int Execute<T>(IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.AssertConfigured();
             var query = new SelectQuery<T>(new NonExecutingSelectQueryExecutor());
             if (predicates != null) {
@@ -173,15 +176,15 @@
                 }
             }
 
-            var entitiesToUpdate = this.Query<T>(sessionState, query).ToList();
+            var entitiesToUpdate = this.Query<T>(connection, transaction, query).ToList();
             foreach (var entity in entitiesToUpdate) {
                 update(entity);
             }
 
-            return this.Save(sessionState, entitiesToUpdate);
+            return this.Save(connection, transaction, entitiesToUpdate);
         }
 
-        public int ExecuteBulkDelete<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
+        public int ExecuteBulkDelete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.AssertConfigured();
             var query = new SelectQuery<T>(new NonExecutingSelectQueryExecutor());
             if (predicates != null) {
@@ -190,48 +193,48 @@
                 }
             }
 
-            var entitiesToDelete = this.Query<T>(sessionState, query).ToList();
-            return this.Delete(sessionState, entitiesToDelete);
+            var entitiesToDelete = this.Query<T>(connection, transaction, query).ToList();
+            return this.Delete(connection, transaction, entitiesToDelete);
         }
 
-        public Task<T> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id) where T : class, new() {
-            return Task.FromResult(this.Query<T, TPrimaryKey>(sessionState, id));
+        public Task<T> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) where T : class, new() {
+            return Task.FromResult(this.Query<T, TPrimaryKey>(connection, transaction, id));
         }
 
-        public Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) where T : class, new() {
-            return Task.FromResult(this.Query<T, TPrimaryKey>(sessionState, ids));
+        public Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids) where T : class, new() {
+            return Task.FromResult(this.Query<T, TPrimaryKey>(connection, transaction, ids));
         }
 
-        public Task<IEnumerable<T>> QueryAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
-            return Task.FromResult(this.Query<T>(sessionState, query));
+        public Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
+            return Task.FromResult(this.Query<T>(connection, transaction, query));
         }
 
-        public Task<Page<T>> QueryPagedAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
-            return Task.FromResult(this.QueryPaged(sessionState, query));
+        public Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
+            return Task.FromResult(this.QueryPaged(connection, transaction, query));
         }
 
-        public Task<int> CountAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
-            return Task.FromResult(this.Count(sessionState, query));
+        public Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
+            return Task.FromResult(this.Count(connection, transaction, query));
         }
 
-        public Task<int> InsertAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
-            return Task.FromResult(this.Insert(sessionState, entities));
+        public Task<int> InsertAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
+            return Task.FromResult(this.Insert(connection, transaction, entities));
         }
 
-        public Task<int> SaveAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
-            return Task.FromResult(this.Save(sessionState, entities));
+        public Task<int> SaveAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
+            return Task.FromResult(this.Save(connection, transaction, entities));
         }
 
-        public Task<int> DeleteAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
-            return Task.FromResult(this.Delete(sessionState, entities));
+        public Task<int> DeleteAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
+            return Task.FromResult(this.Delete(connection, transaction, entities));
         }
 
-        public Task<int> ExecuteAsync<T>(ISessionState sessionState, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
-            return Task.FromResult(this.Execute(sessionState, update, predicates));
+        public Task<int> ExecuteAsync<T>(IDbConnection connection, IDbTransaction transaction, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
+            return Task.FromResult(this.Execute(connection, transaction, update, predicates));
         }
 
-        public Task<int> ExecuteBulkDeleteAsync<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
-            return Task.FromResult(this.ExecuteBulkDelete(sessionState, predicates));
+        public Task<int> ExecuteBulkDeleteAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
+            return Task.FromResult(this.ExecuteBulkDelete(connection, transaction, predicates));
         }
 
         private void AssertConfigured() {

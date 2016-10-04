@@ -1,7 +1,11 @@
 ﻿namespace Dashing.Testing {
     using System;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
 
     public class EntityCloner<TEntity>
         where TEntity : new() {
@@ -18,13 +22,13 @@
             var result = new TEntity();
             foreach (var column in this.configuration.GetMap<TEntity>().OwnedColumns(true)) {
                 var prop = this.entityType.GetProperty(column.Name);
-                if (column.Type.IsValueType) {
+                if (column.Type.IsValueType()) {
                     prop.SetValue(result, prop.GetValue(entity));
                 }
                 else if (column.Type == typeof(string)) {
                     var val = prop.GetValue(entity) as string;
                     if (val != null) {
-                        val = string.Copy(val);
+                        val = new string(val.ToCharArray());
                     }
 
                     prop.SetValue(result, val);
