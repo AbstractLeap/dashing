@@ -6,7 +6,7 @@
     using System.Linq.Expressions;
 
     using Dashing.Configuration;
-    using Dashing.Tests.Annotations;
+    using Dashing.Tests.Properties;
     using Dashing.Tests.TestDomain;
     using Dashing.Tests.TestDomain.OneToOne;
 

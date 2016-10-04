@@ -56,7 +56,7 @@
             }
 
             return this.IsUnique == otherIndex.IsUnique
-                   && this.Columns.SequenceEqual(otherIndex.Columns, new IndexColumnComparer()) && this.Map.Type.Name.Equals(otherIndex.Map.Type.Name, StringComparison.InvariantCultureIgnoreCase);
+                   && this.Columns.SequenceEqual(otherIndex.Columns, new IndexColumnComparer()) && this.Map.Type.Name.Equals(otherIndex.Map.Type.Name, StringComparison.OrdinalIgnoreCase);
         }
 
         public override int GetHashCode() {

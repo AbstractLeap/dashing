@@ -4,8 +4,10 @@
 # User-specific files
 *.suo
 *.user
+.vs/
 *.sln.docstates
 *.nugetreferenceswitcher
+project.lock.json
 
 # Build results
 

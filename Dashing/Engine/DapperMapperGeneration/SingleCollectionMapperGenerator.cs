@@ -3,6 +3,9 @@ namespace Dashing.Engine.DapperMapperGeneration {
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dashing.CodeGeneration;
     using Dashing.Configuration;

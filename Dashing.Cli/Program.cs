@@ -241,7 +241,7 @@
             }
 
             var directories = new[] { new DirectoryInfo(options.WeaveDir), new DirectoryInfo(Path.Combine(options.WeaveDir, 
-                options.WeaveDir.LastIndexOf("bin", StringComparison.InvariantCultureIgnoreCase) >= options.WeaveDir.Length - 4 ? "../" : "../../")), };
+                options.WeaveDir.LastIndexOf("bin", StringComparison.OrdinalIgnoreCase) >= options.WeaveDir.Length - 4 ? "../" : "../../")), };
             foreach (var directoryInfo in directories) {
                 foreach (var fileInfo in directoryInfo.GetFiles().Where(fileInfo => fileInfo.Name.EndsWith(".config"))) {
                     try {
@@ -249,7 +249,7 @@
                         configMap.ExeConfigFilename = fileInfo.FullName;
                         var config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
                         if (config.AppSettings.Settings.AllKeys.Contains("dashing:ignorepeverify")) {
-                            if (config.AppSettings.Settings["dashing:ignorepeverify"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase)) {
+                            if (config.AppSettings.Settings["dashing:ignorepeverify"].Value.Equals("true", StringComparison.OrdinalIgnoreCase)) {
                                 options.IgnorePeVerify = true;
                             }
                         }

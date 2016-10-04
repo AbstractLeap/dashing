@@ -8,7 +8,7 @@
 // ReSharper disable MemberCanBeProtected.Global
 // ReSharper disable InconsistentNaming
 
-namespace Dashing.Tests.Annotations {
+namespace Dashing.Tests.Properties {
     using System;
 
     /// <summary>

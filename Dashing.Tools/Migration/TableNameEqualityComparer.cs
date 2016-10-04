@@ -6,7 +6,7 @@ namespace Dashing.Tools.Migration {
 
     public class TableNameEqualityComparer : IEqualityComparer<IMap> {
         public bool Equals(IMap x, IMap y) {
-            return x.Table.Equals(y.Table, StringComparison.InvariantCultureIgnoreCase);
+            return x.Table.Equals(y.Table, StringComparison.OrdinalIgnoreCase);
         }
 
         public int GetHashCode(IMap obj) {

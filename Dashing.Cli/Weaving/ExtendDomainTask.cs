@@ -95,7 +95,7 @@
             // locate all dlls
             var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
             var assemblyMapDefinitions = new Dictionary<string, List<MapDefinition>>();
-            foreach (var file in Directory.GetFiles(this.WeaveDir).Where(f => f.EndsWith("dll", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith("exe", StringComparison.InvariantCultureIgnoreCase))) {
+            foreach (var file in Directory.GetFiles(this.WeaveDir).Where(f => f.EndsWith("dll", StringComparison.OrdinalIgnoreCase) || f.EndsWith("exe", StringComparison.OrdinalIgnoreCase))) {
                 try {
                     var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
                     var assemblyResolver = new DefaultAssemblyResolver();
@@ -109,7 +109,7 @@
                             || string.Compare(
                                 Path.GetFullPath(this.PathToDll).TrimEnd(Path.DirectorySeparatorChar),
                                 Path.GetFullPath(file).TrimEnd(Path.DirectorySeparatorChar),
-                                StringComparison.InvariantCultureIgnoreCase) == 0) {
+                                StringComparison.OrdinalIgnoreCase) == 0) {
                             this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
 
                             // references dashing, use our other app domain to find the IConfig and instantiate it

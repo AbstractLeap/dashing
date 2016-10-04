@@ -38,5 +38,5 @@ using System.Runtime.InteropServices;
 
 // Ensure the tests can see the internal classes
 
-[assembly: InternalsVisibleTo("Dashing.Tests", AllInternalsVisible = true)]
-[assembly: InternalsVisibleTo("Dashing.Testing.Tests", AllInternalsVisible = true)]
+[assembly: InternalsVisibleTo("Dashing.Tests")]
+[assembly: InternalsVisibleTo("Dashing.Testing.Tests")]

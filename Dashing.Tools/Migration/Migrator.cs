@@ -285,7 +285,7 @@
                             if ((matchingToProp.Relationship == RelationshipType.ManyToOne || matchingToProp.Relationship == RelationshipType.OneToOne)
                                 && (fromProp.Value.Relationship == RelationshipType.ManyToOne
                                     || fromProp.Value.Relationship == RelationshipType.OneToOne)
-                                && !fromProp.Value.Type.Name.Equals(matchingToProp.Type.Name, StringComparison.InvariantCultureIgnoreCase) && currentData != null
+                                && !fromProp.Value.Type.Name.Equals(matchingToProp.Type.Name, StringComparison.OrdinalIgnoreCase) && currentData != null
                                 && currentData[matchingToProp.Map.Type.Name.ToLowerInvariant()].HasRows) {
                                 warningList.Add(
                                     string.Format(

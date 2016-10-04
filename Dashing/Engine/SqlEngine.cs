@@ -14,8 +14,6 @@ namespace Dashing.Engine {
     using Dashing.Engine.DML;
 
     public class SqlEngine : IEngine {
-        private readonly ISqlDialect dialect;
-
         private IConfiguration configuration;
 
         private ISelectWriter selectWriter;
@@ -42,40 +40,31 @@ namespace Dashing.Engine {
             IDbConnection connection,
             IDbTransaction transaction) where T : class, new();
 
-        public ISqlDialect SqlDialect
-        {
-            get
-            {
-                return this.dialect;
-            }
-        }
+        public ISqlDialect SqlDialect { get; }
 
-        public IConfiguration Configuration
-        {
-            get
-            {
+        public IConfiguration Configuration {
+            get {
                 return this.configuration;
             }
 
-            set
-            {
+            set {
                 this.configuration = value;
-                this.selectWriter = new SelectWriter(this.dialect, this.Configuration);
-                this.countWriter = new CountWriter(this.dialect, this.Configuration);
-                this.deleteWriter = new DeleteWriter(this.dialect, this.Configuration);
-                this.updateWriter = new UpdateWriter(this.dialect, this.Configuration);
-                this.insertWriter = new InsertWriter(this.dialect, this.Configuration);
+                this.selectWriter = new SelectWriter(this.SqlDialect, this.Configuration);
+                this.countWriter = new CountWriter(this.SqlDialect, this.Configuration);
+                this.deleteWriter = new DeleteWriter(this.SqlDialect, this.Configuration);
+                this.updateWriter = new UpdateWriter(this.SqlDialect, this.Configuration);
+                this.insertWriter = new InsertWriter(this.SqlDialect, this.Configuration);
             }
         }
 
         public SqlEngine(ISqlDialect dialect) {
-            this.dialect = dialect;
+            this.SqlDialect = dialect;
         }
 
-        public T Query<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id)where T : class, new() {
+        public T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
-            var entity = sessionState.GetConnection().Query<T>(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction()).SingleOrDefault();
+            var entity = connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).SingleOrDefault();
             if (entity != null) {
                 ((ITrackedEntity)entity).EnableTracking();
             }
@@ -83,17 +72,18 @@ namespace Dashing.Engine {
             return entity;
         }
 
-        public IEnumerable<T> Query<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) where T : class, new() {
+        public IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids)
+            where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            return sessionState.GetConnection().Query<T>(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction()).Select(
+            return connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).Select(
                 t => {
                     ((ITrackedEntity)t).EnableTracking();
                     return t;
                 });
         }
 
-        public virtual IEnumerable<T> Query<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public virtual IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
             if (query.HasFetches()) {
@@ -105,10 +95,10 @@ namespace Dashing.Engine {
                     queryFunc = this.delegateQueryCreator.GetNoCollectionFunction<T>(sqlQuery);
                 }
 
-                return queryFunc(sqlQuery, query, sessionState.GetConnection(), sessionState.GetTransaction());
+                return queryFunc(sqlQuery, query, connection, transaction);
             }
 
-            return sessionState.GetConnection().Query<T>(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction()).Select(
+            return connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).Select(
                 t => {
                     ((ITrackedEntity)t).EnableTracking();
                     return t;
@@ -116,27 +106,26 @@ namespace Dashing.Engine {
             ;
         }
 
-        public Page<T> QueryPaged<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public Page<T> QueryPaged<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
-            var totalResults =
-                sessionState.GetConnection().Query<int>(countQuery.Sql, countQuery.Parameters, sessionState.GetTransaction()).SingleOrDefault();
+            var totalResults = connection.Query<int>(countQuery.Sql, countQuery.Parameters, transaction).SingleOrDefault();
 
             return new Page<T> {
                                    TotalResults = totalResults,
-                                   Items = this.Query(sessionState, query).ToArray(),
+                                   Items = this.Query(connection, transaction, query).ToArray(),
                                    Skipped = query.SkipN,
                                    Taken = query.TakeN
                                };
         }
 
-        public int Count<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
-            return sessionState.GetConnection().Query<int>(countQuery.Sql, countQuery.Parameters, sessionState.GetTransaction()).SingleOrDefault();
+            return connection.Query<int>(countQuery.Sql, countQuery.Parameters, transaction).SingleOrDefault();
         }
 
-        public virtual int Insert<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public virtual int Insert<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             this.EnsureConfigurationLoaded();
 
             var i = 0;
@@ -147,19 +136,11 @@ namespace Dashing.Engine {
                 var sqlQuery = this.insertWriter.GenerateSql(entity);
                 if (map.PrimaryKey.IsAutoGenerated) {
                     if (map.PrimaryKey.Type == typeof(Int32)) {
-                        var idResult = sessionState.GetConnection()
-                                                   .Query<int>(
-                                                       sqlQuery.Sql + ";" + getLastInsertedId,
-                                                       sqlQuery.Parameters,
-                                                       sessionState.GetTransaction());
+                        var idResult = connection.Query<int>(sqlQuery.Sql + ";" + getLastInsertedId, sqlQuery.Parameters, transaction);
                         map.SetPrimaryKeyValue(entity, idResult.Single());
                     }
                     else if (map.PrimaryKey.Type == typeof(Int64)) {
-                        var idResult = sessionState.GetConnection()
-                                                   .Query<long>(
-                                                       sqlQuery.Sql + ";" + getLastInsertedId,
-                                                       sqlQuery.Parameters,
-                                                       sessionState.GetTransaction());
+                        var idResult = connection.Query<long>(sqlQuery.Sql + ";" + getLastInsertedId, sqlQuery.Parameters, transaction);
                         map.SetPrimaryKeyValue(entity, idResult.Single());
                     }
                     else {
@@ -167,7 +148,7 @@ namespace Dashing.Engine {
                     }
                 }
                 else {
-                    sessionState.GetConnection().Execute(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction());
+                    connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
                 }
 
                 ((ITrackedEntity)entity).EnableTracking(); // turn on tracking
@@ -177,15 +158,13 @@ namespace Dashing.Engine {
             return i;
         }
 
-        public virtual int Save<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public virtual int Save<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateSql(entities);
-            return sqlQuery.Sql.Length == 0
-                       ? 0
-                       : sessionState.GetConnection().Execute(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction());
+            return sqlQuery.Sql.Length == 0 ? 0 : connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public virtual int Delete<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public virtual int Delete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             var entityArray = entities as T[] ?? entities.ToArray();
 
             // take the short path
@@ -195,29 +174,30 @@ namespace Dashing.Engine {
 
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateSql(entityArray);
-            return sessionState.GetConnection().Execute(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction());
+            return connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public int Execute<T>(ISessionState sessionState, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
+        public int Execute<T>(
+            IDbConnection connection,
+            IDbTransaction transaction,
+            Action<T> update,
+            IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateBulkSql(update, predicates);
-            return sqlQuery.Sql.Length == 0
-                       ? 0
-                       : sessionState.GetConnection().Execute(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction());
+            return sqlQuery.Sql.Length == 0 ? 0 : connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public int ExecuteBulkDelete<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
+        public int ExecuteBulkDelete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates)
+            where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
-            return sessionState.GetConnection().Execute(sqlQuery.Sql, sqlQuery.Parameters, sessionState.GetTransaction());
+            return connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public async Task<T> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, TPrimaryKey id) where T : class, new() {
+        public async Task<T> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
-            var queryResult =
-                await
-                (await sessionState.GetConnectionAsync()).QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, await sessionState.GetTransactionAsync());
+            var queryResult = await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
             var entity = queryResult.SingleOrDefault();
             if (entity != null) {
                 ((ITrackedEntity)entity).EnableTracking();
@@ -226,12 +206,13 @@ namespace Dashing.Engine {
             return entity;
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(ISessionState sessionState, IEnumerable<TPrimaryKey> ids) where T : class, new() {
+        public async Task<IEnumerable<T>> QueryAsync<T, TPrimaryKey>(
+            IDbConnection connection,
+            IDbTransaction transaction,
+            IEnumerable<TPrimaryKey> ids) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
-            var result =
-                await
-                (await sessionState.GetConnectionAsync()).QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, await sessionState.GetTransactionAsync());
+            var result = await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
             return result.Select(
                 t => {
                     ((ITrackedEntity)t).EnableTracking();
@@ -239,73 +220,48 @@ namespace Dashing.Engine {
                 });
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public async Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query)
+            where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
             IEnumerable<T> queryResults;
             if (query.HasFetches()) {
                 if (sqlQuery.NumberCollectionsFetched > 0) {
-                    queryResults =
-                        await
-                        this.delegateQueryCreator.GetAsyncCollectionFunction<T>(sqlQuery)(
-                            sqlQuery,
-                            query,
-                            await sessionState.GetConnectionAsync(),
-                            await sessionState.GetTransactionAsync());
+                    queryResults = await this.delegateQueryCreator.GetAsyncCollectionFunction<T>(sqlQuery)(sqlQuery, query, connection, transaction);
                 }
                 else {
-                    queryResults =
-                        await
-                        this.delegateQueryCreator.GetAsyncNoCollectionFunction<T>(sqlQuery)(
-                            sqlQuery,
-                            query,
-                            await sessionState.GetConnectionAsync(),
-                            await sessionState.GetTransactionAsync());
+                    queryResults = await this.delegateQueryCreator.GetAsyncNoCollectionFunction<T>(sqlQuery)(sqlQuery, query, connection, transaction);
                 }
             }
             else {
-                queryResults =
-                    (await
-                     (await sessionState.GetConnectionAsync()).QueryAsync<T>(
-                         sqlQuery.Sql,
-                         sqlQuery.Parameters,
-                         await sessionState.GetTransactionAsync())).Select(
-                             t => {
-                                 ((ITrackedEntity)t).EnableTracking();
-                                 return t;
-                             });
+                queryResults = (await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction)).Select(
+                    t => {
+                        ((ITrackedEntity)t).EnableTracking();
+                        return t;
+                    });
                 ;
             }
 
             return queryResults;
         }
 
-        public async Task<Page<T>> QueryPagedAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public async Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query)
+            where T : class, new() {
             this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
-            var totalResults =
-                (await
-                 (await sessionState.GetConnectionAsync()).QueryAsync<int>(
-                     countQuery.Sql,
-                     countQuery.Parameters,
-                     await sessionState.GetTransactionAsync())).SingleOrDefault();
-            var results = await this.QueryAsync(sessionState, query);
+            var totalResults = (await connection.QueryAsync<int>(countQuery.Sql, countQuery.Parameters, transaction)).SingleOrDefault();
+            var results = await this.QueryAsync(connection, transaction, query);
 
             return new Page<T> { TotalResults = totalResults, Items = results.ToArray(), Skipped = query.SkipN, Taken = query.TakeN };
         }
 
-        public async Task<int> CountAsync<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
+        public async Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
-            return
-                (await
-                 (await sessionState.GetConnectionAsync()).QueryAsync<int>(
-                     countQuery.Sql,
-                     countQuery.Parameters,
-                     await sessionState.GetTransactionAsync())).SingleOrDefault();
+            return (await connection.QueryAsync<int>(countQuery.Sql, countQuery.Parameters, transaction)).SingleOrDefault();
         }
 
-        public async Task<int> InsertAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public async Task<int> InsertAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             this.EnsureConfigurationLoaded();
 
             var i = 0;
@@ -317,21 +273,11 @@ namespace Dashing.Engine {
                 if (map.PrimaryKey.IsAutoGenerated) {
                     var sqlAndReturnId = sqlQuery.Sql + ";" + getLastInsertedId;
                     if (map.PrimaryKey.Type == typeof(int)) {
-                        var idResult =
-                            await
-                            (await sessionState.GetConnectionAsync()).QueryAsync<int>(
-                                sqlAndReturnId,
-                                sqlQuery.Parameters,
-                                await sessionState.GetTransactionAsync());
+                        var idResult = await connection.QueryAsync<int>(sqlAndReturnId, sqlQuery.Parameters, transaction);
                         map.SetPrimaryKeyValue(entity, idResult.Single());
                     }
                     else if (map.PrimaryKey.Type == typeof(Int64)) {
-                        var idResult =
-                            await
-                            (await sessionState.GetConnectionAsync()).QueryAsync<long>(
-                                sqlAndReturnId,
-                                sqlQuery.Parameters,
-                                await sessionState.GetTransactionAsync());
+                        var idResult = await connection.QueryAsync<long>(sqlAndReturnId, sqlQuery.Parameters, transaction);
                         map.SetPrimaryKeyValue(entity, idResult.Single());
                     }
                     else {
@@ -339,11 +285,7 @@ namespace Dashing.Engine {
                     }
                 }
                 else {
-                    await
-                        (await sessionState.GetConnectionAsync()).ExecuteAsync(
-                            sqlQuery.Sql,
-                            sqlQuery.Parameters,
-                            await sessionState.GetTransactionAsync());
+                    await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
                 }
 
                 ((ITrackedEntity)entity).EnableTracking(); // turn on tracking
@@ -353,19 +295,13 @@ namespace Dashing.Engine {
             return i;
         }
 
-        public async Task<int> SaveAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public async Task<int> SaveAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateSql(entities);
-            return sqlQuery.Sql.Length == 0
-                       ? 0
-                       : await
-                         (await sessionState.GetConnectionAsync()).ExecuteAsync(
-                             sqlQuery.Sql,
-                             sqlQuery.Parameters,
-                             await sessionState.GetTransactionAsync());
+            return sqlQuery.Sql.Length == 0 ? 0 : await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public async Task<int> DeleteAsync<T>(ISessionState sessionState, IEnumerable<T> entities) where T : class, new() {
+        public async Task<int> DeleteAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
             var entityArray = entities as T[] ?? entities.ToArray();
 
             // take the short path
@@ -375,30 +311,26 @@ namespace Dashing.Engine {
 
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateSql(entityArray);
-            return
-                await
-                (await sessionState.GetConnectionAsync()).ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, await sessionState.GetTransactionAsync());
+            return await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public async Task<int> ExecuteAsync<T>(ISessionState sessionState, Action<T> update, IEnumerable<Expression<Func<T, bool>>> predicates)
-            where T : class, new() {
+        public async Task<int> ExecuteAsync<T>(
+            IDbConnection connection,
+            IDbTransaction transaction,
+            Action<T> update,
+            IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateBulkSql(update, predicates);
-            return sqlQuery.Sql.Length == 0
-                       ? 0
-                       : await
-                         (await sessionState.GetConnectionAsync()).ExecuteAsync(
-                             sqlQuery.Sql,
-                             sqlQuery.Parameters,
-                             await sessionState.GetTransactionAsync());
+            return sqlQuery.Sql.Length == 0 ? 0 : await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public async Task<int> ExecuteBulkDeleteAsync<T>(ISessionState sessionState, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
+        public async Task<int> ExecuteBulkDeleteAsync<T>(
+            IDbConnection connection,
+            IDbTransaction transaction,
+            IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
-            return
-                await
-                (await sessionState.GetConnectionAsync()).ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, await sessionState.GetTransactionAsync());
+            return await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
         private void EnsureConfigurationLoaded() {

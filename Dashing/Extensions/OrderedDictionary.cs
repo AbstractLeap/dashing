@@ -62,7 +62,6 @@
             }
         }
 
-        [TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
         public OrderedDictionary()
             : this(0) {
         }
@@ -138,7 +137,6 @@
             return flag;
         }
 
-        [TargetedPatchingOptOut("Performance critical to inline this type of method across NGen image boundaries")]
         IEnumerator IEnumerable.GetEnumerator() {
             return this.GetEnumerator();
         }

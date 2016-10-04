@@ -6,63 +6,78 @@ namespace Dashing {
 
     using Dapper;
 
+    using Dashing.Extensions;
+
     // ReSharper disable InvokeAsExtensionMethod
     public class DapperWrapper : IDapper {
-        private readonly ISessionState sessionState;
+        private readonly Lazy<IDbConnection> connection;
 
-        public DapperWrapper(ISessionState sessionState) {
-            this.sessionState = sessionState;
+        private readonly Lazy<IDbTransaction> transaction;
+
+        private readonly AsyncLazy<IDbConnection> asyncConnection;
+
+        private readonly AsyncLazy<IDbTransaction> asyncTransaction;
+
+        public DapperWrapper(
+            Lazy<IDbConnection> connection,
+            Lazy<IDbTransaction> transaction,
+            AsyncLazy<IDbConnection> asyncConnection,
+            AsyncLazy<IDbTransaction> asyncTransaction) {
+            this.connection = connection;
+            this.transaction = transaction;
+            this.asyncConnection = asyncConnection;
+            this.asyncTransaction = asyncTransaction;
         }
 
-        public int Execute(string sql, dynamic param = null, int? commandTimeout = null, CommandType? commandType = null) {
-            return SqlMapper.Execute(this.sessionState.GetConnection(), sql, param, this.sessionState.GetTransaction(), commandTimeout, commandType);
+        public int Execute(string sql, object param = null, int? commandTimeout = null, CommandType? commandType = null) {
+            return SqlMapper.Execute(this.connection.Value, sql, param, this.transaction.Value, commandTimeout, commandType);
         }
 
         public int Execute(CommandDefinition command) {
-            return SqlMapper.Execute(this.sessionState.GetConnection(), this.ReplaceTransactionIn(command));
+            return SqlMapper.Execute(this.connection.Value, this.ReplaceTransactionIn(command));
         }
 
-        public async Task<int> ExecuteAsync(string sql, dynamic param = null, int? commandTimeout = null, CommandType? commandType = null) {
+        public async Task<int> ExecuteAsync(string sql, object param = null, int? commandTimeout = null, CommandType? commandType = null) {
             return
                 await
                 SqlMapper.ExecuteAsync(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     commandTimeout,
                     commandType);
         }
 
         public async Task<int> ExecuteAsync(CommandDefinition command) {
-            return await SqlMapper.ExecuteAsync(await this.sessionState.GetConnectionAsync(), await this.ReplaceTransactionInAsync(command));
+            return await SqlMapper.ExecuteAsync(await this.asyncConnection, await this.ReplaceTransactionInAsync(command));
         }
 
-        public IDataReader ExecuteReader(string sql, dynamic param = null, int? commandTimeout = null, CommandType? commandType = null) {
+        public IDataReader ExecuteReader(string sql, object param = null, int? commandTimeout = null, CommandType? commandType = null) {
             return SqlMapper.ExecuteReader(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 commandTimeout,
                 commandType);
         }
 
         public IDataReader ExecuteReader(CommandDefinition command) {
-            return SqlMapper.ExecuteReader(this.sessionState.GetConnection(), this.ReplaceTransactionIn(command));
+            return SqlMapper.ExecuteReader(this.connection.Value, this.ReplaceTransactionIn(command));
         }
 
         public IEnumerable<dynamic> Query(
             string sql,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 commandTimeout,
                 commandType);
@@ -70,38 +85,38 @@ namespace Dashing {
 
         public IEnumerable<T> Query<T>(
             string sql,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query<T>(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 commandTimeout,
                 commandType);
         }
 
         public IEnumerable<T> Query<T>(CommandDefinition command) {
-            return SqlMapper.Query<T>(this.sessionState.GetConnection(), this.ReplaceTransactionIn(command));
+            return SqlMapper.Query<T>(this.connection.Value, this.ReplaceTransactionIn(command));
         }
 
         public IEnumerable<TReturn> Query<TFirst, TSecond, TReturn>(
             string sql,
             Func<TFirst, TSecond, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query<TFirst, TSecond, TReturn>(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 map,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 splitOn,
                 commandTimeout,
@@ -111,17 +126,17 @@ namespace Dashing {
         public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query<TFirst, TSecond, TThird, TReturn>(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 map,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 splitOn,
                 commandTimeout,
@@ -131,17 +146,17 @@ namespace Dashing {
         public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TFourth, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query<TFirst, TSecond, TThird, TFourth, TReturn>(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 map,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 splitOn,
                 commandTimeout,
@@ -151,17 +166,17 @@ namespace Dashing {
         public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 map,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 splitOn,
                 commandTimeout,
@@ -171,17 +186,17 @@ namespace Dashing {
         public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 map,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 splitOn,
                 commandTimeout,
@@ -191,17 +206,17 @@ namespace Dashing {
         public IEnumerable<TReturn> Query<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 map,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 splitOn,
                 commandTimeout,
@@ -211,18 +226,18 @@ namespace Dashing {
         public IEnumerable<TReturn> Query<TReturn>(string sql, 
             Type[] types,
             Func<object[], TReturn> map,
-            dynamic param = null, 
+            object param = null, 
             bool buffered = true, 
             string splitOn = "Id", 
             int? commandTimeout = null, 
             CommandType? commandType = null) {
             return SqlMapper.Query(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 types,
                 map,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 buffered,
                 splitOn,
                 commandTimeout,
@@ -231,46 +246,46 @@ namespace Dashing {
 
         public async Task<IEnumerable<dynamic>> QueryAsync(
             string sql,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return
                 await
                 SqlMapper.QueryAsync(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     commandTimeout,
                     commandType);
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(
             string sql,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return
                 await
                 SqlMapper.QueryAsync<T>(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     commandTimeout,
                     commandType);
         }
 
         public async Task<IEnumerable<T>> QueryAsync<T>(CommandDefinition command) {
-            return await SqlMapper.QueryAsync<T>(await this.sessionState.GetConnectionAsync(), await this.ReplaceTransactionInAsync(command));
+            return await SqlMapper.QueryAsync<T>(await this.asyncConnection, await this.ReplaceTransactionInAsync(command));
         }
 
         public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(
             string sql,
             Func<TFirst, TSecond, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
@@ -278,11 +293,11 @@ namespace Dashing {
             return
                 await
                 SqlMapper.QueryAsync<TFirst, TSecond, TReturn>(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     map,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     buffered,
                     splitOn,
                     commandTimeout,
@@ -292,7 +307,7 @@ namespace Dashing {
         public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
@@ -300,11 +315,11 @@ namespace Dashing {
             return
                 await
                 SqlMapper.QueryAsync<TFirst, TSecond, TThird, TReturn>(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     map,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     buffered,
                     splitOn,
                     commandTimeout,
@@ -314,7 +329,7 @@ namespace Dashing {
         public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TFourth, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
@@ -322,11 +337,11 @@ namespace Dashing {
             return
                 await
                 SqlMapper.QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     map,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     buffered,
                     splitOn,
                     commandTimeout,
@@ -336,7 +351,7 @@ namespace Dashing {
         public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
@@ -344,11 +359,11 @@ namespace Dashing {
             return
                 await
                 SqlMapper.QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     map,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     buffered,
                     splitOn,
                     commandTimeout,
@@ -358,7 +373,7 @@ namespace Dashing {
         public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
@@ -366,11 +381,11 @@ namespace Dashing {
             return
                 await
                 SqlMapper.QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     map,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     buffered,
                     splitOn,
                     commandTimeout,
@@ -380,7 +395,7 @@ namespace Dashing {
         public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(
             string sql,
             Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
@@ -388,11 +403,11 @@ namespace Dashing {
             return
                 await
                 SqlMapper.QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(
-                    await this.sessionState.GetConnectionAsync(),
+                    await this.asyncConnection,
                     sql,
                     map,
                     param,
-                    await this.sessionState.GetTransactionAsync(),
+                    await this.asyncTransaction,
                     buffered,
                     splitOn,
                     commandTimeout,
@@ -402,43 +417,43 @@ namespace Dashing {
         public async Task<IEnumerable<TReturn>> QueryAsync<TReturn>(string sql,
             Type[] types,
             Func<object[], TReturn> map,
-            dynamic param = null,
+            object param = null,
             bool buffered = true,
             string splitOn = "Id",
             int? commandTimeout = null,
             CommandType? commandType = null) {
             return SqlMapper.Query(
-                await this.sessionState.GetConnectionAsync(),
+                await this.asyncConnection,
                 sql,
                 types,
                 map,
                 param,
-                await this.sessionState.GetTransactionAsync(),
+                await this.asyncTransaction,
                 buffered,
                 splitOn,
                 commandTimeout,
                 commandType);
         } 
 
-        public SqlMapper.GridReader QueryMultiple(string sql, dynamic param = null, int? commandTimeout = null, CommandType? commandType = null) {
+        public SqlMapper.GridReader QueryMultiple(string sql, object param = null, int? commandTimeout = null, CommandType? commandType = null) {
             return SqlMapper.QueryMultiple(
-                this.sessionState.GetConnection(),
+                this.connection.Value,
                 sql,
                 param,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 commandTimeout,
                 commandType);
         }
 
         public SqlMapper.GridReader QueryMultiple(CommandDefinition command) {
-            return SqlMapper.QueryMultiple(this.sessionState.GetConnection(), this.ReplaceTransactionIn(command));
+            return SqlMapper.QueryMultiple(this.connection.Value, this.ReplaceTransactionIn(command));
         }
 
         private CommandDefinition ReplaceTransactionIn(CommandDefinition command) {
             return new CommandDefinition(
                 command.CommandText,
                 command.Parameters,
-                this.sessionState.GetTransaction(),
+                this.transaction.Value,
                 command.CommandTimeout,
                 command.CommandType,
                 command.Flags,
@@ -449,7 +464,7 @@ namespace Dashing {
             return new CommandDefinition(
                 command.CommandText,
                 command.Parameters,
-                await this.sessionState.GetTransactionAsync(),
+                await this.asyncTransaction,
                 command.CommandTimeout,
                 command.CommandType,
                 command.Flags,

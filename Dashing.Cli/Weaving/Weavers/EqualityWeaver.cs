@@ -20,7 +20,7 @@
             var objectTypeDef = typeDef.Module.Import(typeof(object));
             var pkColDef = this.GetProperty(typeDef, mapDefinition.ColumnDefinitions.Single(d => d.IsPrimaryKey).Name);
             var isGuidPk = pkColDef.PropertyType.Name == "Guid";
-            var isStringPk = !isGuidPk && pkColDef.PropertyType.Name.Equals("string", StringComparison.InvariantCultureIgnoreCase);
+            var isStringPk = !isGuidPk && pkColDef.PropertyType.Name.Equals("string", StringComparison.OrdinalIgnoreCase);
 
             if (!this.DoesNotUseObjectMethod(typeDef, "GetHashCode")) {
                 // override gethashcode

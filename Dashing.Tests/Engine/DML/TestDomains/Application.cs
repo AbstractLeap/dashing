@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tests.Engine.DML.TestDomains.MultipleFetchManyWithThenFetchAndOneToOne {
+﻿namespace Dashing.Tests.Engine.DML.TestDomains {
     using System;
     using System.Collections.Generic;
 

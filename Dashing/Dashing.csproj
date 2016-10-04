@@ -41,7 +41,6 @@
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.Entity.Design" />
     <Reference Include="System.Data.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,30 +57,24 @@
     <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
     <Compile Include="CodeGeneration\TrackingCollection.cs" />
+    <Compile Include="Configuration\BaseConfiguration.cs" />
     <Compile Include="Configuration\Column.cs" />
-    <Compile Include="Configuration\ConfigurationBase.cs" />
-    <Compile Include="Configuration\ConfigurationHelper.cs" />
-    <Compile Include="Configuration\DefaultSessionFactory.cs" />
     <Compile Include="Configuration\ForeignKey.cs" />
     <Compile Include="Configuration\IColumn.cs" />
-    <Compile Include="Configuration\ILicenseManager.cs" />
+    <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IMap.cs" />
     <Compile Include="Configuration\IMapper.cs" />
     <Compile Include="Configuration\IMapT.cs" />
     <Compile Include="Configuration\Index.cs" />
     <Compile Include="Configuration\IndexColumnComparer.cs" />
     <Compile Include="Configuration\ISeeder.cs" />
-    <Compile Include="Configuration\ISessionFactory.cs" />
     <Compile Include="Configuration\ColumnExtensions.cs" />
-    <Compile Include="Configuration\DefaultConfiguration.cs" />
     <Compile Include="Configuration\DefaultConvention.cs" />
-    <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Configuration\IConvention.cs" />
     <Compile Include="Configuration\MapExtensions.cs" />
     <Compile Include="Configuration\DefaultMapper.cs" />
     <Compile Include="Configuration\Map.cs" />
     <Compile Include="Configuration\MapT.cs" />
-    <Compile Include="Configuration\MutableConfiguration.cs" />
     <Compile Include="Configuration\RelationshipType.cs" />
     <Compile Include="DapperWrapper.cs" />
     <Compile Include="DoNotWeaveAttribute.cs" />
@@ -157,17 +150,17 @@
     <Compile Include="IFetchMany.cs" />
     <Compile Include="ISelectQuery.cs" />
     <Compile Include="ISession.cs" />
-    <Compile Include="ISessionState.cs" />
+    <Compile Include="ISessionCreator.cs" />
     <Compile Include="OrderClause.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectQuery.cs" />
     <Compile Include="Session.cs" />
-    <Compile Include="NeedToDash.cs" />
     <Compile Include="SessionExtensions.cs" />
-    <Compile Include="SessionState.cs" />
+    <Compile Include="SqlSessionCreator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="project.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

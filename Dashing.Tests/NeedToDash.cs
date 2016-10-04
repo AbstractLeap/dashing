@@ -1,4 +1,4 @@
-﻿namespace Dashing {
+﻿namespace Dashing.Tests {
     using System;
     using System.Collections.Generic;
     using System.Configuration;

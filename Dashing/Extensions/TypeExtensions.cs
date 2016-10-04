@@ -3,7 +3,12 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Data;
+    using System.Reflection;
+#if !COREFX
     using System.Data.Linq;
+#endif
+
+
 
     /// <summary>
     ///     The type extensions.
@@ -47,8 +52,10 @@
                                                                                                      { typeof(Guid?), DbType.Guid },
                                                                                                      { typeof(DateTime?), DbType.DateTime },
                                                                                                      { typeof(DateTimeOffset?), DbType.DateTimeOffset },
-                                                                                                     { typeof(Binary), DbType.Binary },
-                                                                                                     { typeof(TimeSpan), DbType.Time },
+#if !COREFX
+            { typeof(Binary), DbType.Binary },
+#endif
+            { typeof(TimeSpan), DbType.Time },
                                                                                                      { typeof(TimeSpan?), DbType.Time }
                                                                                                  };
 
@@ -83,7 +90,7 @@
         ///     The <see cref="bool" />.
         /// </returns>
         public static bool IsEntityType(this Type type) {
-            return !type.IsValueType && type != typeof(string) && type != typeof(byte[]);
+            return !type.IsValueType() && type != typeof(string) && type != typeof(byte[]);
         }
 
         /// <summary>
@@ -112,7 +119,7 @@
         ///     The <see cref="bool" />.
         /// </returns>
         public static bool IsImplementationOf(this Type thisType, Type type) {
-            return null != thisType.GetInterface(type.FullName);
+            return type.IsAssignableFrom(thisType);
         }
 
         /// <summary>
@@ -136,7 +143,7 @@
             }
 
             // just use underlying type of enum
-            if (!type.IsEnum) {
+            if (!type.IsEnum()) {
                 throw new ArgumentOutOfRangeException("type", "Unable to determine the DBType for type: " + type.FullName);
             }
 
@@ -171,7 +178,7 @@
         ///     The <see cref="bool" />.
         /// </returns>
         public static bool IsNullable(this Type type) {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+            return type.IsGenericType() && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
         /// <summary>
@@ -190,10 +197,10 @@
             }
 
             // return all inherited types
-            var currentBaseType = type.BaseType;
+            var currentBaseType = type.BaseType();
             while (currentBaseType != null) {
                 yield return currentBaseType;
-                currentBaseType = currentBaseType.BaseType;
+                currentBaseType = currentBaseType.BaseType();
             }
         }
 
@@ -219,6 +226,62 @@
                 default:
                     return false;
             }
+        }
+
+        public static bool IsValueType(this Type type) {
+#if COREFX
+            return type.GetTypeInfo().IsValueType;
+#else
+            return type.IsValueType;
+#endif
+        }
+
+        public static bool IsEnum(this Type type) {
+#if COREFX
+            return type.GetTypeInfo().IsEnum;
+#else
+            return type.IsEnum;
+#endif
+        }
+
+        public static bool IsGenericType(this Type type) {
+#if COREFX
+            return type.GetTypeInfo().IsGenericType;
+#else
+            return type.IsGenericType;
+#endif
+        }
+
+        public static Type BaseType(this Type type) {
+#if COREFX
+            return type.GetTypeInfo().BaseType;
+#else
+            return type.BaseType;
+#endif
+        }
+
+        public static Assembly Assembly(this Type type) {
+#if COREFX
+            return type.GetTypeInfo().Assembly;
+#else
+            return type.Assembly;
+#endif
+        }
+
+        public static bool IsClass(this Type type) {
+#if COREFX
+            return type.GetTypeInfo().IsClass;
+#else
+            return type.IsClass;
+#endif
+        }
+
+        public static bool IsAbstract(this Type type) {
+#if COREFX
+            return type.GetTypeInfo().IsAbstract;
+#else
+            return type.IsAbstract;
+#endif
         }
     }
 }

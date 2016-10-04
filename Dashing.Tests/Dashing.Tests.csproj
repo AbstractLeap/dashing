@@ -132,6 +132,8 @@
     <Compile Include="Engine\DML\UpdateWriterTests.cs" />
     <Compile Include="Extensions\DynamicParametersExtensions.cs" />
     <Compile Include="MockConfiguration.cs" />
+    <Compile Include="MutableConfiguration.cs" />
+    <Compile Include="NeedToDash.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Engine\DDL\DropTableWriterTests.cs" />
     <Compile Include="Engine\DDL\CreateTableWriterTests.cs" />

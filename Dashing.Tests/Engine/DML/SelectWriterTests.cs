@@ -7,7 +7,7 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Extensions;
-    using Dashing.Tests.Engine.DML.TestDomains.MultipleFetchManyWithThenFetchAndOneToOne;
+    using Dashing.Tests.Engine.DML.TestDomains;
     using Dashing.Tests.TestDomain;
 
     using Moq;

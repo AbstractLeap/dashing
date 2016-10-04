@@ -1,0 +1,42 @@
+﻿{
+  "name": "Dashing",
+  "version": "1.2.0",
+  "description": "Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity while not sacrificing (too much) performance.",
+  "authors": [
+    "Mark Jerzykowski",
+    "James Holwell"
+  ],
+  "dependencies": {
+    "Dapper": "1.50.2"
+  },
+  "frameworks": {
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Configuration": "4.0.0.0",
+        "System.Data": "4.0.0.0",
+        "System.Data.Linq": "4.0.0.0",
+        "System.Linq": "4.0.0.0"
+      }
+    },
+    "net451": {
+      "frameworkAssemblies": {
+        "System.Configuration": "4.0.0.0",
+        "System.Data": "4.0.0.0",
+        "System.Data.Linq": "4.0.0.0",
+        "System.Linq": "4.0.0.0"
+      }
+    },
+    "netstandard1.3": {
+      "buildOptions": {
+        "define": [ "COREFX" ]
+      },
+      "dependencies": {
+        "System.Dynamic.Runtime": "4.0.11",
+        "System.Linq": "4.1.0",
+        "System.Runtime": "4.1.0",
+        "System.Reflection": "4.1.0",
+        "System.Reflection.TypeExtensions": "4.1.0"
+      }
+    }
+  }
+}

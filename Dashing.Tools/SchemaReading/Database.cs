@@ -67,7 +67,7 @@ namespace Dashing.Tools.SchemaReading {
                 return matchingTables.First();
             }
             
-            return matchingTables.FirstOrDefault(t => t.Schema.Equals(schema, StringComparison.InvariantCultureIgnoreCase));
+            return matchingTables.FirstOrDefault(t => t.Schema.Equals(schema, StringComparison.OrdinalIgnoreCase));
         }
 
         public IEnumerable<ColumnDto> GetColumnsForTable(string tableName) {
@@ -136,8 +136,8 @@ namespace Dashing.Tools.SchemaReading {
                     return false;
                 }
 
-                return this.TableName.Equals(otherKey.TableName, StringComparison.InvariantCultureIgnoreCase)
-                       && this.ColumnName.Equals(otherKey.ColumnName, StringComparison.InvariantCultureIgnoreCase);
+                return this.TableName.Equals(otherKey.TableName, StringComparison.OrdinalIgnoreCase)
+                       && this.ColumnName.Equals(otherKey.ColumnName, StringComparison.OrdinalIgnoreCase);
             }
         }
     }

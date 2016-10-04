@@ -1,6 +1,5 @@
 ﻿namespace PerformanceTest.Tests.NHibernate {
     using System;
-    using System.Data.Entity.Design.PluralizationServices;
     using System.Globalization;
 
     using FluentNHibernate;
@@ -9,6 +8,8 @@
     using FluentNHibernate.Cfg.Db;
     using FluentNHibernate.Conventions;
     using FluentNHibernate.Conventions.Instances;
+
+    using global::Dashing.Extensions;
 
     using global::NHibernate;
     using global::NHibernate.Cfg;
@@ -57,7 +58,7 @@
         private class TableNameConvention : IClassConvention {
             public void Apply(IClassInstance instance) {
                 string typeName = instance.EntityType.Name;
-                instance.Table(PluralizationService.CreateService(CultureInfo.CurrentCulture).Pluralize(typeName));
+                instance.Table(typeName.Pluralize());
             }
         }
 

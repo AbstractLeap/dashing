@@ -4,7 +4,7 @@
 
     internal class IndexColumnComparer : IEqualityComparer<IColumn> {
         public bool Equals(IColumn x, IColumn y) {
-            return x.Name.Equals(y.Name, StringComparison.InvariantCultureIgnoreCase);
+            return x.Name.Equals(y.Name, StringComparison.OrdinalIgnoreCase);
         }
 
         public int GetHashCode(IColumn obj) {

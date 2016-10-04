@@ -38,9 +38,9 @@
                 return false;
             }
 
-            return this.ChildColumn.Name.Equals(otherForeignKey.ChildColumn.Name, StringComparison.InvariantCultureIgnoreCase)
-                   && this.ChildColumn.Map.Type.Name.Equals(otherForeignKey.ChildColumn.Map.Type.Name, StringComparison.InvariantCultureIgnoreCase)
-                   && this.ParentMap.Type.Name.Equals(otherForeignKey.ParentMap.Type.Name, StringComparison.InvariantCultureIgnoreCase);
+            return this.ChildColumn.Name.Equals(otherForeignKey.ChildColumn.Name, StringComparison.OrdinalIgnoreCase)
+                   && this.ChildColumn.Map.Type.Name.Equals(otherForeignKey.ChildColumn.Map.Type.Name, StringComparison.OrdinalIgnoreCase)
+                   && this.ParentMap.Type.Name.Equals(otherForeignKey.ParentMap.Type.Name, StringComparison.OrdinalIgnoreCase);
         }
 
         public override int GetHashCode() {

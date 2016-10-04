@@ -2,6 +2,9 @@
     using System;
     using System.Data;
     using System.Linq;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;

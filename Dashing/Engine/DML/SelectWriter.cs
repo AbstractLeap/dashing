@@ -4,6 +4,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dapper;
 

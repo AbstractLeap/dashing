@@ -376,7 +376,7 @@
                                     : exp.Expression.Type;
 
             // redirect for .HasValue expressions on nullables
-            if (declaringType.IsGenericType && declaringType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
+            if (declaringType.IsGenericType() && declaringType.GetGenericTypeDefinition() == typeof(Nullable<>)) {
                 var propInfo = exp.Member as PropertyInfo;
                 if (propInfo != null && propInfo.Name == "HasValue") {
                     // re-write to binary expression
@@ -554,7 +554,7 @@
             var param = "@l_" + ++this.paramCounter;
             if (value != null) {
                 var valueType = value.GetType();
-                if (!valueType.IsValueType && this.config.HasMap(valueType)) {
+                if (!valueType.IsValueType() && this.config.HasMap(valueType)) {
                     value = this.config.GetMap(valueType).GetPrimaryKeyValue(value);
                 }
             }

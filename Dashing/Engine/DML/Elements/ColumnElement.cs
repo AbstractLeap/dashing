@@ -6,8 +6,6 @@
     internal sealed class ColumnElement : ISqlElement {
         private readonly string columnName;
 
-        private readonly ISqlDialect dialect;
-
         public ColumnElement(FetchNode node, string columnName, bool isRoot) {
             this.Node = node;
             this.columnName = columnName;

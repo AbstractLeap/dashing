@@ -1,7 +1,9 @@
-namespace Dashing.Configuration {
+namespace Dashing.Tools.Tests {
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+
+    using Dashing.Configuration;
 
     public class MutableConfiguration : DefaultConfiguration {
         public MutableConfiguration(ConnectionStringSettings connectionStringSettings)

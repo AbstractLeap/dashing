@@ -1,9 +1,10 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
-    using System.Data.Entity.Design.PluralizationServices;
     using System.Globalization;
     using System.Linq;
+
+    using Dashing.Extensions;
 
     /// <summary>
     ///     The default convention.
@@ -28,11 +29,6 @@
         private readonly byte decimalScale;
 
         /// <summary>
-        ///     The pluralizer.
-        /// </summary>
-        protected readonly PluralizationService Pluralizer;
-
-        /// <summary>
         ///     Initializes a new instance of the <see cref="DefaultConvention" /> class.
         /// </summary>
         /// <param name="stringLength">
@@ -48,7 +44,6 @@
             this.stringLength = stringLength;
             this.decimalPrecision = decimalPrecision;
             this.decimalScale = decimalScale;
-            this.Pluralizer = PluralizationService.CreateService(new CultureInfo("en-GB")); // <-- Americans, back in your box.
         }
 
         /// <summary>
@@ -61,7 +56,7 @@
         ///     The <see cref="string" />.
         /// </returns>
         public virtual string TableFor(Type entity) {
-            return this.Pluralizer.Pluralize(entity.Name);
+            return entity.Name.Pluralize();
         }
 
         /// <summary>

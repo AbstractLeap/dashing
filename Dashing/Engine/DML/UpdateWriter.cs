@@ -4,6 +4,9 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dapper;
 
