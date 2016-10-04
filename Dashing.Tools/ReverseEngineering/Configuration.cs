@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Tools.ReverseEngineering {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Data;
     using System.Linq;
 
@@ -26,8 +25,6 @@
             this.maps.Add(type, map);
         }
 
-        public ConnectionStringSettings ConnectionStringSettings { get; private set; }
-
         public IEnumerable<IMap> Maps {
             get {
                 return this.maps.Select(k => k.Value);
@@ -48,6 +45,10 @@
 
         public bool HasMap(Type type) {
             return this.maps.ContainsKey(type);
+        }
+
+        public bool HasMap<T>() {
+            return this.HasMap(typeof(T));
         }
 
         public ISession BeginSession() {

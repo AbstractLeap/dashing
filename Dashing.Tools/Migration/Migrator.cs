@@ -4,6 +4,9 @@
     using System.Data;
     using System.Linq;
     using System.Text;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dashing.Configuration;
     using Dashing.Engine.DDL;

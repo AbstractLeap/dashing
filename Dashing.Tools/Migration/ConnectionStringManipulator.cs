@@ -1,22 +1,24 @@
 ﻿namespace Dashing.Tools.Migration {
     using System;
-    using System.Configuration;
     using System.Data.Common;
 
     public class ConnectionStringManipulator {
-        private readonly ConnectionStringSettings connectionStringSettings;
+        private readonly DbProviderFactory dbProviderFactory;
 
-        public ConnectionStringManipulator(ConnectionStringSettings connectionStringSettings) {
-            this.connectionStringSettings = connectionStringSettings;
+        private readonly string connectionString;
+        
+        public ConnectionStringManipulator(DbProviderFactory dbProviderFactory, string connectionString) {
+            this.dbProviderFactory = dbProviderFactory;
+            this.connectionString = connectionString;
         }
 
-        public ConnectionStringSettings GetRootConnectionString() {
-            var builder = DbProviderFactories.GetFactory(this.connectionStringSettings.ProviderName).CreateConnectionStringBuilder();
+        public string GetRootConnectionString() {
+            var builder = this.dbProviderFactory.CreateConnectionStringBuilder();
             if (builder == null) {
-                throw new NotSupportedException("Unable to get connection string builder for " + this.connectionStringSettings.ProviderName);
+                throw new NotSupportedException("Unable to get connection string builder");
             }
 
-            builder.ConnectionString = this.connectionStringSettings.ConnectionString;
+            builder.ConnectionString = this.connectionString;
             var databaseProperties = new[] { "Database", "Initial Catalog" };
             foreach (var databaseProperty in databaseProperties) {
                 if (builder.ContainsKey(databaseProperty)) {
@@ -24,16 +26,16 @@
                 }
             }
 
-            return new ConnectionStringSettings(this.connectionStringSettings.Name, builder.ConnectionString, this.connectionStringSettings.ProviderName);
+            return builder.ConnectionString;
         }
 
         public string GetDatabaseName() {
-            var builder = DbProviderFactories.GetFactory(this.connectionStringSettings.ProviderName).CreateConnectionStringBuilder();
+            var builder = this.dbProviderFactory.CreateConnectionStringBuilder();
             if (builder == null) {
-                throw new NotSupportedException("Unable to get connection string builder for " + this.connectionStringSettings.ProviderName);
+                throw new NotSupportedException("Unable to get connection string builder");
             }
 
-            builder.ConnectionString = this.connectionStringSettings.ConnectionString;
+            builder.ConnectionString = this.connectionString;
             var databaseProperties = new[] { "Database", "Initial Catalog" };
             foreach (var databaseProperty in databaseProperties) {
                 object value;
@@ -46,7 +48,7 @@
                 }
             }
 
-            throw new NotSupportedException(string.Format("Unable to get database name from connection string named {0} ({1})", this.connectionStringSettings.Name, this.connectionStringSettings.ConnectionString));
+            throw new NotSupportedException(string.Format("Unable to get database name from connection string {0}", this.connectionString));
         }
     }
 }

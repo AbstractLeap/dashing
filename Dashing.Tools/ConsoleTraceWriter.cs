@@ -3,6 +3,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+#if COREFX
+    using System.Reflection;
+#endif
 
     public class ConsoleLogger : ILogger {
         private readonly bool isVerbose;
