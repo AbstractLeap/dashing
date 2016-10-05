@@ -46,23 +46,20 @@ namespace Dashing.Engine {
             get {
                 return this.configuration;
             }
-
-            set {
-                this.configuration = value;
-                this.selectWriter = new SelectWriter(this.SqlDialect, this.Configuration);
-                this.countWriter = new CountWriter(this.SqlDialect, this.Configuration);
-                this.deleteWriter = new DeleteWriter(this.SqlDialect, this.Configuration);
-                this.updateWriter = new UpdateWriter(this.SqlDialect, this.Configuration);
-                this.insertWriter = new InsertWriter(this.SqlDialect, this.Configuration);
-            }
         }
 
-        public SqlEngine(ISqlDialect dialect) {
+        public SqlEngine(IConfiguration configuration, ISqlDialect dialect) {
             this.SqlDialect = dialect;
+            this.configuration = configuration;
+            this.selectWriter = new SelectWriter(dialect, configuration);
+            this.countWriter = new CountWriter(dialect, configuration);
+            this.updateWriter = new UpdateWriter(dialect, configuration);
+            this.insertWriter = new InsertWriter(dialect, configuration);
+            this.deleteWriter = new DeleteWriter(dialect, configuration);
+            this.delegateQueryCreator = new DelegateQueryCreator(configuration);
         }
 
         public T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
             var entity = connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).SingleOrDefault();
             if (entity != null) {
@@ -74,7 +71,6 @@ namespace Dashing.Engine {
 
         public IEnumerable<T> Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, IEnumerable<TPrimaryKey> ids)
             where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
             return connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).Select(
                 t => {
@@ -84,7 +80,6 @@ namespace Dashing.Engine {
         }
 
         public virtual IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
             if (query.HasFetches()) {
                 Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> queryFunc;
@@ -107,7 +102,6 @@ namespace Dashing.Engine {
         }
 
         public Page<T> QueryPaged<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
             var totalResults = connection.Query<int>(countQuery.Sql, countQuery.Parameters, transaction).SingleOrDefault();
 
@@ -120,14 +114,11 @@ namespace Dashing.Engine {
         }
 
         public int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
             return connection.Query<int>(countQuery.Sql, countQuery.Parameters, transaction).SingleOrDefault();
         }
 
         public virtual int Insert<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
-            this.EnsureConfigurationLoaded();
-
             var i = 0;
             var map = this.Configuration.GetMap<T>();
             var getLastInsertedId = this.insertWriter.GenerateGetIdSql<T>();
@@ -159,7 +150,6 @@ namespace Dashing.Engine {
         }
 
         public virtual int Save<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateSql(entities);
             return sqlQuery.Sql.Length == 0 ? 0 : connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
@@ -171,8 +161,7 @@ namespace Dashing.Engine {
             if (!entityArray.Any()) {
                 return 0;
             }
-
-            this.EnsureConfigurationLoaded();
+            
             var sqlQuery = this.deleteWriter.GenerateSql(entityArray);
             return connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
@@ -182,20 +171,17 @@ namespace Dashing.Engine {
             IDbTransaction transaction,
             Action<T> update,
             IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateBulkSql(update, predicates);
             return sqlQuery.Sql.Length == 0 ? 0 : connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
         public int ExecuteBulkDelete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates)
             where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
             return connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
         public async Task<T> QueryAsync<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(id);
             var queryResult = await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
             var entity = queryResult.SingleOrDefault();
@@ -210,7 +196,6 @@ namespace Dashing.Engine {
             IDbConnection connection,
             IDbTransaction transaction,
             IEnumerable<TPrimaryKey> ids) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateGetSql<T, TPrimaryKey>(ids);
             var result = await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction);
             return result.Select(
@@ -222,7 +207,6 @@ namespace Dashing.Engine {
 
         public async Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query)
             where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.selectWriter.GenerateSql(query);
             IEnumerable<T> queryResults;
             if (query.HasFetches()) {
@@ -247,7 +231,6 @@ namespace Dashing.Engine {
 
         public async Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query)
             where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
             var totalResults = (await connection.QueryAsync<int>(countQuery.Sql, countQuery.Parameters, transaction)).SingleOrDefault();
             var results = await this.QueryAsync(connection, transaction, query);
@@ -256,14 +239,11 @@ namespace Dashing.Engine {
         }
 
         public async Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var countQuery = this.countWriter.GenerateCountSql(query);
             return (await connection.QueryAsync<int>(countQuery.Sql, countQuery.Parameters, transaction)).SingleOrDefault();
         }
 
         public async Task<int> InsertAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
-            this.EnsureConfigurationLoaded();
-
             var i = 0;
             var map = this.Configuration.GetMap<T>();
             var getLastInsertedId = this.insertWriter.GenerateGetIdSql<T>();
@@ -296,7 +276,6 @@ namespace Dashing.Engine {
         }
 
         public async Task<int> SaveAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateSql(entities);
             return sqlQuery.Sql.Length == 0 ? 0 : await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
@@ -308,8 +287,7 @@ namespace Dashing.Engine {
             if (!entityArray.Any()) {
                 return 0;
             }
-
-            this.EnsureConfigurationLoaded();
+            
             var sqlQuery = this.deleteWriter.GenerateSql(entityArray);
             return await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
@@ -319,7 +297,6 @@ namespace Dashing.Engine {
             IDbTransaction transaction,
             Action<T> update,
             IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.updateWriter.GenerateBulkSql(update, predicates);
             return sqlQuery.Sql.Length == 0 ? 0 : await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
@@ -328,19 +305,8 @@ namespace Dashing.Engine {
             IDbConnection connection,
             IDbTransaction transaction,
             IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
-            this.EnsureConfigurationLoaded();
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
             return await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
-        }
-
-        private void EnsureConfigurationLoaded() {
-            if (this.configuration == null) {
-                throw new InvalidOperationException("Configuration was not injected into the Engine properly");
-            }
-
-            if (this.delegateQueryCreator == null) {
-                this.delegateQueryCreator = new DelegateQueryCreator(this.configuration);
-            }
         }
     }
 }

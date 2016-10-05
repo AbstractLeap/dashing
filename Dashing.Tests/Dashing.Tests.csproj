@@ -107,13 +107,11 @@
     <Compile Include="Engine\DapperMapperGeneration\CollectionTests.cs" />
     <Compile Include="Engine\DapperMapperGeneration\NonCollectionTests.cs" />
     <Compile Include="Configuration\DefaultConventionTests.cs" />
-    <Compile Include="Configuration\DefaultSessionFactoryTests.cs" />
     <Compile Include="Configuration\IndexTests.cs" />
     <Compile Include="Configuration\MapExtensionsTests.cs" />
     <Compile Include="Configuration\MapTests.cs" />
     <Compile Include="Configuration\DefaultMapperTests.cs" />
     <Compile Include="Configuration\ColumnTests.cs" />
-    <Compile Include="Configuration\DefaultConfigurationTests.cs" />
     <Compile Include="Configuration\ConfigurationBaseTests.cs" />
     <Compile Include="Configuration\ReverseEngineer\Sandbox.cs" />
     <Compile Include="Engine\Dialects\AnsiSqlDialectTests.cs" />
@@ -158,6 +156,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dashing.Tools\Dashing.Tools.csproj">

@@ -1,6 +1,5 @@
 ﻿namespace Dashing.Tests.Engine.DapperMapperGeneration {
     using System;
-    using System.Configuration;
     using System.Linq;
 
     using Dashing.CodeGeneration;
@@ -118,9 +117,8 @@
             return func.Item1;
         }
 
-        private class CustomConfig : DefaultConfiguration {
-            public CustomConfig()
-                : base(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
+        private class CustomConfig : BaseConfiguration {
+            public CustomConfig() {
                 this.AddNamespaceOf<Post>();
             }
         }

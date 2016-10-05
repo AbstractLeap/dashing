@@ -57,7 +57,11 @@
             return this.mappedTypes.ContainsKey(type);
         }
 
-        public EventHandlers EventHandlers { get; }
+        public EventHandlers EventHandlers {
+            get {
+                return this.eventHandlers;
+            }
+        }
 
         protected virtual IConfiguration Add<T>() {
             this.Add(new[] { typeof(T) });

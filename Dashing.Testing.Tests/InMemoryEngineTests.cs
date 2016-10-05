@@ -1,5 +1,7 @@
 ﻿namespace Dashing.Testing.Tests {
+    using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
 
     using Dashing.Testing.Tests.TestDomain;
@@ -44,8 +46,8 @@
 
         [Fact]
         public void TestConfigWorks() {
-            var config = new TestConfiguration(true);
-            using (var session = config.BeginSession()) {
+            var config = new TestConfiguration();
+            using (var session = new Session(new InMemoryEngine(config), null)) {
                 session.Insert(new Post() { Title = "Foo" });
                 Assert.Equal("Foo", session.Get<Post>(1).Title);
             }
@@ -149,8 +151,8 @@
 
         [Fact]
         public void InsertLongWorks() {
-            var config = new TestConfiguration(true);
-            using (var session = config.BeginSession()) {
+            var config = new TestConfiguration();
+            using (var session = new Session(new InMemoryEngine(config), new Lazy<IDbConnection>(() => new InMemoryDbConnection()))) {
                 var thing = new ThingWithLongPrimaryKey { Name = "Foo" };
                 var inserts = session.Insert(thing);
                 Assert.Equal(1, inserts);
@@ -164,8 +166,8 @@
         }
 
         private ISession GetSession() {
-            var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
-            var session = new Session(engine, new Mock<ISessionState>().Object);
+            var engine = new InMemoryEngine(new TestConfiguration());
+            var session = new Session(engine, new Lazy<IDbConnection>(() => new InMemoryDbConnection()));
 
             var authors = new List<User> { new User { Username = "Bob", IsEnabled = true }, new User { Username = "Mark", IsEnabled = true }, new User { Username = "James", IsEnabled = false } };
             session.Insert(authors);

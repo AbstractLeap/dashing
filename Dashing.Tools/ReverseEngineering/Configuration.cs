@@ -18,7 +18,7 @@
 
         public Configuration(ISqlDialect sqlDialect) {
             this.maps = new Dictionary<Type, IMap>();
-            this.Engine = new SqlEngine(sqlDialect);
+            this.Engine = new SqlEngine(this, sqlDialect);
         }
 
         public void AddMap(Type type, IMap map) {

@@ -23,7 +23,7 @@ namespace Dashing {
             this.dbProviderFactory = dbProviderFactory;
             this.connectionString = connectionString;
             this.CompleteFailsSilentlyIfRejected = true;
-            this.engine = new SqlEngine(sqlDialect);
+            this.engine = new SqlEngine(configuration, sqlDialect);
         }
 
         public ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {

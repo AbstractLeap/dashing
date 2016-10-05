@@ -1,12 +1,9 @@
 ﻿namespace Dashing.Tests.Configuration.AddNamespaceDomain {
-    using System.Configuration;
-
     using Dashing.Configuration;
 
     [DoNotWeave]
-    public class AddNamespaceConfiguration : DefaultConfiguration {
-        public AddNamespaceConfiguration()
-            : base(new ConnectionStringSettings("Default", "", "System.Data.SqlClient")) {
+    public class AddNamespaceConfiguration : BaseConfiguration {
+        public AddNamespaceConfiguration() {
             this.AddNamespaceOf<Post>();
         }
     }

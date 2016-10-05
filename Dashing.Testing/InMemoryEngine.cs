@@ -21,20 +21,14 @@
 
         private IConfiguration configuration;
 
-        public InMemoryEngine() {
+        public InMemoryEngine(IConfiguration configuration) {
+            this.configuration = configuration;
             this.tables = new Dictionary<Type, object>();
         }
 
         public IConfiguration Configuration {
             get {
                 return this.configuration;
-            }
-            set {
-                if (this.configuration != null) {
-                    throw new Exception("Can only set the configuration once");
-                }
-
-                this.configuration = value;
             }
         }
 

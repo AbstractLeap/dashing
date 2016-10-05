@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Tests.Engine.DapperMapperGeneration {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Linq;
 
     using Dashing.CodeGeneration;
@@ -228,7 +227,8 @@
         [Fact]
         public void FetchNonRootCollectionWorks() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Post.Comments).Take(1) as SelectQuery<PostTag>;
+            var selectQuery =
+                new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Post.Comments).Take(1) as SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery);
             var mapper = new SingleCollectionMapperGenerator(config);
@@ -760,9 +760,8 @@
             return func.Item1;
         }
 
-        private class CustomConfig : DefaultConfiguration {
-            public CustomConfig()
-                : base(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient")) {
+        private class CustomConfig : BaseConfiguration {
+            public CustomConfig() {
                 this.AddNamespaceOf<Post>();
                 this.Add<PostWithoutCollectionInitializerInConstructor>();
                 this.Add<CommentTwo>();

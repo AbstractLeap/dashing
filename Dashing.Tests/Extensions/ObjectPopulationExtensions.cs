@@ -6,6 +6,7 @@
     using System.Reflection;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
 
     public static class ObjectPopulationExtensions {
         public static T Populate<T>(this T obj, params object[] defaults) {
@@ -38,12 +39,12 @@
                 else if (prop.PropertyType == typeof(Type)) {
                     prop.SetValue(obj, typeof(string));
                 }
-                else if (prop.PropertyType.IsEnum) {
+                else if (prop.PropertyType.IsEnum()) {
                     if (prop.PropertyType.IsEnumDefined(1)) {
                         prop.SetValue(obj, 1);
                     }
                 }
-                else if (prop.PropertyType.IsGenericType) {
+                else if (prop.PropertyType.IsGenericType()) {
                     if (obj.GetType().GetGenericTypeDefinition() == typeof(IDictionary<,>)) {
                         var i = prop.PropertyType.GetInterface(typeof(IDictionary).FullName);
                         var t = typeof(Dictionary<,>).MakeGenericType(i.GenericTypeArguments[0], i.GenericTypeArguments[1]);
@@ -62,8 +63,20 @@
             return obj;
         }
 
-        private static bool IsImplementationOf(this Type thisType, Type type) {
-            return null != thisType.GetInterface(type.FullName);
+        public static bool IsEnumDefined(this Type type, object value) {
+#if COREFX
+            return type.GetTypeInfo().IsEnumDefined(value);
+#else
+            return type.IsEnumDefined(value);
+#endif
+        }
+
+        public static Type GetInterface(this Type type, string name) {
+#if COREFX
+            return type.GetTypeInfo().GetInterface(name);
+#else
+            return type.GetInterface(name);
+#endif
         }
     }
 }

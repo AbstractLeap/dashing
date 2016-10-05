@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="EntityCloner.cs" />
     <Compile Include="FetchCloner.cs" />
+    <Compile Include="InMemoryDbConnection.cs" />
     <Compile Include="InMemoryEngine.cs" />
     <Compile Include="InMemoryEnumerableExtensions.cs" />
     <Compile Include="InMemoryKeyGenerator.cs" />

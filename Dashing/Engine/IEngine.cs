@@ -8,7 +8,7 @@ namespace Dashing.Engine {
     using Dashing.Configuration;
 
     public interface IEngine {
-        IConfiguration Configuration { get; set; }
+        IConfiguration Configuration { get; }
 
         T Query<T, TPrimaryKey>(IDbConnection connection, IDbTransaction transaction, TPrimaryKey id) where T : class, new();
 

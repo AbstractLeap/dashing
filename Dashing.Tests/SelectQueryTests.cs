@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Tests {
+    using System;
     using System.Data;
 
     using Dashing.Configuration;
@@ -24,7 +25,7 @@
         }
 
         private ISession GetDashing() {
-            return new Session(this.mockEngine.Object, new SessionState(new Mock<IConfiguration>().Object, connection.Object, transaction.Object));
+            return new Session(this.mockEngine.Object, new Lazy<IDbConnection>(() => connection.Object), transaction.Object);
         }
 
         [Fact]

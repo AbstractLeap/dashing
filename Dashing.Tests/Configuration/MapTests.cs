@@ -1,5 +1,8 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System;
+#if COREFX
+    using System.Reflection;
+#endif
 
     using Dashing.Configuration;
     using Dashing.Tests.Extensions;

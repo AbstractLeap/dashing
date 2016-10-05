@@ -23,11 +23,7 @@
         public IList<IOnPostSaveEventListener> PostSaveListeners { get; private set; }
 
         public IList<IOnPostDeleteEventListener> PostDeleteListeners { get; private set; }
-
-        internal void Invalidate(IEnumerable<IEventListener> listeners) {
-            this.UpdateListeners(listeners);
-        }
-
+        
         private void UpdateListeners(IEnumerable<IEventListener> listeners) {
             foreach (var listener in listeners) {
                 if (listener is IOnPreInsertEventListener) {

@@ -1,5 +1,4 @@
 ﻿namespace Dashing.Tests.Configuration {
-    using System.Configuration;
     using System.Linq;
 
     using Dashing.Configuration;
@@ -58,8 +57,7 @@
         [Fact]
         public void ForeignKeyIndexesAddedAutomatically() {
             var config =
-                new MutableConfiguration(
-                    new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true", "System.Data.SqlClient"))
+                new MutableConfiguration()
                     .AddNamespaceOf<Post>();
             var postMap = config.GetMap<Post>();
             var blogMap = config.GetMap<Blog>();
@@ -72,8 +70,7 @@
         [Fact]
         public void ExistingIndexNotRecreated() {
             var config =
-                new MutableConfiguration(
-                    new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true", "System.Data.SqlClient"))
+                new MutableConfiguration()
                     .AddNamespaceOf<Post>();
             var postMap = config.GetMap<Post>();
             postMap.Index(p => new { p.Blog });

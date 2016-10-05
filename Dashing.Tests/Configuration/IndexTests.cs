@@ -1,6 +1,5 @@
 ﻿namespace Dashing.Tests.Configuration {
     using System;
-    using System.Configuration;
     using System.Linq;
 
     using Dashing.Configuration;
@@ -11,7 +10,7 @@
     public class IndexTests {
         [Fact]
         public void IndexExtensionWorks() {
-            var config = NeedToDash.Configure(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient"));
+            var config = NeedToDash.Configure();
             config.Setup<Blog>();
             config.Setup<User>();
             config.Setup<Post>().Index(p => new { p.Rating, p.Title });
@@ -21,20 +20,20 @@
 
         [Fact]
         public void ThrowOnIndexingIgnoredColumn() {
-            var config = NeedToDash.Configure(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient"));
+            var config = NeedToDash.Configure();
             config.Setup<Post>().Property(p => p.Title).Ignore();
             Assert.Throws<InvalidOperationException>(() => config.Setup<Post>().Index(p => p.Title));
         }
 
         [Fact]
         public void ThrowOnOddIndexExpression() {
-            var config = NeedToDash.Configure(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient"));
+            var config = NeedToDash.Configure();
             Assert.Throws<InvalidOperationException>(() => config.Setup<Post>().Index(p => new { Blah = p.Title }));
         }
 
         [Fact]
         public void UniqueAddedCorrectly() {
-            var config = NeedToDash.Configure(new ConnectionStringSettings("Default", string.Empty, "System.Data.SqlClient"));
+            var config = NeedToDash.Configure();
             config.Setup<Blog>();
             config.Setup<User>();
             config.Setup<Post>().Index(p => new { p.Rating, p.Title }, true);

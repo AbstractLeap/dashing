@@ -1,5 +1,9 @@
 {
-    "projects": [ 
-        "Dashing", "Dashing.Tools"
-    ]
+  "projects": [
+    "Dashing",
+    "Dashing.Tools"
+  ],
+  "sdk": {
+    "version": "1.0.0-*"
+  }
 }
