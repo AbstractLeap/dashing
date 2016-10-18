@@ -114,9 +114,7 @@
     <Compile Include="Configuration\DefaultMapperTests.cs" />
     <Compile Include="Configuration\ColumnTests.cs" />
     <Compile Include="Configuration\DefaultConfigurationTests.cs" />
-    <Compile Include="Configuration\ConfigurationBaseTests.cs">
-      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
-    </Compile>
+    <Compile Include="Configuration\ConfigurationBaseTests.cs" />
     <Compile Include="Configuration\ReverseEngineer\Sandbox.cs" />
     <Compile Include="Engine\Dialects\AnsiSqlDialectTests.cs" />
     <Compile Include="Engine\Dialects\DialectFactoryTests.cs" />
@@ -127,6 +125,7 @@
     <Compile Include="Engine\DML\DeleteWriterTests.cs" />
     <Compile Include="Engine\DML\InsertWriterTests.cs" />
     <Compile Include="Engine\DML\OrderClauseWriterTests.cs" />
+    <Compile Include="Engine\DML\ExcludeIncludeTests.cs" />
     <Compile Include="Engine\DML\SelectWriterTests.cs" />
     <Compile Include="Engine\DML\TestDomains\Application.cs" />
     <Compile Include="Engine\DML\WhereClauseWriterPerformanceTests.cs" />
@@ -192,7 +191,6 @@
   </Choose>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(ProgramFiles)\MSBuild\StyleCop\v4.7\StyleCop.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

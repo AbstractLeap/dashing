@@ -15,8 +15,6 @@ namespace Dashing {
 
         public SelectQuery(ISelectQueryExecutor selectQueryExecutor) {
             this.executor = selectQueryExecutor;
-            this.Includes = new List<Expression>();
-            this.Excludes = new List<Expression>();
             this.Fetches = new List<Expression>();
             this.OrderClauses = new Queue<OrderClause<T>>();
             this.WhereClauses = new List<Expression<Func<T, bool>>>();
@@ -60,11 +58,19 @@ namespace Dashing {
         }
 
         public ISelectQuery<T> Include<TResult>(Expression<Func<T, TResult>> includeExpression) {
+            if (this.Includes == null) {
+                this.Includes = new List<Expression>();
+            }
+
             this.Includes.Add(includeExpression);
             return this;
         }
 
         public ISelectQuery<T> Exclude<TResult>(Expression<Func<T, TResult>> excludeExpression) {
+            if (this.Excludes == null) {
+                this.Excludes = new List<Expression>();
+            }
+
             this.Excludes.Add(excludeExpression);
             return this;
         }
