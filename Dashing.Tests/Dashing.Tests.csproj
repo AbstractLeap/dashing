@@ -141,6 +141,7 @@
     <Compile Include="SelectQueryTests.cs" />
     <Compile Include="TestDomain\Blog.cs" />
     <Compile Include="TestDomain\BoolClass.cs" />
+    <Compile Include="TestDomain\Constructor\ClassWithConstructor.cs" />
     <Compile Include="TestDomain\Comment.cs" />
     <Compile Include="TestDomain\IEnableable.cs" />
     <Compile Include="TestDomain\Like.cs" />

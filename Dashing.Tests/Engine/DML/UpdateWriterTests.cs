@@ -9,6 +9,7 @@
     using Dashing.Engine.DML;
     using Dashing.Tests.Extensions;
     using Dashing.Tests.TestDomain;
+    using Dashing.Tests.TestDomain.Constructor;
 
     using Xunit;
 
@@ -143,6 +144,20 @@
             Assert.IsType(typeof(int), param2);
         }
 
+        [Fact]
+        public void BulkUpdateIgnoresConstructorSetProperties() {
+            // assemble
+            var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
+
+            // act
+            Expression<Func<ClassWithConstructor, bool>> predicate = p => p.Id == 1;
+            var result = updateWriter.GenerateBulkSql(p => { }, new[] { predicate });
+
+            // assert
+            Debug.Write(result.Sql);
+            Assert.Equal(string.Empty, result.Sql); // Is this the correct result?
+        }
+
         private static UpdateWriter MakeTarget() {
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig(true));
             return updateWriter;
@@ -159,12 +174,14 @@
         private class CustomConfig : MockConfiguration {
             public CustomConfig() {
                 this.AddNamespaceOf<Post>();
+                this.AddNamespaceOf<ClassWithConstructor>();
             }
         }
 
         private class CustomConfigWithIgnore : MockConfiguration {
             public CustomConfigWithIgnore() {
                 this.AddNamespaceOf<Post>();
+                this.AddNamespaceOf<ClassWithConstructor>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }
         }

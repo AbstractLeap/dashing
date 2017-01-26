@@ -93,6 +93,18 @@ namespace Dashing.Weaving.Sample.Target {
             return list;
         }
 
+        public bool IsSetLoggingEnabled() {
+            throw new NotImplementedException();
+        }
+
+        public void EnableSetLogging() {
+            throw new NotImplementedException();
+        }
+
+        public void DisableSetLogging() {
+            throw new NotImplementedException();
+        }
+
         public void EnableTracking() {
             this.__isTracking = true;
         }

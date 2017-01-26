@@ -125,6 +125,7 @@
 
             // run the update
             var entity = new T();
+            ((ISetLogger)entity).EnableSetLogging();
             updateAction(entity);
 
             // find the set properties

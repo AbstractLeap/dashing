@@ -43,12 +43,24 @@
 
             // some common type definitions
             var boolTypeDef = typeDef.Module.Import(typeof(bool));
+            var voidTypeDef = typeDef.Module.Import(typeof(void));
             var stringTypeDef = typeDef.Module.Import(typeof(string));
             var listStringTypeDef = typeDef.Module.Import(typeof(List<>)).MakeGenericInstanceType(stringTypeDef);
             var nonPkCols = mapDefinition.ColumnDefinitions.Where(c => !c.IsPrimaryKey && c.Relationship != RelationshipType.OneToMany).ToList();
 
+            // some column names
+            const string isSetLoggingName = "__isSetLogging";
+
+            // add isSetLoggingField if base class
+            if (this.IsBaseClass(typeDef)) {
+                var _isSetLoggingField = new FieldDefinition(isSetLoggingName, FieldAttributes.Family, boolTypeDef);
+                this.MakeNotDebuggerBrowsable(typeDef.Module, _isSetLoggingField);
+                typeDef.Fields.Add(_isSetLoggingField);
+            }
+
             // add the fields for tracking which properties are set
             // and insert the code in to the setter
+            var isSetLoggingField = this.GetField(typeDef, isSetLoggingName);
             foreach (var columnDefinition in nonPkCols) {
                 if (this.HasPropertyInInheritanceChain(typeDef, columnDefinition.Name)) {
                     var propDef = this.GetProperty(typeDef, columnDefinition.Name);
@@ -63,9 +75,23 @@
 
                         // assign true to this field
                         var il = propDef.SetMethod.Body.Instructions;
-                        il.Insert(0, Instruction.Create(OpCodes.Stfld, isSetFieldDef));
-                        il.Insert(0, Instruction.Create(OpCodes.Ldc_I4_1));
-                        il.Insert(0, Instruction.Create(OpCodes.Ldarg_0));
+                        var skipToInstruction = il.First();
+                        var setInstructions = new List<Instruction>();
+
+                        // if (this.__isSetLogging)
+                        setInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                        setInstructions.Add(Instruction.Create(OpCodes.Ldfld, isSetLoggingField));
+                        setInstructions.Add(Instruction.Create(OpCodes.Brfalse, skipToInstruction));
+                        
+                        // __{0}_IsSet = true;
+                        setInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                        setInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_1));
+                        setInstructions.Add(Instruction.Create(OpCodes.Stfld, isSetFieldDef));
+
+                        setInstructions.Reverse();
+                        foreach (var instruction in setInstructions) {
+                            il.Insert(0, instruction);
+                        }
                     }
                 }
             }
@@ -76,6 +102,58 @@
                 methodAttrs = methodAttrs | MethodAttributes.NewSlot | MethodAttributes.Final;
             }
 
+            // EnabledSetLogging
+            if (this.IsBaseClass(typeDef)) {
+                var enableSetLogging = new MethodDefinition(
+                    "EnableSetLogging",
+                    MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
+                    | MethodAttributes.Final,
+                    voidTypeDef);
+                var il = enableSetLogging.Body.Instructions;
+                il.Add(Instruction.Create(OpCodes.Ldarg_0));
+                il.Add(Instruction.Create(OpCodes.Ldc_I4_1));
+                il.Add(Instruction.Create(OpCodes.Stfld, isSetLoggingField));
+                il.Add(Instruction.Create(OpCodes.Ret));
+                typeDef.Methods.Add(enableSetLogging);
+            }
+
+            // DisableSetLogging
+            var disableSetLoggingMethodAttrs = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual;
+            if (notInInheritance) {
+                disableSetLoggingMethodAttrs = disableSetLoggingMethodAttrs | MethodAttributes.NewSlot | MethodAttributes.Final;
+            }
+
+            var disableSetLogging = new MethodDefinition("DisableSetLogging", disableSetLoggingMethodAttrs, voidTypeDef);
+            var disableIl = disableSetLogging.Body.Instructions;
+            disableIl.Add(Instruction.Create(OpCodes.Ldarg_0));
+            disableIl.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+            disableIl.Add(Instruction.Create(OpCodes.Stfld, isSetLoggingField));
+            foreach (var col in nonPkCols) {
+                if (this.HasPropertyInInheritanceChain(typeDef, col.Name)) {
+                    disableIl.Add(Instruction.Create(OpCodes.Ldarg_0));
+                    disableIl.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+                    disableIl.Add(Instruction.Create(OpCodes.Stfld, this.GetField(typeDef, string.Format("__{0}_IsSet", col.Name))));
+                }
+            }
+
+            disableIl.Add(Instruction.Create(OpCodes.Ret));
+            typeDef.Methods.Add(disableSetLogging);
+
+            // IsSetLoggingEnabled
+            if (this.IsBaseClass(typeDef)) {
+                var isSetLoggingEnabled = new MethodDefinition(
+                    "IsSetLoggingEnabled",
+                    MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
+                    | MethodAttributes.Final,
+                    boolTypeDef);
+                var isSetLoggingIl = isSetLoggingEnabled.Body.Instructions;
+                isSetLoggingIl.Add(Instruction.Create(OpCodes.Ldarg_0));
+                isSetLoggingIl.Add(Instruction.Create(OpCodes.Ldfld, isSetLoggingField));
+                isSetLoggingIl.Add(Instruction.Create(OpCodes.Ret));
+                typeDef.Methods.Add(isSetLoggingEnabled);
+            }
+
+            // GetSetProperties
             var getSetProperties = new MethodDefinition(
                 "GetSetProperties",
                 methodAttrs,

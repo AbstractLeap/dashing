@@ -59,6 +59,18 @@ namespace Dashing.Weaving.Sample.Target {
             throw new System.NotImplementedException();
         }
 
+        public bool IsSetLoggingEnabled() {
+            throw new System.NotImplementedException();
+        }
+
+        public void EnableSetLogging() {
+            throw new System.NotImplementedException();
+        }
+
+        public void DisableSetLogging() {
+            throw new System.NotImplementedException();
+        }
+
         public void EnableTracking() {
             throw new System.NotImplementedException();
         }

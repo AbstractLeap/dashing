@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Tests.TestDomain {
+    using System;
     using System.Collections.Generic;
 
     public class Post {
