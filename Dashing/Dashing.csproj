@@ -1,174 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9F337C75-5BB7-4678-A761-BBC371E7FC86}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Dashing</RootNamespace>
+    <Description>Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity whilst not sacrificing (too much) performance.</Description>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <Authors>Mark Jerzykowski;James Holwell</Authors>
+    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
     <AssemblyName>Dashing</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <PackageId>Dashing</PackageId>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+    <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Dashing.xml</DocumentationFile>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="Dapper, Version=1.50.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Dapper.1.50.2\lib\net45\Dapper.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
+    <PackageReference Include="Dapper" Version="1.50.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="System.Data.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="CodeGeneration\DelegateQueryCreator.cs" />
-    <Compile Include="CodeGeneration\FetchCollectionAwaiter.cs" />
-    <Compile Include="CodeGeneration\IEnumerableAwaiter.cs" />
-    <Compile Include="CodeGeneration\ISetLogger.cs" />
-    <Compile Include="CodeGeneration\ITrackedEntity.cs" />
-    <Compile Include="CodeGeneration\ITrackedEntityInspector.cs" />
-    <Compile Include="CodeGeneration\TrackedEntityInspector.cs" />
-    <Compile Include="CodeGeneration\TrackingCollection.cs" />
-    <Compile Include="Configuration\BaseConfiguration.cs" />
-    <Compile Include="Configuration\Column.cs" />
-    <Compile Include="Configuration\ForeignKey.cs" />
-    <Compile Include="Configuration\IColumn.cs" />
-    <Compile Include="Configuration\IConfiguration.cs" />
-    <Compile Include="Configuration\IMap.cs" />
-    <Compile Include="Configuration\IMapper.cs" />
-    <Compile Include="Configuration\IMapT.cs" />
-    <Compile Include="Configuration\Index.cs" />
-    <Compile Include="Configuration\IndexColumnComparer.cs" />
-    <Compile Include="Configuration\ISeeder.cs" />
-    <Compile Include="Configuration\ColumnExtensions.cs" />
-    <Compile Include="Configuration\DefaultConvention.cs" />
-    <Compile Include="Configuration\IConvention.cs" />
-    <Compile Include="Configuration\MapExtensions.cs" />
-    <Compile Include="Configuration\DefaultMapper.cs" />
-    <Compile Include="Configuration\Map.cs" />
-    <Compile Include="Configuration\MapT.cs" />
-    <Compile Include="Configuration\RelationshipType.cs" />
-    <Compile Include="DapperWrapper.cs" />
-    <Compile Include="DoNotWeaveAttribute.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\NonCollectionMapperGenerator.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\INonCollectionMapperGenerator.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\IMultiCollectionMapperGenerator.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\ISingleCollectionMapperGenerator.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\MultiCollectionMapperGenerator.cs" />
-    <Compile Include="Engine\DapperMapperGeneration\SingleCollectionMapperGenerator.cs" />
-    <Compile Include="Engine\DDL\AlterTableWriter.cs" />
-    <Compile Include="Engine\DDL\DropTableWriter.cs" />
-    <Compile Include="Engine\DDL\CreateTableWriter.cs" />
-    <Compile Include="Engine\DDL\IAlterTableWriter.cs" />
-    <Compile Include="Engine\DDL\ICreateTableWriter.cs" />
-    <Compile Include="Engine\DDL\IDropTableWriter.cs" />
-    <Compile Include="Engine\Dialects\AnsiSqlDialect.cs" />
-    <Compile Include="Engine\Dialects\ColumnSpecification.cs" />
-    <Compile Include="Engine\Dialects\DialectFactory.cs" />
-    <Compile Include="Engine\Dialects\ISqlDialect.cs" />
-    <Compile Include="Engine\Dialects\MySqlDialect.cs" />
-    <Compile Include="Engine\Dialects\SqlDialectBase.cs" />
-    <Compile Include="Engine\Dialects\SqliteDialect.cs" />
-    <Compile Include="Engine\Dialects\SqlServer2012Dialect.cs" />
-    <Compile Include="Engine\Dialects\SqlServerDialect.cs" />
-    <Compile Include="Engine\DML\BaseExpressionVisitor.cs" />
-    <Compile Include="Engine\DML\BaseWriter.cs" />
-    <Compile Include="Engine\DML\Elements\ColumnElement.cs" />
-    <Compile Include="Engine\DML\ConstantChecker.cs" />
-    <Compile Include="Engine\DML\Elements\ConstantElement.cs" />
-    <Compile Include="Engine\DML\Elements\StringElement.cs" />
-    <Compile Include="Engine\DML\CountWriter.cs" />
-    <Compile Include="Engine\DML\DeleteWriter.cs" />
-    <Compile Include="Engine\DML\FetchNode.cs" />
-    <Compile Include="Engine\DML\FetchTreeParser.cs" />
-    <Compile Include="Engine\DML\ICountWriter.cs" />
-    <Compile Include="Engine\DML\IDeleteWriter.cs" />
-    <Compile Include="Engine\DML\IInsertWriter.cs" />
-    <Compile Include="Engine\DML\InsertWriter.cs" />
-    <Compile Include="Engine\DML\IOrderClauseWriter.cs" />
-    <Compile Include="Engine\DML\ISelectWriter.cs" />
-    <Compile Include="Engine\DML\Elements\ISqlElement.cs" />
-    <Compile Include="Engine\DML\IUpdateWriter.cs" />
-    <Compile Include="Engine\DML\IWhereClauseWriter.cs" />
-    <Compile Include="Engine\DML\OrderClauseWriter.cs" />
-    <Compile Include="Engine\DML\SelectWriter.cs" />
-    <Compile Include="Engine\DML\SelectWriterResult.cs" />
-    <Compile Include="Engine\DML\SqlWriterResult.cs" />
-    <Compile Include="Engine\DML\UpdateWriter.cs" />
-    <Compile Include="Engine\DML\WhereClauseWriter.cs" />
-    <Compile Include="Engine\DML\WriterQueryCacheKey.cs" />
-    <Compile Include="Engine\NonExecutingSelectQueryExecutor.cs" />
-    <Compile Include="Engine\SqlEngine.cs" />
-    <Compile Include="Engine\IEngine.cs" />
-    <Compile Include="Events\EventHandlers.cs" />
-    <Compile Include="Events\IEventListener.cs" />
-    <Compile Include="Events\IOnPostDeleteEventListener.cs" />
-    <Compile Include="Events\IOnPreDeleteEventListener.cs" />
-    <Compile Include="Events\IOnPostSaveEventListener.cs" />
-    <Compile Include="Events\IOnPostInsertEventListener.cs" />
-    <Compile Include="Events\IOnPreInsertEventListener.cs" />
-    <Compile Include="Events\IOnPreSaveEventListener.cs" />
-    <Compile Include="Extensions\AsyncLazy.cs" />
-    <Compile Include="Extensions\AsyncLock.cs" />
-    <Compile Include="Extensions\DapperExtensions.cs" />
-    <Compile Include="Extensions\DictionaryExtensions.cs" />
-    <Compile Include="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="Extensions\Inflector.cs" />
-    <Compile Include="Extensions\OrderedDictionary.cs" />
-    <Compile Include="Extensions\TypeExtensions.cs" />
-    <Compile Include="FetchMany.cs" />
-    <Compile Include="IDapper.cs" />
-    <Compile Include="IExecuteSelectQueries.cs" />
-    <Compile Include="IFetchMany.cs" />
-    <Compile Include="ISelectQuery.cs" />
-    <Compile Include="ISession.cs" />
-    <Compile Include="ISessionCreator.cs" />
-    <Compile Include="OrderClause.cs" />
-    <Compile Include="Page.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SelectQuery.cs" />
-    <Compile Include="Session.cs" />
-    <Compile Include="SessionExtensions.cs" />
-    <Compile Include="SqlSessionCreator.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  
 </Project>
