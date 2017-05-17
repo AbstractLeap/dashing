@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Linq;
     using System.Text.RegularExpressions;
 
@@ -18,8 +17,8 @@
     public class SimpleTests {
         [Fact]
         public void DropEntityWorks() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).Add<Post>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().Add<Post>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -37,8 +36,8 @@
 
         [Fact]
         public void AddEntityWorks() {
-            var from = new MutableConfiguration(ConnectionString).Add<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
+            var from = new MutableConfiguration().Add<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Post>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -61,8 +60,8 @@ create index [idx_PostComment_Post] on [PostComments] ([PostId]);",
 
         [Fact]
         public void AddPropertyWorks() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Simple2.Post>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Simple2.Post>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -80,8 +79,8 @@ create index [idx_PostComment_Post] on [PostComments] ([PostId]);",
 
         [Fact]
         public void DropPropertyWorks() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Simple2.Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
+            var from = new MutableConfiguration().AddNamespaceOf<Simple2.Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Post>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -110,8 +109,8 @@ alter table [PostComments] drop column [Rating];", @"@\w+\b", "@Foo"), @"(?<!\r)
 
         [Fact]
         public void AddNewRelationshipToTableWithNoData() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Simple2.Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Simple3.Post>();
+            var from = new MutableConfiguration().AddNamespaceOf<Simple2.Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Simple3.Post>();
             var migrator = MakeMigrator(from);
             var answerProvider = new Mock<IAnswerProvider>();
             answerProvider.Setup(a => a.GetAnswer<int>(It.IsAny<string>())).Returns(99);
@@ -134,8 +133,8 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
 
         [Fact]
         public void AddNewRelationshipToTableWithNoDataAndNotNull() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Simple2.Post>();
-            var to = new MutableConfiguration(ConnectionString);
+            var from = new MutableConfiguration().AddNamespaceOf<Simple2.Post>();
+            var to = new MutableConfiguration();
             to.AddNamespaceOf<Simple3.Post>();
             to.Setup<Simple3.Post>().Property(p => p.Blog).IsNullable = false;
             var migrator = MakeMigrator(from);
@@ -160,8 +159,8 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
 
         [Fact]
         public void AddNewNullRelationshipToTableWithData() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Simple2.Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Simple3.Post>();
+            var from = new MutableConfiguration().AddNamespaceOf<Simple2.Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Simple3.Post>();
             var migrator = MakeMigrator(from, true);
             var answerProvider = new Mock<IAnswerProvider>();
             answerProvider.Setup(a => a.GetAnswer<int>(It.IsAny<string>())).Returns(99);
@@ -184,8 +183,8 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
 
         [Fact]
         public void AddNewNotNullRelationshipToTableWithData() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Simple2.Post>();
-            var to = new MutableConfiguration(ConnectionString);
+            var from = new MutableConfiguration().AddNamespaceOf<Simple2.Post>();
+            var to = new MutableConfiguration();
             to.AddNamespaceOf<Simple3.Post>();
             to.Setup<Simple3.Post>().Property(p => p.Blog).IsNullable = false;
             var migrator = MakeMigrator(from, true);
@@ -219,12 +218,6 @@ create index [idx_Post_Blog] on [Posts] ([BlogId]);", @"(?<!\r)\n", Environment.
                 new DropTableWriter(new SqlServerDialect()),
                 mockStatisticsProvider.Object);
             return migrator;
-        }
-
-        private static ConnectionStringSettings ConnectionString {
-            get {
-                return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
-            }
         }
     }
 }

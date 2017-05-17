@@ -1,6 +1,7 @@
 namespace Dashing.Weaving.Tests {
     using System;
     using System.Linq;
+    using System.Reflection;
 
     using Dashing.Weaving.Sample.Domain;
 

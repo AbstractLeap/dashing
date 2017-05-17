@@ -1,4 +1,5 @@
 ﻿namespace Dashing.Weaving.Tests {
+    using System.Reflection;
     using System.Runtime.CompilerServices;
 
     using Dashing.CodeGeneration;

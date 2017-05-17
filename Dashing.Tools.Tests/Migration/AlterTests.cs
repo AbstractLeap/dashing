@@ -23,7 +23,7 @@
             // remove onetooneleft from the config
             var mappedTypes =
                 (IDictionary<Type, IMap>)
-                typeof(ConfigurationBase).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
+                typeof(BaseConfiguration).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
             mappedTypes.Remove(typeof(OneToOneLeft));
             configTo.GetMap<OneToOneRight>().Columns.Remove("Left");
 
@@ -61,7 +61,7 @@
             // remove onetooneleft from the config
             var mappedTypes =
                 (IDictionary<Type, IMap>)
-                typeof(ConfigurationBase).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
+                typeof(BaseConfiguration).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
             mappedTypes.Remove(typeof(OneToOneRight));
             configTo.GetMap<OneToOneLeft>().Columns.Remove("Right");
 
@@ -99,7 +99,7 @@
             // remove onetooneleft from the config
             var mappedTypes =
                 (IDictionary<Type, IMap>)
-                typeof(ConfigurationBase).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
+                typeof(BaseConfiguration).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);
             mappedTypes.Remove(typeof(Pair));
 
             var dialect = new SqlServer2012Dialect();

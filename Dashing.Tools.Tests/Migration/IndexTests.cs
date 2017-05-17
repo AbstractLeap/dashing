@@ -1,6 +1,5 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Linq;
 
     using Dashing.Configuration;
@@ -69,15 +68,8 @@
             return migrator;
         }
 
-        private static ConnectionStringSettings ConnectionString {
-            get {
-                return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
-            }
-        }
-
-        private class SimpleClassConfig : DefaultConfiguration {
-            public SimpleClassConfig()
-                : base(ConnectionString) {
+        private class SimpleClassConfig : BaseConfiguration {
+            public SimpleClassConfig() {
                 this.Add<SimpleClass>();
             }
         }

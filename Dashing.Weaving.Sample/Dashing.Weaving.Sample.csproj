@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dashing.Weaving.Sample2\Dashing.Weaving.Sample2.csproj" />
+    <ProjectReference Include="..\Dashing\Dashing.csproj" />
+  </ItemGroup>
+
+</Project>

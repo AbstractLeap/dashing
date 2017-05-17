@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Linq;
     using System.Text.RegularExpressions;
 
@@ -38,7 +37,7 @@
 
         [Fact]
         public void SelfReferencingWorks() {
-            var config = new MutableConfiguration(ConnectionString);
+            var config = new MutableConfiguration();
             config.Add<Category>();
             var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
@@ -62,7 +61,7 @@ create index [idx_Category_Parent] on [Categories] ([ParentId]);",
 
         [Fact]
         public void PairWorks() {
-            var config = new MutableConfiguration(ConnectionString);
+            var config = new MutableConfiguration();
             config.Add<Pair>();
             var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
@@ -88,7 +87,7 @@ create index [idx_Pair_ReferencedBy] on [Pairs] ([ReferencedById]);",
 
         [Fact]
         public void OneToOneWorks() {
-            var config = new MutableConfiguration(ConnectionString);
+            var config = new MutableConfiguration();
             config.Add<OneToOneLeft>();
             config.Add<OneToOneRight>();
             var migrator = MakeMigrator(config);
@@ -116,7 +115,7 @@ create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);",
 
         [Fact]
         public void ComplexDomainBuilds() {
-            var config = new MutableConfiguration(ConnectionString);
+            var config = new MutableConfiguration();
             config.AddNamespaceOf<Post>();
             var migrator = MakeMigrator(config);
             IEnumerable<string> errors;
@@ -186,15 +185,8 @@ create index [idx_PostTag_Tag] on [PostTags] ([TagId]);",
             return migrator;
         }
 
-        private static ConnectionStringSettings ConnectionString {
-            get {
-                return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
-            }
-        }
-
-        private class SimpleClassConfig : DefaultConfiguration {
-            public SimpleClassConfig()
-                : base(ConnectionString) {
+        private class SimpleClassConfig : BaseConfiguration {
+            public SimpleClassConfig() {
                 this.Add<SimpleClass>();
             }
         }

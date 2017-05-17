@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Linq;
     using System.Text.RegularExpressions;
 
@@ -20,8 +19,8 @@
     public class RenameEntityTests {
         [Fact]
         public void RenameWithIdPrimaryKeyWorks() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Entry>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Entry>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -50,8 +49,8 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
 
         [Fact]
         public void RenameWithDifferentPrimaryKeyWorks() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Entry>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Entry>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -85,8 +84,8 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
 
         [Fact]
         public void RenameWithDifferentPrimaryKeyTypeAndAttemptChangeWorks() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<RenamePkTypeChange.Entry>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<RenamePkTypeChange.Entry>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -125,8 +124,8 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
 
         [Fact]
         public void RenameWithDifferentPrimaryKeyTypeAndDropRecreateWorks() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<RenamePkTypeChange.Entry>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<RenamePkTypeChange.Entry>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -182,8 +181,8 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
 
         [Fact]
         public void DontRenameWorksAndNoWarningWithNoCurrentData() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Entry>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Entry>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -213,8 +212,8 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
 
         [Fact]
         public void DontRenameWorksAndWarningWithCurrentData() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Entry>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Entry>();
             var migrator = MakeMigrator(from, true);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -248,8 +247,8 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
 
         [Fact]
         public void RenameWithPropertyRename() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<RenameTypeChangeAndColumn.Entry>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<RenameTypeChangeAndColumn.Entry>();
             var migrator = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -283,8 +282,8 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
 
         [Fact]
         public void RenameAndChangeWorks() {
-            var from = new MutableConfiguration(ConnectionString).AddNamespaceOf<Post>();
-            var to = new MutableConfiguration(ConnectionString).AddNamespaceOf<Port>();
+            var from = new MutableConfiguration().AddNamespaceOf<Post>();
+            var to = new MutableConfiguration().AddNamespaceOf<Port>();
             var migrater = MakeMigrator(from);
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
@@ -320,12 +319,6 @@ create index [idx_PostComment_Port] on [PostComments] ([PortId]);", @"(?<!\r)\n"
                 new DropTableWriter(new SqlServerDialect()),
                 mockStatisticsProvider.Object);
             return migrator;
-        }
-
-        private static ConnectionStringSettings ConnectionString {
-            get {
-                return new ConnectionStringSettings("DefaultDb", string.Empty, "System.Data.SqlClient");
-            }
         }
     }
 }

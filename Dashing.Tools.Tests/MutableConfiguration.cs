@@ -1,15 +1,10 @@
 namespace Dashing.Tools.Tests {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
 
     using Dashing.Configuration;
 
-    public class MutableConfiguration : DefaultConfiguration {
-        public MutableConfiguration(ConnectionStringSettings connectionStringSettings)
-            : base(connectionStringSettings) {
-        }
-
+    public class MutableConfiguration : BaseConfiguration {
         public new IConfiguration Add<T>() {
             return base.Add<T>();
         }

@@ -48,7 +48,7 @@
                 }
             }
 
-            throw new NotSupportedException(string.Format("Unable to get database name from connection string {0}", this.connectionString));
+            throw new NotSupportedException($"Unable to get database name from connection string {this.connectionString}");
         }
     }
 }

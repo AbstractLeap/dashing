@@ -1,6 +1,6 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System;
-    using System.Configuration;
+    using System.Data.SqlClient;
 
     using Dashing.Tools.Migration;
 
@@ -25,14 +25,9 @@
                                            "Data Source=myServerAddress;Failover Partner=myMirrorServerAddress;Integrated Security=True",
                                            @"Data Source=myServerAddress;Integrated Security=True;User ID=myDomain\myUsername;Password=myPassword"
                                        };
-            var providers = new[] {
-                                      "MySql.Data.MySqlClient", "MySql.Data.MySqlClient", "System.Data.SqlClient", "System.Data.SqlClient",
-                                      "System.Data.SqlClient", "System.Data.SqlClient"
-                                  };
             for (var i = 0; i < connectionStrings.Length; i++) {
-                var connectionStringManipulator =
-                    new ConnectionStringManipulator(new ConnectionStringSettings("Default", connectionStrings[i], providers[i]));
-                Assert.Equal(connectionStringManipulator.GetRootConnectionString().ConnectionString, correctResults[i]);
+                var connectionStringManipulator = new ConnectionStringManipulator(SqlClientFactory.Instance, connectionStrings[i]);
+                Assert.Equal(connectionStringManipulator.GetRootConnectionString(), correctResults[i]);
             }
         }
 
@@ -44,13 +39,8 @@
                                               "Server=myServerAddress;Database=myDataBase;Trusted_Connection=True;",
                                               "Data Source=myServerAddress;Failover Partner=myMirrorServerAddress;Initial Catalog=myDataBase;Integrated Security=True;"
                                           };
-            var providers = new[] {
-                                      "MySql.Data.MySqlClient", "MySql.Data.MySqlClient", "System.Data.SqlClient", "System.Data.SqlClient",
-                                      "System.Data.SqlClient", "System.Data.SqlClient"
-                                  };
             for (var i = 0; i < connectionStrings.Length; i++) {
-                var connectionStringManipulator =
-                    new ConnectionStringManipulator(new ConnectionStringSettings("Default", connectionStrings[i], providers[i]));
+                var connectionStringManipulator = new ConnectionStringManipulator(SqlClientFactory.Instance, connectionStrings[i]);
                 Assert.Equal(connectionStringManipulator.GetDatabaseName(), "myDataBase");
             }
         }
@@ -61,12 +51,8 @@
                                               "Server=myServerAddress;Uid=myUsername;Pwd=myPassword;",
                                               @"Data Source=myServerAddress;Integrated Security=SSPI;User ID=myDomain\myUsername;Password=myPassword;"
                                           };
-            var providers = new[] {
-                                      "MySql.Data.MySqlClient", "System.Data.SqlClient"
-                                  };
             for (var i = 0; i < connectionStrings.Length; i++) {
-                var connectionStringManipulator =
-                    new ConnectionStringManipulator(new ConnectionStringSettings("Default", connectionStrings[i], providers[i]));
+                var connectionStringManipulator = new ConnectionStringManipulator(SqlClientFactory.Instance, connectionStrings[i]);
                 Assert.Throws<NotSupportedException>(() => connectionStringManipulator.GetDatabaseName());
             }
         }
