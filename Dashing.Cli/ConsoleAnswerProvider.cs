@@ -5,8 +5,6 @@
     using System.Linq;
     using System.Text;
 
-    using Dashing.Tools;
-
     internal class ConsoleAnswerProvider : IAnswerProvider {
         private readonly string persistenceFilePath;
 

@@ -4,7 +4,7 @@
     <Description>Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity whilst not sacrificing (too much) performance.</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>Mark Jerzykowski;James Holwell</Authors>
-    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
     <AssemblyName>Dashing</AssemblyName>
     <PackageId>Dashing</PackageId>
   </PropertyGroup>
@@ -15,6 +15,9 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+    <PackageReference Include="Mono.Cecil" Version="0.10.0-beta6" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
