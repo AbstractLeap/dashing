@@ -24,7 +24,7 @@ namespace Dashing.Engine.Dialects {
 
         protected override void AppendAutoGenerateModifier(StringBuilder sql, IColumn column) {
             if (column.Type == typeof(Guid)) {
-                sql.Append(" NEWSEQUENTIALID()");
+                sql.Append(" DEFAULT NEWSEQUENTIALID()");
             }
             else {
                 sql.Append(" identity(1,1)");
