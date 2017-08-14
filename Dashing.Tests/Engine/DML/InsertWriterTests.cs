@@ -16,7 +16,7 @@
             var result = insertWriter.GenerateSql(post);
             Debug.Write(result.Sql);
             Assert.Equal(
-                "insert into [Posts] ([AuthorId], [BlogId], [Content], [DoNotMap], [Rating], [Title]) values (@p_1, @p_2, @p_3, @p_4, @p_5, @p_6)",
+                "insert into [Posts] ([AuthorId], [BlogId], [Content], [DoNotMap], [Rating], [Title]) output inserted.[PostId] values (@p_1, @p_2, @p_3, @p_4, @p_5, @p_6)",
                 result.Sql);
         }
 

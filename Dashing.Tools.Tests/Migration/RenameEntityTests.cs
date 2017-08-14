@@ -112,7 +112,7 @@ alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key 
                 Regex.Replace(
                     @"EXEC sp_RENAME [Posts], [Entries];
 EXEC sp_RENAME 'Entries.Id', 'EntryId', 'COLUMN';
-alter table [Entries] alter column [EntryId] uniqueidentifier not null NEWSEQUENTIALID() primary key;
+alter table [Entries] alter column [EntryId] uniqueidentifier not null DEFAULT NEWSEQUENTIALID() primary key;
 alter table [PostComments] drop constraint [fk_PostComment_Post_Post];
 alter table [PostComments] alter column [PostId] uniqueidentifier null;
 alter table [PostComments] add constraint fk_PostComment_Entry_Post foreign key ([PostId]) references [Entries]([EntryId]);",
@@ -161,7 +161,7 @@ select @OBDCommande51728c6d92c4851aa3b01e8a5a12adb = 'ALTER TABLE [Posts] drop c
                          where t.name = 'Posts' and c.name = 'Id';
 execute(@OBDCommande51728c6d92c4851aa3b01e8a5a12adb);
 alter table [Posts] drop column [Id];
-alter table [Entries] add [EntryId] uniqueidentifier not null NEWSEQUENTIALID() primary key;
+alter table [Entries] add [EntryId] uniqueidentifier not null DEFAULT NEWSEQUENTIALID() primary key;
 alter table [PostComments] drop constraint [fk_PostComment_Post_Post];
 declare @OBDCommand934ba0aed0634856ab81048df9205176 nvarchar(1000);
 select @OBDCommand934ba0aed0634856ab81048df9205176 = 'ALTER TABLE [PostComments] drop constraint ' + d.name from sys.tables t   
