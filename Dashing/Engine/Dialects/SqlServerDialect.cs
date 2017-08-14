@@ -154,7 +154,7 @@ namespace Dashing.Engine.Dialects {
         }
 
         public override void AppendIdOutput(StringBuilder sql, IMap map) {
-            sql.Append(" output inserted.")
+            sql.Append("output inserted.")
                .Append(this.BeginQuoteCharacter)
                .Append(map.PrimaryKey.DbName)
                .Append(this.EndQuoteCharacter);
