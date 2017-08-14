@@ -150,7 +150,14 @@ namespace Dashing.Engine.Dialects {
         }
 
         public override string GetIdSql() {
-            return "SELECT CAST(SCOPE_IDENTITY() as int) id";
+            return string.Empty;
+        }
+
+        public override void AppendIdOutput(StringBuilder sql, IMap map) {
+            sql.Append(" output inserted.")
+               .Append(this.BeginQuoteCharacter)
+               .Append(map.PrimaryKey.DbName)
+               .Append(this.EndQuoteCharacter);
         }
 
         public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
