@@ -1,6 +1,9 @@
 ﻿namespace Dashing.CodeGeneration.Weaving
 {
     using System;
+    using System.Linq;
+
+    using Mono.Cecil;
 
     public static class TypeDefinitionExtensions
     {

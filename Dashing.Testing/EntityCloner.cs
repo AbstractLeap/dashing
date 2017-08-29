@@ -1,14 +1,11 @@
 ﻿namespace Dashing.Testing {
     using System;
-#if COREFX
     using System.Reflection;
-#endif
 
     using Dashing.Configuration;
     using Dashing.Extensions;
 
-    public class EntityCloner<TEntity>
-        where TEntity : new() {
+    public class EntityCloner<TEntity> where TEntity : new() {
         private readonly IConfiguration configuration;
 
         private readonly Type entityType;

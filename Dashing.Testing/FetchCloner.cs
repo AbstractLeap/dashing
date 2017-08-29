@@ -3,9 +3,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-#if COREFX
     using System.Reflection;
-#endif
 
     using Dashing.Configuration;
     using Dashing.Engine.DML;

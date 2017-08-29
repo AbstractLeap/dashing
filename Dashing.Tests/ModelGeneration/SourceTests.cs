@@ -1,8 +1,15 @@
 namespace Dashing.Tools.Tests.ModelGeneration {
+    using Dashing.SchemaReading;
     using System.Collections.Generic;
     using System.Linq;
 
-    using Dashing.Configuration;ng TestNamespace = "My.Test";
+    using Dashing.Configuration;
+    using Dashing.ModelGeneration;
+
+    using Xunit;
+
+    public class SourceTests {
+        private const string TestNamespace = "My.Test";
 
         [Fact]
         public void NamespaceAdded() {
@@ -53,13 +60,20 @@ namespace Dashing.Tools.Tests.ModelGeneration {
                 table.Name = map.Table;
                 foreach (var column in map.Columns.Where(c => c.Value.Relationship == RelationshipType.ManyToOne)) {
                     columns.Add(new ColumnDto { Name = column.Value.DbName, TableName = column.Value.Map.Table, DbType = column.Value.DbType });
-                    fks.Add(new ForeignKeyDto { ColumnName = column.Value.DbName, Name = "fk_" + column.Value.DbName, ReferencedColumnName = column.Value.ParentMap.PrimaryKey.DbName, ReferencedTableName = column.Value.ParentMap.Table, TableName = column.Value.Map.Table });
+                    fks.Add(
+                        new ForeignKeyDto {
+                                              ColumnName = column.Value.DbName,
+                                              Name = "fk_" + column.Value.DbName,
+                                              ReferencedColumnName = column.Value.ParentMap.PrimaryKey.DbName,
+                                              ReferencedTableName = column.Value.ParentMap.Table,
+                                              TableName = column.Value.Map.Table
+                                          });
                 }
 
                 tables.Add(table);
             }
 
-            return new Database (tables, columns, null, fks);
+            return new Database(tables, columns, null, fks);
         }
     }
 }

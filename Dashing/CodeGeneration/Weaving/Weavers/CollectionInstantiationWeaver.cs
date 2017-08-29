@@ -9,45 +9,37 @@
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
 
-    public class CollectionInstantiationWeaver : BaseWeaver
-    {
-        public override void Weave(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition, IEnumerable<ColumnDefinition> columnDefinitions)
-        {
+    public class CollectionInstantiationWeaver : BaseWeaver {
+        public override void Weave(
+            AssemblyDefinition assemblyDefinition,
+            TypeDefinition typeDefinition,
+            IEnumerable<ColumnDefinition> columnDefinitions) {
             var constructors = typeDefinition.GetConstructors().ToArray();
-            foreach (var oneToManyColumnDefinition in columnDefinitions.Where(c => c.Relationship == RelationshipType.OneToMany))
-            {
+            foreach (var oneToManyColumnDefinition in columnDefinitions.Where(c => c.Relationship == RelationshipType.OneToMany)) {
                 var propDef = this.GetProperty(typeDefinition, oneToManyColumnDefinition.Name);
-                if (propDef.SetMethod.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName))
-                {
+                if (propDef.SetMethod.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName)) {
                     // auto prop - see if the prop set method is called in any of the constructors
-                    if (!constructors.Any(c => c.Body.Instructions.Any(i => i.Operand != null && i.Operand.Equals(propDef.SetMethod))))
-                    {
+                    if (!constructors.Any(c => c.Body.Instructions.Any(i => i.Operand != null && i.Operand.Equals(propDef.SetMethod)))) {
                         this.InstantiateCollection(typeDefinition, constructors, propDef);
                     }
                 }
-                else
-                {
+                else {
                     // not an auto prop
                     var backingField = this.GetBackingField(propDef);
-                    if (
-                        !constructors.Any(
-                            c =>
-                                c.Body.Instructions.Any(i => i.Operand != null && (i.Operand.Equals(propDef.SetMethod) || i.Operand.Equals(backingField)))))
-                    {
+                    if (!constructors.Any(
+                            c => c.Body.Instructions.Any(
+                                i => i.Operand != null && (i.Operand.Equals(propDef.SetMethod) || i.Operand.Equals(backingField))))) {
                         this.InstantiateCollection(typeDefinition, constructors, propDef);
                     }
                 }
             }
         }
 
-        private void InstantiateCollection(TypeDefinition typeDef, MethodDefinition[] constructors, PropertyDefinition propDef)
-        {
+        private void InstantiateCollection(TypeDefinition typeDef, MethodDefinition[] constructors, PropertyDefinition propDef) {
             var constructor = constructors.First();
-            if (constructors.Length > 1)
-            {
+            if (constructors.Length > 1) {
                 constructor = constructors.SingleOrDefault(s => !s.HasParameters);
-                if (constructor == null)
-                {
+                if (constructor == null) {
                     this.Log.Error("Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
                 }
             }

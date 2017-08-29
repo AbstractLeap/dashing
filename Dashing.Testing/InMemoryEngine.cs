@@ -7,9 +7,7 @@
     using System.Linq.Expressions;
     using System.Text;
     using System.Threading.Tasks;
-#if COREFX
     using System.Reflection;
-#endif
 
     using Dashing.Configuration;
     using Dashing.Engine;

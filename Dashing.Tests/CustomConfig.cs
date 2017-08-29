@@ -2,7 +2,7 @@ namespace Dashing.Tools.Tests {
     using System;
 
     using Dashing.Configuration;
-    using Dashing.Tools.Tests.TestDomain;
+    using Dashing.Tests.TestDomain;
 
     public class CustomConfig : BaseConfiguration, ISeeder {
         public CustomConfig() {

@@ -4,9 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-#if COREFX
     using System.Reflection;
-#endif
 
     using Dashing.Configuration;
     using Dashing.Engine.DML;

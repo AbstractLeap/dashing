@@ -5,8 +5,8 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
-    using Dashing.Tools.Migration;
-    using Dashing.Tools.Tests.TestDomain;
+    using Dashing.Migration;
+    using Dashing.Tests.TestDomain;
 
     using Moq;
 

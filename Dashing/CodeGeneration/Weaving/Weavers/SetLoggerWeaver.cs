@@ -8,10 +8,11 @@
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
 
-    public class SetLoggerWeaver : BaseWeaver
-    {
-        public override void Weave(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition, IEnumerable<ColumnDefinition> columnDefinitions)
-        {
+    public class SetLoggerWeaver : BaseWeaver {
+        public override void Weave(
+            AssemblyDefinition assemblyDefinition,
+            TypeDefinition typeDefinition,
+            IEnumerable<ColumnDefinition> columnDefinitions) {
             // this gets called with a typeDef set to something that's being mapped
             // but there's the possibility of each column belonging to a different parent class
             // so we'll find all of the class hierarchy and weave them individually
@@ -20,22 +21,22 @@
 
             // if there's only one class and that class is not extended elsewhere we'll use non-virtual methods
             var notInInheritance = totalInChain == 1
-                                   && !assemblyDefinition.MainModule.Types.Any(t => t.IsClass && t.BaseType != null && t.BaseType.FullName == typeDefinition.FullName);
-            while (classHierarchy.Count > 0)
-            {
+                                   && !assemblyDefinition.MainModule.Types.Any(
+                                       t => t.IsClass && t.BaseType != null && t.BaseType.FullName == typeDefinition.FullName);
+            while (classHierarchy.Count > 0) {
                 this.ImplementISetLoggerForTypeDefinition(classHierarchy.Pop(), columnDefinitions, notInInheritance);
             }
         }
 
-        private void ImplementISetLoggerForTypeDefinition(TypeDefinition typeDef, IEnumerable<ColumnDefinition> columnDefinitions, bool notInInheritance)
-        {
-            if (typeDef.Methods.Any(m => m.Name == "GetSetProperties"))
-            {
+        private void ImplementISetLoggerForTypeDefinition(
+            TypeDefinition typeDef,
+            IEnumerable<ColumnDefinition> columnDefinitions,
+            bool notInInheritance) {
+            if (typeDef.Methods.Any(m => m.Name == "GetSetProperties")) {
                 return; // this type has already been woven, exit
             }
 
-            if (!typeDef.ImplementsInterface(typeof(ISetLogger)))
-            {
+            if (!typeDef.ImplementsInterface(typeof(ISetLogger))) {
                 this.AddInterfaceToNonObjectAncestor(typeDef, typeof(ISetLogger));
             }
 
@@ -47,16 +48,13 @@
 
             // add the fields for tracking which properties are set
             // and insert the code in to the setter
-            foreach (var columnDefinition in nonPkCols)
-            {
-                if (this.HasPropertyInInheritanceChain(typeDef, columnDefinition.Name))
-                {
+            foreach (var columnDefinition in nonPkCols) {
+                if (this.HasPropertyInInheritanceChain(typeDef, columnDefinition.Name)) {
                     var propDef = this.GetProperty(typeDef, columnDefinition.Name);
-                    if (propDef.DeclaringType.FullName == typeDef.FullName)
-                    {
+                    if (propDef.DeclaringType.FullName == typeDef.FullName) {
                         // columns in parent classes will have been taken care of
                         var isSetFieldDef = new FieldDefinition(
-                            string.Format((string)"__{0}_IsSet", (object)columnDefinition.Name),
+                            string.Format("__{0}_IsSet", columnDefinition.Name),
                             FieldAttributes.Family,
                             boolTypeDef);
                         this.MakeNotDebuggerBrowsable(typeDef.Module, isSetFieldDef);
@@ -73,8 +71,7 @@
 
             // implement the interface
             var methodAttrs = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual;
-            if (notInInheritance)
-            {
+            if (notInInheritance) {
                 methodAttrs = methodAttrs | MethodAttributes.NewSlot | MethodAttributes.Final;
             }
 
@@ -84,15 +81,16 @@
                 typeDef.Module.ImportReference(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
             getSetProperties.Body.Variables.Add(new VariableDefinition(listStringTypeDef));
             getSetProperties.Body.Variables.Add(
-                new VariableDefinition(typeDef.Module.ImportReference(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
+                new VariableDefinition(
+                    typeDef.Module.ImportReference(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
             getSetProperties.Body.Variables.Add(new VariableDefinition(boolTypeDef));
             getSetProperties.Body.InitLocals = true;
             var instructions = getSetProperties.Body.Instructions;
             instructions.Add(Instruction.Create(OpCodes.Nop));
-            var listStringContruictor =
-                MakeGeneric(
-                    typeDef.Module.ImportReference(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)),
-                    stringTypeDef);
+            var listStringContruictor = MakeGeneric(
+                typeDef.Module.ImportReference(
+                    listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)),
+                stringTypeDef);
             instructions.Add(Instruction.Create(OpCodes.Newobj, listStringContruictor));
             instructions.Add(Instruction.Create(OpCodes.Stloc_0));
 
@@ -101,15 +99,13 @@
             addMethod = MakeGeneric(addMethod, stringTypeDef);
 
             var visibleCols = nonPkCols.Where(c => this.HasPropertyInInheritanceChain(typeDef, c.Name)).ToList();
-            for (var i = 0; i < visibleCols.Count; i++)
-            {
-                if (i == 0)
-                {
+            for (var i = 0; i < visibleCols.Count; i++) {
+                if (i == 0) {
                     instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                 }
 
                 instructions.Add(
-                    Instruction.Create(OpCodes.Ldfld, this.GetField(typeDef, string.Format((string)"__{0}_IsSet", (object)visibleCols.ElementAt(i).Name))));
+                    Instruction.Create(OpCodes.Ldfld, this.GetField(typeDef, string.Format("__{0}_IsSet", visibleCols.ElementAt(i).Name))));
                 instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
                 instructions.Add(Instruction.Create(OpCodes.Ceq));
                 instructions.Add(Instruction.Create(OpCodes.Stloc_2));

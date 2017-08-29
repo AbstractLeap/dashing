@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
 
+    using Dashing.CodeGeneration.Weaving.Task;
     using Dashing.CodeGeneration.Weaving.Weavers;
 
     public interface IPeProcessor

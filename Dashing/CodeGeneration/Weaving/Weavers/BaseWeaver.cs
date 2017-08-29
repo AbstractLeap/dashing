@@ -3,34 +3,29 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using System.Reflection;
 
     using Mono.Cecil;
     using Mono.Cecil.Cil;
+    using System.Reflection;
 
-    public abstract class BaseWeaver : ITaskLogHelper, IWeaver
-    {
+    public abstract class BaseWeaver : ITaskLogHelper, IWeaver {
         private const string BackingFieldTemplate = "<{0}>k__BackingField";
 
         public ILogger Log { get; set; }
 
-        protected FieldDefinition GetBackingField(PropertyDefinition propertyDef)
-        {
+        protected FieldDefinition GetBackingField(PropertyDefinition propertyDef) {
             // have a look for a field matching the standard format
-            var fieldDef = propertyDef.DeclaringType.Fields.SingleOrDefault(f => f.Name == string.Format((string)BackingFieldTemplate, (object)propertyDef.Name));
-            if (fieldDef != null)
-            {
+            var fieldDef = propertyDef.DeclaringType.Fields.SingleOrDefault(f => f.Name == string.Format(BackingFieldTemplate, propertyDef.Name));
+            if (fieldDef != null) {
                 return fieldDef;
             }
 
             // look for fields of this type loaded on to the stack
-            var candidates =
-                propertyDef.GetMethod.Body.Instructions.Where(
-                    i =>
-                        i.OpCode == OpCodes.Ldfld && i.Operand is FieldDefinition
-                        && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName).ToArray();
-            if (candidates.Length == 1)
-            {
+            var candidates = propertyDef.GetMethod.Body.Instructions.Where(
+                                            i => i.OpCode == OpCodes.Ldfld && i.Operand is FieldDefinition
+                                                 && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName)
+                                        .ToArray();
+            if (candidates.Length == 1) {
                 return (FieldDefinition)candidates.First().Operand;
             }
 
@@ -38,16 +33,13 @@
             return null;
         }
 
-        protected FieldDefinition GetField(TypeDefinition typeDefinition, string name)
-        {
+        protected FieldDefinition GetField(TypeDefinition typeDefinition, string name) {
             var field = typeDefinition.Fields.SingleOrDefault(f => f.Name == name);
-            if (field != null)
-            {
+            if (field != null) {
                 return field;
             }
 
-            if (typeDefinition.BaseType.FullName == typeof(object).FullName)
-            {
+            if (typeDefinition.BaseType.FullName == typeof(object).FullName) {
                 this.Log.Error("Unable to find Field " + name);
                 return null;
             }
@@ -55,16 +47,13 @@
             return this.GetField(typeDefinition.BaseType.Resolve(), name);
         }
 
-        protected PropertyDefinition GetProperty(TypeDefinition typeDef, string name)
-        {
+        protected PropertyDefinition GetProperty(TypeDefinition typeDef, string name) {
             var prop = typeDef.Properties.SingleOrDefault(p => p.Name == name);
-            if (prop != null)
-            {
+            if (prop != null) {
                 return prop;
             }
 
-            if (typeDef.BaseType.FullName == typeof(object).FullName)
-            {
+            if (typeDef.BaseType.FullName == typeof(object).FullName) {
                 this.Log.Error("Unable to find Property " + name);
                 return null;
             }
@@ -72,27 +61,22 @@
             return this.GetProperty(typeDef.BaseType.Resolve(), name);
         }
 
-        protected bool HasPropertyInInheritanceChain(TypeDefinition typeDefinition, string name)
-        {
-            if (typeDefinition.Properties.Any(p => p.Name == name))
-            {
+        protected bool HasPropertyInInheritanceChain(TypeDefinition typeDefinition, string name) {
+            if (typeDefinition.Properties.Any(p => p.Name == name)) {
                 return true;
             }
 
-            if (typeDefinition.BaseType.FullName == typeof(object).FullName)
-            {
+            if (typeDefinition.BaseType.FullName == typeof(object).FullName) {
                 return false;
             }
 
             return this.HasPropertyInInheritanceChain(typeDefinition.BaseType.Resolve(), name);
         }
 
-        protected Stack<TypeDefinition> GetClassHierarchy(TypeDefinition typeDef)
-        {
+        protected Stack<TypeDefinition> GetClassHierarchy(TypeDefinition typeDef) {
             var classHierarchy = new Stack<TypeDefinition>();
             var thisTypeDef = typeDef;
-            do
-            {
+            do {
                 classHierarchy.Push(thisTypeDef);
                 thisTypeDef = thisTypeDef.BaseType.Resolve();
             }
@@ -100,98 +84,87 @@
             return classHierarchy;
         }
 
-        protected static TypeReference MakeGenericType(TypeReference self, params TypeReference[] arguments)
-        {
-            if (self.GenericParameters.Count != arguments.Length)
-            {
+        protected static TypeReference MakeGenericType(TypeReference self, params TypeReference[] arguments) {
+            if (self.GenericParameters.Count != arguments.Length) {
                 throw new ArgumentException();
             }
 
             var instance = new GenericInstanceType(self);
-            foreach (var argument in arguments)
-            {
+            foreach (var argument in arguments) {
                 instance.GenericArguments.Add(argument);
             }
 
             return instance;
         }
 
-        protected static MethodReference MakeGeneric(MethodReference self, params TypeReference[] arguments)
-        {
-            var reference = new MethodReference(self.Name, self.ReturnType)
-                            {
-                                DeclaringType = MakeGenericType(self.DeclaringType, arguments),
-                                HasThis = self.HasThis,
-                                ExplicitThis = self.ExplicitThis,
-                                CallingConvention = self.CallingConvention
-                            };
+        protected static MethodReference MakeGeneric(MethodReference self, params TypeReference[] arguments) {
+            var reference =
+                new MethodReference(self.Name, self.ReturnType) {
+                                                                    DeclaringType = MakeGenericType(self.DeclaringType, arguments),
+                                                                    HasThis = self.HasThis,
+                                                                    ExplicitThis = self.ExplicitThis,
+                                                                    CallingConvention = self.CallingConvention
+                                                                };
 
-            foreach (var parameter in self.Parameters)
-            {
+            foreach (var parameter in self.Parameters) {
                 reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
             }
 
-            foreach (var generic_parameter in self.GenericParameters)
-            {
+            foreach (var generic_parameter in self.GenericParameters) {
                 reference.GenericParameters.Add(new GenericParameter(generic_parameter.Name, reference));
             }
 
             return reference;
         }
 
-        protected void MakeNotDebuggerBrowsable(ModuleDefinition module, FieldDefinition field)
-        {
+        protected void MakeNotDebuggerBrowsable(ModuleDefinition module, FieldDefinition field) {
             var debuggerBrowsableConstructor = module.ImportReference(typeof(DebuggerBrowsableAttribute).GetConstructors().First());
             var debuggerBrowsableAttr = new CustomAttribute(debuggerBrowsableConstructor);
             debuggerBrowsableAttr.ConstructorArguments.Add(
-                new CustomAttributeArgument(module.ImportReference(typeof(DebuggerBrowsableState)), DebuggerBrowsableState.Never));
+                new CustomAttributeArgument(
+                    module.ImportReference(typeof(DebuggerBrowsableState)),
+                    DebuggerBrowsableState.Never));
             field.CustomAttributes.Add(debuggerBrowsableAttr);
         }
 
-        protected bool DoesNotUseObjectMethod(TypeDefinition typeDefinition, string methodName)
-        {
+        protected bool DoesNotUseObjectMethod(TypeDefinition typeDefinition, string methodName) {
             return typeDefinition.Methods.Any(m => m.Name == methodName)
                    || (typeDefinition.BaseType.FullName != typeof(object).FullName
                        && this.DoesNotUseObjectMethod(typeDefinition.BaseType.Resolve(), methodName));
         }
 
-        protected void AddInterfaceToNonObjectAncestor(TypeDefinition typeDefinition, Type interfaceType)
-        {
-            if (typeDefinition.BaseType.FullName == typeof(object).FullName)
-            {
+        protected void AddInterfaceToNonObjectAncestor(TypeDefinition typeDefinition, Type interfaceType) {
+            if (typeDefinition.BaseType.FullName == typeof(object).FullName) {
                 typeDefinition.Interfaces.Add(new InterfaceImplementation(typeDefinition.Module.ImportReference(interfaceType)));
             }
-            else
-            {
+            else {
                 this.AddInterfaceToNonObjectAncestor(typeDefinition.BaseType.Resolve(), interfaceType);
             }
         }
 
-        protected bool IsBaseClass(TypeDefinition typeDefinition)
-        {
+        protected bool IsBaseClass(TypeDefinition typeDefinition) {
             return typeDefinition.BaseType.FullName == typeof(object).FullName;
         }
 
-        public static TypeDefinition GetTypeDefFromFullName(string typeFullName, AssemblyDefinition assemblyDefinition)
-        {
+        public static TypeDefinition GetTypeDefFromFullName(string typeFullName, AssemblyDefinition assemblyDefinition) {
             TypeDefinition typeDef;
-            if (typeFullName.Contains('+'))
-            {
+            if (typeFullName.Contains('+')) {
                 var types = typeFullName.Split('+');
                 typeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == types.First());
-                for (var i = 1; i < types.Length; i++)
-                {
+                for (var i = 1; i < types.Length; i++) {
                     typeDef = typeDef.NestedTypes.Single(t => t.Name == types.ElementAt(i));
                 }
             }
-            else
-            {
+            else {
                 typeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == typeFullName);
             }
 
             return typeDef;
         }
 
-        public abstract void Weave(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition, IEnumerable<ColumnDefinition> columnDefinitions);
+        public abstract void Weave(
+            AssemblyDefinition assemblyDefinition,
+            TypeDefinition typeDefinition,
+            IEnumerable<ColumnDefinition> columnDefinitions);
     }
 }

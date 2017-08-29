@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tools.Tests.Migration {
+﻿namespace Dashing.Tests.Migration {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -7,7 +7,8 @@
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
-    using Dashing.Tools.Migration;
+    using Dashing.Migration;
+    using Dashing.Tools.Tests;
     using Dashing.Tools.Tests.TestDomain;
 
     using Moq;
@@ -33,7 +34,7 @@
                 new CreateTableWriter(dialect),
                 new AlterTableWriter(dialect),
                 new DropTableWriter(dialect),
-                GetMockStatisticsProvider(configFrom));
+                this.GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
             var script = migrator.GenerateSqlDiff(
@@ -71,7 +72,7 @@
                 new CreateTableWriter(dialect),
                 new AlterTableWriter(dialect),
                 new DropTableWriter(dialect),
-                GetMockStatisticsProvider(configFrom));
+                this.GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
             var script = migrator.GenerateSqlDiff(
@@ -108,7 +109,7 @@
                 new CreateTableWriter(dialect),
                 new AlterTableWriter(dialect),
                 new DropTableWriter(dialect),
-                GetMockStatisticsProvider(configFrom));
+                this.GetMockStatisticsProvider(configFrom));
             IEnumerable<string> warnings;
             IEnumerable<string> errors;
             var script = migrator.GenerateSqlDiff(

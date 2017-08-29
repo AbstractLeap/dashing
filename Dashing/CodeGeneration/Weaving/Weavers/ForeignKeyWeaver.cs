@@ -10,33 +10,29 @@
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
 
-    public class ForeignKeyWeaver : BaseWeaver
-    {
-        public override void Weave(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition, IEnumerable<ColumnDefinition> columnDefinitions)
-        {
+    public class ForeignKeyWeaver : BaseWeaver {
+        public override void Weave(
+            AssemblyDefinition assemblyDefinition,
+            TypeDefinition typeDefinition,
+            IEnumerable<ColumnDefinition> columnDefinitions) {
             var boolTypeDef = typeDefinition.Module.ImportReference(typeof(bool));
-            foreach (var columnDef in
-                columnDefinitions.Where(
-                    c => c.Relationship == RelationshipType.ManyToOne || c.Relationship == RelationshipType.OneToOne))
-            {
+            foreach (var columnDef in columnDefinitions.Where(
+                c => c.Relationship == RelationshipType.ManyToOne || c.Relationship == RelationshipType.OneToOne)) {
                 // remember the property may be defined on a parent class
                 var propDef = this.GetProperty(typeDefinition, columnDef.Name);
 
                 // add a field with DbType and DbName 
                 TypeReference fkTypeReference;
-                var fkPkType = TypeExtensions.GetCLRType(columnDef.DbType);
-                if (fkPkType.IsValueType)
-                {
+                var fkPkType = columnDef.DbType.GetCLRType();
+                if (fkPkType.IsValueType()) {
                     fkTypeReference = typeDefinition.Module.ImportReference(typeof(Nullable<>).MakeGenericType(fkPkType));
                 }
-                else
-                {
+                else {
                     fkTypeReference = typeDefinition.Module.ImportReference(fkPkType);
                 }
 
                 var fkField = new FieldDefinition(columnDef.DbName, FieldAttributes.Public, fkTypeReference);
-                if (propDef.DeclaringType.Fields.Any(f => f.Name == columnDef.DbName))
-                {
+                if (propDef.DeclaringType.Fields.Any(f => f.Name == columnDef.DbName)) {
                     continue; // already done something here!
                 }
 
@@ -50,8 +46,7 @@
 
                 // override the get method to access this field if null and create a new instance
                 // TODO solve for non auto properties
-                if (!propDef.GetMethod.Body.Variables.Any())
-                {
+                if (!propDef.GetMethod.Body.Variables.Any()) {
                     // Release code is different to debug code!
                     propDef.GetMethod.Body.Variables.Add(new VariableDefinition(propDef.PropertyType));
                 }
@@ -72,8 +67,7 @@
 
                 il.Insert(index++, Instruction.Create(OpCodes.Brtrue, lastInstr));
 
-                if (fkPkType.IsValueType)
-                {
+                if (fkPkType.IsValueType()) {
                     il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
                     il.Insert(index++, Instruction.Create(OpCodes.Ldflda, fkField));
                     il.Insert(
@@ -84,8 +78,7 @@
                                 typeDefinition.Module.ImportReference(fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
                                 typeDefinition.Module.ImportReference(fkPkType))));
                 }
-                else
-                {
+                else {
                     il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
                     il.Insert(index++, Instruction.Create(OpCodes.Ldfld, fkField));
                 }
@@ -96,13 +89,14 @@
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
                 il.Insert(
                     index++,
-                    Instruction.Create(OpCodes.Newobj, typeDefinition.Module.ImportReference(propDef.PropertyType.Resolve().GetConstructors().First())));
+                    Instruction.Create(
+                        OpCodes.Newobj,
+                        typeDefinition.Module.ImportReference(propDef.PropertyType.Resolve().GetConstructors().First())));
                 il.Insert(index++, Instruction.Create(OpCodes.Stloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
 
-                if (fkPkType.IsValueType)
-                {
+                if (fkPkType.IsValueType()) {
                     il.Insert(index++, Instruction.Create(OpCodes.Ldflda, fkField));
                     il.Insert(
                         index++,
@@ -123,8 +117,7 @@
                             typeDefinition.Module.ImportReference(
                                 this.GetProperty(fkTypeReference.Resolve(), columnDef.RelatedTypePrimarykeyName).SetMethod)));
                 }
-                else
-                {
+                else {
                     il.Insert(index++, Instruction.Create(OpCodes.Ldfld, fkField));
                     //var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
                     //var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;

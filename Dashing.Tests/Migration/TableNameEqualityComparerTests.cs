@@ -1,7 +1,7 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using Dashing.Configuration;
-    using Dashing.Tools.Migration;
-    using Dashing.Tools.Tests.TestDomain;
+    using Dashing.Migration;
+    using Dashing.Tests.TestDomain;
 
     using Xunit;
 

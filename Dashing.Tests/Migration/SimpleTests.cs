@@ -7,7 +7,8 @@
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
-    using Dashing.Tools.Migration;
+    using Dashing.Migration;
+    using Dashing.Tests;
     using Dashing.Tools.Tests.Migration.Simple;
 
     using Moq;

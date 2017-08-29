@@ -2,13 +2,18 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
     <AssemblyName>dotnet-dashing</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Weaving\Weavers\**" />
+    <EmbeddedResource Remove="Weaving\Weavers\**" />
+    <None Remove="Weaving\Weavers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Properties\" />
-    <Folder Include="Weaving\Weavers\" />
   </ItemGroup>
 
   <ItemGroup>

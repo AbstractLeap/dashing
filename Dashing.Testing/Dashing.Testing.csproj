@@ -4,7 +4,7 @@
     <Description>Dashing.Testing provides an in-memory database engine to enable simple testing of Dashing code</Description>
     <VersionPrefix>2.1.0</VersionPrefix>
     <Authors>Mark Jerzykowski;James Holwell</Authors>
-    <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
     <AssemblyName>Dashing.Testing</AssemblyName>
     <PackageId>Dashing.Testing</PackageId>
   </PropertyGroup>

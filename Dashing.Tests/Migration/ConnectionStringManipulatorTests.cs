@@ -2,7 +2,7 @@
     using System;
     using System.Data.SqlClient;
 
-    using Dashing.Tools.Migration;
+    using Dashing.Migration;
 
     using Xunit;
 
