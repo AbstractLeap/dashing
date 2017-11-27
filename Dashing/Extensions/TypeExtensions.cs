@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Linq;
+    using System.Linq;
 
     /// <summary>
     ///     The type extensions.
@@ -254,6 +255,30 @@
                 default:
                     return false;
             }
+        }
+
+        public static Type GetEnumerableType(this Type type)
+        {
+            if (type.IsArray)
+            {
+                return type.GetElementType();
+            }
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                return type.GetGenericArguments()[0];
+            }
+
+            var parameterTypeCandidates = type.GetInterfaces()
+                                              .Where(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                                              .Select(t => t.GetGenericArguments()[0])
+                                              .ToArray();
+            if (parameterTypeCandidates.Length == 1)
+            {
+                return parameterTypeCandidates[0];
+            }
+
+            return null;
         }
     }
 }

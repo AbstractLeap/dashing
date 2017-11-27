@@ -411,6 +411,21 @@
         }
 
         [Fact]
+        public void WhereContainsEntityWithoutClosure() {
+            var target = MakeTarget();
+            var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
+            var param = Expression.Parameter(typeof(Blog), "b");
+            var body = Expression.Call(
+                typeof(Enumerable).GetMethods().Single(m => m.Name == "Contains" && m.GetParameters().Length == 2).MakeGenericMethod(typeof(Blog)),
+                Expression.Constant(blogs),
+                param);
+            Expression<Func<Blog, bool>> pred = Expression.Lambda<Func<Blog, bool>>(body, param);
+            var actual = target.GenerateSql(new[] { pred }, null);
+            Assert.Equal(" where [BlogId] in @l_1", actual.Sql);
+            Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
+        }
+
+        [Fact]
         public void WhereContainsRelatedEntity() {
             var target = MakeTarget();
             var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };

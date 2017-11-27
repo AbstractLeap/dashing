@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing</id>
-        <version>1.0.17</version>
+        <version>1.0.18</version>
         <title>Dashing</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -13,7 +13,7 @@
         <summary>Dashing is a simple to use mini ORM built on top of Dapper</summary>
         <releaseNotes>See Git Log at https://github.com/Polylytics/dashing
 
-v1.0.17 Switch to using output clause on SQL Server for generated IDs</releaseNotes>
+v1.0.18 Bug Fix for Constant List of Entities</releaseNotes>
         <copyright>© Polylytics Limited, 2015</copyright>
         <language>en-GB</language>
         <tags>dashing dapper orm sql mini-orm</tags>
