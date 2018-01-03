@@ -768,6 +768,27 @@
             Assert.Equal(" where ((t_100.[Nullable] is not null) and t_100.[Name] like @l_1)", actual.Sql);
         }
 
+        [Fact]
+        public void DateTimedotNowAsItStands() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.CommentDate <= DateTime.UtcNow;
+            var now = DateTime.UtcNow;
+            var actual = target.GenerateSql(new[] { pred }, null);
+            var param = (DateTime)actual.Parameters.GetValue("l_1");
+            Assert.Equal(" where ([CommentDate] <= @l_1)", actual.Sql);
+            Assert.True(Math.Abs((param - now).TotalSeconds) < 60); //if it's within a minute, it's just the execution times
+        }
+
+        [Fact]
+        public void DateTimedotDateFix() {
+            var target = MakeTarget();
+            Expression<Func<Comment, bool>> pred = c => c.CommentDate <= DateTime.UtcNow.Date;
+            var actual = target.GenerateSql(new[] { pred }, null);
+            var param = (DateTime)actual.Parameters.GetValue("l_1");
+            Assert.Equal(" where ([CommentDate] <= @l_1)", actual.Sql);
+            Assert.True(DateTime.UtcNow.Date <= param && param <= DateTime.UtcNow.Date);
+        }
+
         private static WhereClauseWriter MakeTarget() {
             return new WhereClauseWriter(new SqlServerDialect(), MakeConfig());
         }

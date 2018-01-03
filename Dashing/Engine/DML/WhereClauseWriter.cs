@@ -351,23 +351,27 @@
         }
 
         private ISqlElement VisitMemberAccess(MemberExpression exp) {
-            if (exp.Expression == null) {
-                // static property
-                if (this.isTopOfBinaryOrMethod) {
-                    // quicker path
-                    var propInfo = exp.Member as PropertyInfo;
-                    if (propInfo != null) {
-                        return this.AddParameter(propInfo.GetValue(null));
-                    }
-                    var fieldInfo = exp.Member as FieldInfo;
+            if (exp.Expression == null) { // static property
+                
+                //quick path
+                var propInfo = exp.Member as PropertyInfo;
+                if (propInfo != null) {
+                    this.value = propInfo.GetValue(null);
+                } else {
+                     var fieldInfo = exp.Member as FieldInfo;
                     if (fieldInfo != null) {
-                        return this.AddParameter(fieldInfo.GetValue(null));
+                        this.value = fieldInfo.GetValue(null);
+                    } else {
+                            // slow path
+                        this.value = this.GetDynamicValue(exp);
                     }
-
-                    // slow path
-                    return this.AddParameter(this.GetDynamicValue(exp));
                 }
 
+                if (this.isTopOfBinaryOrMethod) {
+                    return this.AddParameter(this.value);
+                }
+
+                this.isConstantExpression = true;
                 return null;
             }
 
