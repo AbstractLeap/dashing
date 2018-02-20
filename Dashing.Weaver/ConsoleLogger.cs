@@ -1,4 +1,4 @@
-﻿namespace Dashing.Cli
+﻿namespace Dashing.Weaver
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
     using System.Reflection;
     using System.Text;
 
-    public class ConsoleLogger : ILogger
+    public class ConsoleLogger : Dashing.ILogger
     {
         private readonly bool isVerbose;
 

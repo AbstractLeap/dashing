@@ -1,8 +1,4 @@
-namespace Dashing.CodeGeneration.Weaving {
-    using System;
-    using System.IO;
-    using System.Reflection;
-
+namespace Dashing.Weaver.Weaving {
     //public class DirectoryAssemblyLoader : IAssemblyLoader
     //{
     //    private readonly string directory;

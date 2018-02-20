@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Dashing.Weaver": {
+      "commandName": "Project"
+    },
+    "TestExtractConfigs": {
+      "commandName": "Project",
+      "commandLineArgs": "extractconfigs -p \"F:\\Projects\\ora\\ORA.Api\\bin\\ORA.Database.dll\" -t \"ORA.Database.DashingConfiguration\""
+    }
+  }
+}

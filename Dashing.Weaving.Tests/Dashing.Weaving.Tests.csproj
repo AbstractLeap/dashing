@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
+	<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,5 +17,14 @@
     <ProjectReference Include="..\Dashing.Weaving.Sample\Dashing.Weaving.Sample.csproj" />
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
   </ItemGroup>
+  
+  <UsingTask TaskName="Dashing.CodeGeneration.Weaving.Task.GetConfig" AssemblyFile=".\$(OutputPath)\Dashing.dll"/>
+  <Target Name="Dashing Weave" AfterTargets="Build">
+	<Message Importance="high" Text="$(MSBuildThisFileDirectory)$(OutputPath)Dashing.Tests.dll" />
+	<GetConfig ConfigurationFullName="Dashing.Weaving.Sample.Config" ConfigurationAssemblyPath="$(MSBuildThisFileDirectory)$(OutputPath)Dashing.Weaving.Sample.dll">
+		<Output TaskParameter="Configuration" PropertyName="ConfigurationJson" />
+	</GetConfig>
+	<Message Text="$(ConfigurationJson)" />
+  </Target>
 
 </Project>

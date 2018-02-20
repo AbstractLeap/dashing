@@ -1,12 +1,14 @@
-﻿namespace Dashing.CodeGeneration.Weaving.Weavers {
+﻿namespace Dashing.Weaver.Weaving.Weavers {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Reflection;
 
     using Mono.Cecil;
     using Mono.Cecil.Cil;
-    using System.Reflection;
+
+    using ILogger = Dashing.ILogger;
 
     public abstract class BaseWeaver : ITaskLogHelper, IWeaver {
         private const string BackingFieldTemplate = "<{0}>k__BackingField";

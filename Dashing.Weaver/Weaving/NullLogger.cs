@@ -1,5 +1,7 @@
-namespace Dashing.CodeGeneration.Weaving {
+namespace Dashing.Weaver.Weaving {
     using System.Collections.Generic;
+
+    using ILogger = Dashing.ILogger;
 
     public class NullLogger : ILogger {
         public void Trace(string message) {

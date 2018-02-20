@@ -1,13 +1,15 @@
-namespace Dashing.Cli {
+namespace Dashing.Weaver {
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
 
     public static class IniParser {
         public static IDictionary<string, IDictionary<string, object>> Parse(string filePath) {
             var result = new Dictionary<string, IDictionary<string, object>>();
             var lastDic = new Dictionary<string, object>();
-            using (var streamReader = new StreamReader(filePath)) {
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            using (var streamReader = new StreamReader(stream)) {
                 string line = null;
                 while ((line = streamReader.ReadLine()) != null) {
                     line = line.Trim();

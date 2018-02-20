@@ -1,4 +1,4 @@
-﻿namespace Dashing.Cli {
+﻿namespace Dashing.Weaver {
     using System;
     using System.Collections.Generic;
     using System.IO;

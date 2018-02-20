@@ -1,9 +1,8 @@
-﻿namespace Dashing.CodeGeneration.Weaving
+﻿namespace Dashing.Weaver.Weaving
 {
     using System.Collections.Generic;
 
-    using Dashing.CodeGeneration.Weaving.Task;
-    using Dashing.CodeGeneration.Weaving.Weavers;
+    using Dashing.Weaver.Weaving.Weavers;
 
     public interface IPeProcessor
     {

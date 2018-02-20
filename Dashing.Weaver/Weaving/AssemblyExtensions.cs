@@ -1,4 +1,4 @@
-﻿namespace Dashing.CodeGeneration.Weaving {
+﻿namespace Dashing.Weaver.Weaving {
     using System;
     using System.Collections.Generic;
     using System.Linq;
