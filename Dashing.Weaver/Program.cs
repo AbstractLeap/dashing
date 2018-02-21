@@ -1,5 +1,9 @@
 ﻿namespace Dashing.Weaver {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
 
     using Dashing.Weaver.ConfigurationMetadataGeneration;
 
@@ -98,6 +102,7 @@
                                         Console.WriteLine("Please specify the configuration type full name(s)");
                                     }
 
+                                    ConfigureAssemblyResolution(assemblyPath.Values);
                                     var configurationMetadataGenerator = new ConfigurationMetadataGenerator();
                                     try {
                                         var metadata =
@@ -112,6 +117,38 @@
                                     return 0;
                                 });
                     });
+        }
+
+        private static void ConfigureAssemblyResolution(IEnumerable<string> assemblyPaths) {
+            var pathsToSearch = assemblyPaths.Select(path => Path.GetDirectoryName(path)).ToArray();
+#if COREFX
+
+#else
+            AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) =>
+                {
+                    var assemblyName = new AssemblyName(iargs.Name);
+
+                    // look in app domain
+                    var loaded = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                    if (loaded != null) {
+                        return loaded;
+                    }
+
+                    // we couldn't find it, look on disk
+                    foreach (var path in pathsToSearch) {
+                        var attempts = new[] { "exe", "dll" }.Select(ext => $"{path}\\{assemblyName.Name}.{ext}");
+                        foreach (var attempt in attempts) {
+                            if (File.Exists(attempt)) {
+                                return Assembly.LoadFile(attempt);
+                                var assemblyData = File.ReadAllBytes(attempt);
+                                return Assembly.Load(assemblyData);
+                            }
+                        }
+                    }
+
+                    return null;
+                };
+#endif
         }
     }
 }

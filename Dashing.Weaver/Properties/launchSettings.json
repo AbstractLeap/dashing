@@ -5,7 +5,7 @@
     },
     "TestExtractConfigs": {
       "commandName": "Project",
-      "commandLineArgs": "extractconfigs -p \"F:\\Projects\\ora\\ORA.Api\\bin\\ORA.Database.dll\" -t \"ORA.Database.DashingConfiguration\""
+      "commandLineArgs": "extractconfigs -p \"F:\\Projects\\Dashing\\Dashing.Weaving.Sample\\bin\\Debug\\net46\\Dashing.Weaving.Sample.exe\" -t \"Dashing.Weaving.Sample.Config\""
     }
   }
 }

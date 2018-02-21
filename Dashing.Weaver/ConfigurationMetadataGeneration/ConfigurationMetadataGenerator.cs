@@ -6,6 +6,7 @@
     using System.Reflection;
     
     using Dashing.Configuration;
+    using Dashing.Extensions;
     using Dashing.Weaver.Weaving;
 
     using Newtonsoft.Json;
@@ -28,7 +29,7 @@
                         foreach (var map in configuration.Maps) {
                             result.Add(
                                 new MapDefinition {
-                                                      AssemblyPath = assembly.Location,
+                                                      AssemblyPath = map.Type.Assembly().Location,
                                                       TypeFullName = map.Type.FullName,
                                                       ColumnDefinitions = map
                                                           .Columns.Where(c => !c.Value.IsIgnored)
