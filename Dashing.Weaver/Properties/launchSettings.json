@@ -6,6 +6,10 @@
     "TestExtractConfigs": {
       "commandName": "Project",
       "commandLineArgs": "extractconfigs -p \"F:\\Projects\\Dashing\\Dashing.Weaving.Sample\\bin\\Debug\\net46\\Dashing.Weaving.Sample.exe\" -t \"Dashing.Weaving.Sample.Config\""
+    },
+    "TestWeave": {
+      "commandName": "Project",
+      "commandLineArgs": "weave -p \"F:\\Projects\\Dashing\\Dashing.Weaving.Sample\\bin\\Debug\\net46\\Dashing.Weaving.Sample.exe\" -t \"Dashing.Weaving.Sample.Config\""
     }
   }
 }

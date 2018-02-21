@@ -6,6 +6,7 @@
     using System.Reflection;
 
     using Dashing.Weaver.ConfigurationMetadataGeneration;
+    using Dashing.Weaver.Weaving;
 
     using Microsoft.Extensions.CommandLineUtils;
 
@@ -62,10 +63,18 @@
 
                                     if (!configurationTypes.HasValue()) {
                                         Console.WriteLine("Please specify the configuration type full name(s)");
+                                        return 1;
                                     }
 
-                                    //ProjectWeaver.Weave(path.Value(), assembly.Value());
-                                    return 0;
+                                    var configurationWeaver = new ConfigurationWeaver();
+                                    try {
+                                        var result = configurationWeaver.Weave(assemblyPath.Values, configurationTypes.Values);
+                                        return result ? 0 : 1;
+                                    }
+                                    catch (Exception ex) {
+                                        Console.WriteLine(ex.Message);
+                                        return 1;
+                                    }
                                 });
                     });
         }
@@ -100,6 +109,7 @@
 
                                     if (!configurationTypes.HasValue()) {
                                         Console.WriteLine("Please specify the configuration type full name(s)");
+                                        return 1;
                                     }
 
                                     ConfigureAssemblyResolution(assemblyPath.Values);

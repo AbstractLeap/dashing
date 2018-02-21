@@ -106,7 +106,6 @@
                                 MakeGeneric(
                                     fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"),
                                     typeDefinition.Module.ImportReference(fkPkType)))));
-
                     //var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
                     //var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
                     //var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
@@ -115,7 +114,7 @@
                         Instruction.Create(
                             OpCodes.Callvirt,
                             typeDefinition.Module.ImportReference(
-                                this.GetProperty(fkTypeReference.Resolve(), columnDef.RelatedTypePrimarykeyName).SetMethod)));
+                                this.GetProperty(propDef.PropertyType.Resolve(), columnDef.RelatedTypePrimarykeyName).SetMethod)));
                 }
                 else {
                     il.Insert(index++, Instruction.Create(OpCodes.Ldfld, fkField));
@@ -127,7 +126,7 @@
                         Instruction.Create(
                             OpCodes.Callvirt,
                             typeDefinition.Module.ImportReference(
-                                this.GetProperty(fkTypeReference.Resolve(), columnDef.RelatedTypePrimarykeyName).SetMethod)));
+                                this.GetProperty(propDef.PropertyType.Resolve(), columnDef.RelatedTypePrimarykeyName).SetMethod)));
                 }
 
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
