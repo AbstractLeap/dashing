@@ -56,7 +56,7 @@
                                        StartInfo = new ProcessStartInfo {
 #if COREFX
                                                                             FileName = "dotnet",
-                                                                            Arguments = "dashing extractconfigs " + arguments,
+                                                                            Arguments = $"{Path.GetFileNameWithoutExtension(typeof(ConfigurationWeaver).Assembly().Location)} extractconfigs " + arguments,
 #else
                                                                             FileName = Path.GetFileName(Assembly.GetExecutingAssembly().Location),
                                                                             Arguments = "extractconfigs " + arguments,

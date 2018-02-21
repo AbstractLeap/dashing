@@ -4,6 +4,9 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+#if COREFX
+    using System.Runtime.Loader;
+#endif
 
     using Dashing.Weaver.ConfigurationMetadataGeneration;
     using Dashing.Weaver.Weaving;
@@ -132,7 +135,20 @@
         private static void ConfigureAssemblyResolution(IEnumerable<string> assemblyPaths) {
             var pathsToSearch = assemblyPaths.Select(path => Path.GetDirectoryName(path)).ToArray();
 #if COREFX
+            AssemblyLoadContext.Default.Resolving += (context, name) =>
+                {
+                    // look on disk
+                    foreach (var path in pathsToSearch) {
+                        var attempts = new[] { "exe", "dll" }.Select(ext => $"{path}\\{name.Name}.{ext}");
+                        foreach (var attempt in attempts) {
+                            if (File.Exists(attempt)) {
+                                return AssemblyContext.LoadFile(attempt);
+                            }
+                        }
+                    }
 
+                    return null;
+                };
 #else
             AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) =>
                 {
