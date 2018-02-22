@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Dashing.Cli.Core\Dashing.Cli.Core.csproj" />
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
   </ItemGroup>
 
@@ -19,13 +20,11 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   
-  <UsingTask TaskName="Dashing.CodeGeneration.Weaving.Task.GetConfig" AssemblyFile=".\$(OutputPath)\Dashing.dll"/>
-  <Target Name="Dashing Weave" AfterTargets="Build">
-	<Message Importance="high" Text="$(MSBuildThisFileDirectory)$(OutputPath)Dashing.Tests.dll" />
-	<GetConfig ConfigurationFullName="Dashing.Tools.Tests.CustomConfig" ConfigurationAssemblyPath="$(MSBuildThisFileDirectory)$(OutputPath)Dashing.Tests.dll">
-		<Output TaskParameter="Configuration" PropertyName="ConfigurationJson" />
-	</GetConfig>
-	<Message Text="$(ConfigurationJson)" />
+  <Target Name="Weave" AfterTargets="AfterBuild">
+    <PropertyGroup>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/Debug/net46/dashing-weaver.exe</Weave>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/Debug/netcoreapp1.1/dashing-weaver.dll"</Weave>
+	</PropertyGroup>
+	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName)$(TargetExt)&quot; -t &quot;Dashing.Tools.Tests.CustomConfig&quot;" />
   </Target>
-
 </Project>

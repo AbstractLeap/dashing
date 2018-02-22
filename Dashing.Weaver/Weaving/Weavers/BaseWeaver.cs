@@ -120,6 +120,8 @@
         }
 
         protected void MakeNotDebuggerBrowsable(ModuleDefinition module, FieldDefinition field) {
+            // TODO Figure out why cecil fails to write this correctly
+#if !COREFX
             var debuggerBrowsableConstructor = module.ImportReference(typeof(DebuggerBrowsableAttribute).GetConstructors().First());
             var debuggerBrowsableAttr = new CustomAttribute(debuggerBrowsableConstructor);
             debuggerBrowsableAttr.ConstructorArguments.Add(
@@ -127,6 +129,7 @@
                     module.ImportReference(typeof(DebuggerBrowsableState)),
                     DebuggerBrowsableState.Never));
             field.CustomAttributes.Add(debuggerBrowsableAttr);
+#endif
         }
 
         protected bool DoesNotUseObjectMethod(TypeDefinition typeDefinition, string methodName) {

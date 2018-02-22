@@ -9,7 +9,7 @@
     },
     "TestWeave": {
       "commandName": "Project",
-      "commandLineArgs": "weave -p \"F:\\Projects\\Dashing\\Dashing.Weaving.Sample\\bin\\Debug\\net46\\Dashing.Weaving.Sample.exe\" -t \"Dashing.Weaving.Sample.Config\""
+      "commandLineArgs": "weave -p \"F:\\Projects\\Dashing\\Dashing.Weaving.Sample\\bin\\Debug\\netcoreapp1.1\\Dashing.Weaving.Sample.dll\" -t \"Dashing.Weaving.Sample.Config\""
     }
   }
 }
