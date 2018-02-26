@@ -15,5 +15,13 @@
     <ProjectReference Include="..\Dashing.Testing\Dashing.Testing.csproj" />
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
   </ItemGroup>
+  
+  <Target Name="Weave" AfterTargets="AfterBuild">
+    <PropertyGroup>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net46/dashing-weaver.exe</Weave>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/netcoreapp1.1/dashing-weaver.dll"</Weave>
+	</PropertyGroup>
+	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)Dashing.Testing.Tests.dll&quot; -t &quot;Dashing.Testing.Tests.TestConfiguration&quot;" />
+  </Target> 
 
 </Project>

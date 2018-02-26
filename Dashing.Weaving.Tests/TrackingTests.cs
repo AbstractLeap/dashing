@@ -166,7 +166,11 @@ namespace Dashing.Weaving.Tests {
             var barAsTracked = (ITrackedEntity)bar;
             bar.GetType().GetField("FooId").SetValue(bar, 2);
             barAsTracked.EnableTracking();
+            Assert.True(barAsTracked.IsTrackingEnabled());
+            Assert.False((bool)bar.GetType().GetField("__Foo_IsDirty", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(bar));
+            Assert.False(bar.Equals(null));
             bar.Foo = null;
+            Assert.True((bool)bar.GetType().GetField("__Foo_IsDirty", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(bar));
             Assert.Equal(1, barAsTracked.GetDirtyProperties().Count());
             Assert.True(barAsTracked.GetDirtyProperties().First() == "Foo");
             Assert.Equal(2, ((Foo)barAsTracked.GetOldValue("Foo")).FooId);

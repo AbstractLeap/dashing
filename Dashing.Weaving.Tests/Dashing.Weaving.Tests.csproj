@@ -18,13 +18,14 @@
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
   </ItemGroup>
   
-  <UsingTask TaskName="Dashing.CodeGeneration.Weaving.Task.GetConfig" AssemblyFile=".\$(OutputPath)\Dashing.dll"/>
-  <Target Name="Dashing Weave" AfterTargets="Build">
-	<Message Importance="high" Text="$(MSBuildThisFileDirectory)$(OutputPath)Dashing.Tests.dll" />
-	<GetConfig ConfigurationFullName="Dashing.Weaving.Sample.Config" ConfigurationAssemblyPath="$(MSBuildThisFileDirectory)$(OutputPath)Dashing.Weaving.Sample.dll">
-		<Output TaskParameter="Configuration" PropertyName="ConfigurationJson" />
-	</GetConfig>
-	<Message Text="$(ConfigurationJson)" />
-  </Target>
+  <Target Name="Weave" AfterTargets="AfterBuild">
+    <PropertyGroup>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net46/dashing-weaver.exe</Weave>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/netcoreapp1.1/dashing-weaver.dll"</Weave>
+	  <SampleAssemblyName Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">Dashing.Weaving.Sample.exe</SampleAssemblyName>
+	  <SampleAssemblyName Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">Dashing.Weaving.Sample.dll</SampleAssemblyName>
+	</PropertyGroup>
+	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)$(SampleAssemblyName)&quot; -t &quot;Dashing.Weaving.Sample.Config&quot;" />
+  </Target> 
 
 </Project>
