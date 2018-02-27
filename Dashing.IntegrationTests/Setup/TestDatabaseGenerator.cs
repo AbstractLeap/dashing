@@ -6,6 +6,7 @@ namespace Dashing.IntegrationTests.Setup {
     using System.Reflection;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
 
     public class TestDatabaseGenerator {
         private static readonly IList<TestSessionWrapper> TestSessions = new List<TestSessionWrapper>(); 
@@ -17,10 +18,11 @@ namespace Dashing.IntegrationTests.Setup {
             }
 
             // generate all the sessions
-            var configurationTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.Namespace == "Dashing.IntegrationTests.Setup" && typeof(IConfiguration).IsAssignableFrom(t)).ToArray();
-            foreach (var configurationType in configurationTypes) {
-                var configuration = (IConfiguration)Activator.CreateInstance(configurationType);
-                var dbInitializer = new DatabaseInitializer(configuration);
+            var sessionCreatorTypes = typeof(TestDatabaseGenerator).Assembly().GetTypes().Where(t => t.Namespace == "Dashing.IntegrationTests.Setup" && typeof(ISessionCreator).IsAssignableFrom(t) && t.IsPublic()).ToArray();
+            var config = new Configuration();
+            foreach (var sessionCreatorType in sessionCreatorTypes) {
+                var sessionCreator = (SqlSessionCreator)Activator.CreateInstance(sessionCreatorType, config);
+                var dbInitializer = new DatabaseInitializer(sessionCreator, config);
                 TestSessions.Add(dbInitializer.Initialize());
             }
         }

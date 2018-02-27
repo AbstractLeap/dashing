@@ -297,6 +297,15 @@
 #endif
         }
 
+        public static bool IsPublic(this Type type)
+        {
+#if COREFX
+            return type.GetTypeInfo().IsPublic;
+#else
+            return type.IsPublic;
+#endif
+        }
+
         public static bool IsAbstract(this Type type) {
 #if COREFX
             return type.GetTypeInfo().IsAbstract;

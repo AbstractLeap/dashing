@@ -4,31 +4,29 @@ namespace Dashing.IntegrationTests.Setup {
 
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
-    using Dashing.Engine.Dialects;
     using Dashing.IntegrationTests.TestDomain;
     using Dashing.IntegrationTests.TestDomain.More;
-    using Dashing.Tools;
-    using Dashing.Tools.Migration;
-
+    using Dashing.Migration;
     using Moq;
 
     public class DatabaseInitializer {
-        private readonly IConfiguration configuration;
+        private readonly SqlSessionCreator sessionCreator;
+
+        private readonly IConfiguration config;
 
         public const string DatabaseName = "dashingintegrationtests";
 
-        public DatabaseInitializer(IConfiguration configuration) {
-            this.configuration = configuration;
+        public DatabaseInitializer(SqlSessionCreator sessionCreator, IConfiguration config) {
+            this.sessionCreator = sessionCreator;
+            this.config = config;
         }
 
         public TestSessionWrapper Initialize() {
-            var dialect = new DialectFactory().Create(this.configuration.ConnectionStringSettings);
-                
             // load the data
-            using (var transactionLessSession = this.configuration.BeginTransactionLessSession()) {
+            using (var transactionLessSession = this.sessionCreator.BeginTransactionLessSession()) {
                 // create database if exists
-                if (!dialect.IgnoreMultipleDatabases) {
-                    if (transactionLessSession.Dapper.Query(dialect.CheckDatabaseExists(DatabaseName)).Any()) {
+                if (!this.sessionCreator.GetDialect().IgnoreMultipleDatabases) {
+                    if (transactionLessSession.Dapper.Query(this.sessionCreator.GetDialect().CheckDatabaseExists(DatabaseName)).Any()) {
                         transactionLessSession.Dapper.Execute("drop database " + DatabaseName);
                     }
 
@@ -37,15 +35,15 @@ namespace Dashing.IntegrationTests.Setup {
                 }
                 
                 var migrator = new Migrator(
-                    dialect,
-                    new CreateTableWriter(dialect),
-                    new AlterTableWriter(dialect),
-                    new DropTableWriter(dialect),
-                    new StatisticsProvider(null, dialect));
+                    this.sessionCreator.GetDialect(),
+                    new CreateTableWriter(this.sessionCreator.GetDialect()),
+                    new AlterTableWriter(this.sessionCreator.GetDialect()),
+                    new DropTableWriter(this.sessionCreator.GetDialect()),
+                    new StatisticsProvider(null, this.sessionCreator.GetDialect()));
                 IEnumerable<string> warnings, errors;
                 var createStatement = migrator.GenerateSqlDiff(
                     new List<IMap>(),
-                    this.configuration.Maps,
+                    this.config.Maps,
                     null,
                     new Mock<ILogger>().Object,
                     new string[0],
@@ -58,8 +56,8 @@ namespace Dashing.IntegrationTests.Setup {
                 }
             }
 
-            var session = this.configuration.BeginSession();
-            if (!dialect.IgnoreMultipleDatabases) {
+            var session = this.sessionCreator.BeginSession();
+            if (!this.sessionCreator.GetDialect().IgnoreMultipleDatabases) {
                 session.Dapper.Execute("use " + DatabaseName);
             }
 

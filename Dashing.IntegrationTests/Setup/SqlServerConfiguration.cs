@@ -1,15 +1,15 @@
 ﻿namespace Dashing.IntegrationTests.Setup {
-    using System.Configuration;
+    using System.Data.SqlClient;
 
     using Dashing.Configuration;
-    using Dashing.IntegrationTests.TestDomain;
-    using Dashing.IntegrationTests.TestDomain.More;
+    using Dashing.Engine.Dialects;
 
-    internal class SqlServerConfiguration : DefaultConfiguration {
-        public SqlServerConfiguration()
-            : base(new ConnectionStringSettings("Default", "Data Source=(localdb)\\v11.0;Integrated Security=true;MultipleActiveResultSets=True", "System.Data.SqlClient")) {
-            this.AddNamespaceOf<Post>();
-            this.AddNamespaceOf<Questionnaire>();
-        }
+#if SQLSERVER
+    public class SqlServerSessionCreator : SqlSessionCreator {
+#else
+    class SqlServerSessionCreator : SqlSessionCreator {
+#endif
+        public SqlServerSessionCreator(IConfiguration configuration)
+            : base(configuration, SqlClientFactory.Instance, $"Server=localhost;Trusted_Connection=True;MultipleActiveResultSets=True", new SqlServer2012Dialect()) { }
     }
 }
