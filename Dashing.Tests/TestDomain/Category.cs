@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tools.Tests.TestDomain {
+﻿namespace Dashing.Tools.TestDomain {
     using System.Collections.Generic;
 
     public class Category {

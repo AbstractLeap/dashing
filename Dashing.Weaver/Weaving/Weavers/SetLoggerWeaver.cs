@@ -43,19 +43,35 @@
 
             // some common type definitions
             var boolTypeDef = typeDef.Module.ImportReference(typeof(bool));
+            var voidTypeDef = typeDef.Module.ImportReference(typeof(void));
             var stringTypeDef = typeDef.Module.ImportReference(typeof(string));
             var listStringTypeDef = typeDef.Module.ImportReference(typeof(List<>)).MakeGenericInstanceType(stringTypeDef);
             var nonPkCols = columnDefinitions.Where(c => !c.IsPrimaryKey && c.Relationship != RelationshipType.OneToMany).ToList();
 
+            // some column names
+            const string isSetLoggingName = "__isSetLogging";
+
+            // add isSetLoggingField if base class
+            if (this.IsBaseClass(typeDef))
+            {
+                var _isSetLoggingField = new FieldDefinition(isSetLoggingName, FieldAttributes.Family, boolTypeDef);
+                this.MakeNotDebuggerBrowsable(typeDef.Module, _isSetLoggingField);
+                typeDef.Fields.Add(_isSetLoggingField);
+            }
+
             // add the fields for tracking which properties are set
             // and insert the code in to the setter
-            foreach (var columnDefinition in nonPkCols) {
-                if (this.HasPropertyInInheritanceChain(typeDef, columnDefinition.Name)) {
+            var isSetLoggingField = this.GetField(typeDef, isSetLoggingName);
+            foreach (var columnDefinition in nonPkCols)
+            {
+                if (this.HasPropertyInInheritanceChain(typeDef, columnDefinition.Name))
+                {
                     var propDef = this.GetProperty(typeDef, columnDefinition.Name);
-                    if (propDef.DeclaringType.FullName == typeDef.FullName) {
+                    if (propDef.DeclaringType.FullName == typeDef.FullName)
+                    {
                         // columns in parent classes will have been taken care of
                         var isSetFieldDef = new FieldDefinition(
-                            string.Format("__{0}_IsSet", columnDefinition.Name),
+                            $"__{columnDefinition.Name}_IsSet",
                             FieldAttributes.Family,
                             boolTypeDef);
                         this.MakeNotDebuggerBrowsable(typeDef.Module, isSetFieldDef);
@@ -63,35 +79,107 @@
 
                         // assign true to this field
                         var il = propDef.SetMethod.Body.Instructions;
-                        il.Insert(0, Instruction.Create(OpCodes.Stfld, isSetFieldDef));
-                        il.Insert(0, Instruction.Create(OpCodes.Ldc_I4_1));
-                        il.Insert(0, Instruction.Create(OpCodes.Ldarg_0));
+                        var skipToInstruction = il.First();
+                        var setInstructions = new List<Instruction>();
+
+                        // if (this.__isSetLogging)
+                        setInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                        setInstructions.Add(Instruction.Create(OpCodes.Ldfld, isSetLoggingField));
+                        setInstructions.Add(Instruction.Create(OpCodes.Brfalse, skipToInstruction));
+
+                        // __{0}_IsSet = true;
+                        setInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                        setInstructions.Add(Instruction.Create(OpCodes.Ldc_I4_1));
+                        setInstructions.Add(Instruction.Create(OpCodes.Stfld, isSetFieldDef));
+
+                        setInstructions.Reverse();
+                        foreach (var instruction in setInstructions)
+                        {
+                            il.Insert(0, instruction);
+                        }
                     }
                 }
             }
 
             // implement the interface
             var methodAttrs = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual;
-            if (notInInheritance) {
+            if (notInInheritance)
+            {
                 methodAttrs = methodAttrs | MethodAttributes.NewSlot | MethodAttributes.Final;
             }
 
+            // EnabledSetLogging
+            if (this.IsBaseClass(typeDef))
+            {
+                var enableSetLogging = new MethodDefinition(
+                    "EnableSetLogging",
+                    MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
+                    | MethodAttributes.Final,
+                    voidTypeDef);
+                var il = enableSetLogging.Body.Instructions;
+                il.Add(Instruction.Create(OpCodes.Ldarg_0));
+                il.Add(Instruction.Create(OpCodes.Ldc_I4_1));
+                il.Add(Instruction.Create(OpCodes.Stfld, isSetLoggingField));
+                il.Add(Instruction.Create(OpCodes.Ret));
+                typeDef.Methods.Add(enableSetLogging);
+            }
+
+            // DisableSetLogging
+            var disableSetLoggingMethodAttrs = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Virtual;
+            if (notInInheritance)
+            {
+                disableSetLoggingMethodAttrs = disableSetLoggingMethodAttrs | MethodAttributes.NewSlot | MethodAttributes.Final;
+            }
+
+            var disableSetLogging = new MethodDefinition("DisableSetLogging", disableSetLoggingMethodAttrs, voidTypeDef);
+            var disableIl = disableSetLogging.Body.Instructions;
+            disableIl.Add(Instruction.Create(OpCodes.Ldarg_0));
+            disableIl.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+            disableIl.Add(Instruction.Create(OpCodes.Stfld, isSetLoggingField));
+            foreach (var col in nonPkCols)
+            {
+                if (this.HasPropertyInInheritanceChain(typeDef, col.Name))
+                {
+                    disableIl.Add(Instruction.Create(OpCodes.Ldarg_0));
+                    disableIl.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+                    disableIl.Add(Instruction.Create(OpCodes.Stfld, this.GetField(typeDef, $"__{col.Name}_IsSet")));
+                }
+            }
+
+            disableIl.Add(Instruction.Create(OpCodes.Ret));
+            typeDef.Methods.Add(disableSetLogging);
+
+            // IsSetLoggingEnabled
+            if (this.IsBaseClass(typeDef))
+            {
+                var isSetLoggingEnabled = new MethodDefinition(
+                    "IsSetLoggingEnabled",
+                    MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
+                    | MethodAttributes.Final,
+                    boolTypeDef);
+                var isSetLoggingIl = isSetLoggingEnabled.Body.Instructions;
+                isSetLoggingIl.Add(Instruction.Create(OpCodes.Ldarg_0));
+                isSetLoggingIl.Add(Instruction.Create(OpCodes.Ldfld, isSetLoggingField));
+                isSetLoggingIl.Add(Instruction.Create(OpCodes.Ret));
+                typeDef.Methods.Add(isSetLoggingEnabled);
+            }
+
+            // GetSetProperties
             var getSetProperties = new MethodDefinition(
                 "GetSetProperties",
                 methodAttrs,
                 typeDef.Module.ImportReference(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
             getSetProperties.Body.Variables.Add(new VariableDefinition(listStringTypeDef));
             getSetProperties.Body.Variables.Add(
-                new VariableDefinition(
-                    typeDef.Module.ImportReference(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
+                new VariableDefinition(typeDef.Module.ImportReference(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
             getSetProperties.Body.Variables.Add(new VariableDefinition(boolTypeDef));
             getSetProperties.Body.InitLocals = true;
             var instructions = getSetProperties.Body.Instructions;
             instructions.Add(Instruction.Create(OpCodes.Nop));
-            var listStringContruictor = MakeGeneric(
-                typeDef.Module.ImportReference(
-                    listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)),
-                stringTypeDef);
+            var listStringContruictor =
+                MakeGeneric(
+                    typeDef.Module.ImportReference(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)),
+                    stringTypeDef);
             instructions.Add(Instruction.Create(OpCodes.Newobj, listStringContruictor));
             instructions.Add(Instruction.Create(OpCodes.Stloc_0));
 
@@ -100,13 +188,15 @@
             addMethod = MakeGeneric(addMethod, stringTypeDef);
 
             var visibleCols = nonPkCols.Where(c => this.HasPropertyInInheritanceChain(typeDef, c.Name)).ToList();
-            for (var i = 0; i < visibleCols.Count; i++) {
-                if (i == 0) {
+            for (var i = 0; i < visibleCols.Count; i++)
+            {
+                if (i == 0)
+                {
                     instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                 }
 
                 instructions.Add(
-                    Instruction.Create(OpCodes.Ldfld, this.GetField(typeDef, string.Format("__{0}_IsSet", visibleCols.ElementAt(i).Name))));
+                    Instruction.Create(OpCodes.Ldfld, this.GetField(typeDef, $"__{visibleCols.ElementAt(i) .Name}_IsSet")));
                 instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
                 instructions.Add(Instruction.Create(OpCodes.Ceq));
                 instructions.Add(Instruction.Create(OpCodes.Stloc_2));

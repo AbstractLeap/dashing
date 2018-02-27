@@ -3,5 +3,11 @@
 
     public interface ISetLogger {
         IEnumerable<string> GetSetProperties();
+
+        bool IsSetLoggingEnabled();
+
+        void EnableSetLogging();
+
+        void DisableSetLogging();
     }
 }

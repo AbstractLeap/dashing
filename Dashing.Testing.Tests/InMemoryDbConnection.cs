@@ -4,23 +4,23 @@ namespace Dashing.Testing.Tests {
 
     internal class InMemoryDbConnection : IDbConnection {
         public void Dispose() {
-            throw new NotImplementedException();
+            
         }
 
         public IDbTransaction BeginTransaction() {
-            throw new NotImplementedException();
+            return new InMemoryDbTransaction(this);
         }
 
         public IDbTransaction BeginTransaction(IsolationLevel il) {
-            throw new NotImplementedException();
+            return new InMemoryDbTransaction(this);
         }
 
         public void Close() {
-            throw new NotImplementedException();
+            this.State = ConnectionState.Closed;
         }
 
         public void ChangeDatabase(string databaseName) {
-            throw new NotImplementedException();
+
         }
 
         public IDbCommand CreateCommand() {
@@ -28,7 +28,7 @@ namespace Dashing.Testing.Tests {
         }
 
         public void Open() {
-            throw new NotImplementedException();
+            this.State = ConnectionState.Open;
         }
 
         public string ConnectionString { get; set; }
@@ -37,6 +37,6 @@ namespace Dashing.Testing.Tests {
 
         public string Database { get; }
 
-        public ConnectionState State { get; }
+        public ConnectionState State { get; private set; }
     }
 }

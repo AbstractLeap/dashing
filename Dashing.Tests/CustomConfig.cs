@@ -3,6 +3,7 @@ namespace Dashing.Tools.Tests {
 
     using Dashing.Configuration;
     using Dashing.Tests.TestDomain;
+    using Dashing.Tests.TestDomain.Constructor;
 
     public class CustomConfig : BaseConfiguration, ISeeder {
         public CustomConfig() {
@@ -15,6 +16,12 @@ namespace Dashing.Tools.Tests {
 
             var user = new User { Username = "Mark", EmailAddress = "maj@113.com" };
             session.InsertOrUpdate(user);
+        }
+    }
+
+    public class ClassWithConstructorConfig : BaseConfiguration {
+        public ClassWithConstructorConfig() {
+            this.Add<ClassWithConstructor>();
         }
     }
 }

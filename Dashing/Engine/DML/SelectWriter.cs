@@ -3,10 +3,9 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-#if COREFX
+    using System.Linq.Expressions;
     using System.Reflection;
-#endif
+    using System.Text;
 
     using Dapper;
 
@@ -28,7 +27,10 @@
         public SqlWriterResult GenerateGetSql<T, TPrimaryKey>(TPrimaryKey id) {
             return new SqlWriterResult(
                 SingleQueryCache.GetOrAdd(new WriterQueryCacheKey(this.Configuration, typeof(T)), k => this.GenerateGetSql<T>(false)),
-                new DynamicParameters(new { Id = id }));
+                new DynamicParameters(
+                    new {
+                            Id = id
+                        }));
         }
 
         public SqlWriterResult GenerateGetSql<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) {
@@ -37,12 +39,18 @@
             if (primaryKeys.Count() == 1) {
                 return new SqlWriterResult(
                     SingleQueryCache.GetOrAdd(new WriterQueryCacheKey(this.Configuration, typeof(T)), k => this.GenerateGetSql<T>(false)),
-                    new DynamicParameters(new { Id = primaryKeys.Single() }));
+                    new DynamicParameters(
+                        new {
+                                Id = primaryKeys.Single()
+                            }));
             }
 
             return new SqlWriterResult(
                 MultipleQueryCache.GetOrAdd(new WriterQueryCacheKey(this.Configuration, typeof(T)), k => this.GenerateGetSql<T>(true)),
-                new DynamicParameters(new { Ids = primaryKeys }));
+                new DynamicParameters(
+                    new {
+                            Ids = primaryKeys
+                        }));
         }
 
         private string GenerateGetSql<T>(bool isMultiple) {
@@ -60,12 +68,16 @@
 
             sql.Append(" where ");
             sql.Append(map.PrimaryKey.Name);
-            sql.Append(isMultiple ? " in @Ids" : " = @Id");
+            sql.Append(
+                isMultiple
+                    ? " in @Ids"
+                    : " = @Id");
 
             return sql.ToString();
         }
 
-        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, bool enforceAlias = false) where T : class, new() {
+        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, bool enforceAlias = false)
+            where T : class, new() {
             // TODO: one StringBuilder to rule them all - Good luck with that ;-) (insertions are expensive)
             var sql = new StringBuilder();
             DynamicParameters parameters = new DynamicParameters();
@@ -75,47 +87,65 @@
             int numberCollectionFetches;
             var rootNode = this.fetchTreeParser.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
 
+            IDictionary<Type, IList<IColumn>> includes = null;
+            IDictionary<Type, IList<IColumn>> excludes = null;
+            if ((selectQuery.Includes != null && selectQuery.Includes.Any()) || (selectQuery.Excludes != null && selectQuery.Excludes.Any())) {
+                var parser = new IncludeExcludeParser(this.Configuration);
+                GetIncludeExcludes<T>(selectQuery.Includes, ref includes, parser);
+                GetIncludeExcludes<T>(selectQuery.Excludes, ref excludes, parser);
+            }
+
             if (numberCollectionFetches > 0) {
-                if (numberCollectionFetches > 1
-                    && (rootNode.Children.Count(
-                        c => c.Value.Column.Relationship == RelationshipType.OneToMany || c.Value.ContainedCollectionfetchesCount > 0) > 1)) {
+                if (numberCollectionFetches > 1 && (rootNode.Children.Count(c => c.Value.Column.Relationship == RelationshipType.OneToMany || c.Value.ContainedCollectionfetchesCount > 0) > 1)) {
                     // multiple one to many branches so we'll perform a union query
                     if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
                         // TODO this is temporary, should generate union query similar to next
-                        rootNode = this.GeneratePagingCollectionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, ref parameters);
+                        rootNode = this.GeneratePagingCollectionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
                     }
                     else {
-                        rootNode = this.GenerateNoPagingUnionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, ref parameters);
+                        rootNode = this.GenerateNoPagingUnionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
                     }
                 }
                 else {
                     if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
                         // we're sub-selecting so need to use a subquery
-                        rootNode = this.GeneratePagingCollectionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, ref parameters);
+                        rootNode = this.GeneratePagingCollectionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
                     }
                     else {
                         // we're fetching all things
-                        rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, ref parameters);
+                        rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
                     }
                 }
             }
             else {
                 // no collection fetches
-                rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, ref parameters);
+                rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
             }
 
-            return new SelectWriterResult(sql.ToString(), parameters, rootNode) { NumberCollectionsFetched = numberCollectionFetches };
+            return new SelectWriterResult(sql.ToString(), parameters, rootNode) {
+                                                                                    NumberCollectionsFetched = numberCollectionFetches
+                                                                                };
         }
 
-        private FetchNode GenerateNoPagingUnionSql<T>(
-            SelectQuery<T> selectQuery,
-            bool enforceAlias,
-            FetchNode rootNode,
-            StringBuilder sql,
-            int numberCollectionFetches,
-            ref DynamicParameters parameters) where T : class, new() {
-            var numQueries =
-                rootNode.Children.Count(c => c.Value.Column.Relationship == RelationshipType.OneToMany || c.Value.ContainedCollectionfetchesCount > 0);
+        private static void GetIncludeExcludes<T>(IList<Expression> expressions, ref IDictionary<Type, IList<IColumn>> includes, IncludeExcludeParser parser)
+            where T : class, new() {
+            if (expressions != null) {
+                includes = new Dictionary<Type, IList<IColumn>>();
+                foreach (var expression in expressions) {
+                    var column = parser.ParseExpression(expression);
+                    if (!includes.ContainsKey(column.Map.Type)) {
+                        includes.Add(column.Map.Type, new List<IColumn>());
+                    }
+
+                    includes[column.Map.Type]
+                        .Add(column);
+                }
+            }
+        }
+
+        private FetchNode GenerateNoPagingUnionSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, ref DynamicParameters parameters)
+            where T : class, new() {
+            var numQueries = rootNode.Children.Count(c => c.Value.Column.Relationship == RelationshipType.OneToMany || c.Value.ContainedCollectionfetchesCount > 0);
             var whereSql = new StringBuilder();
             parameters = this.AddWhereClause(selectQuery.WhereClauses, whereSql, ref rootNode);
 
@@ -125,14 +155,14 @@
                 subQueryColumnSqls[i] = new StringBuilder();
                 subQueryTableSqls[i] = new StringBuilder();
             }
+
             var outerQueryColumnSql = new StringBuilder();
 
             // add root columns
-            foreach (
-                var column in
-                    this.Configuration.GetMap<T>()
-                        .OwnedColumns(selectQuery.FetchAllProperties)
-                        .Where(c => !rootNode.Children.ContainsKey(c.Name) || !rootNode.Children[c.Name].IsFetched)) {
+            foreach (var column in GetColumnsWithIncludesAndExcludes(includes, excludes, this.Configuration.GetMap<T>(), selectQuery.FetchAllProperties)
+                .Where(
+                    c => !rootNode.Children.ContainsKey(c.Name) || !rootNode.Children[c.Name]
+                                                                            .IsFetched)) {
                 foreach (var subQuery in subQueryColumnSqls) {
                     this.AddColumn(subQuery, column, rootNode.Alias, column.DbName + rootNode.Alias);
                     subQuery.Append(", ");
@@ -151,29 +181,39 @@
                 subQuery.Remove(subQuery.Length - 2, 2);
             }
 
-            this.AddTablesForNoPagingUnion(selectQuery, outerQueryColumnSql, subQueryColumnSqls, subQueryTableSqls, rootNode);
+            this.AddTablesForNoPagingUnion(selectQuery, outerQueryColumnSql, subQueryColumnSqls, subQueryTableSqls, rootNode, includes, excludes);
 
             // add order by
             var orderSql = new StringBuilder();
             if (selectQuery.OrderClauses.Any()) {
-                var containsPrimaryKeyClause = this.AddOrderByClause(
-                    selectQuery.OrderClauses,
-                    orderSql,
-                    rootNode,
-                    (c, n) => "i",
-                    (c, n) => c.DbName + n.Alias);
+                var containsPrimaryKeyClause = this.AddOrderByClause(selectQuery.OrderClauses, orderSql, rootNode, (c, n) => "i", (c, n) => c.DbName + n.Alias);
                 if (!containsPrimaryKeyClause) {
-                    this.AppendDefaultOrderBy<T>(rootNode, orderSql, "i", this.Configuration.GetMap<T>().PrimaryKey.DbName + rootNode.Alias, false);
+                    this.AppendDefaultOrderBy<T>(
+                        rootNode,
+                        orderSql,
+                        "i",
+                        this.Configuration.GetMap<T>()
+                            .PrimaryKey.DbName + rootNode.Alias,
+                        false);
                 }
             }
             else {
-                this.AppendDefaultOrderBy<T>(rootNode, orderSql, "i", this.Configuration.GetMap<T>().PrimaryKey.DbName + rootNode.Alias);
+                this.AppendDefaultOrderBy<T>(
+                    rootNode,
+                    orderSql,
+                    "i",
+                    this.Configuration.GetMap<T>()
+                        .PrimaryKey.DbName + rootNode.Alias);
             }
 
             // now create the query
-            sql.Append("select ").Append(outerQueryColumnSql).Append(" from (");
+            sql.Append("select ")
+               .Append(outerQueryColumnSql)
+               .Append(" from (");
             for (var i = 0; i < numQueries; i++) {
-                sql.Append("select ").Append(subQueryColumnSqls[i]).Append(subQueryTableSqls[i]);
+                sql.Append("select ")
+                   .Append(subQueryColumnSqls[i])
+                   .Append(subQueryTableSqls[i]);
                 if (whereSql.Length > 0) {
                     sql.Append(whereSql);
                 }
@@ -192,13 +232,8 @@
             return rootNode;
         }
 
-        private FetchNode GeneratePagingCollectionSql<T>(
-            SelectQuery<T> selectQuery,
-            bool enforceAlias,
-            FetchNode rootNode,
-            StringBuilder sql,
-            int numberCollectionFetches,
-            ref DynamicParameters parameters) where T : class, new() {
+        private FetchNode GeneratePagingCollectionSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, ref DynamicParameters parameters)
+            where T : class, new() {
             // we write a subquery for the root type and all Many-to-One coming off it, we apply paging to that
             // we then left join to all of the collection columns
             // we need to apply the order by outside of the join as well
@@ -207,13 +242,12 @@
 
             // add root columns
             var innerColumnSql = new StringBuilder();
-            this.AddRootColumns(selectQuery, innerColumnSql, rootNode);
+            this.AddRootColumns(selectQuery, innerColumnSql, rootNode, includes, excludes);
             var innerColLength = innerColumnSql.Length;
             var innerColLengthMinusOne = innerColLength - 1;
             var outerColumnSqlTemp = new char[innerColLength];
             for (var i = 0; i < innerColLength; i++) {
-                if (innerColumnSql[i] == 't' && i < innerColLengthMinusOne && (i == 0 || innerColumnSql[i - 1] == ' ')
-                    && (innerColumnSql[i + 1] == '.' || innerColumnSql[i + 1] == '_')) {
+                if (innerColumnSql[i] == 't' && i < innerColLengthMinusOne && (i == 0 || innerColumnSql[i - 1] == ' ') && (innerColumnSql[i + 1] == '.' || innerColumnSql[i + 1] == '_')) {
                     outerColumnSqlTemp[i] = 'i';
                 }
                 else {
@@ -225,11 +259,11 @@
 
             var innerTableSql = new StringBuilder();
             var outerTableSql = new StringBuilder();
-            this.AddTablesForPagedCollection(selectQuery, innerTableSql, outerTableSql, innerColumnSql, outerColumnSql, rootNode);
+            this.AddTablesForPagedCollection(selectQuery, innerTableSql, outerTableSql, innerColumnSql, outerColumnSql, rootNode, includes, excludes);
 
             // add order by
             var innerOrderSql = new StringBuilder();
-            var orderClauses =  new Queue<OrderClause<T>>(selectQuery.OrderClauses); // clone the queue for use in the outer clause
+            var orderClauses = new Queue<OrderClause<T>>(selectQuery.OrderClauses); // clone the queue for use in the outer clause
             if (selectQuery.OrderClauses.Any()) {
                 this.AddOrderByClause(selectQuery.OrderClauses, innerOrderSql, rootNode);
             }
@@ -239,7 +273,10 @@
 
             // construct the query
             var innerSql = new StringBuilder("select ");
-            innerSql.Append(innerColumnSql).Append(innerTableSql).Append(whereSql).Append(innerOrderSql);
+            innerSql.Append(innerColumnSql)
+                    .Append(innerTableSql)
+                    .Append(whereSql)
+                    .Append(innerOrderSql);
             //// if anything is added after orderSql then the paging will probably need changing
 
             // apply paging to inner query
@@ -261,15 +298,15 @@
             }
 
             // now construct the outer query
-            sql.Append("select ").Append(outerColumnSql).Append(" from (").Append(innerSql).Append(") as i").Append(outerTableSql);
+            sql.Append("select ")
+               .Append(outerColumnSql)
+               .Append(" from (")
+               .Append(innerSql)
+               .Append(") as i")
+               .Append(outerTableSql);
             var outerOrderSql = new StringBuilder();
             if (orderClauses.Any()) {
-                var containsPrimaryKeyClause = this.AddOrderByClause(
-                    orderClauses,
-                    outerOrderSql,
-                    rootNode,
-                    (c, n) => "i",
-                    (c, n) => c.DbName);
+                var containsPrimaryKeyClause = this.AddOrderByClause(orderClauses, outerOrderSql, rootNode, (c, n) => "i", (c, n) => c.DbName);
                 if (!containsPrimaryKeyClause) {
                     this.AppendDefaultOrderBy<T>(rootNode, outerOrderSql, "i", isFirstOrderClause: false);
                 }
@@ -282,29 +319,26 @@
             return rootNode;
         }
 
-        private FetchNode GenerateNoPagingSql<T>(
-            SelectQuery<T> selectQuery,
-            bool enforceAlias,
-            FetchNode rootNode,
-            StringBuilder sql,
-            int numberCollectionFetches,
-            ref DynamicParameters parameters) where T : class, new() {
+        private FetchNode GenerateNoPagingSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, ref DynamicParameters parameters)
+            where T : class, new() {
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
             var whereSql = new StringBuilder();
             var orderSql = new StringBuilder();
             if (rootNode == null && enforceAlias) {
-                rootNode = new FetchNode { Alias = "t" };
+                rootNode = new FetchNode {
+                                             Alias = "t"
+                                         };
             }
 
             // add where clause
             parameters = this.AddWhereClause(selectQuery.WhereClauses, whereSql, ref rootNode);
 
             // add select columns
-            this.AddRootColumns(selectQuery, columnSql, rootNode); // do columns second as we may not be fetching but need joins for the where clause
+            this.AddRootColumns(selectQuery, columnSql, rootNode, includes, excludes); // do columns second as we may not be fetching but need joins for the where clause
 
             // add in the tables
-            this.AddTables(selectQuery, tableSql, columnSql, rootNode);
+            this.AddTables(selectQuery, tableSql, columnSql, rootNode, includes, excludes);
 
             // add order by
             if (selectQuery.OrderClauses.Any()) {
@@ -363,10 +397,14 @@
                 orderSql.Append('.');
             }
 
-            this.Dialect.AppendQuotedName(orderSql, name ?? this.Configuration.GetMap<T>().PrimaryKey.DbName);
+            this.Dialect.AppendQuotedName(
+                orderSql,
+                name ?? this.Configuration.GetMap<T>()
+                            .PrimaryKey.DbName);
         }
 
-        protected void AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode) where T : class, new() {
+        protected void AddTables<T>(SelectQuery<T> selectQuery, StringBuilder tableSql, StringBuilder columnSql, FetchNode rootNode, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes)
+            where T : class, new() {
             // separate string builder for the tables as we use the sql builder for fetch columns
             tableSql.Append(" from ");
             this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap<T>());
@@ -382,7 +420,7 @@
                     var signatureBuilder = new StringBuilder();
                     var splitOns = new List<string>();
                     foreach (var node in rootNode.Children) {
-                        var signature = this.AddNode(node.Value, tableSql, columnSql);
+                        var signature = this.AddNode(node.Value, tableSql, columnSql, selectQuery.FetchAllProperties, includes, excludes);
                         if (node.Value.IsFetched) {
                             signatureBuilder.Append(signature.Signature);
                             splitOns.AddRange(signature.SplitOn);
@@ -400,12 +438,8 @@
             }
         }
 
-        private void AddTablesForNoPagingUnion<T>(
-            SelectQuery<T> selectQuery,
-            StringBuilder outerQueryColumnSql,
-            StringBuilder[] subQueryColumnSqls,
-            StringBuilder[] subQueryTableSqls,
-            FetchNode rootNode) where T : class, new() {
+        private void AddTablesForNoPagingUnion<T>(SelectQuery<T> selectQuery, StringBuilder outerQueryColumnSql, StringBuilder[] subQueryColumnSqls, StringBuilder[] subQueryTableSqls, FetchNode rootNode, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes)
+            where T : class, new() {
             foreach (var subQuery in subQueryTableSqls) {
                 subQuery.Append(" from ");
                 this.Dialect.AppendQuotedTableName(subQuery, this.Configuration.GetMap<T>());
@@ -422,14 +456,7 @@
             var insideQueryN = 0;
             var hasSeenFirstCollection = false;
             foreach (var node in rootNode.Children) {
-                var signature = this.AddNodeForNonPagedUnion(
-                    node.Value,
-                    outerQueryColumnSql,
-                    subQueryColumnSqls,
-                    subQueryTableSqls,
-                    ref insideQueryN,
-                    false,
-                    ref hasSeenFirstCollection);
+                var signature = this.AddNodeForNonPagedUnion(node.Value, outerQueryColumnSql, subQueryColumnSqls, subQueryTableSqls, ref insideQueryN, false, ref hasSeenFirstCollection, includes, excludes, selectQuery.FetchAllProperties);
                 if (node.Value.IsFetched) {
                     signatureBuilder.Append(signature.Signature);
                     splitOns.AddRange(signature.SplitOn);
@@ -440,13 +467,8 @@
             rootNode.SplitOn = string.Join(",", splitOns);
         }
 
-        private void AddTablesForPagedCollection<T>(
-            SelectQuery<T> selectQuery,
-            StringBuilder innerTableSql,
-            StringBuilder outerTableSql,
-            StringBuilder innerColumnSql,
-            StringBuilder outerColumnSql,
-            FetchNode rootNode) where T : class, new() {
+        private void AddTablesForPagedCollection<T>(SelectQuery<T> selectQuery, StringBuilder innerTableSql, StringBuilder outerTableSql, StringBuilder innerColumnSql, StringBuilder outerColumnSql, FetchNode rootNode, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes)
+            where T : class, new() {
             innerTableSql.Append(" from ");
             this.Dialect.AppendQuotedTableName(innerTableSql, this.Configuration.GetMap<T>());
             innerTableSql.Append(" as t");
@@ -459,7 +481,7 @@
             var signatureBuilder = new StringBuilder();
             var splitOns = new List<string>();
             foreach (var node in rootNode.Children) {
-                var signature = this.AddNodeForPagedCollection(node.Value, innerTableSql, outerTableSql, innerColumnSql, outerColumnSql, false);
+                var signature = this.AddNodeForPagedCollection(node.Value, innerTableSql, outerTableSql, innerColumnSql, outerColumnSql, false, includes, excludes, selectQuery.FetchAllProperties);
                 if (node.Value.IsFetched) {
                     signatureBuilder.Append(signature.Signature);
                     splitOns.AddRange(signature.SplitOn);
@@ -470,14 +492,7 @@
             rootNode.SplitOn = string.Join(",", splitOns);
         }
 
-        private AddNodeResult AddNodeForNonPagedUnion(
-            FetchNode node,
-            StringBuilder outerQueryColumnSql,
-            StringBuilder[] subQueryColumnSqls,
-            StringBuilder[] subQueryTableSqls,
-            ref int insideQueryN,
-            bool insideCollectionBranch,
-            ref bool hasSeenFirstCollection) {
+        private AddNodeResult AddNodeForNonPagedUnion(FetchNode node, StringBuilder outerQueryColumnSql, StringBuilder[] subQueryColumnSqls, StringBuilder[] subQueryTableSqls, ref int insideQueryN, bool insideCollectionBranch, ref bool hasSeenFirstCollection, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, bool selectQueryFetchAllProperties) {
             var splitOns = new List<string>();
             IMap map;
             if (node.Column.Relationship == RelationshipType.OneToMany) {
@@ -502,7 +517,8 @@
                 StringBuilder query = subQueryTableSqls[insideQueryN];
                 query.Append(" left join ");
                 this.Dialect.AppendQuotedTableName(query, map);
-                query.Append(" as ").Append(node.Alias);
+                query.Append(" as ")
+                     .Append(node.Alias);
                 AppendPagedUnionJoin(node, query);
             }
             else {
@@ -510,7 +526,8 @@
                 foreach (var subQuery in subQueryTableSqls) {
                     subQuery.Append(" left join ");
                     this.Dialect.AppendQuotedTableName(subQuery, map);
-                    subQuery.Append(" as ").Append(node.Alias);
+                    subQuery.Append(" as ")
+                            .Append(node.Alias);
                     AppendPagedUnionJoin(node, subQuery);
                 }
             }
@@ -519,7 +536,10 @@
             if (node.IsFetched) {
                 if (isNowInsideCollection) {
                     // add columns to subquery, nulls to others and cols to outer
-                    foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)) {
+                    foreach (var column in GetColumnsWithIncludesAndExcludes(includes, excludes, map, selectQueryFetchAllProperties)
+                        .Where(
+                            c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
+                                                                            .IsFetched)) {
                         for (var i = 0; i < subQueryColumnSqls.Length; i++) {
                             var subQuery = subQueryColumnSqls[i];
                             subQuery.Append(", ");
@@ -527,11 +547,13 @@
                                 this.AddColumn(subQuery, column, node.Alias, column.DbName + node.Alias);
                             }
                             else {
-                                subQuery.Append("null as ").Append(column.DbName + node.Alias);
+                                subQuery.Append("null as ")
+                                        .Append(column.DbName + node.Alias);
                             }
                         }
 
-                        outerQueryColumnSql.Append(", ").Append("i.");
+                        outerQueryColumnSql.Append(", ")
+                                           .Append("i.");
                         this.Dialect.AppendQuotedName(outerQueryColumnSql, column.DbName + node.Alias);
                         outerQueryColumnSql.Append(" as ");
                         if (column.Relationship == RelationshipType.None) {
@@ -544,14 +566,18 @@
                 }
                 else {
                     // add columns to all queries
-                    foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)) {
+                    foreach (var column in GetColumnsWithIncludesAndExcludes(includes, excludes, map, selectQueryFetchAllProperties)
+                        .Where(
+                            c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
+                                                                            .IsFetched)) {
                         for (var i = 0; i < subQueryColumnSqls.Length; i++) {
                             var subQuery = subQueryColumnSqls[i];
                             subQuery.Append(", ");
                             this.AddColumn(subQuery, column, node.Alias, column.DbName + node.Alias);
                         }
 
-                        outerQueryColumnSql.Append(", ").Append("i.");
+                        outerQueryColumnSql.Append(", ")
+                                           .Append("i.");
                         this.Dialect.AppendQuotedName(outerQueryColumnSql, column.DbName + node.Alias);
                         outerQueryColumnSql.Append(" as ");
                         if (column.Relationship == RelationshipType.None) {
@@ -567,14 +593,7 @@
             // add its children
             var signatureBuilder = new StringBuilder();
             foreach (var child in node.Children) {
-                var signature = this.AddNodeForNonPagedUnion(
-                    child.Value,
-                    outerQueryColumnSql,
-                    subQueryColumnSqls,
-                    subQueryTableSqls,
-                    ref insideQueryN,
-                    isNowInsideCollection,
-                    ref hasSeenFirstCollection);
+                var signature = this.AddNodeForNonPagedUnion(child.Value, outerQueryColumnSql, subQueryColumnSqls, subQueryTableSqls, ref insideQueryN, isNowInsideCollection, ref hasSeenFirstCollection, includes, excludes, selectQueryFetchAllProperties);
                 if (child.Value.IsFetched) {
                     signatureBuilder.Append(signature.Signature);
                     splitOns.AddRange(signature.SplitOn);
@@ -586,16 +605,13 @@
                 actualSignature = node.Column.FetchId + "S" + actualSignature + "E";
             }
 
-            return new AddNodeResult { Signature = actualSignature, SplitOn = splitOns };
+            return new AddNodeResult {
+                                         Signature = actualSignature,
+                                         SplitOn = splitOns
+                                     };
         }
 
-        private AddNodeResult AddNodeForPagedCollection(
-            FetchNode node,
-            StringBuilder innerTableSql,
-            StringBuilder outerTableSql,
-            StringBuilder innerColumnSql,
-            StringBuilder outerColumnSql,
-            bool isAlongCollectionBranch) {
+        private AddNodeResult AddNodeForPagedCollection(FetchNode node, StringBuilder innerTableSql, StringBuilder outerTableSql, StringBuilder innerColumnSql, StringBuilder outerColumnSql, bool isAlongCollectionBranch, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, bool selectQueryFetchAllProperties) {
             var splitOns = new List<string>();
             IMap map;
             if (node.Column.Relationship == RelationshipType.OneToMany) {
@@ -616,11 +632,18 @@
             if (isNowAlongCollectionBranch) {
                 outerTableSql.Append(" left join ");
                 this.Dialect.AppendQuotedTableName(outerTableSql, map);
-                outerTableSql.Append(" as ").Append(node.Alias);
+                outerTableSql.Append(" as ")
+                             .Append(node.Alias);
 
                 if (node.Column.Relationship == RelationshipType.ManyToOne || node.Column.Relationship == RelationshipType.OneToOne) {
-                    outerTableSql.Append(" on ").Append(node.Parent.Alias).Append(".").Append(node.Column.DbName) // is this right?
-                                 .Append(" = ").Append(node.Alias).Append(".").Append(map.PrimaryKey.DbName);
+                    outerTableSql.Append(" on ")
+                                 .Append(node.Parent.Alias)
+                                 .Append(".")
+                                 .Append(node.Column.DbName) // is this right?
+                                 .Append(" = ")
+                                 .Append(node.Alias)
+                                 .Append(".")
+                                 .Append(map.PrimaryKey.DbName);
                 }
                 else if (node.Column.Relationship == RelationshipType.OneToMany) {
                     // we have to rename the columns inside the select query
@@ -661,7 +684,8 @@
             else {
                 innerTableSql.Append(" left join ");
                 this.Dialect.AppendQuotedTableName(innerTableSql, map);
-                innerTableSql.Append(" as ").Append(node.Alias);
+                innerTableSql.Append(" as ")
+                             .Append(node.Alias);
                 innerTableSql.Append(" on ")
                              .Append(node.Parent.Alias)
                              .Append(".")
@@ -674,7 +698,10 @@
 
             // add the columns
             if (node.IsFetched) {
-                foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)) {
+                var columns = GetColumnsWithIncludesAndExcludes(includes, excludes, map, selectQueryFetchAllProperties);
+                foreach (var column in columns.Where(
+                    c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
+                                                                    .IsFetched)) {
                     if (isNowAlongCollectionBranch) {
                         outerColumnSql.Append(", ");
                         this.AddColumn(outerColumnSql, column, node.Alias);
@@ -682,7 +709,11 @@
                     else {
                         innerColumnSql.Append(", ");
                         this.AddColumn(innerColumnSql, column, node.Alias, column.Name + node.Alias);
-                        outerColumnSql.Append(", ").Append("i.").Append(column.Name).Append(node.Alias).Append(" as ");
+                        outerColumnSql.Append(", ")
+                                      .Append("i.")
+                                      .Append(column.Name)
+                                      .Append(node.Alias)
+                                      .Append(" as ");
                         this.Dialect.AppendQuotedName(outerColumnSql, column.DbName);
                     }
                 }
@@ -691,13 +722,7 @@
             // add its children
             var signatureBuilder = new StringBuilder();
             foreach (var child in node.Children) {
-                var signature = this.AddNodeForPagedCollection(
-                    child.Value,
-                    innerTableSql,
-                    outerTableSql,
-                    innerColumnSql,
-                    outerColumnSql,
-                    isNowAlongCollectionBranch);
+                var signature = this.AddNodeForPagedCollection(child.Value, innerTableSql, outerTableSql, innerColumnSql, outerColumnSql, isNowAlongCollectionBranch, includes, excludes, selectQueryFetchAllProperties);
                 if (child.Value.IsFetched) {
                     signatureBuilder.Append(signature.Signature);
                     splitOns.AddRange(signature.SplitOn);
@@ -709,10 +734,13 @@
                 actualSignature = node.Column.FetchId + "S" + actualSignature + "E";
             }
 
-            return new AddNodeResult { Signature = actualSignature, SplitOn = splitOns };
+            return new AddNodeResult {
+                                         Signature = actualSignature,
+                                         SplitOn = splitOns
+                                     };
         }
 
-        private AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql) {
+        private AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes) {
             // add this node and then it's children
             // add table sql
             var splitOns = new List<string>();
@@ -739,13 +767,16 @@
                 tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + map.PrimaryKey.DbName);
             }
             else if (node.Column.Relationship == RelationshipType.OneToMany) {
-                tableSql.Append(
-                    " on " + node.Parent.Alias + "." + node.Column.Map.PrimaryKey.DbName + " = " + node.Alias + "." + node.Column.ChildColumn.DbName);
+                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.Map.PrimaryKey.DbName + " = " + node.Alias + "." + node.Column.ChildColumn.DbName);
             }
 
             // add the columns
             if (node.IsFetched) {
-                foreach (var column in map.OwnedColumns().Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)) {
+                var columns = GetColumnsWithIncludesAndExcludes(includes, excludes, map, selectQueryFetchAllProperties);
+                columns = columns.Where(
+                    c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
+                                                                    .IsFetched);
+                foreach (var column in columns) {
                     columnSql.Append(", ");
                     this.AddColumn(columnSql, column, node.Alias);
                 }
@@ -754,7 +785,7 @@
             // add its children
             var signatureBuilder = new StringBuilder();
             foreach (var child in node.Children) {
-                var signature = this.AddNode(child.Value, tableSql, columnSql);
+                var signature = this.AddNode(child.Value, tableSql, columnSql, selectQueryFetchAllProperties, includes, excludes);
                 if (child.Value.IsFetched) {
                     signatureBuilder.Append(signature.Signature);
                     splitOns.AddRange(signature.SplitOn);
@@ -766,18 +797,24 @@
                 actualSignature = node.Column.FetchId + "S" + actualSignature + "E";
             }
 
-            return new AddNodeResult { Signature = actualSignature, SplitOn = splitOns };
+            return new AddNodeResult {
+                                         Signature = actualSignature,
+                                         SplitOn = splitOns
+                                     };
         }
 
-        private void AddRootColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode, bool removeTrailingComma = true) where T : class, new() {
-            var alias = rootNode != null ? rootNode.Alias : null;
+        private void AddRootColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, bool removeTrailingComma = true)
+            where T : class, new() {
+            var alias = rootNode != null
+                            ? rootNode.Alias
+                            : null;
 
             if (selectQuery.Projection == null) {
-                foreach (
-                    var column in
-                        this.Configuration.GetMap<T>()
-                            .OwnedColumns(selectQuery.FetchAllProperties)
-                            .Where(c => rootNode == null || !rootNode.Children.ContainsKey(c.Name) || !rootNode.Children[c.Name].IsFetched)) {
+                var columns = GetColumnsWithIncludesAndExcludes(includes, excludes, this.Configuration.GetMap<T>(), selectQuery.FetchAllProperties);
+                columns = columns.Where(
+                    c => rootNode == null || !rootNode.Children.ContainsKey(c.Name) || !rootNode.Children[c.Name]
+                                                                                                .IsFetched);
+                foreach (var column in columns) {
                     this.AddColumn(columnSql, column, alias);
                     columnSql.Append(", ");
                 }
@@ -786,6 +823,25 @@
             if (removeTrailingComma) {
                 columnSql.Remove(columnSql.Length - 2, 2);
             }
+        }
+
+        private static IEnumerable<IColumn> GetColumnsWithIncludesAndExcludes(IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, IMap map, bool fetchAllProperties) {
+            var columns = map.OwnedColumns(fetchAllProperties);
+            if (includes != null) {
+                IList<IColumn> thisIncludes;
+                if (includes.TryGetValue(map.Type, out thisIncludes)) {
+                    columns = columns.Union(includes[map.Type]);
+                }
+            }
+
+            if (excludes != null) {
+                IList<IColumn> thisExcludes;
+                if (excludes.TryGetValue(map.Type, out thisExcludes)) {
+                    columns = columns.Where(c => !thisExcludes.Contains(c));
+                }
+            }
+
+            return columns;
         }
 
         private void AddColumn(StringBuilder sql, IColumn column, string tableAlias = null, string columnAlias = null) {

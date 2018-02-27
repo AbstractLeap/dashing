@@ -8,7 +8,6 @@
     using Dashing.Configuration;
     using Dashing.Tests.Properties;
     using Dashing.Tests.TestDomain;
-    using Dashing.Tests.TestDomain.OneToOne;
 
     using Moq;
 

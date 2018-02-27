@@ -1,4 +1,6 @@
-﻿namespace Dashing.Tests.Migration {
+﻿using Dashing.Tests.TestDomain;
+
+namespace Dashing.Tests.Migration {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -8,6 +10,7 @@
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
     using Dashing.Migration;
+    using Dashing.Tools.TestDomain;
     using Dashing.Tools.Tests;
     using Dashing.Tools.Tests.TestDomain;
 
@@ -97,7 +100,7 @@
             var configTo = new CustomConfig();
             var configFrom = new CustomConfig();
 
-            // remove onetooneleft from the config
+            // remove pair from the config
             var mappedTypes =
                 (IDictionary<Type, IMap>)
                 typeof(BaseConfiguration).GetField("mappedTypes", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configTo);

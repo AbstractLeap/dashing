@@ -34,6 +34,7 @@ namespace Dashing.Weaving.Sample.Target {
                         this.__Name_IsDirty = true;
                     }
                 }
+
                 this.__Name_IsSet = true;
                 this.__name = value;
             }
@@ -66,6 +67,7 @@ namespace Dashing.Weaving.Sample.Target {
                 EntityWithStringPrimaryKey entityWithGuidPrimaryKey = obj as EntityWithStringPrimaryKey;
                 result = (entityWithGuidPrimaryKey != null && this.Id != null && this.Id == entityWithGuidPrimaryKey.Id);
             }
+
             return result;
         }
 
@@ -90,7 +92,20 @@ namespace Dashing.Weaving.Sample.Target {
             if (this.__Name_IsSet) {
                 list.Add("Name");
             }
+
             return list;
+        }
+
+        public bool IsSetLoggingEnabled() {
+            throw new NotImplementedException();
+        }
+
+        public void EnableSetLogging() {
+            throw new NotImplementedException();
+        }
+
+        public void DisableSetLogging() {
+            throw new NotImplementedException();
         }
 
         public void EnableTracking() {
@@ -112,6 +127,7 @@ namespace Dashing.Weaving.Sample.Target {
             if (this.__Name_IsDirty) {
                 list.Add("Name");
             }
+
             return list;
         }
 
@@ -123,9 +139,8 @@ namespace Dashing.Weaving.Sample.Target {
                     }
                 }
             }
-            throw new ArgumentOutOfRangeException(
-                "propertyName",
-                "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first");
+
+            throw new ArgumentOutOfRangeException("propertyName", "Either the property doesn't exist or it's not dirty. Consult GetDirtyProperties first");
         }
     }
 }

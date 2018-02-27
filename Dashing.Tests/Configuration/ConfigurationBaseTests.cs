@@ -71,7 +71,7 @@
             var target = new CustomConfigurationWithAddNamespace(mockMapper.Object);
 
             Assert.NotNull(target);
-            Assert.Equal(10, target.Maps.Count());
+            Assert.Equal(13, target.Maps.Count());
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Blog)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Comment)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Like)));
@@ -142,7 +142,7 @@
             var target = new BasicConfigurationWithCodeManager();
 
             // assert
-            Assert.Throws(typeof(ArgumentException), () => { target.GetMap(typeof(Blog)); });
+            Assert.Throws<ArgumentException>(() => { target.GetMap(typeof(Blog)); });
         }
         
         private static Mock<IMapper> MakeMockMapper() {
@@ -159,6 +159,11 @@
             mockMapper.Setup(m => m.MapFor(typeof(BoolClass), It.IsAny<IConfiguration>())).Returns(new Map<BoolClass>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(ThingWithNullable), It.IsAny<IConfiguration>())).Returns(new Map<ThingWithNullable>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(ReferencesThingWithNullable), It.IsAny<IConfiguration>())).Returns(new Map<ReferencesThingWithNullable>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(OneToOneLeft), It.IsAny<IConfiguration>())).Returns(new Map<OneToOneLeft>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(OneToOneRight), It.IsAny<IConfiguration>())).Returns(new Map<OneToOneRight>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Pair), It.IsAny<IConfiguration>())).Returns(new Map<Pair>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Post), It.IsAny<IConfiguration>())).Returns(new Map<Post>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(User), It.IsAny<IConfiguration>())).Returns(new Map<User>()).Verifiable();
             return mockMapper;
         }
 

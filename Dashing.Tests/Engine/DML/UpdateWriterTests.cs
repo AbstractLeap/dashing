@@ -9,6 +9,7 @@
     using Dashing.Engine.DML;
     using Dashing.Tests.Extensions;
     using Dashing.Tests.TestDomain;
+    using Dashing.Tests.TestDomain.Constructor;
 
     using Xunit;
 
@@ -46,8 +47,8 @@
             var param1 = result.Parameters.GetValueOfParameter("@p_1");
             var param2 = result.Parameters.GetValueOfParameter("@p_2");
 
-            Assert.IsType(typeof(int), param1);
-            Assert.IsType(typeof(int), param2);
+            Assert.IsType<int>(param1);
+            Assert.IsType<int>(param2);
         }
 
         [Fact]
@@ -107,7 +108,7 @@
         }
 
         [Fact]
-        public void BuldUpdateManyOneNullAddsNull() {
+        public void BulkUpdateManyOneNullAddsNull() {
             // assemble
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
 
@@ -139,8 +140,22 @@
             var param1 = result.Parameters.GetValueOfParameter("@Blog");
             var param2 = result.Parameters.GetValueOfParameter("@l_1");
 
-            Assert.IsType(typeof(int), param1);
-            Assert.IsType(typeof(int), param2);
+            Assert.IsType<int>(param1);
+            Assert.IsType<int>(param2);
+        }
+
+        [Fact]
+        public void BulkUpdateIgnoresConstructorSetProperties() {
+            // assemble
+            var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
+
+            // act
+            Expression<Func<ClassWithConstructor, bool>> predicate = p => p.Id == 1;
+            var result = updateWriter.GenerateBulkSql(p => { }, new[] { predicate });
+
+            // assert
+            Debug.Write(result.Sql);
+            Assert.Equal(string.Empty, result.Sql); // Is this the correct result?
         }
 
         private static UpdateWriter MakeTarget() {
@@ -159,12 +174,14 @@
         private class CustomConfig : MockConfiguration {
             public CustomConfig() {
                 this.AddNamespaceOf<Post>();
+                this.AddNamespaceOf<ClassWithConstructor>();
             }
         }
 
         private class CustomConfigWithIgnore : MockConfiguration {
             public CustomConfigWithIgnore() {
                 this.AddNamespaceOf<Post>();
+                this.AddNamespaceOf<ClassWithConstructor>();
                 this.Setup<Post>().Property(p => p.DoNotMap).Ignore();
             }
         }

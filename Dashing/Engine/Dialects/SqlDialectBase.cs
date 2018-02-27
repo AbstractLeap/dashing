@@ -440,6 +440,10 @@ namespace Dashing.Engine.Dialects {
             return "select @@identity id";
         }
 
+        public virtual void AppendIdOutput(StringBuilder sql, IMap map) {
+
+        }
+
         public virtual string WriteDropTableIfExists(string tableName) {
             var sql = new StringBuilder();
             sql.Append("if exists (select 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = '");

@@ -167,8 +167,6 @@
                         foreach (var attempt in attempts) {
                             if (File.Exists(attempt)) {
                                 return Assembly.LoadFile(attempt);
-                                var assemblyData = File.ReadAllBytes(attempt);
-                                return Assembly.Load(assemblyData);
                             }
                         }
                     }

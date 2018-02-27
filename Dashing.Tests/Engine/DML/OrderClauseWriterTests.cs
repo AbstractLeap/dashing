@@ -8,7 +8,6 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Tests.TestDomain;
-    using Dashing.Tests.TestDomain.OneToOne;
 
     using Xunit;
 

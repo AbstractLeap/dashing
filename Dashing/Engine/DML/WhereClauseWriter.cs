@@ -538,7 +538,7 @@
         private ISqlElement VisitConstant(ConstantExpression exp) {
             this.isConstantExpression = true;
 
-            if (exp.Value != null && this.isTopOfBinaryOrMethod) {
+            if (exp.Value != null && this.isTopOfBinaryOrMethod && (exp.Type.GetEnumerableType() == null || !this.config.HasMap(exp.Type.GetEnumerableType()))) {
                 return AddParameter(exp.Value);
             }
 

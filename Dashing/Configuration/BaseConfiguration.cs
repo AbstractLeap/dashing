@@ -27,6 +27,10 @@
         }
 
         public BaseConfiguration(IMapper mapper) {
+            if (mapper == null) {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+
             this.mapper = mapper;
             this.mappedTypes = new Dictionary<Type, IMap>();
             this.eventHandlers = new EventHandlers(new List<IEventListener>());

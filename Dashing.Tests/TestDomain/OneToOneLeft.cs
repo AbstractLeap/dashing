@@ -1,4 +1,4 @@
-﻿namespace Dashing.Tools.Tests.TestDomain {
+﻿namespace Dashing.Tests.TestDomain {
     public class OneToOneLeft {
         public virtual int OneToOneLeftId { get; set; }
 

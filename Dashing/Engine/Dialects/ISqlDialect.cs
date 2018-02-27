@@ -37,6 +37,8 @@ namespace Dashing.Engine.Dialects {
 
         string GetIdSql();
 
+        void AppendIdOutput(StringBuilder sql, IMap map);
+
         /// <summary>
         ///     Applies paging to the sql query
         /// </summary>

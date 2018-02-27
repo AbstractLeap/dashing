@@ -47,7 +47,7 @@
         [Fact]
         public void TestConfigWorks() {
             var config = new TestConfiguration();
-            using (var session = new Session(new InMemoryEngine(config), null)) {
+            using (var session = new InMemorySessionCreator(config).BeginSession()) {
                 session.Insert(new Post() { Title = "Foo" });
                 Assert.Equal("Foo", session.Get<Post>(1).Title);
             }
@@ -103,7 +103,7 @@
             session.Delete<User>(u => u.IsEnabled);
             var users = session.Query<User>().ToList();
 
-            Assert.Equal(1, users.Count);
+            Assert.Single(users);
             Assert.Equal(1, users.Count(u => !u.IsEnabled && u.Username == "James"));
         }
 
@@ -166,8 +166,8 @@
         }
 
         private ISession GetSession() {
-            var engine = new InMemoryEngine(new TestConfiguration());
-            var session = new Session(engine, new Lazy<IDbConnection>(() => new InMemoryDbConnection()));
+            var sessionCreator = new InMemorySessionCreator(new TestConfiguration());
+            var session = sessionCreator.BeginSession();
 
             var authors = new List<User> { new User { Username = "Bob", IsEnabled = true }, new User { Username = "Mark", IsEnabled = true }, new User { Username = "James", IsEnabled = false } };
             session.Insert(authors);

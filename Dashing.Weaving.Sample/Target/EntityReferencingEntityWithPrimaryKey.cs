@@ -1,12 +1,17 @@
 namespace Dashing.Weaving.Sample.Target {
+    using System;
     using System.Collections.Generic;
 
     using Dashing.CodeGeneration;
 
     public class EntityReferencingEntityWithPrimaryKey : ISetLogger, ITrackedEntity {
+#pragma warning disable 649
         private bool isTracking;
+#pragma warning restore 649
 
+#pragma warning disable 169
         private int? __hashcode;
+#pragma warning restore 169
 
         protected bool __Name_IsSet;
 
@@ -33,7 +38,9 @@ namespace Dashing.Weaving.Sample.Target {
             get
             {
                 if (this.__entity == null && this.EntityWithStringPrimaryKeyId != null) {
-                    this.__entity = new EntityWithStringPrimaryKey { Id = this.EntityWithStringPrimaryKeyId };
+                    this.__entity = new EntityWithStringPrimaryKey {
+                                                                       Id = this.EntityWithStringPrimaryKeyId
+                                                                   };
                 }
 
                 return this.__entity;
@@ -56,27 +63,39 @@ namespace Dashing.Weaving.Sample.Target {
         }
 
         public IEnumerable<string> GetSetProperties() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+        public bool IsSetLoggingEnabled() {
+            throw new NotImplementedException();
+        }
+
+        public void EnableSetLogging() {
+            throw new NotImplementedException();
+        }
+
+        public void DisableSetLogging() {
+            throw new NotImplementedException();
         }
 
         public void EnableTracking() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void DisableTracking() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool IsTrackingEnabled() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IEnumerable<string> GetDirtyProperties() {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public object GetOldValue(string propertyName) {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

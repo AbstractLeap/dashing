@@ -5,7 +5,6 @@
 
     using Dashing.Configuration;
     using Dashing.Tests.TestDomain;
-    using Dashing.Tests.TestDomain.OneToOne;
 
     using Xunit;
 
@@ -93,7 +92,7 @@
         public void ExcludeByDefaultSetsFlag() {
             var column = MakeTarget();
             column.ExcludeByDefault();
-            Assert.Equal(true, column.IsExcludedByDefault);
+            Assert.True(column.IsExcludedByDefault);
         }
 
         [Fact]
@@ -106,7 +105,7 @@
         public void DontExcludeByDefaultSetsFlag() {
             var column = MakeTarget();
             column.DontExcludeByDefault();
-            Assert.Equal(false, column.IsExcludedByDefault);
+            Assert.False(column.IsExcludedByDefault);
         }
 
         [Fact]
@@ -119,7 +118,7 @@
         public void IgnoreSetsFlag() {
             var column = MakeTarget();
             column.Ignore();
-            Assert.Equal(true, column.IsIgnored);
+            Assert.True(column.IsIgnored);
         }
 
         [Fact]
@@ -132,7 +131,7 @@
         public void DontIgnoreSetsFlag() {
             var column = MakeTarget();
             column.DontIgnore();
-            Assert.Equal(false, column.IsIgnored);
+            Assert.False(column.IsIgnored);
         }
 
         [Fact]
