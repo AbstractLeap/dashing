@@ -2,7 +2,7 @@ namespace Dashing.SchemaReading {
     using System;
 
     public class SchemaReaderFactory {
-        public static ISchemaReader GetSchemaReader(string providerName) {
+        public ISchemaReader GetSchemaReader(string providerName) {
             if (string.IsNullOrWhiteSpace(providerName)) {
                 throw new ArgumentNullException("providerName");
             }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing", "Dashing\Dashing.csproj", "{54B26C08-9BFD-46C4-A16E-97034A1ED114}"
 EndProject
@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Weaving.Tests", "Da
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Weaver", "Dashing.Weaver\Dashing.Weaver.csproj", "{D8603DCD-234C-407B-B917-669755CF5877}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Cli.Core", "Dashing.Cli.Core\Dashing.Cli.Core.csproj", "{E32C4DEE-E73B-4190-A9A5-CCDAF7A92456}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Cli", "Dashing.Cli\Dashing.Cli.csproj", "{E32C4DEE-E73B-4190-A9A5-CCDAF7A92456}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.IntegrationTests", "Dashing.IntegrationTests\Dashing.IntegrationTests.csproj", "{DF243268-4867-4FCA-A5D2-0D41AA2441BE}"
 EndProject
