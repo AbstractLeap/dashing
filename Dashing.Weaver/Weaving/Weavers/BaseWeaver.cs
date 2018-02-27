@@ -151,22 +151,6 @@
             return typeDefinition.BaseType.FullName == typeof(object).FullName;
         }
 
-        public static TypeDefinition GetTypeDefFromFullName(string typeFullName, AssemblyDefinition assemblyDefinition) {
-            TypeDefinition typeDef;
-            if (typeFullName.Contains('+')) {
-                var types = typeFullName.Split('+');
-                typeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == types.First());
-                for (var i = 1; i < types.Length; i++) {
-                    typeDef = typeDef.NestedTypes.Single(t => t.Name == types.ElementAt(i));
-                }
-            }
-            else {
-                typeDef = assemblyDefinition.MainModule.Types.Single(t => t.FullName == typeFullName);
-            }
-
-            return typeDef;
-        }
-
         public abstract void Weave(
             AssemblyDefinition assemblyDefinition,
             TypeDefinition typeDefinition,

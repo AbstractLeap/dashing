@@ -35,7 +35,7 @@
                     assemblyGroup.Key,
                     new ReaderParameters { ReadWrite = true, ReadSymbols = hasSymbols, AssemblyResolver = assemblyResolver })) {
                     foreach (var mapDefinition in assemblyGroup) {
-                        var typeDefinition = assembly.MainModule.GetType(mapDefinition.TypeFullName);
+                        var typeDefinition = assembly.MainModule.GetTypeDefFromFullName(mapDefinition.TypeFullName);
                         foreach (var weaver in weavers) {
                             weaver.Weave(assembly, typeDefinition, mapDefinition.ColumnDefinitions);
                         }
@@ -50,8 +50,7 @@
         }
 
         private IList<MapDefinition> GetMetadata(IEnumerable<string> assemblyPaths, IEnumerable<string> configurationTypes) {
-            var arguments =
-                $"-p {string.Join(",", assemblyPaths.Select(path => "\"" + path + "\""))} -t {string.Join(",", configurationTypes.Select(type => "\"" + type + "\""))}";
+            var arguments = string.Join(" ", assemblyPaths.Select(path => $"-p \"{path}\"")) + " " + string.Join(" ", configurationTypes.Select(path => $"-t \"{path}\""));
             var proc = new Process {
                                        StartInfo = new ProcessStartInfo {
 #if COREFX

@@ -19,6 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Tests", "Dashing.Te
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Testing.Tests", "Dashing.Testing.Tests\Dashing.Testing.Tests.csproj", "{11B63BCF-51C2-4221-AC5B-232230665293}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D8603DCD-234C-407B-B917-669755CF5877} = {D8603DCD-234C-407B-B917-669755CF5877}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Weaving.Tests", "Dashing.Weaving.Tests\Dashing.Weaving.Tests.csproj", "{BDBFA448-CD7C-46A0-9CAF-E8264071D1AA}"
 	ProjectSection(ProjectDependencies) = postProject
