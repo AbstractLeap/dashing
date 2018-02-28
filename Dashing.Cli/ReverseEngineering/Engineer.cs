@@ -49,7 +49,7 @@
             var className = this.convention.ClassNameFor(name);
             var typeBuilder = this.moduleBuilder.DefineType(className, TypeAttributes.Public);
 #if COREFX
-            var type = typeBuilder.CreateTypeInfo().GetType();
+            var type = typeBuilder.CreateTypeInfo().AsType();
 #else
             var type = typeBuilder.CreateType();
 #endif

@@ -92,15 +92,16 @@
 
                                     ConfigureAssemblyResolution(assemblyPath.Value());
                                     DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value());
-                                    var configurationWeaver = new ConfigurationWeaver();
-                                    try {
-                                        var result = configurationWeaver.Weave(assemblyPath.Values, configurationType.Values);
-                                        return result ? 0 : 1;
-                                    }
-                                    catch (Exception ex) {
-                                        Console.WriteLine(ex.Message);
-                                        return 1;
-                                    }
+                                    return 0;
+                                    //var configurationWeaver = new ConfigurationWeaver();
+                                    //try {
+                                    //    var result = configurationWeaver.Weave(assemblyPath.Values, configurationType.Values);
+                                    //    return result ? 0 : 1;
+                                    //}
+                                    //catch (Exception ex) {
+                                    //    Console.WriteLine(ex.Message);
+                                    //    return 1;
+                                    //}
                                 });
                     });
         }
