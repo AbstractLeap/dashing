@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Dashing.Weaver</id>
+    <version>2.0.0-alpha</version>
+    <title>Dashing Weaver</title>
+	<authors>Polylytics</authors>
+	<owners>Polylytics</owners>
+	<projectUrl>https://github.com/Polylytics/dashing</projectUrl>
+	<iconUrl>http://polylytics.com/dashing/dashing-icon.png</iconUrl>
+	<requireLicenseAcceptance>false</requireLicenseAcceptance>
+	<description>Dashing.Weaver is a compile time tool for adding behaviour to a Dashing domain model</description>
+	<copyright>© Polylytics Limited, 2018</copyright>
+	<language>en-GB</language>
+	<tags>dashing dapper orm sql mini-orm</tags>
+  </metadata>
+  <files>
+    <file src="_._" target="lib/netstandard1.5/" />
+    <file src="_._" target="lib/net46/" />
+    <file src="Dashing.Weaver.targets" target="build/netstandard1.5/Dashing.Weaver.targets" />
+    <file src="Dashing.Weaver.targets" target="build/net46/Dashing.Weaver.targets" />
+
+    <file src="Weave.targets" target="tools/" />
+    <file src="$publishdir$\net46\**\*" target="tools/net46/" />
+    <file src="$publishdir$\netcoreapp1.1\**\*" target="tools/netcoreapp1.1/" />
+  </files>
+</package>

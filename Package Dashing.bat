@@ -1,0 +1,1 @@
+dotnet pack ./Dashing/Dashing.csproj --output ../ --configuration Release

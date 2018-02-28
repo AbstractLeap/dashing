@@ -1,13 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Dashing.Core.Cli provides the core functionality for each Dashing.Core.XXX database specific tool</Description>
+    <PackageId>Dashing.Cli</PackageId>
+    <Description>Dashing.Cli provides the functionality for migrating databases</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <Authors>Mark Jerzykowski;James Holwell</Authors>
+	<VersionSuffix>alpha</VersionSuffix>
+    <Authors>Polylytics</Authors>
+    <Owners>Polylytics</Owners>
+	<ProjectUrl>https://github.com/Polylytics/dashing</ProjectUrl>
+	<IconUrl>http://polylytics.com/dashing/dashing-icon.png</IconUrl>
+	<RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+	<Copyright>© Polylytics Limited, 2018</Copyright>
+	<Language>en-GB</Language>
+	<Tags>dashing dapper orm sql mini-orm</Tags>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
     <AssemblyName>dotnet-dashing</AssemblyName>
-    <PackageId>Dashing.Cli.Core</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +28,7 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.4.2" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
   </PropertyGroup>
   
