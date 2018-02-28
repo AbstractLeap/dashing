@@ -17,5 +17,19 @@
                 return connection.Query(dialect.CheckDatabaseExists(databaseName)).Any();
             }
         }
+
+        public static void CreateDatabaseIfNotExists(this DbProviderFactory dbProviderFactory, string connectionString, string providerName, ISqlDialect dialect) {
+            var connectionStringManipulator = new ConnectionStringManipulator(dbProviderFactory, connectionString);
+            using (var connection = dbProviderFactory.CreateConnection())
+            {
+                connection.ConnectionString = connectionStringManipulator.GetRootConnectionString();
+                connection.Open();
+                var databaseName = connectionStringManipulator.GetDatabaseName();
+                if (!connection.Query(dialect.CheckDatabaseExists(databaseName))
+                               .Any()) {
+                    connection.Execute(dialect.CreateDatabase(databaseName));
+                }
+            }
+        }
     }
 }

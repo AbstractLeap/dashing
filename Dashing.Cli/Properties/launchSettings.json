@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Dashing.Cli": {
+      "commandName": "Project"
+    },
+    "script": {
+      "commandName": "Project",
+      "commandLineArgs": "script -a \"C:\\Repos\\dashing\\Dashing.Tests\\bin\\Debug\\net46\\Dashing.Tests.dll\" -t \"Dashing.Tools.Tests.CustomConfig\" -c \"Data Source=.;Initial Catalog=dashingclitest;Integrated Security=True;\""
+    },
+    "migrate": {
+      "commandName": "Project",
+      "commandLineArgs": "migrate -a \"C:\\Repos\\dashing\\Dashing.Tests\\bin\\Debug\\net46\\Dashing.Tests.dll\" -t \"Dashing.Tools.Tests.CustomConfig\" -c \"Data Source=.;Initial Catalog=dashingclitest;Integrated Security=True;\""
+    }
+  }
+}
