@@ -8,18 +8,18 @@
 
     public class DapperWrapperTests {
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public async Task DynamicQueryAsyncWorks(TestSessionWrapper wrapper) {
             var result = await wrapper.Session.Dapper.QueryAsync("select 1 as Id");
-            Assert.Equal(1, result.Count());
+            Assert.Single(result);
             Assert.Equal(1, result.First().Id);
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public async Task StronglyTypedQueryWorks(TestSessionWrapper wrapper) {
             var result = await wrapper.Session.Dapper.QueryAsync<Foo>("select 1 as FooId, 'Rah' as Bar");
-            Assert.Equal(1, result.Count());
+            Assert.Single(result);
             Assert.Equal(1, result.First().FooId);
             Assert.Equal("Rah", result.First().Bar);
         }

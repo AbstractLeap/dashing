@@ -10,7 +10,7 @@
 
     public class CUDTests {
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void InsertEnablesTracking(TestSessionWrapper wrapper) {
             var user = new User { Username = "Joe", EmailAddress = Guid.NewGuid().ToString(), Password = "blah" };
             wrapper.Session.Insert(user);
@@ -18,7 +18,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public async Task InsertAsyncEnablesTracking(TestSessionWrapper wrapper) {
             var user = new User { Username = "Joe", EmailAddress = Guid.NewGuid().ToString(), Password = "blah" };
             await wrapper.Session.InsertAsync(user);
@@ -26,7 +26,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestInsert(TestSessionWrapper wrapper) {
             var user = new User { Username = "Joe", EmailAddress = Guid.NewGuid().ToString(), Password = "blah" };
             wrapper.Session.Insert(user);
@@ -35,7 +35,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestInsertGetsId(TestSessionWrapper wrapper) {
             var user = new User { Username = "Joe", EmailAddress = Guid.NewGuid().ToString(), Password = "blah" };
             wrapper.Session.Insert(user);
@@ -43,7 +43,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestMultipleInsertUpdatesIds(TestSessionWrapper wrapper) {
             var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
             var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
@@ -54,7 +54,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void UpdateBulk(TestSessionWrapper wrapper) {
             wrapper.Session.Update<User>(u => u.Password = "boo", u => u.Username == "BulkUpdate");
             var user = wrapper.Session.Query<User>().First(u => u.Username == "BulkUpdate");
@@ -62,7 +62,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void DeleteBulk(TestSessionWrapper wrapper) {
             wrapper.Session.Delete<User>(u => u.Username == "BulkDelete");
             var users = wrapper.Session.Query<User>().Where(u => u.Username == "BulkDelete");
@@ -70,7 +70,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestUpdate(TestSessionWrapper wrapper) {
             var user = wrapper.Session.Query<User>().First();
             user.HeightInMeters = 1.7m;
@@ -80,7 +80,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestDelete(TestSessionWrapper wrapper) {
             var user = wrapper.Session.Query<User>().First(u => u.Username == "TestDelete");
             wrapper.Session.Delete(user);
@@ -88,7 +88,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void DateTimeInsertedAndSelectedCorrectly(TestSessionWrapper wrapper) {
             var date = new DateTime(2016, 12, 25, 1, 3, 6, DateTimeKind.Utc);
             var comment = new Comment { Content = "Foo", CommentDate = date };

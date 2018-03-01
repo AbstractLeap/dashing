@@ -8,7 +8,7 @@
 
     public class EnumeratingTests {
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestSingleAndFirst(TestSessionWrapper wrapper) {
             // now fetch them
             var t1 = wrapper.Session.Query<User>().First();

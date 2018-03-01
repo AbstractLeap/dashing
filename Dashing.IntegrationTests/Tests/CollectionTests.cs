@@ -8,7 +8,7 @@
 
     public class CollectionTests {
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestCollectionFetch(TestSessionWrapper wrapper) {
             var posts = wrapper.Session.Query<Post>().Fetch(p => p.Comments).ToList();
             Assert.True(
@@ -17,7 +17,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestMultiCollectionFetch(TestSessionWrapper wrapper) {
             var posts = wrapper.Session.Query<Post>().Fetch(p => p.Comments).Fetch(p => p.Tags).Where(p => p.PostId == 1).ToList();
             Assert.True(posts.First().Comments.Count == 3);
@@ -25,14 +25,14 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestFetchingEmptyCollection(TestSessionWrapper wrapper) {
             var emptyBlog = wrapper.Session.Query<Blog>().First(b => b.Title == "EmptyBlog");
             Assert.Empty(emptyBlog.Posts);
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestChainedCollectionFetch(TestSessionWrapper wrapper) {
             var blog = wrapper.Session.Query<Blog>().FetchMany(p => p.Posts).ThenFetch(p => p.Comments).First();
             Assert.Equal(2, blog.Posts.Count);
@@ -40,7 +40,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestManyFetches(TestSessionWrapper wrapper) {
             var post =
                 wrapper.Session.Query<Post>()
@@ -53,7 +53,7 @@
         }
 
         [Theory]
-        [MemberData("GetSessions", MemberType = typeof(SessionDataGenerator))]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
         public void TestManyToManyThing(TestSessionWrapper wrapper) {
             var post =
                 wrapper.Session.Query<Post>()
