@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
-    <WeaveFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)/net46/dashing-weaver.exe"</TsGenFileExe>
-    <WeaveFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)/netcoreapp1.1/dashing-weaver.dll"</TsGenFileExe>
+    <WeaveFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)/net46/dashing-weaver.exe"</WeaveFileExe>
+    <WeaveFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)/netcoreapp1.1/dashing-weaver.dll"</WeaveFileExe>
   </PropertyGroup>
   
   <Target Condition="$(WeaveArguments) != ''" Name="Weave" AfterTargets="AfterBuild">
