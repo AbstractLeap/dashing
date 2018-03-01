@@ -1,4 +1,4 @@
-namespace Dashing.Testing.Tests {
+namespace Dashing.Tests.Engine.InMemory {
     using System;
     using System.Linq.Expressions;
 

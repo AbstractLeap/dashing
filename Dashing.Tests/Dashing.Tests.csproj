@@ -20,12 +20,16 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Engine\InMemory\" />
+  </ItemGroup>
   
   <Target Name="Weave" AfterTargets="AfterBuild">
     <PropertyGroup>
 	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net46/dashing-weaver.exe</Weave>
 	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/netcoreapp1.1/dashing-weaver.dll"</Weave>
 	</PropertyGroup>
-	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName)$(TargetExt)&quot; -t &quot;Dashing.Tools.Tests.CustomConfig&quot; -t &quot;Dashing.Tools.Tests.ClassWithConstructorConfig&quot; -t &quot;Dashing.Tests.Engine.DapperMapperGeneration.CollectionTests+CustomConfig&quot;" />
+	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName)$(TargetExt)&quot; -t &quot;Dashing.Tools.Tests.CustomConfig&quot; -t &quot;Dashing.Tools.Tests.ClassWithConstructorConfig&quot; -t &quot;Dashing.Tests.Engine.DapperMapperGeneration.CollectionTests+CustomConfig&quot; -t &quot;Dashing.Tests.Engine.InMemory.TestConfiguration&quot;" />
   </Target> 
 </Project>

@@ -1,12 +1,11 @@
-﻿namespace Dashing.Testing.Tests {
+﻿namespace Dashing.Tests.Engine.InMemory {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Net;
 
     using Dashing.Engine.InMemory;
-    using Dashing.Testing.Tests.TestDomain;
+    using Dashing.Tests.Engine.InMemory.TestDomain;
 
     using Xunit;
 

@@ -1,8 +1,9 @@
-﻿namespace Dashing.Testing.Tests {
+﻿namespace Dashing {
     using System.Data;
 
     using Dashing.Configuration;
     using Dashing.Engine;
+    using Dashing.Engine.InMemory;
 
     public class InMemorySessionCreator : ISessionCreator {
         private readonly IConfiguration configuration;

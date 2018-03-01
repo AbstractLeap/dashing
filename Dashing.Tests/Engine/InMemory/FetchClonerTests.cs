@@ -1,9 +1,9 @@
-﻿namespace Dashing.Testing.Tests {
+﻿namespace Dashing.Tests.Engine.InMemory {
     using System.Collections.Generic;
 
     using Dashing.Engine;
     using Dashing.Engine.InMemory;
-    using Dashing.Testing.Tests.TestDomain;
+    using Dashing.Tests.Engine.InMemory.TestDomain;
 
     using Xunit;
 
