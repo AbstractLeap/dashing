@@ -9,6 +9,8 @@
     using Dashing.Extensions;
 
     using Microsoft.Extensions.CommandLineUtils;
+    using Microsoft.Extensions.DependencyModel;
+
 #if COREFX
     using System.Runtime.Loader;
 #endif
@@ -22,7 +24,6 @@
 
             ConfigureScript(app);
             ConfigureMigrate(app);
-            
 
             app.OnExecute(
                 () => {
@@ -74,13 +75,14 @@
                                 var result = scriptGenerator.Generate(
                                     LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
                                     connectionString.Value(),
-                                    provider.HasValue() ? provider.Value() : "System.Data.SqlClient",
+                                    provider.HasValue()
+                                        ? provider.Value()
+                                        : "System.Data.SqlClient",
                                     tablesToIgnore.Values,
                                     indexesToIgnore.Values,
                                     GetExtraPluralizationWords(extraPluralizationWords),
                                     verbose.HasValue(),
-                                    new ConsoleAnswerProvider()
-                                    );
+                                    new ConsoleAnswerProvider());
                                 Console.Write(result);
                                 return 0;
                             }
@@ -92,8 +94,7 @@
                 });
         }
 
-        private static void ConfigureMigrate(CommandLineApplication app)
-        {
+        private static void ConfigureMigrate(CommandLineApplication app) {
             app.Command(
                 "migrate",
                 c => {
@@ -112,20 +113,17 @@
 
                     c.OnExecute(
                         () => {
-                            if (!assemblyPath.HasValue())
-                            {
+                            if (!assemblyPath.HasValue()) {
                                 Console.WriteLine("Please specify the path to the assembly");
                                 return 1;
                             }
 
-                            if (!configurationType.HasValue())
-                            {
+                            if (!configurationType.HasValue()) {
                                 Console.WriteLine("Please specify the configuration type full name");
                                 return 1;
                             }
 
-                            if (!connectionString.HasValue())
-                            {
+                            if (!connectionString.HasValue()) {
                                 Console.WriteLine("Please specify the connection string");
                                 return 1;
                             }
@@ -133,22 +131,21 @@
                             ConfigureAssemblyResolution(assemblyPath.Value());
                             DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value());
                             var databaseMigrator = new DatabaseMigrator();
-                            try
-                            {
+                            try {
                                 databaseMigrator.Execute(
                                     LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
                                     connectionString.Value(),
-                                    provider.HasValue() ? provider.Value() : "System.Data.SqlClient",
+                                    provider.HasValue()
+                                        ? provider.Value()
+                                        : "System.Data.SqlClient",
                                     tablesToIgnore.Values,
                                     indexesToIgnore.Values,
                                     GetExtraPluralizationWords(extraPluralizationWords),
                                     verbose.HasValue(),
-                                    new ConsoleAnswerProvider()
-                                    );
+                                    new ConsoleAnswerProvider());
                                 return 0;
                             }
-                            catch (Exception ex)
-                            {
+                            catch (Exception ex) {
                                 Console.WriteLine(ex.Message);
                                 return 1;
                             }
@@ -156,8 +153,7 @@
                 });
         }
 
-        private static void ConfigureSeed(CommandLineApplication app)
-        {
+        private static void ConfigureSeed(CommandLineApplication app) {
             app.Command(
                 "seed",
                 c => {
@@ -174,50 +170,44 @@
 
                     c.OnExecute(
                         () => {
-                            if (!configurationAssemblyPath.HasValue())
-                            {
+                            if (!configurationAssemblyPath.HasValue()) {
                                 Console.WriteLine("Please specify the path to the assembly that contains the configuration");
                                 return 1;
                             }
 
-                            if (!configurationType.HasValue())
-                            {
+                            if (!configurationType.HasValue()) {
                                 Console.WriteLine("Please specify the configuration full name");
                                 return 1;
                             }
 
-                            if (!seederAssemblyPath.HasValue())
-                            {
+                            if (!seederAssemblyPath.HasValue()) {
                                 Console.WriteLine("Please specify the path to the assembly that contains the seeder");
                                 return 1;
                             }
 
-                            if (!seederType.HasValue())
-                            {
+                            if (!seederType.HasValue()) {
                                 Console.WriteLine("Please specify the seeder full name");
                                 return 1;
                             }
 
-                            if (!connectionString.HasValue())
-                            {
+                            if (!connectionString.HasValue()) {
                                 Console.WriteLine("Please specify the connection string");
                                 return 1;
                             }
 
                             ConfigureAssemblyResolution(configurationAssemblyPath.Value());
                             var seeder = new Seeder();
-                            try
-                            {
+                            try {
                                 seeder.Execute(
                                     LoadType<ISeeder>(seederAssemblyPath.Value(), seederType.Value()),
                                     LoadType<IConfiguration>(configurationAssemblyPath.Value(), configurationType.Value()),
                                     connectionString.Value(),
-                                    provider.HasValue() ? provider.Value() : "System.Data.SqlClient"
-                                    );
+                                    provider.HasValue()
+                                        ? provider.Value()
+                                        : "System.Data.SqlClient");
                                 return 0;
                             }
-                            catch (Exception ex)
-                            {
+                            catch (Exception ex) {
                                 Console.WriteLine(ex.Message);
                                 return 1;
                             }
@@ -283,18 +273,24 @@
         private static void ConfigureAssemblyResolution(string assemblyPath) {
             var assemblyDir = Path.GetDirectoryName(assemblyPath);
 #if COREFX
-            AssemblyLoadContext.Default.Resolving += (context, name) =>
-                {
-                    // look on disk
-                    var attempts = new[] { "exe", "dll" }.Select(ext => $"{assemblyDir}\\{name.Name}.{ext}");
-                    foreach (var attempt in attempts) {
-                        if (File.Exists(attempt)) {
-                            return AssemblyContext.LoadFile(attempt);
-                        }
+            AssemblyLoadContext.Default.Resolving += (context, name) => {
+                var dependencies = DependencyContext.Default.RuntimeLibraries;
+                foreach (var library in dependencies) {
+                    if (library.Name == name.Name) {
+                        return context.LoadFromAssemblyName(new AssemblyName(library.Name));
                     }
+                }
 
-                    return null;
-                };
+                // look on disk
+                var attempts = new[] { "exe", "dll" }.Select(ext => $"{assemblyDir}\\{name.Name}.{ext}");
+                foreach (var attempt in attempts) {
+                    if (File.Exists(attempt)) {
+                        return AssemblyContext.LoadFile(attempt);
+                    }
+                }
+
+                return context.LoadFromAssemblyName(name);
+            };
 #else
             AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) => {
                 var assemblyName = new AssemblyName(iargs.Name);

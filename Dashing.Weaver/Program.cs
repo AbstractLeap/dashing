@@ -13,6 +13,7 @@
     using Dashing.Weaver.Weaving;
 
     using Microsoft.Extensions.CommandLineUtils;
+    using Microsoft.Extensions.DependencyModel;
 
     public class Program {
         public static int Main(string[] args) {
@@ -138,6 +139,13 @@
 #if COREFX
             AssemblyLoadContext.Default.Resolving += (context, name) =>
                 {
+                    var dependencies = DependencyContext.Default.RuntimeLibraries;
+                    foreach(var library in dependencies) {
+                        if (library.Name == name.Name) {
+                            return context.LoadFromAssemblyName(new AssemblyName(library.Name));
+                        }
+                    }
+
                     // look on disk
                     foreach (var path in pathsToSearch) {
                         var attempts = new[] { "exe", "dll" }.Select(ext => $"{path}\\{name.Name}.{ext}");
@@ -148,7 +156,7 @@
                         }
                     }
 
-                    return null;
+                    return context.LoadFromAssemblyName(name);
                 };
 #else
             AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) =>
