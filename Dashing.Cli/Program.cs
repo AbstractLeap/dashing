@@ -1,6 +1,9 @@
 ﻿namespace Dashing.Cli {
     using System;
     using System.Collections.Generic;
+#if !COREFX
+    using System.Configuration;
+#endif
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -10,7 +13,6 @@
 
     using Microsoft.Extensions.CommandLineUtils;
     using Microsoft.Extensions.DependencyModel;
-
 #if COREFX
     using System.Runtime.Loader;
 #endif
@@ -292,6 +294,9 @@
                 return context.LoadFromAssemblyName(name);
             };
 #else
+            var assemblySearchPaths = (ConfigurationManager.AppSettings["AssemblySearchPaths"]
+                                                           ?.Split(',') ?? Enumerable.Empty<string>()).ToList();
+            assemblySearchPaths.Insert(0, assemblyDir);
             AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) => {
                 var assemblyName = new AssemblyName(iargs.Name);
 
@@ -303,10 +308,12 @@
                 }
 
                 // we couldn't find it, look on disk
-                var attempts = new[] { "exe", "dll" }.Select(ext => $"{assemblyDir}\\{assemblyName.Name}.{ext}");
-                foreach (var attempt in attempts) {
-                    if (File.Exists(attempt)) {
-                        return Assembly.LoadFile(attempt);
+                foreach (var dir in assemblySearchPaths) {
+                    var attempts = new[] { "exe", "dll" }.Select(ext => $"{dir}\\{assemblyName.Name}.{ext}");
+                    foreach (var attempt in attempts) {
+                        if (File.Exists(attempt)) {
+                            return Assembly.LoadFile(attempt);
+                        }
                     }
                 }
 

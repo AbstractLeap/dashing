@@ -15,9 +15,14 @@
 	<Tags>dashing dapper orm sql mini-orm</Tags>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
-    <AssemblyName>dotnet-dashing</AssemblyName>
+	<AssemblyName>dashing</AssemblyName>
+    <AssemblyName Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">dotnet-dashing</AssemblyName>
 	<PackageType>DotNetCliTool</PackageType>
   </PropertyGroup>
+  
+  <ItemGroup>
+	<Compile Remove="app.config" Condition=" '$(TargetFramework)' == 'netcoreapp1.1' " />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
@@ -38,5 +43,23 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System.Data.Linq" />
   </ItemGroup>
+  
+  <!-- Pack settings -->
+  <PropertyGroup>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <NuspecFile>../NuGet/dashing-cli.nuspec</NuspecFile>
+    <IntermediatePackDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/publish/</IntermediatePackDir>
+    <PublishDir>$(IntermediatePackDir)$(TargetFramework)/</PublishDir>
+	<OutputDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/</OutputDir>
+    <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(IntermediatePackDir)));outputDir=$([MSBuild]::NormalizeDirectory($(OutputDir)))</NuspecProperties>
+  </PropertyGroup>
+  
+   <!-- Executes /t:Publish for all target frameworks before packing-->
+  <Target Name="PublishAll" BeforeTargets="GenerateNuspec">
+    <ItemGroup>
+      <_TargetFramework Include="$(TargetFrameworks)" />
+    </ItemGroup>
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Publish" Properties="TargetFramework=%(_TargetFramework.Identity)" />
+  </Target>
 
 </Project>

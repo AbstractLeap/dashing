@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>Dashing.Cli</id>
+    <version>2.0.0-alpha</version>
+    <title>Dashing Cli</title>
+	<authors>Polylytics</authors>
+	<owners>Polylytics</owners>
+	<projectUrl>https://github.com/Polylytics/dashing</projectUrl>
+	<iconUrl>http://polylytics.com/dashing/dashing-icon.png</iconUrl>
+	<requireLicenseAcceptance>false</requireLicenseAcceptance>
+	<description>Dashing.Cli is a command line tool for migrating database schemas</description>
+	<copyright>© Polylytics Limited, 2018</copyright>
+	<language>en-GB</language>
+	<tags>dashing dapper orm sql mini-orm</tags>
+  </metadata>
+  <files>
+    <file src="$publishdir$\net46\**\*" target="tools/net46/" />
+	<file src="Init.ps1" target="tools\init.ps1" />
+    <file src="$outputDir$netcoreapp1.1\dotnet-dashing.dll" target="lib/netcoreapp1.1/dotnet-dashing.dll" />
+	<file src="$outputDir$netcoreapp1.1\dotnet-dashing.runtimeconfig.json" target="lib/netcoreapp1.1/dotnet-dashing.runtimeconfig.json" />
+  </files>
+</package>
