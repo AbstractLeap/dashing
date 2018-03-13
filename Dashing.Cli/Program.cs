@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Cli {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
 #if !COREFX
     using System.Configuration;
 #endif
@@ -18,12 +19,16 @@
 #endif
 
     public class Program {
-        public static int Main(string[] args) {
-            var app = new CommandLineApplication {
-                                                     Name = "dashing",
-                                                     Description = "Provides functionality to migrate databases"
-                                                 };
+        private static IList<string> assemblySearchDirectories = new List<string>();
 
+        public static int Main(string[] args) {
+            Debugger.Launch();
+            ConfigureAssemblyResolution(); // we have to configure the assembly resolution on it's own in this method as the ExecuteApplication needs it
+            return ExecuteApplication(args);
+        }
+
+        private static int ExecuteApplication(string[] args) {
+            var app = new CommandLineApplication { Name = "dashing", Description = "Provides functionality to migrate databases" };
             ConfigureScript(app);
             ConfigureMigrate(app);
 
@@ -70,22 +75,11 @@
                                 return 1;
                             }
 
-                            ConfigureAssemblyResolution(assemblyPath.Value());
+                            var assemblyDir = Path.GetDirectoryName(assemblyPath.Value());
+                            assemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value());
-                            var scriptGenerator = new ScriptGenerator();
                             try {
-                                var result = scriptGenerator.Generate(
-                                    LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
-                                    connectionString.Value(),
-                                    provider.HasValue()
-                                        ? provider.Value()
-                                        : "System.Data.SqlClient",
-                                    tablesToIgnore.Values,
-                                    indexesToIgnore.Values,
-                                    GetExtraPluralizationWords(extraPluralizationWords),
-                                    verbose.HasValue(),
-                                    new ConsoleAnswerProvider());
-                                Console.Write(result);
+                                ExecuteScript(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords, verbose);
                                 return 0;
                             }
                             catch (Exception ex) {
@@ -94,6 +88,23 @@
                             }
                         });
                 });
+        }
+
+        private static void ExecuteScript(CommandOption assemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider, CommandOption tablesToIgnore, CommandOption indexesToIgnore, CommandOption extraPluralizationWords, CommandOption verbose)
+        {
+            var scriptGenerator = new ScriptGenerator();
+            var result = scriptGenerator.Generate(
+                LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
+                connectionString.Value(),
+                provider.HasValue()
+                    ? provider.Value()
+                    : "System.Data.SqlClient",
+                tablesToIgnore.Values,
+                indexesToIgnore.Values,
+                GetExtraPluralizationWords(extraPluralizationWords),
+                verbose.HasValue(),
+                new ConsoleAnswerProvider());
+            Console.Write(result);
         }
 
         private static void ConfigureMigrate(CommandLineApplication app) {
@@ -130,21 +141,11 @@
                                 return 1;
                             }
 
-                            ConfigureAssemblyResolution(assemblyPath.Value());
+                            var assemblyDir = Path.GetDirectoryName(assemblyPath.Value());
+                            assemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value());
-                            var databaseMigrator = new DatabaseMigrator();
                             try {
-                                databaseMigrator.Execute(
-                                    LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
-                                    connectionString.Value(),
-                                    provider.HasValue()
-                                        ? provider.Value()
-                                        : "System.Data.SqlClient",
-                                    tablesToIgnore.Values,
-                                    indexesToIgnore.Values,
-                                    GetExtraPluralizationWords(extraPluralizationWords),
-                                    verbose.HasValue(),
-                                    new ConsoleAnswerProvider());
+                                ExecuteMigrate(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords, verbose);
                                 return 0;
                             }
                             catch (Exception ex) {
@@ -153,6 +154,21 @@
                             }
                         });
                 });
+        }
+
+        private static void ExecuteMigrate(CommandOption assemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider, CommandOption tablesToIgnore, CommandOption indexesToIgnore, CommandOption extraPluralizationWords, CommandOption verbose) {
+            var databaseMigrator = new DatabaseMigrator();
+            databaseMigrator.Execute(
+                LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
+                connectionString.Value(),
+                provider.HasValue()
+                    ? provider.Value()
+                    : "System.Data.SqlClient",
+                tablesToIgnore.Values,
+                indexesToIgnore.Values,
+                GetExtraPluralizationWords(extraPluralizationWords),
+                verbose.HasValue(),
+                new ConsoleAnswerProvider());
         }
 
         private static void ConfigureSeed(CommandLineApplication app) {
@@ -197,16 +213,10 @@
                                 return 1;
                             }
 
-                            ConfigureAssemblyResolution(configurationAssemblyPath.Value());
-                            var seeder = new Seeder();
+                            var assemblyDir = Path.GetDirectoryName(configurationAssemblyPath.Value());
+                            assemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             try {
-                                seeder.Execute(
-                                    LoadType<ISeeder>(seederAssemblyPath.Value(), seederType.Value()),
-                                    LoadType<IConfiguration>(configurationAssemblyPath.Value(), configurationType.Value()),
-                                    connectionString.Value(),
-                                    provider.HasValue()
-                                        ? provider.Value()
-                                        : "System.Data.SqlClient");
+                                ExecuteSeed(seederAssemblyPath, seederType, configurationAssemblyPath, configurationType, connectionString, provider);
                                 return 0;
                             }
                             catch (Exception ex) {
@@ -215,6 +225,17 @@
                             }
                         });
                 });
+        }
+
+        private static void ExecuteSeed(CommandOption seederAssemblyPath, CommandOption seederType, CommandOption configurationAssemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider) {
+            var seeder = new Seeder();
+            seeder.Execute(
+                LoadType<ISeeder>(seederAssemblyPath.Value(), seederType.Value()),
+                LoadType<IConfiguration>(configurationAssemblyPath.Value(), configurationType.Value()),
+                connectionString.Value(),
+                provider.HasValue()
+                    ? provider.Value()
+                    : "System.Data.SqlClient");
         }
 
         private static IEnumerable<KeyValuePair<string, string>> GetExtraPluralizationWords(CommandOption extraPluralizationWords) {
@@ -272,8 +293,7 @@
             return new ColorContext(color);
         }
 
-        private static void ConfigureAssemblyResolution(string assemblyPath) {
-            var assemblyDir = Path.GetDirectoryName(assemblyPath);
+        private static void ConfigureAssemblyResolution() {
 #if COREFX
             AssemblyLoadContext.Default.Resolving += (context, name) => {
                 var dependencies = DependencyContext.Default.RuntimeLibraries;
@@ -284,19 +304,19 @@
                 }
 
                 // look on disk
-                var attempts = new[] { "exe", "dll" }.Select(ext => $"{assemblyDir}\\{name.Name}.{ext}");
-                foreach (var attempt in attempts) {
-                    if (File.Exists(attempt)) {
-                        return AssemblyContext.LoadFile(attempt);
+                foreach (var assemblySearchDirectory in assemblySearchDirectories) {
+                    var attempts = new[] { "exe", "dll" }.Select(ext => $"{assemblySearchDirectory}\\{name.Name}.{ext}");
+                    foreach (var attempt in attempts) {
+                        if (File.Exists(attempt)) {
+                            return AssemblyContext.LoadFile(attempt);
+                        }
                     }
                 }
 
                 return context.LoadFromAssemblyName(name);
             };
 #else
-            var assemblySearchPaths = (ConfigurationManager.AppSettings["AssemblySearchPaths"]
-                                                           ?.Split(',') ?? Enumerable.Empty<string>()).ToList();
-            assemblySearchPaths.Insert(0, assemblyDir);
+            assemblySearchDirectories = (ConfigurationManager.AppSettings["AssemblySearchPaths"]?.Split(',') ?? Enumerable.Empty<string>()).ToList();
             AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) => {
                 var assemblyName = new AssemblyName(iargs.Name);
 
@@ -308,7 +328,7 @@
                 }
 
                 // we couldn't find it, look on disk
-                foreach (var dir in assemblySearchPaths) {
+                foreach (var dir in assemblySearchDirectories) {
                     var attempts = new[] { "exe", "dll" }.Select(ext => $"{dir}\\{assemblyName.Name}.{ext}");
                     foreach (var attempt in attempts) {
                         if (File.Exists(attempt)) {

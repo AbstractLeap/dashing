@@ -16,6 +16,7 @@
   </metadata>
   <files>
     <file src="$publishdir$\net46\**\*" target="tools/net46/" />
+	<file src="_._" target="lib/net46/" />
 	<file src="Init.ps1" target="tools\init.ps1" />
     <file src="$outputDir$netcoreapp1.1\dotnet-dashing.dll" target="lib/netcoreapp1.1/dotnet-dashing.dll" />
 	<file src="$outputDir$netcoreapp1.1\dotnet-dashing.runtimeconfig.json" target="lib/netcoreapp1.1/dotnet-dashing.runtimeconfig.json" />
