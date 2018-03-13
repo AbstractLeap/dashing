@@ -47,7 +47,7 @@
         [Fact]
         public void TestConfigWorks() {
             var config = new TestConfiguration();
-            using (var session = new InMemorySessionCreator(config).BeginSession()) {
+            using (var session = new InMemoryDatabase(config).BeginSession()) {
                 session.Insert(new Post() { Title = "Foo" });
                 Assert.Equal("Foo", session.Get<Post>(1).Title);
             }
@@ -166,7 +166,7 @@
         }
 
         private ISession GetSession() {
-            var sessionCreator = new InMemorySessionCreator(new TestConfiguration());
+            var sessionCreator = new InMemoryDatabase(new TestConfiguration());
             var session = sessionCreator.BeginSession();
 
             var authors = new List<User> { new User { Username = "Bob", IsEnabled = true }, new User { Username = "Mark", IsEnabled = true }, new User { Username = "James", IsEnabled = false } };

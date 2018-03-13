@@ -5,14 +5,14 @@
     using Dashing.Engine;
     using Dashing.Engine.InMemory;
 
-    public class InMemorySessionCreator : ISessionCreator {
+    public class InMemoryDatabase : IDatabase {
         private readonly IConfiguration configuration;
 
         private InMemoryEngine engine;
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
-        public InMemorySessionCreator(IConfiguration configuration) {
+        public InMemoryDatabase(IConfiguration configuration) {
             this.configuration = configuration;
             this.engine = new InMemoryEngine(configuration);
         }

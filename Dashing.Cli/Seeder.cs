@@ -17,7 +17,7 @@
             }
 
             // run the script
-            var sqlSessionCreator = new SqlSessionCreator(configuration, dbProviderFactory, connectionString, dialect);
+            var sqlSessionCreator = new SqlDatabase(configuration, dbProviderFactory, connectionString, dialect);
             using (var session = sqlSessionCreator.BeginSession()) {
                 seeder.Seed(session);
                 session.Complete();

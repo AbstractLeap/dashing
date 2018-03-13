@@ -18,10 +18,10 @@ namespace Dashing.IntegrationTests.Setup {
             }
 
             // generate all the sessions
-            var sessionCreatorTypes = typeof(TestDatabaseGenerator).Assembly().GetTypes().Where(t => t.Namespace == "Dashing.IntegrationTests.Setup" && typeof(ISessionCreator).IsAssignableFrom(t) && t.IsPublic()).ToArray();
+            var sessionCreatorTypes = typeof(TestDatabaseGenerator).Assembly().GetTypes().Where(t => t.Namespace == "Dashing.IntegrationTests.Setup" && typeof(IDatabase).IsAssignableFrom(t) && t.IsPublic()).ToArray();
             var config = new Configuration();
             foreach (var sessionCreatorType in sessionCreatorTypes) {
-                var sessionCreator = (SqlSessionCreator)Activator.CreateInstance(sessionCreatorType, config);
+                var sessionCreator = (SqlDatabase)Activator.CreateInstance(sessionCreatorType, config);
                 var dbInitializer = new DatabaseInitializer(sessionCreator, config);
                 TestSessions.Add(dbInitializer.Initialize());
             }

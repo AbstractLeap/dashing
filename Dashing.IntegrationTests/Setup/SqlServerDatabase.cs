@@ -5,11 +5,11 @@
     using Dashing.Engine.Dialects;
 
 #if SQLSERVER
-    public class SqlServerSessionCreator : SqlSessionCreator {
+    public class SqlServerDatabase : SqlDatabase {
 #else
-    class SqlServerSessionCreator : SqlSessionCreator {
+    class SqlServerDatabase : SqlSessionCreator {
 #endif
-        public SqlServerSessionCreator(IConfiguration configuration)
+        public SqlServerDatabase(IConfiguration configuration)
             : base(configuration, SqlClientFactory.Instance, $"Server=localhost;Trusted_Connection=True;MultipleActiveResultSets=True", new SqlServer2012Dialect()) { }
     }
 }

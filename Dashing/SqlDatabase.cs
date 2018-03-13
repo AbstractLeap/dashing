@@ -7,7 +7,7 @@ namespace Dashing {
     using Dashing.Engine;
     using Dashing.Engine.Dialects;
 
-    public class SqlSessionCreator : ISessionCreator {
+    public class SqlDatabase : IDatabase {
         private readonly IConfiguration configuration;
 
         private readonly DbProviderFactory dbProviderFactory;
@@ -18,7 +18,7 @@ namespace Dashing {
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
-        public SqlSessionCreator(IConfiguration configuration, DbProviderFactory dbProviderFactory, string connectionString = null, ISqlDialect sqlDialect = null) {
+        public SqlDatabase(IConfiguration configuration, DbProviderFactory dbProviderFactory, string connectionString = null, ISqlDialect sqlDialect = null) {
             this.configuration = configuration;
             this.dbProviderFactory = dbProviderFactory;
             this.connectionString = connectionString;
@@ -27,7 +27,7 @@ namespace Dashing {
         }
 
 #if !COREFX
-        public SqlSessionCreator(IConfiguration configuration, string connectionString, string providerName = "System.Data.SqlClient")
+        public SqlDatabase(IConfiguration configuration, string connectionString, string providerName = "System.Data.SqlClient")
         : this(configuration, GetDbProviderFactory(providerName), connectionString, GetDialect(providerName, connectionString)) {
 
         }

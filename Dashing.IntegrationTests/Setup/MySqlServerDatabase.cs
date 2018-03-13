@@ -5,11 +5,11 @@
     using MySql.Data.MySqlClient;
 
 #if MYSQL
-    public class MySqlServerSessionCreator : SqlSessionCreator {
+    public class MySqlServerDatabase : SqlSessionCreator {
 #else
-    class MySqlServerSessionCreator : SqlSessionCreator {
+    class MySqlServerDatabase : SqlDatabase {
 #endif
-        public MySqlServerSessionCreator(IConfiguration configuration)
+        public MySqlServerDatabase(IConfiguration configuration)
             : base(configuration, MySqlClientFactory.Instance, "Server = localhost; Uid=dashingtest;Pwd=SomeDaftPassword;", new MySqlDialect()) { }
     }
 }

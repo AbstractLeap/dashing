@@ -1,7 +1,7 @@
 namespace Dashing {
     using System.Data;
 
-    public interface ISessionCreator {
+    public interface IDatabase {
         ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null);
 
         ISession BeginTransactionLessSession(IDbConnection connection = null);

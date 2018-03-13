@@ -10,13 +10,13 @@ namespace Dashing.IntegrationTests.Setup {
     using Moq;
 
     public class DatabaseInitializer {
-        private readonly SqlSessionCreator sessionCreator;
+        private readonly SqlDatabase sessionCreator;
 
         private readonly IConfiguration config;
 
         public const string DatabaseName = "dashingintegrationtests";
 
-        public DatabaseInitializer(SqlSessionCreator sessionCreator, IConfiguration config) {
+        public DatabaseInitializer(SqlDatabase sessionCreator, IConfiguration config) {
             this.sessionCreator = sessionCreator;
             this.config = config;
         }
