@@ -26,6 +26,22 @@ namespace Dashing {
             this.engine = new SqlEngine(configuration, sqlDialect);
         }
 
+#if !COREFX
+        public SqlSessionCreator(IConfiguration configuration, string connectionString, string providerName = "System.Data.SqlClient")
+        : this(configuration, GetDbProviderFactory(providerName), connectionString, GetDialect(providerName, connectionString)) {
+
+        }
+
+        private static ISqlDialect GetDialect(string providerName, string connectionString) {
+            var dialectFactory = new DialectFactory();
+            return dialectFactory.Create(providerName, connectionString);
+        }
+
+        private static DbProviderFactory GetDbProviderFactory(string providerName) {
+            return DbProviderFactories.GetFactory(providerName);
+        }
+#endif
+
         public ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {
             return new Session(this.engine, 
                 new Lazy<IDbConnection>(() => connection == null ? this.CreateConnection() : connection),
