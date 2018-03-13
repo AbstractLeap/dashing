@@ -179,7 +179,6 @@
             return mock;
         }
 
-        [DoNotWeave]
         private class CustomConfiguration : BaseConfiguration {
             public CustomConfiguration(
                 IMapper mapper)
@@ -187,7 +186,6 @@
             }
         }
 
-        [DoNotWeave]
         private class CustomConfigurationWithIndividualAdds : CustomConfiguration {
             public CustomConfigurationWithIndividualAdds(IMapper mapper)
                 : base(mapper) {
@@ -196,7 +194,6 @@
             }
         }
 
-        [DoNotWeave]
         private class CustomConfigurationWithAddEnumerable : CustomConfiguration {
             public CustomConfigurationWithAddEnumerable(IMapper mapper)
                 : base(mapper) {
@@ -204,7 +201,6 @@
             }
         }
 
-        [DoNotWeave]
         private class CustomConfigurationWithAddNamespace : CustomConfiguration {
             public CustomConfigurationWithAddNamespace(IMapper mapper)
                 : base(mapper) {
@@ -212,7 +208,6 @@
             }
         }
 
-        [DoNotWeave]
         private class CustomConfigurationWithAddAndSetup : CustomConfiguration {
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfigurationWithAddAndSetup(IMapper mapper)
@@ -222,7 +217,6 @@
             }
         }
 
-        [DoNotWeave]
         private class CustomConfigurationWithSetup : CustomConfiguration {
             [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1126:PrefixCallsCorrectly", Justification = "R# and StyleCop fight over this")]
             public CustomConfigurationWithSetup(IMapper mapper)

@@ -1,7 +1,6 @@
 ﻿namespace Dashing.Tests.Configuration.AddNamespaceDomain {
     using Dashing.Configuration;
 
-    [DoNotWeave]
     public class AddNamespaceConfiguration : BaseConfiguration {
         public AddNamespaceConfiguration() {
             this.AddNamespaceOf<Post>();

@@ -12,7 +12,6 @@
     /// <summary>
     ///     This configuration pretty much only exists to support fetching of different maps within reverse engineering
     /// </summary>
-    [DoNotWeave]
     internal class Configuration : IReverseEngineeringConfiguration {
         private readonly IDictionary<Type, IMap> maps;
 
