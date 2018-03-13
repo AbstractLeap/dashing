@@ -4,8 +4,6 @@
 
     using Dashing.CodeGeneration;
 
-    using Moq;
-
     using Xunit;
 
     public class TrackedEntityInspectorTests {
@@ -33,28 +31,28 @@
         [Fact]
         public void SessionExtensionWorks() {
             var foo = new Foo(new[] { "Name" }, new Dictionary<string, object> { { "Name", "Mark" } });
-            var inspector = new Mock<ISession>().Object.Inspect(foo);
+            var inspector = new TrackedEntityInspector<Foo>(foo);
             Assert.True(inspector.IsPropertyDirty(f => f.Name));
         }
 
         [Fact]
         public void GetNewValueWorks() {
             var foo = new Foo(new[] { "Name" }, new Dictionary<string, object> { { "Name", "Mark" } }) { Name = "James" };
-            var inspector = new Mock<ISession>().Object.Inspect(foo);
+            var inspector = new TrackedEntityInspector<Foo>(foo);
             Assert.Equal("James", inspector.GetNewValue(f => f.Name));
         }
 
         [Fact]
         public void IsDirtyIfHasDirtyProps() {
             var foo = new Foo(new[] { "Name" }, new Dictionary<string, object> { { "Name", "Mark" } }) { Name = "James" };
-            var inspector = new Mock<ISession>().Object.Inspect(foo);
+            var inspector = new TrackedEntityInspector<Foo>(foo);
             Assert.True(inspector.IsDirty());
         }
 
         [Fact]
         public void IsNotDirtyIfDoesNotHaveDirtyProps() {
             var foo = new Foo(new string[0], new Dictionary<string, object>()) { Name = "James" };
-            var inspector = new Mock<ISession>().Object.Inspect(foo);
+            var inspector = new TrackedEntityInspector<Foo>(foo);
             Assert.False(inspector.IsDirty());
         }
     }
