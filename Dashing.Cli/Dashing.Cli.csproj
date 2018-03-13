@@ -15,7 +15,7 @@
 	<Tags>dashing dapper orm sql mini-orm</Tags>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
-	<AssemblyName>dash</AssemblyName>
+	<AssemblyName>dashing</AssemblyName>
     <AssemblyName Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">dotnet-dashing</AssemblyName>
 	<PackageType>DotNetCliTool</PackageType>
   </PropertyGroup>

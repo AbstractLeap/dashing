@@ -15,7 +15,7 @@ $deployTarget = "$rootDir\Dashing"
 Write-Host "Deploy Target: " -nonewline; Write-Host $deployTarget
 
 $appConfigFileDir = [IO.Path]::Combine($installPath, 'tools/net46/')
-$appConfigFile = [IO.Path]::Combine($installPath, 'tools/net46/dash.exe.config')
+$appConfigFile = [IO.Path]::Combine($installPath, 'tools/net46/dashing.exe.config')
 $appConfig = New-Object XML
 $appConfig.Load($appConfigFile)
 $node = $appConfig.SelectSingleNode('configuration/appSettings/add[@key="AssemblySearchPaths"]')
@@ -27,5 +27,5 @@ if (!(Test-Path $deployTarget)) {
 	mkdir $deployTarget
 }
 
-Copy-Item $installPath\tools\net46\dash.exe $deployTarget -Recurse -Force
-Copy-Item $installPath\tools\net46\dash.exe.config $deployTarget -Recurse -Force
+Copy-Item $installPath\tools\net46\dashing.exe $deployTarget -Recurse -Force
+Copy-Item $installPath\tools\net46\dashing.exe.config $deployTarget -Recurse -Force

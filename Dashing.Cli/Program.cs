@@ -2,9 +2,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-#if !COREFX
-    using System.Configuration;
-#endif
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -13,9 +10,13 @@
     using Dashing.Extensions;
 
     using Microsoft.Extensions.CommandLineUtils;
-    using Microsoft.Extensions.DependencyModel;
+#if !COREFX
+    using System.Configuration;
+#endif
+
 #if COREFX
     using System.Runtime.Loader;
+    using Microsoft.Extensions.DependencyModel;
 #endif
 
     public class Program {
@@ -28,7 +29,10 @@
         }
 
         private static int ExecuteApplication(string[] args) {
-            var app = new CommandLineApplication { Name = "dashing", Description = "Provides functionality to migrate databases" };
+            var app = new CommandLineApplication {
+                                                     Name = "dashing",
+                                                     Description = "Provides functionality to migrate databases"
+                                                 };
             ConfigureScript(app);
             ConfigureMigrate(app);
 
@@ -77,21 +81,21 @@
 
                             var assemblyDir = Path.GetDirectoryName(assemblyPath.Value());
                             assemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
-                            DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value());
+                            DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value(), connectionString.Value());
                             try {
                                 ExecuteScript(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords, verbose);
                                 return 0;
                             }
                             catch (Exception ex) {
                                 Console.WriteLine(ex.Message);
+                                Console.Write(ex.StackTrace);
                                 return 1;
                             }
                         });
                 });
         }
 
-        private static void ExecuteScript(CommandOption assemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider, CommandOption tablesToIgnore, CommandOption indexesToIgnore, CommandOption extraPluralizationWords, CommandOption verbose)
-        {
+        private static void ExecuteScript(CommandOption assemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider, CommandOption tablesToIgnore, CommandOption indexesToIgnore, CommandOption extraPluralizationWords, CommandOption verbose) {
             var scriptGenerator = new ScriptGenerator();
             var result = scriptGenerator.Generate(
                 LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
@@ -143,7 +147,7 @@
 
                             var assemblyDir = Path.GetDirectoryName(assemblyPath.Value());
                             assemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
-                            DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value());
+                            DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value(), connectionString.Value());
                             try {
                                 ExecuteMigrate(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords, verbose);
                                 return 0;
@@ -256,6 +260,10 @@
                 throw new Exception($"Unable to find assembly at {assemblyPath}");
             }
 
+            if (!Path.IsPathRooted(assemblyPath)) {
+                assemblyPath = Path.GetFullPath(assemblyPath);
+            }
+
             var assembly = AssemblyContext.LoadFile(assemblyPath);
             var type = assembly.GetLoadableTypes()
                                .SingleOrDefault(t => t.FullName == configurationFullName);
@@ -271,7 +279,7 @@
             return instance;
         }
 
-        private static void DisplayMigrationHeader(string assemblyPath, string configurationFullName) {
+        private static void DisplayMigrationHeader(string assemblyPath, string configurationFullName, string connectionString) {
             using (Color(ConsoleColor.Yellow)) {
                 Console.WriteLine("-- Dashing: Migration Script");
             }
@@ -279,6 +287,7 @@
             Console.WriteLine("-- -------------------------------");
             Console.WriteLine("-- Assembly: {0}", assemblyPath);
             Console.WriteLine("-- Class:    {0}", configurationFullName);
+            Console.WriteLine("-- Connection:    {0}", connectionString);
             Console.WriteLine("-- ");
 
             using (Color(ConsoleColor.Yellow)) {
@@ -316,13 +325,14 @@
                 return context.LoadFromAssemblyName(name);
             };
 #else
-            assemblySearchDirectories = (ConfigurationManager.AppSettings["AssemblySearchPaths"]?.Split(',') ?? Enumerable.Empty<string>()).ToList();
+            assemblySearchDirectories = (ConfigurationManager.AppSettings["AssemblySearchPaths"]
+                                                             ?.Split(';') ?? Enumerable.Empty<string>()).ToList();
             AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) => {
                 var assemblyName = new AssemblyName(iargs.Name);
 
                 // look in app domain
                 var loaded = AppDomain.CurrentDomain.GetAssemblies()
-                                      .SingleOrDefault(a => a.FullName == assemblyName.FullName);
+                                      .SingleOrDefault(a => AssemblyName.ReferenceMatchesDefinition(assemblyName, a.GetName()));
                 if (loaded != null) {
                     return loaded;
                 }
@@ -332,7 +342,8 @@
                     var attempts = new[] { "exe", "dll" }.Select(ext => $"{dir}\\{assemblyName.Name}.{ext}");
                     foreach (var attempt in attempts) {
                         if (File.Exists(attempt)) {
-                            return Assembly.LoadFile(attempt);
+                            var assemblyData = File.ReadAllBytes(Path.GetFullPath(attempt));
+                            return Assembly.Load(assemblyData);
                         }
                     }
                 }
