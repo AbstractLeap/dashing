@@ -213,9 +213,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="id">The primary key of the entity</param>
         /// <returns></returns>
-        public async Task<T> GetAsync<T>(long id)
+        public Task<T> GetAsync<T>(long id)
             where T : class, new() {
-            return await this.GetAsync<T, long>(id);
+            return this.GetAsync<T, long>(id);
         }
 
         /// <summary>
@@ -224,9 +224,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="id">The primary key of the entity</param>
         /// <returns></returns>
-        public async Task<T> GetAsync<T>(int id)
+        public Task<T> GetAsync<T>(int id)
             where T : class, new() {
-            return await this.GetAsync<T, int>(id);
+            return this.GetAsync<T, int>(id);
         }
 
         /// <summary>
@@ -235,9 +235,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="id">The primary key of the entity</param>
         /// <returns></returns>
-        public async Task<T> GetAsync<T>(Guid id)
+        public Task<T> GetAsync<T>(Guid id)
             where T : class, new() {
-            return await this.GetAsync<T, Guid>(id);
+            return this.GetAsync<T, Guid>(id);
         }
 
         /// <summary>
@@ -246,9 +246,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> GetAsync<T>(params long[] ids)
+        public Task<IEnumerable<T>> GetAsync<T>(params long[] ids)
             where T : class, new() {
-            return await this.GetAsync<T>(ids as IEnumerable<long>);
+            return this.GetAsync<T>(ids as IEnumerable<long>);
         }
 
         /// <summary>
@@ -257,9 +257,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> GetAsync<T>(IEnumerable<long> ids)
+        public Task<IEnumerable<T>> GetAsync<T>(IEnumerable<long> ids)
             where T : class, new() {
-            return await this.GetAsync<T, long>(ids);
+            return this.GetAsync<T, long>(ids);
         }
 
         /// <summary>
@@ -268,9 +268,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> GetAsync<T>(params int[] ids)
+        public Task<IEnumerable<T>> GetAsync<T>(params int[] ids)
             where T : class, new() {
-            return await this.GetAsync<T>(ids as IEnumerable<int>);
+            return this.GetAsync<T>(ids as IEnumerable<int>);
         }
 
         /// <summary>
@@ -279,9 +279,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> GetAsync<T>(IEnumerable<int> ids)
+        public Task<IEnumerable<T>> GetAsync<T>(IEnumerable<int> ids)
             where T : class, new() {
-            return await this.GetAsync<T, int>(ids);
+            return this.GetAsync<T, int>(ids);
         }
 
         /// <summary>
@@ -290,9 +290,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> GetAsync<T>(params Guid[] ids)
+        public Task<IEnumerable<T>> GetAsync<T>(params Guid[] ids)
             where T : class, new() {
-            return await this.GetAsync<T>(ids as IEnumerable<Guid>);
+            return this.GetAsync<T>(ids as IEnumerable<Guid>);
         }
 
         /// <summary>
@@ -301,9 +301,9 @@
         /// <typeparam name="T">The type of entity to get</typeparam>
         /// <param name="ids">The primary keys of the entities</param>
         /// <returns></returns>
-        public async Task<IEnumerable<T>> GetAsync<T>(IEnumerable<Guid> ids)
+        public Task<IEnumerable<T>> GetAsync<T>(IEnumerable<Guid> ids)
             where T : class, new() {
-            return await this.GetAsync<T, Guid>(ids);
+            return this.GetAsync<T, Guid>(ids);
         }
 
         /// <summary>
@@ -313,9 +313,9 @@
         /// <param name="entities"></param>
         /// <returns></returns>
         /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        public async Task<int> InsertAsync<T>(params T[] entities)
+        public Task<int> InsertAsync<T>(params T[] entities)
             where T : class, new() {
-            return await this.InsertAsync(entities as IEnumerable<T>);
+            return this.InsertAsync(entities as IEnumerable<T>);
         }
 
         /// <summary>
@@ -324,9 +324,9 @@
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public async Task<int> SaveAsync<T>(params T[] entities)
+        public Task<int> SaveAsync<T>(params T[] entities)
             where T : class, new() {
-            return await this.SaveAsync(entities as IEnumerable<T>);
+            return this.SaveAsync(entities as IEnumerable<T>);
         }
 
         /// <summary>
@@ -335,9 +335,9 @@
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        public async Task<int> DeleteAsync<T>(params T[] entities)
+        public Task<int> DeleteAsync<T>(params T[] entities)
             where T : class, new() {
-            return await this.DeleteAsync(entities as IEnumerable<T>);
+            return this.DeleteAsync(entities as IEnumerable<T>);
         }
 
         /// <summary>
@@ -351,9 +351,9 @@
         /// </param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes an UPDATE query and executes it i.e. no data is fetched from the server</remarks>
-        public async Task<int> UpdateAsync<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates)
+        public Task<int> UpdateAsync<T>(Action<T> update, params Expression<Func<T, bool>>[] predicates)
             where T : class, new() {
-            return await this.UpdateAsync(update, predicates as IEnumerable<Expression<Func<T, bool>>>);
+            return this.UpdateAsync(update, predicates as IEnumerable<Expression<Func<T, bool>>>);
         }
 
         /// <summary>
@@ -366,9 +366,9 @@
         /// </param>
         /// <returns></returns>
         /// <remarks>On a Sql database this writes a DELETE query and executes it i.e. no data is fetched from the server</remarks>
-        public async Task<int> DeleteAsync<T>(params Expression<Func<T, bool>>[] predicates)
+        public Task<int> DeleteAsync<T>(params Expression<Func<T, bool>>[] predicates)
             where T : class, new() {
-            return await this.DeleteAsync(predicates as IEnumerable<Expression<Func<T, bool>>>);
+            return this.DeleteAsync(predicates as IEnumerable<Expression<Func<T, bool>>>);
         }
 
         /// <summary>
@@ -412,6 +412,8 @@
         /// <param name="entity"></param>
         /// <returns></returns>
         public ITrackedEntityInspector<T> Inspect<T>(T entity) {
+            // We can't just new up an ITrackedEntityInspector because it has a type constraint to ITrackedEntity
+            // We don't want to add that constraint here as that interface is added at compile time
             return (ITrackedEntityInspector<T>)Activator.CreateInstance(typeof(TrackedEntityInspector<>).MakeGenericType(typeof(T)), entity);
         }
     }
