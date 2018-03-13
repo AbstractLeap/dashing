@@ -35,6 +35,7 @@
                                                  };
             ConfigureScript(app);
             ConfigureMigrate(app);
+            ConfigureSeed(app);
 
             app.OnExecute(
                 () => {
