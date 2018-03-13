@@ -11,7 +11,7 @@
         [Fact]
         public void StringPrimaryKeyWorks() {
             var thing = new EntityWithStringPrimaryKey { Id = "123", Name = "Foo" };
-            Assert.IsAssignableFrom(typeof(ITrackedEntity), thing);
+            Assert.IsAssignableFrom<ITrackedEntity>(thing);
         }
 
         [Fact]

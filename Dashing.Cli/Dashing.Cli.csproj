@@ -36,6 +36,10 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.4.2" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+	<PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+  </ItemGroup>
+  
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
   </PropertyGroup>

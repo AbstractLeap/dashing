@@ -74,7 +74,7 @@ namespace Dashing.Weaving.Tests {
             fooAsTracked.EnableTracking();
             foo.IsBar = true;
             Assert.Equal(new[] { "IsBar" }, fooAsTracked.GetDirtyProperties());
-            Assert.Equal(false, fooAsTracked.GetOldValue("IsBar"));
+            Assert.False((bool)fooAsTracked.GetOldValue("IsBar"));
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Dashing.Weaving.Tests {
             fooAsTracked.EnableTracking();
             foo.IsRah = true;
             Assert.Equal(new[] { "IsRah" }, fooAsTracked.GetDirtyProperties());
-            Assert.Equal(null, fooAsTracked.GetOldValue("IsRah"));
+            Assert.Null(fooAsTracked.GetOldValue("IsRah"));
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace Dashing.Weaving.Tests {
             fooAsTracked.EnableTracking();
             foo.IsRah = null;
             Assert.Equal(new[] { "IsRah" }, fooAsTracked.GetDirtyProperties());
-            Assert.Equal(false, fooAsTracked.GetOldValue("IsRah"));
+            Assert.False((bool)fooAsTracked.GetOldValue("IsRah"));
         }
 
         [Fact]
@@ -171,7 +171,7 @@ namespace Dashing.Weaving.Tests {
             Assert.False(bar.Equals(null));
             bar.Foo = null;
             Assert.True((bool)bar.GetType().GetField("__Foo_IsDirty", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(bar));
-            Assert.Equal(1, barAsTracked.GetDirtyProperties().Count());
+            Assert.Single(barAsTracked.GetDirtyProperties());
             Assert.True(barAsTracked.GetDirtyProperties().First() == "Foo");
             Assert.Equal(2, ((Foo)barAsTracked.GetOldValue("Foo")).FooId);
         }
@@ -187,7 +187,7 @@ namespace Dashing.Weaving.Tests {
             ting.GetType().GetField("EntityWithStringPrimaryKeyId").SetValue(ting, "Foo");
             tingAsTracked.EnableTracking();
             ting.EntityWithStringPrimaryKey = null;
-            Assert.Equal(1, tingAsTracked.GetDirtyProperties().Count());
+            Assert.Single(tingAsTracked.GetDirtyProperties());
             Assert.True(tingAsTracked.GetDirtyProperties().First() == "EntityWithStringPrimaryKey");
             Assert.Equal("Foo", ((EntityWithStringPrimaryKey)tingAsTracked.GetOldValue("EntityWithStringPrimaryKey")).Id);
         }

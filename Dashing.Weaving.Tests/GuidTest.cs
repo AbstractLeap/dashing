@@ -11,7 +11,7 @@
         [Fact]
         public void GuidPrimaryKeyWorks() {
             var thing = new EntityWithGuidPrimaryKey { Id = Guid.NewGuid(), Name = "Foo" };
-            Assert.IsAssignableFrom(typeof(ITrackedEntity), thing);
+            Assert.IsAssignableFrom<ITrackedEntity>(thing);
         }
 
         [Fact]

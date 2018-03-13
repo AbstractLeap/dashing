@@ -91,20 +91,26 @@ namespace Dashing.Weaving.Tests {
             Assert.False(bar != anotherBar1);
             Assert.False(bar == bar2);
             Assert.True(bar != bar2);
+#pragma warning disable CS1718 // Comparison made to same variable
             Assert.True(bar == bar);
             Assert.False(bar != bar);
+#pragma warning restore CS1718 // Comparison made to same variable
         }
 
         [Fact]
         public void OpEqualityTests() {
             var c = new C();
+#pragma warning disable CS1718 // Comparison made to same variable
             Assert.True(c == c);
+#pragma warning restore CS1718 // Comparison made to same variable
 
             var c2 = new C();
             Assert.False(c == c2);
 
             var b = new B { Id = 1 };
+#pragma warning disable CS1718 // Comparison made to same variable
             Assert.True(b == b);
+#pragma warning restore CS1718 // Comparison made to same variable
 
             var b2 = new B { Id = 2 };
             var bAnother1 = new B { Id = 1 };
@@ -112,7 +118,9 @@ namespace Dashing.Weaving.Tests {
             Assert.True(b == bAnother1);
 
             var a = new A { Id = 1 };
+#pragma warning disable CS1718 // Comparison made to same variable
             Assert.True(a == a);
+#pragma warning restore CS1718 // Comparison made to same variable
 
             var a2 = new A { Id = 2 };
             var aAnother1 = new A { Id = 1 };
@@ -125,7 +133,9 @@ namespace Dashing.Weaving.Tests {
         public int Id { get; set; }
     }
 
+#pragma warning disable 660,661
     public class B : C {
+#pragma warning restore 660,661
         public static bool operator ==(B left, B right) {
             if (ReferenceEquals(left, right)) {
                 return true;
