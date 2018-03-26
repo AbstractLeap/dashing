@@ -7,12 +7,12 @@
     <VersionSuffix>alpha</VersionSuffix>
     <Authors>Polylytics</Authors>
     <Owners>Polylytics</Owners>
-	<ProjectUrl>https://github.com/Polylytics/dashing</ProjectUrl>
-	<IconUrl>http://polylytics.com/dashing/dashing-icon.png</IconUrl>
-	<RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+	<PackageProjectUrl>https://github.com/Polylytics/dashing</PackageProjectUrl>
+	<PackageIconUrl>http://polylytics.com/dashing/dashing-icon.png</PackageIconUrl>
+	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	<Copyright>© Polylytics Limited, 2018</Copyright>
 	<Language>en-GB</Language>
-	<Tags>dashing dapper orm sql mini-orm</Tags>
+	<PackageTags>dashing dapper orm sql mini-orm</PackageTags>
     <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
     <AssemblyName>Dashing</AssemblyName>
   </PropertyGroup>
