@@ -23,7 +23,6 @@
         private static IList<string> assemblySearchDirectories = new List<string>();
 
         public static int Main(string[] args) {
-            Debugger.Launch();
             ConfigureAssemblyResolution(); // we have to configure the assembly resolution on it's own in this method as the ExecuteApplication needs it
             return ExecuteApplication(args);
         }
