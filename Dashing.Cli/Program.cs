@@ -30,7 +30,7 @@
 
         private static int ExecuteApplication(string[] args) {
             var app = new CommandLineApplication {
-                                                     Name = "dashing",
+                                                     Name = "dash",
                                                      Description = "Provides functionality to migrate databases"
                                                  };
             ConfigureScript(app);
