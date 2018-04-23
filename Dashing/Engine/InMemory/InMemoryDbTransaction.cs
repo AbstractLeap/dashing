@@ -1,20 +1,22 @@
 namespace Dashing.Engine.InMemory {
     using System.Data;
+    using System.Data.Common;
 
-    internal class InMemoryDbTransaction : IDbTransaction {
-        public InMemoryDbTransaction(IDbConnection connection, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) {
-            this.Connection = connection;
+    internal class InMemoryDbTransaction : DbTransaction {
+        public InMemoryDbTransaction(DbConnection connection, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) {
+            this.DbConnection = connection;
             this.IsolationLevel = isolationLevel;
         }
 
-        public void Dispose() { }
+        public override void Commit() {
+            
+        }
 
-        public void Commit() { }
+        public override void Rollback() {
+        }
 
-        public void Rollback() { }
+        protected override DbConnection DbConnection { get; }
 
-        public IDbConnection Connection { get; }
-
-        public IsolationLevel IsolationLevel { get; }
+        public override IsolationLevel IsolationLevel { get; }
     }
 }

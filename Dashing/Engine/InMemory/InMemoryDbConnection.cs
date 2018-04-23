@@ -1,42 +1,39 @@
 namespace Dashing.Engine.InMemory {
     using System;
     using System.Data;
+    using System.Data.Common;
 
-    internal class InMemoryDbConnection : IDbConnection {
-        public void Dispose() {
+    internal class InMemoryDbConnection : DbConnection {
+        private ConnectionState state;
+
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) {
+            return new InMemoryDbTransaction(this, isolationLevel);
+        }
+
+        public override void Close() {
+            this.state = ConnectionState.Closed;
+        }
+
+        public override void ChangeDatabase(string databaseName) {
             
         }
 
-        public IDbTransaction BeginTransaction() {
-            return new InMemoryDbTransaction(this);
+        public override void Open() {
+            this.state = ConnectionState.Open;
         }
 
-        public IDbTransaction BeginTransaction(IsolationLevel il) {
-            return new InMemoryDbTransaction(this);
-        }
+        public override string ConnectionString { get; set; }
 
-        public void Close() {
-            this.State = ConnectionState.Closed;
-        }
+        public override string Database { get; }
 
-        public void ChangeDatabase(string databaseName) {
+        public override ConnectionState State => this.state;
 
-        }
+        public override string DataSource { get; }
 
-        public IDbCommand CreateCommand() {
+        public override string ServerVersion { get; }
+
+        protected override DbCommand CreateDbCommand() {
             throw new NotImplementedException();
         }
-
-        public void Open() {
-            this.State = ConnectionState.Open;
-        }
-
-        public string ConnectionString { get; set; }
-
-        public int ConnectionTimeout { get; }
-
-        public string Database { get; }
-
-        public ConnectionState State { get; private set; }
     }
 }
