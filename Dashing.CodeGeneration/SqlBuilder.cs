@@ -19,7 +19,7 @@
             var sqlQuerySelectionClassBuilder = new StringBuilder();
             var sqlFromDefinitionInterfaceBuilder = new StringBuilder();
             var sqlFromDefinitionClassBuilder = new StringBuilder();
-
+            var sqlBuilderBuilderBuilder = new StringBuilder(); // that's right, 3 builders in the name!
 
 
             // SqlQuerySelection
@@ -38,10 +38,18 @@ public interface ISqlQuerySelection<{types}, TResult> : IEnumerable<TResult> {{
                 sqlQuerySelectionClassBuilder.Append(
                     $@"
 public class SqlQuerySelection<{types}, TResult> : ISqlQuerySelection<{types}, TResult> {{
-    private readonly Expression<Func<{types}, TResult>> selectExpression;
+    public Expression<Func<{types}, TResult>> SelectExpression {{ get; set; }}
     
-    public SqlQuerySelection(Expression<Func<{types}, TResult>> selectExpression) {{
-        this.selectExpression = selectExpression;
+    public SqlFromDefinition<{types}> FromDefinition {{ get; set; }}
+
+    public SqlQuerySelection(SqlFromDefinition<{types}> fromDefinition, Expression<Func<{types}, TResult>> selectExpression) {{
+        this.SelectExpression = selectExpression;
+        this.FromDefinition = fromDefinition;
+    }}
+
+    public CommandDefinition Build() {{
+        var builder = new SqlBuilderBuilder<{types}, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition{(i == 1 ? string.Empty : ".")}{string.Join(".", Enumerable.Range(1, i - 1).Select(_ => "PreviousFromDefinition"))}.Session);
+        return builder.Build();
     }}
 
     public IEnumerator<TResult> GetEnumerator()
@@ -76,31 +84,44 @@ public interface ISqlFromDefinition<{types}> {{
                     $@"
 public class SqlFromDefinition<{types}> : ISqlFromDefinition<{types}> {{
 
-    private readonly IList<Expression<Func<{types}, bool>>> whereExpressions = new List<Expression<Func<{types}, bool>>>();
+    public IList<Expression<Func<{types}, bool>>> WhereExpressions {{ get; set; }} = new List<Expression<Func<{types}, bool>>>();
 
-    private readonly IList<Expression<Func<{types}, bool>>> havingExpressions = new List<Expression<Func<{types}, bool>>>();
+    public IList<Expression<Func<{types}, bool>>> HavingExpressions {{ get; set; }} = new List<Expression<Func<{types}, bool>>>();
 
-    private readonly IList<Expression> groupByExpressions = new List<Expression>();
+    public IList<Expression> GroupByExpressions {{ get; set; }} = new List<Expression>();
 
-    private readonly IList<Tuple<Expression, ListSortDirection>> orderByExpressions = new List<Tuple<Expression, ListSortDirection>>();
+    public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions {{ get; set; }} = new List<Tuple<Expression, ListSortDirection>>();
 
                 ");
 
                 if (i > 1) {
                     // join expressions only apply when you have more than 1 table
+                    var previousTypes = GetTypes(i - 1);
                     sqlFromDefinitionClassBuilder.Append(
                         $@"
-    private readonly JoinType joinType;
+    public JoinType JoinType {{ get; set; }}
 
-    private readonly Expression<Func<{types}, bool>> joinExpression;
+    public Expression<Func<{types}, bool>> JoinExpression {{ get; set; }}
 
-    public SqlFromDefinition(JoinType joinType) {{
-        this.joinType = joinType;
+    public SqlFromDefinition<{previousTypes}> PreviousFromDefinition {{ get; set; }}
+
+    public SqlFromDefinition(SqlFromDefinition<{previousTypes}> previousFromDefinition, JoinType joinType) {{
+        this.PreviousFromDefinition = previousFromDefinition;
+        this.JoinType = joinType;
     }}
 
-    public SqlFromDefinition(JoinType joinType, Expression<Func<{types}, bool>> joinExpression) {{
-        this.joinType = joinType;
-        this.joinExpression = joinExpression;
+    public SqlFromDefinition(SqlFromDefinition<{previousTypes}> previousFromDefinition, JoinType joinType, Expression<Func<{types}, bool>> joinExpression) {{
+        this.PreviousFromDefinition = previousFromDefinition;
+        this.JoinType = joinType;
+        this.JoinExpression = joinExpression;
+    }}
+");
+                } else {
+                    sqlFromDefinitionClassBuilder.Append($@"
+    public ISession Session {{ get; set; }}
+
+    public SqlFromDefinition(ISession session) {{
+        this.Session = session;
     }}
 ");
                 }
@@ -118,7 +139,7 @@ public class SqlFromDefinition<{types}> : ISqlFromDefinition<{types}> {{
                         sqlFromDefinitionClassBuilder.Append(
                             $@"
 public ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>() {{
-    return new SqlFromDefinition<{nextTypes}>(JoinType.{joinType});
+    return new SqlFromDefinition<{nextTypes}>(this, JoinType.{joinType});
 }}
 ");
 
@@ -130,7 +151,7 @@ public ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>() {{
                         sqlFromDefinitionClassBuilder.Append(
                             $@"
 public ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>(Expression<Func<{nextTypes}, bool>> joinExpression) {{
-    return new SqlFromDefinition<{nextTypes}>(JoinType.{joinType}, joinExpression);
+    return new SqlFromDefinition<{nextTypes}>(this, JoinType.{joinType}, joinExpression);
 }}
 ");
                     }
@@ -144,7 +165,7 @@ public ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>(Expression<Func<{nex
                 sqlFromDefinitionClassBuilder.Append(
                     $@"
 public ISqlFromDefinition<{types}> Where(Expression<Func<{types}, bool>> whereExpression) {{
-    this.whereExpressions.Add(whereExpression);
+    this.WhereExpressions.Add(whereExpression);
 return this;
                 }}");
 
@@ -156,7 +177,7 @@ return this;
                 sqlFromDefinitionClassBuilder.Append(
                     $@"
 public ISqlFromDefinition<{types}> Having(Expression<Func<{types}, bool>> havingExpression) {{
-    this.havingExpressions.Add(havingExpression);
+    this.HavingExpressions.Add(havingExpression);
     return this;
 }}
 ");
@@ -169,7 +190,7 @@ public ISqlFromDefinition<{types}> Having(Expression<Func<{types}, bool>> having
                 sqlFromDefinitionClassBuilder.Append(
                     $@"
 public ISqlFromDefinition<{types}> GroupBy<TResult>(Expression<Func<{types}, TResult>> groupByExpression) {{
-    this.groupByExpressions.Add(groupByExpression);
+    this.GroupByExpressions.Add(groupByExpression);
     return this;
 }}
 ");
@@ -182,7 +203,7 @@ public ISqlFromDefinition<{types}> GroupBy<TResult>(Expression<Func<{types}, TRe
                 sqlFromDefinitionClassBuilder.Append(
                     $@"
 public ISqlFromDefinition<{types}> OrderBy<TResult>(Expression<Func<{types}, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending) {{
-    this.orderByExpressions.Add(Tuple.Create((Expression)orderByExpression, sortDirection));
+    this.OrderByExpressions.Add(Tuple.Create((Expression)orderByExpression, sortDirection));
     return this;
 }}
 ");
@@ -195,22 +216,44 @@ public ISqlFromDefinition<{types}> OrderBy<TResult>(Expression<Func<{types}, TRe
                 sqlFromDefinitionClassBuilder.Append(
                     $@"
 public ISqlQuerySelection<{types}, TResult> Select<TResult>(Expression<Func<{types}, TResult>> selectExpression) {{
-    return new SqlQuerySelection<{types}, TResult>(selectExpression);
+    return new SqlQuerySelection<{types}, TResult>(this, selectExpression);
 }}
 ");
                 sqlFromDefinitionInterfaceBuilder.AppendLine("}");
                 sqlFromDefinitionClassBuilder.AppendLine("}");
             }
 
+            // Sql Builder Builder
+            for (var i = 1; i <= 16; i++)
+            {
+                var types = GetTypes(i);
+                sqlBuilderBuilderBuilder.Append($@"
+    public class SqlBuilderBuilder<{types}, TResult> {{
+        public SqlBuilderBuilder(
+            SqlFromDefinition<{types}> fromDefinition, 
+            Expression<Func<{types}, TResult>> selectExpression,
+            ISession session) {{
+
+        }}
+
+        public CommandDefinition Build() {{
+            throw new NotImplementedException();
+        }}
+    }}
+");
+            }
+
             var sqlQuerySelectionInterfaces = sqlQuerySelectionInterfaceBuilder.ToString();
             var sqlQuerySelectionClasses = sqlQuerySelectionClassBuilder.ToString();
             var sqlFromDefinitionInterfaces = sqlFromDefinitionInterfaceBuilder.ToString();
             var sqlFromDefinitionClasses = sqlFromDefinitionClassBuilder.ToString();
+            var sqlBuilderBuilderClasses = sqlBuilderBuilderBuilder.ToString();
             var code = $@"
 {sqlQuerySelectionInterfaces}
 {sqlQuerySelectionClasses}
 {sqlFromDefinitionInterfaces}
 {sqlFromDefinitionClasses}
+{sqlBuilderBuilderClasses}
 ";
             this.output.WriteLine(code);
         }
