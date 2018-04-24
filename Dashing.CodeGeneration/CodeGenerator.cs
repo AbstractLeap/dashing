@@ -1,51 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿namespace Dashing.CodeGeneration {
+    using System;
+    using System.Linq;
+    using System.Text;
 
-namespace Dashing.CodeGeneration
-{
-    public class CodeGenerator
-    {
+    using Xunit;
+    using Xunit.Abstractions;
+
+    public class SqlBuilder {
+        private readonly ITestOutputHelper output;
+
+        public SqlBuilder(ITestOutputHelper output) {
+            this.output = output;
+        }
+
         [Fact]
-        public void Main()
-        {
-            var sb = new StringBuilder();
+        public void Main() {
+            var sqlQuerySelectionInterfaceBuilder = new StringBuilder();
+            var sqlQuerySelectionClassBuilder = new StringBuilder();
+            var sqlFromDefinitionInterfaceBuilder = new StringBuilder();
+            var sqlFromDefinitionClassBuilder = new StringBuilder();
+
+
+
             // SqlQuerySelection
-            for (var i = 1; i <= 16; i++)
-            {
+            for (var i = 1; i <= 16; i++) {
                 var types = GetTypes(i);
-                sb.AppendLine($"public class SqlQuerySelection<{types}, TResult> : IEnumerable<TResult> {{");
-                sb.AppendLine($"private readonly Expression<Func<{types}, TResult>> selectExpression;");
-                sb.AppendLine($"public SqlQuerySelection(Expression<Func<{types}, TResult>> selectExpression) {{");
-                sb.AppendLine("this.selectExpression = selectExpression;");
-                sb.AppendLine("}");
-                sb.Append(@"
-public IEnumerator<TResult> GetEnumerator()
-{
-    throw new NotImplementedException();
-}
 
-IEnumerator IEnumerable.GetEnumerator()
-{
-    throw new NotImplementedException();
-}
-
-public Task<IEnumerable<TResult>> EnumerateAsync() {
-    throw new NotImplementedException();
-}
+                // interface
+                sqlQuerySelectionInterfaceBuilder.Append(
+                    $@"
+public interface ISqlQuerySelection<{types}, TResult> : IEnumerable<TResult> {{
+    Task<IEnumerable<TResult>> EnumerateAsync();
+}}
 ");
-                sb.AppendLine("}");
-                sb.AppendLine();
+
+                // class
+                sqlQuerySelectionClassBuilder.Append(
+                    $@"
+public class SqlQuerySelection<{types}, TResult> : ISqlQuerySelection<{types}, TResult> {{
+    private readonly Expression<Func<{types}, TResult>> selectExpression;
+    
+    public SqlQuerySelection(Expression<Func<{types}, TResult>> selectExpression) {{
+        this.selectExpression = selectExpression;
+    }}
+
+    public IEnumerator<TResult> GetEnumerator()
+    {{
+        throw new NotImplementedException();
+    }}
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {{
+        throw new NotImplementedException();
+    }}
+
+    public Task<IEnumerable<TResult>> EnumerateAsync() {{
+        throw new NotImplementedException();
+    }}
+}}
+");
             }
 
             // From Builder
-            for (var i = 1; i <= 16; i++)
-            {
+            for (var i = 1; i <= 16; i++) {
                 var types = GetTypes(i);
-                sb.Append($@"public class SqlFromDefinition<{types}> {{
+
+                // interface
+                sqlFromDefinitionInterfaceBuilder.Append(
+                    $@"
+public interface ISqlFromDefinition<{types}> {{
+");
+
+                // class
+                sqlFromDefinitionClassBuilder.Append(
+                    $@"
+public class SqlFromDefinition<{types}> : ISqlFromDefinition<{types}> {{
 
     private readonly IList<Expression<Func<{types}, bool>>> whereExpressions = new List<Expression<Func<{types}, bool>>>();
 
@@ -56,78 +85,144 @@ public Task<IEnumerable<TResult>> EnumerateAsync() {
     private readonly IList<Tuple<Expression, ListSortDirection>> orderByExpressions = new List<Tuple<Expression, ListSortDirection>>();
 
                 ");
-                if (i > 1)
-                {
-                    sb.Append($@"
+
+                if (i > 1) {
+                    // join expressions only apply when you have more than 1 table
+                    sqlFromDefinitionClassBuilder.Append(
+                        $@"
     private readonly JoinType joinType;
 
     private readonly Expression<Func<{types}, bool>> joinExpression;
 
-public SqlFromDefinition(JoinType joinType) {{
-                        this.joinType = joinType;
-                        }}
+    public SqlFromDefinition(JoinType joinType) {{
+        this.joinType = joinType;
+    }}
 
-public SqlFromDefinition(JoinType joinType, Expression<Func<{types}, bool>> joinExpression) {{
+    public SqlFromDefinition(JoinType joinType, Expression<Func<{types}, bool>> joinExpression) {{
         this.joinType = joinType;
         this.joinExpression = joinExpression;
     }}
 ");
                 }
 
-                if (i < 16)
-                {
+                if (i < 16) {
                     var nextTypes = GetTypes(i + 1);
                     var joinTypes = new[] { "InnerJoin", "LeftJoin", "RightJoin", "FullOuterJoin" };
-                    foreach (var joinType in joinTypes)
-                    {
-                        sb.AppendLine($"public SqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>() {{");
-                        sb.AppendLine($"return new SqlFromDefinition<{nextTypes}>(JoinType.{joinType});");
-                        sb.AppendLine("}");
+                    foreach (var joinType in joinTypes) {
+                        sqlFromDefinitionInterfaceBuilder.Append(
+                            $@"
+    ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>();
+");
 
-                        sb.AppendLine($"public SqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>(Expression<Func<{nextTypes}, bool>> joinExpression) {{");
-                        sb.AppendLine($"return new SqlFromDefinition<{nextTypes}>(JoinType.{joinType}, joinExpression);");
-                        sb.AppendLine("}");
+
+                        sqlFromDefinitionClassBuilder.Append(
+                            $@"
+public ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>() {{
+    return new SqlFromDefinition<{nextTypes}>(JoinType.{joinType});
+}}
+");
+
+                        sqlFromDefinitionInterfaceBuilder.Append(
+                            $@"
+    ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>(Expression<Func<{nextTypes}, bool>> joinExpression);
+");
+
+                        sqlFromDefinitionClassBuilder.Append(
+                            $@"
+public ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>(Expression<Func<{nextTypes}, bool>> joinExpression) {{
+    return new SqlFromDefinition<{nextTypes}>(JoinType.{joinType}, joinExpression);
+}}
+");
                     }
                 }
 
-                sb.AppendLine($"public SqlFromDefinition<{types}> Where(Expression<Func<{types}, bool>> whereExpression) {{");
-                sb.AppendLine($"this.whereExpressions.Add(whereExpression);");
-                sb.AppendLine("return this;");
-                sb.AppendLine("}");
+                sqlFromDefinitionInterfaceBuilder.Append(
+                    $@"
+    ISqlFromDefinition<{types}> Where(Expression<Func<{types}, bool>> whereExpression);
+");
 
-                sb.AppendLine($"public SqlFromDefinition<{types}> Having(Expression<Func<{types}, bool>> havingExpression) {{");
-                sb.AppendLine($"this.havingExpressions.Add(havingExpression);");
-                sb.AppendLine("return this;");
-                sb.AppendLine("}");
+                sqlFromDefinitionClassBuilder.Append(
+                    $@"
+public ISqlFromDefinition<{types}> Where(Expression<Func<{types}, bool>> whereExpression) {{
+    this.whereExpressions.Add(whereExpression);
+return this;
+                }}");
 
-                sb.AppendLine($"public SqlFromDefinition<{types}> GroupBy<TResult>(Expression<Func<{types}, TResult>> groupByExpression) {{");
-                sb.AppendLine($"this.groupByExpressions.Add(groupByExpression);");
-                sb.AppendLine("return this;");
-                sb.AppendLine("}");
+                sqlFromDefinitionInterfaceBuilder.Append(
+                    $@"
+    ISqlFromDefinition<{types}> Having(Expression<Func<{types}, bool>> havingExpression);
+");
 
-                sb.AppendLine($"public SqlFromDefinition<{types}> OrderBy<TResult>(Expression<Func<{types}, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending) {{");
-                sb.AppendLine($"this.orderByExpressions.Add(Tuple.Create((Expression)orderByExpression, sortDirection));");
-                sb.AppendLine("return this;");
-                sb.AppendLine("}");
+                sqlFromDefinitionClassBuilder.Append(
+                    $@"
+public ISqlFromDefinition<{types}> Having(Expression<Func<{types}, bool>> havingExpression) {{
+    this.havingExpressions.Add(havingExpression);
+    return this;
+}}
+");
 
-                sb.Append($@"
+                sqlFromDefinitionInterfaceBuilder.Append(
+                    $@"
+    ISqlFromDefinition<{types}> GroupBy<TResult>(Expression<Func<{types}, TResult>> groupByExpression);
+");
 
-   public IEnumerable<TResult> Select<TResult>(Expression<Func<{types}, TResult>> selectExpression)
-        {{
-                        return new SqlQuerySelection<{types}, TResult>(selectExpression);
-                    }}");
+                sqlFromDefinitionClassBuilder.Append(
+                    $@"
+public ISqlFromDefinition<{types}> GroupBy<TResult>(Expression<Func<{types}, TResult>> groupByExpression) {{
+    this.groupByExpressions.Add(groupByExpression);
+    return this;
+}}
+");
 
-                sb.AppendLine("}");
-                sb.AppendLine();
+                sqlFromDefinitionInterfaceBuilder.Append(
+                    $@"
+    ISqlFromDefinition<{types}> OrderBy<TResult>(Expression<Func<{types}, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
+");
+
+                sqlFromDefinitionClassBuilder.Append(
+                    $@"
+public ISqlFromDefinition<{types}> OrderBy<TResult>(Expression<Func<{types}, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending) {{
+    this.orderByExpressions.Add(Tuple.Create((Expression)orderByExpression, sortDirection));
+    return this;
+}}
+");
+
+                sqlFromDefinitionInterfaceBuilder.Append(
+                    $@"
+    ISqlQuerySelection<{types}, TResult> Select<TResult>(Expression<Func<{types}, TResult>> selectExpression);
+");
+
+                sqlFromDefinitionClassBuilder.Append(
+                    $@"
+public ISqlQuerySelection<{types}, TResult> Select<TResult>(Expression<Func<{types}, TResult>> selectExpression) {{
+    return new SqlQuerySelection<{types}, TResult>(selectExpression);
+}}
+");
+                sqlFromDefinitionInterfaceBuilder.AppendLine("}");
+                sqlFromDefinitionClassBuilder.AppendLine("}");
             }
 
-            var code = sb.ToString();
-            Console.Write(code);
+            var sqlQuerySelectionInterfaces = sqlQuerySelectionInterfaceBuilder.ToString();
+            var sqlQuerySelectionClasses = sqlQuerySelectionClassBuilder.ToString();
+            var sqlFromDefinitionInterfaces = sqlFromDefinitionInterfaceBuilder.ToString();
+            var sqlFromDefinitionClasses = sqlFromDefinitionClassBuilder.ToString();
+            var code = $@"
+{sqlQuerySelectionInterfaces}
+{sqlQuerySelectionClasses}
+{sqlFromDefinitionInterfaces}
+{sqlFromDefinitionClasses}
+";
+            this.output.WriteLine(code);
         }
 
-        private static string GetTypes(int i)
-        {
-            return string.Join(", ", Enumerable.Range(1, i).Select(idx => idx == 1 ? "T" : $"T{idx}"));
+        private static string GetTypes(int i) {
+            return string.Join(
+                ", ",
+                Enumerable.Range(1, i)
+                          .Select(
+                              idx => idx == 1
+                                         ? "T"
+                                         : $"T{idx}"));
         }
     }
 }

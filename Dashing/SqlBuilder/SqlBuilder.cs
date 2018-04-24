@@ -25,7 +25,7 @@ namespace Dashing.SqlBuilder
             this.session = session;
         }
 
-        public SqlFromDefinition<T> From<T>()
+        public ISqlFromDefinition<T> From<T>()
         {
             return new SqlFromDefinition<T>();
         }
