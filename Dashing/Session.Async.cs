@@ -1,4 +1,5 @@
 ﻿namespace Dashing {
+    using Dashing.SqlBuilder;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -119,6 +120,11 @@
         public async Task<int> DeleteAllAsync<T>()
             where T : class, new() {
             return await this.engine.ExecuteBulkDeleteAsync<T>(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), null);
+        }
+
+        public async Task<IEnumerable<T>> QueryAsync<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression)
+            where T : class, new() {
+            return await this.engine.QueryAsync<T>(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), baseSqlFromDefinition, selectExpression);
         }
     }
 }

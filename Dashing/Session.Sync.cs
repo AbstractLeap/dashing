@@ -1,4 +1,5 @@
 ﻿namespace Dashing {
+    using Dashing.SqlBuilder;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -123,6 +124,11 @@
         public int DeleteAll<T>()
             where T : class, new() {
             return this.engine.ExecuteBulkDelete<T>(this.MaybeOpenConnection(), this.GetTransaction(), null);
+        }
+
+        public IEnumerable<T> Query<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression)
+            where T : class, new() {
+            return this.engine.Query<T>(this.MaybeOpenConnection(), this.GetTransaction(), baseSqlFromDefinition, selectExpression);
         }
     }
 }

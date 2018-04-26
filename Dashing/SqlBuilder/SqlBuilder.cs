@@ -16,14 +16,16 @@ namespace Dashing.SqlBuilder
 
     public interface ISqlBuilderExecutor
     {
-        IEnumerable<T> Query<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression);
+        IEnumerable<T> Query<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression)
+            where T : class, new();
 
-        Task<IEnumerable<T>> QueryAsync<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression);
+        Task<IEnumerable<T>> QueryAsync<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression)
+            where T : class, new();
     }
 
     public class SqlQuerySelection<TResult> : ISqlQuerySelection<TResult>
     {
-        private readonly ISession session;
+        private readonly ISqlBuilderExecutor sqlBuilderExecutor;
 
         private readonly Expression selectExpression;
 
@@ -31,26 +33,26 @@ namespace Dashing.SqlBuilder
 
         public SqlQuerySelection(BaseSqlFromDefinition fromDefinition, 
             Expression selectExpression,
-            ISession session)
+            ISqlBuilderExecutor sqlBuilderExecutor)
         {
             this.selectExpression = selectExpression;
-            this.session = session;
+            this.sqlBuilderExecutor = sqlBuilderExecutor;
             this.fromDefinition = fromDefinition;
         }
 
         public IEnumerator<TResult> GetEnumerator()
         {
-            throw new NotImplementedException();
+            return this.sqlBuilderExecutor.Query<TResult>(this.fromDefinition, this.selectExpression).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return this.GetEnumerator();
         }
 
         public Task<IEnumerable<TResult>> EnumerateAsync()
         {
-            throw new NotImplementedException();
+            return this.sqlBuilderExecutor.QueryAsync<TResult>(this.fromDefinition, this.selectExpression);
         }
     }
 
@@ -70,8 +72,6 @@ namespace Dashing.SqlBuilder
         public JoinType JoinType { get; set; }
 
         public Expression JoinExpression { get; set; }
-
-        public BaseSqlFromDefinition PreviousFromDefinition { get; set; }
     }
 
     public enum JoinType
@@ -91,11 +91,11 @@ namespace Dashing.SqlBuilder
 
     class SqlBuilder
     {
-        private readonly ISession session;
+        private readonly ISqlBuilderExecutor sqlBuilderExecutor;
 
-        public SqlBuilder(ISession session)
+        public SqlBuilder(ISqlBuilderExecutor sqlBuilderExecutor)
         {
-            this.session = session;
+            this.sqlBuilderExecutor = sqlBuilderExecutor;
         }
 
         //public ISqlFromDefinition<T> From<T>()

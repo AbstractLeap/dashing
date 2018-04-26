@@ -7,636 +7,8 @@ using System.Threading.Tasks;
 
 namespace Dashing.SqlBuilder
 {
-
-
-
-    public interface ISqlQuerySelection<T, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-    public interface ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> : IEnumerable<TResult>
-    {
-        Task<IEnumerable<TResult>> EnumerateAsync();
-    }
-
-
-    public class SqlQuerySelection<T, TResult> : ISqlQuerySelection<T, TResult>
-    {
-        public Expression<Func<T, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T> fromDefinition, Expression<Func<T, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, TResult> : ISqlQuerySelection<T, T2, TResult>
-    {
-        public Expression<Func<T, T2, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2> fromDefinition, Expression<Func<T, T2, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, TResult> : ISqlQuerySelection<T, T2, T3, TResult>
-    {
-        public Expression<Func<T, T2, T3, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3> fromDefinition, Expression<Func<T, T2, T3, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, TResult> : ISqlQuerySelection<T, T2, T3, T4, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4> fromDefinition, Expression<Func<T, T2, T3, T4, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5> fromDefinition, Expression<Func<T, T2, T3, T4, T5, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> : ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>
-    {
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> SelectExpression { get; set; }
-
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> FromDefinition { get; set; }
-
-        public SqlQuerySelection(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> fromDefinition, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> selectExpression)
-        {
-            this.SelectExpression = selectExpression;
-            this.FromDefinition = fromDefinition;
-        }
-
-        public CommandDefinition Build()
-        {
-            var builder = new SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(this.FromDefinition, this.SelectExpression, this.FromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.Session);
-            return builder.Build();
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<TResult>> EnumerateAsync()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-
-    public interface ISqlFromDefinition<T>
+    
+public interface ISqlFromDefinition<T>
     {
 
         ISqlFromDefinition<T, T2> InnerJoin<T2>();
@@ -663,7 +35,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T> OrderBy<TResult>(Expression<Func<T, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, TResult> Select<TResult>(Expression<Func<T, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2>
@@ -693,7 +65,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2> OrderBy<TResult>(Expression<Func<T, T2, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, TResult> Select<TResult>(Expression<Func<T, T2, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3>
@@ -723,7 +95,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3> OrderBy<TResult>(Expression<Func<T, T2, T3, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, TResult> Select<TResult>(Expression<Func<T, T2, T3, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4>
@@ -753,7 +125,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5>
@@ -783,7 +155,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6>
@@ -813,7 +185,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7>
@@ -843,7 +215,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>
@@ -873,7 +245,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>
@@ -903,7 +275,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>
@@ -933,7 +305,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
@@ -963,7 +335,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
@@ -993,7 +365,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
@@ -1023,7 +395,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
@@ -1053,7 +425,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
@@ -1083,7 +455,7 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> selectExpression);
     }
 
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>
@@ -1097,27 +469,18 @@ namespace Dashing.SqlBuilder
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> OrderBy<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> orderByExpression, ListSortDirection sortDirection = ListSortDirection.Ascending);
 
-        ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> selectExpression);
+        ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> selectExpression);
     }
 
 
-    public class SqlFromDefinition<T> : ISqlFromDefinition<T>
+    public class SqlFromDefinition<T> : BaseSqlFromDefinition, ISqlFromDefinition<T>
     {
 
-        public IList<Expression<Func<T, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, bool>>>();
+        public ISqlBuilderExecutor SqlBuilderExecutor { get; set; }
 
-        public IList<Expression<Func<T, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public ISession Session { get; set; }
-
-        public SqlFromDefinition(ISession session)
+        public SqlFromDefinition(ISqlBuilderExecutor sqlBuilderExecutor)
         {
-            this.Session = session;
+            this.SqlBuilderExecutor = sqlBuilderExecutor;
         }
 
         public ISqlFromDefinition<T, T2> InnerJoin<T2>()
@@ -1183,27 +546,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, TResult> Select<TResult>(Expression<Func<T, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2> : ISqlFromDefinition<T, T2>
+    public class SqlFromDefinition<T, T2> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2>
     {
-
-        public IList<Expression<Func<T, T2, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, bool>>>();
-
-        public IList<Expression<Func<T, T2, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T> PreviousFromDefinition { get; set; }
 
@@ -1213,7 +563,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -1283,27 +633,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, TResult> Select<TResult>(Expression<Func<T, T2, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3> : ISqlFromDefinition<T, T2, T3>
+    public class SqlFromDefinition<T, T2, T3> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3>
     {
-
-        public IList<Expression<Func<T, T2, T3, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2> PreviousFromDefinition { get; set; }
 
@@ -1313,7 +650,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -1383,27 +720,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, TResult> Select<TResult>(Expression<Func<T, T2, T3, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4> : ISqlFromDefinition<T, T2, T3, T4>
+    public class SqlFromDefinition<T, T2, T3, T4> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3> PreviousFromDefinition { get; set; }
 
@@ -1413,7 +737,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -1483,27 +807,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5> : ISqlFromDefinition<T, T2, T3, T4, T5>
+    public class SqlFromDefinition<T, T2, T3, T4, T5> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4> PreviousFromDefinition { get; set; }
 
@@ -1513,7 +824,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -1583,27 +894,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6> : ISqlFromDefinition<T, T2, T3, T4, T5, T6>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5> PreviousFromDefinition { get; set; }
 
@@ -1613,7 +911,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -1683,27 +981,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6> PreviousFromDefinition { get; set; }
 
@@ -1713,7 +998,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -1783,27 +1068,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> PreviousFromDefinition { get; set; }
 
@@ -1813,7 +1085,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -1883,27 +1155,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> PreviousFromDefinition { get; set; }
 
@@ -1913,7 +1172,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -1983,27 +1242,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> PreviousFromDefinition { get; set; }
 
@@ -2013,7 +1259,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -2083,27 +1329,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> PreviousFromDefinition { get; set; }
 
@@ -2113,7 +1346,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -2183,27 +1416,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> PreviousFromDefinition { get; set; }
 
@@ -2213,7 +1433,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -2283,27 +1503,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> PreviousFromDefinition { get; set; }
 
@@ -2313,7 +1520,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -2383,27 +1590,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> PreviousFromDefinition { get; set; }
 
@@ -2413,7 +1607,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -2483,27 +1677,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> PreviousFromDefinition { get; set; }
 
@@ -2513,7 +1694,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -2583,27 +1764,14 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
-    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> : ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>
+    public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>
     {
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>>> WhereExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>>>();
-
-        public IList<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>>> HavingExpressions { get; set; } = new List<Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>>>();
-
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
-
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
-
-
-        public JoinType JoinType { get; set; }
-
-        public Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> JoinExpression { get; set; }
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> PreviousFromDefinition { get; set; }
 
@@ -2613,7 +1781,7 @@ namespace Dashing.SqlBuilder
             this.JoinType = joinType;
         }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
@@ -2643,269 +1811,11 @@ namespace Dashing.SqlBuilder
             return this;
         }
 
-        public ISqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> selectExpression)
+        public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>(this, selectExpression);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
-
-
-    public class SqlBuilderBuilder<T, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T> fromDefinition,
-            Expression<Func<T, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2> fromDefinition,
-            Expression<Func<T, T2, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3> fromDefinition,
-            Expression<Func<T, T2, T3, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4> fromDefinition,
-            Expression<Func<T, T2, T3, T4, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class SqlBuilderBuilder<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>
-    {
-        public SqlBuilderBuilder(
-            SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> fromDefinition,
-            Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> selectExpression,
-            ISession session)
-        {
-
-        }
-
-        public CommandDefinition Build()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 
 
 

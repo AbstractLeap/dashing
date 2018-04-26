@@ -6,6 +6,7 @@ namespace Dashing.Engine {
     using System.Threading.Tasks;
 
     using Dashing.Configuration;
+    using Dashing.SqlBuilder;
 
     public interface IEngine {
         IConfiguration Configuration { get; }
@@ -17,6 +18,8 @@ namespace Dashing.Engine {
         IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
 
         Page<T> QueryPaged<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
+
+        IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) where T : class, new();
 
         int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
 
@@ -37,6 +40,8 @@ namespace Dashing.Engine {
         Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
 
         Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
+
+        Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) where T : class, new();
 
         Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
 

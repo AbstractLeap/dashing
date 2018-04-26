@@ -10,8 +10,9 @@
     using Dashing.Configuration;
     using Dashing.Engine;
     using Dashing.Extensions;
+    using Dashing.SqlBuilder;
 
-    public sealed partial class Session : ISession, ISelectQueryExecutor {
+    public sealed partial class Session : ISession, ISelectQueryExecutor, ISqlBuilderExecutor {
         public IDapper Dapper { get; private set; }
 
         private readonly IEngine engine;

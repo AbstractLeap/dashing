@@ -12,6 +12,7 @@ namespace Dashing.Engine {
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
+    using Dashing.SqlBuilder;
 
     public class SqlEngine : IEngine {
         private IConfiguration configuration;
@@ -340,6 +341,16 @@ namespace Dashing.Engine {
             IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
             return await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
+        }
+
+        public IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) where T : class, new()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) where T : class, new()
+        {
+            throw new NotImplementedException();
         }
     }
 }
