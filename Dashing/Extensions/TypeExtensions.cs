@@ -78,6 +78,7 @@
                                                                                                        { DbType.Boolean, typeof(bool)},
                                                                                                        { DbType.DateTime, typeof(DateTime) },
                                                                                                        { DbType.DateTime2, typeof(DateTime) },
+                                                                                                       { DbType.DateTimeOffset, typeof(DateTimeOffset) },
                                                                                                        { DbType.Decimal, typeof(decimal) }
                                                                                                    };
         
