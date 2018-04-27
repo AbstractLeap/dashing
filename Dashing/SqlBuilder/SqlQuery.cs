@@ -7,8 +7,14 @@ using System.Threading.Tasks;
 
 namespace Dashing.SqlBuilder
 {
-    
-public interface ISqlFromDefinition<T>
+
+
+
+
+
+
+
+    public interface ISqlFromDefinition<T>
     {
 
         ISqlFromDefinition<T, T2> InnerJoin<T2>();
@@ -1816,6 +1822,8 @@ public interface ISqlFromDefinition<T>
             return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
         }
     }
+
+
 
 
 

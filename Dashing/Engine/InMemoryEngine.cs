@@ -15,6 +15,7 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Engine.InMemory;
+    using Dashing.SqlBuilder;
 
     public class InMemoryEngine : IEngine {
         private Dictionary<Type, object> tables;
@@ -120,6 +121,10 @@
             };
         }
 
+        public IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) {
+            throw new NotImplementedException();
+        }
+
         public int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.AssertConfigured();
             return Enumerable.Count<T>(this.Query<T>(connection, transaction, query));
@@ -205,6 +210,10 @@
 
         public Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             return Task.FromResult<Page<T>>(this.QueryPaged(connection, transaction, query));
+        }
+
+        public Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) {
+            throw new NotImplementedException();
         }
 
         public Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {

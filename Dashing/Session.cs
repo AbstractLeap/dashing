@@ -73,6 +73,10 @@
                 new AsyncLazy<IDbTransaction>(() => this.GetTransactionAsync()));
         }
 
+        public SqlBuilder.SqlBuilder Sql() {
+            return new SqlBuilder.SqlBuilder(this);
+        }
+
         public IConfiguration Configuration
         {
             get

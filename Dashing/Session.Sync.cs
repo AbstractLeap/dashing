@@ -126,8 +126,7 @@
             return this.engine.ExecuteBulkDelete<T>(this.MaybeOpenConnection(), this.GetTransaction(), null);
         }
 
-        public IEnumerable<T> Query<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression)
-            where T : class, new() {
+        public IEnumerable<T> Query<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) {
             return this.engine.Query<T>(this.MaybeOpenConnection(), this.GetTransaction(), baseSqlFromDefinition, selectExpression);
         }
     }

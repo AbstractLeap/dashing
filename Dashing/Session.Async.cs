@@ -122,8 +122,7 @@
             return await this.engine.ExecuteBulkDeleteAsync<T>(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), null);
         }
 
-        public async Task<IEnumerable<T>> QueryAsync<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression)
-            where T : class, new() {
+        public async Task<IEnumerable<T>> QueryAsync<T>(BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) {
             return await this.engine.QueryAsync<T>(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), baseSqlFromDefinition, selectExpression);
         }
     }

@@ -15,8 +15,8 @@ namespace Dashing.Tests.SqlBuilder
         {
             var config = new TestConfig();
             var database = new InMemoryDatabase(config);
-            var sqlBuilder = new Dashing.SqlBuilder.SqlBuilder(database.BeginSession());
-            var query = sqlBuilder.From<TestDomain.Post>()
+            var session = database.BeginSession();
+            var query = session.Sql().From<TestDomain.Post>()
                       .InnerJoin<TestDomain.User>((post, user) => post.Author == user)
                       .Where((post, user) => post.Blog.BlogId == 1)
                       .Select((post, user) => post.Title);

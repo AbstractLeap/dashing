@@ -33,6 +33,12 @@ namespace Dashing {
             where T : class, new();
 
         /// <summary>
+        ///     Contruct a strongly typed SQL query
+        /// </summary>
+        /// <returns></returns>
+        SqlBuilder.SqlBuilder Sql();
+
+        /// <summary>
         ///     Inserts a collection of entities in to the database
         /// </summary>
         /// <typeparam name="T"></typeparam>

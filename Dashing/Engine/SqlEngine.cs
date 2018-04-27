@@ -343,13 +343,11 @@ namespace Dashing.Engine {
             return await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
-        public IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) where T : class, new()
-        {
+        public IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) where T : class, new()
-        {
+        public Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) {
             throw new NotImplementedException();
         }
     }
