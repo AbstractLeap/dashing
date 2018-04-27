@@ -1,4 +1,5 @@
-﻿namespace Dashing.SqlBuilder {
+﻿namespace Dashing.Engine.DML
+{
     public class CommandDefinition {
         public string Sql { get; set; }
 

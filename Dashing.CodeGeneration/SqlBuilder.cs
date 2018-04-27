@@ -42,14 +42,16 @@ public class SqlFromDefinition<{types}> : {(i == 1 ? "BaseSqlFromDefinition" : "
                     var previousTypes = GetTypes(i - 1);
                     sqlFromDefinitionClassBuilder.Append(
                         $@"
-    public SqlFromDefinition<{previousTypes}> PreviousFromDefinition {{ get; set; }}
+    public SqlFromDefinition<{previousTypes}> TypedPreviousFromDefinition {{ get; set; }}
 
     public SqlFromDefinition(SqlFromDefinition<{previousTypes}> previousFromDefinition, JoinType joinType) {{
+        this.TypedPreviousFromDefinition = previousFromDefinition;
         this.PreviousFromDefinition = previousFromDefinition;
         this.JoinType = joinType;
     }}
 
     public SqlFromDefinition(SqlFromDefinition<{previousTypes}> previousFromDefinition, JoinType joinType, Expression joinExpression) {{
+        this.TypedPreviousFromDefinition = previousFromDefinition;
         this.PreviousFromDefinition = previousFromDefinition;
         this.JoinType = joinType;
         this.JoinExpression = joinExpression;
@@ -155,7 +157,7 @@ public ISqlFromDefinition<{types}> OrderBy<TResult>(Expression<Func<{types}, TRe
                 sqlFromDefinitionClassBuilder.Append(
                     $@"
 public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<{types}, TResult>> selectExpression) {{
-    return new SqlQuerySelection<TResult>(this, selectExpression, this{(i > 1 ? "." : "")}{string.Join(".", Enumerable.Range(1, i - 1).Select(_ => "PreviousFromDefinition"))}.SqlBuilderExecutor);
+    return new SqlQuerySelection<TResult>(this, selectExpression, this{(i > 1 ? "." : "")}{string.Join(".", Enumerable.Range(1, i - 1).Select(_ => "TypedPreviousFromDefinition"))}.SqlBuilderExecutor);
 }}
 ");
                 sqlFromDefinitionInterfaceBuilder.AppendLine("}");

@@ -5,12 +5,12 @@
     using System.Linq.Expressions;
 
     public abstract class BaseSqlFromDefinition {
-        public IList<Expression> WhereExpressions { get; set; } = new List<Expression>();
+        public IList<Expression> WhereExpressions { get; } = new List<Expression>();
 
-        public IList<Expression> HavingExpressions { get; set; } = new List<Expression>();
+        public IList<Expression> HavingExpressions { get; } = new List<Expression>();
 
-        public IList<Expression> GroupByExpressions { get; set; } = new List<Expression>();
+        public IList<Expression> GroupByExpressions { get; } = new List<Expression>();
 
-        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; set; } = new List<Tuple<Expression, ListSortDirection>>();
+        public IList<Tuple<Expression, ListSortDirection>> OrderByExpressions { get; } = new List<Tuple<Expression, ListSortDirection>>();
     }
 }

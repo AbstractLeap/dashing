@@ -27,6 +27,8 @@ namespace Dashing.Engine {
 
         private IDeleteWriter deleteWriter;
 
+        private SqlSelectWriter sqlSelectWriter;
+
         private DelegateQueryCreator delegateQueryCreator;
 
         private delegate IEnumerable<T> DelegateQuery<T>(
@@ -57,6 +59,7 @@ namespace Dashing.Engine {
             this.updateWriter = new UpdateWriter(dialect, configuration);
             this.insertWriter = new InsertWriter(dialect, configuration);
             this.deleteWriter = new DeleteWriter(dialect, configuration);
+            this.sqlSelectWriter = new SqlSelectWriter(dialect, configuration);
             this.delegateQueryCreator = new DelegateQueryCreator(configuration);
         }
 
@@ -344,11 +347,13 @@ namespace Dashing.Engine {
         }
 
         public IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) {
-            throw new NotImplementedException();
+            var command = this.sqlSelectWriter.GenerateSql(baseSqlFromDefinition, selectExpression);
+            return connection.Query<T>(command.Sql, command.Parameters, transaction);
         }
 
         public Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, BaseSqlFromDefinition baseSqlFromDefinition, Expression selectExpression) {
-            throw new NotImplementedException();
+            var command = this.sqlSelectWriter.GenerateSql(baseSqlFromDefinition, selectExpression);
+            return connection.QueryAsync<T>(command.Sql, command.Parameters, transaction);
         }
     }
 }

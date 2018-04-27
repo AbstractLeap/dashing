@@ -7,14 +7,8 @@ using System.Threading.Tasks;
 
 namespace Dashing.SqlBuilder
 {
-
-
-
-
-
-
-
-    public interface ISqlFromDefinition<T>
+    
+public interface ISqlFromDefinition<T>
     {
 
         ISqlFromDefinition<T, T2> InnerJoin<T2>();
@@ -561,16 +555,18 @@ namespace Dashing.SqlBuilder
     public class SqlFromDefinition<T, T2> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2>
     {
 
-        public SqlFromDefinition<T> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -641,23 +637,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3>
     {
 
-        public SqlFromDefinition<T, T2> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -728,23 +726,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4>
     {
 
-        public SqlFromDefinition<T, T2, T3> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -815,23 +815,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -902,23 +904,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -989,23 +993,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1076,23 +1082,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1163,23 +1171,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1250,23 +1260,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1337,23 +1349,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1424,23 +1438,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1511,23 +1527,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1598,23 +1616,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1685,23 +1705,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1772,23 +1794,25 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
 
     public class SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> : BaseSqlFromWithJoinDefinition, ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>
     {
 
-        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> PreviousFromDefinition { get; set; }
+        public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> TypedPreviousFromDefinition { get; set; }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> previousFromDefinition, JoinType joinType)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
         }
 
         public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> previousFromDefinition, JoinType joinType, Expression joinExpression)
         {
+            this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
             this.JoinType = joinType;
             this.JoinExpression = joinExpression;
@@ -1819,11 +1843,9 @@ namespace Dashing.SqlBuilder
 
         public ISqlQuerySelection<TResult> Select<TResult>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, TResult>> selectExpression)
         {
-            return new SqlQuerySelection<TResult>(this, selectExpression, this.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.PreviousFromDefinition.SqlBuilderExecutor);
+            return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
-
-
 
 
 
