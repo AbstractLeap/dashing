@@ -82,7 +82,7 @@
             return this;
         }
 
-        protected virtual IConfiguration AddNamespaceOf<T>() {
+        protected virtual IConfiguration AddNamespaceOf<T>(bool includeNested = false) {
             var type = typeof(T);
             var ns = type.Namespace;
 
@@ -90,7 +90,7 @@
                 throw new ArgumentException("Namespace of the indicator type is null");
             }
 
-            this.Add(type.Assembly().GetTypes().Where(t => t.IsClass() && !t.IsAbstract() && t.Namespace != null && t.Namespace == ns && !typeof(IConfiguration).IsAssignableFrom(t)));
+            this.Add(type.Assembly().GetTypes().Where(t => (includeNested || !t.IsNested) && t.IsClass() && !t.IsAbstract() && t.Namespace != null && t.Namespace == ns && !typeof(IConfiguration).IsAssignableFrom(t)));
             return this;
         }
 
