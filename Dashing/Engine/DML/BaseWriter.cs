@@ -23,6 +23,7 @@
             var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
             var result = whereClauseWriter.GenerateSql(whereClauses, rootNode);
             if (result.Sql.Length > 0) {
+                sql.Append(" where ");
                 sql.Append(result.Sql);
             }
 

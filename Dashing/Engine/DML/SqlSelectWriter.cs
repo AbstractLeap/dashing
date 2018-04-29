@@ -15,11 +15,13 @@
     {
         private readonly ISqlDialect dialect;
         private readonly IConfiguration configuration;
+        private readonly MultiParameterWhereClausewriter whereClauseWriter;
 
         public SqlSelectWriter(ISqlDialect dialect, IConfiguration configuration)
         {
             this.dialect = dialect;
             this.configuration = configuration;
+            this.whereClauseWriter = new MultiParameterWhereClausewriter(dialect, configuration);
         }
 
         public SqlWriterResult GenerateSql(BaseSqlFromDefinition sqlFromDefinition, Expression selectExpression)
@@ -32,7 +34,16 @@
 
             this.VisitFromDefinition(sqlFromDefinition, fromExpressions, whereExpressions, groupByExpressions, havingExpressions, orderByExpressions);
 
-            return new SqlWriterResult(fromExpressions.ToString(), null);
+            var sql = $@"
+from {fromExpressions}
+{(whereExpressions.Length > 0 ? "where " : "")}{whereExpressions}
+{(groupByExpressions.Length > 0 ? "group by " : "")}{groupByExpressions}
+{(havingExpressions.Length > 0 ? "where " : "")}{havingExpressions}
+{(orderByExpressions.Length > 0 ? "order by " : "")}{orderByExpressions}
+
+";
+
+            return new SqlWriterResult(sql, null);
         }
 
         private void VisitFromDefinition(BaseSqlFromDefinition sqlFromDefinition, StringBuilder fromExpressions, StringBuilder whereExpressions, StringBuilder groupByExpressions, StringBuilder havingExpressions, StringBuilder orderByExpressions)
@@ -48,7 +59,14 @@
                 this.AppendJoin(fromExpressions, sqlWithJoinExpression.JoinType);
                 this.dialect.AppendQuotedTableName(fromExpressions, map);
                 fromExpressions.Append(" as t").Append(fromDefinitionTypes.Length).Append(" ");
-            } else
+                var joinSql = this.whereClauseWriter.GenerateSql(sqlWithJoinExpression.JoinExpression);
+                if (joinSql.Sql.Length > 0)
+                {
+                    fromExpressions.Append(" on ").Append(joinSql.Sql);
+                    // TODO parameters
+                }
+            }
+            else
             {
                 // add in the base clause
                 var baseType = sqlFromDefinition.GetType().GetGenericArguments().First();
@@ -56,8 +74,31 @@
                 this.dialect.AppendQuotedTableName(fromExpressions, map);
                 fromExpressions.Append(" as t1 ");
             }
+
+            AppendLambdaExpressions(sqlFromDefinition.WhereExpressions, whereExpressions);
+            AppendLambdaExpressions(sqlFromDefinition.HavingExpressions, havingExpressions);
         }
-        
+
+        private void AppendLambdaExpressions(IList<Expression> listOfExpressions, StringBuilder expressionStringBuilder)
+        {
+            if (listOfExpressions?.Any() ?? false)
+            {
+                if (expressionStringBuilder.Length > 0)
+                {
+                    expressionStringBuilder.Append(" and ");
+                }
+                foreach (var whereExpression in listOfExpressions)
+                {
+                    var sqlResult = this.whereClauseWriter.GenerateSql(whereExpression as LambdaExpression);
+                    if (sqlResult.Sql.Length > 0)
+                    {
+                        expressionStringBuilder.Append(sqlResult.Sql);
+                        // TODO parameters
+                    }
+                }
+            }
+        }
+
         private void AppendJoin(StringBuilder stringBuilder, JoinType joinType)
         {
             switch(joinType)
@@ -76,6 +117,10 @@
 
                 case JoinType.FullOuterJoin:
                     stringBuilder.Append(" full outer join ");
+                    break;
+
+                case JoinType.CrossJoin:
+                    stringBuilder.Append(" cross join ");
                     break;
             }
         }

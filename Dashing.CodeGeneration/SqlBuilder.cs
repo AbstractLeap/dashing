@@ -44,13 +44,7 @@ public class SqlFromDefinition<{types}> : {(i == 1 ? "BaseSqlFromDefinition" : "
                         $@"
     public SqlFromDefinition<{previousTypes}> TypedPreviousFromDefinition {{ get; set; }}
 
-    public SqlFromDefinition(SqlFromDefinition<{previousTypes}> previousFromDefinition, JoinType joinType) {{
-        this.TypedPreviousFromDefinition = previousFromDefinition;
-        this.PreviousFromDefinition = previousFromDefinition;
-        this.JoinType = joinType;
-    }}
-
-    public SqlFromDefinition(SqlFromDefinition<{previousTypes}> previousFromDefinition, JoinType joinType, Expression joinExpression) {{
+    public SqlFromDefinition(SqlFromDefinition<{previousTypes}> previousFromDefinition, JoinType joinType, Expression<Func<{types}, bool>> joinExpression) {{
         this.TypedPreviousFromDefinition = previousFromDefinition;
         this.PreviousFromDefinition = previousFromDefinition;
         this.JoinType = joinType;
@@ -69,21 +63,8 @@ public class SqlFromDefinition<{types}> : {(i == 1 ? "BaseSqlFromDefinition" : "
 
                 if (i < 16) {
                     var nextTypes = GetTypes(i + 1);
-                    var joinTypes = new[] { "InnerJoin", "LeftJoin", "RightJoin", "FullOuterJoin" };
+                    var joinTypes = new[] { "InnerJoin", "LeftJoin", "RightJoin", "FullOuterJoin", "CrossJoin" };
                     foreach (var joinType in joinTypes) {
-                        sqlFromDefinitionInterfaceBuilder.Append(
-                            $@"
-    ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>();
-");
-
-
-                        sqlFromDefinitionClassBuilder.Append(
-                            $@"
-public ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>() {{
-    return new SqlFromDefinition<{nextTypes}>(this, JoinType.{joinType});
-}}
-");
-
                         sqlFromDefinitionInterfaceBuilder.Append(
                             $@"
     ISqlFromDefinition<{nextTypes}> {joinType}<T{i + 1}>(Expression<Func<{nextTypes}, bool>> joinExpression);

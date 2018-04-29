@@ -6,6 +6,8 @@
 
         RightJoin,
 
-        FullOuterJoin
+        FullOuterJoin,
+
+        CrossJoin
     }
 }

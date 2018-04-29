@@ -7,25 +7,19 @@ using System.Threading.Tasks;
 
 namespace Dashing.SqlBuilder
 {
-    
+
 public interface ISqlFromDefinition<T>
     {
 
-        ISqlFromDefinition<T, T2> InnerJoin<T2>();
-
         ISqlFromDefinition<T, T2> InnerJoin<T2>(Expression<Func<T, T2, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2> LeftJoin<T2>();
 
         ISqlFromDefinition<T, T2> LeftJoin<T2>(Expression<Func<T, T2, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2> RightJoin<T2>();
-
         ISqlFromDefinition<T, T2> RightJoin<T2>(Expression<Func<T, T2, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2> FullOuterJoin<T2>();
-
         ISqlFromDefinition<T, T2> FullOuterJoin<T2>(Expression<Func<T, T2, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2> CrossJoin<T2>(Expression<Func<T, T2, bool>> joinExpression);
 
         ISqlFromDefinition<T> Where(Expression<Func<T, bool>> whereExpression);
 
@@ -41,21 +35,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2>
     {
 
-        ISqlFromDefinition<T, T2, T3> InnerJoin<T3>();
-
         ISqlFromDefinition<T, T2, T3> InnerJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3> LeftJoin<T3>();
 
         ISqlFromDefinition<T, T2, T3> LeftJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3> RightJoin<T3>();
-
         ISqlFromDefinition<T, T2, T3> RightJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3> FullOuterJoin<T3>();
-
         ISqlFromDefinition<T, T2, T3> FullOuterJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3> CrossJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2> Where(Expression<Func<T, T2, bool>> whereExpression);
 
@@ -71,21 +59,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4> InnerJoin<T4>();
-
         ISqlFromDefinition<T, T2, T3, T4> InnerJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4> LeftJoin<T4>();
 
         ISqlFromDefinition<T, T2, T3, T4> LeftJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4> RightJoin<T4>();
-
         ISqlFromDefinition<T, T2, T3, T4> RightJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4> FullOuterJoin<T4>();
-
         ISqlFromDefinition<T, T2, T3, T4> FullOuterJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4> CrossJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3> Where(Expression<Func<T, T2, T3, bool>> whereExpression);
 
@@ -101,21 +83,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5> InnerJoin<T5>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5> InnerJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5> LeftJoin<T5>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5> LeftJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5> RightJoin<T5>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5> RightJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5> FullOuterJoin<T5>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5> FullOuterJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5> CrossJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4> Where(Expression<Func<T, T2, T3, T4, bool>> whereExpression);
 
@@ -131,21 +107,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6> InnerJoin<T6>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6> InnerJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6> LeftJoin<T6>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6> LeftJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6> RightJoin<T6>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6> RightJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6> FullOuterJoin<T6>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6> FullOuterJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6> CrossJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5> Where(Expression<Func<T, T2, T3, T4, T5, bool>> whereExpression);
 
@@ -161,21 +131,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> InnerJoin<T7>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> InnerJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> LeftJoin<T7>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> LeftJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> RightJoin<T7>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> RightJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> FullOuterJoin<T7>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> FullOuterJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> CrossJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6> Where(Expression<Func<T, T2, T3, T4, T5, T6, bool>> whereExpression);
 
@@ -191,21 +155,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> InnerJoin<T8>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> InnerJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> LeftJoin<T8>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> LeftJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> RightJoin<T8>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> RightJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> FullOuterJoin<T8>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> FullOuterJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> CrossJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> whereExpression);
 
@@ -221,21 +179,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> InnerJoin<T9>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> InnerJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> LeftJoin<T9>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> LeftJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> RightJoin<T9>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> RightJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> FullOuterJoin<T9>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> FullOuterJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> CrossJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> whereExpression);
 
@@ -251,21 +203,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> InnerJoin<T10>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> InnerJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> LeftJoin<T10>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> LeftJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> RightJoin<T10>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> RightJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> FullOuterJoin<T10>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> FullOuterJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> CrossJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> whereExpression);
 
@@ -281,21 +227,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> InnerJoin<T11>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> InnerJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> LeftJoin<T11>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> LeftJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> RightJoin<T11>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> RightJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> FullOuterJoin<T11>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> FullOuterJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> CrossJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> whereExpression);
 
@@ -311,21 +251,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> InnerJoin<T12>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> InnerJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> LeftJoin<T12>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> LeftJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> RightJoin<T12>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> RightJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> FullOuterJoin<T12>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> FullOuterJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> CrossJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> whereExpression);
 
@@ -341,21 +275,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> InnerJoin<T13>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> InnerJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> LeftJoin<T13>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> LeftJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> RightJoin<T13>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> RightJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> FullOuterJoin<T13>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> FullOuterJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> CrossJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> whereExpression);
 
@@ -371,21 +299,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> InnerJoin<T14>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> InnerJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> LeftJoin<T14>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> LeftJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> RightJoin<T14>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> RightJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> FullOuterJoin<T14>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> FullOuterJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> CrossJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> whereExpression);
 
@@ -401,21 +323,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> InnerJoin<T15>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> InnerJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> LeftJoin<T15>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> LeftJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> RightJoin<T15>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> RightJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> FullOuterJoin<T15>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> FullOuterJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> CrossJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> whereExpression);
 
@@ -431,21 +347,15 @@ public interface ISqlFromDefinition<T>
     public interface ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
     {
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> InnerJoin<T16>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> InnerJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression);
-
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> LeftJoin<T16>();
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> LeftJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> RightJoin<T16>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> RightJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression);
 
-        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> FullOuterJoin<T16>();
-
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> FullOuterJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression);
+
+        ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> CrossJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression);
 
         ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> whereExpression);
 
@@ -483,19 +393,9 @@ public interface ISqlFromDefinition<T>
             this.SqlBuilderExecutor = sqlBuilderExecutor;
         }
 
-        public ISqlFromDefinition<T, T2> InnerJoin<T2>()
-        {
-            return new SqlFromDefinition<T, T2>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2> InnerJoin<T2>(Expression<Func<T, T2, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2> LeftJoin<T2>()
-        {
-            return new SqlFromDefinition<T, T2>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2> LeftJoin<T2>(Expression<Func<T, T2, bool>> joinExpression)
@@ -503,24 +403,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2> RightJoin<T2>()
-        {
-            return new SqlFromDefinition<T, T2>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2> RightJoin<T2>(Expression<Func<T, T2, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2> FullOuterJoin<T2>()
-        {
-            return new SqlFromDefinition<T, T2>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2> FullOuterJoin<T2>(Expression<Func<T, T2, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2> CrossJoin<T2>(Expression<Func<T, T2, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T> Where(Expression<Func<T, bool>> whereExpression)
@@ -557,14 +452,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -572,19 +460,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3> InnerJoin<T3>()
-        {
-            return new SqlFromDefinition<T, T2, T3>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3> InnerJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3> LeftJoin<T3>()
-        {
-            return new SqlFromDefinition<T, T2, T3>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3> LeftJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression)
@@ -592,24 +470,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3> RightJoin<T3>()
-        {
-            return new SqlFromDefinition<T, T2, T3>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3> RightJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3> FullOuterJoin<T3>()
-        {
-            return new SqlFromDefinition<T, T2, T3>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3> FullOuterJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3> CrossJoin<T3>(Expression<Func<T, T2, T3, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2> Where(Expression<Func<T, T2, bool>> whereExpression)
@@ -646,14 +519,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -661,19 +527,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4> InnerJoin<T4>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4> InnerJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4> LeftJoin<T4>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4> LeftJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression)
@@ -681,24 +537,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4> RightJoin<T4>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4> RightJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4> FullOuterJoin<T4>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4> FullOuterJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4> CrossJoin<T4>(Expression<Func<T, T2, T3, T4, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3> Where(Expression<Func<T, T2, T3, bool>> whereExpression)
@@ -735,14 +586,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -750,19 +594,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5> InnerJoin<T5>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5> InnerJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5> LeftJoin<T5>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5> LeftJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression)
@@ -770,24 +604,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5> RightJoin<T5>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5> RightJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5> FullOuterJoin<T5>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5> FullOuterJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5> CrossJoin<T5>(Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4> Where(Expression<Func<T, T2, T3, T4, bool>> whereExpression)
@@ -824,14 +653,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -839,19 +661,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6> InnerJoin<T6>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6> InnerJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6> LeftJoin<T6>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6> LeftJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression)
@@ -859,24 +671,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6> RightJoin<T6>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6> RightJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6> FullOuterJoin<T6>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6> FullOuterJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6> CrossJoin<T6>(Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5> Where(Expression<Func<T, T2, T3, T4, T5, bool>> whereExpression)
@@ -913,14 +720,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -928,19 +728,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> InnerJoin<T7>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> InnerJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> LeftJoin<T7>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> LeftJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression)
@@ -948,24 +738,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> RightJoin<T7>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> RightJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> FullOuterJoin<T7>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> FullOuterJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> CrossJoin<T7>(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6> Where(Expression<Func<T, T2, T3, T4, T5, T6, bool>> whereExpression)
@@ -1002,14 +787,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1017,19 +795,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> InnerJoin<T8>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> InnerJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> LeftJoin<T8>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> LeftJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression)
@@ -1037,24 +805,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> RightJoin<T8>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> RightJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> FullOuterJoin<T8>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> FullOuterJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> CrossJoin<T8>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, bool>> whereExpression)
@@ -1091,14 +854,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1106,19 +862,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> InnerJoin<T9>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> InnerJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> LeftJoin<T9>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> LeftJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression)
@@ -1126,24 +872,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> RightJoin<T9>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> RightJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> FullOuterJoin<T9>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> FullOuterJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> CrossJoin<T9>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, bool>> whereExpression)
@@ -1180,14 +921,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1195,19 +929,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> InnerJoin<T10>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> InnerJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> LeftJoin<T10>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> LeftJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression)
@@ -1215,24 +939,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> RightJoin<T10>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> RightJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> FullOuterJoin<T10>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> FullOuterJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> CrossJoin<T10>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, bool>> whereExpression)
@@ -1269,14 +988,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1284,19 +996,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> InnerJoin<T11>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> InnerJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> LeftJoin<T11>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> LeftJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression)
@@ -1304,24 +1006,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> RightJoin<T11>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> RightJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> FullOuterJoin<T11>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> FullOuterJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> CrossJoin<T11>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, bool>> whereExpression)
@@ -1358,14 +1055,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1373,19 +1063,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> InnerJoin<T12>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> InnerJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> LeftJoin<T12>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> LeftJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression)
@@ -1393,24 +1073,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> RightJoin<T12>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> RightJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> FullOuterJoin<T12>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> FullOuterJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> CrossJoin<T12>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, bool>> whereExpression)
@@ -1447,14 +1122,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1462,19 +1130,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> InnerJoin<T13>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> InnerJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> LeftJoin<T13>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> LeftJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression)
@@ -1482,24 +1140,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> RightJoin<T13>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> RightJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> FullOuterJoin<T13>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> FullOuterJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> CrossJoin<T13>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, bool>> whereExpression)
@@ -1536,14 +1189,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1551,19 +1197,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> InnerJoin<T14>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> InnerJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> LeftJoin<T14>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> LeftJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression)
@@ -1571,24 +1207,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> RightJoin<T14>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> RightJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> FullOuterJoin<T14>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> FullOuterJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> CrossJoin<T14>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, bool>> whereExpression)
@@ -1625,14 +1256,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1640,19 +1264,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> InnerJoin<T15>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> InnerJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> LeftJoin<T15>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> LeftJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression)
@@ -1660,24 +1274,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> RightJoin<T15>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> RightJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> FullOuterJoin<T15>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> FullOuterJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> CrossJoin<T15>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, bool>> whereExpression)
@@ -1714,14 +1323,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1729,19 +1331,9 @@ public interface ISqlFromDefinition<T>
             this.JoinExpression = joinExpression;
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> InnerJoin<T16>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.InnerJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> InnerJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.InnerJoin, joinExpression);
-        }
-
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> LeftJoin<T16>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.LeftJoin);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> LeftJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression)
@@ -1749,24 +1341,19 @@ public interface ISqlFromDefinition<T>
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.LeftJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> RightJoin<T16>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.RightJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> RightJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.RightJoin, joinExpression);
         }
 
-        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> FullOuterJoin<T16>()
-        {
-            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.FullOuterJoin);
-        }
-
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> FullOuterJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression)
         {
             return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.FullOuterJoin, joinExpression);
+        }
+
+        public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> CrossJoin<T16>(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression)
+        {
+            return new SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this, JoinType.CrossJoin, joinExpression);
         }
 
         public ISqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Where(Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, bool>> whereExpression)
@@ -1803,14 +1390,7 @@ public interface ISqlFromDefinition<T>
 
         public SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> TypedPreviousFromDefinition { get; set; }
 
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> previousFromDefinition, JoinType joinType)
-        {
-            this.TypedPreviousFromDefinition = previousFromDefinition;
-            this.PreviousFromDefinition = previousFromDefinition;
-            this.JoinType = joinType;
-        }
-
-        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> previousFromDefinition, JoinType joinType, Expression joinExpression)
+        public SqlFromDefinition(SqlFromDefinition<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> previousFromDefinition, JoinType joinType, Expression<Func<T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, bool>> joinExpression)
         {
             this.TypedPreviousFromDefinition = previousFromDefinition;
             this.PreviousFromDefinition = previousFromDefinition;
@@ -1846,6 +1426,7 @@ public interface ISqlFromDefinition<T>
             return new SqlQuerySelection<TResult>(this, selectExpression, this.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.TypedPreviousFromDefinition.SqlBuilderExecutor);
         }
     }
+
 
 
 

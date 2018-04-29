@@ -73,7 +73,11 @@
                 throw new NotImplementedException("Dashing does not currently support where clause across tables in a delete");
             }
 
-            sql.Append(whereResult.Sql);
+            if (whereResult.Sql.Length > 0) {
+                sql.Append(" where ");
+                sql.Append(whereResult.Sql);
+            }
+            
             parameters.AddDynamicParams(whereResult.Parameters);
         }
     }

@@ -169,7 +169,10 @@
                 }
 
                 parameters.AddDynamicParams(whereResult.Parameters);
-                sql.Append(whereResult.Sql);
+                if (whereResult.Sql.Length > 0) {
+                    sql.Append(" where ");
+                    sql.Append(whereResult.Sql);
+                }
             }
 
             return new SqlWriterResult(sql.ToString(), parameters);
