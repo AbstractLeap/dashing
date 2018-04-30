@@ -19,7 +19,7 @@
 
             this.InitVariables();
             this.VisitWhereClause(whereClause);
-            return new SqlWriterResult(this.GetSql(removeTrailingElement: false), this.parameters);
+            return new SqlWriterResult(this.GetSql(), this.parameters);
         }
     }
 }

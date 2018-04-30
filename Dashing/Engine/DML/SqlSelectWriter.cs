@@ -34,6 +34,7 @@
 
             this.VisitFromDefinition(sqlFromDefinition, fromExpressions, whereExpressions, groupByExpressions, havingExpressions, orderByExpressions);
 
+            
             var sql = $@"
 from {fromExpressions}
 {(whereExpressions.Length > 0 ? "where " : "")}{whereExpressions}
@@ -75,8 +76,8 @@ from {fromExpressions}
                 fromExpressions.Append(" as t1 ");
             }
 
-            AppendLambdaExpressions(sqlFromDefinition.WhereExpressions, whereExpressions);
-            AppendLambdaExpressions(sqlFromDefinition.HavingExpressions, havingExpressions);
+            this.AppendLambdaExpressions(sqlFromDefinition.WhereExpressions, whereExpressions);
+            this.AppendLambdaExpressions(sqlFromDefinition.HavingExpressions, havingExpressions);
         }
 
         private void AppendLambdaExpressions(IList<Expression> listOfExpressions, StringBuilder expressionStringBuilder)

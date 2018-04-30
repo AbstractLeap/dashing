@@ -446,20 +446,37 @@
                         if (exp.Expression.NodeType == ExpressionType.MemberAccess) {
                             // e.Parent.ParentId == blah => get ParentId on e instead
                             var foreignKeyExpression = ((MemberExpression)exp.Expression);
-                            var foreignKeyName =
-                                this.config.GetMap(foreignKeyExpression.Expression.Type).Columns[foreignKeyExpression.Member.Name].DbName;
-                            return new ColumnElement(
-                                this.currentNode,
-                                foreignKeyName,
-                                foreignKeyExpression.Expression.NodeType != ExpressionType.MemberAccess);
+                            var foreignKeyName = this.config.GetMap(foreignKeyExpression.Expression.Type).Columns[foreignKeyExpression.Member.Name].DbName;
+                            if (this.isMultiParameterWhereClauseWriter) {
+                                return new SpecificParameterColumnElement(this.GetAliasForParameter(), foreignKeyName);
+                            }
+
+                            return new ColumnElement(this.currentNode, foreignKeyName, foreignKeyExpression.Expression.NodeType != ExpressionType.MemberAccess);
                         }
+
+                        var dbName = this.config.GetMap(declaringType).Columns[propInfo.Name].DbName;
+                        if (this.isMultiParameterWhereClauseWriter) {
+                            if (exp.Expression.NodeType != ExpressionType.Parameter) {
+                                throw new NotSupportedException("In a SqlBuilder query you may only specify where clauses on the root types");
+                            }
+
+                            return new SpecificParameterColumnElement(this.GetAliasForParameter(), dbName);
+                        }
+
                         // e.EntityId == blah
-                        return new ColumnElement(this.modifiedRootNode, this.config.GetMap(declaringType).Columns[propInfo.Name].DbName, true);
+                        return new ColumnElement(this.modifiedRootNode, dbName, true);
                     }
-                    return new ColumnElement(
-                        this.currentNode,
-                        this.config.GetMap(declaringType).Columns[propInfo.Name].DbName,
-                        exp.Expression.NodeType != ExpressionType.MemberAccess);
+
+                    var dbColumnName = this.config.GetMap(declaringType).Columns[propInfo.Name].DbName;
+                    if (this.isMultiParameterWhereClauseWriter) {
+                        if (exp.Expression.NodeType != ExpressionType.Parameter) {
+                            throw new NotSupportedException("In a SqlBuilder query you may only specify where clauses on the root types");
+                        }
+
+                        return new SpecificParameterColumnElement(this.GetAliasForParameter(), dbColumnName);
+                    }
+
+                    return new ColumnElement(this.currentNode, dbColumnName, exp.Expression.NodeType != ExpressionType.MemberAccess);
                 }
             }
 
@@ -698,9 +715,9 @@
             }
         }
 
-        protected string GetSql(bool removeTrailingElement = true) {
+        protected string GetSql() {
             var sql = new StringBuilder();
-            while (this.sqlElements.Count > 1 || (!removeTrailingElement && this.sqlElements.Count > 0)) {
+            while (this.sqlElements.Count > 0) {
                 // this is one as there's a trailing "and" that we don't want
                 this.sqlElements.Dequeue().Append(sql, this.dialect);
             }
