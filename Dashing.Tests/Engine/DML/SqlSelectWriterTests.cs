@@ -20,7 +20,6 @@
 
         [Fact]
         public void ItWorks() {
-            this.output.WriteLine($"Debugger: {(Debugger.IsAttached ? "Attached" : "Not attached")}");
             var sqlBuilder = new SqlBuilder(null);
             var from = sqlBuilder.From<Post>()
                                  .InnerJoin<User>((p, u) => p.Author == u)
