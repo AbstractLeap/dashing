@@ -28,7 +28,7 @@
 
         private bool isConstantExpression;
 
-        private bool isTopOfBinaryOrMethod;
+        protected bool isTopOfBinaryOrMethod;
 
         private int paramCounter;
 

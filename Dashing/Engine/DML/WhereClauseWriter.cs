@@ -21,10 +21,7 @@
             this.modifiedRootNode = rootNode;
 
             foreach (var entry in whereClauses.AsSmartEnumerable()) {
-                if (!entry.IsFirst) {
-                    this.ResetVariables();
-                }
-
+                this.ResetVariables();
                 this.VisitWhereClause(entry.Value);
                 if (!entry.IsLast) {
                     this.sqlElements.Enqueue(new StringElement(" and "));
