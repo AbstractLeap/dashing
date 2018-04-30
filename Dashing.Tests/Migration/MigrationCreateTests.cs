@@ -11,6 +11,7 @@ namespace Dashing.Tools.Tests.Migration {
     using Dashing.Engine.Dialects;
     using Dashing.Migration;
     using Dashing.Tests;
+    using Dashing.Tests.TestDomain.Guid;
     using Dashing.Tools.TestDomain;
     using Dashing.Tools.Tests.Migration.Simple;
     using Dashing.Tools.Tests.TestDomain;
@@ -25,6 +26,29 @@ namespace Dashing.Tools.Tests.Migration {
 
         public MigrationCreateTests(ITestOutputHelper output) {
             this.output = output;
+        }
+
+        [Fact]
+        public void GuidPrimaryKeyWorks()
+        {
+            var config = new MutableConfiguration();
+            config.Add<EntityWithGuidPk>();
+            var migrator = MakeMigrator(config);
+            IEnumerable<string> errors;
+            IEnumerable<string> warnings;
+            var script = migrator.GenerateSqlDiff(
+                new IMap[] { },
+                config.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                new string[0],
+                out warnings,
+                out errors);
+            this.output.WriteLine(script);
+            Assert.Equal(
+                "create table [EntityWithGuidPks] ([Id] uniqueidentifier not null DEFAULT NEWSEQUENTIALID() primary key, [Name] nvarchar(255) null);",
+                script.Trim());
         }
 
         [Fact]
