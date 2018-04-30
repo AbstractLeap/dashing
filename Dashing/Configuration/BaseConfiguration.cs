@@ -127,41 +127,4 @@
             return this;
         }
     }
-
-    //public class DashingInMemory : IDashing {
-    //    public DashingInMemory(IConfiguration configuration) {
-
-    //    }
-
-    //    public ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {
-    //        throw new NotImplementedException();
-    //    }
-
-    //    public ISession BeginTransactionLessSession(IDbConnection connection = null) {
-    //        throw new NotImplementedException();
-    //    }
-    //}
-
-    //public class ExampleUsage {
-    //    public class MyConfig : BaseConfiguration {
-    //        public MyConfig() {
-    //            this.Add<Foo>();
-    //        }
-    //    }
-
-    //    public class CommandThatDoesStuff {
-    //        public async Task Execute() {
-    //            var config = new MyConfig();
-    //            var dashing = new DashingSql(config, DbProviderFactories.GetFactory("System.Data.SqlClient"), "connectionstring");
-    //            using (var session = dashing.BeginSession()) {
-    //                var tings = await session.Query<Foo>().ToListAsync();
-    //                session.Complete();
-    //            }
-    //        }
-    //    }
-
-    //    public class Foo {
-
-    //    }
-    //}
 }
