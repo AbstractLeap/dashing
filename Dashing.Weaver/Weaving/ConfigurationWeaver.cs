@@ -42,7 +42,7 @@
                     }
 
                     assemblyResolver.Dispose();
-                    assembly.Write();
+                    assembly.Write(new WriterParameters { WriteSymbols = hasSymbols });
                 }
             }
 
