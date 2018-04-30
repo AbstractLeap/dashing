@@ -18,10 +18,6 @@
     <ProjectReference Include="..\Dashing.Weaving.Sample\Dashing.Weaving.Sample.csproj" />
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
-  </ItemGroup>
   
   <Target Name="Weave" AfterTargets="AfterBuild">
     <PropertyGroup>

@@ -12,6 +12,8 @@ using Xunit.Abstractions;
 
 namespace Dashing.Tests.Engine.DML
 {
+    using System.Diagnostics;
+
     public class SqlSelectWriterTests
     {
         private readonly ITestOutputHelper output;
@@ -24,6 +26,7 @@ namespace Dashing.Tests.Engine.DML
         [Fact]
         public void ItWorks()
         {
+            this.output.WriteLine($"Debugger: {(Debugger.IsAttached ? "Attached" : "Not attached")}");
             var sqlBuilder = new Dashing.SqlBuilder.SqlBuilder(null);
             var from = sqlBuilder
                 .From<TestDomain.Post>()
