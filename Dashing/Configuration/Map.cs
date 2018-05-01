@@ -42,6 +42,11 @@ namespace Dashing.Configuration {
         public string Table { get; set; }
 
         /// <summary>
+        ///     Gets or sets the history table name
+        /// </summary>
+        public string HistoryTable { get; set; }
+
+        /// <summary>
         ///     Gets or sets the schema.
         /// </summary>
         public string Schema { get; set; }

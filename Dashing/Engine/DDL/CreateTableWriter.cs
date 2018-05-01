@@ -33,6 +33,7 @@ namespace Dashing.Engine.DDL {
             }
 
             sql.Append(")");
+            this.dialect.AppendCreateTableSuffix(sql, map);
             return sql.ToString();
         }
 

@@ -6,6 +6,7 @@
     using System.Reflection;
 
     using Dashing.Extensions;
+    using Dashing.Versioning;
 
     /// <summary>
     ///     The default mapper.
@@ -60,15 +61,19 @@
             return map;
         }
 
-        private void Build(Type entity, IMap map, IConfiguration configuration) {
+        private void Build(Type entityType, IMap map, IConfiguration configuration) {
             map.Configuration = configuration;
-            map.Table = this.convention.TableFor(entity);
-            map.Schema = this.convention.SchemaFor(entity);
-            entity.GetProperties()
-                  .Select(property => this.BuildColumn(map, entity, property, configuration))
+            map.Table = this.convention.TableFor(entityType);
+            map.Schema = this.convention.SchemaFor(entityType);
+            if (entityType.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>))) {
+                map.HistoryTable = this.convention.HistoryTableFor(entityType);
+            }
+
+            entityType.GetProperties()
+                  .Select(property => this.BuildColumn(map, entityType, property, configuration))
                   .ToList()
                   .ForEach(c => map.Columns.Add(c.Name, c));
-            this.ResolvePrimaryKey(entity, map);
+            this.ResolvePrimaryKey(entityType, map);
             this.AssignFetchIds(map);
         }
 
@@ -115,7 +120,6 @@
             column.Relationship = RelationshipType.None;
             column.DbName = propertyName;
             column.DbType = propertyType.GetDbType();
-
             column.IsNullable = propertyType.IsNullable();
 
             // check particular types for defaults
@@ -128,6 +132,10 @@
                 case DbType.String:
                     column.Length = this.convention.StringLengthFor(entity, propertyName);
                     column.IsNullable = true;
+                    break;
+
+                case DbType.DateTime2:
+                    column.Precision = this.convention.DateTime2PrecisionFor(entity, propertyName);
                     break;
             }
         }

@@ -2,9 +2,12 @@ namespace Dashing.Engine.Dialects {
     using System;
     using System.Data;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
+    using Dashing.Versioning;
 
     public class SqlServerDialect : SqlDialectBase {
         private const char DotCharacter = '.';
@@ -31,13 +34,59 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
+        protected override void AppendColumnType(StringBuilder sql, IColumn column)
+        {
+            if (column.Map.Type.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>)) && column.Name == nameof(IVersionedEntity<string>.SessionUser)) {
+                return;
+            }
+
+            base.AppendColumnType(sql, column);
+        }
+
+        protected override void AppendColumnProperties(StringBuilder sql, IColumn column, bool scriptDefault)
+        {
+            if (column.Map.Type.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>))) {
+                var spec = this.GetColumnSpecification(column);
+                switch(column.Name) {
+                    case nameof(IVersionedEntity<string>.SessionUser): // string doesn't matter here
+                        sql.Append($" as (cast(SESSION_CONTEXT(N'UserId') as {spec.DbTypeName}))");
+                        return;
+
+                    case nameof(IVersionedEntity<string>.CreatedBy): // string doesn't matter here
+                        sql.Append($"NULL DEFAULT (cast(SESSION_CONTEXT(N'UserId') as {spec.DbTypeName}))");
+                        return;
+
+                    case nameof(IVersionedEntity<string>.SysStartTime):
+                        sql.Append("GENERATED ALWAYS AS ROW START HIDDEN NOT NULL");
+                        return;
+
+                    case nameof(IVersionedEntity<string>.SysEndTime):
+                        sql.Append("GENERATED ALWAYS AS ROW END HIDDEN NOT NULL")
+                           .Append(", PERIOD FOR SYSTEM_TIME (")
+                           .Append(nameof(IVersionedEntity<string>.SysStartTime))
+                           .Append(", ")
+                           .Append(nameof(IVersionedEntity<string>.SysEndTime))
+                           .Append(")");
+                        return;
+                }
+            }
+
+            base.AppendColumnProperties(sql, column, scriptDefault);
+        }
+
+        public override void AppendCreateTableSuffix(StringBuilder sql, IMap map)
+        {
+            if (map.Type.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>))) {
+                sql.Append($" WITH (SYSTEM_VERSIONING = ON ( HISTORY_TABLE = {(string.IsNullOrWhiteSpace(map.Schema) ? "dbo" : map.Schema)}.");
+                this.AppendQuotedName(sql, map.HistoryTable);
+                sql.Append("))");
+            }
+        }
+
         public override ColumnSpecification GetColumnSpecification(IColumn column) {
             switch (column.DbType) {
                 case DbType.Boolean:
                     return new ColumnSpecification { DbTypeName = "bit" };
-
-                case DbType.DateTime2:
-                    return new ColumnSpecification { DbTypeName = "datetime2" };
 
                 case DbType.Guid:
                     return new ColumnSpecification { DbTypeName = "uniqueidentifier" };

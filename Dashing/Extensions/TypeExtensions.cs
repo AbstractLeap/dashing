@@ -34,7 +34,7 @@
                                                                                                      { typeof(string), DbType.String },
                                                                                                      { typeof(char), DbType.StringFixedLength },
                                                                                                      { typeof(Guid), DbType.Guid },
-                                                                                                     { typeof(DateTime), DbType.DateTime },
+                                                                                                     { typeof(DateTime), DbType.DateTime2 },
                                                                                                      { typeof(DateTimeOffset), DbType.DateTimeOffset },
                                                                                                      { typeof(byte[]), DbType.Binary },
                                                                                                      { typeof(byte?), DbType.Byte },
@@ -51,7 +51,7 @@
                                                                                                      { typeof(bool?), DbType.Boolean },
                                                                                                      { typeof(char?), DbType.StringFixedLength },
                                                                                                      { typeof(Guid?), DbType.Guid },
-                                                                                                     { typeof(DateTime?), DbType.DateTime },
+                                                                                                     { typeof(DateTime?), DbType.DateTime2 },
                                                                                                      { typeof(DateTimeOffset?), DbType.DateTimeOffset },
 #if !COREFX
             { typeof(Binary), DbType.Binary },
