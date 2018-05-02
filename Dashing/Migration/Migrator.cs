@@ -230,7 +230,9 @@
                             if (fromProp.Value.DbType != matchingToProp.DbType) {
                                 bool skipQuestion = false;
                                 bool wasPrimaryKeyDroppedAndRecreated = false;
-                                var renamePrimaryKeyModificationsKey =
+                                if ((fromProp.Value.Relationship == RelationshipType.ManyToOne || fromProp.Value.Relationship == RelationshipType.OneToOne)
+                                    && (matchingToProp.Relationship == RelationshipType.ManyToOne || matchingToProp.Relationship == RelationshipType.OneToOne)) {
+                                    var renamePrimaryKeyModificationsKey =
                                     Tuple.Create(
                                         fromProp.Value.Relationship == RelationshipType.ManyToOne
                                             ? fromProp.Value.ParentMap.Type.Name
@@ -238,20 +240,18 @@
                                         matchingToProp.Relationship == RelationshipType.ManyToOne
                                             ? matchingToProp.ParentMap.Type.Name
                                             : matchingToProp.OppositeColumn.Map.Type.Name);
-                                if ((fromProp.Value.Relationship == RelationshipType.OneToOne
-                                     || fromProp.Value.Relationship == RelationshipType.ManyToOne)
-                                    && (matchingToProp.Relationship == RelationshipType.ManyToOne
-                                        || matchingToProp.Relationship == RelationshipType.OneToOne)
-                                    && renamePrimaryKeyModifications.ContainsKey(renamePrimaryKeyModificationsKey)) {
-                                    // skip the question as we've already attempted the modify for the pk so may as well here as well!
-                                    skipQuestion = true;
-                                    wasPrimaryKeyDroppedAndRecreated = !renamePrimaryKeyModifications[renamePrimaryKeyModificationsKey];
+                                
+                                    if (renamePrimaryKeyModifications.ContainsKey(renamePrimaryKeyModificationsKey)) {
+                                        // skip the question as we've already attempted the modify for the pk so may as well here as well!
+                                        skipQuestion = true;
+                                        wasPrimaryKeyDroppedAndRecreated = !renamePrimaryKeyModifications[renamePrimaryKeyModificationsKey];
+                                    }
                                 }
 
                                 bool dropAndRecreate = wasPrimaryKeyDroppedAndRecreated;
                                 if (!skipQuestion) {
                                     dropAndRecreate =
-                                        answerProvider.GetBooleanAnswer(
+                                        !answerProvider.GetBooleanAnswer(
                                             string.Format(
                                                 "Attempting to change DbType for property {0} on {1} from {2} to {3}. Would you like to attempt the change? (selecting \"No\" will drop and re-create the column)",
                                                 matchingToProp.Name,
