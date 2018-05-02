@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>Dashing.Weaver</id>
-    <version>2.0.0-hotel</version>
+    <version>2.0.0-rc1</version>
     <title>Dashing Weaver</title>
 	<authors>Polylytics</authors>
 	<owners>Polylytics</owners>

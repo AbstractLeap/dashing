@@ -4,7 +4,7 @@
     <PackageId>Dashing</PackageId>
     <Description>Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity whilst not sacrificing (too much) performance.</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <VersionSuffix>hotel</VersionSuffix>
+    <VersionSuffix>rc1</VersionSuffix>
     <Authors>Polylytics</Authors>
     <Owners>Polylytics</Owners>
 	<PackageProjectUrl>https://github.com/Polylytics/dashing</PackageProjectUrl>
