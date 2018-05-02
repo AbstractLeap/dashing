@@ -113,5 +113,10 @@
         ///     References the opposite column in a one-to-one relationship
         /// </summary>
         IColumn OppositeColumn { get; set; }
+
+        /// <summary>
+        ///     Indicates whether the weaving process should add code to initialise this property in the constructor
+        /// </summary>
+        bool ShouldWeavingInitialiseListInConstructor { get; set; }
     }
 }

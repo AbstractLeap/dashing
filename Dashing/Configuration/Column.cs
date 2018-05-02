@@ -127,6 +127,11 @@
         public int FetchId { get; set; }
 
         /// <summary>
+        ///     Indicates whether the weaving process should add code to initialise this property in the constructor
+        /// </summary>
+        public bool ShouldWeavingInitialiseListInConstructor { get; set; }
+
+        /// <summary>
         ///     Gets or sets the relationship.
         /// </summary>
         public RelationshipType Relationship { get; set; }

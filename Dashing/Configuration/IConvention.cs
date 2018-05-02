@@ -109,5 +109,13 @@
         /// <param name="propertyName"></param>
         /// <returns></returns>
         byte DateTime2PrecisionFor(Type entity, string propertyName);
+
+        /// <summary>
+        /// Specifies whether a column should be auto-initialised via the contructor by weaving
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        bool IsCollectionInstantiationAutomatic(Type entity, string propertyName);
     }
 }

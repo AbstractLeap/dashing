@@ -13,5 +13,7 @@
         public FooType Type { get; set; }
 
         public IEnumerable<Bar> Bars { get; set; }
+
+        public IList<Duck> Ducks { get; set; }
     }
 }

@@ -95,7 +95,7 @@
             column.Map = map;
             column.Name = property.Name;
             column.IsIgnored = !(property.CanRead && property.CanWrite);
-
+            
             this.ResolveRelationship(entityType, property, column, configuration);
             this.ApplyAnnotations(entityType, property, column);
 
@@ -207,6 +207,7 @@
         private void ResolveOneToManyColumn(IColumn column) {
             // assume to be OneToMany
             column.Relationship = RelationshipType.OneToMany;
+            column.ShouldWeavingInitialiseListInConstructor = this.convention.IsCollectionInstantiationAutomatic(column.Map.Type, column.Name);
         }
 
         private void ApplyAnnotations(Type entity, PropertyInfo property, IColumn column) {
