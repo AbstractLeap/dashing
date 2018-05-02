@@ -30,6 +30,8 @@
             this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true))
                 .Callback<StringBuilder, IColumn, bool>((s, m, b) => s.Append("<colspec:" + m.Name + ">"));
 
+            this.mockDialect.Setup(m => m.AppendCreateTableSuffix(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
+
             var sql = target.CreateTable(MakeMap(new Column<string> { Name = "Username" }));
 
             Assert.Equal("create table <tablename> (<colspec:DummyId>, <colspec:Username>)", sql);
@@ -41,7 +43,12 @@
         private static IMap MakeMap(params IColumn[] columns) {
             var cols = new[] { new Column<int> { Name = "DummyId", IsPrimaryKey = true } }.Union(columns).ToArray();
             var map = new Map<User> { Table = "Dummies", PrimaryKey = cols.First() };
-            cols.ToList().ForEach(c => map.Columns.Add(c.Name, c));
+            cols.ToList().ForEach(
+                c => {
+                    map.Columns.Add(c.Name, c);
+                    c.Map = map;
+                });
+
             return map;
         }
 
@@ -49,6 +56,7 @@
         public void IgnoredPropertyExcludedFromColumnSpecification() {
             this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
             this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true));
+            this.mockDialect.Setup(m => m.AppendCreateTableSuffix(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
 
             var target = this.MakeTarget();
             target.CreateTable(MakeMap(new Column<string> { Name = "Ignored", IsIgnored = true }));
@@ -60,6 +68,7 @@
         public void OneToManyPropertyExcludedFromColumnSpecification() {
             this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
             this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true));
+            this.mockDialect.Setup(m => m.AppendCreateTableSuffix(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
 
             var target = this.MakeTarget();
             target.CreateTable(MakeMap(new Column<string> { Name = "Ignored", Relationship = RelationshipType.OneToMany }));
@@ -71,6 +80,7 @@
         public void ManyToManyPropertyExcludedFromColumnSpecification() {
             this.mockDialect.Setup(m => m.AppendQuotedTableName(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
             this.mockDialect.Setup(m => m.AppendColumnSpecification(It.IsAny<StringBuilder>(), It.IsAny<IColumn>(), true));
+            this.mockDialect.Setup(m => m.AppendCreateTableSuffix(It.IsAny<StringBuilder>(), It.IsAny<IMap>()));
 
             var target = this.MakeTarget();
             target.CreateTable(MakeMap(new Column<string> { Name = "Ignored", Relationship = RelationshipType.ManyToMany }));

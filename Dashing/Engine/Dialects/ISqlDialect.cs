@@ -120,5 +120,7 @@ namespace Dashing.Engine.Dialects {
         string GetForeignKeyName(ForeignKey foreignKey);
 
         string GetIndexName(Index index);
+
+        string AddSystemVersioning(IMap to);
     }
 }

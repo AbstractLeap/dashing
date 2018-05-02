@@ -69,7 +69,7 @@
 
             var maps = new List<IMap>();
             this.configuration = new Configuration(sqlDialect);
-            foreach (var table in schema.Tables.Where(t => !tablesToIgnore.Contains(t.Name))) {
+            foreach (var table in schema.Tables.Where(t => !tablesToIgnore.Contains(t.Name) && t.TemporalType != TemporalType.HistoryTable)) {
                 maps.Add(this.MapTable(table, schema, sqlDialect));
             }
 
@@ -142,6 +142,7 @@
             var map = Activator.CreateInstance(typeof(Map<>).MakeGenericType(type));
             var iMap = map as IMap;
             iMap.Table = table.Name;
+            iMap.HistoryTable = table.HistoryName;
             iMap.Configuration = this.configuration;
             foreach (var column in schema.GetColumnsForTable(table.Name)) {
                 iMap.Columns.Add(this.MapColumn(iMap, column, schema, sqlDialect));

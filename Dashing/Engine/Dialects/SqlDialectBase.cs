@@ -396,6 +396,10 @@ namespace Dashing.Engine.Dialects {
             return name;
         }
 
+        public virtual string AddSystemVersioning(IMap to) {
+            return string.Empty;
+        }
+
         public abstract string ChangeColumnName(IColumn fromColumn, IColumn toColumn);
 
         public abstract string ModifyColumn(IColumn fromColumn, IColumn toColumn);

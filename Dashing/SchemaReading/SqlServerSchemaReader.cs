@@ -1,5 +1,19 @@
 namespace Dashing.SchemaReading {
     class SqlServerSchemaReader : BaseSchemaReader {
+        protected override string GetTableSql() {
+            return @"
+select
+    SCHEMA_NAME(t.schema_id) as [Schema],
+    t.[Name],
+    t.temporal_type as TemporalType,
+    SCHEMA_NAME(ttemporal.schema_id) as HistorySchema,
+    ttemporal.[Name] as HistoryName
+from sys.tables t
+    left join sys.tables ttemporal
+        on t.history_table_id = ttemporal.object_id
+";
+        }
+
         protected override string GetForeignKeySql(string databaseName) {
             return @"SELECT  tab1.name AS [TableName],
     obj.name AS Name,

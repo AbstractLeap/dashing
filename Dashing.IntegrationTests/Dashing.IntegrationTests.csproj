@@ -33,6 +33,6 @@
 	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net46/dashing-weaver.exe</Weave>
 	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/netcoreapp1.1/dashing-weaver.dll"</Weave>
 	</PropertyGroup>
-	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName)$(TargetExt)&quot; -t &quot;Dashing.IntegrationTests.Setup.Configuration&quot;" />
+	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName)$(TargetExt)&quot; -t &quot;Dashing.IntegrationTests.Setup.Configuration&quot; -t &quot;Dashing.IntegrationTests.TestDomain.Versioned.VersionedConfiguration&quot; -t &quot;Dashing.IntegrationTests.TestDomain.Versioned.NonVersioned.NonVersionedConfiguration&quot;" />
   </Target> 
 </Project>

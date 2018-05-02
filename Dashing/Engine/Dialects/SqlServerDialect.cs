@@ -36,7 +36,7 @@ namespace Dashing.Engine.Dialects {
 
         protected override void AppendColumnType(StringBuilder sql, IColumn column)
         {
-            if (column.Map.Type.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>)) && column.Name == nameof(IVersionedEntity<string>.SessionUser)) {
+            if (column.Map.Type.IsVersionedEntity() && column.Name == nameof(IVersionedEntity<string>.SessionUser)) {
                 return;
             }
 
@@ -45,7 +45,7 @@ namespace Dashing.Engine.Dialects {
 
         protected override void AppendColumnProperties(StringBuilder sql, IColumn column, bool scriptDefault)
         {
-            if (column.Map.Type.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>))) {
+            if (column.Map.Type.IsVersionedEntity()) {
                 var spec = this.GetColumnSpecification(column);
                 switch(column.Name) {
                     case nameof(IVersionedEntity<string>.SessionUser): // string doesn't matter here
@@ -53,15 +53,15 @@ namespace Dashing.Engine.Dialects {
                         return;
 
                     case nameof(IVersionedEntity<string>.CreatedBy): // string doesn't matter here
-                        sql.Append($"NULL DEFAULT (cast(SESSION_CONTEXT(N'UserId') as {spec.DbTypeName}))");
+                        sql.Append($" NULL DEFAULT (cast(SESSION_CONTEXT(N'UserId') as {spec.DbTypeName}))");
                         return;
 
                     case nameof(IVersionedEntity<string>.SysStartTime):
-                        sql.Append("GENERATED ALWAYS AS ROW START HIDDEN NOT NULL");
+                        sql.Append(" GENERATED ALWAYS AS ROW START HIDDEN NOT NULL");
                         return;
 
                     case nameof(IVersionedEntity<string>.SysEndTime):
-                        sql.Append("GENERATED ALWAYS AS ROW END HIDDEN NOT NULL")
+                        sql.Append(" GENERATED ALWAYS AS ROW END HIDDEN NOT NULL")
                            .Append(", PERIOD FOR SYSTEM_TIME (")
                            .Append(nameof(IVersionedEntity<string>.SysStartTime))
                            .Append(", ")
@@ -76,11 +76,29 @@ namespace Dashing.Engine.Dialects {
 
         public override void AppendCreateTableSuffix(StringBuilder sql, IMap map)
         {
-            if (map.Type.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>))) {
+            if (map.Type.IsVersionedEntity()) {
                 sql.Append($" WITH (SYSTEM_VERSIONING = ON ( HISTORY_TABLE = {(string.IsNullOrWhiteSpace(map.Schema) ? "dbo" : map.Schema)}.");
                 this.AppendQuotedName(sql, map.HistoryTable);
                 sql.Append("))");
             }
+        }
+
+        public override string AddSystemVersioning(IMap to) {
+            if (to.Type.IsVersionedEntity()) {
+                var sql = new StringBuilder("alter table ");
+                this.AppendQuotedTableName(sql, to);
+                sql.Append(" set (system_versioning = ON ( history_table = ")
+                   .Append(
+                       string.IsNullOrWhiteSpace(to.Schema)
+                           ? "dbo"
+                           : to.Schema)
+                   .Append(".");
+                this.AppendQuotedName(sql, to.HistoryTable);
+                sql.Append("))");
+                return sql.ToString();
+            }
+
+            return string.Empty;
         }
 
         public override ColumnSpecification GetColumnSpecification(IColumn column) {

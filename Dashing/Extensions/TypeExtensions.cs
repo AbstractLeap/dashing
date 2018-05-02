@@ -5,6 +5,8 @@
     using System.Data;
     using System.Linq;
     using System.Reflection;
+
+    using Dashing.Versioning;
 #if !COREFX
     using System.Data.Linq;
 #endif
@@ -122,6 +124,15 @@
         /// </returns>
         public static bool IsImplementationOf(this Type thisType, Type type) {
             return type.IsAssignableFrom(thisType);
+        }
+
+        /// <summary>
+        /// Indicates that the type implements IVersionedEntity
+        /// </summary>
+        /// <param name="thisType"></param>
+        /// <returns></returns>
+        public static bool IsVersionedEntity(this Type thisType) {
+            return thisType.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>));
         }
 
         /// <summary>

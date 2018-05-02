@@ -65,7 +65,7 @@
             map.Configuration = configuration;
             map.Table = this.convention.TableFor(entityType);
             map.Schema = this.convention.SchemaFor(entityType);
-            if (entityType.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>))) {
+            if (entityType.IsVersionedEntity()) {
                 map.HistoryTable = this.convention.HistoryTableFor(entityType);
             }
 
