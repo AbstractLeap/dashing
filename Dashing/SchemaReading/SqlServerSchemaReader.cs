@@ -63,7 +63,7 @@ ORDER BY
      , col.COLUMN_NAME AS Name
      , col.ORDINAL_POSITION AS OrdinalPosition
      , col.DATA_TYPE AS DbTypeName
-	 , col.NUMERIC_PRECISION as [Precision]
+	 , coalesce(col.NUMERIC_PRECISION, col.DATETIME_PRECISION) as [Precision]
 	 , col.NUMERIC_SCALE as Scale
      , case when col.CHARACTER_MAXIMUM_LENGTH = -1 then 1 else 0 end AS MaxLength
      , col.CHARACTER_MAXIMUM_LENGTH as Length
