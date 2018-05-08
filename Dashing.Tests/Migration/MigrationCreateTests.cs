@@ -47,7 +47,7 @@ namespace Dashing.Tools.Tests.Migration {
                 out errors);
             this.output.WriteLine(script);
             Assert.Equal(
-                "create table [VersionedEntities] ([Id] uniqueidentifier not null DEFAULT NEWSEQUENTIALID() primary key, [Name] nvarchar(255) null, [SessionUser]  as (cast(SESSION_CONTEXT(N'UserId') as nvarchar)), [CreatedBy] nvarchar(255) NULL DEFAULT (cast(SESSION_CONTEXT(N'UserId') as nvarchar)), [SysStartTime] datetime2(2) GENERATED ALWAYS AS ROW START HIDDEN NOT NULL, [SysEndTime] datetime2(2) GENERATED ALWAYS AS ROW END HIDDEN NOT NULL, PERIOD FOR SYSTEM_TIME (SysStartTime, SysEndTime)) WITH (SYSTEM_VERSIONING = ON ( HISTORY_TABLE = dbo.[VersionedEntitiesHistory]));",
+                "create table [VersionedEntities] ([Id] uniqueidentifier not null DEFAULT NEWSEQUENTIALID() primary key, [Name] nvarchar(255) null, [SessionUser]  as (cast(SESSION_CONTEXT(N'UserId') as nvarchar)), [CreatedBy] nvarchar(255) NULL DEFAULT (cast(SESSION_CONTEXT(N'UserId') as nvarchar)), [SysStartTime] datetime2(2) GENERATED ALWAYS AS ROW START HIDDEN DEFAULT GETUTCDATE(), [SysEndTime] datetime2(2) GENERATED ALWAYS AS ROW END HIDDEN DEFAULT CONVERT(DATETIME2, '9999-12-31 23:59:59.9999999'), PERIOD FOR SYSTEM_TIME (SysStartTime, SysEndTime)) WITH (SYSTEM_VERSIONING = ON ( HISTORY_TABLE = dbo.[VersionedEntitiesHistory]));",
                 script.Trim());
         }
 

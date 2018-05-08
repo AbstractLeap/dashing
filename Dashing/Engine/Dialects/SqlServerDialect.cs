@@ -57,11 +57,11 @@ namespace Dashing.Engine.Dialects {
                         return;
 
                     case nameof(IVersionedEntity<string>.SysStartTime):
-                        sql.Append(" GENERATED ALWAYS AS ROW START HIDDEN NOT NULL");
+                        sql.Append(" GENERATED ALWAYS AS ROW START HIDDEN DEFAULT GETUTCDATE()");
                         return;
 
                     case nameof(IVersionedEntity<string>.SysEndTime):
-                        sql.Append(" GENERATED ALWAYS AS ROW END HIDDEN NOT NULL")
+                        sql.Append(" GENERATED ALWAYS AS ROW END HIDDEN DEFAULT CONVERT(DATETIME2, '9999-12-31 23:59:59.9999999')")
                            .Append(", PERIOD FOR SYSTEM_TIME (")
                            .Append(nameof(IVersionedEntity<string>.SysStartTime))
                            .Append(", ")
