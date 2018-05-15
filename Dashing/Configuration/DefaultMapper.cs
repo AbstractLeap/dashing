@@ -95,7 +95,8 @@
             column.Map = map;
             column.Name = property.Name;
             column.IsIgnored = !(property.CanRead && property.CanWrite);
-            
+            column.IsComputed = entityType.IsVersionedEntity() && typeof(IVersionedEntity<>).GetProperties().Select(pi => pi.Name).Contains(property.Name);
+
             this.ResolveRelationship(entityType, property, column, configuration);
             this.ApplyAnnotations(entityType, property, column);
 
