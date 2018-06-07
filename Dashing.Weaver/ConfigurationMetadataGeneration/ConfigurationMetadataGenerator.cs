@@ -47,7 +47,8 @@
                                                                                                     ? c.ParentMap.PrimaryKey.Name
                                                                                                     : (c.Relationship == RelationshipType.OneToOne
                                                                                                            ? c.OppositeColumn.Map.PrimaryKey.Name
-                                                                                                           : null)
+                                                                                                           : null),
+                                                                                            ShouldWeavingInitialiseListInConstructor = c.ShouldWeavingInitialiseListInConstructor
                                                                                         })
                                                           .ToList()
                                                   });

@@ -18,6 +18,13 @@
         string TableFor(Type entity);
 
         /// <summary>
+        /// Identifies the table name for the history table relating to this temporal table
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        string HistoryTableFor(Type entity);
+
+        /// <summary>
         ///     Identifies the schema name for an entity type (if specified, else null for the default schema)
         /// </summary>
         /// <param name="entity">
@@ -94,5 +101,21 @@
         ///     The <see cref="byte" />.
         /// </returns>
         byte DecimalScaleFor(Type entity, string propertyName);
+
+        /// <summary>
+        /// Specifies the datetime2 precision for a property
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        byte DateTime2PrecisionFor(Type entity, string propertyName);
+
+        /// <summary>
+        /// Specifies whether a column should be auto-initialised via the contructor by weaving
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        bool IsCollectionInstantiationAutomatic(Type entity, string propertyName);
     }
 }

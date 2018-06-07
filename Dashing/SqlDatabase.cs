@@ -44,9 +44,9 @@ namespace Dashing {
 
         public ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {
             return new Session(this.engine, 
-                new Lazy<IDbConnection>(() => connection == null ? this.CreateConnection() : connection),
+                new Lazy<IDbConnection>(() => connection ?? this.CreateConnection()),
                 transaction,
-                connection != null,
+                connection == null,
                 transaction == null,
                 false,
                 this.CompleteFailsSilentlyIfRejected);
@@ -54,7 +54,7 @@ namespace Dashing {
 
         public ISession BeginTransactionLessSession(IDbConnection connection = null) {
             return new Session(this.engine,
-                new Lazy<IDbConnection>(() => connection == null ? this.CreateConnection() : connection),
+                new Lazy<IDbConnection>(() => connection ?? this.CreateConnection()),
                 null,
                 connection == null,
                 false,

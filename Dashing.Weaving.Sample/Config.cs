@@ -7,6 +7,12 @@
         public Config() {
             this.AddNamespaceOf<Foo>();
             this.Add<AnotherAssembliesClass>();
+            this.Setup<Foo>()
+                .Property(f => f.Ducks)
+                .ShouldWeavingInitialiseListInConstructor = true;
+            this.Setup<Whopper>()
+                .Property(w => w.Ducks)
+                .ShouldWeavingInitialiseListInConstructor = true;
         }
     }
 }

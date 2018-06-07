@@ -11,6 +11,8 @@ namespace Dashing.Tools.Tests.Migration {
     using Dashing.Engine.Dialects;
     using Dashing.Migration;
     using Dashing.Tests;
+    using Dashing.Tests.TestDomain.Guid;
+    using Dashing.Tests.TestDomain.Versioning;
     using Dashing.Tools.TestDomain;
     using Dashing.Tools.Tests.Migration.Simple;
     using Dashing.Tools.Tests.TestDomain;
@@ -25,6 +27,51 @@ namespace Dashing.Tools.Tests.Migration {
 
         public MigrationCreateTests(ITestOutputHelper output) {
             this.output = output;
+        }
+
+        [Fact]
+        public void VersionedEntityWorks() {
+            var config = new MutableConfiguration();
+            config.Add<VersionedEntity>();
+            var migrator = MakeMigrator(config);
+            IEnumerable<string> errors;
+            IEnumerable<string> warnings;
+            var script = migrator.GenerateSqlDiff(
+                new IMap[] { },
+                config.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                new string[0],
+                out warnings,
+                out errors);
+            this.output.WriteLine(script);
+            Assert.Equal(
+                "create table [VersionedEntities] ([Id] uniqueidentifier not null DEFAULT NEWSEQUENTIALID() primary key, [Name] nvarchar(255) null, [SessionUser]  as (cast(SESSION_CONTEXT(N'UserId') as nvarchar)), [CreatedBy] nvarchar(255) NULL DEFAULT (cast(SESSION_CONTEXT(N'UserId') as nvarchar)), [SysStartTime] datetime2(2) GENERATED ALWAYS AS ROW START HIDDEN DEFAULT GETUTCDATE(), [SysEndTime] datetime2(2) GENERATED ALWAYS AS ROW END HIDDEN DEFAULT CONVERT(DATETIME2, '9999-12-31 23:59:59.9999999'), PERIOD FOR SYSTEM_TIME (SysStartTime, SysEndTime)) WITH (SYSTEM_VERSIONING = ON ( HISTORY_TABLE = dbo.[VersionedEntitiesHistory]));",
+                script.Trim());
+        }
+
+        [Fact]
+        public void GuidPrimaryKeyWorks()
+        {
+            var config = new MutableConfiguration();
+            config.Add<EntityWithGuidPk>();
+            var migrator = MakeMigrator(config);
+            IEnumerable<string> errors;
+            IEnumerable<string> warnings;
+            var script = migrator.GenerateSqlDiff(
+                new IMap[] { },
+                config.Maps,
+                null,
+                new Mock<ILogger>().Object,
+                new string[0],
+                new string[0],
+                out warnings,
+                out errors);
+            this.output.WriteLine(script);
+            Assert.Equal(
+                "create table [EntityWithGuidPks] ([Id] uniqueidentifier not null DEFAULT NEWSEQUENTIALID() primary key, [Name] nvarchar(255) null);",
+                script.Trim());
         }
 
         [Fact]
@@ -43,7 +90,7 @@ namespace Dashing.Tools.Tests.Migration {
                 out warnings,
                 out errors);
             Assert.Equal(
-                "create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime not null default (current_timestamp));",
+                "create table [SimpleClasses] ([SimpleClassId] int not null identity(1,1) primary key, [Name] nvarchar(255) null, [CreatedDate] datetime2(2) not null default (current_timestamp));",
                 script.Trim());
         }
 
@@ -142,9 +189,9 @@ create index [idx_OneToOneRight_Left] on [OneToOneRights] ([LeftId]);",
                 out warnings,
                 out errors);
             this.output.WriteLine(script.Trim());
-            Assert.Equal(Regex.Replace(@"create table [Blogs] ([BlogId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [CreateDate] datetime not null default (current_timestamp), [Description] nvarchar(255) null, [OwnerId] int null);
+            Assert.Equal(Regex.Replace(@"create table [Blogs] ([BlogId] int not null identity(1,1) primary key, [Title] nvarchar(255) null, [CreateDate] datetime2(2) not null default (current_timestamp), [Description] nvarchar(255) null, [OwnerId] int null);
 create table [BoolClasses] ([BoolClassId] int not null identity(1,1) primary key, [IsFoo] bit not null default (0));
-create table [Comments] ([CommentId] int not null identity(1,1) primary key, [Content] nvarchar(255) null, [PostId] int null, [UserId] int null, [CommentDate] datetime not null default (current_timestamp));
+create table [Comments] ([CommentId] int not null identity(1,1) primary key, [Content] nvarchar(255) null, [PostId] int null, [UserId] int null, [CommentDate] datetime2(2) not null default (current_timestamp));
 create table [Likes] ([LikeId] int not null identity(1,1) primary key, [UserId] int null, [CommentId] int null);
 create table [OneToOneLefts] ([OneToOneLeftId] int not null identity(1,1) primary key, [RightId] int null, [Name] nvarchar(255) null);
 create table [OneToOneRights] ([OneToOneRightId] int not null identity(1,1) primary key, [LeftId] int null, [Name] nvarchar(255) null);

@@ -13,20 +13,15 @@
     //// ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     //// ReSharper disable once MemberCanBePrivate.Global
     public class DefaultConvention : IConvention {
-        /// <summary>
-        ///     The _string length.
-        /// </summary>
         private readonly ushort stringLength;
 
-        /// <summary>
-        ///     The _decimal precision.
-        /// </summary>
         private readonly byte decimalPrecision;
 
-        /// <summary>
-        ///     The _decimal scale.
-        /// </summary>
         private readonly byte decimalScale;
+
+        private readonly byte dateTime2Precision;
+
+        private readonly bool isCollectionInstantiationAutomatic;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="DefaultConvention" /> class.
@@ -40,10 +35,15 @@
         /// <param name="decimalScale">
         ///     The decimal scale.
         /// </param>
-        public DefaultConvention(ushort stringLength = 255, byte decimalPrecision = 18, byte decimalScale = 10) {
+        /// <param name="dateTime2Precision">
+        ///     The datetime2 precisions
+        /// </param>
+        public DefaultConvention(ushort stringLength = 255, byte decimalPrecision = 18, byte decimalScale = 10, byte dateTime2Precision = 2, bool isCollectionInstantiationAutomatic = false) {
             this.stringLength = stringLength;
             this.decimalPrecision = decimalPrecision;
             this.decimalScale = decimalScale;
+            this.dateTime2Precision = dateTime2Precision;
+            this.isCollectionInstantiationAutomatic = isCollectionInstantiationAutomatic;
         }
 
         /// <summary>
@@ -57,6 +57,15 @@
         /// </returns>
         public virtual string TableFor(Type entity) {
             return entity.Name.Pluralize();
+        }
+
+        /// <summary>
+        /// Identifies the table name for the history table relating to this temporal table
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public string HistoryTableFor(Type entity) {
+            return this.TableFor(entity) + "History";
         }
 
         /// <summary>
@@ -178,6 +187,26 @@
         /// </returns>
         public byte DecimalScaleFor(Type entity, string propertyName) {
             return this.decimalScale;
+        }
+
+        /// <summary>
+        /// The datetime2 precision
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public byte DateTime2PrecisionFor(Type entity, string propertyName) {
+            return this.dateTime2Precision;
+        }
+
+        /// <summary>
+        /// Specifies whether a column should be auto-initialised via the contructor by weaving
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public bool IsCollectionInstantiationAutomatic(Type entity, string propertyName) {
+            return this.isCollectionInstantiationAutomatic;
         }
     }
 }

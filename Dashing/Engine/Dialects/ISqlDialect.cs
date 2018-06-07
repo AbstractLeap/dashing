@@ -93,6 +93,13 @@ namespace Dashing.Engine.Dialects {
         void AppendForUpdateOnQueryFinish(StringBuilder sql);
 
         /// <summary>
+        ///  Enables the ability to apply some text to the end of a create table statement
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="map"></param>
+        void AppendCreateTableSuffix(StringBuilder sql, IMap map);
+
+        /// <summary>
         ///     Called before a column is dropped
         /// </summary>
         /// <param name="column"></param>
@@ -113,5 +120,7 @@ namespace Dashing.Engine.Dialects {
         string GetForeignKeyName(ForeignKey foreignKey);
 
         string GetIndexName(Index index);
+
+        string AddSystemVersioning(IMap to);
     }
 }

@@ -15,7 +15,7 @@
             TypeDefinition typeDefinition,
             IEnumerable<ColumnDefinition> columnDefinitions) {
             var constructors = typeDefinition.GetConstructors().ToArray();
-            foreach (var oneToManyColumnDefinition in columnDefinitions.Where(c => c.Relationship == RelationshipType.OneToMany)) {
+            foreach (var oneToManyColumnDefinition in columnDefinitions.Where(c => c.Relationship == RelationshipType.OneToMany && c.ShouldWeavingInitialiseListInConstructor)) {
                 var propDef = this.GetProperty(typeDefinition, oneToManyColumnDefinition.Name);
                 if (propDef.SetMethod.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName)) {
                     // auto prop - see if the prop set method is called in any of the constructors

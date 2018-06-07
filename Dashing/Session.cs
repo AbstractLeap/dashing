@@ -66,11 +66,7 @@
             this.shouldCommitAndDisposeTransaction = commitAndDisposeTransaction;
             this.isTransactionLess = isTransactionLess;
             this.completeFailsSilentlyIfRejected = completeFailsSilentlyIfRejected;
-            this.Dapper = new DapperWrapper(
-                new Lazy<IDbConnection>(this.MaybeOpenConnection), 
-                new Lazy<IDbTransaction>(this.GetTransaction), 
-                new AsyncLazy<IDbConnection>(() => this.MaybeOpenConnectionAsync()), 
-                new AsyncLazy<IDbTransaction>(() => this.GetTransactionAsync()));
+            this.Dapper = new DapperWrapper(this);
         }
 
         public SqlBuilder.SqlBuilder Sql() {
@@ -85,7 +81,7 @@
             }
         }
 
-        private IDbConnection MaybeOpenConnection() {
+        internal IDbConnection MaybeOpenConnection() {
             if (this.isDisposed) {
                 throw new ObjectDisposedException("Session");
             }
@@ -105,7 +101,7 @@
             return this.connection.Value;
         }
 
-        private IDbTransaction GetTransaction() {
+        internal IDbTransaction GetTransaction() {
             if (this.isDisposed) {
                 throw new ObjectDisposedException("Session");
             }
@@ -124,7 +120,7 @@
             return this.transaction;
         }
 
-        private async Task<IDbConnection> MaybeOpenConnectionAsync() {
+        internal async Task<IDbConnection> MaybeOpenConnectionAsync() {
             if (this.isDisposed) {
                 throw new ObjectDisposedException("Session");
             }

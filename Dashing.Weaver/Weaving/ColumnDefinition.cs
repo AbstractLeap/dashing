@@ -18,5 +18,7 @@
         public bool IsPrimaryKey { get; set; }
 
         public DbType DbType { get; set; }
+
+        public bool ShouldWeavingInitialiseListInConstructor { get; set; }
     }
 }

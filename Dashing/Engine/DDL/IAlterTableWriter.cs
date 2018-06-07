@@ -2,7 +2,7 @@
     using Dashing.Configuration;
 
     public interface IAlterTableWriter {
-        string AddColumn(IColumn column);
+        string AddColumn(params IColumn[] columns);
 
         string DropColumn(IColumn column);
 
@@ -15,5 +15,7 @@
         string DropIndex(Index index);
 
         string RenameTable(IMap @from, IMap to);
+
+        string AddSystemVersioning(IMap to);
     }
 }

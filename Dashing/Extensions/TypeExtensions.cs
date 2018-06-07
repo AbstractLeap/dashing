@@ -5,6 +5,8 @@
     using System.Data;
     using System.Linq;
     using System.Reflection;
+
+    using Dashing.Versioning;
 #if !COREFX
     using System.Data.Linq;
 #endif
@@ -34,7 +36,7 @@
                                                                                                      { typeof(string), DbType.String },
                                                                                                      { typeof(char), DbType.StringFixedLength },
                                                                                                      { typeof(Guid), DbType.Guid },
-                                                                                                     { typeof(DateTime), DbType.DateTime },
+                                                                                                     { typeof(DateTime), DbType.DateTime2 },
                                                                                                      { typeof(DateTimeOffset), DbType.DateTimeOffset },
                                                                                                      { typeof(byte[]), DbType.Binary },
                                                                                                      { typeof(byte?), DbType.Byte },
@@ -51,7 +53,7 @@
                                                                                                      { typeof(bool?), DbType.Boolean },
                                                                                                      { typeof(char?), DbType.StringFixedLength },
                                                                                                      { typeof(Guid?), DbType.Guid },
-                                                                                                     { typeof(DateTime?), DbType.DateTime },
+                                                                                                     { typeof(DateTime?), DbType.DateTime2 },
                                                                                                      { typeof(DateTimeOffset?), DbType.DateTimeOffset },
 #if !COREFX
             { typeof(Binary), DbType.Binary },
@@ -78,6 +80,7 @@
                                                                                                        { DbType.Boolean, typeof(bool)},
                                                                                                        { DbType.DateTime, typeof(DateTime) },
                                                                                                        { DbType.DateTime2, typeof(DateTime) },
+                                                                                                       { DbType.DateTimeOffset, typeof(DateTimeOffset) },
                                                                                                        { DbType.Decimal, typeof(decimal) }
                                                                                                    };
         
@@ -121,6 +124,15 @@
         /// </returns>
         public static bool IsImplementationOf(this Type thisType, Type type) {
             return type.IsAssignableFrom(thisType);
+        }
+
+        /// <summary>
+        /// Indicates that the type implements IVersionedEntity
+        /// </summary>
+        /// <param name="thisType"></param>
+        /// <returns></returns>
+        public static bool IsVersionedEntity(this Type thisType) {
+            return thisType.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == typeof(IVersionedEntity<>));
         }
 
         /// <summary>

@@ -5,9 +5,16 @@
 
     public class WeavingTests {
         [Fact]
-        public void NullCollectionGetsInstantiatedInConstructor() {
+        public void NullCollectionDoesNotGetInstantiatedInConstructor() {
             var foo = new Foo();
-            Assert.NotNull(foo.Bars);
+            Assert.Null(foo.Bars);
+        }
+
+        [Fact]
+        public void NullCollectionGetsInstantiatedInConstructor()
+        {
+            var foo = new Foo();
+            Assert.NotNull(foo.Ducks);
         }
 
         [Fact]

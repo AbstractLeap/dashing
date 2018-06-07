@@ -19,6 +19,11 @@ namespace Dashing.Configuration {
         string Table { get; set; }
 
         /// <summary>
+        ///     Gets or sets the name of the history table if the Type is versioned
+        /// </summary>
+        string HistoryTable { get; set; }
+
+        /// <summary>
         ///     Gets or sets the schema.
         /// </summary>
         string Schema { get; set; }

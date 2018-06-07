@@ -2,9 +2,12 @@ namespace Dashing.Engine.Dialects {
     using System;
     using System.Data;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
+    using Dashing.Versioning;
 
     public class SqlServerDialect : SqlDialectBase {
         private const char DotCharacter = '.';
@@ -31,13 +34,77 @@ namespace Dashing.Engine.Dialects {
             }
         }
 
+        protected override void AppendColumnType(StringBuilder sql, IColumn column)
+        {
+            if (column.Map.Type.IsVersionedEntity() && column.Name == nameof(IVersionedEntity<string>.SessionUser)) {
+                return;
+            }
+
+            base.AppendColumnType(sql, column);
+        }
+
+        protected override void AppendColumnProperties(StringBuilder sql, IColumn column, bool scriptDefault)
+        {
+            if (column.Map.Type.IsVersionedEntity()) {
+                var spec = this.GetColumnSpecification(column);
+                switch(column.Name) {
+                    case nameof(IVersionedEntity<string>.SessionUser): // string doesn't matter here
+                        sql.Append($" as (cast(SESSION_CONTEXT(N'UserId') as {spec.DbTypeName}))");
+                        return;
+
+                    case nameof(IVersionedEntity<string>.CreatedBy): // string doesn't matter here
+                        sql.Append($" NULL DEFAULT (cast(SESSION_CONTEXT(N'UserId') as {spec.DbTypeName}))");
+                        return;
+
+                    case nameof(IVersionedEntity<string>.SysStartTime):
+                        sql.Append(" GENERATED ALWAYS AS ROW START HIDDEN DEFAULT GETUTCDATE()");
+                        return;
+
+                    case nameof(IVersionedEntity<string>.SysEndTime):
+                        sql.Append(" GENERATED ALWAYS AS ROW END HIDDEN DEFAULT CONVERT(DATETIME2, '9999-12-31 23:59:59.9999999')")
+                           .Append(", PERIOD FOR SYSTEM_TIME (")
+                           .Append(nameof(IVersionedEntity<string>.SysStartTime))
+                           .Append(", ")
+                           .Append(nameof(IVersionedEntity<string>.SysEndTime))
+                           .Append(")");
+                        return;
+                }
+            }
+
+            base.AppendColumnProperties(sql, column, scriptDefault);
+        }
+
+        public override void AppendCreateTableSuffix(StringBuilder sql, IMap map)
+        {
+            if (map.Type.IsVersionedEntity()) {
+                sql.Append($" WITH (SYSTEM_VERSIONING = ON ( HISTORY_TABLE = {(string.IsNullOrWhiteSpace(map.Schema) ? "dbo" : map.Schema)}.");
+                this.AppendQuotedName(sql, map.HistoryTable);
+                sql.Append("))");
+            }
+        }
+
+        public override string AddSystemVersioning(IMap to) {
+            if (to.Type.IsVersionedEntity()) {
+                var sql = new StringBuilder("alter table ");
+                this.AppendQuotedTableName(sql, to);
+                sql.Append(" set (system_versioning = ON ( history_table = ")
+                   .Append(
+                       string.IsNullOrWhiteSpace(to.Schema)
+                           ? "dbo"
+                           : to.Schema)
+                   .Append(".");
+                this.AppendQuotedName(sql, to.HistoryTable);
+                sql.Append("))");
+                return sql.ToString();
+            }
+
+            return string.Empty;
+        }
+
         public override ColumnSpecification GetColumnSpecification(IColumn column) {
             switch (column.DbType) {
                 case DbType.Boolean:
                     return new ColumnSpecification { DbTypeName = "bit" };
-
-                case DbType.DateTime2:
-                    return new ColumnSpecification { DbTypeName = "datetime2" };
 
                 case DbType.Guid:
                     return new ColumnSpecification { DbTypeName = "uniqueidentifier" };

@@ -6,6 +6,7 @@
     using System.Reflection;
 
     using Dashing.Extensions;
+    using Dashing.Versioning;
 
     /// <summary>
     ///     The default mapper.
@@ -60,15 +61,19 @@
             return map;
         }
 
-        private void Build(Type entity, IMap map, IConfiguration configuration) {
+        private void Build(Type entityType, IMap map, IConfiguration configuration) {
             map.Configuration = configuration;
-            map.Table = this.convention.TableFor(entity);
-            map.Schema = this.convention.SchemaFor(entity);
-            entity.GetProperties()
-                  .Select(property => this.BuildColumn(map, entity, property, configuration))
+            map.Table = this.convention.TableFor(entityType);
+            map.Schema = this.convention.SchemaFor(entityType);
+            if (entityType.IsVersionedEntity()) {
+                map.HistoryTable = this.convention.HistoryTableFor(entityType);
+            }
+
+            entityType.GetProperties()
+                  .Select(property => this.BuildColumn(map, entityType, property, configuration))
                   .ToList()
                   .ForEach(c => map.Columns.Add(c.Name, c));
-            this.ResolvePrimaryKey(entity, map);
+            this.ResolvePrimaryKey(entityType, map);
             this.AssignFetchIds(map);
         }
 
@@ -90,6 +95,7 @@
             column.Map = map;
             column.Name = property.Name;
             column.IsIgnored = !(property.CanRead && property.CanWrite);
+            column.IsComputed = entityType.IsVersionedEntity() && typeof(IVersionedEntity<>).GetProperties().Select(pi => pi.Name).Contains(property.Name);
 
             this.ResolveRelationship(entityType, property, column, configuration);
             this.ApplyAnnotations(entityType, property, column);
@@ -115,7 +121,6 @@
             column.Relationship = RelationshipType.None;
             column.DbName = propertyName;
             column.DbType = propertyType.GetDbType();
-
             column.IsNullable = propertyType.IsNullable();
 
             // check particular types for defaults
@@ -128,6 +133,10 @@
                 case DbType.String:
                     column.Length = this.convention.StringLengthFor(entity, propertyName);
                     column.IsNullable = true;
+                    break;
+
+                case DbType.DateTime2:
+                    column.Precision = this.convention.DateTime2PrecisionFor(entity, propertyName);
                     break;
             }
         }
@@ -199,6 +208,7 @@
         private void ResolveOneToManyColumn(IColumn column) {
             // assume to be OneToMany
             column.Relationship = RelationshipType.OneToMany;
+            column.ShouldWeavingInitialiseListInConstructor = this.convention.IsCollectionInstantiationAutomatic(column.Map.Type, column.Name);
         }
 
         private void ApplyAnnotations(Type entity, PropertyInfo property, IColumn column) {

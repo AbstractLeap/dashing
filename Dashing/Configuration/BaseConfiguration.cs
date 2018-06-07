@@ -82,7 +82,7 @@
             return this;
         }
 
-        protected virtual IConfiguration AddNamespaceOf<T>() {
+        protected virtual IConfiguration AddNamespaceOf<T>(bool includeNested = false) {
             var type = typeof(T);
             var ns = type.Namespace;
 
@@ -90,7 +90,7 @@
                 throw new ArgumentException("Namespace of the indicator type is null");
             }
 
-            this.Add(type.Assembly().GetTypes().Where(t => t.IsClass() && !t.IsAbstract() && t.Namespace != null && t.Namespace == ns && !typeof(IConfiguration).IsAssignableFrom(t)));
+            this.Add(type.Assembly().GetTypes().Where(t => (includeNested || !t.IsNested) && t.IsClass() && !t.IsAbstract() && t.Namespace != null && t.Namespace == ns && !typeof(IConfiguration).IsAssignableFrom(t)));
             return this;
         }
 
@@ -127,41 +127,4 @@
             return this;
         }
     }
-
-    //public class DashingInMemory : IDashing {
-    //    public DashingInMemory(IConfiguration configuration) {
-
-    //    }
-
-    //    public ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {
-    //        throw new NotImplementedException();
-    //    }
-
-    //    public ISession BeginTransactionLessSession(IDbConnection connection = null) {
-    //        throw new NotImplementedException();
-    //    }
-    //}
-
-    //public class ExampleUsage {
-    //    public class MyConfig : BaseConfiguration {
-    //        public MyConfig() {
-    //            this.Add<Foo>();
-    //        }
-    //    }
-
-    //    public class CommandThatDoesStuff {
-    //        public async Task Execute() {
-    //            var config = new MyConfig();
-    //            var dashing = new DashingSql(config, DbProviderFactories.GetFactory("System.Data.SqlClient"), "connectionstring");
-    //            using (var session = dashing.BeginSession()) {
-    //                var tings = await session.Query<Foo>().ToListAsync();
-    //                session.Complete();
-    //            }
-    //        }
-    //    }
-
-    //    public class Foo {
-
-    //    }
-    //}
 }

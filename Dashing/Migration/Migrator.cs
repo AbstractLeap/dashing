@@ -9,6 +9,7 @@
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;
+    using Dashing.Versioning;
 
 #if COREFX
 #endif
@@ -25,6 +26,8 @@
         private readonly IAlterTableWriter alterTableWriter;
 
         private const string NoRename = "__NOTRENAMED";
+
+        private static string[] versionedEntityColumnNames = typeof(IVersionedEntity<>).GetProperties().Select(p => p.Name).ToArray();
 
         public Migrator(
             ISqlDialect dialect,
@@ -227,7 +230,9 @@
                             if (fromProp.Value.DbType != matchingToProp.DbType) {
                                 bool skipQuestion = false;
                                 bool wasPrimaryKeyDroppedAndRecreated = false;
-                                var renamePrimaryKeyModificationsKey =
+                                if ((fromProp.Value.Relationship == RelationshipType.ManyToOne || fromProp.Value.Relationship == RelationshipType.OneToOne)
+                                    && (matchingToProp.Relationship == RelationshipType.ManyToOne || matchingToProp.Relationship == RelationshipType.OneToOne)) {
+                                    var renamePrimaryKeyModificationsKey =
                                     Tuple.Create(
                                         fromProp.Value.Relationship == RelationshipType.ManyToOne
                                             ? fromProp.Value.ParentMap.Type.Name
@@ -235,20 +240,18 @@
                                         matchingToProp.Relationship == RelationshipType.ManyToOne
                                             ? matchingToProp.ParentMap.Type.Name
                                             : matchingToProp.OppositeColumn.Map.Type.Name);
-                                if ((fromProp.Value.Relationship == RelationshipType.OneToOne
-                                     || fromProp.Value.Relationship == RelationshipType.ManyToOne)
-                                    && (matchingToProp.Relationship == RelationshipType.ManyToOne
-                                        || matchingToProp.Relationship == RelationshipType.OneToOne)
-                                    && renamePrimaryKeyModifications.ContainsKey(renamePrimaryKeyModificationsKey)) {
-                                    // skip the question as we've already attempted the modify for the pk so may as well here as well!
-                                    skipQuestion = true;
-                                    wasPrimaryKeyDroppedAndRecreated = !renamePrimaryKeyModifications[renamePrimaryKeyModificationsKey];
+                                
+                                    if (renamePrimaryKeyModifications.ContainsKey(renamePrimaryKeyModificationsKey)) {
+                                        // skip the question as we've already attempted the modify for the pk so may as well here as well!
+                                        skipQuestion = true;
+                                        wasPrimaryKeyDroppedAndRecreated = !renamePrimaryKeyModifications[renamePrimaryKeyModificationsKey];
+                                    }
                                 }
 
                                 bool dropAndRecreate = wasPrimaryKeyDroppedAndRecreated;
                                 if (!skipQuestion) {
                                     dropAndRecreate =
-                                        answerProvider.GetBooleanAnswer(
+                                        !answerProvider.GetBooleanAnswer(
                                             string.Format(
                                                 "Attempting to change DbType for property {0} on {1} from {2} to {3}. Would you like to attempt the change? (selecting \"No\" will drop and re-create the column)",
                                                 matchingToProp.Name,
@@ -314,31 +317,35 @@
             }
 
             // do additions of properties
-            foreach (var newProp in addedProperties) {
-                // check for relationships where the related table is not empty and the prop is not null
-                if ((newProp.Relationship == RelationshipType.ManyToOne || newProp.Relationship == RelationshipType.OneToOne) && !newProp.IsNullable
-                    && string.IsNullOrWhiteSpace(newProp.GetDefault(this.dialect)) && currentData.ContainsKey(newProp.Map.Type.Name.ToLowerInvariant())
-                    && currentData[newProp.Map.Type.Name.ToLowerInvariant()].HasRows) {
-                    var foreignKeyPrimaryKeyType = newProp.Relationship == RelationshipType.ManyToOne
-                                                       ? newProp.ParentMap.PrimaryKey.Type
-                                                       : newProp.OppositeColumn.Map.PrimaryKey.Type;
-                    var answer = answerProvider.GetType()
-                                               .GetMethod("GetAnswer")
-                                               .MakeGenericMethod(foreignKeyPrimaryKeyType)
-                                               .Invoke(
-                                                   answerProvider,
-                                                   new object[] {
-                                                                    string.Format(
-                                                                        "You are adding a property {0} on {1} that has a foreign key to {2} (which is non-empty) with primary key type {3}. Please specify a default value for the column:",
-                                                                        newProp.Name,
-                                                                        newProp.Map.Type.Name,
-                                                                        newProp.Type.Name,
-                                                                        foreignKeyPrimaryKeyType)
-                                                                });
-                    newProp.Default = answer.ToString();
-                }
+            if (addedProperties.Any()) {
+                foreach (var newPropGrouping in addedProperties.GroupBy(p => p.Map.Type)) {
+                    var thisMapAddedProperies = new List<IColumn>();
+                    foreach (var newProp in newPropGrouping) {
+                        // check for relationships where the related table is not empty and the prop is not null
+                        if ((newProp.Relationship == RelationshipType.ManyToOne || newProp.Relationship == RelationshipType.OneToOne) && !newProp.IsNullable && string.IsNullOrWhiteSpace(newProp.GetDefault(this.dialect)) && currentData.ContainsKey(newProp.Map.Type.Name.ToLowerInvariant()) && currentData[newProp.Map.Type.Name.ToLowerInvariant()]
+                                .HasRows) {
+                            var foreignKeyPrimaryKeyType = newProp.Relationship == RelationshipType.ManyToOne
+                                                               ? newProp.ParentMap.PrimaryKey.Type
+                                                               : newProp.OppositeColumn.Map.PrimaryKey.Type;
+                            var answer = answerProvider.GetType()
+                                                       .GetMethod("GetAnswer")
+                                                       .MakeGenericMethod(foreignKeyPrimaryKeyType)
+                                                       .Invoke(answerProvider, new object[] { string.Format("You are adding a property {0} on {1} that has a foreign key to {2} (which is non-empty) with primary key type {3}. Please specify a default value for the column:", newProp.Name, newProp.Map.Type.Name, newProp.Type.Name, foreignKeyPrimaryKeyType) });
+                            newProp.Default = answer.ToString();
+                        }
 
-                sql.AppendSql(this.alterTableWriter.AddColumn(newProp));
+                        thisMapAddedProperies.Add(newProp);
+                    }
+
+                    sql.AppendSql(this.alterTableWriter.AddColumn(thisMapAddedProperies.ToArray()));
+                }
+            }
+
+            // add in ssytem versioning where necessary
+            foreach (var migrationPair in matches) {
+                if (migrationPair.To.Type.IsVersionedEntity() && string.IsNullOrWhiteSpace(migrationPair.From.HistoryTable)) {
+                    sql.AppendSql(this.alterTableWriter.AddSystemVersioning(migrationPair.To));
+                }
             }
 
             // add in new foreign keys for additions
@@ -386,6 +393,11 @@
         }
 
         private bool RequiresColumnSpecificationChange(IColumn from, IColumn to) {
+            // handle versioned tables
+            if (to.Map.Type.IsVersionedEntity() && versionedEntityColumnNames.Contains(to.Name)) {
+                return false;
+            }
+
             return !this.dialect.GetColumnSpecification(to).Equals(this.dialect.GetColumnSpecification(from))
                    || from.IsNullable != to.IsNullable || (from.GetDefault(this.dialect) ?? string.Empty) != (to.GetDefault(this.dialect) ?? string.Empty) || from.IsAutoGenerated != to.IsAutoGenerated;
         }
