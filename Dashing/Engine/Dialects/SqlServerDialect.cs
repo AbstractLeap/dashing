@@ -49,11 +49,15 @@ namespace Dashing.Engine.Dialects {
                 var spec = this.GetColumnSpecification(column);
                 switch(column.Name) {
                     case nameof(IVersionedEntity<string>.SessionUser): // string doesn't matter here
-                        sql.Append($" as (cast(SESSION_CONTEXT(N'UserId') as {spec.DbTypeName}))");
+                        sql.Append(" as (cast(SESSION_CONTEXT(N\'UserId\') as ");
+                        this.AppendColumnType(sql, spec);
+                        sql.Append("))");
                         return;
 
                     case nameof(IVersionedEntity<string>.CreatedBy): // string doesn't matter here
-                        sql.Append($" NULL DEFAULT (cast(SESSION_CONTEXT(N'UserId') as {spec.DbTypeName}))");
+                        sql.Append(" NULL DEFAULT (cast(SESSION_CONTEXT(N\'UserId\') as ");
+                        this.AppendColumnType(sql, spec);
+                        sql.Append("))");
                         return;
 
                     case nameof(IVersionedEntity<string>.SysStartTime):
