@@ -4,6 +4,10 @@
 @import "{{ site.theme }}";
 
 @media only screen and (min-width: 1140px) {
+    #main_content_wrap {
+        position: relative;
+    }
+
     #main_content_wrap nav {
         position: absolute;
         top: 40px;
