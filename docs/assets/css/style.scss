@@ -1,0 +1,23 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+@media only screen and (min-width: 1140px) {
+    #main_content_wrap nav {
+        position: absolute;
+        top: 40px;
+        right: 50%;
+        margin-right: 340px;
+        width: 220px;
+    }
+}
+
+@media only screen and (max-width: 1139px) {
+    #main_content_wrap nav {
+        max-width: 640px;
+        padding: 20px 10px;
+        margin: auto;
+        margin-bottom: -40px;
+    }
+}
