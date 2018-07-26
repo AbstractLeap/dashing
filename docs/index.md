@@ -1,8 +1,7 @@
 Dashing is a simple to use mini ORM built on top of [Dapper](https://github.com/StackExchange/dapper-dot-net). 
 It aims to be a strongly typed data access layer that is built with productivity and performance in mind.
 
-Features
------------------
+# Features
 
 * Convention over Configuration
 * Sql-like strongly typed query syntax
@@ -13,8 +12,11 @@ Features
 * Multiple Database Support (SQL Server/MySql right now)
 * In-memory engine for testing
 
-Examples
-------------------
+# Installation
+
+Visit the [Getting Started](http://polylytics.github.io/dashing/start.html) page.
+
+# Examples
 
 Update changed properties only
 
@@ -33,12 +35,15 @@ Bulk update entity
     await session.UpdateAsync<Post>(p => p.IsArchived = true, p => p.Author.UserId == 3);
     // update [Posts] set [IsArchived] = @P1 where [AuthorId] = @P2
 
+Drop to Dapper
+
+    await session.Dapper.QueryAsync("select 1 from Foo");
+
 Migrate database to match latest code
 
     ./dash migrate -a "<path to assembly>" -t "<configuration type full name>" -c "<connection string>" 
 
-Who uses Dashing?
----------------------------------
+# Who uses Dashing?
 
 Dashing has been developed over the last 4 years at Polylytics and is in use at nearly all of our clients. It's used to execute millions of queries every week.
 

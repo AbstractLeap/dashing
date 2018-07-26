@@ -1,86 +1,49 @@
-Intro
-=================
-
 Dashing is a simple to use mini ORM built on top of [Dapper](https://github.com/StackExchange/dapper-dot-net). 
-It aims to provide fantastic productivity while not sacrificing (too much) performance.
+It aims to be a strongly typed data access layer that is built with productivity and performance in mind.
 
-We like to think of it as a strongly typed abstraction over Sql so that you get re-factor 
-friendly typed functions that (mostly) mimic the behaviour you'd expect from executing Sql through
-Dapper itself.
+Documentation for v2 is a work in progress which you can [view here](http://polylytics.github.io/dashing/) whilst the [Wiki](https://github.com/Polylytics/dashing/wiki) provides v1 documentation, most of which still applies. 
 
+# Features
 
-Features
------------------
-
-* Simple Configuration
+* Convention over Configuration
 * Sql-like strongly typed query syntax
 * Eager loading of relationships
 * Change Tracking
 * Crud Operations
 * Schema Generation/Migrations
 * Multiple Database Support (SQL Server/MySql right now)
-* Async Support
+* In-memory engine for testing
 
-Getting Started
-=================
+# Examples
 
-Install the package via Nuget:
+Update changed properties only
 
-	Install-Package Dashing
+    var post = await session.GetAsync<Post>(123);
+    post.Title = "New Title";
+    await session.SaveAsync(post); // update [Posts] set [Title] = @P1 where [PostId] = @P2
 
-Dashing is code first so simply create your domain models using POCOs e.g.
+Eager fetching of related entities
 
-	class Blog {
-		public int BlogId { get;set; }
+    var posts = await session.Query<Post>().
+                .FetchMany(p => p.Comments).ThenFetch(c => c.Author)
+                .SingleOrDefaultAsync(p => p.PostId == 123);
 
-		public string Title { get; set; }
+Bulk update entity
 
-		public IList<Post> Posts { get; set; }
-	}
+    await session.UpdateAsync<Post>(p => p.IsArchived = true, p => p.Author.UserId == 3);
+    // update [Posts] set [IsArchived] = @P1 where [AuthorId] = @P2
 
-	class Post {
-		public int PostId { get; set; }
+Drop to Dapper
 
-		public string Title	{ get; set; }
+    await session.Dapper.QueryAsync("select 1 from Foo");
 
-		public DateTime Date { get; set; }
+Migrate database to match latest code
 
-		public Blog Blog { get; set; }
-	}
+    ./dash migrate -a "<path to assembly>" -t "<configuration type full name>" -c "<connection string>" 
 
-and then create your configuration (you'll need to put the connection string in your web.config or app.config):
+# Who uses Dashing?
 
-	class DashingConfiguration: DefaultConfiguration {
-		public DashingConfiguration() : base(ConfigurationManager.ConnectionStrings["DashingConnectionString"]) {
-			
-			this.AddNamespaceOf<Post>();	
-		}
-	}
-
-Next, you'll want to generate the schema to use with your domain model.  
-A folder called "Dashing" should have been added to this solution. 
-Go ahead and open the dev-db.ini file and update the connection string to match your database, 
-then update the path to the dll/exe that contains your IConfiguration 
-and finally specify the full name of the Configuration class.
-
-Once that's done you'll need to build your project and then you can run:
-	
-	dbm -m -c .\Dashing\dev-db.ini
-
-Ok, that should have created your database as well as the tables. To use the database you just grab a session from the configuration:
-
-	var config = new DashingConfiguration();
-	using (var session = config.BeginSession()) {
-		var post = await session.GetAsync<Post>(1);
-		post.Title = "Whoop";
-		await session.SaveAsync(post);
-		session.Complete();
-	}
-	
-Tell me more!
-=================
-
-Further documentation is available in the [Wiki](https://github.com/Polylytics/dashing/wiki)
+Dashing has been developed over the last 4 years at Polylytics and is in use at nearly all of our clients. It's used to execute millions of queries every week.
 
 Feature requests (and voting for them) available at [Feathub](http://feathub.com/Polylytics/dashing)
 
