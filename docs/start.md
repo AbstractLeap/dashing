@@ -14,13 +14,34 @@ Installing Dashing is done via Nuget. There are 3 libraries that you will need:
 
 In many of the projects that we run we have multiple applications accessing the same database through Dashing. 
 As a result our standard setup is to have a separate "class library" project (e.g. MyProject.Domain) which will contain your 
-domain model. If you follow this pattern then create that project and then, using Nuget:
+domain model. 
+
+Installation then depends on whether you're using .Net Framework or .Net Core:
+
+### .Net Framework
 
 ```
 Install-Package Dashing
-Install-Package Dashing.Cli
 Install-Package Dashing.Weaver
+Install-Package Dashing.Cli
 ```
+
+### .Net Core
+
+```
+dotnet add package Dashing
+dotnet add package Dashing.Weaver
+```
+
+To install the Cli tool on .Net core we have to add it to the csproj file manually (see https://github.com/NuGet/Home/issues/4901). To do this open your csproj file and add the following node underneath the top root project node:
+
+```
+<ItemGroup>
+    <DotNetCliToolReference Include="Dashing.Cli" Version="2.0.6" />
+</ItemGroup>
+```
+
+Then `dotnet restore` and you're good to carry on.
 
 ## Your Domain Model
 
