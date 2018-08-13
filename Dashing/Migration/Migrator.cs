@@ -9,6 +9,7 @@
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;
+    using Dashing.Logging;
     using Dashing.Versioning;
 
 #if COREFX
@@ -29,6 +30,8 @@
 
         private static string[] versionedEntityColumnNames = typeof(IVersionedEntity<>).GetProperties().Select(p => p.Name).ToArray();
 
+        private static readonly ILog Logger = LogProvider.For<Migrator>();
+
         public Migrator(
             ISqlDialect dialect,
             ICreateTableWriter createTableWriter,
@@ -46,7 +49,6 @@
             IEnumerable<IMap> fromMaps,
             IEnumerable<IMap> toMaps,
             IAnswerProvider answerProvider,
-            ILogger logger,
             IEnumerable<string> indexesToIgnore,
             IEnumerable<string> tablesToIgnore,
             out IEnumerable<string> warnings,
@@ -71,17 +73,9 @@
             var matches = from.Join(to, f => f.Table.ToLowerInvariant(), t => t.Table.ToLowerInvariant(), MigrationPair.Of).ToList();
 
             // trace output
-            logger.Trace("Additions:");
-            logger.Trace("");
-            logger.Trace(additions.Select(a => new { a.Table, a.Type.Name }), new[] { "Table", "Map Name" });
-            logger.Trace("Removals:");
-            logger.Trace("");
-            logger.Trace(removals.Select(r => new { r.Table, r.Type.Name }), new[] { "Table", "Map Name" });
-            logger.Trace("Matches:");
-            logger.Trace("");
-            logger.Trace(
-                matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }),
-                new[] { "From Table", "From Map", "To Table", "To Map" });
+            Logger.Info("Additions", additions.Select(a => new { a.Table, a.Type.Name }));
+            Logger.Info("Removals", removals.Select(a => new { a.Table, a.Type.Name }));
+            Logger.Info("Matches", matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }));
 
             // look for possible entity name changes
             if (additions.Any() && removals.Any()) {
@@ -222,7 +216,7 @@
 
                 // go through existing columns and handle modifications
                 foreach (var fromProp in pair.From.Columns) {
-                    logger.Trace("Examining {1}.{0}", fromProp.Value.Name, pair.From.Table);
+                    Logger.Debug("Looking for modifications to column", fromProp.Value.Name, pair.From.Table);
                     var matchingToProp = pair.To.Columns.Select(p => p.Value).FirstOrDefault(p => p.Name == fromProp.Key);
                     if (matchingToProp != null) {
                         if (this.RequiresColumnSpecificationChange(fromProp.Value, matchingToProp)) {

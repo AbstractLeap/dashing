@@ -61,10 +61,11 @@
                     var tablesToIgnore = c.Option("-ti|--tablestoignore <tablename>", "The name of any tables which should be ignored in the migration", CommandOptionType.MultipleValue);
                     var indexesToIgnore = c.Option("-ii|--indexestoignore <indexname>", "The name of any indexes which should be ignored in the migration", CommandOptionType.MultipleValue);
                     var extraPluralizationWords = c.Option("-ep|--extraplurals <singlename,pluralname>", "Any extra single/plural pairs that need adding", CommandOptionType.MultipleValue);
-                    var verbose = c.Option("-v|--verbose", "Outputs debug logging statements", CommandOptionType.NoValue);
+                    var logLevel = c.Option("-l|--log <level>", "The logging level, one of verbose,debug,information,warning,error,fatal. Defaults to warning", CommandOptionType.SingleValue);
 
                     c.OnExecute(
                         () => {
+                            LogConfiguration.Configure(logLevel);
                             if (!assemblyPath.HasValue()) {
                                 Console.WriteLine("Please specify the path to the assembly");
                                 return 1;
@@ -84,7 +85,7 @@
                             AssemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value(), connectionString.Value());
                             try {
-                                ExecuteScript(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords, verbose);
+                                ExecuteScript(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords);
                                 return 0;
                             }
                             catch (Exception ex) {
@@ -96,7 +97,7 @@
                 });
         }
 
-        private static void ExecuteScript(CommandOption assemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider, CommandOption tablesToIgnore, CommandOption indexesToIgnore, CommandOption extraPluralizationWords, CommandOption verbose) {
+        private static void ExecuteScript(CommandOption assemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider, CommandOption tablesToIgnore, CommandOption indexesToIgnore, CommandOption extraPluralizationWords) {
             var scriptGenerator = new ScriptGenerator();
             var result = scriptGenerator.Generate(
                 LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
@@ -107,7 +108,6 @@
                 tablesToIgnore.Values,
                 indexesToIgnore.Values,
                 GetExtraPluralizationWords(extraPluralizationWords),
-                verbose.HasValue(),
                 new ConsoleAnswerProvider());
             Console.Write(result);
         }
@@ -127,10 +127,11 @@
                     var tablesToIgnore = c.Option("-ti|--tablestoignore <tablename>", "The name of any tables which should be ignored in the migration", CommandOptionType.MultipleValue);
                     var indexesToIgnore = c.Option("-ii|--indexestoignore <indexname>", "The name of any indexes which should be ignored in the migration", CommandOptionType.MultipleValue);
                     var extraPluralizationWords = c.Option("-ep|--extraplurals <singlename,pluralname>", "Any extra single/plural pairs that need adding", CommandOptionType.MultipleValue);
-                    var verbose = c.Option("-v|--verbose", "Outputs debug logging statements", CommandOptionType.NoValue);
+                    var logLevel = c.Option("-l|--log <level>", "The logging level, one of verbose,debug,information,warning,error,fatal. Defaults to warning", CommandOptionType.SingleValue);
 
                     c.OnExecute(
                         () => {
+                            LogConfiguration.Configure(logLevel);
                             if (!assemblyPath.HasValue()) {
                                 Console.WriteLine("Please specify the path to the assembly");
                                 return 1;
@@ -150,7 +151,7 @@
                             AssemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value(), connectionString.Value());
                             try {
-                                ExecuteMigrate(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords, verbose);
+                                ExecuteMigrate(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords);
                                 return 0;
                             }
                             catch (Exception ex) {
@@ -161,7 +162,7 @@
                 });
         }
 
-        private static void ExecuteMigrate(CommandOption assemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider, CommandOption tablesToIgnore, CommandOption indexesToIgnore, CommandOption extraPluralizationWords, CommandOption verbose) {
+        private static void ExecuteMigrate(CommandOption assemblyPath, CommandOption configurationType, CommandOption connectionString, CommandOption provider, CommandOption tablesToIgnore, CommandOption indexesToIgnore, CommandOption extraPluralizationWords) {
             var databaseMigrator = new DatabaseMigrator();
             databaseMigrator.Execute(
                 LoadType<IConfiguration>(assemblyPath.Value(), configurationType.Value()),
@@ -172,7 +173,6 @@
                 tablesToIgnore.Values,
                 indexesToIgnore.Values,
                 GetExtraPluralizationWords(extraPluralizationWords),
-                verbose.HasValue(),
                 new ConsoleAnswerProvider());
         }
 
@@ -190,9 +190,11 @@
                     var seederType = c.Option("-st|--typefullname <typefullname>", "The full name of the seeder type", CommandOptionType.SingleValue);
                     var connectionString = c.Option("-c|--connection <connectionstring>", "The connection string of the database that you would like to migrate", CommandOptionType.SingleValue);
                     var provider = c.Option("-p|--provider <providername>", "The provider name for the database that you are migrating", CommandOptionType.SingleValue);
+                    var logLevel = c.Option("-l|--log <level>", "The logging level, one of verbose,debug,information,warning,error,fatal. Defaults to warning", CommandOptionType.SingleValue);
 
                     c.OnExecute(
                         () => {
+                            LogConfiguration.Configure(logLevel);
                             if (!configurationAssemblyPath.HasValue()) {
                                 Console.WriteLine("Please specify the path to the assembly that contains the configuration");
                                 return 1;
@@ -254,9 +256,11 @@
                     var projectFilePath = c.Option("-p|--projectfilepath <path>", "Specify the path to the project file to which weaving should be added", CommandOptionType.SingleValue);
                     var configurationType = c.Option("-c|--configurationtype <typefullname>", "The full name of the configuration type", CommandOptionType.SingleValue);
                     var assemblyExtension = c.Option("-a|--assemblyextension <extension>", "The extension of the assembly (when it has been built, e.g. 'dll', 'exe')", CommandOptionType.SingleValue);
+                    var logLevel = c.Option("-l|--log <level>", "The logging level, one of verbose,debug,information,warning,error,fatal. Defaults to warning", CommandOptionType.SingleValue);
 
                     c.OnExecute(
                         () => {
+                            LogConfiguration.Configure(logLevel);
                             if (!projectFilePath.HasValue()) {
                                 Console.WriteLine("Please specify the path to the project file to which weaving should be added");
                                 return 1;

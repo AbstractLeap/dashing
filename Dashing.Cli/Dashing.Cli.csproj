@@ -36,6 +36,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="MySql.Data" Version="6.10.6" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.4.2" />
   </ItemGroup>
 

@@ -29,10 +29,10 @@
             var databaseMigrator = new DatabaseMigrator();
             var configuration = new VersionedConfiguration();
             var answerProvider = new Mock<IAnswerProvider>();
-            databaseMigrator.Execute(configuration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), false, answerProvider.Object);
+            databaseMigrator.Execute(configuration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), answerProvider.Object);
 
             var scriptGenerator = new ScriptGenerator();
-            var script = scriptGenerator.Generate(configuration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), false, answerProvider.Object);
+            var script = scriptGenerator.Generate(configuration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), answerProvider.Object);
             this.output.WriteLine(script);
             Assert.True(string.IsNullOrWhiteSpace(script));
         }
@@ -42,18 +42,18 @@
             var databaseMigrator = new DatabaseMigrator();
             var configuration = new NonVersionedConfiguration();
             var answerProvider = new Mock<IAnswerProvider>();
-            databaseMigrator.Execute(configuration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), false, answerProvider.Object);
+            databaseMigrator.Execute(configuration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), answerProvider.Object);
 
             var versionedConfiguration = new VersionedConfiguration();
             var scriptGenerator = new ScriptGenerator();
-            var migrateScript = scriptGenerator.Generate(versionedConfiguration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), false, answerProvider.Object);
+            var migrateScript = scriptGenerator.Generate(versionedConfiguration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), answerProvider.Object);
             this.output.WriteLine(migrateScript);
 
             var databaseMigrator2 = new DatabaseMigrator();
-            databaseMigrator2.Execute(versionedConfiguration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), false, answerProvider.Object);
+            databaseMigrator2.Execute(versionedConfiguration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), answerProvider.Object);
 
             var scriptGenerator2 = new ScriptGenerator();
-            var script = scriptGenerator2.Generate(versionedConfiguration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), false, answerProvider.Object);
+            var script = scriptGenerator2.Generate(versionedConfiguration, connectionString, "System.Data.SqlClient", Enumerable.Empty<string>(), Enumerable.Empty<string>(), Enumerable.Empty<KeyValuePair<string, string>>(), answerProvider.Object);
             this.output.WriteLine(script);
             Assert.True(string.IsNullOrWhiteSpace(script));
         }

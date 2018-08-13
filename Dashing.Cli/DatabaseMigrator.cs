@@ -15,8 +15,8 @@
             this.scriptGenerator = new ScriptGenerator();
         }
 
-        public void Execute(IConfiguration configuration, string connectionString, string providerName, IEnumerable<string> tablesToIgnore, IEnumerable<string> indexesToIgnore, IEnumerable<KeyValuePair<string, string>> extraPluralizationWords, bool isVerbose, IAnswerProvider answerProvider) {
-            var script = this.scriptGenerator.Generate(configuration, connectionString, providerName, tablesToIgnore, indexesToIgnore, extraPluralizationWords, isVerbose, answerProvider);
+        public void Execute(IConfiguration configuration, string connectionString, string providerName, IEnumerable<string> tablesToIgnore, IEnumerable<string> indexesToIgnore, IEnumerable<KeyValuePair<string, string>> extraPluralizationWords, IAnswerProvider answerProvider) {
+            var script = this.scriptGenerator.Generate(configuration, connectionString, providerName, tablesToIgnore, indexesToIgnore, extraPluralizationWords, answerProvider);
             if (string.IsNullOrWhiteSpace(script)) {
                 using (new ColorContext(ConsoleColor.Green)) {
                     Console.WriteLine("-- No migration script to run");
