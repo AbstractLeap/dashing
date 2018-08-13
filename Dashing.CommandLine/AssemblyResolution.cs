@@ -31,7 +31,7 @@ namespace Dashing.CommandLine {
                         }
                     }
 
-                    return context.LoadFromAssemblyName(name);
+                    return null;
                 };
 #else
             AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) =>

@@ -24,8 +24,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Compile Include="..\Dashing.CommandLine\AssemblyContext.cs" Link="AssemblyContext.cs" />
-    <Compile Include="..\Dashing.CommandLine\AssemblyResolution.cs" Link="AssemblyResolution.cs" />
+    <Compile Include="..\Dashing.CommandLine\*.cs" LinkBase="CommandLine" />
   </ItemGroup>
 
   <ItemGroup>

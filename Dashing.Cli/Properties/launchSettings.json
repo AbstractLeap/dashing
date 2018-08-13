@@ -5,7 +5,7 @@
     },
     "script": {
       "commandName": "Project",
-      "commandLineArgs": "script -a \"C:\\Repos\\dashing\\Dashing.Tests\\bin\\Debug\\net46\\Dashing.Tests.dll\" -t \"Dashing.Tools.Tests.CustomConfig\" -c \"Data Source=.;Initial Catalog=dashingclitest;Integrated Security=True;\""
+      "commandLineArgs": "script -a \"C:\\Repos\\dashingcoretest\\bin\\Debug\\netcoreapp2.0\\dashingcoretest.dll\" -t \"dashingcoretest.DashingConfiguration\" -c \"Data Source=.;Initial Catalog=dashingcoretest;Integrated Security=True;\""
     },
     "migrate": {
       "commandName": "Project",

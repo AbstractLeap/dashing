@@ -4,6 +4,7 @@
 
     using Dapper;
 
+    using Dashing.CommandLine;
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
 

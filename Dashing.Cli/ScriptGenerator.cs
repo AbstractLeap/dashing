@@ -3,6 +3,7 @@
     using System.Data.Common;
     using System.Linq;
 
+    using Dashing.CommandLine;
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;

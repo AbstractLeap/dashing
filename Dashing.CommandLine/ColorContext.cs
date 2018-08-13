@@ -1,4 +1,5 @@
-﻿namespace Dashing.Cli {
+﻿namespace Dashing.CommandLine
+{
     using System;
 
     public class ColorContext : IDisposable
