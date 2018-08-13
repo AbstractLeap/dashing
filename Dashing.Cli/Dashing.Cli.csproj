@@ -22,6 +22,11 @@
   <ItemGroup>
 	<Compile Remove="app.config" Condition=" '$(TargetFramework)' == 'netcoreapp1.1' " />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="..\Dashing.CommandLine\AssemblyContext.cs" Link="AssemblyContext.cs" />
+    <Compile Include="..\Dashing.CommandLine\AssemblyResolution.cs" Link="AssemblyResolution.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dashing\Dashing.csproj" />

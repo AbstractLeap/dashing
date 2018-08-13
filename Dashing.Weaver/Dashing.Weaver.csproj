@@ -9,6 +9,11 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Include="..\Dashing.CommandLine\AssemblyContext.cs" Link="AssemblyContext.cs" />
+    <Compile Include="..\Dashing.CommandLine\AssemblyResolution.cs" Link="AssemblyResolution.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />

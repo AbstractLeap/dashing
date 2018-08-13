@@ -1,8 +1,8 @@
-namespace Dashing.Cli {
+namespace Dashing.CommandLine {
     using System.Reflection;
-
 #if COREFX
     using System.Runtime.Loader;
+
 #endif
 
     public static class AssemblyContext {

@@ -1,12 +1,11 @@
 ﻿namespace Dashing.Cli {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Xml;
 
+    using Dashing.CommandLine;
     using Dashing.Configuration;
     using Dashing.Extensions;
 
@@ -15,16 +14,16 @@
     using System.Configuration;
 #endif
 
+    public class Program {
 #if COREFX
-    using System.Runtime.Loader;
-    using Microsoft.Extensions.DependencyModel;
+        private static readonly IList<string> AssemblySearchDirectories = new List<string>();
+#else
+        private static readonly IList<string> AssemblySearchDirectories = (ConfigurationManager.AppSettings["AssemblySearchPaths"]
+                                                                                               ?.Split(';') ?? Enumerable.Empty<string>()).ToList();
 #endif
 
-    public class Program {
-        private static IList<string> assemblySearchDirectories = new List<string>();
-
         public static int Main(string[] args) {
-            ConfigureAssemblyResolution(); // we have to configure the assembly resolution on it's own in this method as the ExecuteApplication needs it
+            AssemblyResolution.Configure(AssemblySearchDirectories); // we have to configure the assembly resolution on it's own in this method as the ExecuteApplication needs it
             return ExecuteApplication(args);
         }
 
@@ -82,7 +81,7 @@
                             }
 
                             var assemblyDir = Path.GetDirectoryName(assemblyPath.Value());
-                            assemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
+                            AssemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value(), connectionString.Value());
                             try {
                                 ExecuteScript(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords, verbose);
@@ -148,7 +147,7 @@
                             }
 
                             var assemblyDir = Path.GetDirectoryName(assemblyPath.Value());
-                            assemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
+                            AssemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value(), connectionString.Value());
                             try {
                                 ExecuteMigrate(assemblyPath, configurationType, connectionString, provider, tablesToIgnore, indexesToIgnore, extraPluralizationWords, verbose);
@@ -220,7 +219,7 @@
                             }
 
                             var assemblyDir = Path.GetDirectoryName(configurationAssemblyPath.Value());
-                            assemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
+                            AssemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             try {
                                 ExecuteSeed(seederAssemblyPath, seederType, configurationAssemblyPath, configurationType, connectionString, provider);
                                 return 0;
@@ -274,7 +273,7 @@
                             }
 
                             var projectFileFullPath = Path.GetFullPath(projectFilePath.Value());
-                            assemblySearchDirectories.Insert(0, Path.GetDirectoryName(projectFileFullPath)); // favour user code over dashing code
+                            AssemblySearchDirectories.Insert(0, Path.GetDirectoryName(projectFileFullPath)); // favour user code over dashing code
                             try {
                                 ExecuteAddWeave(projectFileFullPath, configurationType, assemblyExtension);
                                 return 0;
@@ -382,57 +381,6 @@
 
         private static ColorContext Color(ConsoleColor color) {
             return new ColorContext(color);
-        }
-
-        private static void ConfigureAssemblyResolution() {
-#if COREFX
-            AssemblyLoadContext.Default.Resolving += (context, name) => {
-                var dependencies = DependencyContext.Default.RuntimeLibraries;
-                foreach (var library in dependencies) {
-                    if (library.Name == name.Name) {
-                        return context.LoadFromAssemblyName(new AssemblyName(library.Name));
-                    }
-                }
-
-                // look on disk
-                foreach (var assemblySearchDirectory in assemblySearchDirectories) {
-                    var attempts = new[] { "exe", "dll" }.Select(ext => $"{assemblySearchDirectory}\\{name.Name}.{ext}");
-                    foreach (var attempt in attempts) {
-                        if (File.Exists(attempt)) {
-                            return AssemblyContext.LoadFile(attempt);
-                        }
-                    }
-                }
-
-                return null;
-            };
-#else
-            assemblySearchDirectories = (ConfigurationManager.AppSettings["AssemblySearchPaths"]
-                                                             ?.Split(';') ?? Enumerable.Empty<string>()).ToList();
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) => {
-                var assemblyName = new AssemblyName(iargs.Name);
-
-                // look in app domain
-                var loaded = AppDomain.CurrentDomain.GetAssemblies()
-                                      .SingleOrDefault(a => AssemblyName.ReferenceMatchesDefinition(assemblyName, a.GetName()));
-                if (loaded != null) {
-                    return loaded;
-                }
-
-                // we couldn't find it, look on disk
-                foreach (var dir in assemblySearchDirectories) {
-                    var attempts = new[] { "exe", "dll" }.Select(ext => $"{dir}\\{assemblyName.Name}.{ext}");
-                    foreach (var attempt in attempts) {
-                        if (File.Exists(attempt)) {
-                            var assemblyData = File.ReadAllBytes(Path.GetFullPath(attempt));
-                            return Assembly.Load(assemblyData);
-                        }
-                    }
-                }
-
-                return null;
-            };
-#endif
         }
     }
 }

@@ -1,19 +1,13 @@
 ﻿namespace Dashing.Weaver {
     using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
-#if COREFX
-    using System.Runtime.Loader;
-#endif
 
+    using Dashing.CommandLine;
     using Dashing.Weaver.ConfigurationMetadataGeneration;
     using Dashing.Weaver.Weaving;
 
     using Microsoft.Extensions.CommandLineUtils;
-    using Microsoft.Extensions.DependencyModel;
 
     public class Program {
         public static int Main(string[] args) {
@@ -117,7 +111,7 @@
                                         return 1;
                                     }
 
-                                    ConfigureAssemblyResolution(assemblyPath.Values);
+                                    AssemblyResolution.Configure(assemblyPath.Values.Select(Path.GetDirectoryName).ToArray());
                                     var configurationMetadataGenerator = new ConfigurationMetadataGenerator();
                                     try {
                                         var metadata =
@@ -132,56 +126,6 @@
                                     return 0;
                                 });
                     });
-        }
-
-        private static void ConfigureAssemblyResolution(IEnumerable<string> assemblyPaths) {
-            var pathsToSearch = assemblyPaths.Select(path => Path.GetDirectoryName(path)).ToArray();
-#if COREFX
-            AssemblyLoadContext.Default.Resolving += (context, name) =>
-                {
-                    var dependencies = DependencyContext.Default.RuntimeLibraries;
-                    foreach(var library in dependencies) {
-                        if (library.Name == name.Name) {
-                            return context.LoadFromAssemblyName(new AssemblyName(library.Name));
-                        }
-                    }
-
-                    // look on disk
-                    foreach (var path in pathsToSearch) {
-                        var attempts = new[] { "exe", "dll" }.Select(ext => $"{path}\\{name.Name}.{ext}");
-                        foreach (var attempt in attempts) {
-                            if (File.Exists(attempt)) {
-                                return AssemblyContext.LoadFile(attempt);
-                            }
-                        }
-                    }
-
-                    return context.LoadFromAssemblyName(name);
-                };
-#else
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, iargs) =>
-                {
-                    var assemblyName = new AssemblyName(iargs.Name);
-
-                    // look in app domain
-                    var loaded = AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(a => a.FullName == assemblyName.FullName);
-                    if (loaded != null) {
-                        return loaded;
-                    }
-
-                    // we couldn't find it, look on disk
-                    foreach (var path in pathsToSearch) {
-                        var attempts = new[] { "exe", "dll" }.Select(ext => $"{path}\\{assemblyName.Name}.{ext}");
-                        foreach (var attempt in attempts) {
-                            if (File.Exists(attempt)) {
-                                return Assembly.LoadFile(attempt);
-                            }
-                        }
-                    }
-
-                    return null;
-                };
-#endif
         }
     }
 }
