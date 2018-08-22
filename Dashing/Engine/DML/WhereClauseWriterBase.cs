@@ -67,8 +67,11 @@
 
         protected void InitVariables() {
             this.sqlElements = new Queue<ISqlElement>();
-            this.parameters = new DynamicParameters();
-            this.paramCounter = 0;
+            if (this.parameters == null) {
+                this.parameters = new DynamicParameters();
+            }
+
+            this.paramCounter = this.parameters.ParameterNames.Count();
             this.aliasCounter = 99;
         }
 

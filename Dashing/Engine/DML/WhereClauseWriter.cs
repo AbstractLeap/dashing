@@ -17,6 +17,7 @@
                 return new SelectWriterResult(string.Empty, null, rootNode);
             }
 
+            this.parameters = null;
             this.InitVariables();
             this.modifiedRootNode = rootNode;
 

@@ -1,6 +1,6 @@
 ﻿namespace Dashing.Engine.DML
 {
-
+    using Dapper;
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
     using Dashing.SqlBuilder;
@@ -31,8 +31,9 @@
             var havingExpressions = new StringBuilder();
             var groupByExpressions = new StringBuilder();
             var orderByExpressions = new StringBuilder();
+            var parameters = new DynamicParameters();
 
-            this.VisitFromDefinition(sqlFromDefinition, fromExpressions, whereExpressions, groupByExpressions, havingExpressions, orderByExpressions);
+            this.VisitFromDefinition(sqlFromDefinition, fromExpressions, whereExpressions, groupByExpressions, havingExpressions, orderByExpressions, parameters);
 
             
             var sql = $@"
@@ -47,11 +48,11 @@ from {fromExpressions}
             return new SqlWriterResult(sql, null);
         }
 
-        private void VisitFromDefinition(BaseSqlFromDefinition sqlFromDefinition, StringBuilder fromExpressions, StringBuilder whereExpressions, StringBuilder groupByExpressions, StringBuilder havingExpressions, StringBuilder orderByExpressions)
+        private void VisitFromDefinition(BaseSqlFromDefinition sqlFromDefinition, StringBuilder fromExpressions, StringBuilder whereExpressions, StringBuilder groupByExpressions, StringBuilder havingExpressions, StringBuilder orderByExpressions, DynamicParameters parameters)
         {
             if (sqlFromDefinition is BaseSqlFromWithJoinDefinition sqlWithJoinExpression)
             {
-                this.VisitFromDefinition(sqlWithJoinExpression.PreviousFromDefinition, fromExpressions, whereExpressions, groupByExpressions, havingExpressions, orderByExpressions);
+                this.VisitFromDefinition(sqlWithJoinExpression.PreviousFromDefinition, fromExpressions, whereExpressions, groupByExpressions, havingExpressions, orderByExpressions, parameters);
 
                 // now add in the clauses for this definition
                 var fromDefinitionTypes = sqlWithJoinExpression.GetType().GetGenericArguments();
@@ -60,11 +61,9 @@ from {fromExpressions}
                 this.AppendJoin(fromExpressions, sqlWithJoinExpression.JoinType);
                 this.dialect.AppendQuotedTableName(fromExpressions, map);
                 fromExpressions.Append(" as t").Append(fromDefinitionTypes.Length).Append(" ");
-                var joinSql = this.whereClauseWriter.GenerateSql(sqlWithJoinExpression.JoinExpression);
-                if (joinSql.Sql.Length > 0)
-                {
+                var joinSql = this.whereClauseWriter.GenerateSql(sqlWithJoinExpression.JoinExpression, parameters);
+                if (joinSql.Sql.Length > 0) {
                     fromExpressions.Append(" on ").Append(joinSql.Sql);
-                    // TODO parameters
                 }
             }
             else
@@ -76,11 +75,11 @@ from {fromExpressions}
                 fromExpressions.Append(" as t1 ");
             }
 
-            this.AppendLambdaExpressions(sqlFromDefinition.WhereExpressions, whereExpressions);
-            this.AppendLambdaExpressions(sqlFromDefinition.HavingExpressions, havingExpressions);
+            this.AppendLambdaExpressions(sqlFromDefinition.WhereExpressions, whereExpressions, parameters);
+            this.AppendLambdaExpressions(sqlFromDefinition.HavingExpressions, havingExpressions, parameters);
         }
 
-        private void AppendLambdaExpressions(IList<Expression> listOfExpressions, StringBuilder expressionStringBuilder)
+        private void AppendLambdaExpressions(IList<Expression> listOfExpressions, StringBuilder expressionStringBuilder, DynamicParameters parameters)
         {
             if (listOfExpressions?.Any() ?? false)
             {
@@ -90,11 +89,10 @@ from {fromExpressions}
                 }
                 foreach (var whereExpression in listOfExpressions)
                 {
-                    var sqlResult = this.whereClauseWriter.GenerateSql(whereExpression as LambdaExpression);
+                    var sqlResult = this.whereClauseWriter.GenerateSql(whereExpression as LambdaExpression, parameters);
                     if (sqlResult.Sql.Length > 0)
                     {
                         expressionStringBuilder.Append(sqlResult.Sql);
-                        // TODO parameters
                     }
                 }
             }
