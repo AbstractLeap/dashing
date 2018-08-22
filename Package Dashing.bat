@@ -1,3 +1,4 @@
+@echo off
 set /p version="What is the package version? "
 dotnet pack ./Dashing/Dashing.csproj --output ../ --configuration Release /p:PackageVersion=%version%
 dotnet pack ./Dashing.Cli/Dashing.Cli.csproj --output ../ --configuration Release /p:PackageVersion=%version%
