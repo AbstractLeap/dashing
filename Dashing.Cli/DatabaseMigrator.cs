@@ -8,6 +8,8 @@
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
 
+    using Serilog;
+
     public class DatabaseMigrator {
         private ScriptGenerator scriptGenerator;
 
@@ -19,7 +21,7 @@
             var script = this.scriptGenerator.Generate(configuration, connectionString, providerName, tablesToIgnore, indexesToIgnore, extraPluralizationWords, answerProvider);
             if (string.IsNullOrWhiteSpace(script)) {
                 using (new ColorContext(ConsoleColor.Green)) {
-                    Console.WriteLine("-- No migration script to run");
+                    Log.Logger.Information("No migration script to run");
                     return;
                 }
             }

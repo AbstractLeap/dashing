@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>Dashing.Cli</id>
-    <version>2.0.7</version>
+	<version>$version$</version>
     <title>Dashing Cli</title>
 	<authors>Polylytics</authors>
 	<owners>Polylytics</owners>
@@ -18,12 +18,13 @@
     </packageTypes>
     <dependencies>
       <group targetFramework=".NETCoreApp1.1">
-        <dependency id="Dashing" version="2.0.7" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.Extensions.CommandLineUtils" version="1.1.1" exclude="Build,Analyzers" />
+        <dependency id="Dashing" version="$version$" exclude="Build,Analyzers" />
+        <dependency id="McMaster.Extensions.CommandLineUtils" version="2.2.5" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Extensions.DependencyModel" version="1.1.0" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Extensions.PlatformAbstractions" version="1.1.0" exclude="Build,Analyzers" />
         <dependency id="Microsoft.NETCore.App" version="1.1.2" exclude="Build,Analyzers" />
         <dependency id="MySql.Data" version="6.10.6" exclude="Build,Analyzers" />
+		<dependency id="Serilog.Sinks.Console" version="3.1.1" exclude="Build,Analyzers" />
         <dependency id="System.Data.SqlClient" version="4.4.2" exclude="Build,Analyzers" />
         <dependency id="System.Runtime.Loader" version="4.3.0" exclude="Build,Analyzers" />
         <dependency id="System.Xml.XmlDocument" version="4.3.0" exclude="Build,Analyzers" />
