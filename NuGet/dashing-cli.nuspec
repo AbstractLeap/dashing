@@ -13,9 +13,6 @@
 	<copyright>© Polylytics Limited, 2018</copyright>
 	<language>en-GB</language>
 	<tags>dashing dapper orm sql mini-orm</tags>
-    <packageTypes>
-      <packageType name="DotNetCliTool" />
-    </packageTypes>
     <dependencies>
       <group targetFramework=".NETCoreApp1.1">
         <dependency id="Dashing" version="$version$" exclude="Build,Analyzers" />

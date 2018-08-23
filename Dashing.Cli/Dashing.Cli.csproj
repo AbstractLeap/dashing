@@ -16,7 +16,7 @@
     <TargetFrameworks>net46;netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
 	<AssemblyName>dash</AssemblyName>
     <AssemblyName Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' ">dotnet-dash</AssemblyName>
-	<PackageType>DotNetCliTool</PackageType>
+	<PackageType Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' ">DotNetCliTool</PackageType>
   </PropertyGroup>
   
   <ItemGroup>

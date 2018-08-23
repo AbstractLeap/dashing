@@ -48,14 +48,32 @@
                 xmlDocument.Load(projectFileStream);
             }
 
-            if (!string.Equals("Project", xmlDocument.DocumentElement.LocalName, StringComparison.OrdinalIgnoreCase)) {
+            if (xmlDocument.DocumentElement == null || !string.Equals("Project", xmlDocument.DocumentElement.LocalName, StringComparison.OrdinalIgnoreCase)) {
                 throw new Exception("The project file must have a root element of <Project ...>");
             }
 
+            // if it's the new format we need to split out the props and targets so that $(OutputPath) can work
+            if (xmlDocument.DocumentElement.HasAttribute("Sdk") && xmlDocument.DocumentElement.GetAttribute("Sdk")
+                                                                              .StartsWith("Microsoft.NET.Sdk", StringComparison.OrdinalIgnoreCase)) {
+                var sdk = xmlDocument.DocumentElement.GetAttribute("Sdk");
+                xmlDocument.DocumentElement.RemoveAttribute("Sdk");
+                var propsImport = xmlDocument.CreateElement("Import");
+                propsImport.SetAttribute("Sdk", sdk);
+                propsImport.SetAttribute("Project", "Sdk.props");
+                xmlDocument.DocumentElement.PrependChild(propsImport);
+                var targetsImport = xmlDocument.CreateElement("Import");
+                targetsImport.SetAttribute("Sdk", sdk);
+                targetsImport.SetAttribute("Project", "Sdk.targets");
+                xmlDocument.DocumentElement.AppendChild(targetsImport);
+            }
+
+            // create the property group
             var propertyGroup = xmlDocument.CreateElement("PropertyGroup");
             var property = xmlDocument.CreateElement("WeaveArguments");
             property.InnerText = $"-p \"$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName).{assemblyExtension.Value()}\" -t \"{configurationType.Value()}\"";
             propertyGroup.AppendChild(property);
+
+            // for .Net Framwork nuget inserts an <Import ... > to add in the Weaver target, we need to insert before that
             var wasInserted = false;
             for (var i = 0; i < xmlDocument.DocumentElement.ChildNodes.Count; i++) {
                 var childNode = xmlDocument.DocumentElement.ChildNodes[i];
@@ -69,7 +87,7 @@
             }
 
             if (!wasInserted) {
-                xmlDocument.DocumentElement.InsertAfter(propertyGroup, xmlDocument.DocumentElement.LastChild);
+                xmlDocument.DocumentElement.AppendChild(propertyGroup);
             }
 
             using (var writeProjectStream = File.OpenWrite(projectFileFullPath)) {
