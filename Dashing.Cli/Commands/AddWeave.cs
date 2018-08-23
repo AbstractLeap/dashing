@@ -3,6 +3,8 @@
     using System.IO;
     using System.Xml;
 
+    using Dashing.CommandLine;
+
     using McMaster.Extensions.CommandLineUtils;
 
     using Serilog;
@@ -21,6 +23,7 @@
 
                     c.OnExecute(
                         () => {
+                            c.EnableLogging();
                             var projectFileFullPath = Path.GetFullPath(projectFilePath.Value());
                             Program.AssemblySearchDirectories.Insert(0, Path.GetDirectoryName(projectFileFullPath)); // favour user code over dashing code
                             try {

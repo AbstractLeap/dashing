@@ -29,7 +29,7 @@
                                                      Name = "dash",
                                                      Description = "Provides functionality to migrate databases"
                                                  };
-            app.ConfigureLogging();
+            app.AddLogLevelOption();
             app.HelpOption(inherited: true);
             app.UseScript();
             app.UseMigrate();

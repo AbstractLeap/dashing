@@ -31,6 +31,7 @@
 
                     c.OnExecute(
                         () => {
+                            c.EnableLogging();
                             var assemblyDir = Path.GetDirectoryName(configurationAssemblyPath.Value());
                             Program.AssemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             try {
