@@ -50,7 +50,7 @@ namespace Dashing.CommandLine {
                     var attempts = new[] { "exe", "dll" }.Select(ext => $"{path}\\{assemblyName.Name}.{ext}");
                     foreach (var attempt in attempts) {
                         if (File.Exists(attempt)) {
-                            return Assembly.LoadFile(attempt);
+                            return Assembly.LoadFile(Path.GetFullPath(attempt));
                         }
                     }
                 }
