@@ -68,8 +68,8 @@
             }
 
             // create the property group
-            var propertyGroup = xmlDocument.CreateElement("PropertyGroup");
-            var property = xmlDocument.CreateElement("WeaveArguments");
+            var propertyGroup = xmlDocument.CreateElement("PropertyGroup", xmlDocument.DocumentElement.NamespaceURI);
+            var property = xmlDocument.CreateElement("WeaveArguments", xmlDocument.DocumentElement.NamespaceURI);
             property.InnerText = $"-p \"$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName).{assemblyExtension.Value()}\" -t \"{configurationType.Value()}\"";
             propertyGroup.AppendChild(property);
 
