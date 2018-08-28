@@ -47,23 +47,25 @@ Then `dotnet restore` and you're good to carry on.
 
 Once you've done this you can create the first version of your domain model using POCOs (Plain old CLR objects). For example:
 
-	public class Blog {
-		public int BlogId { get;set; }
+```
+public class Blog {
+	public int BlogId { get;set; }
 
-		public string Title { get; set; }
+	public string Title { get; set; }
 
-		public IList<Post> Posts { get; set; }
-	}
+	public IList<Post> Posts { get; set; }
+}
 
-	public class Post {
-		public int PostId { get; set; }
+public class Post {
+	public int PostId { get; set; }
 
-		public string Title	{ get; set; }
+	public string Title	{ get; set; }
 
-		public DateTime Date { get; set; }
+	public DateTime Date { get; set; }
 
-		public Blog Blog { get; set; }
-	}
+	public Blog Blog { get; set; }
+}
+```
 
 A couple of things to note, which may be different from other ORMs:
 
@@ -77,10 +79,10 @@ How your domain model is mapped in to a database schema is done via a Configurat
 
 ```
 public class DashingConfiguration : BaseConfiguration {
-        public DashingConfiguration() {
-            this.AddNamespaceOf<Blog>();
-        }
+    public DashingConfiguration() {
+        this.AddNamespaceOf<Blog>();
     }
+}
 ```
 
 You can override many things in the configuration and do so either by providing a new convention or by overriding each class/property.

@@ -16,7 +16,6 @@
                 c => {
                     c.Description = "Executes a function to seed a database";
 
-                    // attempts to weave the assemblies at the specified location
                     var configurationAssemblyPath = c.Option("-ca|--configurationassemblypath <path>", "Specify the path to the assembly that contains the configuration", CommandOptionType.SingleValue)
                                                      .IsRequired();
                     var configurationType = c.Option("-ct|--typefullname <typefullname>", "The full name of the configuration type", CommandOptionType.SingleValue)
