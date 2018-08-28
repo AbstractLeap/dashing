@@ -5,4 +5,4 @@ The following sections detail how to perform the various functions:
 
 * [Configuration Basics](configuration-basics) - how to add entities to your domain and some common modifications
 * [Conventions](configuration-conventions) - what Conventions are there and how to override
-* [Indexes](indexes) - how to add Indexes
+* [Indexes](Indexes) - how to add Indexes
