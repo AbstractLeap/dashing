@@ -36,7 +36,21 @@
         <ol>
             <li><a href="/dashing">Intro</a></li>
             <li><a href="start.html">Getting Started</a></li>
-            <li><a href="queries.html">Manipulating Data</a></li>
+            <li>
+		<a href="queries.html">Manipulating Data</a>
+		{% if page.queries %}
+		<ul>
+		  <li><a href="sessions">Sessions</a></li>
+		  <li><a href="selecting-data">Getting data out</a></li>
+		  <li><a href="saving-and-deleting">Saving and deleting entities</a></li>
+		  <li><a href="fetching-associations">Fetching associations</a></li>
+		  <li><a href="bulk-queries">Bulk queries</a></li>
+		  <li><a href="dapper">Dapper</a></li>
+		  <li><a href="async-support">Async/sync support</a></li>
+		  <li><a href="performance">Performance</a></li>
+		</ul>
+		{% endif %}
+	    </li>
             <li><a href="configuration.html">Configuration</a></li>
             <li><a href="migrations.html">Migrations</a></li>
 			<li><a href="testing.html">Testing</a></li>
