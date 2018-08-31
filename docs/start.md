@@ -2,15 +2,12 @@
 
 Installing Dashing is done via Nuget. There are 3 libraries that you will need:
 
-- **Dashing** <https://www.nuget.org/packages/Dashing>
-
-  The core library, it contains all of the code that you will use to query the database.
-- **Dashing.Cli** <https://www.nuget.org/packages/Dashing.Cli>
-
-  A library that provides a console application for performing updates to your databases e.g. schema migrations as you change your domain model.
-- **Dashing.Weaver** <https://www.nuget.org/packages/Dashing.Weaver>
-
-  A tool library that is used during the compilation of your projects to inject extra behaviour in to your domain model.
+- **Dashing** <https://www.nuget.org/packages/Dashing>  
+ The core library, it contains all of the code that you will use to query the database.
+- **Dashing.Cli** <https://www.nuget.org/packages/Dashing.Cli>  
+ A library that provides a console application for performing updates to your databases e.g. schema migrations as you change your domain model.
+- **Dashing.Weaver** <https://www.nuget.org/packages/Dashing.Weaver>  
+ A tool library that is used during the compilation of your projects to inject extra behaviour in to your domain model.
 
 In many of the projects that we run we have multiple applications accessing the same database through Dashing. 
 As a result our standard setup is to have a separate "class library" project (e.g. MyProject.Domain) which will contain your 
@@ -41,7 +38,7 @@ To install the Cli tool on .Net core we have to add it to the csproj file manual
 </ItemGroup>
 ```
 
-Then `dotnet restore` and you're good to carry on.
+Then `dotnet restore` and you're good to carry on (you don't have to do this with the 2.x cli tools).
 
 ## Your Domain Model
 
@@ -69,9 +66,9 @@ public class Post {
 
 A couple of things to note, which may be different from other ORMs:
 
-1. At the moment we only support single column primary keys and by default they must be named `<ClassName>Id` or `Id`. You can override this if you want but there are many conventions to prevent [RSI](https://en.wikipedia.org/wiki/Repetitive_strain_injury) inducing activities.
+1. At the moment we only support single column primary keys and by default they must be named `<ClassName>Id` or `Id`. You can override this if you want but there are many [conventions](configuration-conventions) to prevent [RSI](https://en.wikipedia.org/wiki/Repetitive_strain_injury) inducing activities.
 2. The foreign key columns (e.g. `Blog` on `Post`) are strongly typed.
-3. We don't need to make things virtual. Many ORMs use proxies to inject behaviour in to the domain instances, which sometimes requires properties to be virtual, however we re-write the IL at compile time.
+3. We don't need to make things virtual. Many ORMs use proxies to inject behaviour in to the domain instances, which sometimes requires properties to be virtual, however we re-write the IL at compile time. Beta versions of Dashing did actually use proxy technology but we got bored of typing or forgetting it! 
 
 ## The Configuration
 
@@ -85,7 +82,7 @@ public class DashingConfiguration : BaseConfiguration {
 }
 ```
 
-You can override many things in the configuration and do so either by providing a new convention or by overriding each class/property.
+You can override many things in the [configuration](configuration) and do so either by providing a new [convention](configuration-conventions) or by overriding each class/property.
 
 ## Injecting the Compilation Step
 
@@ -102,7 +99,7 @@ ___
 
 A folder named "Dashing" should have been created at the root of your solution. In this folder is an application called "dash". You invoke it the same way you would any other console application.
 
-### .Net Standard
+### .Net Core
 
 If you're using the dotnet cli tools (i.e. you type things like `dotnet new` at the command line) the dash tool gets installed as something you can call in the same way. So you just call `dotnet dash <command>` from within the solution directory.
 
@@ -117,15 +114,19 @@ So, simply open your shell of choice and type:
 
 As an example:
 
-    dotnet dash addweave -p "../MyProject.Domain/MyProject.Domain.csproj" -c "MyProject.Domain.DashingConfiguration" -a "dll"
+    dotnet dash addweave -p ".\MyProject.Domain\MyProject.Domain.csproj" -c "MyProject.Domain.DashingConfiguration" -a "dll"
 
 This modifies your csproj slightly by adding the following section. This signals to Dashing.Weaver what configuration it should use in order to identify the classes that it should modify:
 
     <PropertyGroup>
         <WeaveArguments>-p "$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName).dll" -t  "MyProject.Domain.DashingConfiguration"</WeaveArguments>
     </PropertyGroup>
+	
+In .Net Core it also modifies your csproj file slightly by splitting out the <Project> node in to separate props and targets imports, so that OutputPath is set correctly.
 
-Build your solution and make sure everything's good to go!
+Build your solution and make sure everything's good to go! 
+
+> At this point you can go open MyProject.Domain.dll (from you bin directory) using an Il Decompiler (maybe [IlSpy](https://github.com/icsharpcode/ILSpy)) and see the changes that have been made to your POCOs.
 
 ## Creating your Database
 
@@ -138,13 +139,13 @@ Now you have your domain model, configuration and a built project you can use da
 
 As an example:
 
-    dotnet dash migrate -a "../MyProject.Domain/bin/Debug/MyProject.Domain.dll" -t "MyProject.Domain.DashingConfiguration" -c "Data Source=.;Initial Catalog=dbname;Integrated Security=True;"
+    dotnet dash migrate -a ".\MyProject.Domain\bin\Debug\MyProject.Domain.dll" -t "MyProject.Domain.DashingConfiguration" -c "Data Source=.;Initial Catalog=dbname;Integrated Security=True;"
 
 You should now have your database created.
 
 ## Access your Database
 
-In order to query the database you need a connection to it. We do that using an instance of an `IDatabase`. Dashing comes with 2 implementations of `IDatabase`: `SqlDatabase` and `InMemoryDatabase`. The latter is used for testing purposes whilst the former lets you access your newly created database.
+In order to query the database you need a connection to it. We do that using an instance of an `IDatabase`. Dashing comes with 2 implementations of `IDatabase`: `SqlDatabase` and `InMemoryDatabase`. The latter is used for [testing](testing) purposes whilst the former lets you access your newly created database.
 
 ```
 var dashingConfig = new DashingConfiguration();

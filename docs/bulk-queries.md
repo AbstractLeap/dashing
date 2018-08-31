@@ -1,3 +1,9 @@
+---
+queries: true
+---
+
+# Bulk queries
+
 SQL gives you the ability to execute update and delete statements against a table with a where clause to 
 specify which rows to update. Dashing lets you do that too!
 
@@ -6,7 +12,9 @@ Updates
 
 Updating a sub-set of rows at once:
 
-    await session.UpdateAsync<Post>(p => p.IsArchived = true, p => p.CreatedDate < DateTime.UtcNow);
+    await session.UpdateAsync<Post>(
+		p => p.IsArchived = true, // the Action<Post> that specifies the updated property values
+		p => p.CreatedDate < DateTime.UtcNow); // the Expression<Func<Post, bool>> that specifies the where clause on the update statement
 
 Updating all rows:
 

@@ -4,13 +4,18 @@
 @import "{{ site.theme }}";
 
 @media only screen and (min-width: 1140px) {
+	#main_content {
+		padding-top: 20px;
+		min-height: 450px;
+	}
+
     #main_content_wrap {
         position: relative;
     }
 
     #main_content_wrap nav {
-        position: absolute;
-        top: 40px;
+        position: fixed;
+        top: 235px;
         right: 50%;
         margin-right: 340px;
         width: 220px;

@@ -1,4 +1,10 @@
-The ConfigurationBase and DefaultConfiguration classes, if you're extending them, allow you to specify an 
+---
+configuration: true
+---
+
+# Conventions
+
+The BaseConfiguration class, if you're extending it, allows you to specify an 
 IConvention for mapping classes to tables.
 
     string TableFor(Type entity);
@@ -9,7 +15,7 @@ IConvention for mapping classes to tables.
     byte DecimalPrecisionFor(Type entity, string propertyName);
     byte DecimalScaleFor(Type entity, string propertyName);
 
-The default convention, cunningly named, "DefaultConvention" does the following:
+The default convention, "DefaultConvention"(!), does the following:
 
 TableFor
 -----------

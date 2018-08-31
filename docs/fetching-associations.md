@@ -1,3 +1,9 @@
+---
+queries: true
+---
+
+# Fetching associations
+
 We've made a (semi-) conscious decision in Dashing to only enable fetching of relations through
  eager fetching - there is no support for Lazy fetching (we think it leads to lazy coding
  and unobvious performance issues such as n+1)
@@ -65,17 +71,17 @@ One to many fetching in Dashing allows you to traverse collection type propertie
  fetch those entities as well. For example:
 
     var blogs = await session.Query<Blog>()
-                             .Fetch(b => b.Posts)
-                             .ToArrayAsync();
+				 .Fetch(b => b.Posts)
+				 .ToArrayAsync();
 
 In this instance we simple fetch all of the blogs and all of their posts at the same
  time. If you would also like to fetch the Author of each Post then you can use the
  following type of query:
 
     var blogsWithPostsAndAuthors = await session.Query<Blog>()
-                                                .FetchMany(b => b.Posts)
-                                                .ThenFetch(p => p.Author)
-                                                .ToArrayAsync();
+									.FetchMany(b => b.Posts)
+									.ThenFetch(p => p.Author)
+									.ToArrayAsync();
 
 As with many to one fetching you can traverse these trees multiple times and Dashing
  will only add the columns and joins for new entities in the tree.

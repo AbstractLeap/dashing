@@ -34,10 +34,10 @@
     <nav>
         <h2>Navigation</h2>
         <ol>
-            <li><a href="/dashing">Intro</a></li>
-            <li><a href="start.html">Getting Started</a></li>
+            <li><a href="/dashing">Introduction</a></li>
+            <li><a href="start">Getting Started</a></li>
             <li>
-		<a href="queries.html">Manipulating Data</a>
+		<a href="queries">Manipulating Data</a>
 		{% if page.queries %}
 		<ul>
 		  <li><a href="sessions">Sessions</a></li>
@@ -51,9 +51,19 @@
 		</ul>
 		{% endif %}
 	    </li>
-            <li><a href="configuration.html">Configuration</a></li>
-            <li><a href="migrations.html">Migrations</a></li>
-			<li><a href="testing.html">Testing</a></li>
+            <li>
+				<a href="configuration">Configuration</a>
+				{% if page.configuration %}
+				<ul>
+				  <li><a href="configuration-basics">Basics</a></li>
+				  <li><a href="configuration-conventions">Conventions</a></li>
+				  <li><a href="configuration-indexes">Indexes</a></li>
+				</ul>
+				{% endif %}
+			</li>
+            <li><a href="migrations">Migrations</a></li>
+			<li><a href="testing">Testing</a></li>
+			<li><a href="background">Background</a></li>
         </ol>
     </nav>
     <section id="main_content" class="inner">

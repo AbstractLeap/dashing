@@ -4,9 +4,10 @@ queries: true
 
 # Manipulating Data
 
-Dashing attempts to provide an intuitive api for performing most of the common sql functions that you'd expect to be able to perform 
-i.e. selecting data as objects from the database, updating or deleting that data, inserting new data. 
-We like to think of Dashing as a tool for quickly performing sql functions, as opposed to a complete abstraction of the database, 
+Dashing attempts to provide an intuitive api for performing most of the common sql functions that you would expect to be able to perform 
+e.g. selecting data as objects from the database, updating or deleting that data, inserting new data. 
+
+We like to think of Dashing as a tool for easily performing sql functions, as opposed to a complete abstraction of the database, 
 and as such you can also perform bulk updates to your database.
 
 The following sections detail how to perform the various functions:

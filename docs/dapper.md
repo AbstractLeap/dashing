@@ -1,5 +1,10 @@
-There are many occasions where you might wish to return to the "comfort" of 
-using Dapper on its own so that you can execute a complicated query or simply maximise
+---
+queries: true
+---
+
+# Dapper
+
+There are occasions where you will want to use Dapper on its own so that you can execute a complicated query or simply maximise
  the performance of your database interaction. To take advantage of dapper simply
  use the Dapper property on your ISession and then invoke whichever method you need.
  This Dapper property, by default, makes use of the open IDbConnection and IDbTransaction

@@ -1,4 +1,10 @@
-We're built on top of Dashing so performance is pretty good!
+---
+queries: true
+---
+
+# Performance
+
+We're built on top of Dashing so performance is pretty good! We also do behaviour modification at compile time, do IL generation at runtime and lots of caching.
 
 The following tables list some benchmarks we've ran against various ORMs. For further information please take a look at the 
 source code - it's highly probable that we've misunderstood some ORM and mis-represented it. Each test gives you an idea of the 

@@ -1,7 +1,13 @@
+---
+configuration: true
+---
+
+# Basics
+
 Your IConfiguration provides information regarding which classes are in your domain and how those classes
 are mapped to the database.
 
-Assuming you're inheriting from DefaultConfiguration you'll be able to access the
+Assuming you're inheriting from BaseConfiguration you'll be able to access the
 Add, AddNamespaceOf and Setup methods from within your constructor. These methods allow you to quickly 
 add the domain classes. Note, that they will only be added once, irrespective of how many times the
 method is called.

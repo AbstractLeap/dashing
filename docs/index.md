@@ -1,3 +1,5 @@
+# Introduction
+
 Dashing is a simple to use mini ORM built on top of [Dapper](https://github.com/StackExchange/dapper-dot-net). 
 It aims to be a strongly typed data access layer that is built with productivity and performance in mind. 
 
@@ -46,12 +48,12 @@ Delete
 Eager fetching of related entities
 
     var posts = await session.Query<Post>()
-				.Fetch(p => p.Author)
-				.Fetch(p => p.Tags)
-                .FetchMany(p => p.Comments).ThenFetch(c => c.Author)
-                .Where(p => p.Category == ".Net ORM")
-				.OrderByDescending(p => p.CreatedDate)
-				.ToListAsync();
+		.Fetch(p => p.Author)
+		.Fetch(p => p.Tags)
+		.FetchMany(p => p.Comments).ThenFetch(c => c.Author)
+		.Where(p => p.Category == ".Net ORM")
+		.OrderByDescending(p => p.CreatedDate)
+		.ToListAsync();
 
 Paging
 

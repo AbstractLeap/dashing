@@ -1,8 +1,14 @@
+---
+configuration: true
+---
+
+# Indexes
+
 Adding indexes to your database schema is done using the configuration object. These 
 indexes can then be created using the dash tool.
 
-By default indexes are automatically created on all properties that are many to one relations. 
-This is done on the premise that you will be using these relationships in fetch queries and that 
+By default indexes are automatically created on all properties that are many-to-one or one-to-one relations. 
+This is done on the premise that you will be using these relationships in fetch queries (joins) and that 
 these will benefit from the indexes.
 
 To specifically add a new index use the Index() method on a particular IMap instance. 

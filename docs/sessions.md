@@ -1,11 +1,17 @@
+---
+queries: true
+---
+
+# Sessions
+
 The IConfiguration, IDatabase and ISession interfaces are the main entry points for 
-Dashing. Your IConfiguration details how your domain model is mapped to the database,
+Dashing. Your IConfiguration details how your domain model is mapped to the database and 
 the IDatabase lets you perform sql queries by creating ISessions. 
 
-There are pretty much two methods available for getting an ISession, both of which are
+There are essentially two methods available for getting an ISession, both of which are
  defined on the IDatabase interface. They are BeginSession and BeginTransactionLessSession.
- BeginSession will generally wrap your connection in an IDbTransaction so that you can commit/rollback
- your work as you wish while BeginTransactionLessSession will simply open a connection to the database
+ BeginSession will begin an IDbTransaction inside your connection so that you can commit/rollback
+ your session as you wish while BeginTransactionLessSession will simply open a connection to the database
  without a transaction.
 
 BeginSession
