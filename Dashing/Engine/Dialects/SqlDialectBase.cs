@@ -190,6 +190,10 @@ namespace Dashing.Engine.Dialects {
 
         protected virtual void AppendColumnType(StringBuilder sql, IColumn column) {
             var spec = this.GetColumnSpecification(column);
+            this.AppendColumnType(sql, spec);
+        }
+
+        protected virtual void AppendColumnType(StringBuilder sql, ColumnSpecification spec) {
             sql.Append(spec.DbTypeName);
             if (spec.Length.HasValue) {
                 sql.Append("(");

@@ -4,7 +4,8 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    
+
+    using Dashing.CommandLine;
     using Dashing.Configuration;
     using Dashing.Extensions;
     using Dashing.Weaver.Weaving;

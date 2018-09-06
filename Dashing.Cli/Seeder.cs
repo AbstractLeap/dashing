@@ -4,6 +4,8 @@
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
 
+    using Serilog;
+
     public class Seeder {
         public void Execute(ISeeder seeder, IConfiguration configuration, string connectionString, string providerName) {
             // set up the database connection
@@ -12,7 +14,7 @@
             var dbProviderFactoryFactory = new DbProviderFactoryFactory();
             var dbProviderFactory = dbProviderFactoryFactory.Create(providerName, connectionString);
             if (!dbProviderFactory.DatabaseExists(connectionString, providerName, dialect)) {
-                Console.WriteLine("Database doesn't exist");
+                Log.Logger.Error("Database doesn't exist");
                 return;
             }
 

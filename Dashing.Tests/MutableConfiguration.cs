@@ -13,7 +13,7 @@ namespace Dashing.Tests {
             return base.Add(types);
         }
 
-        public new IConfiguration AddNamespaceOf<T>() {
+        public IConfiguration AddNamespaceOf<T>() {
             return base.AddNamespaceOf<T>();
         }
 

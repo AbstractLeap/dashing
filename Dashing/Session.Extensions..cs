@@ -200,7 +200,7 @@
 
             // map the properties on to the existing entity
             var map = this.Configuration.GetMap<T>();
-            foreach (var col in map.OwnedColumns().Where(c => !c.IsPrimaryKey)) {
+            foreach (var col in map.OwnedColumns().Where(c => !c.IsPrimaryKey && !c.IsComputed)) {
                 map.SetColumnValue(existingEntity, col, map.GetColumnValue(entity, col));
             }
 
@@ -398,7 +398,7 @@
 
             // map the properties on to the existing entity
             var map = this.Configuration.GetMap<T>();
-            foreach (var col in map.OwnedColumns().Where(c => !c.IsPrimaryKey)) {
+            foreach (var col in map.OwnedColumns().Where(c => !c.IsPrimaryKey && !c.IsComputed)) {
                 map.SetColumnValue(existingEntity, col, map.GetColumnValue(entity, col));
             }
 

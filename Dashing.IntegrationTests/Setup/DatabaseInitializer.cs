@@ -45,7 +45,6 @@ namespace Dashing.IntegrationTests.Setup {
                     new List<IMap>(),
                     this.config.Maps,
                     null,
-                    new Mock<ILogger>().Object,
                     new string[0],
                     new string[0],
                     out warnings,

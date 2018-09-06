@@ -1,4 +1,5 @@
-﻿namespace Dashing.Cli {
+﻿namespace Dashing.CommandLine
+{
     using System;
     using System.Collections.Generic;
     using System.IO;
