@@ -311,7 +311,12 @@
                         this.EnsureRootNodeExists(); // we need everything to have an alias now
                         this.ResetVariables();
                         var columnElement = (ColumnElement)this.Visit(columnWithAnyExpression); // this ensures we're joining the correct stuff
-                        this.sqlElements.Enqueue(new StringElement("exists ("));
+                        if (isCurrentlyNegated) {
+                            this.sqlElements.Enqueue(new StringElement("not exists ("));
+                        }
+                        else {
+                            this.sqlElements.Enqueue(new StringElement("exists ("));
+                        }
 
                         // add the reference back to the related column
                         var thisTinyBitOfSql = new StringBuilder(" and ");

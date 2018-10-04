@@ -658,6 +658,16 @@
         }
 
         [Fact]
+        public void WhereNotAnyGetsGoodSql() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => !p.Comments.Any(c => c.Content == "foo");
+            var actual = target.GenerateSql(new[] { pred }, null);
+            var indexOfParam = actual.Sql.IndexOf("@l");
+            Assert.Equal(" where not exists (select 1 from [Comments] as i where (i.[Content] = ", actual.Sql.Substring(0, indexOfParam));
+            Assert.Equal(") and t.[PostId] = i.[PostId])", actual.Sql.Substring(indexOfParam + 13));
+        }
+
+        [Fact]
         public void WhereAnyRelatedGetsGoodSql() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Comments.Any(c => c.User.EmailAddress == "foo");
