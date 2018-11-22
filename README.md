@@ -44,12 +44,12 @@ Delete
 Eager fetching of related entities
 
     var posts = await session.Query<Post>()
-				.Fetch(p => p.Author)
-				.Fetch(p => p.Tags)
-                .FetchMany(p => p.Comments).ThenFetch(c => c.Author)
-                .Where(p => p.Category == ".Net ORM")
-				.OrderByDescending(p => p.CreatedDate)
-				.ToListAsync();
+		.Fetch(p => p.Author)
+		.Fetch(p => p.Tags)
+		.FetchMany(p => p.Comments).ThenFetch(c => c.Author)
+		.Where(p => p.Category == ".Net ORM")
+		.OrderByDescending(p => p.CreatedDate)
+		.ToListAsync();
 
 Paging
 
