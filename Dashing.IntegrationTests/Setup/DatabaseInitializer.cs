@@ -2,6 +2,7 @@ namespace Dashing.IntegrationTests.Setup {
     using System.Collections.Generic;
     using System.Linq;
 
+    using Dashing;
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.IntegrationTests.TestDomain;

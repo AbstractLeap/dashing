@@ -89,34 +89,6 @@ namespace Dashing {
             where T : class, new();
 
         /// <summary>
-        ///     Inserts a collection of entities in to the database
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        int Insert<T>(params T[] entities)
-            where T : class, new();
-
-        /// <summary>
-        ///     Saves all changes on a collection of entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        int Save<T>(params T[] entities)
-            where T : class, new();
-
-        /// <summary>
-        ///     Deletes a collection of entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        int Delete<T>(params T[] entities)
-            where T : class, new();
-
-        /// <summary>
         ///     Execute an update query against a collection of entities as defined by the predicates
         /// </summary>
         /// <typeparam name="T">The type of entities to update</typeparam>
@@ -236,35 +208,7 @@ namespace Dashing {
         /// <returns></returns>
         Task<IEnumerable<T>> GetAsync<T>(IEnumerable<Guid> ids)
             where T : class, new();
-
-        /// <summary>
-        ///     Inserts a collection of entities in to the database
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        Task<int> InsertAsync<T>(params T[] entities)
-            where T : class, new();
-
-        /// <summary>
-        ///     Saves all changes on a collection of entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        Task<int> SaveAsync<T>(params T[] entities)
-            where T : class, new();
-
-        /// <summary>
-        ///     Deletes a collection of entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        Task<int> DeleteAsync<T>(params T[] entities)
-            where T : class, new();
-
+        
         /// <summary>
         ///     Execute an update query against a collection of entities as defined by the predicates
         /// </summary>

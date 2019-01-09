@@ -307,40 +307,6 @@
         }
 
         /// <summary>
-        ///     Inserts a collection of entities in to the database
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        public Task<int> InsertAsync<T>(params T[] entities)
-            where T : class, new() {
-            return this.InsertAsync(entities as IEnumerable<T>);
-        }
-
-        /// <summary>
-        ///     Saves all changes on a collection of entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        public Task<int> SaveAsync<T>(params T[] entities)
-            where T : class, new() {
-            return this.SaveAsync(entities as IEnumerable<T>);
-        }
-
-        /// <summary>
-        ///     Deletes a collection of entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        public Task<int> DeleteAsync<T>(params T[] entities)
-            where T : class, new() {
-            return this.DeleteAsync(entities as IEnumerable<T>);
-        }
-
-        /// <summary>
         ///     Execute an update query against a collection of entities as defined by the predicates
         /// </summary>
         /// <typeparam name="T">The type of entities to update</typeparam>
