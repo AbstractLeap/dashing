@@ -78,9 +78,12 @@
                                                                                                        { DbType.Guid, typeof(Guid) },
                                                                                                        { DbType.Time, typeof(TimeSpan) },
                                                                                                        { DbType.Boolean, typeof(bool)},
+                                                                                                       { DbType.Date, typeof(DateTime) },
                                                                                                        { DbType.DateTime, typeof(DateTime) },
                                                                                                        { DbType.DateTime2, typeof(DateTime) },
                                                                                                        { DbType.DateTimeOffset, typeof(DateTimeOffset) },
+                                                                                                       { DbType.Single, typeof(float) },
+                                                                                                       { DbType.Double, typeof(double) },
                                                                                                        { DbType.Decimal, typeof(decimal) }
                                                                                                    };
         
