@@ -120,7 +120,7 @@
         private void ResolveValueColumn(Type entity, IColumn column, string propertyName, Type propertyType) {
             column.Relationship = RelationshipType.None;
             column.DbName = propertyName;
-            column.DbType = propertyType.GetDbType();
+            column.DbType = this.convention.GetDbTypeFor(propertyType);
             column.IsNullable = propertyType.IsNullable();
 
             // check particular types for defaults

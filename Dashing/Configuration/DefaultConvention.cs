@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Globalization;
     using System.Linq;
 
@@ -207,6 +208,10 @@
         /// <returns></returns>
         public bool IsCollectionInstantiationAutomatic(Type entity, string propertyName) {
             return this.isCollectionInstantiationAutomatic;
+        }
+
+        public DbType GetDbTypeFor(Type type) {
+            return type.GetDbType();
         }
     }
 }

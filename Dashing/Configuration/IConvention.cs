@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Configuration {
     using System;
     using System.Collections.Generic;
+    using System.Data;
 
     /// <summary>
     ///     The Convention interface.
@@ -117,5 +118,12 @@
         /// <param name="propertyName"></param>
         /// <returns></returns>
         bool IsCollectionInstantiationAutomatic(Type entity, string propertyName);
+
+        /// <summary>
+        /// Maps a .Net type to a database type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        DbType GetDbTypeFor(Type type);
     }
 }
