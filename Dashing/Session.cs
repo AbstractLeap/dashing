@@ -1,10 +1,13 @@
 ﻿namespace Dashing {
     using System;
+    using System.Collections;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Threading.Tasks;
 
     using Dashing.Configuration;
@@ -12,6 +15,8 @@
     using Dashing.Extensions;
 
     public sealed partial class Session : ISession, ISelectQueryExecutor {
+        private static readonly Type TypeIEnumerable = typeof(IEnumerable);
+
         public IDapper Dapper { get; private set; }
 
         private readonly IEngine engine;
@@ -37,6 +42,20 @@
         private readonly object connectionOpenLock = new object();
 
         private readonly AsyncLock asyncConnectionOpenLock = new AsyncLock();
+
+        #region MethodCaches
+        private static readonly ConcurrentDictionary<Type, Func<Session, object, object>> InsertMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, object>>();
+
+        private static readonly ConcurrentDictionary<Type, Func<Session, object, object>> SaveMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, object>>();
+
+        private static readonly ConcurrentDictionary<Type, Func<Session, object, object>> DeleteMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, object>>();
+
+        private static readonly ConcurrentDictionary<Type, Func<Session, object, object>> InsertAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, object>>();
+
+        private static readonly ConcurrentDictionary<Type, Func<Session, object, object>> SaveAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, object>>();
+
+        private static readonly ConcurrentDictionary<Type, Func<Session, object, object>> DeleteAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, object>>();
+        #endregion
 
         public Session(IEngine engine, 
             Lazy<IDbConnection> connection,

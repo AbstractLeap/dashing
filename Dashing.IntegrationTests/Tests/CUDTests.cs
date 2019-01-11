@@ -47,7 +47,7 @@
         public void TestMultipleInsertUpdatesIds(TestSessionWrapper wrapper) {
             var user = new User { Username = "Bob", EmailAddress = "asd", Password = "asdf" };
             var user2 = new User { Username = "Bob2", EmailAddress = "asd", Password = "asdf" };
-            wrapper.Session.Insert(user, user2);
+            wrapper.Session.Insert(new[] { user, user2 });
             Assert.NotEqual(0, user.UserId);
             Assert.NotEqual(0, user2.UserId);
             Assert.NotEqual(user.UserId, user2.UserId);

@@ -108,41 +108,7 @@
             return this.Get<T, Guid>(ids);
         }
 
-        /// <summary>
-        ///     Inserts a collection of entities in to the database
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        public int Insert<T>(params T[] entities)
-            where T : class, new() {
-            return this.Insert(entities as IEnumerable<T>);
-        }
-
-        /// <summary>
-        ///     Saves all changes on a collection of entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        public int Save<T>(params T[] entities)
-            where T : class, new() {
-            return this.Save(entities as IEnumerable<T>);
-        }
-
-        /// <summary>
-        ///     Deletes a collection of entities
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entities"></param>
-        /// <returns></returns>
-        public int Delete<T>(params T[] entities)
-            where T : class, new() {
-            return this.Delete(entities as IEnumerable<T>);
-        }
-
-        /// <summary>
+       /// <summary>
         ///     Execute an update query against a collection of entities as defined by the predicates
         /// </summary>
         /// <typeparam name="T">The type of entities to update</typeparam>

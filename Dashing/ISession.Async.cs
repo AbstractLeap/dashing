@@ -26,23 +26,21 @@ namespace Dashing {
             where T : class, new();
 
         /// <summary>
-        ///     Inserts a collection of entities in to the database
+        ///     Inserts an entity or a collection of entities in to the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
         /// <remarks>Where the primary key is dynamically generated the primary key will be populated</remarks>
-        Task<int> InsertAsync<T>(IEnumerable<T> entities)
-            where T : class, new();
+        Task<int> InsertAsync<T>(T entities);
 
         /// <summary>
-        ///     Saves all changes on a collection of entities
+        ///     Saves all changes on an entity or a collection of entities
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entities"></param>
         /// <returns></returns>
-        Task<int> SaveAsync<T>(IEnumerable<T> entities)
-            where T : class, new();
+        Task<int> SaveAsync<T>(T entities);
 
         /// <summary>
         ///     Execute an update query against a collection of entities as defined by the predicates
@@ -59,11 +57,10 @@ namespace Dashing {
             where T : class, new();
 
         /// <summary>
-        ///     Deletes a collection of entities
+        ///     Deletes an entity or a collection of entities
         /// </summary>
         /// <returns></returns>
-        Task<int> DeleteAsync<T>(IEnumerable<T> entities)
-            where T : class, new();
+        Task<int> DeleteAsync<T>(T entities);
 
         /// <summary>
         ///     Deletes a collection of entities based on a group of predicates

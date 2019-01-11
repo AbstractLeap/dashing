@@ -119,7 +119,7 @@ namespace Dashing.IntegrationTests.Setup {
             session.Insert(new User { Username = "BulkUpdate", Password = "Blah" });
 
             // add users for bulk delete
-            session.Insert(new User { Username = "BulkDelete", Password = "Foo" }, new User { Username = "BulkDelete", Password = "Bar" });
+            session.Insert(new[] {new User { Username = "BulkDelete", Password = "Foo" }, new User { Username = "BulkDelete", Password = "Bar" }});
 
             // test delete user
             session.Insert(new User { Username = "TestDelete", Password = "Blah" });
