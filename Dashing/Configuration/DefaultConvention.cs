@@ -65,7 +65,7 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public string HistoryTableFor(Type entity) {
+        public virtual  string HistoryTableFor(Type entity) {
             return this.TableFor(entity) + "History";
         }
 
@@ -115,9 +115,9 @@
 
         private struct PrimaryKeyCandidate {
             public readonly string PropertyName;
-
+                   
             public readonly int Score;
-
+                   
             public PrimaryKeyCandidate(string propertyName, int score)
                 : this() {
                 this.PropertyName = propertyName;
@@ -154,7 +154,7 @@
         /// <returns>
         ///     The <see cref="ushort" />.
         /// </returns>
-        public ushort StringLengthFor(Type entity, string propertyName) {
+        public virtual  ushort StringLengthFor(Type entity, string propertyName) {
             return this.stringLength;
         }
 
@@ -170,7 +170,7 @@
         /// <returns>
         ///     The <see cref="byte" />.
         /// </returns>
-        public byte DecimalPrecisionFor(Type entity, string propertyName) {
+        public virtual  byte DecimalPrecisionFor(Type entity, string propertyName) {
             return this.decimalPrecision;
         }
 
@@ -186,7 +186,7 @@
         /// <returns>
         ///     The <see cref="byte" />.
         /// </returns>
-        public byte DecimalScaleFor(Type entity, string propertyName) {
+        public virtual  byte DecimalScaleFor(Type entity, string propertyName) {
             return this.decimalScale;
         }
 
@@ -196,7 +196,7 @@
         /// <param name="entity"></param>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public byte DateTime2PrecisionFor(Type entity, string propertyName) {
+        public virtual  byte DateTime2PrecisionFor(Type entity, string propertyName) {
             return this.dateTime2Precision;
         }
 
@@ -206,11 +206,16 @@
         /// <param name="entity"></param>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        public bool IsCollectionInstantiationAutomatic(Type entity, string propertyName) {
+        public virtual  bool IsCollectionInstantiationAutomatic(Type entity, string propertyName) {
             return this.isCollectionInstantiationAutomatic;
         }
 
-        public DbType GetDbTypeFor(Type type) {
+        /// <summary>
+        /// Maps a .Net type to a database type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public virtual DbType GetDbTypeFor(Type type) {
             return type.GetDbType();
         }
     }
