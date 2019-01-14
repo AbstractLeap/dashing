@@ -8,7 +8,7 @@
         public static Func<T, object, object> ConvertToWeakDelegate<T>(this MethodInfo method)
             where T : class {
             // First fetch the generic form
-            MethodInfo genericHelper = typeof(Session).GetMethod(nameof(MagicMethodHelper),
+            MethodInfo genericHelper = typeof(MethodInfoExtensions).GetMethod(nameof(MagicMethodHelper),
                                                     BindingFlags.Static | BindingFlags.NonPublic);
 
             // Now supply the type arguments
