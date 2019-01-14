@@ -51,9 +51,9 @@
 
             var insertAsyncMethod = typeof(Session).GetMethod(nameof(Session.InsertAsync), BindingFlags.NonPublic | BindingFlags.Instance)
                                               .MakeGenericMethod(type);
-            var action = insertAsyncMethod.ConvertToWeakDelegate<Session>();
+            var action = insertAsyncMethod.ConvertToWeakDelegate<Task<int>>();
             InsertAsyncMethodsOfType.TryAdd(type, action);
-            return (Task<int>)action(this, entities);
+            return action(this, entities);
         }
 
         private async Task<int> InsertAsync<T>(IEnumerable<T> entities)
@@ -94,9 +94,9 @@
 
             var saveAsyncMethod = typeof(Session).GetMethod(nameof(Session.SaveAsync), BindingFlags.NonPublic | BindingFlags.Instance)
                                                    .MakeGenericMethod(type);
-            var action = saveAsyncMethod.ConvertToWeakDelegate<Session>();
+            var action = saveAsyncMethod.ConvertToWeakDelegate<Task<int>>();
             SaveAsyncMethodsOfType.TryAdd(type, action);
-            return (Task<int>)action(this, entities);
+            return action(this, entities);
         }
 
         private async Task<int> SaveAsync<T>(IEnumerable<T> entities)
@@ -146,9 +146,9 @@
 
             var deleteAsyncMethod = typeof(Session).GetMethod(nameof(Session.DeleteAsync), BindingFlags.NonPublic | BindingFlags.Instance)
                                                    .MakeGenericMethod(type);
-            var action = deleteAsyncMethod.ConvertToWeakDelegate<Session>();
+            var action = deleteAsyncMethod.ConvertToWeakDelegate<Task<int>>();
             DeleteAsyncMethodsOfType.TryAdd(type, action);
-            return (Task<int>)action(this, entities);
+            return action(this, entities);
         }
 
         private async Task<int> DeleteAsync<T>(IEnumerable<T> entities)

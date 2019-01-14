@@ -56,9 +56,9 @@
 
             var insertMethod = typeof(Session).GetMethod(nameof(Session.Insert), BindingFlags.NonPublic | BindingFlags.Instance)
                                                .MakeGenericMethod(type);
-            var action = insertMethod.ConvertToWeakDelegate<Session>();
+            var action = insertMethod.ConvertToWeakDelegate<int>();
             InsertMethodsOfType.TryAdd(type, action);
-            return (int)action(this, entities);
+            return action(this, entities);
         }
 
         private int Insert<T>(IEnumerable<T> entities)
@@ -99,9 +99,9 @@
 
             var saveMethod = typeof(Session).GetMethod(nameof(Session.Save), BindingFlags.NonPublic | BindingFlags.Instance)
                                               .MakeGenericMethod(type);
-            var action = saveMethod.ConvertToWeakDelegate<Session>();
+            var action = saveMethod.ConvertToWeakDelegate<int>();
             SaveMethodsOfType.TryAdd(type, action);
-            return (int)action(this, entities);
+            return action(this, entities);
         }
 
         private int Save<T>(IEnumerable<T> entities)
@@ -151,9 +151,9 @@
 
             var deleteMethod = typeof(Session).GetMethod(nameof(Session.Delete), BindingFlags.NonPublic | BindingFlags.Instance)
                                             .MakeGenericMethod(type);
-            var action = deleteMethod.ConvertToWeakDelegate<Session>();
+            var action = deleteMethod.ConvertToWeakDelegate<int>();
             DeleteMethodsOfType.TryAdd(type, action);
-            return (int)action(this, entities);
+            return action(this, entities);
         }
 
         private int Delete<T>(IEnumerable<T> entities)
