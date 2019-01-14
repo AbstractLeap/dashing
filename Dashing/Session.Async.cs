@@ -46,12 +46,12 @@
 
         private Task<int> InsertAsyncFor<T>(Type type, T entities) where T : IEnumerable {
             if (InsertAsyncMethodsOfType.TryGetValue(type, out var method)) {
-                return (Task<int>)method(this, entities);
+                return method(this, entities);
             }
 
             var insertAsyncMethod = typeof(Session).GetMethod(nameof(Session.InsertAsync), BindingFlags.NonPublic | BindingFlags.Instance)
                                               .MakeGenericMethod(type);
-            var action = insertAsyncMethod.ConvertToWeakDelegate<Task<int>>();
+            var action = insertAsyncMethod.ConvertToStrongDelegate<IEnumerable, Task<int>>();
             InsertAsyncMethodsOfType.TryAdd(type, action);
             return action(this, entities);
         }
@@ -89,12 +89,12 @@
 
         private Task<int> SaveAsyncFor<T>(Type type, T entities) where T : IEnumerable {
             if (SaveAsyncMethodsOfType.TryGetValue(type, out var method)) {
-                return (Task<int>)method(this, entities);
+                return method(this, entities);
             }
 
             var saveAsyncMethod = typeof(Session).GetMethod(nameof(Session.SaveAsync), BindingFlags.NonPublic | BindingFlags.Instance)
                                                    .MakeGenericMethod(type);
-            var action = saveAsyncMethod.ConvertToWeakDelegate<Task<int>>();
+            var action = saveAsyncMethod.ConvertToStrongDelegate<IEnumerable, Task<int>>();
             SaveAsyncMethodsOfType.TryAdd(type, action);
             return action(this, entities);
         }
@@ -141,12 +141,12 @@
 
         private Task<int> DeleteAsyncFor<T>(Type type, T entities) where T : IEnumerable {
             if (DeleteAsyncMethodsOfType.TryGetValue(type, out var method)) {
-                return (Task<int>)method(this, entities);
+                return method(this, entities);
             }
 
             var deleteAsyncMethod = typeof(Session).GetMethod(nameof(Session.DeleteAsync), BindingFlags.NonPublic | BindingFlags.Instance)
                                                    .MakeGenericMethod(type);
-            var action = deleteAsyncMethod.ConvertToWeakDelegate<Task<int>>();
+            var action = deleteAsyncMethod.ConvertToStrongDelegate<IEnumerable, Task<int>>();
             DeleteAsyncMethodsOfType.TryAdd(type, action);
             return action(this, entities);
         }

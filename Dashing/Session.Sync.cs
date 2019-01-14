@@ -51,12 +51,12 @@
 
         private int InsertFor<T>(Type type, T entities) where T : IEnumerable {
             if (InsertMethodsOfType.TryGetValue(type, out var method)) {
-                return (int)method(this, entities);
+                return method(this, entities);
             }
 
             var insertMethod = typeof(Session).GetMethod(nameof(Session.Insert), BindingFlags.NonPublic | BindingFlags.Instance)
                                                .MakeGenericMethod(type);
-            var action = insertMethod.ConvertToWeakDelegate<int>();
+            var action = insertMethod.ConvertToStrongDelegate<IEnumerable, int>();
             InsertMethodsOfType.TryAdd(type, action);
             return action(this, entities);
         }
@@ -94,12 +94,12 @@
 
         private int SaveFor<T>(Type type, T entities) where T : IEnumerable {
             if (SaveMethodsOfType.TryGetValue(type, out var method)) {
-                return (int)method(this, entities);
+                return method(this, entities);
             }
 
             var saveMethod = typeof(Session).GetMethod(nameof(Session.Save), BindingFlags.NonPublic | BindingFlags.Instance)
                                               .MakeGenericMethod(type);
-            var action = saveMethod.ConvertToWeakDelegate<int>();
+            var action = saveMethod.ConvertToStrongDelegate<IEnumerable, int>();
             SaveMethodsOfType.TryAdd(type, action);
             return action(this, entities);
         }
@@ -146,12 +146,12 @@
 
         private int DeleteFor<T>(Type type, T entities) where T : IEnumerable {
             if (DeleteMethodsOfType.TryGetValue(type, out var method)) {
-                return (int)method(this, entities);
+                return method(this, entities);
             }
 
             var deleteMethod = typeof(Session).GetMethod(nameof(Session.Delete), BindingFlags.NonPublic | BindingFlags.Instance)
                                             .MakeGenericMethod(type);
-            var action = deleteMethod.ConvertToWeakDelegate<int>();
+            var action = deleteMethod.ConvertToStrongDelegate<IEnumerable, int>();
             DeleteMethodsOfType.TryAdd(type, action);
             return action(this, entities);
         }

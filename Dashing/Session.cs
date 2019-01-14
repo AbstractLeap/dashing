@@ -44,13 +44,13 @@
         private readonly AsyncLock asyncConnectionOpenLock = new AsyncLock();
 
         #region MethodCaches
-        private static readonly ConcurrentDictionary<Type, Func<Session, object, int>> InsertMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, int>>();
-        private static readonly ConcurrentDictionary<Type, Func<Session, object, int>> SaveMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, int>>();
-        private static readonly ConcurrentDictionary<Type, Func<Session, object, int>> DeleteMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, int>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> InsertMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> SaveMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> DeleteMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
 
-        private static readonly ConcurrentDictionary<Type, Func<Session, object, Task<int>>> InsertAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, Task<int>>>();
-        private static readonly ConcurrentDictionary<Type, Func<Session, object, Task<int>>> SaveAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, Task<int>>>();
-        private static readonly ConcurrentDictionary<Type, Func<Session, object, Task<int>>> DeleteAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, object, Task<int>>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> InsertAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> SaveAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> DeleteAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
         #endregion
 
         public Session(IEngine engine, 
