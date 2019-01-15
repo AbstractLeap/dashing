@@ -6,6 +6,7 @@
     using System.Linq.Expressions;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
     using Dashing.Tests.Properties;
     using Dashing.Tests.TestDomain;
 
@@ -138,6 +139,7 @@
 
         [Fact]
         public void StringLengthDelegatesToConvention() {
+            this.mockConvention.Setup(m => m.GetDbTypeFor(typeof(string))).Returns(DbType.String);
             this.mockConvention.Setup(m => m.StringLengthFor(typeof(User), "Username")).Returns(ExampleUshort).Verifiable();
             var target = this.MakeTarget();
 
@@ -152,6 +154,7 @@
 
         [Fact]
         public void DecimalPrecisionDelegatesToConvention() {
+            this.mockConvention.Setup(m => m.GetDbTypeFor(typeof(decimal))).Returns(DbType.Decimal);
             this.mockConvention.Setup(m => m.DecimalPrecisionFor(typeof(User), "HeightInMeters")).Returns(ExampleByte).Verifiable();
             var target = this.MakeTarget();
 
@@ -166,6 +169,7 @@
 
         [Fact]
         public void DecimalScaleDelegatesToConvention() {
+            this.mockConvention.Setup(m => m.GetDbTypeFor(typeof(decimal))).Returns(DbType.Decimal);
             this.mockConvention.Setup(m => m.DecimalScaleFor(typeof(User), "HeightInMeters")).Returns(ExampleByte).Verifiable();
             var target = this.MakeTarget();
 
@@ -322,6 +326,8 @@
         }
 
         private IMap<T> Map<T>() {
+            this.mockConvention.Setup(c => c.GetDbTypeFor(It.IsAny<Type>()))
+                .Returns<Type>(t => t.GetDbType());
             var target = this.MakeTarget();
             var map = target.MapFor<T>(this.mockConfiguration.Object);
             Assert.NotNull(map);
