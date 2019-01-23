@@ -38,7 +38,7 @@
         private void InstantiateCollection(TypeDefinition typeDef, MethodDefinition[] constructors, PropertyDefinition propDef) {
             var constructor = constructors.First();
             if (constructors.Length > 1) {
-                constructor = constructors.SingleOrDefault(s => !s.HasParameters);
+                constructor = constructors.SingleOrDefault(s => !s.HasParameters && !s.IsStatic);
                 if (constructor == null) {
                     this.Log.Error("Type " + typeDef.FullName + " does not have a parameterless constructor for instantiating collections in");
                 }

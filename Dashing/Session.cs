@@ -1,10 +1,13 @@
 ﻿namespace Dashing {
     using System;
+    using System.Collections;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Threading.Tasks;
 
     using Dashing.Configuration;
@@ -12,6 +15,8 @@
     using Dashing.Extensions;
 
     public sealed partial class Session : ISession, ISelectQueryExecutor {
+        private static readonly Type TypeIEnumerable = typeof(IEnumerable);
+
         public IDapper Dapper { get; private set; }
 
         private readonly IEngine engine;
@@ -37,6 +42,16 @@
         private readonly object connectionOpenLock = new object();
 
         private readonly AsyncLock asyncConnectionOpenLock = new AsyncLock();
+
+        #region MethodCaches
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> InsertMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> SaveMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> DeleteMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
+
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> InsertAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> SaveAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
+        private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> DeleteAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
+        #endregion
 
         public Session(IEngine engine, 
             Lazy<IDbConnection> connection,

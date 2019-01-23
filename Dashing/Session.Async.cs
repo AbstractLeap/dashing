@@ -1,9 +1,13 @@
 ﻿namespace Dashing {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Threading.Tasks;
+
+    using Dashing.Extensions;
 
     public sealed partial class Session {
         public async Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id)
@@ -31,7 +35,28 @@
             return await this.engine.CountAsync(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), query);
         }
 
-        public async Task<int> InsertAsync<T>(IEnumerable<T> entities)
+        public Task<int> InsertAsync<T>(T entities) {
+            var underlyingType = typeof(T).GetEnumerableType();
+            if (underlyingType != null) { // is T[] or IEnumerable<T>
+                return this.InsertAsyncFor(underlyingType, (IEnumerable)entities);
+            }
+
+            return this.InsertAsyncFor(typeof(T), new[] { entities });
+        }
+
+        private Task<int> InsertAsyncFor<T>(Type type, T entities) where T : IEnumerable {
+            if (InsertAsyncMethodsOfType.TryGetValue(type, out var method)) {
+                return method(this, entities);
+            }
+
+            var insertAsyncMethod = typeof(Session).GetMethod(nameof(Session.InsertAsync), BindingFlags.NonPublic | BindingFlags.Instance)
+                                              .MakeGenericMethod(type);
+            var action = insertAsyncMethod.ConvertToStrongDelegate<IEnumerable, Task<int>>();
+            InsertAsyncMethodsOfType.TryAdd(type, action);
+            return action(this, entities);
+        }
+
+        private async Task<int> InsertAsync<T>(IEnumerable<T> entities)
             where T : class, new() {
             if (this.Configuration.EventHandlers.PreInsertListeners.Any()) {
                 foreach (var entity in entities) {
@@ -53,7 +78,28 @@
             return insertedRows;
         }
 
-        public async Task<int> SaveAsync<T>(IEnumerable<T> entities)
+        public Task<int> SaveAsync<T>(T entities) {
+            var underlyingType = typeof(T).GetEnumerableType();
+            if (underlyingType != null) { // is T[] or IEnumerable<T>
+                return this.SaveAsyncFor(underlyingType, (IEnumerable)entities);
+            }
+
+            return this.SaveAsyncFor(typeof(T), new[] { entities });
+        }
+
+        private Task<int> SaveAsyncFor<T>(Type type, T entities) where T : IEnumerable {
+            if (SaveAsyncMethodsOfType.TryGetValue(type, out var method)) {
+                return method(this, entities);
+            }
+
+            var saveAsyncMethod = typeof(Session).GetMethod(nameof(Session.SaveAsync), BindingFlags.NonPublic | BindingFlags.Instance)
+                                                   .MakeGenericMethod(type);
+            var action = saveAsyncMethod.ConvertToStrongDelegate<IEnumerable, Task<int>>();
+            SaveAsyncMethodsOfType.TryAdd(type, action);
+            return action(this, entities);
+        }
+
+        private async Task<int> SaveAsync<T>(IEnumerable<T> entities)
             where T : class, new() {
             if (this.Configuration.EventHandlers.PreSaveListeners.Any()) {
                 foreach (var entity in entities) {
@@ -84,7 +130,28 @@
             return await this.engine.ExecuteAsync(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), update, predicates);
         }
 
-        public async Task<int> DeleteAsync<T>(IEnumerable<T> entities)
+        public Task<int> DeleteAsync<T>(T entities) {
+            var underlyingType = typeof(T).GetEnumerableType();
+            if (underlyingType != null) { // is T[] or IEnumerable<T>
+                return this.DeleteAsyncFor(underlyingType, (IEnumerable)entities);
+            }
+
+            return this.DeleteAsyncFor(typeof(T), new[] { entities });
+        }
+
+        private Task<int> DeleteAsyncFor<T>(Type type, T entities) where T : IEnumerable {
+            if (DeleteAsyncMethodsOfType.TryGetValue(type, out var method)) {
+                return method(this, entities);
+            }
+
+            var deleteAsyncMethod = typeof(Session).GetMethod(nameof(Session.DeleteAsync), BindingFlags.NonPublic | BindingFlags.Instance)
+                                                   .MakeGenericMethod(type);
+            var action = deleteAsyncMethod.ConvertToStrongDelegate<IEnumerable, Task<int>>();
+            DeleteAsyncMethodsOfType.TryAdd(type, action);
+            return action(this, entities);
+        }
+
+        private async Task<int> DeleteAsync<T>(IEnumerable<T> entities)
             where T : class, new() {
             if (this.Configuration.EventHandlers.PreDeleteListeners.Any()) {
                 foreach (var entity in entities) {
