@@ -269,6 +269,7 @@ namespace Dashing.Engine.Dialects {
                     return DbType.AnsiStringFixedLength;
 
                 case "varbinary(max)":
+                case "varbinary":
                     return DbType.Binary;
 
                 case "boolean":
