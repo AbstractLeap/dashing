@@ -71,7 +71,7 @@
             var target = new CustomConfigurationWithAddNamespace(mockMapper.Object);
 
             Assert.NotNull(target);
-            Assert.Equal(13, target.Maps.Count());
+            Assert.Equal(18, target.Maps.Count());
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Blog)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Comment)));
             Assert.Equal(1, target.Maps.Count(m => m.Type == typeof(Like)));
@@ -164,6 +164,11 @@
             mockMapper.Setup(m => m.MapFor(typeof(Pair), It.IsAny<IConfiguration>())).Returns(new Map<Pair>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(Post), It.IsAny<IConfiguration>())).Returns(new Map<Post>()).Verifiable();
             mockMapper.Setup(m => m.MapFor(typeof(User), It.IsAny<IConfiguration>())).Returns(new Map<User>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(LineItem), It.IsAny<IConfiguration>())).Returns(new Map<LineItem>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Order), It.IsAny<IConfiguration>())).Returns(new Map<Order>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Customer), It.IsAny<IConfiguration>())).Returns(new Map<Customer>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(Delivery), It.IsAny<IConfiguration>())).Returns(new Map<Delivery>()).Verifiable();
+            mockMapper.Setup(m => m.MapFor(typeof(ThingThatReferencesOrderNullable), It.IsAny<IConfiguration>())).Returns(new Map<ThingThatReferencesOrderNullable>()).Verifiable();
             return mockMapper;
         }
 

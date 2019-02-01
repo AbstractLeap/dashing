@@ -36,6 +36,40 @@
         }
 
         [Fact]
+        public void NonNullableFetch() {
+            var query = this.GetSelectQuery<LineItem>().Fetch(li => li.Order);
+            var selectQuery = query as SelectQuery<LineItem>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[LineItemId], t_1.[OrderId], t_1.[DeliveryId], t_1.[CustomerId] from [LineItems] as t inner join [Orders] as t_1 on t.OrderId = t_1.OrderId",
+                sql.Sql);
+        }
+
+        [Fact]
+        public void NonNullableAndNullableFetch()
+        {
+            var query = this.GetSelectQuery<LineItem>().Fetch(li => li.Order.Delivery);
+            var selectQuery = query as SelectQuery<LineItem>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[LineItemId], t_1.[OrderId], t_1.[CustomerId], t_2.[DeliveryId], t_2.[Name] from [LineItems] as t inner join [Orders] as t_1 on t.OrderId = t_1.OrderId left join [Deliveries] as t_2 on t_1.DeliveryId = t_2.DeliveryId",
+                sql.Sql);
+        }
+
+        [Fact]
+        public void NullableThenNonNullableFetch() {
+            var query = this.GetSelectQuery<ThingThatReferencesOrderNullable>().Fetch(li => li.Order.Customer);
+            var selectQuery = query as SelectQuery<ThingThatReferencesOrderNullable>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[Id], t_1.[OrderId], t_1.[DeliveryId], t_2.[CustomerId], t_2.[Name] from [ThingThatReferencesOrderNullables] as t left join [Orders] as t_1 on t.OrderId = t_1.OrderId left join [Customers] as t_2 on t_1.CustomerId = t_2.CustomerId",
+                sql.Sql);
+        }
+
+        [Fact]
         public void SimpleFetchReturnsGoodSignature() {
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author);
             var selectQuery = query as SelectQuery<Post>;
@@ -278,6 +312,17 @@
             Debug.Write(sql.Sql);
             Assert.Equal(
                 "select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t left join [Posts] as t_1 on t.PostId = t_1.PostId left join [Users] as t_100 on t.UserId = t_100.UserId where (t_100.[EmailAddress] = @l_1)",
+                sql.Sql);
+        }
+
+        [Fact]
+        public void FetchWithNonFetchNonNullWhereClause() {
+            var query = this.GetSelectQuery<LineItem>().Fetch(c => c.Order).Where(c => c.Order.Customer.Name == "foo");
+            var selectQuery = query as SelectQuery<LineItem>;
+            var sql = this.GetWriter().GenerateSql(selectQuery);
+            Debug.Write(sql.Sql);
+            Assert.Equal(
+                "select t.[LineItemId], t_1.[OrderId], t_1.[DeliveryId], t_1.[CustomerId] from [LineItems] as t inner join [Orders] as t_1 on t.OrderId = t_1.OrderId inner join [Customers] as t_100 on t_1.CustomerId = t_100.CustomerId where (t_100.[Name] = @l_1)",
                 sql.Sql);
         }
 
@@ -813,6 +858,8 @@
         private class CustomConfig : MockConfiguration {
             public CustomConfig() {
                 this.AddNamespaceOf<Post>();
+                this.Setup<LineItem>().Property(li => li.Order).IsNullable = false;
+                this.Setup<Order>().Property(o => o.Customer).IsNullable = false;
             }
         }
 
