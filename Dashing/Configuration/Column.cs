@@ -69,10 +69,23 @@
 
         public bool MaxLength { get; set; }
 
+        private ushort length;
+
         /// <summary>
         ///     Gets or sets the length.
         /// </summary>
-        public ushort Length { get; set; }
+        public ushort Length {
+            get {
+                return (this.Relationship == RelationshipType.ManyToOne || this.Relationship == RelationshipType.OneToOne)
+                       && this.Map.Configuration.HasMap(this.Type)
+                           ? this.Map.Configuration.GetMap(this.Type).PrimaryKey.Length
+                           : this.length;
+            }
+
+            set {
+                this.length = value;
+            }
+        }
 
         private string defaultValue;
 
