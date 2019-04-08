@@ -740,6 +740,18 @@
                                      };
         }
 
+        private bool HasAnyNullableAncestor(FetchNode node) {
+            if (node.Column == null) {
+                return false;
+            }
+
+            if (node.Column.IsNullable) {
+                return true;
+            }
+
+            return this.HasAnyNullableAncestor(node.Parent);
+        }
+
         private AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes) {
             // add this node and then it's children
             // add table sql
@@ -759,7 +771,11 @@
                 splitOns.Add(map.PrimaryKey.Name);
             }
 
-            tableSql.Append(" left join ");
+            // if this is a non-nullable relationship and we've not already done a left join on the way to this node
+            // we can do an inner join
+            tableSql.Append(node.Column.IsNullable || node.Column.Relationship == RelationshipType.OneToMany || this.HasAnyNullableAncestor(node.Parent)
+                                ? " left join " 
+                                : " inner join ");
             this.Dialect.AppendQuotedTableName(tableSql, map);
             tableSql.Append(" as " + node.Alias);
 
