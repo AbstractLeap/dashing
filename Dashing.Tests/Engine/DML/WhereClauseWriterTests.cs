@@ -675,7 +675,7 @@
             var actual = target.GenerateSql(new[] { pred }, null);
             var indexOfParam = actual.Sql.IndexOf("@l");
             Assert.Equal(
-                " where exists (select 1 from [Comments] as i left join [Users] as i_100 on i.UserId = i_100.UserId where (i_100.[EmailAddress] = ",
+                " where exists (select 1 from [Comments] as i inner join [Users] as i_100 on i.UserId = i_100.UserId where (i_100.[EmailAddress] = ",
                 actual.Sql.Substring(0, indexOfParam));
             Assert.Equal(") and t.[PostId] = i.[PostId])", actual.Sql.Substring(indexOfParam + 13));
         }

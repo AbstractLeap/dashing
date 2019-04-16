@@ -39,7 +39,7 @@
             var sql = target.GenerateCountSql(query);
 
             Assert.Equal(
-                "select count(1) from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId where (t_1.[HeightInMeters] < @l_1)",
+                "select count(1) from [Posts] as t inner join [Users] as t_1 on t.AuthorId = t_1.UserId where (t_1.[HeightInMeters] < @l_1)",
                 sql.Sql);
         }
 

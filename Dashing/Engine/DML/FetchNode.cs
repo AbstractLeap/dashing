@@ -17,6 +17,12 @@
         public bool IsFetched { get; set; }
 
         /// <summary>
+        ///     If true then this property can be inner joined as it, or one of it's children,
+        ///     is used in a where clause
+        /// </summary>
+        public bool InferredInnerJoin { get; set; }
+
+        /// <summary>
         ///     This signature is used to select the correct mapper for dapper
         /// </summary>
         public string FetchSignature { get; set; }

@@ -745,7 +745,7 @@
                 return false;
             }
 
-            if (node.Column.IsNullable) {
+            if (node.Column.IsNullable && !node.InferredInnerJoin) {
                 return true;
             }
 
@@ -773,9 +773,9 @@
 
             // if this is a non-nullable relationship and we've not already done a left join on the way to this node
             // we can do an inner join
-            tableSql.Append(node.Column.IsNullable || node.Column.Relationship == RelationshipType.OneToMany || this.HasAnyNullableAncestor(node.Parent)
-                                ? " left join " 
-                                : " inner join ");
+            tableSql.Append(node.InferredInnerJoin || (!node.Column.IsNullable && node.Column.Relationship != RelationshipType.OneToMany && !this.HasAnyNullableAncestor(node.Parent))
+                                ? " inner join " 
+                                : " left join ");
             this.Dialect.AppendQuotedTableName(tableSql, map);
             tableSql.Append(" as " + node.Alias);
 

@@ -22,6 +22,10 @@
 
         private FetchNode currentNode;
 
+        private List<PropertyInfo> currentFetchStack;
+
+        private IList<IList<PropertyInfo>> currentFetchStacks;
+
         private Queue<ISqlElement> sqlElements;
 
         private DynamicParameters parameters;
@@ -74,7 +78,22 @@
                 this.sqlElements.Enqueue(new StringElement(" and "));
             }
 
+            this.InferInnerJoins();
             return new SelectWriterResult(this.GetSql(), this.parameters, this.modifiedRootNode);
+        }
+
+        private void InferInnerJoins() {
+            if (this.modifiedRootNode == null) {
+                return;
+            }
+
+            foreach (var fetchStack in this.currentFetchStacks) {
+                var currentNodeDownStack = this.modifiedRootNode;
+                foreach (var propertyInfo in fetchStack) {
+                    currentNodeDownStack = currentNodeDownStack.Children[propertyInfo.Name];
+                    currentNodeDownStack.InferredInnerJoin = true;
+                }
+            }
         }
 
         private void InitVariables() {
@@ -83,6 +102,7 @@
             this.parameters = new DynamicParameters();
             this.paramCounter = 0;
             this.aliasCounter = 99;
+            this.currentFetchStacks = new List<IList<PropertyInfo>>();
         }
 
         private void VisitWhereClause<T>(Expression<Func<T, bool>> whereClause) {
@@ -91,6 +111,9 @@
             if (el != null) {
                 this.sqlElements.Enqueue(el);
                 this.sqlElements.Enqueue(new StringElement(this.isNegated ? " = 0" : " = 1"));
+                if (this.currentFetchStack.Any()) {
+                    this.currentFetchStacks.Add(this.currentFetchStack);
+                }
             }
         }
 
@@ -102,6 +125,7 @@
             this.isPrimaryKeyAccess = false;
             this.isNegated = false;
             this.isEntityFetch = false;
+            this.currentFetchStack = new List<PropertyInfo>();
         }
 
         private ISqlElement VisitMethodCall(MethodCallExpression exp) {
@@ -477,6 +501,7 @@
         }
 
         private void GetOrCreateCurrentNode(PropertyInfo propInfo, Type declaringType) {
+            this.currentFetchStack.Add(propInfo);
             if (!this.currentNode.Children.ContainsKey(propInfo.Name)) {
                 // create the node
                 var newNode = new FetchNode {
@@ -596,59 +621,10 @@
             var isInAndOrOrExpression = exp.NodeType == ExpressionType.AndAlso || exp.NodeType == ExpressionType.OrElse;
 
             if (this.isInBinaryComparisonExpression) {
-                // we're inside a comparion here so we'll get the left and right hand sides 
-                // and then add the elemts properly
-                this.ResetVariables();
-                var left = this.Visit(exp.Left);
-                var isLeftConstantExpression = this.isConstantExpression;
-                this.ResetVariables();
-                var right = this.Visit(exp.Right);
-                var isRightConstantExpression = this.isConstantExpression;
-
-                if (isLeftConstantExpression && left == null) {
-                    left = this.AddParameter(this.GetDynamicValue(exp.Left));
-                }
-
-                if (isRightConstantExpression && right == null) {
-                    var dynamicValue = this.GetDynamicValue(exp.Right);
-                    right = (dynamicValue == null) ? new ConstantElement("null", null) : this.AddParameter(dynamicValue);
-                }
-
-                this.sqlElements.Enqueue(new StringElement("("));
-                if (isLeftConstantExpression && ((ConstantElement)left).Value == null) {
-                    this.sqlElements.Enqueue(right);
-                    this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, true)));
-                    this.sqlElements.Enqueue(left);
-                }
-                else {
-                    this.sqlElements.Enqueue(left);
-                    this.sqlElements.Enqueue(
-                        new StringElement(this.GetOperator(exp.NodeType, isRightConstantExpression && ((ConstantElement)right).Value == null)));
-                    this.sqlElements.Enqueue(right);
-                }
-
-                this.sqlElements.Enqueue(new StringElement(")"));
-                this.isInBinaryComparisonExpression = false;
+                this.VisitBinaryComparison(exp);
             }
             else if (isInAndOrOrExpression) {
-                // we're got an and or an or so we just visit the sides as at some point they'll hit the code above
-                this.sqlElements.Enqueue(new StringElement("("));
-                this.ResetVariables();
-                var left = this.Visit(exp.Left);
-                if (left != null) {
-                    this.sqlElements.Enqueue(left); // for boolean type stuff
-                    this.sqlElements.Enqueue(new StringElement(this.isNegated ? " = 0" : " = 1"));
-                }
-
-                this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, false)));
-                this.ResetVariables();
-                var right = this.Visit(exp.Right);
-                if (right != null) {
-                    this.sqlElements.Enqueue(right);
-                    this.sqlElements.Enqueue(new StringElement(this.isNegated ? " = 0" : " = 1"));
-                }
-
-                this.sqlElements.Enqueue(new StringElement(")"));
+                this.VisitAndOrBinary(exp);
             }
             else {
                 // we're almost certainly inside some constant expression here so we'll let it go
@@ -656,6 +632,112 @@
             }
 
             return null;
+        }
+
+        private void VisitAndOrBinary(BinaryExpression exp) { // we're got an and or an or so we just visit the sides as at some point they'll hit the code above
+            this.sqlElements.Enqueue(new StringElement("("));
+            this.ResetVariables();
+            var left = this.Visit(exp.Left);
+            if (left != null) {
+                this.sqlElements.Enqueue(left); // for boolean type stuff
+                this.sqlElements.Enqueue(new StringElement(this.isNegated ? " = 0" : " = 1"));
+            }
+
+            var leftFetchStacks = this.currentFetchStacks;
+            this.currentFetchStacks = new List<IList<PropertyInfo>>();
+
+            this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, false)));
+            this.ResetVariables();
+            var right = this.Visit(exp.Right);
+            if (right != null) {
+                this.sqlElements.Enqueue(right);
+                this.sqlElements.Enqueue(new StringElement(this.isNegated ? " = 0" : " = 1"));
+            }
+
+            var rightFetchStacks = this.currentFetchStacks;
+            if (exp.NodeType == ExpressionType.AndAlso) {
+                // we union the left and right hand side fetch stacks
+                this.currentFetchStacks = leftFetchStacks.Union(rightFetchStacks).ToList();
+            } else if (exp.NodeType == ExpressionType.OrElse) {
+                // we intersect the lists taking the common denominator fetch paths
+                // i.e. p.X.Y intersecting p.X.Z leaves p.X
+                var result = new List<IList<PropertyInfo>>();
+                foreach (var stack in leftFetchStacks) {
+                    foreach (var comparisonStack in rightFetchStacks) {
+                        for (var i = 0; i < stack.Count; i++) {
+                            var stackPropInfo = stack[i];
+                            if (i >= comparisonStack.Count) {
+                                // reached the end of comparison
+                                if (i > 0) {
+                                    result.Add(stack.Take(i).ToList());
+                                }
+                            } else {
+                                var comparisonPropInfo = comparisonStack[i];
+                                if (comparisonPropInfo.MetadataToken != stackPropInfo.MetadataToken
+                                    || !Equals(comparisonPropInfo.Module, stackPropInfo.Module)) {
+                                    // not the same prop info, take what we've got so far
+                                    if (i > 1) {
+                                        result.Add(stack.Take(i - 1).ToList());
+                                    }
+                                    else {
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                this.currentFetchStacks = result;
+            }
+
+            this.sqlElements.Enqueue(new StringElement(")"));
+        }
+
+        private void MaybeAddFetchStackToStacks() {
+            if (!this.isConstantExpression && this.currentFetchStack.Count > 0) {
+                this.currentFetchStacks.Add(this.currentFetchStack);
+            }
+        }
+
+        private void VisitBinaryComparison(BinaryExpression exp) { 
+            // we're inside a comparion here so we'll get the left and right hand sides 
+            // and then add the elemts properly
+            this.ResetVariables();
+            var left = this.Visit(exp.Left);
+            this.MaybeAddFetchStackToStacks();
+            var isLeftConstantExpression = this.isConstantExpression;
+
+            this.ResetVariables();
+            var right = this.Visit(exp.Right);
+            this.MaybeAddFetchStackToStacks();
+            var isRightConstantExpression = this.isConstantExpression;
+
+            if (isLeftConstantExpression && left == null) {
+                left = this.AddParameter(this.GetDynamicValue(exp.Left));
+            }
+
+            if (isRightConstantExpression && right == null) {
+                var dynamicValue = this.GetDynamicValue(exp.Right);
+                right = (dynamicValue == null)
+                            ? new ConstantElement("null", null)
+                            : this.AddParameter(dynamicValue);
+            }
+
+            this.sqlElements.Enqueue(new StringElement("("));
+            if (isLeftConstantExpression && ((ConstantElement)left).Value == null) {
+                this.sqlElements.Enqueue(right);
+                this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, true)));
+                this.sqlElements.Enqueue(left);
+            }
+            else {
+                this.sqlElements.Enqueue(left);
+                this.sqlElements.Enqueue(new StringElement(this.GetOperator(exp.NodeType, isRightConstantExpression && ((ConstantElement)right).Value == null)));
+                this.sqlElements.Enqueue(right);
+            }
+
+            this.sqlElements.Enqueue(new StringElement(")"));
+            this.isInBinaryComparisonExpression = false;
         }
 
         private bool IsInBinaryComparisonExpression(ExpressionType nodeType) {
