@@ -32,19 +32,35 @@
         }
 
         public static IMap<T> Index<T, TResult>(this IMap<T> map, Expression<Func<T, TResult>> indexExpression, bool isUnique = false) {
-            var columnNames = typeof(TResult).GetProperties();
             var columns = new List<IColumn>();
-            foreach (var columnName in columnNames.Select(p => p.Name)) {
-                if (!map.Columns.ContainsKey(columnName)) {
-                    throw new InvalidOperationException("The index must be on a property in the entity");
+            if (indexExpression.Body.NodeType == ExpressionType.MemberAccess) {
+                // simple, just accessing a property on the type
+                var propInfo = ((MemberExpression)indexExpression.Body).Member;
+                if (!map.Columns.TryGetValue(propInfo.Name, out var column)) {
+                    throw new InvalidOperationException($"Unable to find property {propInfo.Name} on map {map.Type}");
                 }
 
-                var column = map.Columns[columnName];
                 if (column.IsIgnored) {
-                    throw new InvalidOperationException("The index can not be on an ignored column");
+                    throw new InvalidOperationException($"You can not add an index to {propInfo.Name} on map {map.Type} as it is ignored");
                 }
 
                 columns.Add(column);
+            }
+            else if (indexExpression.Body.NodeType == ExpressionType.New) {
+                var columnNames = typeof(TResult).GetProperties();
+
+                foreach (var columnName in columnNames.Select(p => p.Name)) {
+                    if (!map.Columns.ContainsKey(columnName)) {
+                        throw new InvalidOperationException("The index must be on a property in the entity");
+                    }
+
+                    var column = map.Columns[columnName];
+                    if (column.IsIgnored) {
+                        throw new InvalidOperationException("The index can not be on an ignored column");
+                    }
+
+                    columns.Add(column);
+                }
             }
 
             map.AddIndex(new Index(map, columns, isUnique: isUnique));
