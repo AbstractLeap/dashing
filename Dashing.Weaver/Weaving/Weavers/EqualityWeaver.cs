@@ -17,7 +17,12 @@
             var guidTypeDef = typeDefinition.Module.ImportReference(typeof(Guid));
             var boolTypeDef = typeDefinition.Module.ImportReference(typeof(bool));
             var objectTypeDef = typeDefinition.Module.ImportReference(typeof(object));
-            var pkColDef = this.GetProperty(typeDefinition, columnDefinitions.Single(d => d.IsPrimaryKey).Name);
+            var pkColumnDefinition = columnDefinitions.SingleOrDefault(d => d.IsPrimaryKey);
+            if (pkColumnDefinition == null) {
+                return;
+            }
+
+            var pkColDef = this.GetProperty(typeDefinition, pkColumnDefinition.Name);
             var isGuidPk = pkColDef.PropertyType.Name == "Guid";
             var isStringPk = !isGuidPk && pkColDef.PropertyType.Name.Equals("string", StringComparison.OrdinalIgnoreCase);
 
