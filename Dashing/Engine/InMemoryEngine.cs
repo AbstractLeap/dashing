@@ -238,7 +238,7 @@
 
             if (this.tables.Count == 0) {
                 // create the in memory tables
-                foreach (var map in this.configuration.Maps) {
+                foreach (var map in this.configuration.Maps.Where(m => m.PrimaryKey != null)) {
                     var tableType = typeof(InMemoryTable<,>).MakeGenericType(map.Type, map.PrimaryKey.Type);
                     this.tables.Add(map.Type, Activator.CreateInstance(tableType, new object[] { this.configuration }));
                 }
