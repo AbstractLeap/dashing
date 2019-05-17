@@ -168,6 +168,7 @@
 
                         // now fix the other side
                         candidateColumns[0].Value.Relationship = RelationshipType.OneToOne;
+                        candidateColumns[0].Value.IsNullable = true; // we match up what ResolveOneToOneColumn does
                     }
                 }
                 else {
@@ -202,7 +203,7 @@
         private void ResolveManyToOneColumn(IColumn column, string propertyName) {
             column.Relationship = RelationshipType.ManyToOne;
             column.DbName = propertyName + "Id";
-            column.IsNullable = true;
+            column.IsNullable = this.convention.IsManyToOneNullable(column.Map.Type, propertyName);
         }
 
         private void ResolveOneToManyColumn(IColumn column) {

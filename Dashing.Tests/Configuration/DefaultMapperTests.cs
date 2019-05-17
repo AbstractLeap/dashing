@@ -326,8 +326,12 @@
         }
 
         private IMap<T> Map<T>() {
-            this.mockConvention.Setup(c => c.GetDbTypeFor(It.IsAny<Type>()))
+            this.mockConvention
+                .Setup(c => c.GetDbTypeFor(It.IsAny<Type>()))
                 .Returns<Type>(t => t.GetDbType());
+            this.mockConvention
+                .Setup(c => c.IsManyToOneNullable(It.IsAny<Type>(), It.IsAny<string>()))
+                .Returns(true);
             var target = this.MakeTarget();
             var map = target.MapFor<T>(this.mockConfiguration.Object);
             Assert.NotNull(map);

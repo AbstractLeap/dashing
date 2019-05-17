@@ -125,5 +125,13 @@
         /// <param name="type"></param>
         /// <returns></returns>
         DbType GetDbTypeFor(Type type);
+
+        /// <summary>
+        /// Specifies whether the column is nullable in the case that it's many to one
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        bool IsManyToOneNullable(Type entity, string propertyName);
     }
 }

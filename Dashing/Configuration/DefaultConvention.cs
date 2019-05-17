@@ -218,5 +218,15 @@
         public virtual DbType GetDbTypeFor(Type type) {
             return type.GetDbType();
         }
+
+        /// <summary>
+        /// Specifies whether the column is nullable in the case that it's many to one
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public bool IsManyToOneNullable(Type entity, string propertyName) {
+            return true;
+        }
     }
 }
