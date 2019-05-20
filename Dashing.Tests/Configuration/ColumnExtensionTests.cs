@@ -83,6 +83,32 @@
         }
 
         [Fact]
+        public void NullThrowsIfColumnIsNull() {
+            var column = MakeNullTarget();
+            Assert.Throws<ArgumentNullException>(() => { column.Null(); });
+        }
+
+        [Fact]
+        public void NullIsSet() {
+            var column = MakeTarget();
+            column.Null();
+            Assert.True(column.IsNullable);
+        }
+
+        [Fact]
+        public void NotNullThrowsIfColumnIsNull() {
+            var column = MakeNullTarget();
+            Assert.Throws<ArgumentNullException>(() => { column.NotNull(); });
+        }
+
+        [Fact]
+        public void NotNullIsSet() {
+            var column = MakeTarget();
+            column.NotNull();
+            Assert.False(column.IsNullable);
+        }
+
+        [Fact]
         public void ExcludeByDefaultThrowsIfColumnIsNull() {
             var column = MakeNullTarget();
             Assert.Throws<ArgumentNullException>(() => { column.ExcludeByDefault(); });

@@ -140,6 +140,30 @@
         }
 
         /// <summary>
+        /// Makes this column nullable in the database
+        /// </summary>
+        public static IColumn Null(this IColumn column) {
+            if (column == null) {
+                throw new ArgumentNullException(nameof(column));
+            }
+
+            column.IsNullable = true;
+            return column;
+        }
+
+        /// <summary>
+        /// Makes this column not nullable in the database
+        /// </summary>
+        public static IColumn NotNull(this IColumn column) {
+            if (column == null) {
+                throw new ArgumentNullException(nameof(column));
+            }
+
+            column.IsNullable = false;
+            return column;
+        }
+
+        /// <summary>
         ///     Sets the db default value for this column
         /// </summary>
         /// <param name="column"></param>
