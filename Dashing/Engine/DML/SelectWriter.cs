@@ -11,6 +11,7 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
+    using Dashing.Extensions;
 
     internal class SelectWriter : BaseWriter, ISelectWriter {
         public SelectWriter(ISqlDialect dialect, IConfiguration config)
@@ -119,7 +120,54 @@
             }
             else {
                 // no collection fetches
-                rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                // see if we can transform to union query for non-root disjunctions
+                var nonRootDisjunctionTransformationSucceeded = false;
+                if (selectQuery.TakeN == 0 && selectQuery.SkipN == 0) {
+                    var outerJoinDisjunctionTransformer = new OuterJoinDisjunctionTransformer(this.Configuration);
+                    int substitutedWhereClauseIndex = -1;
+                    Expression<Func<T, bool>> substitutedWhereClause = null;
+                    IEnumerable<Expression<Func<T, bool>>> substitutions = null;
+                    foreach (var whereClauseEntry in selectQuery.WhereClauses.AsSmartEnumerable()) {
+                        var whereClause = whereClauseEntry.Value;
+                        var result = outerJoinDisjunctionTransformer.AttemptGetOuterJoinDisjunctions(whereClause);
+                        if (result.ContainsOuterJoinDisjunction) {
+                            if (substitutedWhereClause != null) {
+                                // we'll bail out here as we're not supporting multiple disjunctions
+                                substitutedWhereClause = null;
+                                break;
+                            }
+
+                            substitutedWhereClauseIndex = whereClauseEntry.Index;
+                            substitutedWhereClause = whereClause;
+                            substitutions = result.UnionWhereClauses;
+                        }
+                    }
+
+                    if (substitutedWhereClause != null) {
+                        // we don't want to order the unioned queries, we'll order them subsequently
+                        var originalOrderClauses = selectQuery.OrderClauses;
+                        selectQuery.OrderClauses = new Queue<OrderClause<T>>();
+                        foreach (var substitution in substitutions.AsSmartEnumerable()) {
+                            // swap out the original where clause for the substitute
+                            selectQuery.WhereClauses.RemoveAt(substitutedWhereClauseIndex);
+                            selectQuery.WhereClauses.Insert(substitutedWhereClauseIndex, substitution.Value);
+                            rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                            if (!substitution.IsLast) {
+                                sql.Append(" union ");
+                            }
+                        }
+
+                        if (originalOrderClauses != null && originalOrderClauses.Any()) {
+                            this.AddOrderByClause(originalOrderClauses, sql, rootNode);
+                        }
+
+                        nonRootDisjunctionTransformationSucceeded = true;
+                    }
+                }
+
+                if (!nonRootDisjunctionTransformationSucceeded) {
+                    rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                }
             }
 
             return new SelectWriterResult(sql.ToString(), parameters, rootNode) {

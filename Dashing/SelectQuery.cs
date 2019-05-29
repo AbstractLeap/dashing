@@ -31,7 +31,7 @@ namespace Dashing {
 
         public IList<KeyValuePair<Expression, List<Expression>>> CollectionFetches { get; private set; }
 
-        public Queue<OrderClause<T>> OrderClauses { get; private set; }
+        public Queue<OrderClause<T>> OrderClauses { get; internal set; }
 
         public IList<Expression<Func<T, bool>>> WhereClauses { get; private set; }
 

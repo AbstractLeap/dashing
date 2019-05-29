@@ -163,12 +163,13 @@
         [Fact]
         public void OrKeepsLeftJoin() {
             var query = GetSelectQuery<Post>()
+                        .Take(2) // added the take so the outerjoindisjunctiontransform doesn't kick in
                             .Where(p => p.Blog.Title != null || p.Blog.BlogId == 2 || p.Author.HeightInMeters > 3) as SelectQuery<Post>;
             var result = this.GetSql2012Writer()
                              .GenerateSql(query);
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Users] as t_101 on t.AuthorId = t_101.UserId left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (((t_100.[Title] is not null) or (t.[BlogId] = @l_1)) or (t_101.[HeightInMeters] > @l_2))", result.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Users] as t_101 on t.AuthorId = t_101.UserId left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (((t_100.[Title] is not null) or (t.[BlogId] = @l_1)) or (t_101.[HeightInMeters] > @l_2)) order by t.[PostId] offset 0 rows fetch next @take rows only", result.Sql);
         }
 
         [Fact]
