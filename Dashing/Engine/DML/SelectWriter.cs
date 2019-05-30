@@ -77,10 +77,13 @@
             return sql.ToString();
         }
 
-        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, AutoNamingDynamicParameters parameters, bool enforceAlias = false)
+        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, AutoNamingDynamicParameters parameters = null, bool enforceAlias = false)
             where T : class, new() {
             // TODO: one StringBuilder to rule them all - Good luck with that ;-) (insertions are expensive)
             var sql = new StringBuilder();
+            if (parameters == null) {
+                parameters = new AutoNamingDynamicParameters();
+            }
             
             // get fetch tree structure
             int aliasCounter;
