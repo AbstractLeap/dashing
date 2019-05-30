@@ -343,6 +343,42 @@
             Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[Title] = @l_1) and (t.[Rating] > @l_2) union select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Users] as t_100 on t.AuthorId = t_100.UserId where (t_100.[HeightInMeters] = @l_3) and (t.[Rating] > @l_4)", result.Sql);
         }
 
+        [Fact]
+        public void MultipleDisjunctionInMultipleWhereClausesDoesnt() {
+            var query = GetSelectQuery<Post>()
+                        .Where(p => p.Blog.Title == "Foo" || p.Author.HeightInMeters == 2)
+                        .Where(p => p.Rating > 5 || p.Blog.CreateDate > DateTime.UtcNow) as SelectQuery<Post>;
+            var result = this.GetSql2012Writer()
+                             .GenerateSql(query, new AutoNamingDynamicParameters());
+
+            this.outputHelper.WriteLine(result.Sql);
+            Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Users] as t_101 on t.AuthorId = t_101.UserId left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where ((t_100.[Title] = @l_1) or (t_101.[HeightInMeters] = @l_2)) and ((t.[Rating] > @l_3) or (t_100.[CreateDate] > @l_4))", result.Sql);
+        }
+
+        [Fact]
+        public void OrderByInDisjunctionAppliedLast() {
+            var query = GetSelectQuery<Post>()
+                        .Where(p => p.Blog.Title == "Foo" || p.Author.HeightInMeters == 2)
+                        .OrderBy(p => p.Title) as SelectQuery<Post>;
+            var result = this.GetSql2012Writer()
+                             .GenerateSql(query, new AutoNamingDynamicParameters());
+
+            this.outputHelper.WriteLine(result.Sql);
+            Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[Title] = @l_1) union select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Users] as t_100 on t.AuthorId = t_100.UserId where (t_100.[HeightInMeters] = @l_2) order by t.[Title] asc", result.Sql);
+        }
+
+        [Fact]
+        public void FetchAcrossJoinsDoesNotInferInnerQuery() {
+            var query = GetSelectQuery<Post>()
+                        .Fetch(p => p.Blog)
+                        .Where(p => p.Blog.Title == "Foo" || p.Author.HeightInMeters == 2) as SelectQuery<Post>;
+            var result = this.GetSql2012Writer()
+                             .GenerateSql(query, new AutoNamingDynamicParameters());
+
+            this.outputHelper.WriteLine(result.Sql);
+            Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[DoNotMap], t_1.[BlogId], t_1.[Title], t_1.[CreateDate], t_1.[Description], t_1.[OwnerId] from [Posts] as t inner join [Blogs] as t_1 on t.BlogId = t_1.BlogId where (t_1.[Title] = @l_1) union select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[DoNotMap], t_1.[BlogId], t_1.[Title], t_1.[CreateDate], t_1.[Description], t_1.[OwnerId] from [Posts] as t inner join [Users] as t_100 on t.AuthorId = t_100.UserId left join [Blogs] as t_1 on t.BlogId = t_1.BlogId where (t_100.[HeightInMeters] = @l_2)", result.Sql);
+        }
+
         private SelectWriter GetSql2012Writer(IConfiguration configuration = null) {
             if (configuration == null) {
                 configuration = new CustomConfig();

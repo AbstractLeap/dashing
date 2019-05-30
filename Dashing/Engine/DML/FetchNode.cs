@@ -53,20 +53,27 @@
                 throw new NotSupportedException();
             }
 
+            return InnerClone(this, null);
+        }
+
+        private static FetchNode InnerClone(FetchNode progenitor, FetchNode parent) {
             var clone = new FetchNode {
-                                          Alias = this.Alias,
-                                          ContainedCollectionfetchesCount = this.ContainedCollectionfetchesCount,
-                                          FetchSignature = this.FetchSignature,
-                                          InferredInnerJoin = this.InferredInnerJoin,
-                                          IsFetched = this.IsFetched,
-                                          SplitOn = this.SplitOn
+                                          Alias = progenitor.Alias,
+                                          ContainedCollectionfetchesCount = progenitor.ContainedCollectionfetchesCount,
+                                          FetchSignature = progenitor.FetchSignature,
+                                          InferredInnerJoin = progenitor.InferredInnerJoin,
+                                          IsFetched = progenitor.IsFetched,
+                                          SplitOn = progenitor.SplitOn,
+                                          Column = progenitor.Column,
+                                          Parent = parent
                                       };
-            var childCopy = new OrderedDictionary<string, FetchNode>();
-            foreach (var keyValue in this.Children) {
-                childCopy.Add(keyValue.Key, keyValue.Value);
+
+            var clonedChildren = new OrderedDictionary<string, FetchNode>();
+            foreach (var keyValue in progenitor.Children) {
+                clonedChildren.Add(keyValue.Key, InnerClone(keyValue.Value, clone));
             }
 
-            clone.Children = childCopy;
+            clone.Children = clonedChildren;
             return clone;
         }
     }
