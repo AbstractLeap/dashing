@@ -28,13 +28,11 @@
 
         private Queue<ISqlElement> sqlElements;
 
-        private DynamicParameters parameters;
+        private AutoNamingDynamicParameters autoNamingDynamicParameters;
 
         private bool isConstantExpression;
 
         private bool isTopOfBinaryOrMethod;
-
-        private int paramCounter;
 
         private bool doAppendValue;
 
@@ -65,12 +63,13 @@
             this.config = config;
         }
 
-        public SelectWriterResult GenerateSql<T>(IEnumerable<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode) {
+        public SelectWriterResult GenerateSql<T>(IEnumerable<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode, AutoNamingDynamicParameters parameters) {
             if (whereClauses.IsEmpty()) {
                 return new SelectWriterResult(string.Empty, null, rootNode);
             }
 
             this.InitVariables();
+            this.autoNamingDynamicParameters = parameters;
             this.modifiedRootNode = rootNode;
 
             foreach (var whereClause in whereClauses) {
@@ -79,7 +78,7 @@
             }
 
             this.InferInnerJoins();
-            return new SelectWriterResult(this.GetSql(), this.parameters, this.modifiedRootNode);
+            return new SelectWriterResult(this.GetSql(), this.autoNamingDynamicParameters, this.modifiedRootNode);
         }
 
         private void InferInnerJoins() {
@@ -99,8 +98,6 @@
         private void InitVariables() {
             this.sqlElements = new Queue<ISqlElement>();
             this.sqlElements.Enqueue(new StringElement(" where "));
-            this.parameters = new DynamicParameters();
-            this.paramCounter = 0;
             this.aliasCounter = 99;
             this.currentFetchStacks = new List<IList<PropertyInfo>>();
         }
@@ -315,10 +312,10 @@
                         var selectQuery = Activator.CreateInstance(
                             typeof(SelectQuery<>).MakeGenericType(columnType),
                             new NonExecutingSelectQueryExecutor());
-                        var whereMethod = selectQuery.GetType().GetMethod("Where");
+                        var whereMethod = selectQuery.GetType().GetMethod(nameof(SelectQuery<object>.Where));
                         whereMethod.Invoke(selectQuery, new object[] { memberExpr });
-                        var generateSqlMethod = innerSelectWriter.GetType().GetMethod("GenerateSql").MakeGenericMethod(columnType);
-                        var innerStatement = (SelectWriterResult)generateSqlMethod.Invoke(innerSelectWriter, new[] { selectQuery, true });
+                        var generateSqlMethod = innerSelectWriter.GetType().GetMethod( nameof(SelectWriter.GenerateSql)).MakeGenericMethod(columnType);
+                        var innerStatement = (SelectWriterResult)generateSqlMethod.Invoke(innerSelectWriter, new[] { selectQuery, this.autoNamingDynamicParameters, true });
 
                         // remove the columns from the expression
                         // TODO tell the select writer to not do this in the first place
@@ -354,17 +351,7 @@
                             thisTinyBitOfSql,
                             this.config.GetMap(columnWithAnyExpression.Expression.Type).Columns[columnWithAnyExpression.Member.Name].ChildColumn
                                                                                                                                     .DbName);
-
-                        // add the parameters to this dictionary
-                        var paramPrefix = "l" + Guid.NewGuid().ToString("N").Substring(0, 8);
-                            // chances of clash inside nested Any queries ??? l is so that first letter is character
-                        foreach (var param in innerStatement.Parameters.ParameterNames) {
-                            // rename it 
-                            var newName = paramPrefix + param;
-                            innerStatement.Sql = innerStatement.Sql.Replace("@l_", "@" + paramPrefix + "l_");
-                            this.parameters.Add(newName, innerStatement.Parameters.GetValue(param));
-                        }
-
+                        
                         // finish off the sql
                         this.sqlElements.Enqueue(new StringElement(innerStatement.Sql + thisTinyBitOfSql));
                         this.sqlElements.Enqueue(new StringElement(")"));
@@ -581,7 +568,6 @@
         }
 
         private ConstantElement AddParameter(object value) {
-            var param = "@l_" + ++this.paramCounter;
             if (value != null) {
                 var valueType = value.GetType();
                 if (!valueType.IsValueType() && this.config.HasMap(valueType)) {
@@ -589,8 +575,8 @@
                 }
             }
 
-            this.parameters.Add(param, this.doAppendValue || this.doPrependValue ? this.WrapValue(value) : value);
-            return new ConstantElement(param, value);
+            var name = this.autoNamingDynamicParameters.Add(this.doAppendValue || this.doPrependValue ? this.WrapValue(value) : value);
+            return new ConstantElement(name, value);
         }
 
         private object WrapValue(object value) {

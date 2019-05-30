@@ -49,7 +49,7 @@
         public SqlWriterResult GenerateBulkSql<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
             var map = this.Configuration.GetMap<T>();
             var sql = new StringBuilder();
-            var parameters = new DynamicParameters();
+            var parameters = new AutoNamingDynamicParameters();
 
             sql.Append("delete from ");
             this.Dialect.AppendQuotedTableName(sql, map);
@@ -60,7 +60,7 @@
             return new SqlWriterResult(sql.ToString(), parameters);
         }
 
-        private void AppendPredicates<T>(IEnumerable<Expression<Func<T, bool>>> predicates, StringBuilder sql, DynamicParameters parameters) {
+        private void AppendPredicates<T>(IEnumerable<Expression<Func<T, bool>>> predicates, StringBuilder sql, AutoNamingDynamicParameters parameters) {
             var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates.ToArray();
 
             if (!predicateArray.Any()) {
@@ -68,13 +68,12 @@
             }
 
             var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
-            var whereResult = whereClauseWriter.GenerateSql(predicateArray, null);
+            var whereResult = whereClauseWriter.GenerateSql(predicateArray, null, parameters);
             if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
                 throw new NotImplementedException("Dashing does not currently support where clause across tables in a delete");
             }
 
             sql.Append(whereResult.Sql);
-            parameters.AddDynamicParams(whereResult.Parameters);
         }
     }
 }

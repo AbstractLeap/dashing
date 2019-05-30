@@ -56,7 +56,7 @@
             var config = new CustomConfig();
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new NonCollectionMapperGenerator(config);
             var func = mapper.GenerateNonCollectionMapper<Post>(result.FetchTree);
             return func.Item1;
@@ -111,7 +111,7 @@
             var config = new CustomConfig();
             var selectQuery = new SelectQuery<Comment>(new Mock<ISelectQueryExecutor>().Object).Fetch(c => c.Post.Author) as SelectQuery<Comment>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new NonCollectionMapperGenerator(config);
             var func = mapper.GenerateNonCollectionMapper<Comment>(result.FetchTree);
             return func.Item1;

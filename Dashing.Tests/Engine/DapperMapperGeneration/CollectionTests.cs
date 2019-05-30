@@ -177,7 +177,7 @@
             var selectQuery =
                 new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Comments).ThenFetch(c => c.User) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new SingleCollectionMapperGenerator(config);
             var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
@@ -230,7 +230,7 @@
             var selectQuery =
                 new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Post.Comments).Take(1) as SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
 
@@ -281,7 +281,7 @@
                 new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
                 SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
 
@@ -344,7 +344,7 @@
                 new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
                 SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
 
@@ -395,7 +395,7 @@
                 new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
                 SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
 
@@ -449,7 +449,7 @@
                                                                               .FetchMany(p => p.DeletedTags)
                                                                               .ThenFetch(t => t.ElTag) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new MultiCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree).Item1;
 
@@ -496,7 +496,7 @@
                                                                               .FetchMany(p => p.Posts)
                                                                               .ThenFetch(p => p.Author) as SelectQuery<Blog>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new MultiCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree).Item1;
 
@@ -586,7 +586,7 @@
                                                                               .FetchMany(p => p.Posts)
                                                                               .ThenFetch(p => p.Author) as SelectQuery<Blog>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new MultiCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree).Item1;
 
@@ -656,7 +656,7 @@
                                                                               .FetchMany(p => p.Posts)
                                                                               .ThenFetch(p => p.Author) as SelectQuery<Blog>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new MultiCollectionMapperGenerator(config);
             var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree).Item1;
 
@@ -717,7 +717,7 @@
             var selectQuery =
                 new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Tags) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new MultiCollectionMapperGenerator(config);
             var func = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree);
@@ -729,7 +729,7 @@
             var selectQuery =
                 new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new SingleCollectionMapperGenerator(config);
             var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
@@ -740,7 +740,7 @@
             var config = new CustomConfig();
             var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new SingleCollectionMapperGenerator(config);
             var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
@@ -753,7 +753,7 @@
                 new SelectQuery<PostWithoutCollectionInitializerInConstructor>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments) as
                 SelectQuery<PostWithoutCollectionInitializerInConstructor>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
-            var result = writer.GenerateSql(selectQuery);
+            var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new SingleCollectionMapperGenerator(config);
             var func = mapper.GenerateCollectionMapper<PostWithoutCollectionInitializerInConstructor>(result.FetchTree);

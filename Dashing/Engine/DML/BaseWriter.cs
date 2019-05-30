@@ -19,15 +19,14 @@
             this.Configuration = config;
         }
 
-        public DynamicParameters AddWhereClause<T>(IList<Expression<Func<T, bool>>> whereClauses, StringBuilder sql, ref FetchNode rootNode) {
+        public void AddWhereClause<T>(IList<Expression<Func<T, bool>>> whereClauses, StringBuilder sql, AutoNamingDynamicParameters parameters, ref FetchNode rootNode) {
             var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
-            var result = whereClauseWriter.GenerateSql(whereClauses, rootNode);
+            var result = whereClauseWriter.GenerateSql(whereClauses, rootNode, parameters);
             if (result.Sql.Length > 0) {
                 sql.Append(result.Sql);
             }
 
             rootNode = result.FetchTree;
-            return result.Parameters;
         }
 
         public bool AddOrderByClause<T>(

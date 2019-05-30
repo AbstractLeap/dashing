@@ -17,7 +17,8 @@ namespace Dashing.Engine.DML {
 
             // add where clause
             var whereSql = new StringBuilder();
-            var parameters = this.AddWhereClause(selectQuery.WhereClauses, whereSql, ref rootNode);
+            var parameters = new AutoNamingDynamicParameters();
+            this.AddWhereClause(selectQuery.WhereClauses, whereSql, parameters, ref rootNode);
 
             // add in the tables
             var columnSql = new StringBuilder();

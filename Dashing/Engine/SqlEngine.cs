@@ -80,7 +80,8 @@ namespace Dashing.Engine {
         }
 
         public virtual IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
-            var sqlQuery = this.selectWriter.GenerateSql(query);
+            var parameters = new AutoNamingDynamicParameters();
+            var sqlQuery = this.selectWriter.GenerateSql(query, parameters);
             if (query.HasFetches()) {
                 Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> queryFunc;
                 if (sqlQuery.NumberCollectionsFetched > 0) {
@@ -93,7 +94,7 @@ namespace Dashing.Engine {
                 return queryFunc(sqlQuery, query, connection, transaction);
             }
 
-            return connection.Query<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction).Select(
+            return connection.Query<T>(sqlQuery.Sql, parameters, transaction).Select(
                 t => {
                     ((ITrackedEntity)t).EnableTracking();
                     return t;
@@ -225,7 +226,8 @@ namespace Dashing.Engine {
 
         public async Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query)
             where T : class, new() {
-            var sqlQuery = this.selectWriter.GenerateSql(query);
+            var parameters = new AutoNamingDynamicParameters();
+            var sqlQuery = this.selectWriter.GenerateSql(query, parameters);
             IEnumerable<T> queryResults;
             if (query.HasFetches()) {
                 if (sqlQuery.NumberCollectionsFetched > 0) {
@@ -236,7 +238,7 @@ namespace Dashing.Engine {
                 }
             }
             else {
-                queryResults = (await connection.QueryAsync<T>(sqlQuery.Sql, sqlQuery.Parameters, transaction)).Select(
+                queryResults = (await connection.QueryAsync<T>(sqlQuery.Sql, parameters, transaction)).Select(
                     t => {
                         ((ITrackedEntity)t).EnableTracking();
                         return t;

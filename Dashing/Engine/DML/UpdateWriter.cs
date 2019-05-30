@@ -123,7 +123,7 @@
 
         public SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
             var sql = new StringBuilder();
-            var parameters = new DynamicParameters();
+            var parameters = new AutoNamingDynamicParameters();
             var map = this.Configuration.GetMap<T>();
 
             // run the update
@@ -163,12 +163,11 @@
 
             if (predicates != null && predicates.Any()) {
                 var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
-                var whereResult = whereClauseWriter.GenerateSql(predicates, null);
+                var whereResult = whereClauseWriter.GenerateSql(predicates, null, parameters);
                 if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
                     throw new NotImplementedException("Dashing does not currently support where clause across tables in an update");
                 }
 
-                parameters.AddDynamicParams(whereResult.Parameters);
                 sql.Append(whereResult.Sql);
             }
 

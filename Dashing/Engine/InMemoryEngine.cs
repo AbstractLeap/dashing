@@ -68,7 +68,7 @@
 
             // we may have to query across non-fetched stuff
             var baseWriter = new BaseWriter(new SqlServer2012Dialect(), this.configuration);
-            baseWriter.AddWhereClause(query.WhereClauses, new StringBuilder(), ref fetchTree);
+            baseWriter.AddWhereClause(query.WhereClauses, new StringBuilder(), new AutoNamingDynamicParameters(), ref fetchTree);
 
             // note that this fetches all the things in the tree as the whereclause may reference things not fetched
             if (fetchTree != null) {

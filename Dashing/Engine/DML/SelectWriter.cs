@@ -77,12 +77,11 @@
             return sql.ToString();
         }
 
-        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, bool enforceAlias = false)
+        public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, AutoNamingDynamicParameters parameters, bool enforceAlias = false)
             where T : class, new() {
             // TODO: one StringBuilder to rule them all - Good luck with that ;-) (insertions are expensive)
             var sql = new StringBuilder();
-            DynamicParameters parameters = new DynamicParameters();
-
+            
             // get fetch tree structure
             int aliasCounter;
             int numberCollectionFetches;
@@ -101,20 +100,20 @@
                     // multiple one to many branches so we'll perform a union query
                     if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
                         // TODO this is temporary, should generate union query similar to next
-                        rootNode = this.GeneratePagingCollectionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                        rootNode = this.GeneratePagingCollectionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, parameters);
                     }
                     else {
-                        rootNode = this.GenerateNoPagingUnionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                        rootNode = this.GenerateNoPagingUnionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, parameters);
                     }
                 }
                 else {
                     if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
                         // we're sub-selecting so need to use a subquery
-                        rootNode = this.GeneratePagingCollectionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                        rootNode = this.GeneratePagingCollectionSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, parameters);
                     }
                     else {
                         // we're fetching all things
-                        rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                        rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, parameters);
                     }
                 }
             }
@@ -147,11 +146,18 @@
                         // we don't want to order the unioned queries, we'll order them subsequently
                         var originalOrderClauses = selectQuery.OrderClauses;
                         selectQuery.OrderClauses = new Queue<OrderClause<T>>();
+
+                        // we need to copy the fetch node and re-use it inside every query
+                        var originalRootNode = rootNode != null 
+                            ? rootNode.Clone()
+                                : new FetchNode { Alias = "t" }; // we force the unions to have the same alias
+                        
                         foreach (var substitution in substitutions.AsSmartEnumerable()) {
                             // swap out the original where clause for the substitute
                             selectQuery.WhereClauses.RemoveAt(substitutedWhereClauseIndex);
                             selectQuery.WhereClauses.Insert(substitutedWhereClauseIndex, substitution.Value);
-                            rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                            var substitutionRootNode = originalRootNode.Clone();
+                            rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, substitutionRootNode, sql, numberCollectionFetches, includes, excludes, parameters);
                             if (!substitution.IsLast) {
                                 sql.Append(" union ");
                             }
@@ -166,7 +172,7 @@
                 }
 
                 if (!nonRootDisjunctionTransformationSucceeded) {
-                    rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, ref parameters);
+                    rootNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, rootNode, sql, numberCollectionFetches, includes, excludes, parameters);
                 }
             }
 
@@ -191,11 +197,11 @@
             }
         }
 
-        private FetchNode GenerateNoPagingUnionSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, ref DynamicParameters parameters)
+        private FetchNode GenerateNoPagingUnionSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, AutoNamingDynamicParameters parameters)
             where T : class, new() {
             var numQueries = rootNode.Children.Count(c => c.Value.Column.Relationship == RelationshipType.OneToMany || c.Value.ContainedCollectionfetchesCount > 0);
             var whereSql = new StringBuilder();
-            parameters = this.AddWhereClause(selectQuery.WhereClauses, whereSql, ref rootNode);
+            this.AddWhereClause(selectQuery.WhereClauses, whereSql, parameters, ref rootNode);
 
             var subQueryColumnSqls = new StringBuilder[numQueries];
             var subQueryTableSqls = new StringBuilder[numQueries];
@@ -280,13 +286,13 @@
             return rootNode;
         }
 
-        private FetchNode GeneratePagingCollectionSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, ref DynamicParameters parameters)
+        private FetchNode GeneratePagingCollectionSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, AutoNamingDynamicParameters parameters)
             where T : class, new() {
             // we write a subquery for the root type and all Many-to-One coming off it, we apply paging to that
             // we then left join to all of the collection columns
             // we need to apply the order by outside of the join as well
             var whereSql = new StringBuilder();
-            parameters = this.AddWhereClause(selectQuery.WhereClauses, whereSql, ref rootNode);
+            this.AddWhereClause(selectQuery.WhereClauses, whereSql, parameters, ref rootNode);
 
             // add root columns
             var innerColumnSql = new StringBuilder();
@@ -326,12 +332,7 @@
                     .Append(whereSql)
                     .Append(innerOrderSql);
             //// if anything is added after orderSql then the paging will probably need changing
-
-            // apply paging to inner query
-            if (parameters == null) {
-                parameters = new DynamicParameters();
-            }
-
+            
             this.Dialect.ApplySkipTake(innerSql, innerOrderSql, selectQuery.TakeN, selectQuery.SkipN);
             if (selectQuery.TakeN > 0) {
                 parameters.Add("@take", selectQuery.TakeN);
@@ -367,7 +368,7 @@
             return rootNode;
         }
 
-        private FetchNode GenerateNoPagingSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, ref DynamicParameters parameters)
+        private FetchNode GenerateNoPagingSql<T>(SelectQuery<T> selectQuery, bool enforceAlias, FetchNode rootNode, StringBuilder sql, int numberCollectionFetches, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, AutoNamingDynamicParameters parameters)
             where T : class, new() {
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
@@ -380,7 +381,7 @@
             }
 
             // add where clause
-            parameters = this.AddWhereClause(selectQuery.WhereClauses, whereSql, ref rootNode);
+            this.AddWhereClause(selectQuery.WhereClauses, whereSql, parameters, ref rootNode);
 
             // add select columns
             this.AddRootColumns(selectQuery, columnSql, rootNode, includes, excludes); // do columns second as we may not be fetching but need joins for the where clause
@@ -411,10 +412,6 @@
             // apply paging
             // only add paging to the query if it doesn't have any collection fetches
             if (selectQuery.TakeN > 0 || selectQuery.SkipN > 0) {
-                if (parameters == null) {
-                    parameters = new DynamicParameters();
-                }
-
                 this.Dialect.ApplySkipTake(sql, orderSql, selectQuery.TakeN, selectQuery.SkipN);
                 if (selectQuery.TakeN > 0) {
                     parameters.Add("@take", selectQuery.TakeN);

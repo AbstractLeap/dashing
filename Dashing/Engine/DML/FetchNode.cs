@@ -1,4 +1,6 @@
 ﻿namespace Dashing.Engine.DML {
+    using System;
+
     using Dashing.Configuration;
     using Dashing.Extensions;
 
@@ -36,6 +38,36 @@
 
         public FetchNode() {
             this.Children = new OrderedDictionary<string, FetchNode>();
+        }
+
+        /// <summary>
+        ///     Clones a parent fetch node
+        /// </summary>
+        /// <returns></returns>
+        public FetchNode Clone() {
+            if (this.Parent != null) {
+                throw new NotSupportedException();
+            }
+
+            if (this.Column != null) {
+                throw new NotSupportedException();
+            }
+
+            var clone = new FetchNode {
+                                          Alias = this.Alias,
+                                          ContainedCollectionfetchesCount = this.ContainedCollectionfetchesCount,
+                                          FetchSignature = this.FetchSignature,
+                                          InferredInnerJoin = this.InferredInnerJoin,
+                                          IsFetched = this.IsFetched,
+                                          SplitOn = this.SplitOn
+                                      };
+            var childCopy = new OrderedDictionary<string, FetchNode>();
+            foreach (var keyValue in this.Children) {
+                childCopy.Add(keyValue.Key, keyValue.Value);
+            }
+
+            clone.Children = childCopy;
+            return clone;
         }
     }
 }
