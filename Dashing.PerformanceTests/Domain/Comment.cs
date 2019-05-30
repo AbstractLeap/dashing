@@ -1,4 +1,4 @@
-﻿namespace PerformanceTest.Domain {
+﻿namespace Dashing.PerformanceTests.Domain {
     using System;
 
     public class Comment {

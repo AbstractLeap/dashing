@@ -1,14 +1,17 @@
-namespace PerformanceTest.Tests.EF {
+namespace Dashing.PerformanceTests.Tests.EntityFramework {
+#if NET46
     using System.Data.Entity;
 
-    using PerformanceTest.Domain;
+    using global::Dashing.PerformanceTests.Domain;
 
-    internal class EfContext : DbContext {
+    using PerformanceTest;
+
+        internal class EfContext : DbContext {
         public EfContext()
-            : base(Program.ConnectionString.ConnectionString) {
-        }
+            : base(Program.ConnectionString) { }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder) {
+            // @formatter:off
             modelBuilder.Entity<Post>().HasOptional(p => p.Author).WithMany().Map(e => e.MapKey("AuthorId"));
             modelBuilder.Entity<Post>().HasOptional(p => p.Blog).WithMany(b => b.Posts).Map(e => e.MapKey("BlogId"));
             modelBuilder.Entity<Comment>().HasOptional(c => c.Post).WithMany().Map(e => e.MapKey("PostId"));
@@ -17,6 +20,7 @@ namespace PerformanceTest.Tests.EF {
             modelBuilder.Entity<Post>().HasMany(p => p.Tags).WithOptional(p => p.Post);
             modelBuilder.Entity<PostTag>().HasOptional(c => c.Post).WithMany().Map(e => e.MapKey("PostId"));
             modelBuilder.Entity<PostTag>().HasOptional(c => c.Tag).WithMany().Map(e => e.MapKey("TagId"));
+            // @formatter:on
         }
 
         public DbSet<Post> Posts { get; set; }
@@ -27,4 +31,7 @@ namespace PerformanceTest.Tests.EF {
 
         public DbSet<Comment> Comments { get; set; }
     }
+
+#endif
+    
 }

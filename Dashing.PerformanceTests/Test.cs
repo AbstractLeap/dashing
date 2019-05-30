@@ -1,4 +1,4 @@
-namespace PerformanceTest {
+namespace Dashing.PerformanceTests {
     using System;
 
     internal class Test {
@@ -22,12 +22,6 @@ namespace PerformanceTest {
 
         public Action<int> TestFunc { get; private set; }
 
-        public string FriendlyName
-        {
-            get
-            {
-                return this.Method == null ? this.Provider : string.Format("{0} ({1})", this.Provider, this.Method);
-            }
-        }
+        public string FriendlyName => this.Method == null ? this.Provider : $"{this.Provider} ({this.Method})";
     }
 }

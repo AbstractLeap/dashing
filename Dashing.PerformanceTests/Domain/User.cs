@@ -1,4 +1,4 @@
-﻿namespace PerformanceTest.Domain {
+﻿namespace Dashing.PerformanceTests.Domain {
     public class User {
         public virtual int UserId { get; set; }
 

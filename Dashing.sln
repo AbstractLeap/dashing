@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Cli", "Dashing.Cli\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.IntegrationTests", "Dashing.IntegrationTests\Dashing.IntegrationTests.csproj", "{DF243268-4867-4FCA-A5D2-0D41AA2441BE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.PerformanceTests", "Dashing.PerformanceTests\Dashing.PerformanceTests.csproj", "{56D2183E-2677-40EB-B311-4F0F45554AF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -133,6 +135,18 @@ Global
 		{DF243268-4867-4FCA-A5D2-0D41AA2441BE}.Release|x64.Build.0 = Release|Any CPU
 		{DF243268-4867-4FCA-A5D2-0D41AA2441BE}.Release|x86.ActiveCfg = Release|Any CPU
 		{DF243268-4867-4FCA-A5D2-0D41AA2441BE}.Release|x86.Build.0 = Release|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Debug|x64.Build.0 = Debug|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Debug|x86.Build.0 = Debug|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Release|x64.ActiveCfg = Release|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Release|x64.Build.0 = Release|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Release|x86.ActiveCfg = Release|Any CPU
+		{56D2183E-2677-40EB-B311-4F0F45554AF7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,6 +157,7 @@ Global
 		{38DA6DBA-1894-46E0-9DC4-58CC21036A60} = {736005D8-C028-4F23-B44C-91CDA2183A2D}
 		{BDBFA448-CD7C-46A0-9CAF-E8264071D1AA} = {736005D8-C028-4F23-B44C-91CDA2183A2D}
 		{DF243268-4867-4FCA-A5D2-0D41AA2441BE} = {736005D8-C028-4F23-B44C-91CDA2183A2D}
+		{56D2183E-2677-40EB-B311-4F0F45554AF7} = {736005D8-C028-4F23-B44C-91CDA2183A2D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {74E05CD7-E0FF-4FEE-ADCC-6177A8398F68}

@@ -1,4 +1,4 @@
-﻿namespace PerformanceTest.Domain {
+﻿namespace Dashing.PerformanceTests.Domain {
     public class PostTag {
         public virtual int PostTagId { get; set; }
 
