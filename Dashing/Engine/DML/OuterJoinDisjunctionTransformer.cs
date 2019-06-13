@@ -5,6 +5,7 @@
     using System.Linq.Expressions;
 
     using Dashing.Configuration;
+    using Dashing.Extensions;
 
     internal class OuterJoinDisjunctionTransformer : ExpressionVisitor {
         private readonly IConfiguration configuration;
@@ -153,15 +154,17 @@
                 }
 
                 if (memberExpression.Expression is MemberExpression parentMemberExpression) { // could this be an explicit cast?
+                    // handle nullable<> HasValue and Value access
+                    if (memberExpression.Member.DeclaringType != null && (memberExpression.Member.DeclaringType.IsGenericType() && memberExpression.Member.DeclaringType.GetGenericTypeDefinition() == typeof(Nullable<>))) {
+                        return this.IsNonRootMemberAccess(parentMemberExpression); // we ask the same of the nullable property
+                    }
+
                     if (parentMemberExpression.Expression.NodeType != ExpressionType.Parameter && IsMemberExpressionForParameter(parentMemberExpression)) { // we're definitely away from the root
                         return true;
                     }
 
                     if (parentMemberExpression.Expression.NodeType == ExpressionType.Parameter) {
-                        var map = this.configuration.GetMap(memberExpression.Member.DeclaringType);
-                        if (map == null) {
-                            throw new InvalidOperationException($"Unable to find map for type {memberExpression.Member.DeclaringType}");
-                        }
+                        var map = this.configuration.GetMap(memberExpression.Member.DeclaringType); // this throws if not mapped
 
                         if (!map.Columns.TryGetValue(memberExpression.Member.Name, out var column) || column.IsIgnored) {
                             throw new InvalidOperationException($"Property {memberExpression.Member.Name} not mapped");

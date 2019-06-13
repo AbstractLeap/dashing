@@ -55,6 +55,31 @@
         }
 
         [Fact]
+        public void NullableRootThingWorks() {
+            Expression<Func<ThingWithNullable, bool>> pred = p => !p.Nullable.HasValue || p.Nullable > 3;
+            var outerJoinDisjunctionTransformer = new OuterJoinDisjunctionTransformer(new CustomConfig());
+            var result = outerJoinDisjunctionTransformer.AttemptGetOuterJoinDisjunctions(pred);
+            Assert.False(result.ContainsOuterJoinDisjunction);
+        }
+
+        [Fact]
+        public void NonRootNullableJoinDisjunctionWorks() {
+            Expression<Func<ReferencesThingWithNullable, bool>> pred = p => !p.Thing.Nullable.HasValue || p.Thing.Nullable > 3;
+            var outerJoinDisjunctionTransformer = new OuterJoinDisjunctionTransformer(new CustomConfig());
+            var result = outerJoinDisjunctionTransformer.AttemptGetOuterJoinDisjunctions(pred);
+            Assert.True(result.ContainsOuterJoinDisjunction);
+            Assert.Equal(2, result.UnionWhereClauses.Count());
+            Assert.Equal(
+                ((Expression<Func<ReferencesThingWithNullable, bool>>)(p => !p.Thing.Nullable.HasValue)).ToDebugString(),
+                result.UnionWhereClauses.ElementAt(0)
+                      .ToDebugString());
+            Assert.Equal(
+                ((Expression<Func<ReferencesThingWithNullable, bool>>)(p => p.Thing.Nullable > 3)).ToDebugString(),
+                result.UnionWhereClauses.ElementAt(1)
+                      .ToDebugString());
+        }
+
+        [Fact]
         public void NonRootBoolMemberAccessJoinDisjunctionWorks() {
             var user = new User {
                                     UserId = 1
