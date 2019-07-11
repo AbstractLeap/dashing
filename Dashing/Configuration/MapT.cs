@@ -74,14 +74,17 @@ namespace Dashing.Configuration {
             if (this.propertyGetters == null) {
                 lock (this.propertyGettersLock) {
                     if (this.propertyGetters == null) {
-                        this.propertyGetters = new Dictionary<IColumn, Func<T, object>>();
+                        // don't set this until the end so that anything hitting this code concurrently sees it as null
+                        var propertyGettersTemp = new Dictionary<IColumn, Func<T, object>>();
                         foreach (var col in this.OwnedColumns(true)) {
                             var param = Expression.Parameter(typeof(T));
                             var getter =
                                 Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(param, col.Name), typeof(object)), param)
                                           .Compile();
-                            this.propertyGetters.Add(col, getter);
+                            propertyGettersTemp.Add(col, getter);
                         }
+
+                        this.propertyGetters = propertyGettersTemp;
                     }
                 }
             }
@@ -93,7 +96,8 @@ namespace Dashing.Configuration {
             if (this.propertySetters == null) {
                 lock (this.propertySettersLock) {
                     if (this.propertySetters == null) {
-                        this.propertySetters = new Dictionary<IColumn, Action<T, object>>();
+                        // don't set this until the end so that anything hitting this code concurrently sees it as null
+                        var propertySettersTemp = new Dictionary<IColumn, Action<T, object>>();
                         foreach (var col in this.OwnedColumns(true)) {
                             var entityParam = Expression.Parameter(typeof(T));
                             var valueParam = Expression.Parameter(typeof(object));
@@ -102,8 +106,10 @@ namespace Dashing.Configuration {
                                     Expression.Assign(Expression.Property(entityParam, col.Name), Expression.Convert(valueParam, col.Type)),
                                     entityParam,
                                     valueParam).Compile();
-                            this.propertySetters.Add(col, setter);
+                            propertySettersTemp.Add(col, setter);
                         }
+
+                        this.propertySetters = propertySettersTemp;
                     }
                 }
             }
