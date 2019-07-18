@@ -371,6 +371,7 @@
                 // static property
                 if (this.isTopOfBinaryOrMethod) {
                     // quicker path
+                    this.isConstantExpression = true;
                     var propInfo = exp.Member as PropertyInfo;
                     if (propInfo != null) {
                         return this.AddParameter(propInfo.GetValue(null));

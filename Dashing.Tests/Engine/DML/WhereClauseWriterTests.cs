@@ -464,6 +464,27 @@
         }
 
         [Fact]
+        public void WhereContainsString() {
+            var target = MakeTarget();
+            var values = new[] { "Foo", "Bar" };
+            Expression<Func<Post, bool>> pred = p => values.Contains(p.Title);
+            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            Assert.Equal(" where [Title] in @l_1", actual.Sql);
+            Assert.Equal(new[] { "Foo", "Bar" }, actual.Parameters.GetValue("l_1") as IEnumerable<string>);
+        }
+
+        private static readonly string[] WhereContainsStringStaticValues = new[] { "Foo", "Bar" };
+
+        [Fact]
+        public void WhereContainsStringStatic() {
+            var target = MakeTarget();
+            Expression<Func<Post, bool>> pred = p => WhereContainsStringStaticValues.Contains(p.Title);
+            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            Assert.Equal(" where [Title] in @l_1", actual.Sql);
+            Assert.Equal(new[] { "Foo", "Bar" }, actual.Parameters.GetValue("l_1") as IEnumerable<string>);
+        }
+
+        [Fact]
         public void WhereContainsOnQueryable() {
             var target = MakeTarget();
             var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
