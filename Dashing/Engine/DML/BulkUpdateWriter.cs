@@ -8,6 +8,7 @@
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
+    using Dashing.Extensions;
 
     internal class BulkUpdateWriter : BaseWriter, IBulkUpdateWriter {
         public BulkUpdateWriter(ISqlDialect dialect, IConfiguration config)
@@ -15,9 +16,13 @@
 
         public SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates)
             where T : class, new() {
-            var sql = new StringBuilder();
+            var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates.ToArray();
+
+            // add where clause
+            var whereSql = new StringBuilder();
             var parameters = new AutoNamingDynamicParameters();
-            var map = this.Configuration.GetMap<T>();
+            FetchNode rootNode = null;
+            this.AddWhereClause(predicateArray, whereSql, parameters, ref rootNode);
 
             // run the update
             var entity = new T();
@@ -31,14 +36,57 @@
                 return new SqlWriterResult(string.Empty, parameters);
             }
 
+            if (rootNode == null) {
+                // the where clauses on are on the root table
+                return new SqlWriterResult(this.GetSimpleUpdateQuery(setProps, entity, parameters, whereSql), parameters);
+            }
+
+            // cross table where clause
+            return new SqlWriterResult(this.GetMultiTableUpdateQuery(setProps, entity, parameters, whereSql, rootNode), parameters);
+        }
+
+        private string GetMultiTableUpdateQuery<T>(IEnumerable<string> setProps, T entity, AutoNamingDynamicParameters parameters, StringBuilder whereSql, FetchNode rootNode) {
+            var map = this.Configuration.GetMap<T>();
+            var sql = new StringBuilder();
+
+            sql.Append("update t set ");
+
+            this.AddSetClauses(setProps, map, sql, entity, parameters, true);
+
+            sql.Append(" from ");
+            this.Dialect.AppendQuotedTableName(sql, map);
+            sql.Append(" as t");
+
+            foreach (var node in rootNode.Children) {
+                this.AddNode(node.Value, sql);
+            }
+
+            sql.Append(whereSql);
+            return sql.ToString();
+        }
+
+        private string GetSimpleUpdateQuery<T>(IEnumerable<string> setProps, T entity, AutoNamingDynamicParameters parameters, StringBuilder whereSql) {
+            var map = this.Configuration.GetMap<T>();
+            var sql = new StringBuilder();
+
             sql.Append("update ");
             this.Dialect.AppendQuotedTableName(sql, map);
             sql.Append(" set ");
 
-            foreach (var updatedProp in setProps) {
-                var column = map.Columns[updatedProp];
+            this.AddSetClauses(setProps, map, sql, entity, parameters, false);
+            sql.Append(whereSql);
+            return sql.ToString();
+        }
+
+        private void AddSetClauses<T>(IEnumerable<string> setProps, IMap<T> map, StringBuilder sql, T entity, AutoNamingDynamicParameters parameters, bool includeRootAlias) {
+            foreach (var updatedPropEntry in setProps.AsSmartEnumerable()) {
+                if (includeRootAlias) {
+                    sql.Append("t.");
+                }
+
+                var column = map.Columns[updatedPropEntry.Value];
                 this.Dialect.AppendQuotedName(sql, column.DbName);
-                var paramName = "@" + updatedProp;
+                var paramName = "@" + updatedPropEntry.Value;
                 var propertyValue = map.GetColumnValue(entity, column);
                 if (propertyValue == null) {
                     parameters.Add(paramName, null);
@@ -49,22 +97,10 @@
 
                 sql.Append(" = ");
                 sql.Append(paramName);
-                sql.Append(", ");
-            }
-
-            sql.Remove(sql.Length - 2, 2);
-
-            if (predicates != null && predicates.Any()) {
-                var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
-                var whereResult = whereClauseWriter.GenerateSql(predicates, null, parameters);
-                if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
-                    throw new NotImplementedException("Dashing does not currently support where clause across tables in an update");
+                if (!updatedPropEntry.IsLast) {
+                    sql.Append(", ");
                 }
-
-                sql.Append(whereResult.Sql);
             }
-
-            return new SqlWriterResult(sql.ToString(), parameters);
         }
     }
 }

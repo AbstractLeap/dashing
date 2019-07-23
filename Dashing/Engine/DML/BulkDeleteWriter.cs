@@ -13,33 +13,48 @@
             : base(dialect, config) { }
 
         public SqlWriterResult GenerateBulkSql<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
+            var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates.ToArray();
+
+            // add where clause
+            var whereSql = new StringBuilder();
+            var parameters = new AutoNamingDynamicParameters();
+            FetchNode rootNode = null;
+            this.AddWhereClause(predicateArray, whereSql, parameters, ref rootNode);
+
+            if (rootNode == null) {
+                // the where clauses were all on the root table
+                return new SqlWriterResult(this.GetSimpleDeleteQuery<T>(whereSql), parameters);
+            }
+
+            // cross table where clause
+            return new SqlWriterResult(this.GetMultiTableDeleteQuery<T>(whereSql, rootNode), parameters);
+        }
+
+        private string GetMultiTableDeleteQuery<T>(StringBuilder whereSql, FetchNode rootNode) {
             var map = this.Configuration.GetMap<T>();
             var sql = new StringBuilder();
-            var parameters = new AutoNamingDynamicParameters();
+
+            sql.Append("delete t from ");
+            this.Dialect.AppendQuotedTableName(sql, map);
+            sql.Append(" as t");
+
+            foreach (var node in rootNode.Children) {
+                this.AddNode(node.Value, sql);
+            }
+
+            sql.Append(whereSql);
+            return sql.ToString();
+        }
+
+        private string GetSimpleDeleteQuery<T>(StringBuilder whereSql) {
+            var map = this.Configuration.GetMap<T>();
+            var sql = new StringBuilder();
 
             sql.Append("delete from ");
             this.Dialect.AppendQuotedTableName(sql, map);
-            if (predicates != null) {
-                this.AppendPredicates(predicates, sql, parameters);
-            }
 
-            return new SqlWriterResult(sql.ToString(), parameters);
-        }
-
-        private void AppendPredicates<T>(IEnumerable<Expression<Func<T, bool>>> predicates, StringBuilder sql, AutoNamingDynamicParameters parameters) {
-            var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates.ToArray();
-
-            if (!predicateArray.Any()) {
-                return;
-            }
-
-            var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
-            var whereResult = whereClauseWriter.GenerateSql(predicateArray, null, parameters);
-            if (whereResult.FetchTree != null && whereResult.FetchTree.Children.Any()) {
-                throw new NotImplementedException("Dashing does not currently support where clause across tables in a delete");
-            }
-
-            sql.Append(whereResult.Sql);
+            sql.Append(whereSql);
+            return sql.ToString();
         }
     }
 }

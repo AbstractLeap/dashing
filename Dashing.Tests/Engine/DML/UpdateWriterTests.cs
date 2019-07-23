@@ -107,57 +107,6 @@
                 result.Sql);
         }
 
-        [Fact]
-        public void BulkUpdateManyOneNullAddsNull() {
-            // assemble
-            var updateWriter = new BulkUpdateWriter(new SqlServerDialect(), MakeConfig());
-
-            // act
-            Expression<Func<Post, bool>> predicate = p => p.PostId == 1;
-            var result = updateWriter.GenerateBulkSql(p => p.Blog = null, new[] { predicate });
-
-            // assert
-            Debug.Write(result.Sql);
-            Assert.Equal("update [Posts] set [BlogId] = @Blog where ([PostId] = @l_1)", result.Sql); // Is this the correct result?
-
-            var param1 = result.Parameters.GetValueOfParameter("@Blog");
-            Assert.Null(param1);
-        }
-
-        [Fact]
-        public void BulkUpdateManyToOnePropertyResolvesForeignKeyId() {
-            // assemble
-            var updateWriter = new BulkUpdateWriter(new SqlServerDialect(), MakeConfig());
-
-            // act
-            Expression<Func<Post, bool>> predicate = p => p.PostId == 1;
-            var result = updateWriter.GenerateBulkSql(p => p.Blog = new Blog { BlogId = 1 }, new[] { predicate });
-
-            // assert
-            Debug.Write(result.Sql);
-            Assert.Equal("update [Posts] set [BlogId] = @Blog where ([PostId] = @l_1)", result.Sql); // Is this the correct result?
-
-            var param1 = result.Parameters.GetValueOfParameter("@Blog");
-            var param2 = result.Parameters.GetValueOfParameter("@l_1");
-
-            Assert.IsType<int>(param1);
-            Assert.IsType<int>(param2);
-        }
-
-        [Fact]
-        public void BulkUpdateIgnoresConstructorSetProperties() {
-            // assemble
-            var updateWriter = new BulkUpdateWriter(new SqlServerDialect(), MakeConfig());
-
-            // act
-            Expression<Func<ClassWithConstructor, bool>> predicate = p => p.Id == 1;
-            var result = updateWriter.GenerateBulkSql(p => { }, new[] { predicate });
-
-            // assert
-            Debug.Write(result.Sql);
-            Assert.Equal(string.Empty, result.Sql); // Is this the correct result?
-        }
-
         private static UpdateWriter MakeTarget() {
             var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig(true));
             return updateWriter;

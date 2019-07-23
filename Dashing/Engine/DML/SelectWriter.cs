@@ -788,85 +788,6 @@
                                      };
         }
 
-        private bool HasAnyNullableAncestor(FetchNode node) {
-            if (node.Column == null) {
-                return false;
-            }
-
-            if (node.Column.IsNullable && !node.InferredInnerJoin) {
-                return true;
-            }
-
-            return this.HasAnyNullableAncestor(node.Parent);
-        }
-
-        private AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes) {
-            // add this node and then it's children
-            // add table sql
-            var splitOns = new List<string>();
-            IMap map;
-            if (node.Column.Relationship == RelationshipType.OneToMany) {
-                map = this.Configuration.GetMap(node.Column.Type.GetGenericArguments()[0]);
-            }
-            else if (node.Column.Relationship == RelationshipType.ManyToOne || node.Column.Relationship == RelationshipType.OneToOne) {
-                map = this.Configuration.GetMap(node.Column.Type);
-            }
-            else {
-                throw new NotSupportedException();
-            }
-
-            if (node.IsFetched) {
-                splitOns.Add(map.PrimaryKey.Name);
-            }
-
-            // if this is a non-nullable relationship and we've not already done a left join on the way to this node
-            // we can do an inner join
-            tableSql.Append(node.InferredInnerJoin || (!node.Column.IsNullable && node.Column.Relationship != RelationshipType.OneToMany && !this.HasAnyNullableAncestor(node.Parent))
-                                ? " inner join " 
-                                : " left join ");
-            this.Dialect.AppendQuotedTableName(tableSql, map);
-            tableSql.Append(" as " + node.Alias);
-
-            if (node.Column.Relationship == RelationshipType.ManyToOne || node.Column.Relationship == RelationshipType.OneToOne) {
-                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + map.PrimaryKey.DbName);
-            }
-            else if (node.Column.Relationship == RelationshipType.OneToMany) {
-                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.Map.PrimaryKey.DbName + " = " + node.Alias + "." + node.Column.ChildColumn.DbName);
-            }
-
-            // add the columns
-            if (node.IsFetched) {
-                var columns = GetColumnsWithIncludesAndExcludes(includes, excludes, map, selectQueryFetchAllProperties);
-                columns = columns.Where(
-                    c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
-                                                                    .IsFetched);
-                foreach (var column in columns) {
-                    columnSql.Append(", ");
-                    this.AddColumn(columnSql, column, node.Alias);
-                }
-            }
-
-            // add its children
-            var signatureBuilder = new StringBuilder();
-            foreach (var child in node.Children) {
-                var signature = this.AddNode(child.Value, tableSql, columnSql, selectQueryFetchAllProperties, includes, excludes);
-                if (child.Value.IsFetched) {
-                    signatureBuilder.Append(signature.Signature);
-                    splitOns.AddRange(signature.SplitOn);
-                }
-            }
-
-            var actualSignature = signatureBuilder.ToString();
-            if (node.IsFetched) {
-                actualSignature = node.Column.FetchId + "S" + actualSignature + "E";
-            }
-
-            return new AddNodeResult {
-                                         Signature = actualSignature,
-                                         SplitOn = splitOns
-                                     };
-        }
-
         private void AddRootColumns<T>(SelectQuery<T> selectQuery, StringBuilder columnSql, FetchNode rootNode, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, bool removeTrailingComma = true)
             where T : class, new() {
             var alias = rootNode != null
@@ -886,45 +807,6 @@
 
             if (removeTrailingComma) {
                 columnSql.Remove(columnSql.Length - 2, 2);
-            }
-        }
-
-        private static IEnumerable<IColumn> GetColumnsWithIncludesAndExcludes(IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, IMap map, bool fetchAllProperties) {
-            var columns = map.OwnedColumns(fetchAllProperties);
-            if (includes != null) {
-                IList<IColumn> thisIncludes;
-                if (includes.TryGetValue(map.Type, out thisIncludes)) {
-                    columns = columns.Union(includes[map.Type]);
-                }
-            }
-
-            if (excludes != null) {
-                IList<IColumn> thisExcludes;
-                if (excludes.TryGetValue(map.Type, out thisExcludes)) {
-                    columns = columns.Where(c => !thisExcludes.Contains(c));
-                }
-            }
-
-            return columns;
-        }
-
-        private void AddColumn(StringBuilder sql, IColumn column, string tableAlias = null, string columnAlias = null) {
-            // add the table alias
-            if (tableAlias != null) {
-                sql.Append(tableAlias + ".");
-            }
-
-            // add the column name
-            this.Dialect.AppendQuotedName(sql, column.DbName);
-
-            // add a column alias if required
-            if (columnAlias != null) {
-                sql.Append(" as ");
-                this.Dialect.AppendQuotedName(sql, columnAlias);
-            }
-            else if (column.DbName != column.Name && column.Relationship == RelationshipType.None) {
-                sql.Append(" as ");
-                this.Dialect.AppendQuotedName(sql, column.Name);
             }
         }
 
@@ -959,12 +841,6 @@
                         .Append(".")
                         .Append(node.Column.ChildColumn.DbName);
             }
-        }
-
-        private class AddNodeResult {
-            public string Signature { get; set; }
-
-            public IList<string> SplitOn { get; set; }
         }
     }
 }
