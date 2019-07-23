@@ -110,7 +110,7 @@
         [Fact]
         public void BulkUpdateManyOneNullAddsNull() {
             // assemble
-            var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
+            var updateWriter = new BulkUpdateWriter(new SqlServerDialect(), MakeConfig());
 
             // act
             Expression<Func<Post, bool>> predicate = p => p.PostId == 1;
@@ -127,7 +127,7 @@
         [Fact]
         public void BulkUpdateManyToOnePropertyResolvesForeignKeyId() {
             // assemble
-            var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
+            var updateWriter = new BulkUpdateWriter(new SqlServerDialect(), MakeConfig());
 
             // act
             Expression<Func<Post, bool>> predicate = p => p.PostId == 1;
@@ -147,7 +147,7 @@
         [Fact]
         public void BulkUpdateIgnoresConstructorSetProperties() {
             // assemble
-            var updateWriter = new UpdateWriter(new SqlServerDialect(), MakeConfig());
+            var updateWriter = new BulkUpdateWriter(new SqlServerDialect(), MakeConfig());
 
             // act
             Expression<Func<ClassWithConstructor, bool>> predicate = p => p.Id == 1;

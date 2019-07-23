@@ -63,5 +63,26 @@
 
             return containsRootPrimaryKeyClause;
         }
+
+        /// <summary>
+        ///     look up the column type and decide where to get the value from
+        /// </summary>
+        /// <param name="mappedColumn"></param>
+        /// <param name="propertyValue"></param>
+        /// <returns></returns>
+        protected object GetValueOrPrimaryKey(IColumn mappedColumn, object propertyValue) {
+            switch (mappedColumn.Relationship) {
+                case RelationshipType.None:
+                    return propertyValue;
+
+                case RelationshipType.ManyToOne:
+                case RelationshipType.OneToOne:
+                    var foreignKeyMap = this.Configuration.GetMap(mappedColumn.Type);
+                    return foreignKeyMap.GetPrimaryKeyValue(propertyValue);
+
+                default:
+                    throw new NotImplementedException($"Unexpected column relationship {mappedColumn.Relationship} on entity {mappedColumn.Type.Name}.{mappedColumn.Name} in UpdateWriter");
+            }
+        }
     }
 }

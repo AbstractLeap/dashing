@@ -22,9 +22,13 @@ namespace Dashing.Engine {
 
         private IUpdateWriter updateWriter;
 
+        private IBulkUpdateWriter bulkUpdateWriter;
+
         private IInsertWriter insertWriter;
 
         private IDeleteWriter deleteWriter;
+
+        private IBulkDeleteWriter bulkDeleteWriter;
 
         private DelegateQueryCreator delegateQueryCreator;
 
@@ -56,6 +60,8 @@ namespace Dashing.Engine {
             this.updateWriter = new UpdateWriter(dialect, configuration);
             this.insertWriter = new InsertWriter(dialect, configuration);
             this.deleteWriter = new DeleteWriter(dialect, configuration);
+            this.bulkUpdateWriter = new BulkUpdateWriter(dialect, configuration);
+            this.bulkDeleteWriter = new BulkDeleteWriter(dialect, configuration);
             this.delegateQueryCreator = new DelegateQueryCreator(configuration);
         }
 
@@ -189,13 +195,13 @@ namespace Dashing.Engine {
             IDbTransaction transaction,
             Action<T> update,
             IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
-            var sqlQuery = this.updateWriter.GenerateBulkSql(update, predicates);
+            var sqlQuery = this.bulkUpdateWriter.GenerateBulkSql(update, predicates);
             return sqlQuery.Sql.Length == 0 ? 0 : connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
         public int ExecuteBulkDelete<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates)
             where T : class, new() {
-            var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
+            var sqlQuery = this.bulkDeleteWriter.GenerateBulkSql(predicates);
             return connection.Execute(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
@@ -330,7 +336,7 @@ namespace Dashing.Engine {
             IDbTransaction transaction,
             Action<T> update,
             IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
-            var sqlQuery = this.updateWriter.GenerateBulkSql(update, predicates);
+            var sqlQuery = this.bulkUpdateWriter.GenerateBulkSql(update, predicates);
             return sqlQuery.Sql.Length == 0 ? 0 : await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
 
@@ -338,7 +344,7 @@ namespace Dashing.Engine {
             IDbConnection connection,
             IDbTransaction transaction,
             IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new() {
-            var sqlQuery = this.deleteWriter.GenerateBulkSql(predicates);
+            var sqlQuery = this.bulkDeleteWriter.GenerateBulkSql(predicates);
             return await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
     }
