@@ -115,11 +115,16 @@
 
         public Page<T> QueryPaged<T>(ISessionState sessionState, SelectQuery<T> query) where T : class, new() {
             this.AssertConfigured();
+            var take = query.TakeN;
+            var skip = query.SkipN;
+            query.GetType().GetProperty(nameof(SelectQuery<T>.TakeN)).SetMethod.Invoke(query, new object[] { 0 });
+            query.GetType().GetProperty(nameof(SelectQuery<T>.SkipN)).SetMethod.Invoke(query, new object[] { 0 });
+            var items = this.Query(sessionState, query).ToArray();
             return new Page<T> {
-                Items = this.Query<T>(sessionState, query),
-                Skipped = query.SkipN,
-                Taken = query.TakeN,
-                TotalResults = this.Count(sessionState, query)
+                Items = items.Skip(skip).Take(take),
+                Skipped = skip,
+                Taken = take,
+                TotalResults = items.Length
             };
         }
 
