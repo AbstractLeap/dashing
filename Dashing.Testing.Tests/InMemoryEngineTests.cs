@@ -163,6 +163,19 @@
             }
         }
 
+        [Fact]
+        public void PagedWorks() {
+            var session = this.GetSession();
+            var thirdFourthComments = session.Query<Comment>()
+                                             .OrderBy(c => c.CommentId)
+                                             .AsPaged(2, 2);
+            Assert.Equal(6, thirdFourthComments.TotalResults);
+            Assert.Equal(2, thirdFourthComments.Taken);
+            Assert.Equal(2, thirdFourthComments.Skipped);
+            Assert.Equal(3, thirdFourthComments.Items.ElementAt(0).CommentId);
+            Assert.Equal(4, thirdFourthComments.Items.ElementAt(1).CommentId);
+        }
+
         private ISession GetSession() {
             var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
             var session = new Session(engine, new Mock<ISessionState>().Object);
