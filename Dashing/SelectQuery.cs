@@ -11,9 +11,9 @@ namespace Dashing {
 
     public class SelectQuery<T> : ISelectQuery<T>
         where T : class, new() {
-        private readonly ISelectQueryExecutor executor;
+        private readonly IProjectedSelectQueryExecutor executor;
 
-        public SelectQuery(ISelectQueryExecutor selectQueryExecutor) {
+        public SelectQuery(IProjectedSelectQueryExecutor selectQueryExecutor) {
             this.executor = selectQueryExecutor;
             this.Fetches = new List<Expression>();
             this.OrderClauses = new Queue<OrderClause<T>>();
@@ -47,9 +47,8 @@ namespace Dashing {
             return this.Fetches.Any() || this.CollectionFetches.Any();
         }
 
-        public ISelectQuery<T> Select(Expression<Func<T, dynamic>> projection) {
-            this.Projection = projection;
-            return this;
+        public IProjectedSelectQuery<T, TProjection> Select<TProjection>(Expression<Func<T, TProjection>> projection) {
+            return new ProjectedSelectQuery<T, TProjection>(this.executor, this, projection);
         }
 
         public ISelectQuery<T> IncludeAll() {

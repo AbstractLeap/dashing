@@ -35,6 +35,16 @@
             return this.engine.QueryPaged(this.MaybeOpenConnection(), this.GetTransaction(), query);
         }
 
+        public IEnumerable<TProjection> Query<TBase, TProjection>(ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            return this.engine.Query(this.MaybeOpenConnection(), this.GetTransaction(), query);
+        }
+
+        public Page<TProjection> QueryPaged<TBase, TProjection>(ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            return this.engine.QueryPaged(this.MaybeOpenConnection(), this.GetTransaction(), query);
+        }
+
         public int Count<T>(SelectQuery<T> query)
             where T : class, new() {
             return this.engine.Count(this.MaybeOpenConnection(), this.GetTransaction(), query);

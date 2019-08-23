@@ -18,6 +18,12 @@ namespace Dashing.Engine {
 
         Page<T> QueryPaged<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
 
+        IEnumerable<TProjection> Query<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new();
+
+        Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query) 
+            where TBase : class, new();
+
         int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
 
         int Insert<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<T> entities) where T : class, new();
@@ -37,6 +43,12 @@ namespace Dashing.Engine {
         Task<IEnumerable<T>> QueryAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
 
         Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
+
+        Task<IEnumerable<TProjection>> QueryAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query) 
+            where TBase : class, new();
+
+        Task<Page<TProjection>> QueryPagedAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query) 
+            where TBase : class, new();
 
         Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new();
 

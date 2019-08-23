@@ -14,7 +14,7 @@
     using Dashing.Engine;
     using Dashing.Extensions;
 
-    public sealed partial class Session : ISession, ISelectQueryExecutor {
+    public sealed partial class Session : ISession, IProjectedSelectQueryExecutor {
         private static readonly Type TypeIEnumerable = typeof(IEnumerable);
 
         public IDapper Dapper { get; private set; }

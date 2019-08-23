@@ -7,7 +7,7 @@ namespace Dashing {
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface ISelectQuery<T> : IEnumerable<T> where T : class, new() {
+    public interface ISelectQuery<T> : IEnumerableSelectQuery<T> where T : class, new() {
         /// <summary>
         ///     The select.
         /// </summary>
@@ -17,7 +17,7 @@ namespace Dashing {
         /// <returns>
         ///     The <see cref="SelectQuery{T}" />.
         /// </returns>
-        ISelectQuery<T> Select(Expression<Func<T, object>> projection);
+        IProjectedSelectQuery<T, TProjection> Select<TProjection>(Expression<Func<T, TProjection>> projection);
 
         /// <summary>
         ///     The include all.
@@ -134,28 +134,16 @@ namespace Dashing {
         ///     The <see cref="SelectQuery{T}" />.
         /// </returns>
         ISelectQuery<T> OrderByDescending<TResult>(Expression<Func<T, TResult>> keySelector);
-
-        T First();
-
+        
         T First(Expression<Func<T, bool>> predicate);
-
-        T FirstOrDefault();
 
         T FirstOrDefault(Expression<Func<T, bool>> predicate);
 
-        T Single();
-
         T Single(Expression<Func<T, bool>> predicate);
-
-        T SingleOrDefault();
 
         T SingleOrDefault(Expression<Func<T, bool>> predicate);
 
-        T Last();
-
         T Last(Expression<Func<T, bool>> predicate);
-
-        T LastOrDefault();
 
         T LastOrDefault(Expression<Func<T, bool>> predicate);
 
@@ -163,45 +151,25 @@ namespace Dashing {
 
         int Count(Expression<Func<T, bool>> predicate);
 
-        Page<T> AsPaged(int skip, int take);
-
         bool Any();
 
         bool Any(Expression<Func<T, bool>> predicate);
 
-        Task<IList<T>> ToListAsync();
-
-        Task<T[]> ToArrayAsync();
-
-        Task<T> FirstAsync();
-
         Task<T> FirstAsync(Expression<Func<T, bool>> predicate);
-
-        Task<T> FirstOrDefaultAsync();
 
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
 
-        Task<T> SingleAsync();
-
         Task<T> SingleAsync(Expression<Func<T, bool>> predicate);
-
-        Task<T> SingleOrDefaultAsync();
 
         Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate);
 
-        Task<T> LastAsync();
-
         Task<T> LastAsync(Expression<Func<T, bool>> predicate);
-
-        Task<T> LastOrDefaultAsync();
 
         Task<T> LastOrDefaultAsync(Expression<Func<T, bool>> predicate);
 
         Task<int> CountAsync();
 
         Task<int> CountAsync(Expression<Func<T, bool>> predicate);
-
-        Task<Page<T>> AsPagedAsync(int skip, int take);
 
         Task<bool> AnyAsync();
 

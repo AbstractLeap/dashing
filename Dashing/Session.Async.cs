@@ -30,6 +30,16 @@
             return await this.engine.QueryPagedAsync(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), query);
         }
 
+        public async Task<IEnumerable<TProjection>> QueryAsync<TBase, TProjection>(ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            return await this.engine.QueryAsync(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), query);
+        }
+
+        public async Task<Page<TProjection>> QueryPagedAsync<TBase, TProjection>(ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            return await this.engine.QueryPagedAsync(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), query);
+        }
+
         public async Task<int> CountAsync<T>(SelectQuery<T> query)
             where T : class, new() {
             return await this.engine.CountAsync(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), query);
