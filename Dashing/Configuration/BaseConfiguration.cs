@@ -5,37 +5,57 @@
 
     using Dashing.Events;
     using Dashing.Extensions;
+
+    using Poly.Logging;
+
 #if COREFX
     using System.Reflection;
 #endif
 
     public abstract class BaseConfiguration : IConfiguration {
+
         private readonly IMapper mapper;
 
         private IDictionary<Type, IMap> mappedTypes;
 
         private EventHandlers eventHandlers;
 
-        public IEnumerable<IMap> Maps {
-            get {
-                return this.mappedTypes.Values;
-            }
-        }
-
         public BaseConfiguration() : this(new DefaultMapper(new DefaultConvention())) {
-
         }
 
-        public BaseConfiguration(IMapper mapper) {
+        public BaseConfiguration(IMapper mapper, IPolyLogger polyLogger = null) {
             if (mapper == null) {
                 throw new ArgumentNullException(nameof(mapper));
             }
 
             this.mapper = mapper;
             this.mappedTypes = new Dictionary<Type, IMap>();
-            this.eventHandlers = new EventHandlers(new List<IEventListener>());
+            this.EventHandlers = new EventHandlers(new List<IEventListener>());
+            this.Logger = polyLogger;
         }
 
+        public BaseConfiguration(IPolyLogger polyLogger) : this(new DefaultMapper(new DefaultConvention()))
+        {
+            if (polyLogger == null)
+            {
+                throw new ArgumentNullException(nameof(polyLogger));
+            }
+
+            this.Logger = polyLogger;
+        }
+
+        public EventHandlers EventHandlers { get; }
+
+        public IPolyLogger Logger { get; }
+
+        public IEnumerable<IMap> Maps
+        {
+            get
+            {
+                return this.mappedTypes.Values;
+            }
+        }
+        
         public IMap<T> GetMap<T>() {
             var map = this.GetMap(typeof(T)) as IMap<T>;
             return map;
@@ -59,12 +79,6 @@
 
         public bool HasMap(Type type) {
             return this.mappedTypes.ContainsKey(type);
-        }
-
-        public EventHandlers EventHandlers {
-            get {
-                return this.eventHandlers;
-            }
         }
 
         protected virtual IConfiguration Add<T>() {

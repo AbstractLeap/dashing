@@ -4,6 +4,8 @@ namespace Dashing.Configuration {
 
     using Dashing.Events;
 
+    using Poly.Logging;
+
     public interface IConfiguration {
         IEnumerable<IMap> Maps { get; }
 
@@ -16,5 +18,7 @@ namespace Dashing.Configuration {
         bool HasMap(Type type);
 
         EventHandlers EventHandlers { get; }
+
+        IPolyLogger Logger { get; }
     }
 }

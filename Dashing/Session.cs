@@ -2,12 +2,8 @@
     using System;
     using System.Collections;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
     using System.Threading.Tasks;
 
     using Dashing.Configuration;
@@ -60,6 +56,7 @@
             bool commitAndDisposeTransaction = false,
             bool isTransactionLess = false,
             bool completeFailsSilentlyIfRejected = true) {
+
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -69,8 +66,7 @@
             }
 
             if (isTransactionLess && commitAndDisposeTransaction) {
-                throw new InvalidOperationException(
-                    "As this session is transaction-less it will not be possible to commit and dispose of the transaction");
+                throw new InvalidOperationException("As this session is transaction-less it will not be possible to commit and dispose of the transaction");
             }
 
             this.engine = engine;

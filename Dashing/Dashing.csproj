@@ -22,6 +22,8 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="Poly.Logging" Version="1.0.2" />
+    <PackageReference Include="Poly.Logging.TextFile" Version="1.0.0" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
