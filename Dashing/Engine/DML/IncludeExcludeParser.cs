@@ -75,7 +75,7 @@
             }
 
             if (!parentNode.Children.ContainsKey(baseExpr.Member.Name)) {
-                throw new InvalidOperationException($"Member {baseExpr.Member.Name} is not mapped");
+                throw new InvalidOperationException($"You must Fetch {baseExpr.Member.Name} if you wish to you it in an Include/Exclude clause");
             }
 
             return parentNode.Children[baseExpr.Member.Name];
