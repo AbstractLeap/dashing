@@ -5,7 +5,7 @@
 
     using Dashing.Configuration;
 
-    internal class IncludeExcludeParser {
+    internal class IncludeExcludeParser : MemberExpressionFetchNodeVisitor {
         private readonly IConfiguration configuration;
 
         public IncludeExcludeParser(IConfiguration configuration) {
@@ -50,35 +50,6 @@
             (isInclude
                  ? node.IncludedColumns
                  : node.ExcludedColumns).Add(column);
-        }
-
-        private FetchNode VisitExpression(Expression expr, FetchNode rootNode) {
-            var memberExpr = expr as MemberExpression;
-            if (memberExpr == null) {
-                throw new InvalidOperationException("Include/Exclude clauses must contain MemberExpressions");
-            }
-
-            if (memberExpr.Expression.NodeType == ExpressionType.Parameter) {
-                // we're at the bottom
-                return rootNode; // this should be the root node
-            }
-
-            // not at the bottom, find the child and return that
-            var parentNode = this.VisitExpression(memberExpr.Expression, rootNode);
-            if (parentNode == null) {
-                throw new InvalidOperationException("You must Fetch a relationship if you wish to Include or Exclude a property on it");
-            }
-
-            var baseExpr = memberExpr.Expression as MemberExpression;
-            if (baseExpr == null) {
-                throw new InvalidOperationException("Include/Exclude clauses must contain MemberExpressions");
-            }
-
-            if (!parentNode.Children.ContainsKey(baseExpr.Member.Name)) {
-                throw new InvalidOperationException($"You must Fetch {baseExpr.Member.Name} if you wish to you it in an Include/Exclude clause");
-            }
-
-            return parentNode.Children[baseExpr.Member.Name];
         }
     }
 }
