@@ -52,6 +52,14 @@
                                      });
         }
 
+        private void AssertSqlMatches<TBase, TProjection>(string expected, IProjectedSelectQuery<TBase, TProjection> projectedSelectQuery)
+            where TBase : class, new() {
+            var selectWriter = this.GetSql2012Writer();
+            var concreteQuery = (ProjectedSelectQuery<TBase, TProjection>)projectedSelectQuery;
+            var sqlResult = selectWriter.GenerateSql(concreteQuery);
+            Assert.Equal(expected, sqlResult.Sql);
+        }
+
         private SelectWriter GetSql2012Writer(IConfiguration configuration = null)
         {
             if (configuration == null)
