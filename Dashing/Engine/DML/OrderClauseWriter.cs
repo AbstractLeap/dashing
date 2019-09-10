@@ -95,6 +95,7 @@
                 // we're at the bottom
                 return rootNode;
             }
+
             // we're not at the bottom, find the child and return that
             var parentNode = this.VisitOrderClause(memberExpr.Expression, rootNode);
             if (parentNode == null) {

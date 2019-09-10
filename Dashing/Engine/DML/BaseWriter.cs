@@ -27,7 +27,7 @@
             }
         }
 
-        protected AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties, IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes) {
+        protected AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties) {
             // add this node and then it's children
             // add table sql
             var splitOns = new List<string>();
@@ -41,7 +41,7 @@
 
             // add the columns
             if (node.IsFetched) {
-                var columns = GetColumnsWithIncludesAndExcludes(includes, excludes, map, selectQueryFetchAllProperties);
+                var columns = GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties);
                 columns = columns.Where(
                     c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
                                                                     .IsFetched);
@@ -54,7 +54,7 @@
             // add its children
             var signatureBuilder = new StringBuilder();
             foreach (var child in node.Children) {
-                var signature = this.AddNode(child.Value, tableSql, columnSql, selectQueryFetchAllProperties, includes, excludes);
+                var signature = this.AddNode(child.Value, tableSql, columnSql, selectQueryFetchAllProperties);
                 if (child.Value.IsFetched) {
                     signatureBuilder.Append(signature.Signature);
                     splitOns.AddRange(signature.SplitOn);
@@ -137,20 +137,14 @@
             }
         }
 
-        protected static IEnumerable<IColumn> GetColumnsWithIncludesAndExcludes(IDictionary<Type, IList<IColumn>> includes, IDictionary<Type, IList<IColumn>> excludes, IMap map, bool fetchAllProperties) {
+        protected static IEnumerable<IColumn> GetColumnsWithIncludesAndExcludes(IList<IColumn> includes, IList<IColumn> excludes, IMap map, bool fetchAllProperties) {
             var columns = map.OwnedColumns(fetchAllProperties);
             if (includes != null) {
-                IList<IColumn> thisIncludes;
-                if (includes.TryGetValue(map.Type, out thisIncludes)) {
-                    columns = columns.Union(includes[map.Type]);
-                }
+                columns = columns.Union(includes);
             }
 
             if (excludes != null) {
-                IList<IColumn> thisExcludes;
-                if (excludes.TryGetValue(map.Type, out thisExcludes)) {
-                    columns = columns.Where(c => !thisExcludes.Contains(c));
-                }
+                columns = columns.Where(c => !excludes.Contains(c));
             }
 
             return columns;

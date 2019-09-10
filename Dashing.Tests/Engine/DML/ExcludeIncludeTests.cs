@@ -39,7 +39,7 @@
             var writer = new SelectWriter(new SqlServerDialect(), config);
             var sql = writer.GenerateSql(query, new AutoNamingDynamicParameters());
             this.output.WriteLine(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts]", sql.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t", sql.Sql);
         }
 
         [Fact]
@@ -67,7 +67,7 @@
             var writer = new SelectWriter(new SqlServerDialect(), config);
             var sql = writer.GenerateSql(query, new AutoNamingDynamicParameters());
             this.output.WriteLine(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Rating], [AuthorId], [BlogId], [DoNotMap], [Content] from [Posts]", sql.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap], t.[Content] from [Posts] as t", sql.Sql);
         }
 
         [Fact]

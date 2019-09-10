@@ -23,7 +23,7 @@ namespace Dashing.Engine.DML {
             // add in the tables
             var columnSql = new StringBuilder();
             var tableSql = new StringBuilder();
-            this.AddTables(selectQuery, tableSql, columnSql, rootNode, null, null);
+            this.AddTables(selectQuery, tableSql, columnSql, rootNode);
 
             var sql = new StringBuilder(15 + tableSql.Length + whereSql.Length);
             sql.Append("select count(");
