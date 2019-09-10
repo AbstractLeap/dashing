@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Engine.DML {
     using System;
+    using System.Collections.Generic;
 
     using Dashing.Configuration;
     using Dashing.Extensions;
@@ -35,6 +36,10 @@
         public string SplitOn { get; set; }
 
         public int ContainedCollectionfetchesCount { get; set; }
+
+        public IList<IColumn> IncludedColumns { get; set; }
+
+        public IList<IColumn> ExcludedColumns { get; set; }
 
         public FetchNode() {
             this.Children = new OrderedDictionary<string, FetchNode>();

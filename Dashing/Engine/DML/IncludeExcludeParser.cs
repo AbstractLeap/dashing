@@ -1,34 +1,55 @@
 ﻿namespace Dashing.Engine.DML {
     using System;
+    using System.Collections.Generic;
     using System.Linq.Expressions;
 
     using Dashing.Configuration;
 
-    public class IncludeExcludeParser {
+    internal class IncludeExcludeParser : MemberExpressionFetchNodeVisitor {
         private readonly IConfiguration configuration;
 
-        public IncludeExcludeParser(IConfiguration configuration)
-        {
+        public IncludeExcludeParser(IConfiguration configuration) {
             this.configuration = configuration;
         }
 
-        public IColumn ParseExpression(Expression expression)
-        {
+        public void ParseExpression<TBase>(Expression expression, FetchNode rootNode, bool isInclude) {
             var lambda = expression as LambdaExpression;
-            if (lambda == null)
-            {
+            if (lambda == null) {
                 throw new InvalidOperationException("Include and Exclude expressions must be LambdaExpressions");
             }
 
-            var memberExpression = lambda.Body as MemberExpression;
-            if (memberExpression == null)
-            {
-                throw new InvalidOperationException("Include and Exclude expressions must use a MemberExpression to access the property");
+            var node = this.VisitExpression(lambda.Body, rootNode);
+            IMap map;
+            if (ReferenceEquals(node, rootNode)) {
+                map = this.configuration.GetMap<TBase>();
+            }
+            else {
+                if (node.Column.Relationship == RelationshipType.ManyToOne) {
+                    map = node.Column.ParentMap;
+                }
+                else if (node.Column.Relationship == RelationshipType.OneToOne) {
+                    map = node.Column.OppositeColumn.Map;
+                }
+                else {
+                    throw new NotSupportedException("Include/Exclude clauses can only use Many to One and One to One relationships");
+                }
             }
 
-            var domainType = memberExpression.Expression.Type;
-            var map = this.configuration.GetMap(domainType);
-            return map.Columns[memberExpression.Member.Name];
+            var column = map.Columns[((MemberExpression)lambda.Body).Member.Name];
+            if (column.Relationship != RelationshipType.None) {
+                throw new NotSupportedException("Include/Exclude clauses must end with a property that is a non-relationship type property e.g. a string");
+            }
+
+            if (isInclude && node.IncludedColumns == null) {
+                node.IncludedColumns = new List<IColumn>();
+            }
+            else if (!isInclude && node.ExcludedColumns == null) {
+                node.ExcludedColumns = new List<IColumn>();
+            }
+
+            (isInclude
+                 ? node.IncludedColumns
+                 : node.ExcludedColumns).Add(column);
         }
     }
 }
