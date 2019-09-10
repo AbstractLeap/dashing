@@ -29,16 +29,6 @@
         }
 
         [Fact]
-        public void TestProjection() {
-            var dashing = this.GetDashing();
-            var query = dashing.Query<Blog>().Select(b => new { b.BlogId, b.Title });
-
-            var selectQuery = query as SelectQuery<Blog>;
-            Assert.NotNull(selectQuery);
-            Assert.NotNull(selectQuery.Projection);
-        }
-
-        [Fact]
         public void FetchAllProperties() {
             var query = this.GetDashing().Query<Blog>().IncludeAll();
 

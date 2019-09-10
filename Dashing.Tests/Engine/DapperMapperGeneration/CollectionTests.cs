@@ -175,7 +175,7 @@
         private static Delegate GenerateThenFetchMapper() {
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Comments).ThenFetch(c => c.User) as SelectQuery<Post>;
+                new SelectQuery<Post>(new Mock<IProjectedSelectQueryExecutor>().Object).FetchMany(p => p.Comments).ThenFetch(c => c.User) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
@@ -228,7 +228,7 @@
         public void FetchNonRootCollectionWorks() {
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Post.Comments).Take(1) as SelectQuery<PostTag>;
+                new SelectQuery<PostTag>(new Mock<IProjectedSelectQueryExecutor>().Object).Fetch(p => p.Post.Comments).Take(1) as SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
@@ -278,7 +278,7 @@
         public void FetchManyNonRootWorks() {
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
+                new SelectQuery<PostTag>(new Mock<IProjectedSelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
                 SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
@@ -341,7 +341,7 @@
         public void FetchManyNonRootTrackingEnabled() {
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
+                new SelectQuery<PostTag>(new Mock<IProjectedSelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
                 SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
@@ -392,7 +392,7 @@
         public void FetchManyNonRootTrackingEnabledLast() {
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<PostTag>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
+                new SelectQuery<PostTag>(new Mock<IProjectedSelectQueryExecutor>().Object).FetchMany(p => p.Post.Comments).ThenFetch(c => c.User) as
                 SelectQuery<PostTag>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
@@ -444,7 +444,7 @@
             // setup the factory
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).FetchMany(p => p.Tags)
+                new SelectQuery<Post>(new Mock<IProjectedSelectQueryExecutor>().Object).FetchMany(p => p.Tags)
                                                                               .ThenFetch(p => p.ElTag)
                                                                               .FetchMany(p => p.DeletedTags)
                                                                               .ThenFetch(t => t.ElTag) as SelectQuery<Post>;
@@ -487,7 +487,7 @@
             // setup the factory
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<Blog>(new Mock<ISelectQueryExecutor>().Object).FetchMany(b => b.Posts)
+                new SelectQuery<Blog>(new Mock<IProjectedSelectQueryExecutor>().Object).FetchMany(b => b.Posts)
                                                                               .ThenFetchMany(p => p.Tags)
                                                                               .ThenFetch(t => t.ElTag)
                                                                               .FetchMany(b => b.Posts)
@@ -577,7 +577,7 @@
             // setup the factory
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<Blog>(new Mock<ISelectQueryExecutor>().Object).FetchMany(b => b.Posts)
+                new SelectQuery<Blog>(new Mock<IProjectedSelectQueryExecutor>().Object).FetchMany(b => b.Posts)
                                                                               .ThenFetchMany(p => p.Tags)
                                                                               .ThenFetch(t => t.ElTag)
                                                                               .FetchMany(b => b.Posts)
@@ -647,7 +647,7 @@
             // setup the factory
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<Blog>(new Mock<ISelectQueryExecutor>().Object).FetchMany(b => b.Posts)
+                new SelectQuery<Blog>(new Mock<IProjectedSelectQueryExecutor>().Object).FetchMany(b => b.Posts)
                                                                               .ThenFetchMany(p => p.Tags)
                                                                               .ThenFetch(t => t.ElTag)
                                                                               .FetchMany(b => b.Posts)
@@ -715,7 +715,7 @@
         private static Delegate GenerateMultiMapper() {
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Tags) as SelectQuery<Post>;
+                new SelectQuery<Post>(new Mock<IProjectedSelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Tags) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
@@ -727,7 +727,7 @@
         private static Delegate GenerateSingleMapperWithFetch() {
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Blog) as SelectQuery<Post>;
+                new SelectQuery<Post>(new Mock<IProjectedSelectQueryExecutor>().Object).Fetch(p => p.Comments).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
@@ -738,7 +738,7 @@
 
         private static Delegate GenerateSingleMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments) as SelectQuery<Post>;
+            var selectQuery = new SelectQuery<Post>(new Mock<IProjectedSelectQueryExecutor>().Object).Fetch(p => p.Comments) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
@@ -750,7 +750,7 @@
         private static Delegate GenerateSingleAwkwardMapper() {
             var config = new CustomConfig();
             var selectQuery =
-                new SelectQuery<PostWithoutCollectionInitializerInConstructor>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Comments) as
+                new SelectQuery<PostWithoutCollectionInitializerInConstructor>(new Mock<IProjectedSelectQueryExecutor>().Object).Fetch(p => p.Comments) as
                 SelectQuery<PostWithoutCollectionInitializerInConstructor>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());

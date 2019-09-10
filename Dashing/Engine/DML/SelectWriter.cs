@@ -77,6 +77,11 @@
             return sql.ToString();
         }
 
+        public SelectWriterResult GenerateSql<TBase, TProjection>(ProjectedSelectQuery<TBase, TProjection> projectedSelectQuery)
+            where TBase : class, new() {
+            throw new NotImplementedException();
+        }
+
         public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, AutoNamingDynamicParameters parameters = null, bool enforceAlias = false)
             where T : class, new() {
             // TODO: one StringBuilder to rule them all - Good luck with that ;-) (insertions are expensive)

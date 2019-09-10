@@ -119,6 +119,16 @@ namespace Dashing.Engine {
                                };
         }
 
+        public IEnumerable<TProjection> Query<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            throw new NotImplementedException();
+        }
+
+        public Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            throw new NotImplementedException();
+        }
+
         public int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             var countQuery = this.countWriter.GenerateCountSql(query);
             return connection.Query<int>(countQuery.Sql, countQuery.Parameters, transaction).SingleOrDefault();
@@ -260,6 +270,16 @@ namespace Dashing.Engine {
             var results = await this.QueryAsync(connection, transaction, query);
 
             return new Page<T> { TotalResults = totalResults, Items = results.ToArray(), Skipped = query.SkipN, Taken = query.TakeN };
+        }
+
+        public Task<IEnumerable<TProjection>> QueryAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            throw new NotImplementedException();
+        }
+
+        public Task<Page<TProjection>> QueryPagedAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            throw new NotImplementedException();
         }
 
         public async Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {

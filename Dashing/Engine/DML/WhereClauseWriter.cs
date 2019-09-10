@@ -314,7 +314,7 @@
                             new NonExecutingSelectQueryExecutor());
                         var whereMethod = selectQuery.GetType().GetMethod(nameof(SelectQuery<object>.Where));
                         whereMethod.Invoke(selectQuery, new object[] { memberExpr });
-                        var generateSqlMethod = innerSelectWriter.GetType().GetMethod( nameof(SelectWriter.GenerateSql)).MakeGenericMethod(columnType);
+                        var generateSqlMethod = innerSelectWriter.GetType().GetMethods().Single(m => m.Name == nameof(SelectWriter.GenerateSql) && m.GetGenericArguments().Length == 1).MakeGenericMethod(columnType);
                         var innerStatement = (SelectWriterResult)generateSqlMethod.Invoke(innerSelectWriter, new[] { selectQuery, this.autoNamingDynamicParameters, true });
 
                         // remove the columns from the expression

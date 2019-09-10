@@ -19,7 +19,7 @@
         public void SimpleQueryBuilds() {
             var dialect = new SqlServerDialect();
             var selectWriter = new SelectWriter(dialect, MakeConfig());
-            var sql = selectWriter.GenerateSql(new SelectQuery<User>(new Mock<ISelectQueryExecutor>().Object), new AutoNamingDynamicParameters());
+            var sql = selectWriter.GenerateSql(new SelectQuery<User>(new Mock<IProjectedSelectQueryExecutor>().Object), new AutoNamingDynamicParameters());
 
             Assert.NotNull(sql);
         }
@@ -838,7 +838,7 @@
         }
 
         private SelectQuery<T> GetSelectQuery<T>() where T : class, new() {
-            return new SelectQuery<T>(new Mock<ISelectQueryExecutor>().Object);
+            return new SelectQuery<T>(new Mock<IProjectedSelectQueryExecutor>().Object);
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {

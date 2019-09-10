@@ -119,6 +119,22 @@
             };
         }
 
+        public IEnumerable<TProjection> Query<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            return this.Query(connection, transaction, query.BaseSelectQuery).Select(query.ProjectionExpression.Compile());
+        }
+
+        public Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            var pagedBase = this.QueryPaged(connection, transaction, query.BaseSelectQuery);
+            return new Page<TProjection> {
+                                             Items = pagedBase.Items.Select(query.ProjectionExpression.Compile()),
+                                             Skipped = pagedBase.Skipped,
+                                             Taken = pagedBase.Taken,
+                                             TotalResults = pagedBase.TotalResults
+                                         };
+        }
+
         public int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             this.AssertConfigured();
             return this.Query(connection, transaction, query).Count();
@@ -193,6 +209,24 @@
 
         public Task<Page<T>> QueryPagedAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             return Task.FromResult(this.QueryPaged(connection, transaction, query));
+        }
+
+        public async Task<IEnumerable<TProjection>> QueryAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            var baseResult = await this.QueryAsync(connection, transaction, query.BaseSelectQuery);
+            return baseResult.Select(query.ProjectionExpression.Compile());
+        }
+
+        public async Task<Page<TProjection>> QueryPagedAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+            where TBase : class, new() {
+            var pagedBase = await this.QueryPagedAsync(connection, transaction, query.BaseSelectQuery);
+            return new Page<TProjection>
+                   {
+                       Items = pagedBase.Items.Select(query.ProjectionExpression.Compile()),
+                       Skipped = pagedBase.Skipped,
+                       Taken = pagedBase.Taken,
+                       TotalResults = pagedBase.TotalResults
+                   };
         }
 
         public Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {

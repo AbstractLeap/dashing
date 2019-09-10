@@ -54,7 +54,7 @@
 
         private static Delegate GenerateSingleMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
+            var selectQuery = new SelectQuery<Post>(new Mock<IProjectedSelectQueryExecutor>().Object).Fetch(p => p.Blog) as SelectQuery<Post>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new NonCollectionMapperGenerator(config);
@@ -109,7 +109,7 @@
 
         private static Delegate GenerateMultipleNoCollectionMapper() {
             var config = new CustomConfig();
-            var selectQuery = new SelectQuery<Comment>(new Mock<ISelectQueryExecutor>().Object).Fetch(c => c.Post.Author) as SelectQuery<Comment>;
+            var selectQuery = new SelectQuery<Comment>(new Mock<IProjectedSelectQueryExecutor>().Object).Fetch(c => c.Post.Author) as SelectQuery<Comment>;
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new NonCollectionMapperGenerator(config);

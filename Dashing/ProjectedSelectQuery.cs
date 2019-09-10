@@ -13,14 +13,14 @@ namespace Dashing {
         where TBase : class, new() {
         private readonly IProjectedSelectQueryExecutor executor;
 
-        private readonly SelectQuery<TBase> baseSelectQuery;
+        public SelectQuery<TBase> BaseSelectQuery { get; }
 
-        private readonly Expression<Func<TBase, TProjection>> projectionExpression;
+        public Expression<Func<TBase, TProjection>> ProjectionExpression { get; }
 
         public ProjectedSelectQuery(IProjectedSelectQueryExecutor executor, SelectQuery<TBase> baseSelectQuery, Expression<Func<TBase, TProjection>> projectionExpression) {
             this.executor = executor;
-            this.baseSelectQuery = baseSelectQuery;
-            this.projectionExpression = projectionExpression;
+            this.BaseSelectQuery = baseSelectQuery;
+            this.ProjectionExpression = projectionExpression;
         }
 
         public IEnumerator<TProjection> GetEnumerator() {
@@ -42,7 +42,7 @@ namespace Dashing {
         }
 
         public TProjection FirstOrDefault() {
-            this.baseSelectQuery.Take(1);
+            this.BaseSelectQuery.Take(1);
             return this.ToList()
                        .FirstOrDefault();
         }
@@ -70,24 +70,24 @@ namespace Dashing {
         }
 
         public TProjection LastOrDefault() {
-            if (this.baseSelectQuery.OrderClauses.IsEmpty()) {
+            if (this.BaseSelectQuery.OrderClauses.IsEmpty()) {
                 throw new InvalidOperationException("You can not request the last item without specifying an order clause");
             }
 
             // switch order clause direction
-            foreach (var clause in this.baseSelectQuery.OrderClauses) {
+            foreach (var clause in this.BaseSelectQuery.OrderClauses) {
                 clause.Direction = clause.Direction == ListSortDirection.Ascending
                                        ? ListSortDirection.Descending
                                        : ListSortDirection.Ascending;
             }
 
-            this.baseSelectQuery.Take(1);
+            this.BaseSelectQuery.Take(1);
             return this.ToList()
                        .FirstOrDefault();
         }
 
         public Page<TProjection> AsPaged(int skip, int take) {
-            this.baseSelectQuery.Skip(skip)
+            this.BaseSelectQuery.Skip(skip)
                 .Take(take);
             return this.executor.QueryPaged(this);
         }
@@ -112,7 +112,7 @@ namespace Dashing {
         }
 
         public async Task<TProjection> FirstOrDefaultAsync() {
-            this.baseSelectQuery.Take(1);
+            this.BaseSelectQuery.Take(1);
             var result = await this.executor.QueryAsync(this);
             return result.FirstOrDefault();
         }
@@ -141,23 +141,23 @@ namespace Dashing {
         }
 
         public Task<TProjection> LastOrDefaultAsync() {
-            if (this.baseSelectQuery.OrderClauses.IsEmpty()) {
+            if (this.BaseSelectQuery.OrderClauses.IsEmpty()) {
                 throw new InvalidOperationException("You can not request the last item without specifying an order clause");
             }
 
             // switch order clause direction
-            foreach (var clause in this.baseSelectQuery.OrderClauses) {
+            foreach (var clause in this.BaseSelectQuery.OrderClauses) {
                 clause.Direction = clause.Direction == ListSortDirection.Ascending
                                        ? ListSortDirection.Descending
                                        : ListSortDirection.Ascending;
             }
 
-            this.baseSelectQuery.Take(1);
+            this.BaseSelectQuery.Take(1);
             return this.FirstOrDefaultAsync();
         }
 
         public Task<Page<TProjection>> AsPagedAsync(int skip, int take) {
-            this.baseSelectQuery.Skip(skip)
+            this.BaseSelectQuery.Skip(skip)
                 .Take(take);
             return this.executor.QueryPagedAsync(this);
         }

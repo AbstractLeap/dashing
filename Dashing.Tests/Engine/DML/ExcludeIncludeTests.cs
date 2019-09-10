@@ -162,7 +162,7 @@
 
         private SelectQuery<T> GetSelectQuery<T>()
             where T : class, new() {
-            return new SelectQuery<T>(new Mock<ISelectQueryExecutor>().Object);
+            return new SelectQuery<T>(new Mock<IProjectedSelectQueryExecutor>().Object);
         }
     }
 }

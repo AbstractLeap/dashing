@@ -55,11 +55,11 @@
         }
 
         private static SelectQuery<User> MakeUserQuery() {
-            return new SelectQuery<User>(new Mock<ISelectQueryExecutor>().Object);
+            return new SelectQuery<User>(new Mock<IProjectedSelectQueryExecutor>().Object);
         }
 
         private static SelectQuery<Post> MakePostQuery() {
-            return new SelectQuery<Post>(new Mock<ISelectQueryExecutor>().Object);
+            return new SelectQuery<Post>(new Mock<IProjectedSelectQueryExecutor>().Object);
         }
 
         private static ICountWriter MakeTarget() {
