@@ -9,6 +9,8 @@
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
 
+    using Dashing.Logging;
+
     public class CollectionInstantiationWeaver : BaseWeaver {
         public override void Weave(
             AssemblyDefinition assemblyDefinition,
@@ -40,7 +42,7 @@
             if (constructors.Length > 1) {
                 constructor = constructors.SingleOrDefault(s => !s.HasParameters && !s.IsStatic);
                 if (constructor == null) {
-                    this.PolyLogger.TrackTrace($"Type {typeDef.FullName} does not have a parameterless constructor for instantiating collections in");
+                    this.Logger.Trace($"Type {typeDef.FullName} does not have a parameterless constructor for instantiating collections in");
                 }
             }
 

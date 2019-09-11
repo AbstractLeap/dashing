@@ -6,7 +6,7 @@ namespace Dashing.CommandLine {
     using System.Reflection;
 
 #if COREFX
-    using System.Runtime.Loader;
+    //using System.Runtime.Loader;
     using Microsoft.Extensions.DependencyModel;
 #endif
 

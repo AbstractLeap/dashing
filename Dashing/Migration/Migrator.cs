@@ -2,18 +2,14 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using System.Text;
 
     using Dashing.Configuration;
     using Dashing.Engine.DDL;
     using Dashing.Engine.Dialects;
     using Dashing.Extensions;
-    //using Dashing.Logging;
+    using Dashing.Logging;
     using Dashing.Versioning;
-
-#if COREFX
-#endif
 
     public class Migrator : IMigrator {
         private readonly ISqlDialect dialect;
@@ -30,7 +26,7 @@
 
         private static string[] versionedEntityColumnNames = typeof(IVersionedEntity<>).GetProperties().Select(p => p.Name).ToArray();
 
-        //private static readonly ILog Logger = LogProvider.For<Migrator>();
+        private static readonly ILog Logger = LogProvider.For<Migrator>();
 
         public Migrator(
             ISqlDialect dialect,
@@ -72,10 +68,12 @@
             var removals = from.Except(to, mapComparer).ToList();
             var matches = from.Join(to, f => f.Table.ToLowerInvariant(), t => t.Table.ToLowerInvariant(), MigrationPair.Of).ToList();
 
-            //// trace output
-            //Logger.Info("Additions", additions.Select(a => new { a.Table, a.Type.Name }));
-            //Logger.Info("Removals", removals.Select(a => new { a.Table, a.Type.Name }));
-            //Logger.Info("Matches", matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }));
+            // trace output
+            Logger.Info("Additions", additions.Select(a => new { a.Table, a.Type.Name }));
+            Logger.Info("Removals", removals.Select(a => new { a.Table, a.Type.Name }));
+            Logger.Info("Matches", matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }));
+
+            //Logging.Log.Logger.Info()
 
             // look for possible entity name changes
             if (additions.Any() && removals.Any()) {

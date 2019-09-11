@@ -8,15 +8,12 @@
     using Mono.Cecil;
     using Mono.Cecil.Cil;
 
-    using Poly.Logging;
-    using Poly.Logging.DTOs;
-
-    //using ILogger = Dashing.ILogger;
+    using Dashing.Logging;
 
     public abstract class BaseWeaver : ITaskLogHelper, IWeaver {
         private const string BackingFieldTemplate = "<{0}>k__BackingField";
 
-        public IPolyLogger PolyLogger { get; set; }
+        public ILog Logger { get; set; } = LogProvider.GetCurrentClassLogger();
 
         protected FieldDefinition GetBackingField(PropertyDefinition propertyDef) {
             // have a look for a field matching the standard format
@@ -24,8 +21,7 @@
             if (fieldDef != null) {
                 return fieldDef;
             }
-
-
+            
             // look for stfld il in the setter
             var candidates =
                 propertyDef.SetMethod.Body.Instructions.Where(
@@ -50,8 +46,8 @@
                 return (FieldDefinition)candidates.First().Operand;
             }
 
-            this.PolyLogger?.TrackTrace("Unable to determine backing field for property " + propertyDef.FullName, SeverityLevel.Error);
-
+            this.Logger.Error("Unable to determine backing field for property " + propertyDef.FullName);
+            
             return null;
         }
 
@@ -62,7 +58,7 @@
             }
 
             if (typeDefinition.BaseType.FullName == typeof(object).FullName) {
-                this.PolyLogger?.TrackTrace("Unable to find Field " + name, SeverityLevel.Error);
+                this.Logger.Error("Unable to find Field " + name);
 
                 return null;
             }
@@ -77,8 +73,8 @@
             }
 
             if (typeDef.BaseType.FullName == typeof(object).FullName) {
-                this.PolyLogger?.TrackTrace("Unable to find Property " + name, SeverityLevel.Error);
-                
+                this.Logger.Error("Unable to find Property " + name);
+
                 return null;
             }
 

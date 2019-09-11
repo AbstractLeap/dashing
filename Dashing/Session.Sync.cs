@@ -10,24 +10,17 @@
     using Dashing.Extensions;
     using Dashing.Logging;
 
-    using Poly.Logging.Extensions;
-
     public sealed partial class Session
     {
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id) where T : class, new()
         {
-            using (var t = this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Get")) {
-                return this.engine.Query<T, TPrimaryKey>(this.MaybeOpenConnection(), this.GetTransaction(), id);
-            }
+            return this.engine.Query<T, TPrimaryKey>(this.MaybeOpenConnection(), this.GetTransaction(), id);
         }
 
         public IEnumerable<T> Get<T, TPrimaryKey>(IEnumerable<TPrimaryKey> ids) where T : class, new()
         {
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Get"))
-            {
-                return this.engine.Query<T, TPrimaryKey>(this.MaybeOpenConnection(), this.GetTransaction(), ids);
-            }
+            return this.engine.Query<T, TPrimaryKey>(this.MaybeOpenConnection(), this.GetTransaction(), ids);
         }
 
         public ISelectQuery<T> Query<T>() where T : class, new()
@@ -37,26 +30,17 @@
 
         public IEnumerable<T> Query<T>(SelectQuery<T> query) where T : class, new()
         {
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Query"))
-            {
-                return this.engine.Query(this.MaybeOpenConnection(), this.GetTransaction(), query);
-            }
+            return this.engine.Query(this.MaybeOpenConnection(), this.GetTransaction(), query);
         }
 
         public Page<T> QueryPaged<T>(SelectQuery<T> query) where T : class, new()
         {
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "QueryPaged"))
-            {
-                return this.engine.QueryPaged(this.MaybeOpenConnection(), this.GetTransaction(), query);
-            }
+            return this.engine.QueryPaged(this.MaybeOpenConnection(), this.GetTransaction(), query);
         }
 
         public int Count<T>(SelectQuery<T> query) where T : class, new()
         {
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Count"))
-            {
-                return this.engine.Count(this.MaybeOpenConnection(), this.GetTransaction(), query);
-            }
+            return this.engine.Count(this.MaybeOpenConnection(), this.GetTransaction(), query);
         }
 
         public int Insert<T>(T entities)
@@ -99,12 +83,8 @@
                 }
             }
 
-            int insertedRows;
-
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Insert"))
-            {
-                insertedRows = this.engine.Insert(this.MaybeOpenConnection(), this.GetTransaction(), entities);
-            }
+            int insertedRows = this.engine.Insert(this.MaybeOpenConnection(), this.GetTransaction(), entities);
+            
 
             if (this.Configuration.EventHandlers.PostInsertListeners.Any())
             {
@@ -160,13 +140,8 @@
                 }
             }
 
-            int updatedRows;
-
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Save"))
-            {
-                updatedRows = this.engine.Save(this.MaybeOpenConnection(), this.GetTransaction(), entities);
-            }
-
+            int updatedRows = this.engine.Save(this.MaybeOpenConnection(), this.GetTransaction(), entities);
+            
             if (this.Configuration.EventHandlers.PostSaveListeners.Any())
             {
                 foreach (var entity in entities)
@@ -188,10 +163,7 @@
                 throw new ArgumentException("You must provide at least 1 predicate to Update. If you wish to update all entities use UpdateAll");
             }
 
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Update"))
-            {
-                return this.engine.Execute(this.MaybeOpenConnection(), this.GetTransaction(), update, predicates);
-            }
+            return this.engine.Execute(this.MaybeOpenConnection(), this.GetTransaction(), update, predicates);
         }
 
         public int Delete<T>(T entities)
@@ -202,10 +174,8 @@
             { // is T[] or IEnumerable<T>
                 return this.DeleteFor(underlyingType, (IEnumerable)entities);
             }
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Delete"))
-            {
-                return this.DeleteFor(typeof(T), new[] { entities });
-            }
+            
+            return this.DeleteFor(typeof(T), new[] { entities });
         }
 
         private int DeleteFor<T>(Type type, T entities) where T : IEnumerable
@@ -254,26 +224,17 @@
 
         public int Delete<T>(IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new()
         {
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "Delete"))
-            {
-                return this.engine.ExecuteBulkDelete(this.MaybeOpenConnection(), this.GetTransaction(), predicates);
-            }
+            return this.engine.ExecuteBulkDelete(this.MaybeOpenConnection(), this.GetTransaction(), predicates);
         }
 
         public int UpdateAll<T>(Action<T> update) where T : class, new()
         {
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "UpdateAll"))
-            {
-                return this.engine.Execute(this.MaybeOpenConnection(), this.GetTransaction(), update, null);
-            }
+            return this.engine.Execute(this.MaybeOpenConnection(), this.GetTransaction(), update, null);
         }
 
         public int DeleteAll<T>() where T : class, new()
         {
-            using (this.Configuration.Logger.CreateDependencyExecutionTimer(LoggingConfig.DashingDependencyTypeName, "DeleteAll"))
-            {
-                return this.engine.ExecuteBulkDelete<T>(this.MaybeOpenConnection(), this.GetTransaction(), null);
-            }
+            return this.engine.ExecuteBulkDelete<T>(this.MaybeOpenConnection(), this.GetTransaction(), null);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace Dashing.Weaver.Weaving.Weavers {
-    using Poly.Logging;
+    using Dashing.Logging;
 
     public interface ITaskLogHelper {
-        IPolyLogger PolyLogger { get; set; }
+        ILog Logger { get; set; }
     }
 }

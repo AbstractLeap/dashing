@@ -9,8 +9,6 @@
     using Dashing.Engine.Dialects;
     using Dashing.Events;
 
-    using Poly.Logging;
-
     /// <summary>
     ///     This configuration pretty much only exists to support fetching of different maps within reverse engineering
     /// </summary>
@@ -21,9 +19,7 @@
             this.maps = new Dictionary<Type, IMap>();
             this.Engine = new SqlEngine(this, sqlDialect);
         }
-
-        public IPolyLogger Logger { get; }
-
+        
         public void AddMap(Type type, IMap map) {
             this.maps.Add(type, map);
         }

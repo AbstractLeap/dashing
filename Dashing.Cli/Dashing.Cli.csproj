@@ -6,17 +6,17 @@
     <VersionPrefix>2.0.7</VersionPrefix>
     <Authors>Polylytics</Authors>
     <Owners>Polylytics</Owners>
-	<ProjectUrl>https://github.com/Polylytics/dashing</ProjectUrl>
-	<IconUrl>http://polylytics.com/dashing/dashing-icon.png</IconUrl>
-	<RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-	<Copyright>© Polylytics Limited, 2018</Copyright>
-	<Language>en-GB</Language>
-	<Tags>dashing dapper orm sql mini-orm</Tags>
+	  <ProjectUrl>https://github.com/Polylytics/dashing</ProjectUrl>
+	  <IconUrl>http://polylytics.com/dashing/dashing-icon.png</IconUrl>
+	  <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+	  <Copyright>© Polylytics Limited, 2018</Copyright>
+	  <Language>en-GB</Language>
+	  <Tags>dashing dapper orm sql mini-orm</Tags>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;netcoreapp1.1;netcoreapp2.0</TargetFrameworks>
-	<AssemblyName>dash</AssemblyName>
+    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
+	  <AssemblyName>dash</AssemblyName>
     <AssemblyName Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' ">dotnet-dash</AssemblyName>
-	<PackageType Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' ">DotNetCliTool</PackageType>
+	  <PackageType Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' ">DotNetCliTool</PackageType>
   </PropertyGroup>
   
   <ItemGroup>
@@ -37,7 +37,7 @@
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="MySql.Data" Version="6.10.7" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.4.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.6.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0'  ">
@@ -45,11 +45,11 @@
 	<PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
   </ItemGroup>
   
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0'  ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.x'  ">
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
   </PropertyGroup>
   
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System.Data.Linq" />
   </ItemGroup>
   
@@ -59,7 +59,7 @@
     <NuspecFile>../NuGet/dashing-cli.nuspec</NuspecFile>
     <IntermediatePackDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/publish/</IntermediatePackDir>
     <PublishDir>$(IntermediatePackDir)$(TargetFramework)/</PublishDir>
-	<OutputDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/</OutputDir>
+	  <OutputDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/</OutputDir>
     <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(IntermediatePackDir)));outputDir=$([MSBuild]::NormalizeDirectory($(OutputDir)));version=$(PackageVersion)</NuspecProperties>
   </PropertyGroup>
   

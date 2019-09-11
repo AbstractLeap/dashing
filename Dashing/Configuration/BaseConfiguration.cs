@@ -6,8 +6,6 @@
     using Dashing.Events;
     using Dashing.Extensions;
 
-    using Poly.Logging;
-
 #if COREFX
     using System.Reflection;
 #endif
@@ -23,7 +21,7 @@
         public BaseConfiguration() : this(new DefaultMapper(new DefaultConvention())) {
         }
 
-        public BaseConfiguration(IMapper mapper, IPolyLogger polyLogger = null) {
+        public BaseConfiguration(IMapper mapper) {
             if (mapper == null) {
                 throw new ArgumentNullException(nameof(mapper));
             }
@@ -31,22 +29,9 @@
             this.mapper = mapper;
             this.mappedTypes = new Dictionary<Type, IMap>();
             this.EventHandlers = new EventHandlers(new List<IEventListener>());
-            this.Logger = polyLogger;
         }
-
-        public BaseConfiguration(IPolyLogger polyLogger) : this(new DefaultMapper(new DefaultConvention()))
-        {
-            if (polyLogger == null)
-            {
-                throw new ArgumentNullException(nameof(polyLogger));
-            }
-
-            this.Logger = polyLogger;
-        }
-
+        
         public EventHandlers EventHandlers { get; }
-
-        public IPolyLogger Logger { get; }
 
         public IEnumerable<IMap> Maps
         {

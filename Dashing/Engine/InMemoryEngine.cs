@@ -5,6 +5,7 @@
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Runtime.CompilerServices;
 #if COREFX
     using System.Reflection;
 #endif
@@ -15,6 +16,7 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Engine.InMemory;
+    using Dashing.Logging;
 
     public class InMemoryEngine : IEngine {
         private readonly Dictionary<Type, object> tables;

@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
+    <Configurations>Debug;Release;Tests</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

@@ -7,7 +7,7 @@ namespace Dashing.CommandLine {
     using Dashing.Extensions;
 
 #if COREFX
-    using System.Runtime.Loader;
+    //using System.Runtime.Loader;
 #endif
 
     public static class AssemblyContext {

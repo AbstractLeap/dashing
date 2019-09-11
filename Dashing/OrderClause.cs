@@ -32,12 +32,4 @@ namespace Dashing {
             this.Direction = direction;
         }
     }
-
-#if COREFX
-    public enum ListSortDirection
-  {
-    Ascending,
-    Descending,
-  }
-#endif
 }
