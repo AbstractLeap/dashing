@@ -4,19 +4,16 @@
     using System.Runtime.CompilerServices;
 
     using Dashing.Configuration;
+    using Dashing.Logging;
 
     using Mono.Cecil;
     using Mono.Cecil.Cil;
     using Mono.Cecil.Rocks;
 
-    using Dashing.Logging;
-
     public class CollectionInstantiationWeaver : BaseWeaver {
-        public override void Weave(
-            AssemblyDefinition assemblyDefinition,
-            TypeDefinition typeDefinition,
-            IEnumerable<ColumnDefinition> columnDefinitions) {
-            var constructors = typeDefinition.GetConstructors().ToArray();
+        public override void Weave(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition, IEnumerable<ColumnDefinition> columnDefinitions) {
+            var constructors = typeDefinition.GetConstructors()
+                                             .ToArray();
             foreach (var oneToManyColumnDefinition in columnDefinitions.Where(c => c.Relationship == RelationshipType.OneToMany && c.ShouldWeavingInitialiseListInConstructor)) {
                 var propDef = this.GetProperty(typeDefinition, oneToManyColumnDefinition.Name);
                 if (propDef.SetMethod.CustomAttributes.Any(c => c.AttributeType.FullName == typeof(CompilerGeneratedAttribute).FullName)) {
@@ -28,9 +25,7 @@
                 else {
                     // not an auto prop
                     var backingField = this.GetBackingField(propDef);
-                    if (!constructors.Any(
-                            c => c.Body.Instructions.Any(
-                                i => i.Operand != null && (i.Operand.Equals(propDef.SetMethod) || i.Operand.Equals(backingField))))) {
+                    if (!constructors.Any(c => c.Body.Instructions.Any(i => i.Operand != null && (i.Operand.Equals(propDef.SetMethod) || i.Operand.Equals(backingField))))) {
                         this.InstantiateCollection(typeDefinition, constructors, propDef);
                     }
                 }

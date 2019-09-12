@@ -1,14 +1,13 @@
 ﻿namespace Dashing.Weaver.Weaving.Weavers {
-
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    
-    using Mono.Cecil;
-    using Mono.Cecil.Cil;
 
     using Dashing.Logging;
+
+    using Mono.Cecil;
+    using Mono.Cecil.Cil;
 
     public abstract class BaseWeaver : ITaskLogHelper, IWeaver {
         private const string BackingFieldTemplate = "<{0}>k__BackingField";
@@ -21,33 +20,32 @@
             if (fieldDef != null) {
                 return fieldDef;
             }
-            
+
             // look for stfld il in the setter
-            var candidates =
-                propertyDef.SetMethod.Body.Instructions.Where(
-                    i =>
-                        i.OpCode == OpCodes.Stfld && i.Operand is FieldDefinition
-                                                  && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName).ToArray();
+            var candidates = propertyDef.SetMethod.Body.Instructions.Where(i => i.OpCode == OpCodes.Stfld && i.Operand is FieldDefinition && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName)
+                                        .ToArray();
             if (candidates.Length == 1) {
                 // they only store one thing in a field
-                return (FieldDefinition)candidates.First().Operand;
+                return (FieldDefinition)candidates.First()
+                                                  .Operand;
             }
-            else if (candidates.Count(i => i.Previous != null && i.Previous.OpCode == OpCodes.Ldarg_1) == 1) {
+
+            if (candidates.Count(i => i.Previous != null && i.Previous.OpCode == OpCodes.Ldarg_1) == 1) {
                 // they only store one thing in a field by the previous instruction is to load the "value" on to the stack
-                return (FieldDefinition)candidates.Single(i => i.Previous != null && i.Previous.OpCode == OpCodes.Ldarg_1).Operand;
+                return (FieldDefinition)candidates.Single(i => i.Previous != null && i.Previous.OpCode == OpCodes.Ldarg_1)
+                                                  .Operand;
             }
 
             // look for fields of this type loaded on to the stack
-            candidates = propertyDef.GetMethod.Body.Instructions.Where(
-                                            i => i.OpCode == OpCodes.Ldfld && i.Operand is FieldDefinition
-                                                 && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName)
-                                        .ToArray();
+            candidates = propertyDef.GetMethod.Body.Instructions.Where(i => i.OpCode == OpCodes.Ldfld && i.Operand is FieldDefinition && ((FieldDefinition)i.Operand).FieldType.FullName == propertyDef.PropertyType.FullName)
+                                    .ToArray();
             if (candidates.Length == 1) {
-                return (FieldDefinition)candidates.First().Operand;
+                return (FieldDefinition)candidates.First()
+                                                  .Operand;
             }
 
             this.Logger.Error("Unable to determine backing field for property " + propertyDef.FullName);
-            
+
             return null;
         }
 
@@ -101,6 +99,7 @@
                 thisTypeDef = thisTypeDef.BaseType.Resolve();
             }
             while (thisTypeDef.FullName != typeof(object).FullName);
+
             return classHierarchy;
         }
 
@@ -118,13 +117,12 @@
         }
 
         protected static MethodReference MakeGeneric(MethodReference self, params TypeReference[] arguments) {
-            var reference =
-                new MethodReference(self.Name, self.ReturnType) {
-                                                                    DeclaringType = MakeGenericType(self.DeclaringType, arguments),
-                                                                    HasThis = self.HasThis,
-                                                                    ExplicitThis = self.ExplicitThis,
-                                                                    CallingConvention = self.CallingConvention
-                                                                };
+            var reference = new MethodReference(self.Name, self.ReturnType) {
+                                                                                DeclaringType = MakeGenericType(self.DeclaringType, arguments),
+                                                                                HasThis = self.HasThis,
+                                                                                ExplicitThis = self.ExplicitThis,
+                                                                                CallingConvention = self.CallingConvention
+                                                                            };
 
             foreach (var parameter in self.Parameters) {
                 reference.Parameters.Add(new ParameterDefinition(parameter.ParameterType));
@@ -140,20 +138,17 @@
         protected void MakeNotDebuggerBrowsable(ModuleDefinition module, FieldDefinition field) {
             // TODO Figure out why cecil fails to write this correctly
 #if !COREFX
-            var debuggerBrowsableConstructor = module.ImportReference(typeof(DebuggerBrowsableAttribute).GetConstructors().First());
+            var debuggerBrowsableConstructor = module.ImportReference(
+                typeof(DebuggerBrowsableAttribute).GetConstructors()
+                                                  .First());
             var debuggerBrowsableAttr = new CustomAttribute(debuggerBrowsableConstructor);
-            debuggerBrowsableAttr.ConstructorArguments.Add(
-                new CustomAttributeArgument(
-                    module.ImportReference(typeof(DebuggerBrowsableState)),
-                    DebuggerBrowsableState.Never));
+            debuggerBrowsableAttr.ConstructorArguments.Add(new CustomAttributeArgument(module.ImportReference(typeof(DebuggerBrowsableState)), DebuggerBrowsableState.Never));
             field.CustomAttributes.Add(debuggerBrowsableAttr);
 #endif
         }
 
         protected bool DoesNotUseObjectMethod(TypeDefinition typeDefinition, string methodName) {
-            return typeDefinition.Methods.Any(m => m.Name == methodName)
-                   || (typeDefinition.BaseType.FullName != typeof(object).FullName
-                       && this.DoesNotUseObjectMethod(typeDefinition.BaseType.Resolve(), methodName));
+            return typeDefinition.Methods.Any(m => m.Name == methodName) || (typeDefinition.BaseType.FullName != typeof(object).FullName && this.DoesNotUseObjectMethod(typeDefinition.BaseType.Resolve(), methodName));
         }
 
         protected void AddInterfaceToNonObjectAncestor(TypeDefinition typeDefinition, Type interfaceType) {
@@ -169,9 +164,6 @@
             return typeDefinition.BaseType.FullName == typeof(object).FullName;
         }
 
-        public abstract void Weave(
-            AssemblyDefinition assemblyDefinition,
-            TypeDefinition typeDefinition,
-            IEnumerable<ColumnDefinition> columnDefinitions);
+        public abstract void Weave(AssemblyDefinition assemblyDefinition, TypeDefinition typeDefinition, IEnumerable<ColumnDefinition> columnDefinitions);
     }
 }

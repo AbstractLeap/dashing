@@ -21,11 +21,11 @@
 
         private IDbTransaction transaction;
 
-        private bool shouldDisposeConnection;
+        private readonly bool shouldDisposeConnection;
 
         private bool shouldCommitAndDisposeTransaction;
 
-        private bool isTransactionLess;
+        private readonly bool isTransactionLess;
 
         private readonly bool completeFailsSilentlyIfRejected;
 
@@ -40,23 +40,22 @@
         private readonly AsyncLock asyncConnectionOpenLock = new AsyncLock();
 
         #region MethodCaches
+
         private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> InsertMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
+
         private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> SaveMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
+
         private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, int>> DeleteMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, int>>();
 
         private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> InsertAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
+
         private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> SaveAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
+
         private static readonly ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>> DeleteAsyncMethodsOfType = new ConcurrentDictionary<Type, Func<Session, IEnumerable, Task<int>>>();
+
         #endregion
 
-        public Session(IEngine engine, 
-            Lazy<IDbConnection> connection,
-            IDbTransaction transaction = null,
-            bool disposeConnection = true,
-            bool commitAndDisposeTransaction = false,
-            bool isTransactionLess = false,
-            bool completeFailsSilentlyIfRejected = true) {
-
+        public Session(IEngine engine, Lazy<IDbConnection> connection, IDbTransaction transaction = null, bool disposeConnection = true, bool commitAndDisposeTransaction = false, bool isTransactionLess = false, bool completeFailsSilentlyIfRejected = true) {
             if (engine == null) {
                 throw new ArgumentNullException("engine");
             }
@@ -118,7 +117,8 @@
 
             if (this.transaction == null) {
                 if (!this.isTransactionLess) {
-                    this.transaction = this.MaybeOpenConnection().BeginTransaction();
+                    this.transaction = this.MaybeOpenConnection()
+                                           .BeginTransaction();
                     this.shouldCommitAndDisposeTransaction = true;
                 }
             }

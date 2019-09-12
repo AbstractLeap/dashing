@@ -73,8 +73,6 @@
             Logger.Info("Removals", removals.Select(a => new { a.Table, a.Type.Name }));
             Logger.Info("Matches", matches.Select(m => new { FromTable = m.From.Table, FromMap = m.From.Type.Name, ToTable = m.To.Table, ToMap = m.To.Type.Name }));
 
-            //Logging.Log.Logger.Info()
-
             // look for possible entity name changes
             if (additions.Any() && removals.Any()) {
                 // TODO do something a bit more sensible with regards to likelihood of rename
@@ -214,7 +212,7 @@
 
                 // go through existing columns and handle modifications
                 foreach (var fromProp in pair.From.Columns) {
-                    //Logger.Debug("Looking for modifications to column", fromProp.Value.Name, pair.From.Table);
+                    Logger.Debug("Looking for modifications to column", fromProp.Value.Name, pair.From.Table);
                     var matchingToProp = pair.To.Columns.Select(p => p.Value).FirstOrDefault(p => p.Name == fromProp.Key);
                     if (matchingToProp != null) {
                         if (this.RequiresColumnSpecificationChange(fromProp.Value, matchingToProp)) {

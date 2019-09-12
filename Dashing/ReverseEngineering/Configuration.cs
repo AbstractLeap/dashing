@@ -19,13 +19,15 @@
             this.maps = new Dictionary<Type, IMap>();
             this.Engine = new SqlEngine(this, sqlDialect);
         }
-        
+
         public void AddMap(Type type, IMap map) {
             this.maps.Add(type, map);
         }
 
-        public IEnumerable<IMap> Maps {
-            get {
+        public IEnumerable<IMap> Maps
+        {
+            get
+            {
                 return this.maps.Select(k => k.Value);
             }
         }
@@ -72,22 +74,28 @@
 
         public IEngine Engine { get; set; }
 
-        public IMapper Mapper {
-            get {
+        public IMapper Mapper
+        {
+            get
+            {
                 throw new NotImplementedException();
             }
         }
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
-        public ICollection<IEventListener> EventListeners {
-            get {
+        public ICollection<IEventListener> EventListeners
+        {
+            get
+            {
                 throw new NotImplementedException();
             }
         }
 
-        public EventHandlers EventHandlers {
-            get {
+        public EventHandlers EventHandlers
+        {
+            get
+            {
                 throw new NotImplementedException();
             }
         }

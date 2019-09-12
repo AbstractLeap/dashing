@@ -1,62 +1,84 @@
-﻿namespace Dashing.Tests.Configuration
-{
+﻿namespace Dashing.Tests.Configuration {
     using System;
     using System.Collections.Generic;
-    
+
     using Dashing.Tests.Engine.InMemory;
     using Dashing.Tests.Engine.InMemory.TestDomain;
 
-    using Xunit;
-
-    public class LoggingTests
-    {
+    public class LoggingTests {
         [Fact]
         public void WillItLog() {
             var session = this.GetSession();
 
             var list = session.Get<Comment>(1);
-            
+
             session.Reject();
         }
 
         [Fact]
-        public void WillItInsert()
-        {
+        public void WillItInsert() {
             var session = this.GetSession();
 
-            var someInt = session.Insert<Comment>(new Comment {
-                                                               User = new User { UserId = 1 },
-                                                               Post = new Post { PostId = 2 },
-                                                               Content = "Test-y test comment",
-                                                               CommentDate = DateTime.Now
-                                                           });
+            var someInt = session.Insert(
+                new Comment {
+                                User = new User {
+                                                    UserId = 1
+                                                },
+                                Post = new Post {
+                                                    PostId = 2
+                                                },
+                                Content = "Test-y test comment",
+                                CommentDate = DateTime.Now
+                            });
 
             session.Reject();
         }
 
-        private ISession GetSession()
-        {
+        private ISession GetSession() {
             var sessionCreator = new InMemoryDatabase(new ConfigurationWithLogging());
             var session = sessionCreator.BeginSession();
 
             var authors = new List<User> {
-                                             new User { Username = "Bob", IsEnabled = true },
-                                             new User { Username = "Mark", IsEnabled = true },
-                                             new User { Username = "James", IsEnabled = false }
+                                             new User {
+                                                          Username = "Bob",
+                                                          IsEnabled = true
+                                                      },
+                                             new User {
+                                                          Username = "Mark",
+                                                          IsEnabled = true
+                                                      },
+                                             new User {
+                                                          Username = "James",
+                                                          IsEnabled = false
+                                                      }
                                          };
 
             session.Insert(authors);
 
             var blogs = new List<Blog> {
-                                           new Blog { Owner = authors[0], Title = "Bob's Blog" }
+                                           new Blog {
+                                                        Owner = authors[0],
+                                                        Title = "Bob's Blog"
+                                                    }
                                        };
 
             session.Insert(blogs);
 
             var posts = new List<Post> {
-                                           new Post { Author = authors[0], Blog = blogs[0], Title = "My First Post" },
-                                           new Post { Author = authors[0], Blog = blogs[0], Title = "My Second Post" },
-                                           new Post { Author = authors[1], Title = "A post without a blog!" }
+                                           new Post {
+                                                        Author = authors[0],
+                                                        Blog = blogs[0],
+                                                        Title = "My First Post"
+                                                    },
+                                           new Post {
+                                                        Author = authors[0],
+                                                        Blog = blogs[0],
+                                                        Title = "My Second Post"
+                                                    },
+                                           new Post {
+                                                        Author = authors[1],
+                                                        Title = "A post without a blog!"
+                                                    }
                                        };
 
             session.Insert(posts);
@@ -91,12 +113,11 @@
                                                                  User = authors[0],
                                                                  Post = posts[1],
                                                                  Content = "This is bob's comment on the second post"
-                                                             },
+                                                             }
                                              };
             session.Insert(comments);
 
             return session;
         }
-
     }
 }
