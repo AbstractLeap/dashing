@@ -45,10 +45,7 @@
             var parser = new IncludeExcludeParser(config);
             Expression<Func<Post, string>> pred = post => post.Blog.Description;
             var rootNode = new FetchNode();
-            var blogNode = new FetchNode {
-                                             Parent = rootNode,
-                                             Column = config.GetMap<Post>().Property(p => p.Blog)
-                                         };
+            var blogNode = rootNode.AddChild(config.GetMap<Post>().Property(p => p.Blog), true);
             rootNode.Children = new OrderedDictionary<string, FetchNode> {
                                                                              { nameof(Post.Blog), blogNode }
                                                                          };
@@ -95,11 +92,7 @@
             var parser = new IncludeExcludeParser(config);
             Expression<Func<Post, string>> pred = post => post.Blog.Description;
             var rootNode = new FetchNode();
-            var blogNode = new FetchNode {
-                                             Parent = rootNode,
-                                             Column = config.GetMap<Post>()
-                                                            .Property(p => p.Blog)
-                                         };
+            var blogNode = rootNode.AddChild(config.GetMap<Post>().Property(p => p.Blog), true);
             rootNode.Children = new OrderedDictionary<string, FetchNode> {
                                                                              { nameof(Post.Blog), blogNode }
                                                                          };

@@ -491,35 +491,7 @@
         private void GetOrCreateCurrentNode(PropertyInfo propInfo, Type declaringType) {
             this.currentFetchStack.Add(propInfo);
             if (!this.currentNode.Children.ContainsKey(propInfo.Name)) {
-                // create the node
-                var newNode = new FetchNode {
-                                                Alias = "t_" + ++this.aliasCounter,
-                                                IsFetched = false,
-                                                Parent = this.currentNode,
-                                                Column = this.config.GetMap(declaringType).Columns[propInfo.Name]
-                                            };
-                if (this.currentNode.Children.Any()) {
-                    var i = 0;
-                    var inserted = false;
-                    foreach (var child in this.currentNode.Children) {
-                        if (child.Value.Column.FetchId > newNode.Column.FetchId) {
-                            this.currentNode.Children.Insert(i, new KeyValuePair<string, FetchNode>(propInfo.Name, newNode));
-                            inserted = true;
-                            break;
-                        }
-
-                        ++i;
-                    }
-
-                    if (!inserted) {
-                        this.currentNode.Children.Add(propInfo.Name, newNode);
-                    }
-                }
-                else {
-                    this.currentNode.Children.Add(propInfo.Name, newNode);
-                }
-
-                this.currentNode = newNode;
+                this.currentNode = this.currentNode.AddChild(this.config.GetMap(declaringType).Columns[propInfo.Name], false);
             }
             else {
                 this.currentNode = this.currentNode.Children[propInfo.Name];
@@ -528,7 +500,7 @@
 
         private void EnsureRootNodeExists() {
             if (this.modifiedRootNode == null) {
-                this.modifiedRootNode = new FetchNode { Alias = "t" };
+                this.modifiedRootNode = new FetchNode();
 
                 // update exising ISqlElements to use new rootnode (and alias)
                 foreach (var element in this.sqlElements) {

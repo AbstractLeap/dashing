@@ -98,7 +98,7 @@
             // add in any includes or excludes
             if ((selectQuery.Includes != null && selectQuery.Includes.Any()) || (selectQuery.Excludes != null && selectQuery.Excludes.Any())) {
                 var parser = new IncludeExcludeParser(this.Configuration);
-                rootNode = rootNode ?? new FetchNode { Alias = "t" };
+                rootNode = rootNode ?? new FetchNode();
                 GetIncludeExcludes<T>(selectQuery.Includes, parser, rootNode, true);
                 GetIncludeExcludes<T>(selectQuery.Excludes, parser, rootNode, false);
             }
@@ -158,7 +158,7 @@
                         // we need to copy the fetch node and re-use it inside every query
                         var originalRootNode = rootNode != null 
                             ? rootNode.Clone()
-                                : new FetchNode { Alias = "t" }; // we force the unions to have the same alias
+                                : new FetchNode(); // we force the unions to have the same alias
                         
                         foreach (var substitution in substitutions.AsSmartEnumerable()) {
                             // swap out the original where clause for the substitute
@@ -378,9 +378,7 @@
             var whereSql = new StringBuilder();
             var orderSql = new StringBuilder();
             if (rootNode == null && enforceAlias) {
-                rootNode = new FetchNode {
-                                             Alias = "t"
-                                         };
+                rootNode = new FetchNode();
             }
 
             // add where clause

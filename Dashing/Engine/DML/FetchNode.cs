@@ -1,23 +1,38 @@
 ﻿namespace Dashing.Engine.DML {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Dashing.Configuration;
     using Dashing.Extensions;
 
     public class FetchNode {
-        public IColumn Column { get; set; }
+        private int aliasCounter;
 
-        public string Alias { get; set; }
+        private int whereClauseAliasCounter;
+
+        /// <summary>
+        ///     Creates a new root node
+        /// </summary>
+        public FetchNode() {
+            this.Children = new OrderedDictionary<string, FetchNode>();
+            this.aliasCounter = 0;
+            this.whereClauseAliasCounter = 99;
+            this.Alias = "t";
+        }
+
+        public IColumn Column { get; private set; }
+
+        public string Alias { get; private set; }
 
         public OrderedDictionary<string, FetchNode> Children { get; set; }
 
-        public FetchNode Parent { get; set; }
+        public FetchNode Parent { get; private set; }
 
         /// <summary>
         ///     Indicates whether the property here is being fetch or simply used in a where clause
         /// </summary>
-        public bool IsFetched { get; set; }
+        public bool IsFetched { get; private set; }
 
         /// <summary>
         ///     If true then this property can be inner joined as it, or one of it's children,
@@ -41,8 +56,47 @@
 
         public IList<IColumn> ExcludedColumns { get; set; }
 
-        public FetchNode() {
-            this.Children = new OrderedDictionary<string, FetchNode>();
+        public FetchNode AddChild(IColumn column, bool isFetched) {
+            // create the node
+            var newNode = new FetchNode {
+                                            Alias = "t_" + (isFetched
+                                                                ? ++this.aliasCounter
+                                                                : ++this.whereClauseAliasCounter),
+                                            IsFetched = isFetched,
+                                            Parent = this,
+                                            Column = column
+                                        };
+
+            if (column.Relationship == RelationshipType.OneToMany) {
+                // go through and increase the number of contained collections in each parent node
+                var parent = this;
+                while (parent != null) {
+                    ++parent.ContainedCollectionfetchesCount;
+                    parent = parent.Parent;
+                }
+            }
+
+            // insert it
+            if (this.Children.Any()) {
+                var i = 0;
+                var inserted = false;
+                foreach (var child in this.Children) {
+                    if (child.Value.Column.FetchId > newNode.Column.FetchId) {
+                        this.Children.Insert(i, new KeyValuePair<string, FetchNode>(column.Name, newNode));
+                        inserted = true;
+                        break;
+                    }
+
+                    ++i;
+                }
+
+                if (!inserted) this.Children.Add(column.Name, newNode);
+            }
+            else {
+                this.Children.Add(column.Name, newNode);
+            }
+
+            return newNode;
         }
 
         /// <summary>

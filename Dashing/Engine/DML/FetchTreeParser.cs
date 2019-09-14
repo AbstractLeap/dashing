@@ -22,7 +22,7 @@
 
             if (selectQuery.HasFetches()) {
                 // now we go through the fetches and generate the tree structure
-                rootNode = new FetchNode { Alias = "t" };
+                rootNode = new FetchNode();
                 foreach (var fetch in selectQuery.Fetches) {
                     var lambda = fetch as LambdaExpression;
                     if (lambda != null) {
@@ -104,40 +104,7 @@
                     }
 
                     // add to tree
-                    var node = new FetchNode { Parent = currentNode, Column = column, Alias = "t_" + ++aliasCounter, IsFetched = true };
-                    if (column.Relationship == RelationshipType.OneToMany) {
-                        // go through and increase the number of contained collections in each parent node
-                        var parent = node.Parent;
-                        while (parent != null) {
-                            ++parent.ContainedCollectionfetchesCount;
-                            parent = parent.Parent;
-                        }
-                    }
-
-                    // insert the node in the correct order (i.e. respecting the FetchId and then all other things that depend on this
-                    // should be constant
-                    if (currentNode.Children.Any()) {
-                        var i = 0;
-                        var inserted = false;
-                        foreach (var child in currentNode.Children) {
-                            if (child.Value.Column.FetchId > column.FetchId) {
-                                currentNode.Children.Insert(i, new KeyValuePair<string, FetchNode>(propName, node));
-                                inserted = true;
-                                break;
-                            }
-
-                            i++;
-                        }
-
-                        if (!inserted) {
-                            currentNode.Children.Add(propName, node);
-                        }
-                    }
-                    else {
-                        currentNode.Children.Add(propName, node);
-                    }
-
-                    currentNode = node;
+                    currentNode = currentNode.AddChild(column, true);
                 }
                 else {
                     currentNode = currentNode.Children[propName];
