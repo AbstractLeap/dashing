@@ -9,7 +9,7 @@
     public class FetchNode {
         private int aliasCounter;
 
-        private int whereClauseAliasCounter;
+        private int nonFetchedAliasCounter;
 
         /// <summary>
         ///     Creates a new root node
@@ -17,8 +17,9 @@
         public FetchNode() {
             this.Children = new OrderedDictionary<string, FetchNode>();
             this.aliasCounter = 0;
-            this.whereClauseAliasCounter = 99;
+            this.nonFetchedAliasCounter = 99;
             this.Alias = "t";
+            this.Root = this;
         }
 
         public IColumn Column { get; private set; }
@@ -28,6 +29,8 @@
         public OrderedDictionary<string, FetchNode> Children { get; set; }
 
         public FetchNode Parent { get; private set; }
+
+        public FetchNode Root { get; private set; }
 
         /// <summary>
         ///     Indicates whether the property here is being fetch or simply used in a where clause
@@ -60,10 +63,11 @@
             // create the node
             var newNode = new FetchNode {
                                             Alias = "t_" + (isFetched
-                                                                ? ++this.aliasCounter
-                                                                : ++this.whereClauseAliasCounter),
+                                                                ? ++this.Root.aliasCounter
+                                                                : ++this.Root.nonFetchedAliasCounter),
                                             IsFetched = isFetched,
                                             Parent = this,
+                                            Root = this.Root,
                                             Column = column
                                         };
 
