@@ -24,26 +24,33 @@
             FetchNode fetchNode = null;
             this.VisitMember(node, x => fetchNode = x);
             if (!context.Parent.IsExpressionOf(ExpressionType.MemberAccess)) {
-                // we're at the end
+                    // we're at the end
                 if (ReferenceEquals(this.rootNode, fetchNode)) {
+                    // we're at the bottom of the member expression
                     var map = this.configuration.GetMap<TBase>();
                     if (map.Columns.TryGetValue(node.Member.Name, out var column)) {
                         if (column.Relationship == RelationshipType.None) {
+                            // add to the included columns for this node
                             if (fetchNode.IncludedColumns == null) {
                                 fetchNode.IncludedColumns = new List<IColumn>();
                             }
 
                             fetchNode.IncludedColumns.Add(column);
                         } else if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
-                            fetchNode.AddChild(column, true);
+                            // add a new fetch node for this column
+                            if (!fetchNode.Children.ContainsKey(column.Name)) {
+                                fetchNode.AddChild(column, true);
+                            }
                         }
                         else {
                             throw new NotSupportedException($"Unable to project OneToMany relationships - {column.Name}");
                         }
                     }
                 }
-
-                
+                else {
+                    // we're not at the end of the member expression
+                    
+                }
             }
         }
 
