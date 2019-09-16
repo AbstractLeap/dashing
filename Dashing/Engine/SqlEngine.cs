@@ -121,7 +121,14 @@ namespace Dashing.Engine {
 
         public IEnumerable<TProjection> Query<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
             where TBase : class, new() {
-            throw new NotImplementedException();
+            var sqlResult = this.selectWriter.GenerateSql(query);
+            if (sqlResult.FetchTree.Children.Count == 0) {
+                return connection.Query<TBase>(sqlResult.Sql, sqlResult.Parameters, transaction)
+                                 .Select(query.ProjectionExpression.Compile());
+            }
+
+            var projectionDelegateResult = this.delegateQueryCreator.GetProjectionResult(query, sqlResult.FetchTree);
+            return connection.Query()
         }
 
         public Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)

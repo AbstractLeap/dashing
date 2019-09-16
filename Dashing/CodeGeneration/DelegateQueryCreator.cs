@@ -392,5 +392,10 @@
                         "Dashing is unable to fetch more than 14 collections in one query due to that lack of Func<> overloads");
             }
         }
+
+        public DelegateProjectionResult<TProjection> GetProjectionResult<TBase, TProjection>(ProjectedSelectQuery<TBase, TProjection> query, FetchNode sqlResultFetchTree)
+            where TBase : class, new() {
+            throw new NotImplementedException();
+        }
     }
 }
