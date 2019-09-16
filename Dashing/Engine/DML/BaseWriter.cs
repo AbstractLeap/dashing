@@ -27,7 +27,7 @@
             }
         }
 
-        protected AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties) {
+        protected AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties, bool isProjectedQuery) {
             // add this node and then it's children
             // add table sql
             var splitOns = new List<string>();
@@ -41,7 +41,7 @@
 
             // add the columns
             if (node.IsFetched) {
-                var columns = GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties);
+                var columns = GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties, isProjectedQuery);
                 columns = columns.Where(
                     c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
                                                                     .IsFetched);
@@ -54,7 +54,7 @@
             // add its children
             var signatureBuilder = new StringBuilder();
             foreach (var child in node.Children) {
-                var signature = this.AddNode(child.Value, tableSql, columnSql, selectQueryFetchAllProperties);
+                var signature = this.AddNode(child.Value, tableSql, columnSql, selectQueryFetchAllProperties, isProjectedQuery);
                 if (child.Value.IsFetched) {
                     signatureBuilder.Append(signature.Signature);
                     splitOns.AddRange(signature.SplitOn);
@@ -137,7 +137,15 @@
             }
         }
 
-        protected static IEnumerable<IColumn> GetColumnsWithIncludesAndExcludes(IList<IColumn> includes, IList<IColumn> excludes, IMap map, bool fetchAllProperties) {
+        protected static IEnumerable<IColumn> GetColumnsWithIncludesAndExcludes(IList<IColumn> includes, IList<IColumn> excludes, IMap map, bool fetchAllProperties, bool isProjectedQuery) {
+            if (isProjectedQuery) {
+                if (includes != null) {
+                    return includes;
+                }
+
+                return map.OwnedColumns(fetchAllProperties);
+            }
+
             var columns = map.OwnedColumns(fetchAllProperties);
             if (includes != null) {
                 columns = columns.Union(includes);

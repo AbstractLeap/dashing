@@ -21,8 +21,6 @@ namespace Dashing {
             this.CollectionFetches = new List<KeyValuePair<Expression, List<Expression>>>();
         }
 
-        public Expression<Func<T, dynamic>> Projection { get; private set; }
-
         public IList<Expression> Includes { get; private set; }
 
         public IList<Expression> Excludes { get; private set; }

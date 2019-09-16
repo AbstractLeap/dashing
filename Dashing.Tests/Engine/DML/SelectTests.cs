@@ -9,8 +9,15 @@
     using Moq;
 
     using Xunit;
+    using Xunit.Abstractions;
 
     public class SelectTests {
+        private readonly ITestOutputHelper outputHelper;
+
+        public SelectTests(ITestOutputHelper outputHelper) {
+            this.outputHelper = outputHelper;
+        }
+
         [Fact]
         public void SelectAnonymousWorks() {
             var query = this.GetSelectQuery<Post>()
@@ -18,6 +25,7 @@
                                 p => new {
                                              p.Title
                                          });
+            this.AssertSqlMatches("select t.[Title] from [Posts] as t", query);
         }
 
         [Fact]
@@ -27,6 +35,7 @@
                                 p => new Post {
                                                   Title = p.Title
                                               });
+            this.AssertSqlMatches("select t.[Title] from [Posts] as t", query);
         }
 
         [Fact]
@@ -38,6 +47,7 @@
                                          Title = p.Title,
                                          Author = p.Author
                                      });
+            this.AssertSqlMatches("select t.[Title], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId", query);
         }
 
         [Fact]
@@ -50,6 +60,7 @@
                                          Title = p.Title,
                                          Author = p.Author
                                      });
+            this.AssertSqlMatches("select t.[Title], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId", query);
         }
 
         private void AssertSqlMatches<TBase, TProjection>(string expected, IProjectedSelectQuery<TBase, TProjection> projectedSelectQuery)
@@ -57,6 +68,7 @@
             var selectWriter = this.GetSql2012Writer();
             var concreteQuery = (ProjectedSelectQuery<TBase, TProjection>)projectedSelectQuery;
             var sqlResult = selectWriter.GenerateSql(concreteQuery);
+            this.outputHelper.WriteLine(sqlResult.Sql);
             Assert.Equal(expected, sqlResult.Sql);
         }
 

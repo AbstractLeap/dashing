@@ -19,37 +19,55 @@
             this.Visit(expression);
         }
 
-        protected override void VisitMember(Context context, MemberExpression node)
-        {
+        protected override void VisitMember(Context context, MemberExpression node) {
             FetchNode fetchNode = null;
             this.VisitMember(node, x => fetchNode = x);
             if (!context.Parent.IsExpressionOf(ExpressionType.MemberAccess)) {
-                    // we're at the end
-                if (ReferenceEquals(this.rootNode, fetchNode)) {
-                    // we're at the bottom of the member expression
-                    var map = this.configuration.GetMap<TBase>();
-                    if (map.Columns.TryGetValue(node.Member.Name, out var column)) {
-                        if (column.Relationship == RelationshipType.None) {
-                            // add to the included columns for this node
-                            if (fetchNode.IncludedColumns == null) {
-                                fetchNode.IncludedColumns = new List<IColumn>();
-                            }
+                // we're at the end
+                var map = ReferenceEquals(this.rootNode, fetchNode)
+                              ? this.configuration.GetMap<TBase>()
+                              : (fetchNode.Column.Relationship == RelationshipType.ManyToOne
+                                     ? fetchNode.Column.ParentMap
+                                     : (fetchNode.Column.Relationship == RelationshipType.OneToOne
+                                            ? fetchNode.Column.OppositeColumn.Map
+                                            : throw new NotSupportedException("Include/Exclude clauses can only use Many to One and One to One relationships")));
 
-                            fetchNode.IncludedColumns.Add(column);
-                        } else if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
-                            // add a new fetch node for this column
-                            if (!fetchNode.Children.ContainsKey(column.Name)) {
-                                fetchNode.AddChild(column, true);
-                            }
+                if (map.Columns.TryGetValue(node.Member.Name, out var column)) {
+                    if (column.Relationship == RelationshipType.None) {
+                        // add to the included columns for this node
+                        if (fetchNode.IncludedColumns == null) {
+                            fetchNode.IncludedColumns = new List<IColumn>();
                         }
-                        else {
-                            throw new NotSupportedException($"Unable to project OneToMany relationships - {column.Name}");
+
+                        fetchNode.IncludedColumns.Add(column);
+                    }
+                    else if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
+                        // add a new fetch node for this column
+                        if (!fetchNode.Children.ContainsKey(column.Name)) {
+                            fetchNode.AddChild(column, true);
                         }
+                    }
+                    else {
+                        throw new NotSupportedException($"Unable to project OneToMany relationships - {column.Name}");
                     }
                 }
                 else {
-                    // we're not at the end of the member expression
-                    
+                    throw new InvalidOperationException($"Unable to find column {node.Member.Name} in projection");
+                }
+            }
+            else {
+                // we're not at the end of the member access
+                var declaringType = node.Member.DeclaringType;
+                if (!this.configuration.HasMap(declaringType)) {
+                    throw new InvalidOperationException($"Type not mapped: {declaringType.FullName}");
+                }
+
+                var map = this.configuration.GetMap(declaringType);
+                if (!fetchNode.Children.ContainsKey(node.Member.Name)) {
+                    context.State(fetchNode.AddChild(map.Columns[node.Member.Name], true));
+                }
+                else {
+                    context.State(fetchNode.Children[node.Member.Name]);
                 }
             }
         }
