@@ -16,7 +16,7 @@
 
         private readonly FetchNode rootNode;
 
-        private readonly IDictionary<FetchNode, int> fetchNodeLookup;
+        private readonly IDictionary<FetchNode, FetchNodeLookupValue> fetchNodeLookup;
 
         private readonly ParameterExpression parameterExpression;
 
@@ -24,7 +24,7 @@
             this.configuration = configuration;
             this.query = query;
             this.rootNode = rootNode;
-            this.fetchNodeLookup = new Dictionary<FetchNode, int>();
+            this.fetchNodeLookup = new Dictionary<FetchNode, FetchNodeLookupValue>();
             this.parameterExpression = Expression.Parameter(typeof(object[]));
         }
 
@@ -32,27 +32,28 @@
             var expr = this.Visit(this.query.ProjectionExpression);
             var newLambda = Expression.Lambda(((LambdaExpression)expr).Body, this.parameterExpression);
             return new DelegateProjectionResult<TProjection>(
-                null, 
+                this.fetchNodeLookup.Values.OrderBy(l => l.Idx).Select(l => l.ConversionType).ToArray(), 
                 (Func<object[], TProjection>)newLambda.Compile());
         }
 
         protected override Expression VisitMember(MemberExpression node) {
             var fetchNode = this.VisitMember(node);
-            if (!this.fetchNodeLookup.TryGetValue(fetchNode, out var idx)) {
-                idx = this.fetchNodeLookup.Count;
-                this.fetchNodeLookup.Add(fetchNode, idx);
-            }
-
             var isRootNode = ReferenceEquals(fetchNode, this.rootNode);
-            var conversionType = isRootNode 
-                                     ? typeof(TBase) 
-                                     : (IsRelationshipAccess() 
-                                            ? fetchNode.Column.Type 
-                                            : node.Member.DeclaringType);
-
+            if (!this.fetchNodeLookup.TryGetValue(fetchNode, out var lookup)) {
+                lookup = new FetchNodeLookupValue {
+                                                      Idx = this.fetchNodeLookup.Count,
+                                                      ConversionType = isRootNode
+                                                                           ? typeof(TBase)
+                                                                           : (IsRelationshipAccess()
+                                                                                  ? fetchNode.Column.Type
+                                                                                  : node.Member.DeclaringType)
+                                                  };
+                this.fetchNodeLookup.Add(fetchNode, lookup);
+            }
+            
             var convertExpression = Expression.Convert(
-                Expression.ArrayAccess(this.parameterExpression, Expression.Constant(idx)),
-                conversionType);
+                Expression.ArrayAccess(this.parameterExpression, Expression.Constant(lookup.Idx)),
+                lookup.ConversionType);
             if (!isRootNode && IsRelationshipAccess()) {
                 return convertExpression;
             }
@@ -110,6 +111,12 @@
             }
 
             throw new NotSupportedException();
+        }
+
+        class FetchNodeLookupValue {
+            public int Idx { get; set; }
+
+            public Type ConversionType { get; set; }
         }
     }
 }

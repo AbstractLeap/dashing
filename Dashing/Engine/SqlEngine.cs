@@ -127,8 +127,9 @@ namespace Dashing.Engine {
                                  .Select(query.ProjectionExpression.Compile());
             }
 
-            var projectionDelegateResult = this.delegateQueryCreator.GetProjectionResult(query, sqlResult.FetchTree);
-            throw new NotImplementedException();
+            var projectionExpressionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(this.configuration, query, sqlResult.FetchTree);
+            var projectionDelegateResult = projectionExpressionRewriter.Rewrite();
+            return connection.Query<TProjection>(sqlResult.Sql, projectionDelegateResult.Types, projectionDelegateResult.Mapper, sqlResult.Parameters, transaction, splitOn: sqlResult.FetchTree.SplitOn);
         }
 
         public Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)

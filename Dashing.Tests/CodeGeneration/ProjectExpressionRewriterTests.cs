@@ -28,8 +28,9 @@
                                 p => new {
                                     p.Title
                                 });
-            this.AssertMapperMatches(new []{ new Post { Title = "Foo" }}
-                , query, 
+            this.AssertMapperMatches(new []{ new Post { Title = "Foo" }}, 
+                new[] { typeof(Post) },
+                query, 
                 obj => Assert.Equal("Foo", obj.Title));
         }
 
@@ -42,7 +43,8 @@
                                 {
                                     Title = p.Title
                                 });
-            this.AssertMapperMatches(new[] { new Post { Title = "Foo" } }, 
+            this.AssertMapperMatches(new[] { new Post { Title = "Foo" } },
+                new[] { typeof(Post) },
                 query, 
                 obj => Assert.Equal("Foo", obj.Title),
                 obj => Assert.IsType<Post>(obj));
@@ -59,6 +61,7 @@
                                     Author = p.Author
                                 });
             this.AssertMapperMatches(new object[] { new Post { Title = "Foo" }, new User { UserId = 35, EmailAddress = "joe@acme.com" } },
+                new[] { typeof(Post), typeof(User) },
                 query,
                 obj => Assert.Equal("Foo", obj.Title),
                 obj => Assert.Equal(35, obj.Author.UserId),
@@ -76,6 +79,7 @@
                                     Author = p.Author
                                 });
             this.AssertMapperMatches(new object[] { new Post { Title = "Foo" }, new User { UserId = 35, EmailAddress = "joe@acme.com" } },
+                new[] { typeof(Post), typeof(User) },
                 query,
                 obj => Assert.Equal("Foo", obj.Title),
                 obj => Assert.Equal(35, obj.Author.UserId),
@@ -94,13 +98,14 @@
                                          EmailAddress = p.Author.EmailAddress
                                      });
             this.AssertMapperMatches(new object[] { new Post { Title = "Foo" }, new User { UserId = 35, EmailAddress = "joe@acme.com" } },
+                new[] { typeof(Post), typeof(User) },
                 query,
                 obj => Assert.Equal("Foo", obj.Title),
                 obj => Assert.Equal(35, obj.AuthorId),
                 obj => Assert.Equal("joe@acme.com", obj.EmailAddress));
         }
 
-        private void AssertMapperMatches<TBase, TProjection>(object[] inputs, IProjectedSelectQuery<TBase, TProjection> projectedSelectQuery, params Action<TProjection>[] assertions)
+        private void AssertMapperMatches<TBase, TProjection>(object[] inputs, Type[] types, IProjectedSelectQuery<TBase, TProjection> projectedSelectQuery, params Action<TProjection>[] assertions)
             where TBase : class, new()
         {
             var selectWriter = this.GetSql2012Writer();
@@ -108,6 +113,7 @@
             var sqlResult = selectWriter.GenerateSql(concreteQuery);
             var projectionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(selectWriter.Configuration, concreteQuery, sqlResult.FetchTree);
             var result = projectionRewriter.Rewrite();
+            Assert.Equal(types, result.Types);
             var projection = result.Mapper(inputs);
             foreach (var assertion in assertions) {
                 assertion(projection);
