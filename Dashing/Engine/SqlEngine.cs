@@ -128,7 +128,7 @@ namespace Dashing.Engine {
             }
 
             var projectionDelegateResult = this.delegateQueryCreator.GetProjectionResult(query, sqlResult.FetchTree);
-            return connection.Query()
+            throw new NotImplementedException();
         }
 
         public Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)

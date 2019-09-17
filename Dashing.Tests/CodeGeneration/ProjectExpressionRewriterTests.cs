@@ -1,4 +1,6 @@
 ﻿namespace Dashing.Tests.CodeGeneration {
+    using System;
+
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
@@ -26,7 +28,9 @@
                                 p => new {
                                     p.Title
                                 });
-            this.AssertMapperMatches("select t.[Title] from [Posts] as t", query);
+            this.AssertMapperMatches(new []{ new Post { Title = "Foo" }}
+                , query, 
+                obj => Assert.Equal("Foo", obj.Title));
         }
 
         [Fact]
@@ -38,7 +42,10 @@
                                 {
                                     Title = p.Title
                                 });
-            this.AssertMapperMatches("select t.[Title] from [Posts] as t", query);
+            this.AssertMapperMatches(new[] { new Post { Title = "Foo" } }, 
+                query, 
+                obj => Assert.Equal("Foo", obj.Title),
+                obj => Assert.IsType<Post>(obj));
         }
 
         [Fact]
@@ -51,7 +58,11 @@
                                     Title = p.Title,
                                     Author = p.Author
                                 });
-            this.AssertMapperMatches("select t.[Title], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId", query);
+            this.AssertMapperMatches(new object[] { new Post { Title = "Foo" }, new User { UserId = 35, EmailAddress = "joe@acme.com" } },
+                query,
+                obj => Assert.Equal("Foo", obj.Title),
+                obj => Assert.Equal(35, obj.Author.UserId),
+                obj => Assert.Equal("joe@acme.com", obj.Author.EmailAddress));
         }
 
         [Fact]
@@ -64,17 +75,43 @@
                                     Title = p.Title,
                                     Author = p.Author
                                 });
-            this.AssertMapperMatches("select t.[Title], t_1.[UserId], t_1.[Username], t_1.[EmailAddress], t_1.[Password], t_1.[IsEnabled], t_1.[HeightInMeters] from [Posts] as t left join [Users] as t_1 on t.AuthorId = t_1.UserId", query);
+            this.AssertMapperMatches(new object[] { new Post { Title = "Foo" }, new User { UserId = 35, EmailAddress = "joe@acme.com" } },
+                query,
+                obj => Assert.Equal("Foo", obj.Title),
+                obj => Assert.Equal(35, obj.Author.UserId),
+                obj => Assert.Equal("joe@acme.com", obj.Author.EmailAddress));
         }
 
-        private void AssertMapperMatches<TBase, TProjection>(string expected, IProjectedSelectQuery<TBase, TProjection> projectedSelectQuery)
+        [Fact]
+        public void ProjectRelationshipAnonymousWorks()
+        {
+            var query = this.GetSelectQuery<Post>()
+                            .Select(
+                                p => new
+                                     {
+                                         Title = p.Title,
+                                         AuthorId = p.Author.UserId,
+                                         EmailAddress = p.Author.EmailAddress
+                                     });
+            this.AssertMapperMatches(new object[] { new Post { Title = "Foo" }, new User { UserId = 35, EmailAddress = "joe@acme.com" } },
+                query,
+                obj => Assert.Equal("Foo", obj.Title),
+                obj => Assert.Equal(35, obj.AuthorId),
+                obj => Assert.Equal("joe@acme.com", obj.EmailAddress));
+        }
+
+        private void AssertMapperMatches<TBase, TProjection>(object[] inputs, IProjectedSelectQuery<TBase, TProjection> projectedSelectQuery, params Action<TProjection>[] assertions)
             where TBase : class, new()
         {
             var selectWriter = this.GetSql2012Writer();
             var concreteQuery = (ProjectedSelectQuery<TBase, TProjection>)projectedSelectQuery;
             var sqlResult = selectWriter.GenerateSql(concreteQuery);
             var projectionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(concreteQuery, sqlResult.FetchTree);
-            Assert.Equal(expected, projectionRewriter.Rewrite().);
+            var result = projectionRewriter.Rewrite();
+            var projection = result.Mapper(inputs);
+            foreach (var assertion in assertions) {
+                assertion(projection);
+            }
         }
 
         private SelectWriter GetSql2012Writer(IConfiguration configuration = null)
