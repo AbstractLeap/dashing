@@ -106,7 +106,7 @@
             var selectWriter = this.GetSql2012Writer();
             var concreteQuery = (ProjectedSelectQuery<TBase, TProjection>)projectedSelectQuery;
             var sqlResult = selectWriter.GenerateSql(concreteQuery);
-            var projectionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(concreteQuery, sqlResult.FetchTree);
+            var projectionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(selectWriter.Configuration, concreteQuery, sqlResult.FetchTree);
             var result = projectionRewriter.Rewrite();
             var projection = result.Mapper(inputs);
             foreach (var assertion in assertions) {

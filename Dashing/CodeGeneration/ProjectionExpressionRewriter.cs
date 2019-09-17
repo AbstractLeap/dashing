@@ -6,6 +6,7 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.DML;
+    using Dashing.Extensions;
 
     class ProjectionExpressionRewriter<TBase, TProjection> : ExpressionVisitor
         where TBase : class, new() {
@@ -15,27 +16,52 @@
 
         private readonly FetchNode rootNode;
 
-        private readonly IList<Type> types;
+        private readonly IDictionary<FetchNode, int> fetchNodeLookup;
+
+        private readonly ParameterExpression parameterExpression;
 
         public ProjectionExpressionRewriter(IConfiguration configuration, ProjectedSelectQuery<TBase, TProjection> query, FetchNode rootNode) {
             this.configuration = configuration;
             this.query = query;
             this.rootNode = rootNode;
-            this.types = new List<Type>();
+            this.fetchNodeLookup = new Dictionary<FetchNode, int>();
+            this.parameterExpression = Expression.Parameter(typeof(object[]));
         }
 
         public DelegateProjectionResult<TProjection> Rewrite() {
             var expr = this.Visit(this.query.ProjectionExpression);
-            return new DelegateProjectionResult<TProjection>(this.types.ToArray(), (Func<object[], TProjection>)((LambdaExpression)expr).Compile());
+            var newLambda = Expression.Lambda(((LambdaExpression)expr).Body, this.parameterExpression);
+            return new DelegateProjectionResult<TProjection>(
+                null, 
+                (Func<object[], TProjection>)newLambda.Compile());
         }
 
         protected override Expression VisitMember(MemberExpression node) {
             var fetchNode = this.VisitMember(node);
-            if (ReferenceEquals(this.rootNode, fetchNode)) {
-                return node;
+            if (!this.fetchNodeLookup.TryGetValue(fetchNode, out var idx)) {
+                idx = this.fetchNodeLookup.Count;
+                this.fetchNodeLookup.Add(fetchNode, idx);
             }
 
-            
+            var isRootNode = ReferenceEquals(fetchNode, this.rootNode);
+            var conversionType = isRootNode 
+                                     ? typeof(TBase) 
+                                     : (IsRelationshipAccess() 
+                                            ? fetchNode.Column.Type 
+                                            : node.Member.DeclaringType);
+
+            var convertExpression = Expression.Convert(
+                Expression.ArrayAccess(this.parameterExpression, Expression.Constant(idx)),
+                conversionType);
+            if (!isRootNode && IsRelationshipAccess()) {
+                return convertExpression;
+            }
+
+            return Expression.MakeMemberAccess(convertExpression, node.Member);
+
+            bool IsRelationshipAccess() {
+                return fetchNode.Column.Name == node.Member.Name;
+            }
         }
 
         private FetchNode VisitMember(Expression expression) {
@@ -44,23 +70,43 @@
             }
 
             if (expression is MemberExpression memberExpression) {
-                var node = this.VisitMember(memberExpression.Expression);
-                if (ReferenceEquals(node, this.rootNode)) {
-                    var map = this.configuration.GetMap<TBase>();
-                    if (map.Columns.TryGetValue(memberExpression.Member.Name, out var column)) {
-                        if (column.Relationship == RelationshipType.None) {
-                            return node; // this is at the bottom anyway, we don't need to specify a different parameter
-                        }
-                        else if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
-                            return node.Children[column.Name];
-                        }
-                    } else {
-                        throw new InvalidOperationException($"Unable to find column to project");
+                var fetchNode = this.VisitMember(memberExpression.Expression);
+                var map = ReferenceEquals(this.rootNode, fetchNode)
+                              ? this.configuration.GetMap<TBase>()
+                              : (fetchNode.Column.Relationship == RelationshipType.ManyToOne
+                                     ? fetchNode.Column.ParentMap
+                                     : (fetchNode.Column.Relationship == RelationshipType.OneToOne
+                                            ? fetchNode.Column.OppositeColumn.Map
+                                            : throw new NotSupportedException("Include/Exclude clauses can only use Many to One and One to One relationships")));
+                if (map.Columns.TryGetValue(memberExpression.Member.Name, out var column)) {
+                    if (column.Relationship == RelationshipType.None) {
+                        return fetchNode; // this is at the bottom anyway, we don't need to specify a different parameter
+                    }
+
+                    if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
+                        return fetchNode.Children[column.Name];
                     }
                 }
                 else {
-                    return node.Children[memberExpression.Member.Name];
+                    throw new InvalidOperationException($"Unable to find column to project");
                 }
+
+                //if (ReferenceEquals(node, this.rootNode)) {
+                //    var map = this.configuration.GetMap<TBase>();
+                //    if (map.Columns.TryGetValue(memberExpression.Member.Name, out var column)) {
+                //        if (column.Relationship == RelationshipType.None) {
+                //            return node; // this is at the bottom anyway, we don't need to specify a different parameter
+                //        }
+                //        else if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
+                //            return node.Children[column.Name];
+                //        }
+                //    } else {
+                //        throw new InvalidOperationException($"Unable to find column to project");
+                //    }
+                //}
+                //else {
+                //    return node.Children[memberExpression.Member.Name];
+                //}
             }
 
             throw new NotSupportedException();
