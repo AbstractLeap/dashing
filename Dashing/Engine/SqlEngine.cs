@@ -134,7 +134,14 @@ namespace Dashing.Engine {
 
         public Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
             where TBase : class, new() {
-            throw new NotImplementedException();
+            var countQuery = this.countWriter.GenerateCountSql(query);
+            var totalResults = connection.Query<int>(countQuery.Sql, countQuery.Parameters, transaction).SingleOrDefault();
+            return new Page<TProjection> {
+                                             TotalResults = totalResults,
+                                             Items = this.Query(connection, transaction, query).ToArray(),
+                                             Skipped = query.BaseSelectQuery.SkipN,
+                                             Taken = query.BaseSelectQuery.TakeN
+                                         };
         }
 
         public int Count<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
@@ -280,14 +287,30 @@ namespace Dashing.Engine {
             return new Page<T> { TotalResults = totalResults, Items = results.ToArray(), Skipped = query.SkipN, Taken = query.TakeN };
         }
 
-        public Task<IEnumerable<TProjection>> QueryAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+        public async Task<IEnumerable<TProjection>> QueryAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
             where TBase : class, new() {
-            throw new NotImplementedException();
+            var sqlResult = this.selectWriter.GenerateSql(query);
+            if (sqlResult.FetchTree.Children.Count == 0) {
+                var results = await connection.QueryAsync<TBase>(sqlResult.Sql, sqlResult.Parameters, transaction);
+                return results.Select(query.ProjectionExpression.Compile());
+            }
+
+            var projectionExpressionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(this.configuration, query, sqlResult.FetchTree);
+            var projectionDelegateResult = projectionExpressionRewriter.Rewrite();
+            return await connection.QueryAsync<TProjection>(sqlResult.Sql, projectionDelegateResult.Types, projectionDelegateResult.Mapper, sqlResult.Parameters, transaction, splitOn: sqlResult.FetchTree.SplitOn);
         }
 
-        public Task<Page<TProjection>> QueryPagedAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
+        public async Task<Page<TProjection>> QueryPagedAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
             where TBase : class, new() {
-            throw new NotImplementedException();
+            var countQuery = this.countWriter.GenerateCountSql(query);
+            var totalResults = (await connection.QueryAsync<int>(countQuery.Sql, countQuery.Parameters, transaction)).SingleOrDefault();
+            return new Page<TProjection>
+                   {
+                       TotalResults = totalResults,
+                       Items = (await this.QueryAsync(connection, transaction, query)).ToArray(),
+                       Skipped = query.BaseSelectQuery.SkipN,
+                       Taken = query.BaseSelectQuery.TakeN
+                   };
         }
 
         public async Task<int> CountAsync<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {

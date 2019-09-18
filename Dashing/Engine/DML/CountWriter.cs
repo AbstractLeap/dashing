@@ -11,11 +11,25 @@ namespace Dashing.Engine.DML {
 
         public SqlWriterResult GenerateCountSql<T>(SelectQuery<T> selectQuery) where T : class, new() {
             // get fetch tree structure
-            int aliasCounter;
-            int numberCollectionFetches;
-            var rootNode = this.fetchTreeParser.GetFetchTree(selectQuery, out aliasCounter, out numberCollectionFetches);
+            var rootNode = this.fetchTreeParser.GetFetchTree(selectQuery, out _, out var numberCollectionFetches);
 
-            // add where clause
+            return this.InnerGenerateCountSql(selectQuery, rootNode, numberCollectionFetches);
+        }
+
+        public SqlWriterResult GenerateCountSql<TBase, TProjection>(ProjectedSelectQuery<TBase, TProjection> projectedSelectQuery)
+            where TBase : class, new() {
+            // get fetch tree structure
+            var rootNode = this.fetchTreeParser.GetFetchTree(projectedSelectQuery.BaseSelectQuery, out _, out var numberCollectionFetches) ?? new FetchNode();
+
+            // add in the projection structure
+            var selectProjectionParser = new SelectProjectionParser<TBase>(this.Configuration);
+            selectProjectionParser.ParseExpression(projectedSelectQuery.ProjectionExpression, rootNode);
+
+            return this.InnerGenerateCountSql(projectedSelectQuery.BaseSelectQuery, rootNode, numberCollectionFetches);
+        }
+
+        private SqlWriterResult InnerGenerateCountSql<T>(SelectQuery<T> selectQuery, FetchNode rootNode, int numberCollectionFetches)
+            where T : class, new() { // add where clause
             var whereSql = new StringBuilder();
             var parameters = new AutoNamingDynamicParameters();
             this.AddWhereClause(selectQuery.WhereClauses, whereSql, parameters, ref rootNode);
@@ -39,7 +53,10 @@ namespace Dashing.Engine.DML {
                     sql.Append('.');
                 }
 
-                this.Dialect.AppendQuotedName(sql, this.Configuration.GetMap<T>().PrimaryKey.DbName);
+                this.Dialect.AppendQuotedName(
+                    sql,
+                    this.Configuration.GetMap<T>()
+                        .PrimaryKey.DbName);
             }
 
             sql.Append(")");
