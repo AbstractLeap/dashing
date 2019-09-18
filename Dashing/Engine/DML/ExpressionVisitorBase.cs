@@ -260,7 +260,6 @@
                     break;
                 default:
                     throw new Exception("Cannont bind type " + node.BindingType);
-                    break;
             }
         }
 

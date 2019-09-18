@@ -42,8 +42,6 @@
 
         private string appendValue;
 
-        private int aliasCounter;
-
         private bool isPrimaryKeyAccess;
 
         private bool isEntityFetch;
@@ -98,7 +96,6 @@
         private void InitVariables() {
             this.sqlElements = new Queue<ISqlElement>();
             this.sqlElements.Enqueue(new StringElement(" where "));
-            this.aliasCounter = 99;
             this.currentFetchStacks = new List<IList<PropertyInfo>>();
         }
 
