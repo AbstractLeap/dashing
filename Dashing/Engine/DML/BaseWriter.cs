@@ -8,6 +8,7 @@
 
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
+    using Dashing.Extensions;
 
     public class BaseWriter {
         protected internal ISqlDialect Dialect { get; set; }
@@ -30,24 +31,22 @@
         protected AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties, bool isProjectedQuery) {
             // add this node and then it's children
             // add table sql
-            var splitOns = new List<string>();
             var map = this.GetMapForNode(node);
-
-            if (node.IsFetched) {
-                splitOns.Add(map.PrimaryKey.Name);
-            }
-
             this.AddTableSqlForNode(node, map, tableSql);
 
             // add the columns
+            var splitOns = new List<string>();
             if (node.IsFetched) {
                 var columns = GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties, isProjectedQuery);
                 columns = columns.Where(
                     c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
                                                                     .IsFetched);
-                foreach (var column in columns) {
+                foreach (var columnEntry in columns.AsSmartEnumerable()) {
                     columnSql.Append(", ");
-                    this.AddColumn(columnSql, column, node.Alias);
+                    this.AddColumn(columnSql, columnEntry.Value, node.Alias);
+                    if (columnEntry.IsFirst) {
+                        splitOns.Add(columnEntry.Value.Name);
+                    }
                 }
             }
 

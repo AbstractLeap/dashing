@@ -542,17 +542,12 @@
         }
 
         private AddNodeResult AddNodeForNonPagedUnion(FetchNode node, StringBuilder outerQueryColumnSql, StringBuilder[] subQueryColumnSqls, StringBuilder[] subQueryTableSqls, ref int insideQueryN, bool insideCollectionBranch, ref bool hasSeenFirstCollection, bool selectQueryFetchAllProperties, bool isProjectedQuery) {
-            var splitOns = new List<string>();
             IMap map;
             if (node.Column.Relationship == RelationshipType.OneToMany) {
                 map = this.Configuration.GetMap(node.Column.Type.GetGenericArguments()[0]);
             }
             else {
                 map = this.Configuration.GetMap(node.Column.Type);
-            }
-
-            if (node.IsFetched) {
-                splitOns.Add(map.PrimaryKey.Name);
             }
 
             var isNowInsideCollection = insideCollectionBranch || node.Column.Relationship == RelationshipType.OneToMany;
@@ -582,8 +577,11 @@
             }
 
             // add the columns
+            var splitOns = new List<string>();
             if (node.IsFetched) {
                 if (isNowInsideCollection) {
+                    splitOns.Add(map.PrimaryKey.Name);
+
                     // add columns to subquery, nulls to others and cols to outer
                     foreach (var column in GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties, isProjectedQuery)
                         .Where(
@@ -615,10 +613,14 @@
                 }
                 else {
                     // add columns to all queries
-                    foreach (var column in GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties, isProjectedQuery)
-                        .Where(
-                            c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
-                                                                            .IsFetched)) {
+                    foreach (var columnEntry in GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties, isProjectedQuery)
+                        .Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched)
+                        .AsSmartEnumerable()) {
+                        var column = columnEntry.Value;
+                        if (columnEntry.IsFirst) {
+                            splitOns.Add(column.Name);
+                        }
+
                         for (var i = 0; i < subQueryColumnSqls.Length; i++) {
                             var subQuery = subQueryColumnSqls[i];
                             subQuery.Append(", ");
@@ -661,7 +663,6 @@
         }
 
         private AddNodeResult AddNodeForPagedCollection(FetchNode node, StringBuilder innerTableSql, StringBuilder outerTableSql, StringBuilder innerColumnSql, StringBuilder outerColumnSql, bool isAlongCollectionBranch, bool selectQueryFetchAllProperties, bool isProjectedQuery) {
-            var splitOns = new List<string>();
             IMap map;
             if (node.Column.Relationship == RelationshipType.OneToMany) {
                 map = this.Configuration.GetMap(node.Column.Type.GetGenericArguments()[0]);
@@ -671,10 +672,6 @@
             }
             else {
                 throw new NotSupportedException();
-            }
-
-            if (node.IsFetched) {
-                splitOns.Add(map.PrimaryKey.Name);
             }
 
             var isNowAlongCollectionBranch = isAlongCollectionBranch || node.Column.Relationship == RelationshipType.OneToMany;
@@ -746,11 +743,15 @@
             }
 
             // add the columns
+            var splitOns = new List<string>();
             if (node.IsFetched) {
                 var columns = GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties, isProjectedQuery);
-                foreach (var column in columns.Where(
-                    c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
-                                                                    .IsFetched)) {
+                foreach (var columnEntry in columns.Where(c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name].IsFetched).AsSmartEnumerable()) {
+                    var column = columnEntry.Value;
+                    if (columnEntry.IsFirst) {
+                        splitOns.Add(column.Name);
+                    }
+
                     if (isNowAlongCollectionBranch) {
                         outerColumnSql.Append(", ");
                         this.AddColumn(outerColumnSql, column, node.Alias);
