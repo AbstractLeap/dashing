@@ -404,6 +404,18 @@
             Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[DoNotMap], t_1.[BlogId], t_1.[Title], t_1.[CreateDate], t_1.[Description], t_1.[OwnerId] from [Posts] as t inner join [Blogs] as t_1 on t.BlogId = t_1.BlogId where (t_1.[Title] = @l_1) union select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[DoNotMap], t_1.[BlogId], t_1.[Title], t_1.[CreateDate], t_1.[Description], t_1.[OwnerId] from [Posts] as t inner join [Users] as t_100 on t.AuthorId = t_100.UserId left join [Blogs] as t_1 on t.BlogId = t_1.BlogId where (t_100.[HeightInMeters] = @l_2)", result.Sql);
         }
 
+        [Fact]
+        public void MultipleFetchAcrossJoinsDoesNotInferInnerQuery() {
+            var query = GetSelectQuery<Comment>()
+                        .Fetch(p => p.Post)
+                        .Where(p => p.Post.Blog.Title == "Foo" && (p.User.HeightInMeters > 100 || p.User.EmailAddress == "foo")) as SelectQuery<Comment>;
+            var result = this.GetSql2012Writer()
+                             .GenerateSql(query, new AutoNamingDynamicParameters());
+
+            this.outputHelper.WriteLine(result.Sql);
+            Assert.Equal(@"select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t inner join [Posts] as t_1 on t.PostId = t_1.PostId inner join [Blogs] as t_100 on t_1.BlogId = t_100.BlogId inner join [Users] as t_101 on t.UserId = t_101.UserId where ((t_100.[Title] = @l_1) and (t_101.[HeightInMeters] > @l_2)) union select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t inner join [Posts] as t_1 on t.PostId = t_1.PostId inner join [Blogs] as t_100 on t_1.BlogId = t_100.BlogId inner join [Users] as t_101 on t.UserId = t_101.UserId where ((t_100.[Title] = @l_3) and (t_101.[EmailAddress] = @l_4))", result.Sql);
+        }
+
         private SelectWriter GetSql2012Writer(IConfiguration configuration = null) {
             if (configuration == null) {
                 configuration = new CustomConfig();

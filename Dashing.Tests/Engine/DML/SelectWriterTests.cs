@@ -13,8 +13,15 @@
     using Moq;
 
     using Xunit;
+    using Xunit.Abstractions;
 
     public class SelectWriterTests {
+        private readonly ITestOutputHelper outputHelper;
+
+        public SelectWriterTests(ITestOutputHelper outputHelper) {
+            this.outputHelper = outputHelper;
+        }
+
         [Fact]
         public void SimpleQueryBuilds() {
             var dialect = new SqlServerDialect();

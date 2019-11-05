@@ -121,15 +121,16 @@
 
         private static FetchNode InnerClone(FetchNode progenitor, FetchNode parent) {
             var clone = new FetchNode {
-                                          Alias = progenitor.Alias,
-                                          ContainedCollectionfetchesCount = progenitor.ContainedCollectionfetchesCount,
-                                          FetchSignature = progenitor.FetchSignature,
-                                          InferredInnerJoin = progenitor.InferredInnerJoin,
-                                          IsFetched = progenitor.IsFetched,
-                                          SplitOn = progenitor.SplitOn,
-                                          Column = progenitor.Column,
-                                          Parent = parent
-                                      };
+                Alias = progenitor.Alias,
+                ContainedCollectionfetchesCount = progenitor.ContainedCollectionfetchesCount,
+                FetchSignature = progenitor.FetchSignature,
+                InferredInnerJoin = progenitor.InferredInnerJoin,
+                IsFetched = progenitor.IsFetched,
+                SplitOn = progenitor.SplitOn,
+                Column = progenitor.Column,
+                Parent = parent
+            };
+            clone.Root = parent?.Root ?? clone;
 
             var clonedChildren = new OrderedDictionary<string, FetchNode>();
             foreach (var keyValue in progenitor.Children) {
