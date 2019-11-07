@@ -16,13 +16,15 @@
 
         public SqlWriterResult GenerateBulkSql<T>(Action<T> updateAction, IEnumerable<Expression<Func<T, bool>>> predicates)
             where T : class, new() {
-            var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates.ToArray();
+            var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates?.ToArray();
 
             // add where clause
             var whereSql = new StringBuilder();
             var parameters = new AutoNamingDynamicParameters();
             FetchNode rootNode = null;
-            this.AddWhereClause(predicateArray, whereSql, parameters, ref rootNode);
+            if (predicateArray != null) {
+                this.AddWhereClause(predicateArray, whereSql, parameters, ref rootNode);
+            }
 
             // run the update
             var entity = new T();

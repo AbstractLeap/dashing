@@ -13,13 +13,15 @@
             : base(dialect, config) { }
 
         public SqlWriterResult GenerateBulkSql<T>(IEnumerable<Expression<Func<T, bool>>> predicates) {
-            var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates.ToArray();
+            var predicateArray = predicates as Expression<Func<T, bool>>[] ?? predicates?.ToArray();
 
             // add where clause
             var whereSql = new StringBuilder();
             var parameters = new AutoNamingDynamicParameters();
             FetchNode rootNode = null;
-            this.AddWhereClause(predicateArray, whereSql, parameters, ref rootNode);
+            if (predicateArray != null) {
+                this.AddWhereClause(predicateArray, whereSql, parameters, ref rootNode);
+            }
 
             if (rootNode == null) {
                 // the where clauses were all on the root table

@@ -1,5 +1,6 @@
 ﻿namespace Dashing.Tests.Engine.DML {
     using System;
+    using System.Linq;
     using System.Linq.Expressions;
 
     using Dashing.Configuration;
@@ -15,6 +16,22 @@
 
         public BulkDeleteWriterTests(ITestOutputHelper outputHelper) {
             this.outputHelper = outputHelper;
+        }
+
+        [Fact]
+        public void NoPredicateWorks() {
+            var bulkDeleteWriter = new BulkDeleteWriter(new SqlServerDialect(), MakeConfig());
+            var result = bulkDeleteWriter.GenerateBulkSql<Post>(null);
+            this.outputHelper.WriteLine(result.Sql);
+            Assert.Equal("delete from [Posts]", result.Sql);
+        }
+
+        [Fact]
+        public void EmptyPredicateWorks() {
+            var bulkDeleteWriter = new BulkDeleteWriter(new SqlServerDialect(), MakeConfig());
+            var result = bulkDeleteWriter.GenerateBulkSql<Post>(Enumerable.Empty<Expression<Func<Post, bool>>>());
+            this.outputHelper.WriteLine(result.Sql);
+            Assert.Equal("delete from [Posts]", result.Sql);
         }
 
         [Fact]

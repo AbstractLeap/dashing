@@ -1,6 +1,7 @@
 ﻿namespace Dashing.Tests.Engine.DML {
     using System;
     using System.Diagnostics;
+    using System.Linq;
     using System.Linq.Expressions;
 
     using Dashing.Configuration;
@@ -18,6 +19,24 @@
 
         public BulkUpdateWriterTests(ITestOutputHelper outputHelper) {
             this.outputHelper = outputHelper;
+        }
+
+        [Fact]
+        public void BulkUpdateNull() {
+            var updateWriter = new BulkUpdateWriter(new SqlServerDialect(), MakeConfig());
+            var result = updateWriter.GenerateBulkSql<Post>(p => p.Title = "Foo", null);
+            this.outputHelper.WriteLine(result.Sql);
+
+            Assert.Equal("update [Posts] set [Title] = @Title", result.Sql);
+        }
+
+        [Fact]
+        public void BulkUpdateEmptyArray() {
+            var updateWriter = new BulkUpdateWriter(new SqlServerDialect(), MakeConfig());
+            var result = updateWriter.GenerateBulkSql<Post>(p => p.Title = "Foo", Enumerable.Empty<Expression<Func<Post, bool>>>());
+            this.outputHelper.WriteLine(result.Sql);
+
+            Assert.Equal("update [Posts] set [Title] = @Title", result.Sql);
         }
 
         [Fact]
