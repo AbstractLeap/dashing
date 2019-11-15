@@ -6,11 +6,11 @@ Documentation for v2 is available to [view here](http://polylytics.github.io/das
 # Features
 
 * Convention over Configuration with code-first minimal configuration
-* Sql-like strongly typed query syntax
+* SQL-like strongly typed query syntax
 * Paging support
 * Eager loading of relationships
 * Change tracking
-* Crud operations
+* CRUD operations
 * Default transactional behaviour
 * Schema generation/migrations
 * Dynamic method generation and caching
@@ -21,63 +21,74 @@ Documentation for v2 is available to [view here](http://polylytics.github.io/das
 # Examples
 
 Get Entity
-
-	var post = await session.GetAsync<Post>(123);
-	var post = await session.Query<Post>().SingleAsync(p => p.PostId == 123);
+```cs
+var post = await session.GetAsync<Post>(123);
+var post = await session.Query<Post>().SingleAsync(p => p.PostId == 123);
+```
 
 Insert
-	
-	var post = new Post { Title = "Hello World" };
-	await session.InsertAsync(post);
-	Console.WriteLine(post.PostId); // 123
+```cs
+var post = new Post { Title = "Hello World" };
+await session.InsertAsync(post);
+Console.WriteLine(post.PostId); // 123
+```
 
 Update changed properties only
-
-    var post = await session.GetAsync<Post>(123);
-    post.Title = "New Title";
-    await session.SaveAsync(post); // update [Posts] set [Title] = @P1 where [PostId] = @P2
+```cs
+var post = await session.GetAsync<Post>(123);
+post.Title = "New Title";
+await session.SaveAsync(post); // update [Posts] set [Title] = @P1 where [PostId] = @P2
+```
 
 Delete
-
-	await session.DeleteAsync(post);
+```cs
+await session.DeleteAsync(post);
+```
 
 Eager fetching of related entities
-
-    var posts = await session.Query<Post>()
-		.Fetch(p => p.Author)
-		.Fetch(p => p.Tags)
-		.FetchMany(p => p.Comments).ThenFetch(c => c.Author)
-		.Where(p => p.Category == ".Net ORM")
-		.OrderByDescending(p => p.CreatedDate)
-		.ToListAsync();
+```cs
+var posts = await session.Query<Post>()
+    .Fetch(p => p.Author)
+    .Fetch(p => p.Tags)
+    .FetchMany(p => p.Comments).ThenFetch(c => c.Author)
+    .Where(p => p.Category == ".Net ORM")
+    .OrderByDescending(p => p.CreatedDate)
+    .ToListAsync();
+```
 
 Paging
-
-	var firstPage = await session.Query<Post>().AsPagedAsync(0, 10);
+```cs
+var firstPage = await session.Query<Post>().AsPagedAsync(0, 10);
+```
 
 Count/Any
-
-	var numberPosts = await session.Query<Post>().CountAsync(p => p.Author.UserId == userId);
-	var hasAuthored = await session.Query<Post>().AnyAsync(p => p.Author.UserId == userId);
+```cs
+var numberPosts = await session.Query<Post>().CountAsync(p => p.Author.UserId == userId);
+var hasAuthored = await session.Query<Post>().AnyAsync(p => p.Author.UserId == userId);
+```
 
 Bulk update entity
-
-    await session.UpdateAsync<Post>(p => p.IsArchived = true, p => p.Author.UserId == 3);
-    // update [Posts] set [IsArchived] = @P1 where [AuthorId] = @P2
+```cs
+await session.UpdateAsync<Post>(p => p.IsArchived = true, p => p.Author.UserId == 3);
+// update [Posts] set [IsArchived] = @P1 where [AuthorId] = @P2
+```
 
 Bulk delete
-
-	await session.DeleteAsync<Post>(p => p.IsArchived);
+```cs
+await session.DeleteAsync<Post>(p => p.IsArchived);
+```
 
 Drop to Dapper
-
-    await session.Dapper.QueryAsync("select 1 from Foo");
+```cs
+await session.Dapper.QueryAsync("select 1 from Foo");
+```
 
 Inspect changes
-	
-	post.Title = "New";
-	session.Inspect(post).IsPropertyDirty(p => p.Title);
-	var oldTitle = session.Inspect(post).GetOldValue(p => p.Title); // Old
+```cs
+post.Title = "New";
+session.Inspect(post).IsPropertyDirty(p => p.Title);
+var oldTitle = session.Inspect(post).GetOldValue(p => p.Title); // Old
+```
 
 Migrate database to match latest code
 
