@@ -6,17 +6,17 @@
     <VersionPrefix>2.0.8.1</VersionPrefix>
     <Authors>Polylytics</Authors>
     <Owners>Polylytics</Owners>
-	<PackageProjectUrl>https://github.com/Polylytics/dashing</PackageProjectUrl>
-	<PackageIconUrl>http://polylytics.com/dashing/dashing-icon.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/Polylytics/dashing</PackageProjectUrl>
+    <PackageIconUrl>http://polylytics.com/dashing/dashing-icon.png</PackageIconUrl>
     <PackageIcon>dashing-icon.png</PackageIcon>
-	<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-	<Copyright>© Polylytics Limited, 2018</Copyright>
-	<Language>en-GB</Language>
-	<PackageTags>dashing dapper orm sql mini-orm</PackageTags>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>© Polylytics Limited, 2018</Copyright>
+    <Language>en-GB</Language>
+    <PackageTags>dashing dapper orm sql mini-orm</PackageTags>
     <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
     <AssemblyName>Dashing</AssemblyName>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <None Include="..\dashing-icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
@@ -26,11 +26,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="Dapper" Version="1.60.6" />
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System.Data.Linq" />
   </ItemGroup>
-  
+
 </Project>

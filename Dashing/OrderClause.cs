@@ -33,7 +33,7 @@ namespace Dashing {
         }
     }
 
-#if COREFX
+#if NETSTANDARD1_5
     public enum ListSortDirection
   {
     Ascending,
