@@ -2,9 +2,6 @@
     using System;
     using System.Linq;
     using System.Reflection;
-#if COREFX
-    using System.Reflection;
-#endif
 
     using Dashing.Configuration;
     using Dashing.Tests.Extensions;

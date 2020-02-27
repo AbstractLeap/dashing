@@ -12,7 +12,7 @@
     using Dashing.Logging;
     using Dashing.Versioning;
 
-#if COREFX
+#if NETSTANDARD2_0
 #endif
 
     public class Migrator : IMigrator {

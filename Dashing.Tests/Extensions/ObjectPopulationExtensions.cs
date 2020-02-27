@@ -64,19 +64,11 @@
         }
 
         public static bool IsEnumDefined(this Type type, object value) {
-#if COREFX
-            return type.GetTypeInfo().IsEnumDefined(value);
-#else
             return type.IsEnumDefined(value);
-#endif
         }
 
         public static Type GetInterface(this Type type, string name) {
-#if COREFX
             return type.GetTypeInfo().GetInterface(name);
-#else
-            return type.GetInterface(name);
-#endif
         }
     }
 }

@@ -2,7 +2,7 @@
     using System;
     using System.Data;
     using System.Linq;
-#if COREFX
+#if NETSTANDARD2_0
     using System.Reflection;
 #endif
 

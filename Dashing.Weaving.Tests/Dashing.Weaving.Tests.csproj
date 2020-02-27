@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp3.0</TargetFrameworks>
 	<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
@@ -26,7 +26,7 @@
   <Target Name="Weave" AfterTargets="AfterBuild">
     <PropertyGroup>
 	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net46/dashing-weaver.exe</Weave>
-	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/netcoreapp1.1/dashing-weaver.dll"</Weave>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/netcoreapp3.0/dashing-weaver.dll"</Weave>
 	  <SampleAssemblyName Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">Dashing.Weaving.Sample.exe</SampleAssemblyName>
 	  <SampleAssemblyName Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">Dashing.Weaving.Sample.dll</SampleAssemblyName>
 	</PropertyGroup>

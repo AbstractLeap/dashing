@@ -137,7 +137,7 @@
 
         protected void MakeNotDebuggerBrowsable(ModuleDefinition module, FieldDefinition field) {
             // TODO Figure out why cecil fails to write this correctly
-#if !COREFX
+#if !NETCOREAPP
             var debuggerBrowsableConstructor = module.ImportReference(typeof(DebuggerBrowsableAttribute).GetConstructors().First());
             var debuggerBrowsableAttr = new CustomAttribute(debuggerBrowsableConstructor);
             debuggerBrowsableAttr.ConstructorArguments.Add(

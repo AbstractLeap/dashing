@@ -7,7 +7,7 @@
     using System.Reflection;
 
     using Dashing.Versioning;
-#if !COREFX
+#if !NETSTANDARD2_0
     using System.Data.Linq;
 #endif
 
@@ -55,7 +55,7 @@
                                                                                                      { typeof(Guid?), DbType.Guid },
                                                                                                      { typeof(DateTime?), DbType.DateTime2 },
                                                                                                      { typeof(DateTimeOffset?), DbType.DateTimeOffset },
-#if !COREFX
+#if !NETSTANDARD2_0
             { typeof(Binary), DbType.Binary },
 #endif
             { typeof(TimeSpan), DbType.Time },
@@ -266,7 +266,7 @@
         }
 
         public static bool IsValueType(this Type type) {
-#if COREFX
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsValueType;
 #else
             return type.IsValueType;
@@ -274,7 +274,7 @@
         }
 
         public static bool IsEnum(this Type type) {
-#if COREFX
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsEnum;
 #else
             return type.IsEnum;
@@ -282,7 +282,7 @@
         }
 
         public static bool IsGenericType(this Type type) {
-#if COREFX
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsGenericType;
 #else
             return type.IsGenericType;
@@ -290,7 +290,7 @@
         }
 
         public static Type BaseType(this Type type) {
-#if COREFX
+#if NETSTANDARD2_0
             return type.GetTypeInfo().BaseType;
 #else
             return type.BaseType;
@@ -298,7 +298,7 @@
         }
 
         public static Assembly Assembly(this Type type) {
-#if COREFX
+#if NETSTANDARD2_0
             return type.GetTypeInfo().Assembly;
 #else
             return type.Assembly;
@@ -306,7 +306,7 @@
         }
 
         public static bool IsClass(this Type type) {
-#if COREFX
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsClass;
 #else
             return type.IsClass;
@@ -315,7 +315,7 @@
 
         public static bool IsPublic(this Type type)
         {
-#if COREFX
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsPublic;
 #else
             return type.IsPublic;
@@ -323,7 +323,7 @@
         }
 
         public static bool IsAbstract(this Type type) {
-#if COREFX
+#if NETSTANDARD2_0
             return type.GetTypeInfo().IsAbstract;
 #else
             return type.IsAbstract;

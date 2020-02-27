@@ -5,7 +5,7 @@
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
-#if COREFX
+#if NETSTANDARD2_0
     using System.Reflection;
 #endif
     using System.Text;

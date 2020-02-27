@@ -7,12 +7,12 @@
 
     using McMaster.Extensions.CommandLineUtils;
 
-#if !COREFX
+#if !NETCOREAPP
     using System.Configuration;
 #endif
 
     public class Program {
-#if COREFX
+#if NETCOREAPP
         internal static readonly IList<string> AssemblySearchDirectories = new List<string>();
 #else
         internal static readonly IList<string> AssemblySearchDirectories = (ConfigurationManager.AppSettings["AssemblySearchPaths"]

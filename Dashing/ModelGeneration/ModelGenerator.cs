@@ -6,7 +6,7 @@
 
     using Dashing.Configuration;
     using Dashing.SchemaReading;
-#if COREFX
+#if NETSTANDARD2_0
     using System.Reflection;
 #endif
 

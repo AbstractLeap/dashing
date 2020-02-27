@@ -3,7 +3,7 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-#if COREFX
+#if NETSTANDARD2_0
     using System.Reflection;
 #endif
 

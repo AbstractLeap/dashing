@@ -26,7 +26,7 @@ namespace Dashing {
             this.engine = new SqlEngine(configuration, sqlDialect);
         }
 
-#if !COREFX
+#if !NETSTANDARD2_0
         public SqlDatabase(IConfiguration configuration, string connectionString, string providerName = "System.Data.SqlClient")
         : this(configuration, GetDbProviderFactory(providerName), connectionString, GetDialect(providerName, connectionString)) {
 

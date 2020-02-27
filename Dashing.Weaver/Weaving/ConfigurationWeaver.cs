@@ -53,11 +53,11 @@
             var arguments = string.Join(" ", assemblyPaths.Select(path => $"-p \"{path}\"")) + " " + string.Join(" ", configurationTypes.Select(path => $"-t \"{path}\""));
             var proc = new Process {
                                        StartInfo = new ProcessStartInfo {
-#if COREFX
+#if NETCOREAPP
                                                                             FileName = "dotnet",
                                                                             Arguments = $"{typeof(ConfigurationWeaver).Assembly().Location} extractconfigs " + arguments,
 #else
-                                                                            FileName = Path.GetFileName(Assembly.GetExecutingAssembly().Location),
+                                           FileName = Path.GetFileName(Assembly.GetExecutingAssembly().Location),
                                                                             Arguments = "extractconfigs " + arguments,
 #endif
                                                                             RedirectStandardOutput = true,

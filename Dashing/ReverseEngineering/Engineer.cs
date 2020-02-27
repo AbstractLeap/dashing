@@ -37,7 +37,7 @@
 
         private void InitTypeGenerator() {
             var assemblyName = new AssemblyName("Dashing.ReverseEngineering");
-#if COREFX
+#if NETSTANDARD2_0
             var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 #else
             var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
@@ -48,7 +48,7 @@
         private Type GenerateType(string name) {
             var className = this.convention.ClassNameFor(name);
             var typeBuilder = this.moduleBuilder.DefineType(className, TypeAttributes.Public);
-#if COREFX
+#if NETSTANDARD2_0
             var type = typeBuilder.CreateTypeInfo().AsType();
 #else
             var type = typeBuilder.CreateType();

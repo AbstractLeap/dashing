@@ -5,7 +5,7 @@
 
     using Dashing.Events;
     using Dashing.Extensions;
-#if COREFX
+#if NETSTANDARD2_0
     using System.Reflection;
 #endif
 

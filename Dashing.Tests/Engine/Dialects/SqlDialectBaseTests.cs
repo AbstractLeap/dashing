@@ -128,7 +128,7 @@
                 throw new NotImplementedException();
             }
 
-            public override string DropIndex(Index index) {
+            public override string DropIndex(Dashing.Configuration.Index index) {
                 throw new NotImplementedException();
             }
 

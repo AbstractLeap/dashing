@@ -5,18 +5,10 @@ namespace Dashing.CommandLine {
     using System.Reflection;
 
     using Dashing.Extensions;
-
-#if COREFX
-    using System.Runtime.Loader;
-#endif
-
+    
     public static class AssemblyContext {
         public static Assembly LoadFile(string assemblyPath) {
-#if COREFX
-            return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
-#else
             return Assembly.LoadFile(assemblyPath);
-#endif
         }
 
         public static TInterfaceType LoadType<TInterfaceType>(string assemblyPath, string configurationFullName)
