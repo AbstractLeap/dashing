@@ -14,10 +14,10 @@
             MapDefinition mapDefinition,
             Dictionary<string, List<MapDefinition>> assemblyMapDefinitions,
             Dictionary<string, AssemblyDefinition> assemblyDefinitions) {
-            var intTypeDef = typeDef.Module.Import(typeof(int));
-            var guidTypeDef = typeDef.Module.Import(typeof(Guid));
-            var boolTypeDef = typeDef.Module.Import(typeof(bool));
-            var objectTypeDef = typeDef.Module.Import(typeof(object));
+            var intTypeDef = typeDef.Module.ImportReference(typeof(int));
+            var guidTypeDef = typeDef.Module.ImportReference(typeof(Guid));
+            var boolTypeDef = typeDef.Module.ImportReference(typeof(bool));
+            var objectTypeDef = typeDef.Module.ImportReference(typeof(object));
             var pkColDef = this.GetProperty(typeDef, mapDefinition.ColumnDefinitions.Single(d => d.IsPrimaryKey).Name);
             var isGuidPk = pkColDef.PropertyType.Name == "Guid";
             var isStringPk = !isGuidPk && pkColDef.PropertyType.Name.Equals("string", StringComparison.InvariantCultureIgnoreCase);
@@ -27,7 +27,7 @@
                 var hashCodeBackingField = new FieldDefinition(
                     "__hashcode",
                     FieldAttributes.Private,
-                    typeDef.Module.Import(typeof(Nullable<>).MakeGenericType(typeof(int))));
+                    typeDef.Module.ImportReference(typeof(Nullable<>).MakeGenericType(typeof(int))));
                 typeDef.Fields.Add(hashCodeBackingField);
 
                 var method = new MethodDefinition(
@@ -52,12 +52,12 @@
                 var il = method.Body.Instructions;
                 var getHasValueMethodRef =
                     MakeGeneric(
-                        typeDef.Module.Import(hashCodeBackingField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
-                        typeDef.Module.Import(typeof(int)));
+                        typeDef.Module.ImportReference(hashCodeBackingField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
+                        typeDef.Module.ImportReference(typeof(int)));
                 var getValueMethodRef =
                     MakeGeneric(
-                        typeDef.Module.Import(hashCodeBackingField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value")),
-                        typeDef.Module.Import(typeof(int)));
+                        typeDef.Module.ImportReference(hashCodeBackingField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value")),
+                        typeDef.Module.ImportReference(typeof(int)));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldflda, hashCodeBackingField));
                 il.Add(Instruction.Create(OpCodes.Call, getHasValueMethodRef));
@@ -77,7 +77,7 @@
                     il.Add(Instruction.Create(OpCodes.Initobj, guidTypeDef));
                     il.Add(Instruction.Create(OpCodes.Ldloc_1));
                     il.Add(
-                        Instruction.Create(OpCodes.Call, typeDef.Module.Import(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Equality"))));
+                        Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Equality"))));
                     il.Add(Instruction.Create(OpCodes.Brfalse_S, useIdInstr));
                 }
                 else {
@@ -86,13 +86,13 @@
 
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
-                il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
+                il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
                 il.Add(
                     Instruction.Create(
                         OpCodes.Newobj,
                         MakeGeneric(
-                            typeDef.Module.Import(hashCodeBackingField.FieldType.Resolve().GetConstructors().First()),
-                            typeDef.Module.Import(typeof(int)))));
+                            typeDef.Module.ImportReference(hashCodeBackingField.FieldType.Resolve().GetConstructors().First()),
+                            typeDef.Module.ImportReference(typeof(int)))));
                 il.Add(Instruction.Create(OpCodes.Stfld, hashCodeBackingField));
                 il.Add(Instruction.Create(OpCodes.Ldarg_0));
                 il.Add(Instruction.Create(OpCodes.Ldflda, hashCodeBackingField));
@@ -106,11 +106,11 @@
                     il.Add(Instruction.Create(OpCodes.Ldloca_S, var2));
                     il.Add(Instruction.Create(OpCodes.Constrained, guidTypeDef));
                     il.Add(
-                        Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
+                        Instruction.Create(OpCodes.Callvirt, typeDef.Module.ImportReference(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
                 }
                 else if (isStringPk) {
                     il.Add(
-                        Instruction.Create(OpCodes.Callvirt, typeDef.Module.Import(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
+                        Instruction.Create(OpCodes.Callvirt, typeDef.Module.ImportReference(typeof(object).GetMethods().Single(m => m.Name == "GetHashCode"))));
                 }
                 else {
                     if (pkColDef.PropertyType.Name != typeof(Int32).Name) {
@@ -119,7 +119,7 @@
 
                     il.Add(Instruction.Create(OpCodes.Stloc_1));
                     il.Add(Instruction.Create(OpCodes.Ldloca_S, var1));
-                    il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.Import(intTypeDef.Resolve().Methods.Single(m => m.Name == "GetHashCode"))));
+                    il.Add(Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(intTypeDef.Resolve().Methods.Single(m => m.Name == "GetHashCode"))));
                     il.Add(Instruction.Create(OpCodes.Ldc_I4, 17));
                     il.Add(Instruction.Create(OpCodes.Mul));
                 }
@@ -166,7 +166,7 @@
                     il.Add(Instruction.Create(OpCodes.Initobj, guidTypeDef));
                     il.Add(Instruction.Create(OpCodes.Ldloc_2));
                     il.Add(
-                        Instruction.Create(OpCodes.Call, typeDef.Module.Import(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Inequality"))));
+                        Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Inequality"))));
                 }
 
                 il.Add(Instruction.Create(OpCodes.Brfalse_S, nearlyTheEndInstr));
@@ -177,7 +177,7 @@
                 var veryNearlyTheEndInstr = Instruction.Create(OpCodes.Stloc_0); // !!!
                 if (isGuidPk) {
                     il.Add(
-                        Instruction.Create(OpCodes.Call, typeDef.Module.Import(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Equality"))));
+                        Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(guidTypeDef.Resolve().Methods.Single(m => m.Name == "op_Equality"))));
                 }
                 else {
                     il.Add(Instruction.Create(OpCodes.Ceq));

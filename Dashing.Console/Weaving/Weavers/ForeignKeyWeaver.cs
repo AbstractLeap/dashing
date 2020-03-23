@@ -17,7 +17,7 @@
             MapDefinition mapDefinition,
             Dictionary<string, List<MapDefinition>> assemblyMapDefinitions,
             Dictionary<string, AssemblyDefinition> assemblyDefinitions) {
-            var boolTypeDef = typeDef.Module.Import(typeof(bool));
+            var boolTypeDef = typeDef.Module.ImportReference(typeof(bool));
             foreach (var columnDef in
                 mapDefinition.ColumnDefinitions.Where(
                     c => c.Relationship == RelationshipType.ManyToOne || c.Relationship == RelationshipType.OneToOne)) {
@@ -28,10 +28,10 @@
                 TypeReference fkTypeReference;
                 var fkPkType = columnDef.DbType.GetCLRType();
                 if (fkPkType.IsValueType) {
-                    fkTypeReference = typeDef.Module.Import(typeof(Nullable<>).MakeGenericType(fkPkType));
+                    fkTypeReference = typeDef.Module.ImportReference(typeof(Nullable<>).MakeGenericType(fkPkType));
                 }
                 else {
-                    fkTypeReference = typeDef.Module.Import(fkPkType);
+                    fkTypeReference = typeDef.Module.ImportReference(fkPkType);
                 }
 
                 var fkField = new FieldDefinition(columnDef.DbName, FieldAttributes.Public, fkTypeReference);
@@ -78,8 +78,8 @@
                         Instruction.Create(
                             OpCodes.Call,
                             MakeGeneric(
-                                typeDef.Module.Import(fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
-                                typeDef.Module.Import(fkPkType))));
+                                typeDef.Module.ImportReference(fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
+                                typeDef.Module.ImportReference(fkPkType))));
                 }
                 else {
                     il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
@@ -92,7 +92,7 @@
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
                 il.Insert(
                     index++,
-                    Instruction.Create(OpCodes.Newobj, typeDef.Module.Import(propDef.PropertyType.Resolve().GetConstructors().First())));
+                    Instruction.Create(OpCodes.Newobj, typeDef.Module.ImportReference(propDef.PropertyType.Resolve().GetConstructors().First())));
                 il.Insert(index++, Instruction.Create(OpCodes.Stloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldloc_0));
                 il.Insert(index++, Instruction.Create(OpCodes.Ldarg_0));
@@ -103,10 +103,10 @@
                         index++,
                         Instruction.Create(
                             OpCodes.Call,
-                            typeDef.Module.Import(
+                            typeDef.Module.ImportReference(
                                 MakeGeneric(
                                     fkField.FieldType.Resolve().GetMethods().Single(m => m.Name == "get_Value"),
-                                    typeDef.Module.Import(fkPkType)))));
+                                    typeDef.Module.ImportReference(fkPkType)))));
                     var fkMapDef = assemblyMapDefinitions.SelectMany(am => am.Value).First(m => m.TypeFullName == columnDef.TypeFullName);
                     var assemblyDef = assemblyDefinitions.Single(ad => ad.Value.FullName == fkMapDef.AssemblyFullName).Value;
                     var fkMapTypeRef = GetTypeDefFromFullName(columnDef.TypeFullName, assemblyDef);
@@ -114,7 +114,7 @@
                         index++,
                         Instruction.Create(
                             OpCodes.Callvirt,
-                            typeDef.Module.Import(
+                            typeDef.Module.ImportReference(
                                 this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod)));
                 }
                 else {
@@ -126,7 +126,7 @@
                         index++,
                         Instruction.Create(
                             OpCodes.Callvirt,
-                            typeDef.Module.Import(
+                            typeDef.Module.ImportReference(
                                 this.GetProperty(fkMapTypeRef, fkMapDef.ColumnDefinitions.Single(cd => cd.IsPrimaryKey).Name).SetMethod)));
                 }
 

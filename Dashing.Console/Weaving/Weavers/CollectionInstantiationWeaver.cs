@@ -55,8 +55,8 @@
                 Instruction.Create(
                     OpCodes.Newobj,
                     MakeGeneric(
-                        typeDef.Module.Import(
-                            typeDef.Module.Import(typeof(List<>))
+                        typeDef.Module.ImportReference(
+                            typeDef.Module.ImportReference(typeof(List<>))
                                    .MakeGenericInstanceType(propDef.PropertyType)
                                    .Resolve()
                                    .GetConstructors()

@@ -42,10 +42,10 @@
             }
 
             // some common type definitions
-            var boolTypeDef = typeDef.Module.Import(typeof(bool));
-            var voidTypeDef = typeDef.Module.Import(typeof(void));
-            var stringTypeDef = typeDef.Module.Import(typeof(string));
-            var listStringTypeDef = typeDef.Module.Import(typeof(List<>)).MakeGenericInstanceType(stringTypeDef);
+            var boolTypeDef = typeDef.Module.ImportReference(typeof(bool));
+            var voidTypeDef = typeDef.Module.ImportReference(typeof(void));
+            var stringTypeDef = typeDef.Module.ImportReference(typeof(string));
+            var listStringTypeDef = typeDef.Module.ImportReference(typeof(List<>)).MakeGenericInstanceType(stringTypeDef);
             var nonPkCols = mapDefinition.ColumnDefinitions.Where(c => !c.IsPrimaryKey && c.Relationship != RelationshipType.OneToMany).ToList();
 
             // some column names
@@ -157,23 +157,23 @@
             var getSetProperties = new MethodDefinition(
                 "GetSetProperties",
                 methodAttrs,
-                typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
+                typeDef.Module.ImportReference(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
             getSetProperties.Body.Variables.Add(new VariableDefinition(listStringTypeDef));
             getSetProperties.Body.Variables.Add(
-                new VariableDefinition(typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
+                new VariableDefinition(typeDef.Module.ImportReference(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
             getSetProperties.Body.Variables.Add(new VariableDefinition(boolTypeDef));
             getSetProperties.Body.InitLocals = true;
             var instructions = getSetProperties.Body.Instructions;
             instructions.Add(Instruction.Create(OpCodes.Nop));
-            var listStringContruictor =
+            var listStringConstructor =
                 MakeGeneric(
-                    typeDef.Module.Import(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)),
+                    typeDef.Module.ImportReference(listStringTypeDef.Resolve().GetConstructors().First(c => !c.HasParameters && !c.IsStatic && c.IsPublic)),
                     stringTypeDef);
-            instructions.Add(Instruction.Create(OpCodes.Newobj, listStringContruictor));
+            instructions.Add(Instruction.Create(OpCodes.Newobj, listStringConstructor));
             instructions.Add(Instruction.Create(OpCodes.Stloc_0));
 
             var breakToInstruction = Instruction.Create(nonPkCols.Count == 1 ? OpCodes.Ldloc_0 : OpCodes.Ldarg_0);
-            var addMethod = typeDef.Module.Import(listStringTypeDef.Resolve().Methods.Single(m => m.Name == "Add"));
+            var addMethod = typeDef.Module.ImportReference(listStringTypeDef.Resolve().Methods.Single(m => m.Name == "Add"));
             addMethod = MakeGeneric(addMethod, stringTypeDef);
 
             var visibleCols = nonPkCols.Where(c => this.HasPropertyInInheritanceChain(typeDef, c.Name)).ToList();

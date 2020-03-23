@@ -146,10 +146,10 @@
         }
 
         protected void MakeNotDebuggerBrowsable(ModuleDefinition module, FieldDefinition field) {
-            var debuggerBrowsableConstructor = module.Import(typeof(DebuggerBrowsableAttribute).GetConstructors().First());
+            var debuggerBrowsableConstructor = module.ImportReference(typeof(DebuggerBrowsableAttribute).GetConstructors().First());
             var debuggerBrowsableAttr = new CustomAttribute(debuggerBrowsableConstructor);
             debuggerBrowsableAttr.ConstructorArguments.Add(
-                new CustomAttributeArgument(module.Import(typeof(DebuggerBrowsableState)), DebuggerBrowsableState.Never));
+                new CustomAttributeArgument(module.ImportReference(typeof(DebuggerBrowsableState)), DebuggerBrowsableState.Never));
             field.CustomAttributes.Add(debuggerBrowsableAttr);
         }
 
