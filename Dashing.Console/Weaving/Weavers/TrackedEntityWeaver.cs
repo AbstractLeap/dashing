@@ -484,7 +484,7 @@
                 "GetDirtyProperties",
                 getDirtyPropertiesMethodAttrs,
                 typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
-            getDirtyProperties.Body.Variables.Add(new VariableDefinition("dirtyProps", listStringTypeDef));
+            getDirtyProperties.Body.Variables.Add(new VariableDefinition(listStringTypeDef));
             getDirtyProperties.Body.Variables.Add(
                 new VariableDefinition(typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
             getDirtyProperties.Body.Variables.Add(new VariableDefinition(boolTypeDef));

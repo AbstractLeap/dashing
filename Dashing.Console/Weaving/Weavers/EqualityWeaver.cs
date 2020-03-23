@@ -37,8 +37,8 @@
 
                 var variableType = isGuidPk ? guidTypeDef : intTypeDef;
                 method.Body.Variables.Add(new VariableDefinition(intTypeDef));
-                var var1 = new VariableDefinition("CS$0$0000", variableType);
-                var var2 = new VariableDefinition("CS$0$0001", variableType);
+                var var1 = new VariableDefinition(variableType);
+                var var2 = new VariableDefinition(variableType);
                 if (!isStringPk) {
                     method.Body.Variables.Add(var1);
                 }
@@ -140,7 +140,7 @@
                 equals.Body.InitLocals = true;
                 equals.Body.Variables.Add(new VariableDefinition(boolTypeDef));
                 equals.Body.Variables.Add(new VariableDefinition(typeDef));
-                var guidVar = new VariableDefinition("CS$0$0000", guidTypeDef);
+                var guidVar = new VariableDefinition(guidTypeDef);
                 if (isGuidPk) {
                     equals.Body.Variables.Add(guidVar);
                 }

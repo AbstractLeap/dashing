@@ -158,7 +158,7 @@
                 "GetSetProperties",
                 methodAttrs,
                 typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef));
-            getSetProperties.Body.Variables.Add(new VariableDefinition("setProps", listStringTypeDef));
+            getSetProperties.Body.Variables.Add(new VariableDefinition(listStringTypeDef));
             getSetProperties.Body.Variables.Add(
                 new VariableDefinition(typeDef.Module.Import(typeof(IEnumerable<>)).MakeGenericInstanceType(stringTypeDef)));
             getSetProperties.Body.Variables.Add(new VariableDefinition(boolTypeDef));

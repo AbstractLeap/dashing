@@ -88,15 +88,20 @@
             // locate all dlls
             var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
             var assemblyMapDefinitions = new Dictionary<string, List<MapDefinition>>();
+            var assemblyResolvers = new List<BaseAssemblyResolver>();
             foreach (var file in Directory.GetFiles(this.WeaveDir).Where(f => f.EndsWith("dll", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith("exe", StringComparison.InvariantCultureIgnoreCase))) {
                 try {
                     var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
                     var assemblyResolver = new DefaultAssemblyResolver();
                     assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(file));
+                    assemblyResolvers.Add(assemblyResolver);
+
                     var assembly = AssemblyDefinition.ReadAssembly(
                         file,
-                        new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver });
+                        new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver, ReadWrite = true });
+
                     assemblyDefinitions.Add(file, assembly);
+
                     if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == "Dashing")) {
                         this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
 
@@ -124,7 +129,7 @@
             AppDomain.Unload(configAppDomain);
 
             // trim the list of assembly definitions to only those we need
-            assemblyDefinitions =
+            var usedAssemblyDefinitions =
                 assemblyDefinitions.Where(k => assemblyMapDefinitions.Select(mk => mk.Key).Contains(k.Value.FullName))
                                    .ToDictionary(k => k.Key, k => k.Value);
 
@@ -143,7 +148,7 @@
             this.Logger.Trace("Found the following weavers: " + string.Join(", ", weavers.Select(w => w.GetType().Name)));
 
             foreach (var assemblyMapDefinition in assemblyMapDefinitions) {
-                var assemblyDefinitionLookup = assemblyDefinitions.Single(a => a.Value.FullName == assemblyMapDefinition.Key);
+                var assemblyDefinitionLookup = usedAssemblyDefinitions.Single(a => a.Value.FullName == assemblyMapDefinition.Key);
                 var assemblyDefinition = assemblyDefinitionLookup.Value;
                 foreach (var mapDefinition in assemblyMapDefinition.Value) {
                     if (visitedTypes.Contains(mapDefinition.TypeFullName)) {
@@ -153,7 +158,7 @@
                     this.Logger.Trace("Weaving {0} in {1}", mapDefinition.TypeFullName, mapDefinition.AssemblyFullName);
                     var typeDef = BaseWeaver.GetTypeDefFromFullName(mapDefinition.TypeFullName, assemblyDefinition);
                     foreach (var weaver in weavers) {
-                        weaver.Weave(typeDef, assemblyDefinition, mapDefinition, assemblyMapDefinitions, assemblyDefinitions);
+                        weaver.Weave(typeDef, assemblyDefinition, mapDefinition, assemblyMapDefinitions, usedAssemblyDefinitions);
                     }
 
                     visitedTypes.Add(mapDefinition.TypeFullName);
@@ -218,6 +223,14 @@
                 //        processedFileLocations.Add(projectFile);
                 //    }
                 //}
+            }
+
+            foreach (var assemblyDefinition in assemblyDefinitions) {
+                assemblyDefinition.Value.Dispose();
+            }
+
+            foreach (var assemblyResolver in assemblyResolvers) {
+                assemblyResolver.Dispose();
             }
 
             return true;

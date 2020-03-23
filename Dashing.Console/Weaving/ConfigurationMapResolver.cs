@@ -38,7 +38,7 @@ namespace Dashing.Console.Weaving {
 
             // load the assembly if necessary
             var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.FullName == args.AssemblyFullName);
-            var assemblyDefinition = AssemblyDefinition.ReadAssembly(args.AssemblyFilePath);
+            var assemblyDefinition = AssemblyDefinition.ReadAssembly(args.AssemblyFilePath, new ReaderParameters { InMemory = true });
             if (assembly == null) {
                 assembly = Assembly.LoadFile(args.AssemblyFilePath);
             }

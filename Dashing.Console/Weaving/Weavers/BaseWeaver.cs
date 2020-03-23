@@ -102,7 +102,7 @@
         }
 
         protected bool ImplementsInterface(TypeDefinition typeDefinition, Type interfaceType) {
-            if (typeDefinition.Interfaces.Any(i => i.FullName == interfaceType.FullName)) {
+            if (typeDefinition.Interfaces.Any(i => i.InterfaceType.FullName == interfaceType.FullName)) {
                 return true;
             }
 
@@ -161,7 +161,7 @@
 
         protected void AddInterfaceToNonObjectAncestor(TypeDefinition typeDefinition, Type interfaceType) {
             if (typeDefinition.BaseType.FullName == typeof(object).FullName) {
-                typeDefinition.Interfaces.Add(typeDefinition.Module.Import(interfaceType));
+                typeDefinition.Interfaces.Add(new InterfaceImplementation(typeDefinition.Module.ImportReference(interfaceType)));
             }
             else {
                 this.AddInterfaceToNonObjectAncestor(typeDefinition.BaseType.Resolve(), interfaceType);
