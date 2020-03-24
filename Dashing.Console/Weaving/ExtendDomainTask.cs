@@ -86,47 +86,68 @@
                 (ConfigurationMapResolver)configAppDomain.CreateInstanceFromAndUnwrap(me.CodeBase, typeof(ConfigurationMapResolver).FullName);
 
             // locate all dlls
-            var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
             var assemblyMapDefinitions = new Dictionary<string, List<MapDefinition>>();
-            var assemblyResolvers = new List<BaseAssemblyResolver>();
-            foreach (var file in Directory.GetFiles(this.WeaveDir).Where(f => f.EndsWith("dll", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith("exe", StringComparison.InvariantCultureIgnoreCase))) {
-                try {
+            var usedAssemblyFiles = new HashSet<string>();
+            foreach (var file in Directory.GetFiles(this.WeaveDir).Where(f => f.EndsWith("dll", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith("exe", StringComparison.InvariantCultureIgnoreCase)))
+            {
+                try
+                {
                     var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
-                    var assemblyResolver = new DefaultAssemblyResolver();
-                    assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(file));
-                    assemblyResolvers.Add(assemblyResolver);
+                    using (var assemblyResolver = new DefaultAssemblyResolver())
+                    {
+                        assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(file));
 
-                    var assembly = AssemblyDefinition.ReadAssembly(
-                        file,
-                        new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver, ReadWrite = true });
+                        using (var assembly = AssemblyDefinition.ReadAssembly(
+                            file,
+                            new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver })) { 
+                        if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == "Dashing"))
+                        {
+                            this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
 
-                    assemblyDefinitions.Add(file, assembly);
+                            // references dashing, use our other app domain to find the IConfig and instantiate it
+                            var args = new ConfigurationMapResolverArgs { AssemblyFilePath = file };
+                            configurationMapResolver.Resolve(args);
+                            var definitions = JsonConvert.DeserializeObject<IEnumerable<MapDefinition>>(args.SerializedConfigurationMapDefinitions);
+                                if (definitions.Any())
+                                {
+                                    foreach (var mapDefinition in definitions)
+                                    {
+                                        usedAssemblyFiles.Add(mapDefinition.AssemblyPath);
 
-                    if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == "Dashing")) {
-                        this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
-
-                        // references dashing, use our other app domain to find the IConfig and instantiate it
-                        var args = new ConfigurationMapResolverArgs { AssemblyFilePath = file };
-                        configurationMapResolver.Resolve(args);
-                        var definitions = JsonConvert.DeserializeObject<IEnumerable<MapDefinition>>(args.SerializedConfigurationMapDefinitions);
-                        if (definitions.Any()) {
-                            foreach (var mapDefinition in definitions) {
-                                if (!assemblyMapDefinitions.ContainsKey(mapDefinition.AssemblyFullName)) {
-                                    assemblyMapDefinitions.Add(mapDefinition.AssemblyFullName, new List<MapDefinition>());
+                                        if (!assemblyMapDefinitions.ContainsKey(mapDefinition.AssemblyFullName))
+                                        {
+                                            assemblyMapDefinitions.Add(mapDefinition.AssemblyFullName, new List<MapDefinition>());
+                                        }
+                                        assemblyMapDefinitions[mapDefinition.AssemblyFullName].Add(mapDefinition);
+                                    }
                                 }
-
-                                assemblyMapDefinitions[mapDefinition.AssemblyFullName].Add(mapDefinition);
                             }
                         }
                     }
                 }
-                catch (BadImageFormatException) {
+                catch (BadImageFormatException)
+                {
                     // swallow and carry on - prob not a managed file
                 }
             }
 
-            // now we can unload the appdomain
+            //// now we can unload the appdomain
             AppDomain.Unload(configAppDomain);
+
+            var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
+            var assemblyResolvers = new List<BaseAssemblyResolver>();
+            foreach (var file in usedAssemblyFiles) {
+                var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
+                var assemblyResolver = new DefaultAssemblyResolver();
+                assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(file));
+                assemblyResolvers.Add(assemblyResolver);
+
+                var assembly = AssemblyDefinition.ReadAssembly(
+                    file,
+                    new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver, ReadWrite = true, InMemory = true });
+
+                assemblyDefinitions.Add(file, assembly);
+            }
 
             // trim the list of assembly definitions to only those we need
             var usedAssemblyDefinitions =
@@ -168,7 +189,7 @@
                     if (File.Exists(assemblyDefinitionLookup.Key.Substring(0, assemblyDefinitionLookup.Key.Length - 3) + "pdb")) {
                         assemblyDefinition.Write(
                             assemblyDefinitionLookup.Key,
-                            new WriterParameters { WriteSymbols = true, SymbolWriterProvider = new PdbWriterProvider() });
+                            new WriterParameters { WriteSymbols = true, SymbolWriterProvider = new NativePdbWriterProvider() });
                     }
                     else {
                         assemblyDefinition.Write(assemblyDefinitionLookup.Key);

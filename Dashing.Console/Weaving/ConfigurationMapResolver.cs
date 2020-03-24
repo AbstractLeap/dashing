@@ -71,6 +71,7 @@ namespace Dashing.Console.Weaving {
                         mapDefinitions.Add(
                             new MapDefinition {
                                                   AssemblyFullName = map.Type.Assembly.FullName,
+                                                  AssemblyPath = map.Type.Assembly.Location,
                                                   TypeFullName = map.Type.FullName,
                                                   ColumnDefinitions =
                                                       map.Columns.Where(c => !c.Value.IsIgnored)
@@ -141,6 +142,8 @@ namespace Dashing.Console.Weaving {
 
     public class MapDefinition {
         public string AssemblyFullName { get; set; }
+
+        public string AssemblyPath { get; set; }
 
         public string TypeFullName { get; set; }
 
