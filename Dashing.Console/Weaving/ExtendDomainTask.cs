@@ -87,37 +87,29 @@
 
             // locate all dlls
             var assemblyMapDefinitions = new Dictionary<string, List<MapDefinition>>();
-            var usedAssemblyFiles = new HashSet<string>();
-            foreach (var file in Directory.GetFiles(this.WeaveDir).Where(f => f.EndsWith("dll", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith("exe", StringComparison.InvariantCultureIgnoreCase)))
-            {
-                try
-                {
+            var allAssemblyFilePaths = new Dictionary<string, string>(); // some assemblies might reference others so we keep track of the assemblyname to filepath link so that we can load as well
+            foreach (var file in Directory.GetFiles(this.WeaveDir).Where(f => f.EndsWith("dll", StringComparison.InvariantCultureIgnoreCase) || f.EndsWith("exe", StringComparison.InvariantCultureIgnoreCase))) {
+                try {
                     var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
-                    using (var assemblyResolver = new DefaultAssemblyResolver())
-                    {
+                    using (var assemblyResolver = new DefaultAssemblyResolver()) {
                         assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(file));
 
-                        using (var assembly = AssemblyDefinition.ReadAssembly(
-                            file,
-                            new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver })) { 
-                        if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == "Dashing"))
-                        {
-                            this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
+                        using (var assembly = AssemblyDefinition.ReadAssembly(file, new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver })) {
+                            allAssemblyFilePaths.Add(assembly.FullName, file);
 
-                            // references dashing, use our other app domain to find the IConfig and instantiate it
-                            var args = new ConfigurationMapResolverArgs { AssemblyFilePath = file };
-                            configurationMapResolver.Resolve(args);
-                            var definitions = JsonConvert.DeserializeObject<IEnumerable<MapDefinition>>(args.SerializedConfigurationMapDefinitions);
-                                if (definitions.Any())
-                                {
-                                    foreach (var mapDefinition in definitions)
-                                    {
-                                        usedAssemblyFiles.Add(mapDefinition.AssemblyPath);
+                            if (assembly.MainModule.AssemblyReferences.Any(a => a.Name == "Dashing")) {
+                                this.Logger.Trace("Probing " + assembly.FullName + " for IConfigurations");
 
-                                        if (!assemblyMapDefinitions.ContainsKey(mapDefinition.AssemblyFullName))
-                                        {
+                                // references dashing, use our other app domain to find the IConfig and instantiate it
+                                var args = new ConfigurationMapResolverArgs { AssemblyFilePath = file };
+                                configurationMapResolver.Resolve(args);
+                                var definitions = JsonConvert.DeserializeObject<IEnumerable<MapDefinition>>(args.SerializedConfigurationMapDefinitions);
+                                if (definitions.Any()) {
+                                    foreach (var mapDefinition in definitions) {
+                                        if (!assemblyMapDefinitions.ContainsKey(mapDefinition.AssemblyFullName)) {
                                             assemblyMapDefinitions.Add(mapDefinition.AssemblyFullName, new List<MapDefinition>());
                                         }
+
                                         assemblyMapDefinitions[mapDefinition.AssemblyFullName].Add(mapDefinition);
                                     }
                                 }
@@ -125,8 +117,7 @@
                         }
                     }
                 }
-                catch (BadImageFormatException)
-                {
+                catch (BadImageFormatException) {
                     // swallow and carry on - prob not a managed file
                 }
             }
@@ -136,17 +127,18 @@
 
             var assemblyDefinitions = new Dictionary<string, AssemblyDefinition>();
             var assemblyResolvers = new List<BaseAssemblyResolver>();
-            foreach (var file in usedAssemblyFiles) {
-                var readSymbols = File.Exists(file.Substring(0, file.Length - 3) + "pdb");
+            foreach (var assemblyNameFilePathPair in allAssemblyFilePaths.Where(kvp => assemblyMapDefinitions.ContainsKey(kvp.Key))) {
+                var filePath = assemblyNameFilePathPair.Value;
+                var readSymbols = File.Exists(filePath.Substring(0, filePath.Length - 3) + "pdb");
                 var assemblyResolver = new DefaultAssemblyResolver();
-                assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(file));
+                assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(filePath));
                 assemblyResolvers.Add(assemblyResolver);
 
                 var assembly = AssemblyDefinition.ReadAssembly(
-                    file,
+                    filePath,
                     new ReaderParameters { ReadSymbols = readSymbols, AssemblyResolver = assemblyResolver, ReadWrite = true, InMemory = true });
 
-                assemblyDefinitions.Add(file, assembly);
+                assemblyDefinitions.Add(filePath, assembly);
             }
 
             // trim the list of assembly definitions to only those we need
