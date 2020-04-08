@@ -1,7 +1,7 @@
 Dashing is a simple to use mini ORM built on top of [Dapper](https://github.com/StackExchange/dapper-dot-net). 
 It aims to be a strongly typed data access layer that is built with productivity and performance in mind. 
 
-Documentation for v2 is available to [view here](http://polylytics.github.io/dashing/). 
+📘 **Documentation** for v2 is available to [view here](http://polylytics.github.io/dashing/). 
 
 # Features
 
