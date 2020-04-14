@@ -96,7 +96,7 @@ Migrate database to match latest code
 
 # Who uses Dashing?
 
-Dashing has been developed over the last 4 years at Polylytics and is in use at nearly all of our clients. It's used to execute millions of queries every week.
+Dashing has been developed over the last 4 years at [Abstract Leap](https://www.abstractleap.com) and is in use at nearly all of our clients. It's used to execute millions of queries every week.
 
 Feature requests (and voting for them) available at [Feathub](http://feathub.com/Polylytics/dashing)
 
