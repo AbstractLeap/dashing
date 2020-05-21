@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Dashing.Testing</id>
-        <version>2.0.10</version>
+        <version>2.0.11</version>
         <title>Dashing Testing Support</title>
         <authors>Polylytics</authors>
         <owners>Polylytics</owners>
@@ -11,7 +11,7 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity while not sacrificing (too much) performance.</description>
         <summary>Provides Dashing-compatible mocks to make testing easier</summary>
-        <releaseNotes>* 2.0.9/10 - Bug fixes
+        <releaseNotes>* 2.0.9/10/11 - Bug fixes
 * 2.0.5/6/7/8 - Bug Fixes
 * 2.0.4 - OrderBy Works
 * 2.0.3 - Op Equality Works
