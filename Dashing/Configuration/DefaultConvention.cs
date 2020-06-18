@@ -4,6 +4,7 @@
     using System.Data;
     using System.Globalization;
     using System.Linq;
+    using System.Reflection;
 
     using Dashing.Extensions;
 
@@ -140,6 +141,17 @@
             }
 
             return false;
+        }
+
+        ///<inheritdoc/>
+        public BindingFlags MemberBindingFlags(Type entityType) {
+            return BindingFlags.GetProperty | BindingFlags.Instance;
+        }
+
+        ///<inheritdoc/>
+        public bool IsIgnored(Type entityType, MemberInfo memberInfo) {
+            return memberInfo is PropertyInfo propertyInfo
+                && !(propertyInfo.CanRead && propertyInfo.CanWrite);
         }
 
         /// <summary>

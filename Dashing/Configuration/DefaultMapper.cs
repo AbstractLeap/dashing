@@ -69,8 +69,8 @@
                 map.HistoryTable = this.convention.HistoryTableFor(entityType);
             }
 
-            entityType.GetProperties()
-                  .Select(property => this.BuildColumn(map, entityType, property, configuration))
+            entityType.GetMembers(this.convention.MemberBindingFlags(entityType))
+                  .Select(member => this.BuildColumn(map, entityType, member, configuration))
                   .ToList()
                   .ForEach(c => map.Columns.Add(c.Name, c));
             this.ResolvePrimaryKey(entityType, map);
@@ -89,31 +89,43 @@
             }
         }
 
-        private IColumn BuildColumn(IMap map, Type entityType, PropertyInfo property, IConfiguration configuration) {
-            // TODO: this can be cached
-            var column = (IColumn)Activator.CreateInstance(typeof(Column<>).MakeGenericType(property.PropertyType));
-            column.Map = map;
-            column.Name = property.Name;
-            column.IsIgnored = !(property.CanRead && property.CanWrite);
-            column.IsComputed = entityType.IsVersionedEntity() && typeof(IVersionedEntity<>).GetProperties().Select(pi => pi.Name).Contains(property.Name);
+        private IColumn BuildColumn(IMap map, Type entityType, MemberInfo memberInfo, IConfiguration configuration) {
+            var memberType = GetMemberType(memberInfo);
 
-            this.ResolveRelationship(entityType, property, column, configuration);
-            this.ApplyAnnotations(entityType, property, column);
+            // TODO: this can be cached
+            var column = (IColumn)Activator.CreateInstance(typeof(Column<>).MakeGenericType(memberType));
+            column.Map = map;
+            column.Name = memberInfo.Name;
+            column.IsIgnored = this.convention.IsIgnored(entityType, memberInfo);
+            column.IsComputed = entityType.IsVersionedEntity() && typeof(IVersionedEntity<>).GetProperties().Select(pi => pi.Name).Contains(memberInfo.Name);
+
+            this.ResolveRelationship(entityType, memberInfo, column, configuration);
+            this.ApplyAnnotations(entityType, memberInfo, column);
 
             return column;
         }
 
-        private void ResolveRelationship(Type entity, PropertyInfo property, IColumn column, IConfiguration configuration) {
-            if (property.PropertyType.IsEntityType()) {
-                if (property.PropertyType.IsCollection()) {
+        private static Type GetMemberType(MemberInfo memberInfo) {
+            var memberType = (memberInfo as PropertyInfo)?.PropertyType ?? (memberInfo as FieldInfo)?.FieldType;
+            if (memberType == null) {
+                throw new InvalidOperationException($"Unable to determine type of member {memberInfo}");
+            }
+
+            return memberType;
+        }
+
+        private void ResolveRelationship(Type entity, MemberInfo memberInfo, IColumn column, IConfiguration configuration) {
+            var memberType = GetMemberType(memberInfo);
+            if (memberType.IsEntityType()) {
+                if (memberType.IsCollection()) {
                     this.ResolveOneToManyColumn(column);
                 }
                 else {
-                    this.ResolveEntityColumn(column, property.Name, configuration);
+                    this.ResolveEntityColumn(column, memberInfo.Name, configuration);
                 }
             }
             else {
-                this.ResolveValueColumn(entity, column, property.Name, property.PropertyType);
+                this.ResolveValueColumn(entity, column, memberInfo.Name, memberType);
             }
         }
 
@@ -212,7 +224,7 @@
             column.ShouldWeavingInitialiseListInConstructor = this.convention.IsCollectionInstantiationAutomatic(column.Map.Type, column.Name);
         }
 
-        private void ApplyAnnotations(Type entity, PropertyInfo property, IColumn column) {
+        private void ApplyAnnotations(Type entity, MemberInfo property, IColumn column) {
             /* should do something, innit! */
         }
 
