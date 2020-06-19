@@ -8,6 +8,13 @@
     /// </summary>
     public interface IConvention {
         /// <summary>
+        /// Determines whether the type is "Owned" or not. If owned it will not be persisted on it's own but inside the entities that reference it
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <returns></returns>
+        bool IsOwned(Type entityType);
+
+        /// <summary>
         ///     Identifies the table name for an entity type
         /// </summary>
         /// <param name="entity">
@@ -133,5 +140,13 @@
         /// <param name="propertyName"></param>
         /// <returns></returns>
         bool IsManyToOneNullable(Type entity, string propertyName);
+
+        /// <summary>
+        /// Specifies whether the owned property is nullable
+        /// </summary>
+        /// <param name="entityType"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        bool IsOwnedPropertyNullable(Type entityType, string propertyName);
     }
 }

@@ -14,6 +14,12 @@ namespace Dashing.Configuration {
         IConfiguration Configuration { get; set; }
 
         /// <summary>
+        /// Indicates if the type is owned by other types
+        /// This means that the type will not be persisted itself but always inside other types
+        /// </summary>
+        bool IsOwned { get; set; }
+
+        /// <summary>
         ///     Gets or sets the table.
         /// </summary>
         string Table { get; set; }
