@@ -292,7 +292,6 @@
                 throw new ArgumentException("mapToExpression must be a MemberExpression");
             }
 
-            column.Relationship = RelationshipType.OneToOne;
             column.OppositeColumnName = memberExpression.Member.Name;
             return column;
         }
