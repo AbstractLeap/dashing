@@ -4,6 +4,7 @@
     using System.Data;
     using System.Globalization;
     using System.Linq;
+    using System.Reflection;
 
     using Dashing.Extensions;
 
