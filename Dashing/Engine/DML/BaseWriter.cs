@@ -42,10 +42,21 @@
                     c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
                                                                     .IsFetched);
                 foreach (var columnEntry in columns.AsSmartEnumerable()) {
-                    columnSql.Append(", ");
-                    this.AddColumn(columnSql, columnEntry.Value, node.Alias);
-                    if (columnEntry.IsFirst) {
-                        splitOns.Add(columnEntry.Value.Name);
+                    if (columnEntry.Value.Relationship == RelationshipType.Owned) {
+                        foreach (var ownedColumnEntry in GetOwnedMap(columnEntry.Value).OwnedColumns(true).AsSmartEnumerable()) {
+                            columnSql.Append(", ");
+                            this.AddColumn(columnSql, ownedColumnEntry.Value, node.Alias);
+                            if (ownedColumnEntry.IsFirst) {
+                                splitOns.Add(ownedColumnEntry.Value.Name);
+                            }
+                        }
+                    }
+                    else {
+                        columnSql.Append(", ");
+                        this.AddColumn(columnSql, columnEntry.Value, node.Alias);
+                        if (columnEntry.IsFirst) {
+                            splitOns.Add(columnEntry.Value.Name);
+                        }
                     }
                 }
             }
@@ -221,6 +232,15 @@
             public string Signature { get; set; }
 
             public IList<string> SplitOn { get; set; }
+        }
+
+        protected static IMap GetOwnedMap(IColumn column) {
+            var ownedMap = column.Map.Configuration.GetMap(column.Type);
+            if (ownedMap == null) {
+                throw new Exception($"Could not locate map for {column.Type}. It might need adding to the configuration");
+            }
+
+            return ownedMap;
         }
     }
 }

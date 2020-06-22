@@ -59,8 +59,17 @@
             var sql = new StringBuilder("select ");
 
             foreach (var column in map.OwnedColumns()) {
-                this.AddColumn(sql, column);
-                sql.Append(", ");
+                if (column.Relationship == RelationshipType.Owned) {
+                    var ownedMap = GetOwnedMap(column);
+                    foreach (var ownedColumn in ownedMap.OwnedColumns()) {
+                        this.AddColumn(sql, ownedColumn);
+                        sql.Append(", ");
+                    }
+                }
+                else {
+                    this.AddColumn(sql, column);
+                    sql.Append(", ");
+                }
             }
 
             sql.Remove(sql.Length - 2, 2);
@@ -223,16 +232,27 @@
                 .Where(
                     c => !rootNode.Children.ContainsKey(c.Name) || !rootNode.Children[c.Name]
                                                                             .IsFetched)) {
-                foreach (var subQuery in subQueryColumnSqls) {
-                    this.AddColumn(subQuery, column, rootNode.Alias, column.DbName + rootNode.Alias);
-                    subQuery.Append(", ");
+                if (column.Relationship == RelationshipType.Owned) {
+                    foreach (var ownedColumn in GetOwnedMap(column).OwnedColumns()) {
+                        AddColumnToSubQueries(ownedColumn);
+                    }
+                }
+                else {
+                    AddColumnToSubQueries(column);
                 }
 
-                outerQueryColumnSql.Append("i.");
-                this.Dialect.AppendQuotedName(outerQueryColumnSql, column.DbName + rootNode.Alias);
-                outerQueryColumnSql.Append(" as ");
-                this.Dialect.AppendQuotedName(outerQueryColumnSql, column.DbName);
-                outerQueryColumnSql.Append(", ");
+                void AddColumnToSubQueries(IColumn column1) {
+                    foreach (var subQuery in subQueryColumnSqls) {
+                        this.AddColumn(subQuery, column1, rootNode.Alias, column1.DbName + rootNode.Alias);
+                        subQuery.Append(", ");
+                    }
+
+                    outerQueryColumnSql.Append("i.");
+                    this.Dialect.AppendQuotedName(outerQueryColumnSql, column1.DbName + rootNode.Alias);
+                    outerQueryColumnSql.Append(" as ");
+                    this.Dialect.AppendQuotedName(outerQueryColumnSql, column1.DbName);
+                    outerQueryColumnSql.Append(", ");
+                }
             }
 
             // remove extraneous ,
@@ -587,27 +607,38 @@
                         .Where(
                             c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
                                                                             .IsFetched)) {
-                        for (var i = 0; i < subQueryColumnSqls.Length; i++) {
-                            var subQuery = subQueryColumnSqls[i];
-                            subQuery.Append(", ");
-                            if (i == insideQueryN) {
-                                this.AddColumn(subQuery, column, node.Alias, column.DbName + node.Alias);
+                        if (column.Relationship == RelationshipType.Owned) {
+                            foreach (var ownedColumn in GetOwnedMap(column).OwnedColumns()) {
+                                AddColumnsToSubQuery(ownedColumn, ref insideQueryN);
                             }
-                            else {
-                                subQuery.Append("null as ")
-                                        .Append(column.DbName + node.Alias);
-                            }
-                        }
-
-                        outerQueryColumnSql.Append(", ")
-                                           .Append("i.");
-                        this.Dialect.AppendQuotedName(outerQueryColumnSql, column.DbName + node.Alias);
-                        outerQueryColumnSql.Append(" as ");
-                        if (column.Relationship == RelationshipType.None) {
-                            this.Dialect.AppendQuotedName(outerQueryColumnSql, column.Name);
                         }
                         else {
-                            this.Dialect.AppendQuotedName(outerQueryColumnSql, column.DbName);
+                            AddColumnsToSubQuery(column, ref insideQueryN);
+                        }
+
+                        void AddColumnsToSubQuery(IColumn column1, ref int insideQueryN1) {
+                            for (var i = 0; i < subQueryColumnSqls.Length; i++) {
+                                var subQuery = subQueryColumnSqls[i];
+                                subQuery.Append(", ");
+                                if (i == insideQueryN1) {
+                                    this.AddColumn(subQuery, column1, node.Alias, column1.DbName + node.Alias);
+                                }
+                                else {
+                                    subQuery.Append("null as ")
+                                            .Append(column1.DbName + node.Alias);
+                                }
+                            }
+
+                            outerQueryColumnSql.Append(", ")
+                                               .Append("i.");
+                            this.Dialect.AppendQuotedName(outerQueryColumnSql, column1.DbName + node.Alias);
+                            outerQueryColumnSql.Append(" as ");
+                            if (column1.Relationship == RelationshipType.None) {
+                                this.Dialect.AppendQuotedName(outerQueryColumnSql, column1.Name);
+                            }
+                            else {
+                                this.Dialect.AppendQuotedName(outerQueryColumnSql, column1.DbName);
+                            }
                         }
                     }
                 }
@@ -621,21 +652,36 @@
                             splitOns.Add(column.Name);
                         }
 
-                        for (var i = 0; i < subQueryColumnSqls.Length; i++) {
-                            var subQuery = subQueryColumnSqls[i];
-                            subQuery.Append(", ");
-                            this.AddColumn(subQuery, column, node.Alias, column.DbName + node.Alias);
-                        }
+                        if (column.Relationship == RelationshipType.Owned) {
+                            foreach (var ownedColumnEntry in GetOwnedMap(column).OwnedColumns().AsSmartEnumerable()) {
+                                if (ownedColumnEntry.IsFirst) {
+                                    splitOns.Add(ownedColumnEntry.Value.Name);
+                                }
 
-                        outerQueryColumnSql.Append(", ")
-                                           .Append("i.");
-                        this.Dialect.AppendQuotedName(outerQueryColumnSql, column.DbName + node.Alias);
-                        outerQueryColumnSql.Append(" as ");
-                        if (column.Relationship == RelationshipType.None) {
-                            this.Dialect.AppendQuotedName(outerQueryColumnSql, column.Name);
+                                AddColumnToAllQueries(ownedColumnEntry.Value);
+                            }
                         }
                         else {
-                            this.Dialect.AppendQuotedName(outerQueryColumnSql, column.DbName);
+                            AddColumnToAllQueries(column);
+                        }
+
+                        void AddColumnToAllQueries(IColumn column2) {
+                            for (var i = 0; i < subQueryColumnSqls.Length; i++) {
+                                var subQuery = subQueryColumnSqls[i];
+                                subQuery.Append(", ");
+                                this.AddColumn(subQuery, column2, node.Alias, column2.DbName + node.Alias);
+                            }
+
+                            outerQueryColumnSql.Append(", ")
+                                               .Append("i.");
+                            this.Dialect.AppendQuotedName(outerQueryColumnSql, column2.DbName + node.Alias);
+                            outerQueryColumnSql.Append(" as ");
+                            if (column2.Relationship == RelationshipType.None) {
+                                this.Dialect.AppendQuotedName(outerQueryColumnSql, column2.Name);
+                            }
+                            else {
+                                this.Dialect.AppendQuotedName(outerQueryColumnSql, column2.DbName);
+                            }
                         }
                     }
                 }
@@ -801,8 +847,16 @@
                 c => rootNode == null || !rootNode.Children.ContainsKey(c.Name) || !rootNode.Children[c.Name]
                                                                                                 .IsFetched);
             foreach (var column in columns) {
-                this.AddColumn(columnSql, column, alias);
-                columnSql.Append(", ");
+                if (column.Relationship == RelationshipType.Owned) {
+                    foreach (var ownedColumn in GetOwnedMap(column).OwnedColumns()) {
+                        this.AddColumn(columnSql, ownedColumn, alias);
+                        columnSql.Append(", ");
+                    }
+                }
+                else {
+                    this.AddColumn(columnSql, column, alias);
+                    columnSql.Append(", ");
+                }
             }
             
             if (removeTrailingComma) {

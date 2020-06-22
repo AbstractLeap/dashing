@@ -9,8 +9,8 @@
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
 
-    internal class InsertWriter : IInsertWriter {
-        public InsertWriter(ISqlDialect dialect, IConfiguration config) {
+    internal class InsertWriter : BaseWriter, IInsertWriter {
+        public InsertWriter(ISqlDialect dialect, IConfiguration config) : base(dialect, config) {
             this.dialect = dialect;
             this.configuration = config;
         }
@@ -63,7 +63,7 @@
                                       .OrderBy(k => k.Name)) {
                 // TODO recursion down through owned types
                 if (column.Relationship == RelationshipType.Owned) {
-                    var ownedMap = GetOwnedMap(map, column);
+                    var ownedMap = GetOwnedMap(column);
                     foreach (var ownedColumn in ownedMap.OwnedColumns(true))  {
                         AddColumn(ownedColumn);
                     }
@@ -94,7 +94,7 @@
                                       .OrderBy(k => k.Name)) {
                 // TODO recursion down through owned types
                 if (column.Relationship == RelationshipType.Owned) {
-                    var ownedMap = GetOwnedMap(map, column);
+                    var ownedMap = BaseWriter.GetOwnedMap(column);
                     foreach (var ownedColumn in ownedMap.OwnedColumns(true)) {
                         GenerateColumnValueSpec(sql, parameters, ownedColumn, map.GetColumnValue(entity, column), generateSql, fillParams, paramIdx++);
                     }
@@ -108,15 +108,6 @@
                 sql.Remove(sql.Length - 2, 2);
                 sql.Append(")");
             }
-        }
-
-        private static IMap GetOwnedMap(IMap map, IColumn column) {
-            var ownedMap = map.Configuration.GetMap(column.Type);
-            if (ownedMap == null) {
-                throw new Exception($"Could not locate map for {column.Type}. It might need adding to the configuration");
-            }
-
-            return ownedMap;
         }
 
         private void GenerateColumnValueSpec(StringBuilder sql, DynamicParameters parameters, IColumn column, object entity, bool generateSql, bool fillParams, int paramIdx) {
