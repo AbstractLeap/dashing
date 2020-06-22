@@ -32,6 +32,7 @@
                                 new MapDefinition {
                                                       AssemblyPath = map.Type.Assembly().Location,
                                                       TypeFullName = map.Type.FullName,
+                                                      IsOwned = map.IsOwned,
                                                       ColumnDefinitions = map
                                                           .Columns.Where(c => !c.Value.IsIgnored)
                                                           .Select(c => c.Value)

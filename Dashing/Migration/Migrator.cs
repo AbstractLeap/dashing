@@ -68,7 +68,7 @@
 
             // get additions and removals
             var mapComparer = new TableNameEqualityComparer();
-            var additions = to.Except(from, mapComparer).Where(m => !tablesToIgnore.Contains(m.Table)).ToList();
+            var additions = to.Except(from, mapComparer).Where(m => !m.IsOwned && !tablesToIgnore.Contains(m.Table)).ToList();
             var removals = from.Except(to, mapComparer).ToList();
             var matches = from.Join(to, f => f.Table.ToLowerInvariant(), t => t.Table.ToLowerInvariant(), MigrationPair.Of).ToList();
 
