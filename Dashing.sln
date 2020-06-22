@@ -1,15 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing", "Dashing\Dashing.csproj", "{54B26C08-9BFD-46C4-A16E-97034A1ED114}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{736005D8-C028-4F23-B44C-91CDA2183A2D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Weaving.Sample", "Dashing.Weaving.Sample\Dashing.Weaving.Sample.csproj", "{E2C843AC-64B1-47B9-BF1A-CF684FB6C699}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D8603DCD-234C-407B-B917-669755CF5877} = {D8603DCD-234C-407B-B917-669755CF5877}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Weaving.Sample2", "Dashing.Weaving.Sample2\Dashing.Weaving.Sample2.csproj", "{5E06E370-8753-48DB-86C2-9AF4871FEF95}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D8603DCD-234C-407B-B917-669755CF5877} = {D8603DCD-234C-407B-B917-669755CF5877}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Tests", "Dashing.Tests\Dashing.Tests.csproj", "{38DA6DBA-1894-46E0-9DC4-58CC21036A60}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -26,8 +32,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.Cli", "Dashing.Cli\Dashing.Cli.csproj", "{E32C4DEE-E73B-4190-A9A5-CCDAF7A92456}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.IntegrationTests", "Dashing.IntegrationTests\Dashing.IntegrationTests.csproj", "{DF243268-4867-4FCA-A5D2-0D41AA2441BE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D8603DCD-234C-407B-B917-669755CF5877} = {D8603DCD-234C-407B-B917-669755CF5877}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashing.PerformanceTests", "Dashing.PerformanceTests\Dashing.PerformanceTests.csproj", "{56D2183E-2677-40EB-B311-4F0F45554AF7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D8603DCD-234C-407B-B917-669755CF5877} = {D8603DCD-234C-407B-B917-669755CF5877}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
