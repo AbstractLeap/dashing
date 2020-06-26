@@ -126,5 +126,9 @@
                         || c.Relationship == RelationshipType.OneToOne
                         || c.Relationship == RelationshipType.Owned));
         }
+
+        public static bool HasOwnedProperties(this IMap map) {
+            return map.Columns.Any(c => c.Value.Relationship == RelationshipType.Owned);
+        }
     }
 }

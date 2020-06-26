@@ -87,7 +87,7 @@ namespace Dashing.Engine {
 
         public virtual IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
             var sqlQuery = this.selectWriter.GenerateSql(query);
-            if (query.HasFetches()) {
+            if (query.HasFetches() || this.configuration.GetMap<T>().HasOwnedProperties()) {
                 Func<SelectWriterResult, SelectQuery<T>, IDbConnection, IDbTransaction, IEnumerable<T>> queryFunc;
                 if (sqlQuery.NumberCollectionsFetched > 0) {
                     queryFunc = this.delegateQueryCreator.GetCollectionFunction<T>(sqlQuery);
@@ -258,7 +258,7 @@ namespace Dashing.Engine {
             where T : class, new() {
             var sqlQuery = this.selectWriter.GenerateSql(query);
             IEnumerable<T> queryResults;
-            if (query.HasFetches()) {
+            if (query.HasFetches() || this.configuration.GetMap<T>().HasOwnedProperties()) {
                 if (sqlQuery.NumberCollectionsFetched > 0) {
                     queryResults = await this.delegateQueryCreator.GetAsyncCollectionFunction<T>(sqlQuery)(sqlQuery, query, connection, transaction);
                 }

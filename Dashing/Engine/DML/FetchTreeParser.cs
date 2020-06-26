@@ -20,6 +20,16 @@
             numberCollectionFetches = 0;
             aliasCounter = 0;
 
+            var map = this.configuration.GetMap<T>();
+            if (map.HasOwnedProperties()) {
+                rootNode = new FetchNode();
+
+                // TODO recurse down
+                foreach (var column in map.OwnedColumns(true).Where(c => c.Relationship == RelationshipType.Owned)) {
+                    this.AddPropertiesToFetchTree<T>(ref aliasCounter, ref numberCollectionFetches, new Stack<string>(new [] { column.Name }), rootNode, rootNode);
+                }
+            }
+
             if (selectQuery.HasFetches()) {
                 // now we go through the fetches and generate the tree structure
                 rootNode = new FetchNode();
@@ -104,7 +114,8 @@
                     }
 
                     // add to tree
-                    currentNode = currentNode.AddChild(column, true);
+                    var isOwned = column.Relationship == RelationshipType.Owned;
+                    currentNode = currentNode.AddChild(column, !isOwned, isOwned);
                 }
                 else {
                     currentNode = currentNode.Children[propName];

@@ -38,6 +38,11 @@
         public bool IsFetched { get; private set; }
 
         /// <summary>
+        /// Indicates that the property is owned, so a different instance but the same table
+        /// </summary>
+        public bool IsOwned { get; private set; }
+
+        /// <summary>
         ///     If true then this property can be inner joined as it, or one of it's children,
         ///     is used in a where clause
         /// </summary>
@@ -59,13 +64,14 @@
 
         public IList<IColumn> ExcludedColumns { get; set; }
 
-        public FetchNode AddChild(IColumn column, bool isFetched) {
+        public FetchNode AddChild(IColumn column, bool isFetched, bool isOwned = false) {
             // create the node
             var newNode = new FetchNode {
                                             Alias = "t_" + (isFetched
                                                                 ? ++this.Root.aliasCounter
                                                                 : ++this.Root.nonFetchedAliasCounter),
                                             IsFetched = isFetched,
+                                            IsOwned = isOwned,
                                             Parent = this,
                                             Root = this.Root,
                                             Column = column
