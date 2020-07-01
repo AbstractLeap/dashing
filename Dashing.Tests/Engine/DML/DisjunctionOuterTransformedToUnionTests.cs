@@ -220,7 +220,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([AuthorId] = @l_1)", result.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where (t.[AuthorId] = @l_1)", result.Sql);
         }
 
         [Fact]
@@ -231,7 +231,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal("select [BoolClassId], [IsFoo] from [BoolClasses] where ([IsFoo] = 1 or ([BoolClassId] = @l_1))", result.Sql);
+            Assert.Equal("select t.[BoolClassId], t.[IsFoo] from [BoolClasses] as t where (t.[IsFoo] = 1 or (t.[BoolClassId] = @l_1))", result.Sql);
         }
 
         [Fact]
@@ -325,7 +325,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal(@"select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where (([Title] = @l_1) or ([Rating] = @l_2))", result.Sql);
+            Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where ((t.[Title] = @l_1) or (t.[Rating] = @l_2))", result.Sql);
         }
 
         [Fact]
@@ -336,7 +336,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal(@"select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where (([AuthorId] = @l_1) or ([BlogId] = @l_2))", result.Sql);
+            Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where ((t.[AuthorId] = @l_1) or (t.[BlogId] = @l_2))", result.Sql);
         }
 
         [Fact]
@@ -353,7 +353,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal(@"select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where (([AuthorId] = @l_1) or ([BlogId] = @l_2))", result.Sql);
+            Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where ((t.[AuthorId] = @l_1) or (t.[BlogId] = @l_2))", result.Sql);
         }
 
         [Fact]
@@ -377,7 +377,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Users] as t_101 on t.AuthorId = t_101.UserId left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where ((t_100.[Title] = @l_1) or (t_101.[HeightInMeters] = @l_2)) and ((t.[Rating] > @l_3) or (t_100.[CreateDate] > @l_4))", result.Sql);
+            Assert.Equal(@"select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Users] as t_100 on t.AuthorId = t_100.UserId left join [Blogs] as t_101 on t.BlogId = t_101.BlogId where ((t_101.[Title] = @l_1) or (t_100.[HeightInMeters] = @l_2)) and ((t.[Rating] > @l_3) or (t_101.[CreateDate] > @l_4))", result.Sql);
         }
 
         [Fact]

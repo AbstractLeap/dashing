@@ -4,6 +4,6 @@
     using Dashing.Engine.DML;
 
     internal interface INonCollectionMapperGenerator {
-        Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(FetchNode fetchTree);
+        Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(QueryTree mapQueryTree);
     }
 }

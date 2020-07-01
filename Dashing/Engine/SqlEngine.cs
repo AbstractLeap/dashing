@@ -122,14 +122,14 @@ namespace Dashing.Engine {
         public IEnumerable<TProjection> Query<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
             where TBase : class, new() {
             var sqlResult = this.selectWriter.GenerateSql(query);
-            if (sqlResult.FetchTree.Children.Count == 0) {
+            if (sqlResult.MapQueryTree.Children.Count == 0) {
                 return connection.Query<TBase>(sqlResult.Sql, sqlResult.Parameters, transaction)
                                  .Select(query.ProjectionExpression.Compile());
             }
 
-            var projectionExpressionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(this.configuration, query, sqlResult.FetchTree);
+            var projectionExpressionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(this.configuration, query, sqlResult.MapQueryTree);
             var projectionDelegateResult = projectionExpressionRewriter.Rewrite();
-            return connection.Query<TProjection>(sqlResult.Sql, projectionDelegateResult.Types, projectionDelegateResult.Mapper, sqlResult.Parameters, transaction, splitOn: sqlResult.FetchTree.SplitOn);
+            return connection.Query<TProjection>(sqlResult.Sql, projectionDelegateResult.Types, projectionDelegateResult.Mapper, sqlResult.Parameters, transaction, splitOn: sqlResult.MapQueryTree.GetSplitOn());
         }
 
         public Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
@@ -290,14 +290,14 @@ namespace Dashing.Engine {
         public async Task<IEnumerable<TProjection>> QueryAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
             where TBase : class, new() {
             var sqlResult = this.selectWriter.GenerateSql(query);
-            if (sqlResult.FetchTree.Children.Count == 0) {
+            if (sqlResult.MapQueryTree.Children.Count == 0) {
                 var results = await connection.QueryAsync<TBase>(sqlResult.Sql, sqlResult.Parameters, transaction);
                 return results.Select(query.ProjectionExpression.Compile());
             }
 
-            var projectionExpressionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(this.configuration, query, sqlResult.FetchTree);
+            var projectionExpressionRewriter = new ProjectionExpressionRewriter<TBase, TProjection>(this.configuration, query, sqlResult.MapQueryTree);
             var projectionDelegateResult = projectionExpressionRewriter.Rewrite();
-            return await connection.QueryAsync<TProjection>(sqlResult.Sql, projectionDelegateResult.Types, projectionDelegateResult.Mapper, sqlResult.Parameters, transaction, splitOn: sqlResult.FetchTree.SplitOn);
+            return await connection.QueryAsync<TProjection>(sqlResult.Sql, projectionDelegateResult.Types, projectionDelegateResult.Mapper, sqlResult.Parameters, transaction, splitOn: sqlResult.MapQueryTree.GetSplitOn());
         }
 
         public async Task<Page<TProjection>> QueryPagedAsync<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)

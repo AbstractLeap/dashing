@@ -81,7 +81,7 @@
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Assert.Equal("1SE", sql.FetchTree.FetchSignature);
+            Assert.Equal("1SE", sql.MapQueryTree.GetFetchSignature());
         }
 
         [Fact]
@@ -89,7 +89,7 @@
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Author);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Assert.Equal("UserId", sql.FetchTree.SplitOn);
+            Assert.Equal("UserId", sql.MapQueryTree.GetSplitOn());
         }
 
         [Fact]
@@ -108,7 +108,7 @@
             var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog);
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Assert.Equal("2S2SEE", sql.FetchTree.FetchSignature);
+            Assert.Equal("2S2SEE", sql.MapQueryTree.GetFetchSignature());
         }
 
         [Fact]
@@ -116,7 +116,7 @@
             var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog);
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Assert.Equal("PostId,BlogId", sql.FetchTree.SplitOn);
+            Assert.Equal("PostId,BlogId", sql.MapQueryTree.GetSplitOn());
         }
 
         [Fact]
@@ -135,7 +135,7 @@
             var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog).Fetch(c => c.User);
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Assert.Equal("2S2SEE3SE", sql.FetchTree.FetchSignature);
+            Assert.Equal("2S2SEE3SE", sql.MapQueryTree.GetFetchSignature());
         }
 
         [Fact]
@@ -143,7 +143,7 @@
             var query = this.GetSelectQuery<Comment>().Fetch(c => c.Post.Blog).Fetch(c => c.User);
             var selectQuery = query as SelectQuery<Comment>;
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Assert.Equal("PostId,BlogId,UserId", sql.FetchTree.SplitOn);
+            Assert.Equal("PostId,BlogId,UserId", sql.MapQueryTree.GetSplitOn());
         }
 
         [Fact]
@@ -163,7 +163,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where (t.[PostId] = @l_1)",
                 sql.Sql);
         }
 
@@ -175,7 +175,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where (t.[PostId] = @l_1)",
                 sql.Sql);
         }
 
@@ -187,7 +187,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where (t.[PostId] = @l_1)",
                 sql.Sql);
         }
 
@@ -199,7 +199,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([BlogId] = @l_1)",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where (t.[BlogId] = @l_1)",
                 sql.Sql);
         }
 
@@ -211,7 +211,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([BlogId] = @l_1)",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where (t.[BlogId] = @l_1)",
                 sql.Sql);
         }
 
@@ -223,7 +223,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where [PostId] in @l_1",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where t.[PostId] in @l_1",
                 sql.Sql);
         }
 
@@ -252,7 +252,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([PostId] = @l_1)",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where (t.[PostId] = @l_1)",
                 sql.Sql);
         }
 
@@ -340,7 +340,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Rating] asc",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[Rating] asc",
                 sql.Sql);
         }
 
@@ -358,7 +358,7 @@
             var selectQuery = query;
             var sql = this.GetWriter(true).GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId] from [Posts]", sql.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId] from [Posts] as t", sql.Sql);
         }
 
         [Fact]
@@ -379,7 +379,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select top (@take) [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]",
+                "select top (@take) t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[PostId]",
                 sql.Sql);
         }
 
@@ -390,7 +390,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset 0 rows fetch next @take rows only",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[PostId] offset 0 rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -401,7 +401,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset 0 rows fetch next @take rows only",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[Title] asc offset 0 rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -412,7 +412,7 @@
             var sql = this.GetMySqlWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @take",
+                "select t.`PostId`, t.`Title`, t.`Content`, t.`Rating`, t.`AuthorId`, t.`BlogId`, t.`DoNotMap` from `Posts` as t order by t.`PostId` limit @take",
                 sql.Sql);
         }
 
@@ -423,7 +423,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select * from (select ROW_NUMBER() OVER ( order by [PostId]) as RowNum, [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]) as pagetable where pagetable.RowNum between @skip + 1 and 18446744073709551615 order by pagetable.RowNum",
+                "select * from (select ROW_NUMBER() OVER ( order by t.[PostId]) as RowNum, t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[PostId]) as pagetable where pagetable.RowNum between @skip + 1 and 18446744073709551615 order by pagetable.RowNum",
                 sql.Sql);
         }
 
@@ -434,7 +434,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip rows",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[PostId] offset @skip rows",
                 sql.Sql);
         }
 
@@ -445,7 +445,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip rows",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[Title] asc offset @skip rows",
                 sql.Sql);
         }
 
@@ -456,7 +456,7 @@
             var sql = this.GetMySqlWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @skip, 18446744073709551615",
+                "select t.`PostId`, t.`Title`, t.`Content`, t.`Rating`, t.`AuthorId`, t.`BlogId`, t.`DoNotMap` from `Posts` as t order by t.`PostId` limit @skip, 18446744073709551615",
                 sql.Sql);
         }
 
@@ -467,7 +467,7 @@
             var sql = this.GetWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select * from (select ROW_NUMBER() OVER ( order by [PostId]) as RowNum, [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId]) as pagetable where pagetable.RowNum between @skip + 1 and @skip + @take order by pagetable.RowNum",
+                "select * from (select ROW_NUMBER() OVER ( order by t.[PostId]) as RowNum, t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[PostId]) as pagetable where pagetable.RowNum between @skip + 1 and @skip + @take order by pagetable.RowNum",
                 sql.Sql);
         }
 
@@ -483,7 +483,7 @@
             // assert
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [PostId] offset @skip rows fetch next @take rows only",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[PostId] offset @skip rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -494,7 +494,7 @@
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] order by [Title] asc offset @skip rows fetch next @take rows only",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t order by t.[Title] asc offset @skip rows fetch next @take rows only",
                 sql.Sql);
         }
 
@@ -505,7 +505,7 @@
             var sql = this.GetMySqlWriter().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             Debug.Write(sql.Sql);
             Assert.Equal(
-                "select `PostId`, `Title`, `Content`, `Rating`, `AuthorId`, `BlogId`, `DoNotMap` from `Posts` order by `PostId` limit @skip, @take",
+                "select t.`PostId`, t.`Title`, t.`Content`, t.`Rating`, t.`AuthorId`, t.`BlogId`, t.`DoNotMap` from `Posts` as t order by t.`PostId` limit @skip, @take",
                 sql.Sql);
         }
 
@@ -525,9 +525,9 @@
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Tags).Fetch(p => p.Comments);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Debug.Write(sql.Sql);
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[CommentIdt_2] as [CommentId], i.[Contentt_2] as [Content], i.[PostIdt_2] as [PostId], i.[UserIdt_2] as [UserId], i.[CommentDatet_2] as [CommentDate], i.[PostTagIdt_1] as [PostTagId], i.[PostIdt_1] as [PostId], i.[ElTagIdt_1] as [ElTagId] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_2.[CommentId] as [CommentIdt_2], t_2.[Content] as [Contentt_2], t_2.[PostId] as [PostIdt_2], t_2.[UserId] as [UserIdt_2], t_2.[CommentDate] as [CommentDatet_2], null as PostTagIdt_1, null as PostIdt_1, null as ElTagIdt_1 from [Posts] as t left join [Comments] as t_2 on t.PostId = t_2.PostId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as CommentIdt_2, null as Contentt_2, null as PostIdt_2, null as UserIdt_2, null as CommentDatet_2, t_1.[PostTagId] as [PostTagIdt_1], t_1.[PostId] as [PostIdt_1], t_1.[ElTagId] as [ElTagIdt_1] from [Posts] as t left join [PostTags] as t_1 on t.PostId = t_1.PostId) as i order by i.[PostIdt]",
+                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[CommentIdt_1] as [CommentId], i.[Contentt_1] as [Content], i.[PostIdt_1] as [PostId], i.[UserIdt_1] as [UserId], i.[CommentDatet_1] as [CommentDate], i.[PostTagIdt_2] as [PostTagId], i.[PostIdt_2] as [PostId], i.[ElTagIdt_2] as [ElTagId] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_1.[CommentId] as [CommentIdt_1], t_1.[Content] as [Contentt_1], t_1.[PostId] as [PostIdt_1], t_1.[UserId] as [UserIdt_1], t_1.[CommentDate] as [CommentDatet_1], null as PostTagIdt_2, null as PostIdt_2, null as ElTagIdt_2 from [Posts] as t left join [Comments] as t_1 on t.PostId = t_1.PostId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as CommentIdt_1, null as Contentt_1, null as PostIdt_1, null as UserIdt_1, null as CommentDatet_1, t_2.[PostTagId] as [PostTagIdt_2], t_2.[PostId] as [PostIdt_2], t_2.[ElTagId] as [ElTagIdt_2] from [Posts] as t left join [PostTags] as t_2 on t.PostId = t_2.PostId) as i order by i.[PostIdt]",
                 sql.Sql);
         }
 
@@ -567,9 +567,9 @@
                     .Where(p => p.Person == patient);
             var selectQuery = query as SelectQuery<Application>;
             var sql = new SelectWriter(new SqlServer2012Dialect(), new MultipleFetchManyWithThenFetchConfig()).GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Debug.Write(sql.Sql);
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[ApplicationIdt] as [ApplicationId], i.[CreatedDatet] as [CreatedDate], i.[ReferenceIdt_7] as [ReferenceId], i.[ApplicationIdt_7] as [ApplicationId], i.[ParentReferenceIdt_8] as [ParentReferenceId], i.[Questiont_8] as [Question], i.[PersonIdt_1] as [PersonId], i.[Namet_1] as [Name], i.[PlanIdt_4] as [PlanId], i.[ApplicationIdt_4] as [ApplicationId], i.[ProductInstanceIdt_5] as [ProductInstanceId], i.[ProductIdt_6] as [ProductId], i.[Namet_6] as [Name], i.[ProviderIdt_2] as [ProviderId], i.[OrganisationIdt_3] as [OrganisationId], i.[Foot_3] as [Foo], i.[ProviderIdt_3] as [ProviderId] from (select t.[ApplicationId] as [ApplicationIdt], t.[CreatedDate] as [CreatedDatet], t_7.[ReferenceId] as [ReferenceIdt_7], t_7.[ApplicationId] as [ApplicationIdt_7], t_8.[ParentReferenceId] as [ParentReferenceIdt_8], t_8.[Question] as [Questiont_8], t_1.[PersonId] as [PersonIdt_1], t_1.[Name] as [Namet_1], null as PlanIdt_4, null as ApplicationIdt_4, null as ProductInstanceIdt_5, null as ProductIdt_6, null as Namet_6, t_2.[ProviderId] as [ProviderIdt_2], t_3.[OrganisationId] as [OrganisationIdt_3], t_3.[Foo] as [Foot_3], t_3.[ProviderId] as [ProviderIdt_3] from [Applications] as t left join [References] as t_7 on t.ApplicationId = t_7.ApplicationId left join [ParentReferences] as t_8 on t_7.ParentReferenceId = t_8.ParentReferenceId left join [People] as t_1 on t.PersonId = t_1.PersonId left join [Providers] as t_2 on t.ProviderId = t_2.ProviderId left join [Organisations] as t_3 on t_2.ProviderId = t_3.ProviderId where (t.[PersonId] = @l_1) union all select t.[ApplicationId] as [ApplicationIdt], t.[CreatedDate] as [CreatedDatet], null as ReferenceIdt_7, null as ApplicationIdt_7, null as ParentReferenceIdt_8, null as Questiont_8, t_1.[PersonId] as [PersonIdt_1], t_1.[Name] as [Namet_1], t_4.[PlanId] as [PlanIdt_4], t_4.[ApplicationId] as [ApplicationIdt_4], t_5.[ProductInstanceId] as [ProductInstanceIdt_5], t_6.[ProductId] as [ProductIdt_6], t_6.[Name] as [Namet_6], t_2.[ProviderId] as [ProviderIdt_2], t_3.[OrganisationId] as [OrganisationIdt_3], t_3.[Foo] as [Foot_3], t_3.[ProviderId] as [ProviderIdt_3] from [Applications] as t left join [People] as t_1 on t.PersonId = t_1.PersonId left join [Plans] as t_4 on t.ApplicationId = t_4.ApplicationId left join [ProductInstances] as t_5 on t_4.ProductInstanceId = t_5.ProductInstanceId left join [Products] as t_6 on t_5.ProductId = t_6.ProductId left join [Providers] as t_2 on t.ProviderId = t_2.ProviderId left join [Organisations] as t_3 on t_2.ProviderId = t_3.ProviderId where (t.[PersonId] = @l_1)) as i order by i.[ApplicationIdt]",
+                "select i.[ApplicationIdt] as [ApplicationId], i.[CreatedDatet] as [CreatedDate], i.[ReferenceIdt_1] as [ReferenceId], i.[ApplicationIdt_1] as [ApplicationId], i.[ParentReferenceIdt_2] as [ParentReferenceId], i.[Questiont_2] as [Question], i.[PersonIdt_3] as [PersonId], i.[Namet_3] as [Name], i.[PlanIdt_4] as [PlanId], i.[ApplicationIdt_4] as [ApplicationId], i.[ProductInstanceIdt_5] as [ProductInstanceId], i.[ProductIdt_6] as [ProductId], i.[Namet_6] as [Name], i.[ProviderIdt_7] as [ProviderId], i.[OrganisationIdt_8] as [OrganisationId], i.[Foot_8] as [Foo], i.[ProviderIdt_8] as [ProviderId] from (select t.[ApplicationId] as [ApplicationIdt], t.[CreatedDate] as [CreatedDatet], t_1.[ReferenceId] as [ReferenceIdt_1], t_1.[ApplicationId] as [ApplicationIdt_1], t_2.[ParentReferenceId] as [ParentReferenceIdt_2], t_2.[Question] as [Questiont_2], t_3.[PersonId] as [PersonIdt_3], t_3.[Name] as [Namet_3], null as PlanIdt_4, null as ApplicationIdt_4, null as ProductInstanceIdt_5, null as ProductIdt_6, null as Namet_6, t_7.[ProviderId] as [ProviderIdt_7], t_8.[OrganisationId] as [OrganisationIdt_8], t_8.[Foo] as [Foot_8], t_8.[ProviderId] as [ProviderIdt_8] from [Applications] as t left join [References] as t_1 on t.ApplicationId = t_1.ApplicationId left join [ParentReferences] as t_2 on t_1.ParentReferenceId = t_2.ParentReferenceId left join [People] as t_3 on t.PersonId = t_3.PersonId left join [Providers] as t_7 on t.ProviderId = t_7.ProviderId left join [Organisations] as t_8 on t_7.ProviderId = t_8.ProviderId where (t.[PersonId] = @l_1) union all select t.[ApplicationId] as [ApplicationIdt], t.[CreatedDate] as [CreatedDatet], null as ReferenceIdt_1, null as ApplicationIdt_1, null as ParentReferenceIdt_2, null as Questiont_2, t_3.[PersonId] as [PersonIdt_3], t_3.[Name] as [Namet_3], t_4.[PlanId] as [PlanIdt_4], t_4.[ApplicationId] as [ApplicationIdt_4], t_5.[ProductInstanceId] as [ProductInstanceIdt_5], t_6.[ProductId] as [ProductIdt_6], t_6.[Name] as [Namet_6], t_7.[ProviderId] as [ProviderIdt_7], t_8.[OrganisationId] as [OrganisationIdt_8], t_8.[Foo] as [Foot_8], t_8.[ProviderId] as [ProviderIdt_8] from [Applications] as t left join [People] as t_3 on t.PersonId = t_3.PersonId left join [Plans] as t_4 on t.ApplicationId = t_4.ApplicationId left join [ProductInstances] as t_5 on t_4.ProductInstanceId = t_5.ProductInstanceId left join [Products] as t_6 on t_5.ProductId = t_6.ProductId left join [Providers] as t_7 on t.ProviderId = t_7.ProviderId left join [Organisations] as t_8 on t_7.ProviderId = t_8.ProviderId where (t.[PersonId] = @l_1)) as i order by i.[ApplicationIdt]",
                 sql.Sql);
         }
 
@@ -579,9 +579,9 @@
                 this.GetSelectQuery<Post>().FetchMany(p => p.Tags).ThenFetch(p => p.ElTag).FetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Debug.Write(sql.Sql);
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[PostTagIdt_3] as [PostTagId], i.[PostIdt_3] as [PostId], i.[TagIdt_4] as [TagId], i.[Contentt_4] as [Content], i.[PostTagIdt_1] as [PostTagId], i.[PostIdt_1] as [PostId], i.[TagIdt_2] as [TagId], i.[Contentt_2] as [Content] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_3.[PostTagId] as [PostTagIdt_3], t_3.[PostId] as [PostIdt_3], t_4.[TagId] as [TagIdt_4], t_4.[Content] as [Contentt_4], null as PostTagIdt_1, null as PostIdt_1, null as TagIdt_2, null as Contentt_2 from [Posts] as t left join [PostTags] as t_3 on t.PostId = t_3.PostId left join [Tags] as t_4 on t_3.ElTagId = t_4.TagId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as PostTagIdt_3, null as PostIdt_3, null as TagIdt_4, null as Contentt_4, t_1.[PostTagId] as [PostTagIdt_1], t_1.[PostId] as [PostIdt_1], t_2.[TagId] as [TagIdt_2], t_2.[Content] as [Contentt_2] from [Posts] as t left join [PostTags] as t_1 on t.PostId = t_1.PostId left join [Tags] as t_2 on t_1.ElTagId = t_2.TagId) as i order by i.[PostIdt]",
+                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[PostTagIdt_1] as [PostTagId], i.[PostIdt_1] as [PostId], i.[TagIdt_2] as [TagId], i.[Contentt_2] as [Content], i.[PostTagIdt_3] as [PostTagId], i.[PostIdt_3] as [PostId], i.[TagIdt_4] as [TagId], i.[Contentt_4] as [Content] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_1.[PostTagId] as [PostTagIdt_1], t_1.[PostId] as [PostIdt_1], t_2.[TagId] as [TagIdt_2], t_2.[Content] as [Contentt_2], null as PostTagIdt_3, null as PostIdt_3, null as TagIdt_4, null as Contentt_4 from [Posts] as t left join [PostTags] as t_1 on t.PostId = t_1.PostId left join [Tags] as t_2 on t_1.ElTagId = t_2.TagId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as PostTagIdt_1, null as PostIdt_1, null as TagIdt_2, null as Contentt_2, t_3.[PostTagId] as [PostTagIdt_3], t_3.[PostId] as [PostIdt_3], t_4.[TagId] as [TagIdt_4], t_4.[Content] as [Contentt_4] from [Posts] as t left join [PostTags] as t_3 on t.PostId = t_3.PostId left join [Tags] as t_4 on t_3.ElTagId = t_4.TagId) as i order by i.[PostIdt]",
                 sql.Sql);
         }
 
@@ -596,9 +596,9 @@
                     .ThenFetch(t => t.ElTag);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Debug.Write(sql.Sql);
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[DoNotMapt] as [DoNotMap], i.[BlogIdt_1] as [BlogId], i.[Titlet_1] as [Title], i.[CreateDatet_1] as [CreateDate], i.[Descriptiont_1] as [Description], i.[OwnerIdt_1] as [OwnerId], i.[PostTagIdt_4] as [PostTagId], i.[PostIdt_4] as [PostId], i.[TagIdt_5] as [TagId], i.[Contentt_5] as [Content], i.[PostTagIdt_2] as [PostTagId], i.[PostIdt_2] as [PostId], i.[TagIdt_3] as [TagId], i.[Contentt_3] as [Content] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], t_4.[PostTagId] as [PostTagIdt_4], t_4.[PostId] as [PostIdt_4], t_5.[TagId] as [TagIdt_5], t_5.[Content] as [Contentt_5], null as PostTagIdt_2, null as PostIdt_2, null as TagIdt_3, null as Contentt_3 from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [PostTags] as t_4 on t.PostId = t_4.PostId left join [Tags] as t_5 on t_4.ElTagId = t_5.TagId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], null as PostTagIdt_4, null as PostIdt_4, null as TagIdt_5, null as Contentt_5, t_2.[PostTagId] as [PostTagIdt_2], t_2.[PostId] as [PostIdt_2], t_3.[TagId] as [TagIdt_3], t_3.[Content] as [Contentt_3] from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [PostTags] as t_2 on t.PostId = t_2.PostId left join [Tags] as t_3 on t_2.ElTagId = t_3.TagId) as i order by i.[PostIdt]",
+                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[DoNotMapt] as [DoNotMap], i.[BlogIdt_1] as [BlogId], i.[Titlet_1] as [Title], i.[CreateDatet_1] as [CreateDate], i.[Descriptiont_1] as [Description], i.[OwnerIdt_1] as [OwnerId], i.[PostTagIdt_2] as [PostTagId], i.[PostIdt_2] as [PostId], i.[TagIdt_3] as [TagId], i.[Contentt_3] as [Content], i.[PostTagIdt_4] as [PostTagId], i.[PostIdt_4] as [PostId], i.[TagIdt_5] as [TagId], i.[Contentt_5] as [Content] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], t_2.[PostTagId] as [PostTagIdt_2], t_2.[PostId] as [PostIdt_2], t_3.[TagId] as [TagIdt_3], t_3.[Content] as [Contentt_3], null as PostTagIdt_4, null as PostIdt_4, null as TagIdt_5, null as Contentt_5 from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [PostTags] as t_2 on t.PostId = t_2.PostId left join [Tags] as t_3 on t_2.ElTagId = t_3.TagId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], null as PostTagIdt_2, null as PostIdt_2, null as TagIdt_3, null as Contentt_3, t_4.[PostTagId] as [PostTagIdt_4], t_4.[PostId] as [PostIdt_4], t_5.[TagId] as [TagIdt_5], t_5.[Content] as [Contentt_5] from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [PostTags] as t_4 on t.PostId = t_4.PostId left join [Tags] as t_5 on t_4.ElTagId = t_5.TagId) as i order by i.[PostIdt]",
                 sql.Sql);
         }
 
@@ -640,9 +640,9 @@
             var query = this.GetSelectQuery<Post>().Fetch(p => p.Tags).Fetch(p => p.Comments).OrderByDescending(p => p.Rating);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Debug.Write(sql.Sql);
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[CommentIdt_2] as [CommentId], i.[Contentt_2] as [Content], i.[PostIdt_2] as [PostId], i.[UserIdt_2] as [UserId], i.[CommentDatet_2] as [CommentDate], i.[PostTagIdt_1] as [PostTagId], i.[PostIdt_1] as [PostId], i.[ElTagIdt_1] as [ElTagId] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_2.[CommentId] as [CommentIdt_2], t_2.[Content] as [Contentt_2], t_2.[PostId] as [PostIdt_2], t_2.[UserId] as [UserIdt_2], t_2.[CommentDate] as [CommentDatet_2], null as PostTagIdt_1, null as PostIdt_1, null as ElTagIdt_1 from [Posts] as t left join [Comments] as t_2 on t.PostId = t_2.PostId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as CommentIdt_2, null as Contentt_2, null as PostIdt_2, null as UserIdt_2, null as CommentDatet_2, t_1.[PostTagId] as [PostTagIdt_1], t_1.[PostId] as [PostIdt_1], t_1.[ElTagId] as [ElTagIdt_1] from [Posts] as t left join [PostTags] as t_1 on t.PostId = t_1.PostId) as i order by i.[Ratingt] desc, i.[PostIdt]",
+                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[CommentIdt_1] as [CommentId], i.[Contentt_1] as [Content], i.[PostIdt_1] as [PostId], i.[UserIdt_1] as [UserId], i.[CommentDatet_1] as [CommentDate], i.[PostTagIdt_2] as [PostTagId], i.[PostIdt_2] as [PostId], i.[ElTagIdt_2] as [ElTagId] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_1.[CommentId] as [CommentIdt_1], t_1.[Content] as [Contentt_1], t_1.[PostId] as [PostIdt_1], t_1.[UserId] as [UserIdt_1], t_1.[CommentDate] as [CommentDatet_1], null as PostTagIdt_2, null as PostIdt_2, null as ElTagIdt_2 from [Posts] as t left join [Comments] as t_1 on t.PostId = t_1.PostId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as CommentIdt_1, null as Contentt_1, null as PostIdt_1, null as UserIdt_1, null as CommentDatet_1, t_2.[PostTagId] as [PostTagIdt_2], t_2.[PostId] as [PostIdt_2], t_2.[ElTagId] as [ElTagIdt_2] from [Posts] as t left join [PostTags] as t_2 on t.PostId = t_2.PostId) as i order by i.[Ratingt] desc, i.[PostIdt]",
                 sql.Sql);
         }
 
@@ -683,9 +683,9 @@
                     .OrderByDescending(a => a.CreatedDate);
             var selectQuery = query as SelectQuery<Application>;
             var sql = new SelectWriter(new SqlServer2012Dialect(), new MultipleFetchManyWithThenFetchConfig()).GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Debug.Write(sql.Sql);
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[ApplicationIdt] as [ApplicationId], i.[CreatedDatet] as [CreatedDate], i.[ReferenceIdt_7] as [ReferenceId], i.[ApplicationIdt_7] as [ApplicationId], i.[ParentReferenceIdt_8] as [ParentReferenceId], i.[Questiont_8] as [Question], i.[PersonIdt_1] as [PersonId], i.[Namet_1] as [Name], i.[PlanIdt_4] as [PlanId], i.[ApplicationIdt_4] as [ApplicationId], i.[ProductInstanceIdt_5] as [ProductInstanceId], i.[ProductIdt_6] as [ProductId], i.[Namet_6] as [Name], i.[ProviderIdt_2] as [ProviderId], i.[OrganisationIdt_3] as [OrganisationId], i.[Foot_3] as [Foo], i.[ProviderIdt_3] as [ProviderId] from (select t.[ApplicationId] as [ApplicationIdt], t.[CreatedDate] as [CreatedDatet], t_7.[ReferenceId] as [ReferenceIdt_7], t_7.[ApplicationId] as [ApplicationIdt_7], t_8.[ParentReferenceId] as [ParentReferenceIdt_8], t_8.[Question] as [Questiont_8], t_1.[PersonId] as [PersonIdt_1], t_1.[Name] as [Namet_1], null as PlanIdt_4, null as ApplicationIdt_4, null as ProductInstanceIdt_5, null as ProductIdt_6, null as Namet_6, t_2.[ProviderId] as [ProviderIdt_2], t_3.[OrganisationId] as [OrganisationIdt_3], t_3.[Foo] as [Foot_3], t_3.[ProviderId] as [ProviderIdt_3] from [Applications] as t left join [References] as t_7 on t.ApplicationId = t_7.ApplicationId left join [ParentReferences] as t_8 on t_7.ParentReferenceId = t_8.ParentReferenceId left join [People] as t_1 on t.PersonId = t_1.PersonId left join [Providers] as t_2 on t.ProviderId = t_2.ProviderId left join [Organisations] as t_3 on t_2.ProviderId = t_3.ProviderId where (t.[PersonId] = @l_1) union all select t.[ApplicationId] as [ApplicationIdt], t.[CreatedDate] as [CreatedDatet], null as ReferenceIdt_7, null as ApplicationIdt_7, null as ParentReferenceIdt_8, null as Questiont_8, t_1.[PersonId] as [PersonIdt_1], t_1.[Name] as [Namet_1], t_4.[PlanId] as [PlanIdt_4], t_4.[ApplicationId] as [ApplicationIdt_4], t_5.[ProductInstanceId] as [ProductInstanceIdt_5], t_6.[ProductId] as [ProductIdt_6], t_6.[Name] as [Namet_6], t_2.[ProviderId] as [ProviderIdt_2], t_3.[OrganisationId] as [OrganisationIdt_3], t_3.[Foo] as [Foot_3], t_3.[ProviderId] as [ProviderIdt_3] from [Applications] as t left join [People] as t_1 on t.PersonId = t_1.PersonId left join [Plans] as t_4 on t.ApplicationId = t_4.ApplicationId left join [ProductInstances] as t_5 on t_4.ProductInstanceId = t_5.ProductInstanceId left join [Products] as t_6 on t_5.ProductId = t_6.ProductId left join [Providers] as t_2 on t.ProviderId = t_2.ProviderId left join [Organisations] as t_3 on t_2.ProviderId = t_3.ProviderId where (t.[PersonId] = @l_1)) as i order by i.[CreatedDatet] desc, i.[ApplicationIdt]",
+                "select i.[ApplicationIdt] as [ApplicationId], i.[CreatedDatet] as [CreatedDate], i.[ReferenceIdt_1] as [ReferenceId], i.[ApplicationIdt_1] as [ApplicationId], i.[ParentReferenceIdt_2] as [ParentReferenceId], i.[Questiont_2] as [Question], i.[PersonIdt_3] as [PersonId], i.[Namet_3] as [Name], i.[PlanIdt_4] as [PlanId], i.[ApplicationIdt_4] as [ApplicationId], i.[ProductInstanceIdt_5] as [ProductInstanceId], i.[ProductIdt_6] as [ProductId], i.[Namet_6] as [Name], i.[ProviderIdt_7] as [ProviderId], i.[OrganisationIdt_8] as [OrganisationId], i.[Foot_8] as [Foo], i.[ProviderIdt_8] as [ProviderId] from (select t.[ApplicationId] as [ApplicationIdt], t.[CreatedDate] as [CreatedDatet], t_1.[ReferenceId] as [ReferenceIdt_1], t_1.[ApplicationId] as [ApplicationIdt_1], t_2.[ParentReferenceId] as [ParentReferenceIdt_2], t_2.[Question] as [Questiont_2], t_3.[PersonId] as [PersonIdt_3], t_3.[Name] as [Namet_3], null as PlanIdt_4, null as ApplicationIdt_4, null as ProductInstanceIdt_5, null as ProductIdt_6, null as Namet_6, t_7.[ProviderId] as [ProviderIdt_7], t_8.[OrganisationId] as [OrganisationIdt_8], t_8.[Foo] as [Foot_8], t_8.[ProviderId] as [ProviderIdt_8] from [Applications] as t left join [References] as t_1 on t.ApplicationId = t_1.ApplicationId left join [ParentReferences] as t_2 on t_1.ParentReferenceId = t_2.ParentReferenceId left join [People] as t_3 on t.PersonId = t_3.PersonId left join [Providers] as t_7 on t.ProviderId = t_7.ProviderId left join [Organisations] as t_8 on t_7.ProviderId = t_8.ProviderId where (t.[PersonId] = @l_1) union all select t.[ApplicationId] as [ApplicationIdt], t.[CreatedDate] as [CreatedDatet], null as ReferenceIdt_1, null as ApplicationIdt_1, null as ParentReferenceIdt_2, null as Questiont_2, t_3.[PersonId] as [PersonIdt_3], t_3.[Name] as [Namet_3], t_4.[PlanId] as [PlanIdt_4], t_4.[ApplicationId] as [ApplicationIdt_4], t_5.[ProductInstanceId] as [ProductInstanceIdt_5], t_6.[ProductId] as [ProductIdt_6], t_6.[Name] as [Namet_6], t_7.[ProviderId] as [ProviderIdt_7], t_8.[OrganisationId] as [OrganisationIdt_8], t_8.[Foo] as [Foot_8], t_8.[ProviderId] as [ProviderIdt_8] from [Applications] as t left join [People] as t_3 on t.PersonId = t_3.PersonId left join [Plans] as t_4 on t.ApplicationId = t_4.ApplicationId left join [ProductInstances] as t_5 on t_4.ProductInstanceId = t_5.ProductInstanceId left join [Products] as t_6 on t_5.ProductId = t_6.ProductId left join [Providers] as t_7 on t.ProviderId = t_7.ProviderId left join [Organisations] as t_8 on t_7.ProviderId = t_8.ProviderId where (t.[PersonId] = @l_1)) as i order by i.[CreatedDatet] desc, i.[ApplicationIdt]",
                 sql.Sql);
         }
 
@@ -695,9 +695,9 @@
                 this.GetSelectQuery<Post>().FetchMany(p => p.Tags).ThenFetch(p => p.ElTag).FetchMany(p => p.DeletedTags).ThenFetch(t => t.ElTag).OrderByDescending(p => p.Rating);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Debug.Write(sql.Sql);
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[PostTagIdt_3] as [PostTagId], i.[PostIdt_3] as [PostId], i.[TagIdt_4] as [TagId], i.[Contentt_4] as [Content], i.[PostTagIdt_1] as [PostTagId], i.[PostIdt_1] as [PostId], i.[TagIdt_2] as [TagId], i.[Contentt_2] as [Content] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_3.[PostTagId] as [PostTagIdt_3], t_3.[PostId] as [PostIdt_3], t_4.[TagId] as [TagIdt_4], t_4.[Content] as [Contentt_4], null as PostTagIdt_1, null as PostIdt_1, null as TagIdt_2, null as Contentt_2 from [Posts] as t left join [PostTags] as t_3 on t.PostId = t_3.PostId left join [Tags] as t_4 on t_3.ElTagId = t_4.TagId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as PostTagIdt_3, null as PostIdt_3, null as TagIdt_4, null as Contentt_4, t_1.[PostTagId] as [PostTagIdt_1], t_1.[PostId] as [PostIdt_1], t_2.[TagId] as [TagIdt_2], t_2.[Content] as [Contentt_2] from [Posts] as t left join [PostTags] as t_1 on t.PostId = t_1.PostId left join [Tags] as t_2 on t_1.ElTagId = t_2.TagId) as i order by i.[Ratingt] desc, i.[PostIdt]",
+                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[PostTagIdt_1] as [PostTagId], i.[PostIdt_1] as [PostId], i.[TagIdt_2] as [TagId], i.[Contentt_2] as [Content], i.[PostTagIdt_3] as [PostTagId], i.[PostIdt_3] as [PostId], i.[TagIdt_4] as [TagId], i.[Contentt_4] as [Content] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_1.[PostTagId] as [PostTagIdt_1], t_1.[PostId] as [PostIdt_1], t_2.[TagId] as [TagIdt_2], t_2.[Content] as [Contentt_2], null as PostTagIdt_3, null as PostIdt_3, null as TagIdt_4, null as Contentt_4 from [Posts] as t left join [PostTags] as t_1 on t.PostId = t_1.PostId left join [Tags] as t_2 on t_1.ElTagId = t_2.TagId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as PostTagIdt_1, null as PostIdt_1, null as TagIdt_2, null as Contentt_2, t_3.[PostTagId] as [PostTagIdt_3], t_3.[PostId] as [PostIdt_3], t_4.[TagId] as [TagIdt_4], t_4.[Content] as [Contentt_4] from [Posts] as t left join [PostTags] as t_3 on t.PostId = t_3.PostId left join [Tags] as t_4 on t_3.ElTagId = t_4.TagId) as i order by i.[Ratingt] desc, i.[PostIdt]",
                 sql.Sql);
         }
 
@@ -713,9 +713,9 @@
                     .OrderByDescending(p => p.Rating);
             var selectQuery = query as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(selectQuery, new AutoNamingDynamicParameters());
-            Debug.Write(sql.Sql);
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[DoNotMapt] as [DoNotMap], i.[BlogIdt_1] as [BlogId], i.[Titlet_1] as [Title], i.[CreateDatet_1] as [CreateDate], i.[Descriptiont_1] as [Description], i.[OwnerIdt_1] as [OwnerId], i.[PostTagIdt_4] as [PostTagId], i.[PostIdt_4] as [PostId], i.[TagIdt_5] as [TagId], i.[Contentt_5] as [Content], i.[PostTagIdt_2] as [PostTagId], i.[PostIdt_2] as [PostId], i.[TagIdt_3] as [TagId], i.[Contentt_3] as [Content] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], t_4.[PostTagId] as [PostTagIdt_4], t_4.[PostId] as [PostIdt_4], t_5.[TagId] as [TagIdt_5], t_5.[Content] as [Contentt_5], null as PostTagIdt_2, null as PostIdt_2, null as TagIdt_3, null as Contentt_3 from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [PostTags] as t_4 on t.PostId = t_4.PostId left join [Tags] as t_5 on t_4.ElTagId = t_5.TagId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], null as PostTagIdt_4, null as PostIdt_4, null as TagIdt_5, null as Contentt_5, t_2.[PostTagId] as [PostTagIdt_2], t_2.[PostId] as [PostIdt_2], t_3.[TagId] as [TagIdt_3], t_3.[Content] as [Contentt_3] from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [PostTags] as t_2 on t.PostId = t_2.PostId left join [Tags] as t_3 on t_2.ElTagId = t_3.TagId) as i order by i.[Ratingt] desc, i.[PostIdt]",
+                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[DoNotMapt] as [DoNotMap], i.[BlogIdt_1] as [BlogId], i.[Titlet_1] as [Title], i.[CreateDatet_1] as [CreateDate], i.[Descriptiont_1] as [Description], i.[OwnerIdt_1] as [OwnerId], i.[PostTagIdt_2] as [PostTagId], i.[PostIdt_2] as [PostId], i.[TagIdt_3] as [TagId], i.[Contentt_3] as [Content], i.[PostTagIdt_4] as [PostTagId], i.[PostIdt_4] as [PostId], i.[TagIdt_5] as [TagId], i.[Contentt_5] as [Content] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], t_2.[PostTagId] as [PostTagIdt_2], t_2.[PostId] as [PostIdt_2], t_3.[TagId] as [TagIdt_3], t_3.[Content] as [Contentt_3], null as PostTagIdt_4, null as PostIdt_4, null as TagIdt_5, null as Contentt_5 from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [PostTags] as t_2 on t.PostId = t_2.PostId left join [Tags] as t_3 on t_2.ElTagId = t_3.TagId union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], null as PostTagIdt_2, null as PostIdt_2, null as TagIdt_3, null as Contentt_3, t_4.[PostTagId] as [PostTagIdt_4], t_4.[PostId] as [PostIdt_4], t_5.[TagId] as [TagIdt_5], t_5.[Content] as [Contentt_5] from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [PostTags] as t_4 on t.PostId = t_4.PostId left join [Tags] as t_5 on t_4.ElTagId = t_5.TagId) as i order by i.[Ratingt] desc, i.[PostIdt]",
                 sql.Sql);
         }
 
@@ -763,8 +763,9 @@
             var query =
                 this.GetSelectQuery<Post>().Fetch(p => p.Tags).Fetch(p => p.Comments).Where(p => p.Blog.Description == "Foo") as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(query, new AutoNamingDynamicParameters());
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[CommentIdt_2] as [CommentId], i.[Contentt_2] as [Content], i.[PostIdt_2] as [PostId], i.[UserIdt_2] as [UserId], i.[CommentDatet_2] as [CommentDate], i.[PostTagIdt_1] as [PostTagId], i.[PostIdt_1] as [PostId], i.[ElTagIdt_1] as [ElTagId] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_2.[CommentId] as [CommentIdt_2], t_2.[Content] as [Contentt_2], t_2.[PostId] as [PostIdt_2], t_2.[UserId] as [UserIdt_2], t_2.[CommentDate] as [CommentDatet_2], null as PostTagIdt_1, null as PostIdt_1, null as ElTagIdt_1 from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId left join [Comments] as t_2 on t.PostId = t_2.PostId where (t_100.[Description] = @l_1) union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as CommentIdt_2, null as Contentt_2, null as PostIdt_2, null as UserIdt_2, null as CommentDatet_2, t_1.[PostTagId] as [PostTagIdt_1], t_1.[PostId] as [PostIdt_1], t_1.[ElTagId] as [ElTagIdt_1] from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId left join [PostTags] as t_1 on t.PostId = t_1.PostId where (t_100.[Description] = @l_1)) as i order by i.[PostIdt]",
+                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[BlogIdt] as [BlogId], i.[DoNotMapt] as [DoNotMap], i.[CommentIdt_1] as [CommentId], i.[Contentt_1] as [Content], i.[PostIdt_1] as [PostId], i.[UserIdt_1] as [UserId], i.[CommentDatet_1] as [CommentDate], i.[PostTagIdt_2] as [PostTagId], i.[PostIdt_2] as [PostId], i.[ElTagIdt_2] as [ElTagId] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], t_1.[CommentId] as [CommentIdt_1], t_1.[Content] as [Contentt_1], t_1.[PostId] as [PostIdt_1], t_1.[UserId] as [UserIdt_1], t_1.[CommentDate] as [CommentDatet_1], null as PostTagIdt_2, null as PostIdt_2, null as ElTagIdt_2 from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId left join [Comments] as t_1 on t.PostId = t_1.PostId where (t_100.[Description] = @l_1) union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[BlogId] as [BlogIdt], t.[DoNotMap] as [DoNotMapt], null as CommentIdt_1, null as Contentt_1, null as PostIdt_1, null as UserIdt_1, null as CommentDatet_1, t_2.[PostTagId] as [PostTagIdt_2], t_2.[PostId] as [PostIdt_2], t_2.[ElTagId] as [ElTagIdt_2] from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId left join [PostTags] as t_2 on t.PostId = t_2.PostId where (t_100.[Description] = @l_1)) as i order by i.[PostIdt]",
                 sql.Sql);
         }
 
@@ -784,7 +785,7 @@
                 SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(query, new AutoNamingDynamicParameters());
             Assert.Equal(
-                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[DoNotMap], t_2.[BlogId], t_2.[Title], t_2.[CreateDate], t_2.[Description], t_2.[OwnerId], t_1.[CommentId], t_1.[Content], t_1.[PostId], t_1.[UserId], t_1.[CommentDate] from [Posts] as t inner join [Blogs] as t_2 on t.BlogId = t_2.BlogId inner join [Users] as t_100 on t_2.OwnerId = t_100.UserId left join [Comments] as t_1 on t.PostId = t_1.PostId where (t_100.[EmailAddress] = @l_1) order by t.[PostId]",
+                "select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[DoNotMap], t_1.[BlogId], t_1.[Title], t_1.[CreateDate], t_1.[Description], t_1.[OwnerId], t_2.[CommentId], t_2.[Content], t_2.[PostId], t_2.[UserId], t_2.[CommentDate] from [Posts] as t inner join [Blogs] as t_1 on t.BlogId = t_1.BlogId inner join [Users] as t_100 on t_1.OwnerId = t_100.UserId left join [Comments] as t_2 on t.PostId = t_2.PostId where (t_100.[EmailAddress] = @l_1) order by t.[PostId]",
                 sql.Sql);
         }
 
@@ -797,8 +798,9 @@
                     .Fetch(p => p.Blog)
                     .Where(p => p.Blog.Owner.EmailAddress == "Foo") as SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(query, new AutoNamingDynamicParameters());
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[DoNotMapt] as [DoNotMap], i.[BlogIdt_3] as [BlogId], i.[Titlet_3] as [Title], i.[CreateDatet_3] as [CreateDate], i.[Descriptiont_3] as [Description], i.[OwnerIdt_3] as [OwnerId], i.[CommentIdt_2] as [CommentId], i.[Contentt_2] as [Content], i.[PostIdt_2] as [PostId], i.[UserIdt_2] as [UserId], i.[CommentDatet_2] as [CommentDate], i.[PostTagIdt_1] as [PostTagId], i.[PostIdt_1] as [PostId], i.[ElTagIdt_1] as [ElTagId] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_3.[BlogId] as [BlogIdt_3], t_3.[Title] as [Titlet_3], t_3.[CreateDate] as [CreateDatet_3], t_3.[Description] as [Descriptiont_3], t_3.[OwnerId] as [OwnerIdt_3], t_2.[CommentId] as [CommentIdt_2], t_2.[Content] as [Contentt_2], t_2.[PostId] as [PostIdt_2], t_2.[UserId] as [UserIdt_2], t_2.[CommentDate] as [CommentDatet_2], null as PostTagIdt_1, null as PostIdt_1, null as ElTagIdt_1 from [Posts] as t left join [Blogs] as t_3 on t.BlogId = t_3.BlogId left join [Users] as t_100 on t_3.OwnerId = t_100.UserId left join [Comments] as t_2 on t.PostId = t_2.PostId where (t_100.[EmailAddress] = @l_1) union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_3.[BlogId] as [BlogIdt_3], t_3.[Title] as [Titlet_3], t_3.[CreateDate] as [CreateDatet_3], t_3.[Description] as [Descriptiont_3], t_3.[OwnerId] as [OwnerIdt_3], null as CommentIdt_2, null as Contentt_2, null as PostIdt_2, null as UserIdt_2, null as CommentDatet_2, t_1.[PostTagId] as [PostTagIdt_1], t_1.[PostId] as [PostIdt_1], t_1.[ElTagId] as [ElTagIdt_1] from [Posts] as t left join [Blogs] as t_3 on t.BlogId = t_3.BlogId left join [Users] as t_100 on t_3.OwnerId = t_100.UserId left join [PostTags] as t_1 on t.PostId = t_1.PostId where (t_100.[EmailAddress] = @l_1)) as i order by i.[PostIdt]",
+                "select i.[PostIdt] as [PostId], i.[Titlet] as [Title], i.[Contentt] as [Content], i.[Ratingt] as [Rating], i.[AuthorIdt] as [AuthorId], i.[DoNotMapt] as [DoNotMap], i.[BlogIdt_1] as [BlogId], i.[Titlet_1] as [Title], i.[CreateDatet_1] as [CreateDate], i.[Descriptiont_1] as [Description], i.[OwnerIdt_1] as [OwnerId], i.[CommentIdt_2] as [CommentId], i.[Contentt_2] as [Content], i.[PostIdt_2] as [PostId], i.[UserIdt_2] as [UserId], i.[CommentDatet_2] as [CommentDate], i.[PostTagIdt_3] as [PostTagId], i.[PostIdt_3] as [PostId], i.[ElTagIdt_3] as [ElTagId] from (select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], t_2.[CommentId] as [CommentIdt_2], t_2.[Content] as [Contentt_2], t_2.[PostId] as [PostIdt_2], t_2.[UserId] as [UserIdt_2], t_2.[CommentDate] as [CommentDatet_2], null as PostTagIdt_3, null as PostIdt_3, null as ElTagIdt_3 from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [Users] as t_100 on t_1.OwnerId = t_100.UserId left join [Comments] as t_2 on t.PostId = t_2.PostId where (t_100.[EmailAddress] = @l_1) union all select t.[PostId] as [PostIdt], t.[Title] as [Titlet], t.[Content] as [Contentt], t.[Rating] as [Ratingt], t.[AuthorId] as [AuthorIdt], t.[DoNotMap] as [DoNotMapt], t_1.[BlogId] as [BlogIdt_1], t_1.[Title] as [Titlet_1], t_1.[CreateDate] as [CreateDatet_1], t_1.[Description] as [Descriptiont_1], t_1.[OwnerId] as [OwnerIdt_1], null as CommentIdt_2, null as Contentt_2, null as PostIdt_2, null as UserIdt_2, null as CommentDatet_2, t_3.[PostTagId] as [PostTagIdt_3], t_3.[PostId] as [PostIdt_3], t_3.[ElTagId] as [ElTagIdt_3] from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [Users] as t_100 on t_1.OwnerId = t_100.UserId left join [PostTags] as t_3 on t.PostId = t_3.PostId where (t_100.[EmailAddress] = @l_1)) as i order by i.[PostIdt]",
                 sql.Sql);
         }
 
@@ -827,8 +829,9 @@
                 this.GetSelectQuery<Post>().Fetch(p => p.Tags).Fetch(p => p.Comments).Where(p => p.Blog.Description == "Foo").Take(10).Skip(0) as
                 SelectQuery<Post>;
             var sql = this.GetSql2012Writer().GenerateSql(query, new AutoNamingDynamicParameters());
+            this.outputHelper.WriteLine(sql.Sql);
             Assert.Equal(
-                "select i.[PostId], i.[Title], i.[Content], i.[Rating], i.[AuthorId], i.[BlogId], i.[DoNotMap], t_2.[CommentId], t_2.[Content], t_2.[PostId], t_2.[UserId], t_2.[CommentDate], t_1.[PostTagId], t_1.[PostId], t_1.[ElTagId] from (select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[Description] = @l_1) order by t.[PostId] offset 0 rows fetch next @take rows only) as i left join [Comments] as t_2 on i.PostId = t_2.PostId left join [PostTags] as t_1 on i.PostId = t_1.PostId order by i.[PostId]",
+                "select i.[PostId], i.[Title], i.[Content], i.[Rating], i.[AuthorId], i.[BlogId], i.[DoNotMap], t_1.[CommentId], t_1.[Content], t_1.[PostId], t_1.[UserId], t_1.[CommentDate], t_2.[PostTagId], t_2.[PostId], t_2.[ElTagId] from (select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[Description] = @l_1) order by t.[PostId] offset 0 rows fetch next @take rows only) as i left join [Comments] as t_1 on i.PostId = t_1.PostId left join [PostTags] as t_2 on i.PostId = t_2.PostId order by i.[PostId]",
                 sql.Sql);
         }
 

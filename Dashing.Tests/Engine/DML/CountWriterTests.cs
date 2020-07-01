@@ -16,7 +16,7 @@
 
             var sql = target.GenerateCountSql(query);
 
-            Assert.Equal("select count(1) from [Users]", sql.Sql);
+            Assert.Equal("select count(1) from [Users] as t", sql.Sql);
         }
 
         [Fact]
@@ -27,7 +27,7 @@
             query.Where(u => u.HeightInMeters < 1);
             var sql = target.GenerateCountSql(query);
 
-            Assert.Equal("select count(1) from [Users] where ([HeightInMeters] < @l_1)", sql.Sql);
+            Assert.Equal("select count(1) from [Users] as t where (t.[HeightInMeters] < @l_1)", sql.Sql);
         }
 
         [Fact]

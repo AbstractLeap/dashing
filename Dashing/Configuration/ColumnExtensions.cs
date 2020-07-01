@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Linq.Expressions;
+    using System.Reflection;
 
     /// <summary>
     ///     The column extensions.
@@ -295,6 +296,24 @@
             column.Relationship = RelationshipType.OneToOne;
             column.OppositeColumnName = memberExpression.Member.Name;
             return column;
+        }
+
+        /// <summary>
+        /// Gets the map for the type of the property
+        /// For enumerable properties, gets the map of the enumerated type
+        /// </summary>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        public static IMap GetMapOfColumnType(this IColumn column) {
+            if (column.Relationship == RelationshipType.OneToMany) {
+                return column.Map.Configuration.GetMap(column.Type.GetGenericArguments()[0]);
+            }
+
+            if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
+                return column.Map.Configuration.GetMap(column.Type);
+            }
+
+            throw new NotSupportedException();
         }
     }
 }

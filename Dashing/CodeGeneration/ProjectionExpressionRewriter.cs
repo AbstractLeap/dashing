@@ -14,17 +14,17 @@
 
         private readonly ProjectedSelectQuery<TBase, TProjection> query;
 
-        private readonly FetchNode rootNode;
+        private readonly QueryTree queryTree;
 
-        private readonly IDictionary<FetchNode, FetchNodeLookupValue> fetchNodeLookup;
+        private readonly IDictionary<BaseQueryNode, FetchNodeLookupValue> fetchNodeLookup;
 
         private readonly ParameterExpression parameterExpression;
 
-        public ProjectionExpressionRewriter(IConfiguration configuration, ProjectedSelectQuery<TBase, TProjection> query, FetchNode rootNode) {
+        public ProjectionExpressionRewriter(IConfiguration configuration, ProjectedSelectQuery<TBase, TProjection> query, QueryTree queryTree) {
             this.configuration = configuration;
             this.query = query;
-            this.rootNode = rootNode;
-            this.fetchNodeLookup = new Dictionary<FetchNode, FetchNodeLookupValue>();
+            this.queryTree = queryTree;
+            this.fetchNodeLookup = new Dictionary<BaseQueryNode, FetchNodeLookupValue>();
             this.parameterExpression = Expression.Parameter(typeof(object[]));
         }
 
@@ -38,14 +38,14 @@
 
         protected override Expression VisitMember(MemberExpression node) {
             var fetchNode = this.VisitMember(node);
-            var isRootNode = ReferenceEquals(fetchNode, this.rootNode);
+            var isRootNode = fetchNode is QueryTree;
             if (!this.fetchNodeLookup.TryGetValue(fetchNode, out var lookup)) {
                 lookup = new FetchNodeLookupValue {
                                                       Idx = this.fetchNodeLookup.Count,
                                                       ConversionType = isRootNode
                                                                            ? typeof(TBase)
                                                                            : (IsRelationshipAccess()
-                                                                                  ? fetchNode.Column.Type
+                                                                                  ? ((QueryNode)fetchNode).Column.Type
                                                                                   : node.Member.DeclaringType)
                                                   };
                 this.fetchNodeLookup.Add(fetchNode, lookup);
@@ -61,24 +61,22 @@
             return Expression.MakeMemberAccess(convertExpression, node.Member);
 
             bool IsRelationshipAccess() {
-                return fetchNode.Column.Name == node.Member.Name;
+                return fetchNode is QueryNode queryNode && queryNode.Column.Name == node.Member.Name;
             }
         }
 
-        private FetchNode VisitMember(Expression expression) {
+        private BaseQueryNode VisitMember(Expression expression) {
             if (expression.NodeType == ExpressionType.Parameter) {
-                return this.rootNode;
+                return this.queryTree;
             }
 
             if (expression is MemberExpression memberExpression) {
                 var fetchNode = this.VisitMember(memberExpression.Expression);
-                var map = ReferenceEquals(this.rootNode, fetchNode)
-                              ? this.configuration.GetMap<TBase>()
-                              : (fetchNode.Column.Relationship == RelationshipType.ManyToOne
-                                     ? fetchNode.Column.ParentMap
-                                     : (fetchNode.Column.Relationship == RelationshipType.OneToOne
-                                            ? fetchNode.Column.OppositeColumn.Map
-                                            : throw new NotSupportedException("Include/Exclude clauses can only use Many to One and One to One relationships")));
+                var map = fetchNode is QueryTree queryTree
+                              ? queryTree.GetMapForNode()
+                              : (fetchNode is QueryNode queryNode && (queryNode.Column.Relationship == RelationshipType.ManyToOne || queryNode.Column.Relationship == RelationshipType.OneToOne)
+                                     ? queryNode.GetMapForNode()
+                                     : throw new NotSupportedException("Include/Exclude clauses can only use Many to One and One to One relationships"));
                 if (map.Columns.TryGetValue(memberExpression.Member.Name, out var column)) {
                     if (column.Relationship == RelationshipType.None) {
                         return fetchNode; // this is at the bottom anyway, we don't need to specify a different parameter
@@ -92,21 +90,21 @@
                     throw new InvalidOperationException($"Unable to find column to project");
                 }
 
-                //if (ReferenceEquals(node, this.rootNode)) {
+                //if (ReferenceEquals(queryNode, this.rootQueryNode)) {
                 //    var map = this.configuration.GetMap<TBase>();
                 //    if (map.Columns.TryGetValue(memberExpression.Member.Name, out var column)) {
                 //        if (column.Relationship == RelationshipType.None) {
-                //            return node; // this is at the bottom anyway, we don't need to specify a different parameter
+                //            return queryNode; // this is at the bottom anyway, we don't need to specify a different parameter
                 //        }
                 //        else if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
-                //            return node.Children[column.Name];
+                //            return queryNode.Children[column.Name];
                 //        }
                 //    } else {
                 //        throw new InvalidOperationException($"Unable to find column to project");
                 //    }
                 //}
                 //else {
-                //    return node.Children[memberExpression.Member.Name];
+                //    return queryNode.Children[memberExpression.Member.Name];
                 //}
             }
 

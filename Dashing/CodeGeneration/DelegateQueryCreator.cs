@@ -86,20 +86,20 @@
         }
 
         private Delegate GetNoCollectionFunction<T>(SelectWriterResult result, bool isAsync, out Delegate func) {
-            var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
+            var key = Tuple.Create(typeof(T), result.MapQueryTree.GetFetchSignature());
             var queries = isAsync ? this.asyncNoCollectionQueries : this.noCollectionQueries;
-            var mapper = this.mapperFactories.GetOrAdd(key, t => this.nonCollectionMapperGenerator.GenerateNonCollectionMapper<T>(result.FetchTree));
+            var mapper = this.mapperFactories.GetOrAdd(key, t => this.nonCollectionMapperGenerator.GenerateNonCollectionMapper<T>(result.MapQueryTree));
             func = queries.GetOrAdd(key, t => this.GenerateQuery<T>(mapper.Item1, isAsync, mapper.Item2));
             return mapper.Item1;
         }
 
         private Delegate GetCollectionFunction<T>(SelectWriterResult result, bool isAsync, out Delegate func) {
-            var key = Tuple.Create(typeof(T), result.FetchTree.FetchSignature);
+            var key = Tuple.Create(typeof(T), result.MapQueryTree.GetFetchSignature());
             var collectionQueries = isAsync ? this.asyncCollectionQueries : this.collectionQueries;
             if (result.NumberCollectionsFetched == 1) {
                 Tuple<Delegate, Type[]> mapperFactory = this.mapperFactories.GetOrAdd(
                     key,
-                    t => this.singleCollectionMapperGenerator.GenerateCollectionMapper<T>(result.FetchTree));
+                    t => this.singleCollectionMapperGenerator.GenerateCollectionMapper<T>(result.MapQueryTree));
                 func = collectionQueries.GetOrAdd(
                     key,
                     t => this.GenerateCollectionFactory<T>(result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, null));
@@ -109,7 +109,7 @@
             else {
                 Tuple<Delegate, Type[], Type[]> mapperFactory = this.multiCollectionMapperFactories.GetOrAdd(
                     key,
-                    t => this.multiCollectionMapperGenerator.GenerateMultiCollectionMapper<T>(result.FetchTree));
+                    t => this.multiCollectionMapperGenerator.GenerateMultiCollectionMapper<T>(result.MapQueryTree));
                 func = collectionQueries.GetOrAdd(
                     key,
                     t => this.GenerateCollectionFactory<T>(result.NumberCollectionsFetched, isAsync, mapperFactory.Item2, mapperFactory.Item3));
@@ -138,7 +138,7 @@
                 transactionParam,
                 mappedTypes);
 
-            // generate lambda (mapper) => ((result, query, connection, transaction) => SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
+            // generate lambda (mapper) => ((result, query, connection, transaction) => SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.MapQueryTree, commandTimeout: int?, commandType: CommandType?);
             var expr = Expression.Lambda(
                 Expression.Lambda(callQueryExpression, resultParam, queryParam, connectionParam, transactionParam),
                 mapperParam);
@@ -161,7 +161,7 @@
                 Expression.Property(resultParam, "Parameters"),
                 transactionParam,
                 Expression.Constant(true),
-                Expression.Property(Expression.Property(resultParam, "FetchTree"), "SplitOn"),
+                Expression.Call(Expression.Property(resultParam, "MapQueryTree"), nameof(QueryTree.GetSplitOn), Array.Empty<Type>()),
                 Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(int))),
                 Expression.Convert(Expression.Constant(null), typeof(Nullable<>).MakeGenericType(typeof(CommandType))));
         }
@@ -259,7 +259,7 @@
             variableExpressions.Add(mapperVariable);
             statements.Add(mapperExpr);
 
-            // var queryResult = SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.FetchTree, commandTimeout: int?, commandType: CommandType?);
+            // var queryResult = SqlMapper.Query<...>(connection, result.Sql, mapper, result.Parameters, transaction, buffer: true, splitOn: result.MapQueryTree, commandTimeout: int?, commandType: CommandType?);
             var sqlMapperQuery = this.GetArbitraryQueryMethod<T>(tt, mappedTypes, isAsync);
 
             if (!isAsync) {

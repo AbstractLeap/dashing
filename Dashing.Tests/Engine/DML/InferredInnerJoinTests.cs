@@ -20,10 +20,9 @@
         public void WhereSimpleNullableJoinRewritten() {
             var query = GetSelectQuery<Post>()
                             .Where(p => p.Blog.Title != null) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
-            var blog = result.FetchTree.Children[nameof(Post.Blog)];
+            var blog = result.MapQueryTree.Children[nameof(Post.Blog)];
             Assert.False(blog.IsFetched);
             Assert.True(blog.InferredInnerJoin);
         }
@@ -32,11 +31,10 @@
         public void WhereOrKeepsLeftJoin() {
             var query = GetSelectQuery<Post>()
                             .Where(p => p.Blog.Title != null || p.Blog.BlogId == 2 || p.Author.HeightInMeters > 3) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
-            var blog = result.FetchTree.Children[nameof(Post.Blog)];
-            var author = result.FetchTree.Children[nameof(Post.Author)];
+            var blog = result.MapQueryTree.Children[nameof(Post.Blog)];
+            var author = result.MapQueryTree.Children[nameof(Post.Author)];
             Assert.False(blog.IsFetched);
             Assert.False(blog.InferredInnerJoin);
             Assert.False(author.IsFetched);
@@ -47,11 +45,10 @@
         public void WhereAndInfers() {
             var query = GetSelectQuery<Post>()
                             .Where(p => p.Blog.Title == "Foo" && p.Author.HeightInMeters > 3) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
-            var blog = result.FetchTree.Children[nameof(Post.Blog)];
-            var author = result.FetchTree.Children[nameof(Post.Author)];
+            var blog = result.MapQueryTree.Children[nameof(Post.Blog)];
+            var author = result.MapQueryTree.Children[nameof(Post.Author)];
             Assert.False(blog.IsFetched);
             Assert.True(blog.InferredInnerJoin);
             Assert.False(author.IsFetched);
@@ -62,20 +59,18 @@
         public void WherePkDoesntJoin() {
             var query = GetSelectQuery<Post>()
                             .Where(p => p.Blog.BlogId == 3) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
-            Assert.Null(result.FetchTree);
+            Assert.Null(result.MapQueryTree);
         }
 
         [Fact]
         public void WhereAndNestedOrDoesInfer() {
             var query = GetSelectQuery<Post>()
                             .Where(p => p.Blog.BlogId == 2 && (p.Blog.Owner.UserId == 3 || p.Content.Contains("Foo")) && p.Author.HeightInMeters > 3) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
-            var blog = result.FetchTree.Children[nameof(Post.Blog)];
-            var author = result.FetchTree.Children[nameof(Post.Author)];
+            var result = this.GetSelectWriterResult(query);
+            var blog = result.MapQueryTree.Children[nameof(Post.Blog)];
+            var author = result.MapQueryTree.Children[nameof(Post.Author)];
             Assert.False(blog.IsFetched);
             Assert.False(blog.InferredInnerJoin);
             Assert.False(author.IsFetched);
@@ -86,10 +81,9 @@
         public void WhereTrueGoesToInner() {
             var query = GetSelectQuery<Post>()
                             .Where(p => p.Author.IsEnabled) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
-            var author = result.FetchTree.Children[nameof(Post.Author)];
+            var author = result.MapQueryTree.Children[nameof(Post.Author)];
             Assert.False(author.IsFetched);
             Assert.True(author.InferredInnerJoin);
         }
@@ -98,10 +92,9 @@
         public void WhereFalseGoesToInner() {
             var query = GetSelectQuery<Post>()
                             .Where(p => !p.Author.IsEnabled) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
-            var author = result.FetchTree.Children[nameof(Post.Author)];
+            var author = result.MapQueryTree.Children[nameof(Post.Author)];
             Assert.False(author.IsFetched);
             Assert.True(author.InferredInnerJoin);
         }
@@ -110,10 +103,9 @@
         public void WhereNullCheckOnPropIsINner() {
             var query = GetSelectQuery<Post>()
                             .Where(p => p.Blog.Title == null) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
-            var author = result.FetchTree.Children[nameof(Post.Blog)];
+            var author = result.MapQueryTree.Children[nameof(Post.Blog)];
             Assert.False(author.IsFetched);
             Assert.True(author.InferredInnerJoin);
         }
@@ -122,11 +114,10 @@
         public void WhereIsNullCheckOnMappedPropDoesInfer() {
             var query = GetSelectQuery<Post>()
                             .Where(p => p.Blog.Owner == null) as SelectQuery<Post>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
             // we expect the blog to be inner joined but then the owner prop is not fetched
-            var blog = result.FetchTree.Children[nameof(Post.Blog)];
+            var blog = result.MapQueryTree.Children[nameof(Post.Blog)];
             Assert.False(blog.IsFetched);
             Assert.True(blog.InferredInnerJoin);
             Assert.Empty(blog.Children);
@@ -137,16 +128,22 @@
             var query = GetSelectQuery<Comment>()
                         .Fetch(p => p.Post.Author)
                         .Where(p => p.Post.Author.UserId == 1) as SelectQuery<Comment>;
-            var result = this.GetWhereClauseWriter()
-                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters());
+            var result = this.GetSelectWriterResult(query);
 
             // we expect the blog to be inner joined but then the owner prop is not fetched
-            var post = result.FetchTree.Children[nameof(Comment.Post)];
+            var post = result.MapQueryTree.Children[nameof(Comment.Post)];
             var author = post.Children[nameof(Post.Author)];
             Assert.True(post.IsFetched);
             Assert.True(post.InferredInnerJoin);
             Assert.True(author.IsFetched);
             Assert.True(author.InferredInnerJoin);
+        }
+
+        private SelectWriterResult GetSelectWriterResult<T>(SelectQuery<T> query)
+            where T : class, new() {
+            var result = this.GetWhereClauseWriter()
+                             .GenerateSql(query.WhereClauses, null, new AutoNamingDynamicParameters(), new DefaultAliasProvider());
+            return result;
         }
 
         [Fact]
@@ -169,7 +166,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Users] as t_101 on t.AuthorId = t_101.UserId left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (((t_100.[Title] is not null) or (t.[BlogId] = @l_1)) or (t_101.[HeightInMeters] > @l_2)) order by t.[PostId] offset 0 rows fetch next @take rows only", result.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t left join [Users] as t_100 on t.AuthorId = t_100.UserId left join [Blogs] as t_101 on t.BlogId = t_101.BlogId where (((t_101.[Title] is not null) or (t.[BlogId] = @l_1)) or (t_100.[HeightInMeters] > @l_2)) order by t.[PostId] offset 0 rows fetch next @take rows only", result.Sql);
         }
 
         [Fact]
@@ -180,7 +177,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Users] as t_101 on t.AuthorId = t_101.UserId inner join [Blogs] as t_100 on t.BlogId = t_100.BlogId where ((t_100.[Title] = @l_1) and (t_101.[HeightInMeters] > @l_2))", result.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Users] as t_100 on t.AuthorId = t_100.UserId inner join [Blogs] as t_101 on t.BlogId = t_101.BlogId where ((t_101.[Title] = @l_1) and (t_100.[HeightInMeters] > @l_2))", result.Sql);
         }
 
         [Fact]
@@ -191,7 +188,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal("select [PostId], [Title], [Content], [Rating], [AuthorId], [BlogId], [DoNotMap] from [Posts] where ([BlogId] = @l_1)", result.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t where (t.[BlogId] = @l_1)", result.Sql);
         }
 
         [Fact]
@@ -202,7 +199,7 @@
                              .GenerateSql(query, new AutoNamingDynamicParameters());
 
             this.outputHelper.WriteLine(result.Sql);
-            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Users] as t_101 on t.AuthorId = t_101.UserId left join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (((t.[BlogId] = @l_1) and ((t_100.[OwnerId] = @l_2) or t.[Content] like @l_3)) and (t_101.[HeightInMeters] > @l_4))", result.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Users] as t_100 on t.AuthorId = t_100.UserId left join [Blogs] as t_101 on t.BlogId = t_101.BlogId where (((t.[BlogId] = @l_1) and ((t_101.[OwnerId] = @l_2) or t.[Content] like @l_3)) and (t_100.[HeightInMeters] > @l_4))", result.Sql);
         }
 
         [Fact]
@@ -249,13 +246,13 @@
             Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[BlogId], t.[DoNotMap] from [Posts] as t inner join [Blogs] as t_100 on t.BlogId = t_100.BlogId where (t_100.[OwnerId] is null)", result.Sql);
         }
 
-        private void AssertNoInference(FetchNode fetchNode) {
-            if (fetchNode == null) {
+        private void AssertNoInference(QueryNode mapQueryNode) {
+            if (mapQueryNode == null) {
                 return;
             }
 
-            Assert.False(fetchNode.InferredInnerJoin);
-            foreach (var fetchNodeChild in fetchNode.Children) {
+            Assert.False(mapQueryNode.InferredInnerJoin);
+            foreach (var fetchNodeChild in mapQueryNode.Children) {
                 this.AssertNoInference(fetchNodeChild.Value);
             }
         }

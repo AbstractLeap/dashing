@@ -21,9 +21,10 @@
             // add where clause
             var whereSql = new StringBuilder();
             var parameters = new AutoNamingDynamicParameters();
-            FetchNode rootNode = null;
+            var aliasBucket = new DefaultAliasProvider();
+            QueryTree queryTree = null;
             if (predicateArray != null) {
-                this.AddWhereClause(predicateArray, whereSql, parameters, ref rootNode);
+                this.AddWhereClause(predicateArray, whereSql, parameters, aliasBucket, ref queryTree);
             }
 
             // run the update
@@ -38,16 +39,16 @@
                 return new SqlWriterResult(string.Empty, parameters);
             }
 
-            if (rootNode == null) {
+            if (queryTree == null) {
                 // the where clauses on are on the root table
                 return new SqlWriterResult(this.GetSimpleUpdateQuery(setProps, entity, parameters, whereSql), parameters);
             }
 
             // cross table where clause
-            return new SqlWriterResult(this.GetMultiTableUpdateQuery(setProps, entity, parameters, whereSql, rootNode), parameters);
+            return new SqlWriterResult(this.GetMultiTableUpdateQuery(setProps, entity, parameters, aliasBucket, whereSql, queryTree), parameters);
         }
 
-        private string GetMultiTableUpdateQuery<T>(IEnumerable<string> setProps, T entity, AutoNamingDynamicParameters parameters, StringBuilder whereSql, FetchNode rootNode) {
+        private string GetMultiTableUpdateQuery<T>(IEnumerable<string> setProps, T entity, AutoNamingDynamicParameters parameters, IAliasProvider aliasProvider, StringBuilder whereSql, QueryTree rootQueryNode) {
             var map = this.Configuration.GetMap<T>();
             var sql = new StringBuilder();
 
@@ -59,8 +60,8 @@
             this.Dialect.AppendQuotedTableName(sql, map);
             sql.Append(" as t");
 
-            foreach (var node in rootNode.Children) {
-                this.AddNode(node.Value, sql);
+            foreach (var node in rootQueryNode.Children) {
+                this.AddNode(node.Value, sql, aliasProvider);
             }
 
             sql.Append(whereSql);

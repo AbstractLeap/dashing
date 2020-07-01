@@ -17,7 +17,7 @@
             this.configuration = configuration;
         }
 
-        public Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(FetchNode fetchTree) {
+        public Tuple<Delegate, Type[]> GenerateNonCollectionMapper<T>(QueryTree mapQueryTree) {
             // this is simple, just take the arguments, map them
             // params go in order of fetch tree
             var tt = typeof(T);
@@ -31,7 +31,7 @@
 
             // go through the tree
             int i = 1;
-            statements.AddRange(this.VisitNonCollectionTree<T>(fetchTree, objectsParam, rootVar, ref i, mappedTypes));
+            statements.AddRange(this.VisitNonCollectionTree<T>(mapQueryTree, objectsParam, rootVar, ref i, mappedTypes));
 
             // add in the return statement and parameter
             statements.Add(Expression.Call(rootVar, tt.GetMethod("EnableTracking")));
@@ -48,13 +48,13 @@
         }
 
         private IEnumerable<Expression> VisitNonCollectionTree<T>(
-            FetchNode fetchTree,
+            BaseQueryNode mapQueryTree,
             ParameterExpression objectsParam,
             Expression parent,
             ref int i,
             IList<Type> mappedTypes) {
             var statements = new List<Expression>();
-            foreach (var child in fetchTree.Children) {
+            foreach (var child in mapQueryTree.Children) {
                 if (child.Value.IsFetched) {
                     var propExpr = Expression.Property(parent, child.Value.Column.Name);
                     var indexExpr = Expression.ArrayIndex(objectsParam, Expression.Constant(i));

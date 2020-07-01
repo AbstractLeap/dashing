@@ -58,7 +58,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new NonCollectionMapperGenerator(config);
-            var func = mapper.GenerateNonCollectionMapper<Post>(result.FetchTree);
+            var func = mapper.GenerateNonCollectionMapper<Post>(result.MapQueryTree);
             return func.Item1;
         }
 
@@ -113,7 +113,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new NonCollectionMapperGenerator(config);
-            var func = mapper.GenerateNonCollectionMapper<Comment>(result.FetchTree);
+            var func = mapper.GenerateNonCollectionMapper<Comment>(result.MapQueryTree);
             return func.Item1;
         }
 

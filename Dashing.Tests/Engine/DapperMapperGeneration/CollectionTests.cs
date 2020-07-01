@@ -180,7 +180,7 @@
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new SingleCollectionMapperGenerator(config);
-            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
+            var func = mapper.GenerateCollectionMapper<Post>(result.MapQueryTree);
             return func.Item1;
         }
 
@@ -232,7 +232,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
-            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
+            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.MapQueryTree).Item1;
 
             var tag1 = new PostTag { PostTagId = 1 };
             var tag2 = new PostTag { PostTagId = 2 };
@@ -283,7 +283,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
-            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
+            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.MapQueryTree).Item1;
 
             // setup the scenario
             var tag1 = new PostTag { PostTagId = 1 };
@@ -346,7 +346,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
-            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
+            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.MapQueryTree).Item1;
 
             // setup the scenario
             var tag1 = new PostTag { PostTagId = 1 };
@@ -397,7 +397,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new SingleCollectionMapperGenerator(config);
-            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.FetchTree).Item1;
+            var funcFac = mapper.GenerateCollectionMapper<PostTag>(result.MapQueryTree).Item1;
 
             // setup the scenario
             var tag1 = new PostTag { PostTagId = 1 };
@@ -451,7 +451,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new MultiCollectionMapperGenerator(config);
-            var funcFac = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree).Item1;
+            var funcFac = mapper.GenerateMultiCollectionMapper<Post>(result.MapQueryTree).Item1;
 
             // setup the scenario
             var post1 = new Post { PostId = 1 };
@@ -498,7 +498,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new MultiCollectionMapperGenerator(config);
-            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree).Item1;
+            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.MapQueryTree).Item1;
 
             // setup the scenario
             var blog1 = new Blog { BlogId = 1 };
@@ -588,7 +588,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new MultiCollectionMapperGenerator(config);
-            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree).Item1;
+            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.MapQueryTree).Item1;
 
             // setup the scenario
             var blog1 = new Blog { BlogId = 1 };
@@ -658,7 +658,7 @@
             var writer = new SelectWriter(new SqlServer2012Dialect(), config);
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
             var mapper = new MultiCollectionMapperGenerator(config);
-            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.FetchTree).Item1;
+            var funcFac = mapper.GenerateMultiCollectionMapper<Blog>(result.MapQueryTree).Item1;
 
             // setup the scenario
             var blog1 = new Blog { BlogId = 1 };
@@ -720,7 +720,7 @@
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new MultiCollectionMapperGenerator(config);
-            var func = mapper.GenerateMultiCollectionMapper<Post>(result.FetchTree);
+            var func = mapper.GenerateMultiCollectionMapper<Post>(result.MapQueryTree);
             return func.Item1;
         }
 
@@ -732,7 +732,7 @@
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new SingleCollectionMapperGenerator(config);
-            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
+            var func = mapper.GenerateCollectionMapper<Post>(result.MapQueryTree);
             return func.Item1;
         }
 
@@ -743,7 +743,7 @@
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new SingleCollectionMapperGenerator(config);
-            var func = mapper.GenerateCollectionMapper<Post>(result.FetchTree);
+            var func = mapper.GenerateCollectionMapper<Post>(result.MapQueryTree);
             return func.Item1;
         }
 
@@ -756,7 +756,7 @@
             var result = writer.GenerateSql(selectQuery, new AutoNamingDynamicParameters());
 
             var mapper = new SingleCollectionMapperGenerator(config);
-            var func = mapper.GenerateCollectionMapper<PostWithoutCollectionInitializerInConstructor>(result.FetchTree);
+            var func = mapper.GenerateCollectionMapper<PostWithoutCollectionInitializerInConstructor>(result.MapQueryTree);
             return func.Item1;
         }
 

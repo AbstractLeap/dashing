@@ -4,13 +4,18 @@
     using Dashing.Configuration;
 
     internal interface IOrderClauseWriter {
-        string GetOrderClause<T>(OrderClause<T> clause, FetchNode rootNode, out bool isRootPrimaryKeyClause);
+        string GetOrderClause<T>(
+            OrderClause<T> clause, 
+            QueryTree rootQueryNode,
+            IAliasProvider aliasProvider, 
+            out bool isRootPrimaryKeyClause);
 
         string GetOrderClause<T>(
             OrderClause<T> clause,
-            FetchNode rootNode,
-            Func<IColumn, FetchNode, string> aliasRewriter,
-            Func<IColumn, FetchNode, string> nameRewriter,
+            QueryTree rootQueryNode,
+            IAliasProvider aliasProvider,
+            Func<IColumn, BaseQueryNode, string> aliasRewriter,
+            Func<IColumn, BaseQueryNode, string> nameRewriter,
             out bool isRootPrimaryKeyClause);
     }
 }

@@ -10,7 +10,7 @@
             this.sqlElement = sqlElement;
         }
 
-        public void Append(StringBuilder stringBuilder, ISqlDialect dialect) {
+        public void Append(StringBuilder stringBuilder, ISqlDialect dialect, IAliasProvider aliasProvider) {
             stringBuilder.Append(this.sqlElement);
         }
     }

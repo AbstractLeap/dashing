@@ -17,15 +17,20 @@
             this.dialect = dialect;
         }
 
-        public string GetOrderClause<T>(OrderClause<T> clause, FetchNode rootNode, out bool isRootPrimaryKeyClause) {
-            return this.GetOrderClauseInner(clause, rootNode, null, null, out isRootPrimaryKeyClause);
+        public string GetOrderClause<T>(
+            OrderClause<T> clause, 
+            QueryTree rootQueryNode,
+            IAliasProvider aliasProvider, 
+            out bool isRootPrimaryKeyClause) {
+            return this.GetOrderClauseInner(clause, rootQueryNode, aliasProvider, null, null, out isRootPrimaryKeyClause);
         }
 
         public string GetOrderClause<T>(
             OrderClause<T> clause,
-            FetchNode rootNode,
-            Func<IColumn, FetchNode, string> aliasRewriter,
-            Func<IColumn, FetchNode, string> nameRewriter,
+            QueryTree rootQueryNode,
+            IAliasProvider aliasProvider,
+            Func<IColumn, BaseQueryNode, string> aliasRewriter,
+            Func<IColumn, BaseQueryNode, string> nameRewriter,
             out bool isRootPrimaryKeyClause) {
             if (aliasRewriter == null) {
                 throw new ArgumentNullException("aliasRewriter");
@@ -35,21 +40,16 @@
                 throw new ArgumentNullException("nameRewriter");
             }
 
-            return this.GetOrderClauseInner(clause, rootNode, aliasRewriter, nameRewriter, out isRootPrimaryKeyClause);
+            return this.GetOrderClauseInner(clause, rootQueryNode, aliasProvider, aliasRewriter, nameRewriter, out isRootPrimaryKeyClause);
         }
 
-        private string GetOrderClauseInner<T>(
-            OrderClause<T> clause,
-            FetchNode rootNode,
-            Func<IColumn, FetchNode, string> aliasRewriter,
-            Func<IColumn, FetchNode, string> nameRewriter,
-            out bool isRootPrimaryKeyClause) {
+        private string GetOrderClauseInner<T>(OrderClause<T> clause, QueryTree rootQueryNode, IAliasProvider aliasProvider, Func<IColumn, BaseQueryNode, string> aliasRewriter, Func<IColumn, BaseQueryNode, string> nameRewriter, out bool isRootPrimaryKeyClause) {
             var lambdaExpression = clause.Expression as LambdaExpression;
             if (lambdaExpression == null) {
                 throw new InvalidOperationException("OrderBy clauses must be LambdaExpressions");
             }
 
-            var node = this.VisitExpression(lambdaExpression.Body, rootNode);
+            var node = this.VisitExpression(lambdaExpression.Body, rootQueryNode);
             var sb = new StringBuilder();
             if (node == null) {
                 var column = this.configuration.GetMap<T>().Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
@@ -58,26 +58,19 @@
                 isRootPrimaryKeyClause = column.IsPrimaryKey;
             }
             else {
-                IColumn column = null;
-                if (ReferenceEquals(node, rootNode)) {
-                    column = this.configuration.GetMap<T>().Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
-                    isRootPrimaryKeyClause = column.IsPrimaryKey;
-                }
-                else {
-                    if (node.Column.Relationship == RelationshipType.ManyToOne) {
-                        column = node.Column.ParentMap.Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
-                    }
-                    else if (node.Column.Relationship == RelationshipType.OneToOne) {
-                        column = node.Column.OppositeColumn.Map.Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
-                    }
-                    else {
+                var column = node.GetMapForNode()
+                                 .Columns[((MemberExpression)lambdaExpression.Body).Member.Name];
+                if (node is QueryNode queryNode) {
+                    isRootPrimaryKeyClause = false;
+                    if (queryNode.Column.Relationship != RelationshipType.ManyToOne && queryNode.Column.Relationship != RelationshipType.OneToOne) {
                         throw new NotSupportedException();
                     }
-
-                    isRootPrimaryKeyClause = false;
+                }
+                else {
+                    isRootPrimaryKeyClause = column.IsPrimaryKey;
                 }
 
-                sb.Append(aliasRewriter != null ? aliasRewriter(column, node) : node.Alias).Append(".");
+                sb.Append(aliasRewriter != null ? aliasRewriter(column, node) : aliasProvider.GetAlias(node)).Append(".");
                 this.dialect.AppendQuotedName(sb, nameRewriter != null ? nameRewriter(column, node) : column.DbName);
                 sb.Append(" ").Append(clause.Direction == ListSortDirection.Ascending ? "asc" : "desc");
             }

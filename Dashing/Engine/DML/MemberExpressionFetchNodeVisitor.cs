@@ -3,7 +3,7 @@
     using System.Linq.Expressions;
 
     abstract class MemberExpressionFetchNodeVisitor {
-        protected FetchNode VisitExpression(Expression expr, FetchNode rootNode) {
+        protected BaseQueryNode VisitExpression(Expression expr, QueryTree rootQueryNode) {
             var memberExpr = expr as MemberExpression;
             if (memberExpr == null) {
                 throw new InvalidOperationException("Order/Include/Exclude clauses must contain MemberExpressions");
@@ -11,11 +11,11 @@
 
             if (memberExpr.Expression.NodeType == ExpressionType.Parameter) {
                 // we're at the bottom
-                return rootNode; // this should be the root node
+                return rootQueryNode; // this should be the root queryNode
             }
 
             // not at the bottom, find the child and return that
-            var parentNode = this.VisitExpression(memberExpr.Expression, rootNode);
+            var parentNode = this.VisitExpression(memberExpr.Expression, rootQueryNode);
             if (parentNode == null) {
                 throw new InvalidOperationException("You must Fetch a relationship if you want to use it in an order by or include/exclude clause");
             }

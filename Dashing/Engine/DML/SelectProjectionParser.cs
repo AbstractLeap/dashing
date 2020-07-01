@@ -5,46 +5,42 @@
 
     using Dashing.Configuration;
 
-    internal class SelectProjectionParser<TBase> : ExpressionVisitorBase<Action<FetchNode>> {
+    internal class SelectProjectionParser<TBase> : ExpressionVisitorBase<Action<BaseQueryNode>> {
         private readonly IConfiguration configuration;
 
-        private FetchNode rootNode;
+        private QueryTree rootQueryNode;
 
         public SelectProjectionParser(IConfiguration configuration) {
             this.configuration = configuration;
         }
 
-        public void ParseExpression<TProjection>(Expression<Func<TBase, TProjection>> expression, FetchNode rootNode) {
-            this.rootNode = rootNode;
+        public void ParseExpression<TProjection>(Expression<Func<TBase, TProjection>> expression, QueryTree rootQueryNode) {
+            this.rootQueryNode = rootQueryNode;
             this.Visit(expression);
         }
 
         protected override void VisitMember(Context context, MemberExpression node) {
-            FetchNode fetchNode = null;
-            this.VisitMember(node, x => fetchNode = x);
+            BaseQueryNode mapQueryNode = null;
+            this.VisitMember(node,
+                x => mapQueryNode = x);
             if (!context.Parent.IsExpressionOf(ExpressionType.MemberAccess)) {
                 // we're at the end
-                var map = ReferenceEquals(this.rootNode, fetchNode)
-                              ? this.configuration.GetMap<TBase>()
-                              : (fetchNode.Column.Relationship == RelationshipType.ManyToOne
-                                     ? fetchNode.Column.ParentMap
-                                     : (fetchNode.Column.Relationship == RelationshipType.OneToOne
-                                            ? fetchNode.Column.OppositeColumn.Map
-                                            : throw new NotSupportedException("Include/Exclude clauses can only use Many to One and One to One relationships")));
-
+                var map = mapQueryNode.GetMapForNode();
+                if (mapQueryNode is QueryNode queryNode)  {
+                    if (queryNode.Column.Relationship != RelationshipType.ManyToOne && queryNode.Column.Relationship != RelationshipType.OneToOne) {
+                        throw new NotSupportedException("Include/Exclude clauses can only use Many to One and One to One relationships");
+                    }
+                }
+                
                 if (map.Columns.TryGetValue(node.Member.Name, out var column)) {
                     if (column.Relationship == RelationshipType.None) {
-                        // add to the included columns for this node
-                        if (fetchNode.IncludedColumns == null) {
-                            fetchNode.IncludedColumns = new List<IColumn>();
-                        }
-
-                        fetchNode.IncludedColumns.Add(column);
+                        // add to the included columns for this queryNode
+                        mapQueryNode.AddIncludedColumn(column);
                     }
                     else if (column.Relationship == RelationshipType.ManyToOne || column.Relationship == RelationshipType.OneToOne) {
-                        // add a new fetch node for this column
-                        if (!fetchNode.Children.ContainsKey(column.Name)) {
-                            fetchNode.AddChild(column, true);
+                        // add a new fetch queryNode for this column
+                        if (!mapQueryNode.Children.ContainsKey(column.Name)) {
+                            mapQueryNode.AddChild(column, true);
                         }
                     }
                     else {
@@ -63,17 +59,17 @@
                 }
 
                 var map = this.configuration.GetMap(declaringType);
-                if (!fetchNode.Children.ContainsKey(node.Member.Name)) {
-                    context.State(fetchNode.AddChild(map.Columns[node.Member.Name], true));
+                if (!mapQueryNode.Children.ContainsKey(node.Member.Name)) {
+                    context.State(mapQueryNode.AddChild(map.Columns[node.Member.Name], true));
                 }
                 else {
-                    context.State(fetchNode.Children[node.Member.Name]);
+                    context.State(mapQueryNode.Children[node.Member.Name]);
                 }
             }
         }
 
         protected override void VisitParameter(Context context, ParameterExpression node) {
-            context.State(this.rootNode);
+            context.State(this.rootQueryNode);
         }
 
         protected override void VisitLambda(Context context, LambdaExpression node) {

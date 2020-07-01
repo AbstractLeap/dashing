@@ -30,7 +30,7 @@
             return result;
         }
 
-        private void Clone(object entity, object result, FetchNode fetchNode) {
+        private void Clone(object entity, object result, BaseQueryNode mapQueryNode) {
             var entityType = entity.GetType();
             foreach (var column in Enumerable.Where<KeyValuePair<string, IColumn>>(this.configuration.GetMap(entityType).Columns, c => !c.Value.IsIgnored)) {
                 var prop = entityType.GetProperty(column.Key);
@@ -48,10 +48,10 @@
                 else if (column.Value.Relationship == RelationshipType.ManyToOne || column.Value.Relationship == RelationshipType.OneToOne) {
                     var val = prop.GetValue(entity);
                     if (val != null) {
-                        if (fetchNode != null && fetchNode.Children.ContainsKey(column.Key)) {
+                        if (mapQueryNode != null && mapQueryNode.Children.ContainsKey(column.Key)) {
                             // fetched, we need to deep clone this
                             var fetchedResult = Activator.CreateInstance(column.Value.Type);
-                            this.Clone(val, fetchedResult, fetchNode.Children[column.Key]);
+                            this.Clone(val, fetchedResult, mapQueryNode.Children[column.Key]);
                             prop.SetValue(result, fetchedResult);
                         }
                         else {
@@ -85,7 +85,7 @@
                             this.Clone(
                                 collectionEntity,
                                 collectionResult,
-                                fetchNode != null && fetchNode.Children.ContainsKey(column.Key) ? fetchNode.Children[column.Key] : null);
+                                mapQueryNode != null && mapQueryNode.Children.ContainsKey(column.Key) ? mapQueryNode.Children[column.Key] : null);
                             listType.GetMethod("Add").Invoke(listResult, new[] { collectionResult });
                         }
                         prop.SetValue(result, listResult);

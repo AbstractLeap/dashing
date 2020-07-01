@@ -4,6 +4,6 @@
     using Dashing.Engine.Dialects;
 
     internal interface ISqlElement {
-        void Append(StringBuilder stringBuilder, ISqlDialect dialect);
+        void Append(StringBuilder stringBuilder, ISqlDialect dialect, IAliasProvider aliasProvider);
     }
 }

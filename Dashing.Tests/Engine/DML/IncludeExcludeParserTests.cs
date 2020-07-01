@@ -13,96 +13,87 @@
     public class IncludeExcludeParserTests {
         [Fact]
         public void SimpleIncludeAddedToTree() {
-            var parser = new IncludeExcludeParser(this.GetConfig<Post, string>(post => post.Title));
             Expression<Func<Post, string>> pred = post => post.Title;
-            var fetchNode = new FetchNode();
-            parser.ParseExpression<Post>(pred, fetchNode, true);
+            var config = this.GetConfig<Post, string>(post => post.Title);
+            var fetchNode = this.Parse(config, pred);
 
-            Assert.Single(fetchNode.IncludedColumns);
-            Assert.Null(fetchNode.ExcludedColumns);
-            Assert.Equal(nameof(Post.Title), fetchNode.IncludedColumns.First().Name);
+            Assert.Contains(fetchNode.GetSelectedColumns(), column => column.Name == nameof(Post.Title));
         }
 
         [Fact]
         public void NonFetchedIncludeThrows() {
-            var parser = new IncludeExcludeParser(this.GetConfig<Blog, string>(blog => blog.Description));
             Expression<Func<Post, string>> pred = post => post.Blog.Description;
-            var fetchNode = new FetchNode();
-            Assert.Throws<InvalidOperationException>(() => parser.ParseExpression<Post>(pred, fetchNode, true));
+            var config = this.GetConfig<Blog, string>(blog => blog.Description);
+            Assert.Throws<InvalidOperationException>(() => this.Parse(config, pred));
         }
 
         [Fact]
         public void RelationshipIncludeThrows() {
-            var parser = new IncludeExcludeParser(this.GetConfig<Blog, string>(blog => blog.Description));
             Expression<Func<Post, Blog>> pred = post => post.Blog;
-            var fetchNode = new FetchNode();
-            Assert.Throws<NotSupportedException>(() => parser.ParseExpression<Post>(pred, fetchNode, true));
+            var config = this.GetConfig<Blog, string>(blog => blog.Description);
+            Assert.Throws<NotSupportedException>(() => this.Parse(config, pred));
         }
 
         [Fact]
         public void FetchedIncludeWorks() {
-            var config = this.GetConfig<Blog, string>(blog => blog.Description);
-            var parser = new IncludeExcludeParser(config);
             Expression<Func<Post, string>> pred = post => post.Blog.Description;
-            var rootNode = new FetchNode();
+            var config = this.GetConfig<Blog, string>(blog => blog.Description);
+            var rootNode = new QueryTree(false, false, config.GetMap<Post>());
             var blogNode = rootNode.AddChild(config.GetMap<Post>().Property(p => p.Blog), true);
-            rootNode.Children = new OrderedDictionary<string, FetchNode> {
+            rootNode.Children = new OrderedDictionary<string, QueryNode> {
                                                                              { nameof(Post.Blog), blogNode }
                                                                          };
-            parser.ParseExpression<Post>(pred, rootNode, true);
+            rootNode = this.Parse(config, pred, rootNode);
 
-            Assert.Null(rootNode.IncludedColumns);
-            Assert.Null(rootNode.ExcludedColumns);
-            Assert.Single(blogNode.IncludedColumns);
-            Assert.Null(blogNode.ExcludedColumns);
-            Assert.Equal(nameof(Blog.Description), blogNode.IncludedColumns.First().Name);
+            Assert.Contains(rootNode.Children[nameof(Post.Blog)].GetSelectedColumns(), c => c.Name == nameof(Blog.Description));
         }
 
         [Fact]
         public void SimpleExcludeAddedToTree() {
-            var parser = new IncludeExcludeParser(this.GetConfig<Post, string>(post => post.Title));
+            var config = this.GetConfig<Post, string>(post => post.Title);
             Expression<Func<Post, string>> pred = post => post.Title;
-            var fetchNode = new FetchNode();
-            parser.ParseExpression<Post>(pred, fetchNode, false);
+            var fetchNode = this.Parse(config, pred, isInclude: false);
 
-            Assert.Single(fetchNode.ExcludedColumns);
-            Assert.Null(fetchNode.IncludedColumns);
-            Assert.Equal(nameof(Post.Title), fetchNode.ExcludedColumns.First().Name);
+            Assert.True(fetchNode.GetSelectedColumns().All(c => c.Name != nameof(Post.Title)));
         }
 
         [Fact]
         public void NonFetchedExcludeThrows() {
-            var parser = new IncludeExcludeParser(this.GetConfig<Blog, string>(blog => blog.Description));
+            var config = this.GetConfig<Blog, string>(blog => blog.Description);
             Expression<Func<Post, string>> pred = post => post.Blog.Description;
-            var fetchNode = new FetchNode();
-            Assert.Throws<InvalidOperationException>(() => parser.ParseExpression<Post>(pred, fetchNode, false));
+            Assert.Throws<InvalidOperationException>(() => this.Parse(config, pred, isInclude: false));
         }
 
         [Fact]
         public void RelationshipExcludeThrows() {
-            var parser = new IncludeExcludeParser(this.GetConfig<Blog, string>(blog => blog.Description));
+            var config = this.GetConfig<Blog, string>(blog => blog.Description);
             Expression<Func<Post, Blog>> pred = post => post.Blog;
-            var fetchNode = new FetchNode();
-            Assert.Throws<NotSupportedException>(() => parser.ParseExpression<Post>(pred, fetchNode, false));
+            Assert.Throws<NotSupportedException>(() => this.Parse(config, pred, isInclude: false));
         }
 
         [Fact]
         public void FetchedExcludeWorks() {
             var config = this.GetConfig<Blog, string>(blog => blog.Description);
-            var parser = new IncludeExcludeParser(config);
             Expression<Func<Post, string>> pred = post => post.Blog.Description;
-            var rootNode = new FetchNode();
+            var rootNode = new QueryTree(false, false, config.GetMap<Post>());
             var blogNode = rootNode.AddChild(config.GetMap<Post>().Property(p => p.Blog), true);
-            rootNode.Children = new OrderedDictionary<string, FetchNode> {
+            rootNode.Children = new OrderedDictionary<string, QueryNode> {
                                                                              { nameof(Post.Blog), blogNode }
                                                                          };
-            parser.ParseExpression<Post>(pred, rootNode, false);
+            rootNode = this.Parse(config, pred, rootNode, isInclude: false);
 
-            Assert.Null(rootNode.IncludedColumns);
-            Assert.Null(rootNode.ExcludedColumns);
-            Assert.Single(blogNode.ExcludedColumns);
-            Assert.Null(blogNode.IncludedColumns);
-            Assert.Equal(nameof(Blog.Description), blogNode.ExcludedColumns.First().Name);
+            Assert.True(rootNode.Children.First().Value.GetSelectedColumns().All(c => c.Name != nameof(Blog.Description)));
+        }
+
+        private QueryTree Parse<T, TInclude>(IConfiguration configuration, Expression<Func<T, TInclude>> pred, QueryTree queryTree = null, bool isInclude = true)
+        {
+            var parser = new IncludeExcludeParser(configuration);
+            if (queryTree == null) {
+                queryTree = new QueryTree(false, false, configuration.GetMap<T>());
+            }
+
+            parser.ParseExpression<Post>(pred, queryTree, isInclude);
+            return queryTree;
         }
 
         private IConfiguration GetConfig() {

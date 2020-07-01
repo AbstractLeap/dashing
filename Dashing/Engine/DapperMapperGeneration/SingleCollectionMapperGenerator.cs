@@ -18,7 +18,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
             this.configuration = configuration;
         }
 
-        public Tuple<Delegate, Type[]> GenerateCollectionMapper<T>(FetchNode fetchTree) {
+        public Tuple<Delegate, Type[]> GenerateCollectionMapper<T>(QueryTree mapQueryTree) {
             var rootType = typeof(T);
 
             // closure variables
@@ -46,7 +46,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
             var objectParamArrayIdx = 1;
             bool hasVisitedCollection = false;
             var innerStatements = this.VisitTree(
-                fetchTree,
+                mapQueryTree,
                 currentRootParam,
                 objectsParam,
                 ref hasVisitedCollection,
@@ -74,7 +74,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
         }
 
         private Tuple<IEnumerable<Expression>, IEnumerable<Expression>> VisitTree(
-            FetchNode node,
+            BaseQueryNode queryNode,
             Expression currentBranchExpression,
             ParameterExpression objectsParam,
             ref bool hasVisitedCollection,
@@ -83,7 +83,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
             ref int objectParamArrayIdx) {
             var newRootStatements = new List<Expression>();
             var insideCollectionStatements = new List<Expression>();
-            foreach (var childNode in node.Children) {
+            foreach (var childNode in queryNode.Children) {
                 if (childNode.Value.IsFetched) {
                     // create a parameter
                     Type childType;

@@ -18,9 +18,9 @@
 
         private readonly IConfiguration config;
 
-        private FetchNode modifiedRootNode;
+        private QueryTree modifiedRootQueryNode;
 
-        private FetchNode currentNode;
+        private BaseQueryNode currentQueryNode;
 
         private List<PropertyInfo> currentFetchStack;
 
@@ -56,19 +56,25 @@
 
         private object value;
 
+        private IAliasProvider aliasProvider;
+
+        private IMap rootMap;
+
         public WhereClauseWriter(ISqlDialect dialect, IConfiguration config) {
             this.dialect = dialect;
             this.config = config;
         }
 
-        public SelectWriterResult GenerateSql<T>(IEnumerable<Expression<Func<T, bool>>> whereClauses, FetchNode rootNode, AutoNamingDynamicParameters parameters) {
+        public SelectWriterResult GenerateSql<T>(IEnumerable<Expression<Func<T, bool>>> whereClauses, QueryTree rootQueryNode, AutoNamingDynamicParameters parameters, IAliasProvider aliasProvider) {
             if (whereClauses.IsEmpty()) {
-                return new SelectWriterResult(string.Empty, null, rootNode);
+                return new SelectWriterResult(string.Empty, null, rootQueryNode);
             }
 
             this.InitVariables();
             this.autoNamingDynamicParameters = parameters;
-            this.modifiedRootNode = rootNode;
+            this.modifiedRootQueryNode = rootQueryNode;
+            this.aliasProvider = aliasProvider;
+            this.rootMap = this.config.GetMap<T>();
 
             foreach (var whereClause in whereClauses) {
                 this.VisitWhereClause(whereClause);
@@ -76,16 +82,16 @@
             }
 
             this.InferInnerJoins();
-            return new SelectWriterResult(this.GetSql(), this.autoNamingDynamicParameters, this.modifiedRootNode);
+            return new SelectWriterResult(this.GetSql(), this.autoNamingDynamicParameters, this.modifiedRootQueryNode);
         }
 
         private void InferInnerJoins() {
-            if (this.modifiedRootNode == null) {
+            if (this.modifiedRootQueryNode == null) {
                 return;
             }
 
             foreach (var fetchStack in this.currentFetchStacks) {
-                var currentNodeDownStack = this.modifiedRootNode;
+                BaseQueryNode currentNodeDownStack = this.modifiedRootQueryNode;
                 foreach (var propertyInfo in fetchStack) {
                     currentNodeDownStack = currentNodeDownStack.Children[propertyInfo.Name];
                     currentNodeDownStack.InferredInnerJoin = true;
@@ -339,7 +345,7 @@
                         // add the reference back to the related column
                         var thisTinyBitOfSql = new StringBuilder(" and ");
                         var mapPrimaryKey = this.config.GetMap(columnWithAnyExpression.Expression.Type).PrimaryKey.DbName;
-                        thisTinyBitOfSql.Append(columnElement.Node != null ? columnElement.Node.Alias : "t");
+                        thisTinyBitOfSql.Append(columnElement.QueryNode != null ? this.aliasProvider.GetAlias(columnElement.QueryNode) : "t");
                         thisTinyBitOfSql.Append(".");
                         this.dialect.AppendQuotedName(thisTinyBitOfSql, mapPrimaryKey);
                         thisTinyBitOfSql.Append(" = ");
@@ -457,7 +463,7 @@
                     var fkName = this.config.GetMap(declaringType).Columns[propInfo.Name].DbName;
                     isEntityFetch = true;
                     entityFetchType = propInfo.PropertyType;
-                    return new ColumnElement(this.currentNode, fkName, exp.Expression.NodeType != ExpressionType.MemberAccess);
+                    return new ColumnElement(this.currentQueryNode, fkName, exp.Expression.NodeType != ExpressionType.MemberAccess);
                 }
 
                 if (this.config.HasMap(declaringType)) {
@@ -468,15 +474,15 @@
                             var foreignKeyName =
                                 this.config.GetMap(foreignKeyExpression.Expression.Type).Columns[foreignKeyExpression.Member.Name].DbName;
                             return new ColumnElement(
-                                this.currentNode,
+                                this.currentQueryNode,
                                 foreignKeyName,
                                 foreignKeyExpression.Expression.NodeType != ExpressionType.MemberAccess);
                         }
                         // e.EntityId == blah
-                        return new ColumnElement(this.modifiedRootNode, this.config.GetMap(declaringType).Columns[propInfo.Name].DbName, true);
+                        return new ColumnElement(this.modifiedRootQueryNode, this.config.GetMap(declaringType).Columns[propInfo.Name].DbName, true);
                     }
                     return new ColumnElement(
-                        this.currentNode,
+                        this.currentQueryNode,
                         this.config.GetMap(declaringType).Columns[propInfo.Name].DbName,
                         exp.Expression.NodeType != ExpressionType.MemberAccess);
                 }
@@ -487,27 +493,27 @@
 
         private void GetOrCreateCurrentNode(PropertyInfo propInfo, Type declaringType) {
             this.currentFetchStack.Add(propInfo);
-            if (!this.currentNode.Children.ContainsKey(propInfo.Name)) {
-                this.currentNode = this.currentNode.AddChild(this.config.GetMap(declaringType).Columns[propInfo.Name], false);
+            if (!this.currentQueryNode.Children.ContainsKey(propInfo.Name)) {
+                this.currentQueryNode = this.currentQueryNode.AddChild(this.config.GetMap(declaringType).Columns[propInfo.Name], false);
             }
             else {
-                this.currentNode = this.currentNode.Children[propInfo.Name];
+                this.currentQueryNode = this.currentQueryNode.Children[propInfo.Name];
             }
         }
 
         private void EnsureRootNodeExists() {
-            if (this.modifiedRootNode == null) {
-                this.modifiedRootNode = new FetchNode();
+            if (this.modifiedRootQueryNode == null) {
+                this.modifiedRootQueryNode = new QueryTree(false, false, this.rootMap);
 
                 // update exising ISqlElements to use new rootnode (and alias)
                 foreach (var element in this.sqlElements) {
                     var columnElement = element as ColumnElement;
                     if (columnElement != null && columnElement.IsRoot) {
-                        columnElement.Node = this.modifiedRootNode;
+                        columnElement.QueryNode = this.modifiedRootQueryNode;
                     }
                 }
 
-                this.currentNode = this.modifiedRootNode;
+                this.currentQueryNode = this.modifiedRootQueryNode;
             }
         }
 
@@ -515,10 +521,10 @@
             if (this.isTopOfBinaryOrMethod) {
                 this.isEntityFetch = true;
                 this.entityFetchType = exp.Type;
-                return new ColumnElement(this.modifiedRootNode, this.config.GetMap(exp.Type).PrimaryKey.DbName, true);
+                return new ColumnElement(this.modifiedRootQueryNode, this.config.GetMap(exp.Type).PrimaryKey.DbName, true);
             }
 
-            this.currentNode = this.modifiedRootNode;
+            this.currentQueryNode = this.modifiedRootQueryNode;
             return null;
         }
 
@@ -737,7 +743,7 @@
             var sql = new StringBuilder();
             while (this.sqlElements.Count > 1) {
                 // this is one as there's a trailing and that we don't want
-                this.sqlElements.Dequeue().Append(sql, this.dialect);
+                this.sqlElements.Dequeue().Append(sql, this.dialect, this.aliasProvider);
             }
 
             return sql.ToString();

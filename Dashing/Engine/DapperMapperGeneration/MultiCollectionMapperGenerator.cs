@@ -18,7 +18,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
             this.configuration = configuration;
         }
 
-        public Tuple<Delegate, Type[], Type[]> GenerateMultiCollectionMapper<T>(FetchNode fetchTree) {
+        public Tuple<Delegate, Type[], Type[]> GenerateMultiCollectionMapper<T>(QueryTree mapQueryTree) {
             var rootType = typeof(T);
             var currentRootParam = Expression.Parameter(rootType, "currentRoot");
             var rootVar = Expression.Variable(rootType, "rootVar");
@@ -38,7 +38,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
             var objectParamArrayIdx = 1;
             var collectionFetchParamCounter = 0;
             var innerStatements = this.VisitMultiCollectionTree<T>(
-                fetchTree,
+                mapQueryTree,
                 ref collectionFetchParamCounter,
                 currentRootParam,
                 primaryKey.Type,
@@ -84,7 +84,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
         ///     Item1 is the expressions for mapping the current root var, Item2 is all the other expressions from this branch
         /// </returns>
         private Tuple<IEnumerable<Expression>, IEnumerable<Expression>> VisitMultiCollectionTree<T>(
-            FetchNode node,
+            BaseQueryNode queryNode,
             ref int collectionFetchParamCounter,
             Expression parentExpression,
             Type currentRootPrimaryKeyType,
@@ -97,7 +97,7 @@ namespace Dashing.Engine.DapperMapperGeneration {
             ref int objectParamArrayIdx) {
             var rootStatements = new List<Expression>();
             var collectionStatements = new List<Expression>();
-            foreach (var child in node.Children) {
+            foreach (var child in queryNode.Children) {
                 if (child.Value.IsFetched) {
                     // create a param
                     var isOneToMany = child.Value.Column.Relationship == RelationshipType.OneToMany;

@@ -15,19 +15,19 @@
             this.configuration = configuration;
         }
 
-        public FetchNode GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out int numberCollectionFetches) where T : class, new() {
-            FetchNode rootNode = null;
+        public QueryTree GetFetchTree<T>(SelectQuery<T> selectQuery, out int aliasCounter, out int numberCollectionFetches) where T : class, new() {
+            QueryTree rootQueryNode = null;
             numberCollectionFetches = 0;
             aliasCounter = 0;
 
             if (selectQuery.HasFetches()) {
                 // now we go through the fetches and generate the tree structure
-                rootNode = new FetchNode();
+                rootQueryNode = new QueryTree(false, selectQuery.FetchAllProperties, this.configuration.GetMap<T>());
                 foreach (var fetch in selectQuery.Fetches) {
                     var lambda = fetch as LambdaExpression;
                     if (lambda != null) {
                         var expr = lambda.Body as MemberExpression;
-                        var currentNode = rootNode;
+                        var currentNode = rootQueryNode;
                         var entityNames = new Stack<string>();
 
                         // TODO Change this so that algorithm only goes through tree once
@@ -38,14 +38,14 @@
                         }
 
                         // Now go through the expression forwards adding in nodes where needed
-                        this.AddPropertiesToFetchTree<T>(ref aliasCounter, ref numberCollectionFetches, entityNames, currentNode, rootNode);
+                        this.AddPropertiesToFetchTree<T>(ref numberCollectionFetches, entityNames, currentNode);
                     }
                 }
 
                 // now iterate through the collection fetches
                 foreach (var collectionFetch in selectQuery.CollectionFetches) {
                     var entityNames = new Stack<string>();
-                    var currentNode = rootNode;
+                    var currentNode = rootQueryNode;
 
                     // start at the top of the stack, pop the expression off and do as above
                     for (var i = collectionFetch.Value.Count - 1; i >= 0; i--) {
@@ -69,31 +69,23 @@
                         }
                     }
 
-                    this.AddPropertiesToFetchTree<T>(ref aliasCounter, ref numberCollectionFetches, entityNames, currentNode, rootNode);
+                    this.AddPropertiesToFetchTree<T>(ref numberCollectionFetches, entityNames, currentNode);
                 }
             }
 
-            return rootNode;
+            return rootQueryNode;
         }
 
         private void AddPropertiesToFetchTree<T>(
-            ref int aliasCounter,
             ref int numberCollectionFetches,
             Stack<string> entityNames,
-            FetchNode currentNode,
-            FetchNode rootNode) {
+            BaseQueryNode currentQueryNode) {
             while (entityNames.Count > 0) {
                 var propName = entityNames.Pop();
 
                 // don't add duplicates
-                if (!currentNode.Children.ContainsKey(propName)) {
-                    var column =
-                        this.configuration.GetMap(
-                            currentNode == rootNode
-                                ? typeof(T)
-                                : (currentNode.Column.Relationship == RelationshipType.OneToMany
-                                       ? currentNode.Column.Type.GetGenericArguments().First()
-                                       : currentNode.Column.Type)).Columns[propName];
+                if (!currentQueryNode.Children.ContainsKey(propName)) {
+                    var column = currentQueryNode.GetMapForNode().Columns[propName];
                     if (column.IsIgnored) {
                         //TODO we should probably warn at this point
                         continue;
@@ -104,10 +96,10 @@
                     }
 
                     // add to tree
-                    currentNode = currentNode.AddChild(column, true);
+                    currentQueryNode = currentQueryNode.AddChild(column, true);
                 }
                 else {
-                    currentNode = currentNode.Children[propName];
+                    currentQueryNode = currentQueryNode.Children[propName];
                 }
             }
         }

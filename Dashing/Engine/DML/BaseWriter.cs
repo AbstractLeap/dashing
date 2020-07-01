@@ -20,102 +20,59 @@
             this.Configuration = config;
         }
 
-        protected void AddNode(FetchNode node, StringBuilder tableSql) {
-            var map = this.GetMapForNode(node);
-            this.AddTableSqlForNode(node, map, tableSql);
-            foreach (var child in node.Children) {
-                this.AddNode(child.Value, tableSql);
+        protected void AddNode(QueryNode queryNode, StringBuilder tableSql, IAliasProvider aliasProvider) {
+            var map = queryNode.Column.GetMapOfColumnType();
+            this.AddTableSqlForNode(queryNode, map, tableSql, aliasProvider);
+            foreach (var child in queryNode.Children) {
+                this.AddNode(child.Value, tableSql, aliasProvider);
             }
         }
 
-        protected AddNodeResult AddNode(FetchNode node, StringBuilder tableSql, StringBuilder columnSql, bool selectQueryFetchAllProperties, bool isProjectedQuery) {
-            // add this node and then it's children
+        protected void AddNode(QueryNode queryNode, StringBuilder tableSql, StringBuilder columnSql, IAliasProvider aliasProvider, bool selectQueryFetchAllProperties, bool isProjectedQuery) {
+            // add this queryNode and then it's children
             // add table sql
-            var map = this.GetMapForNode(node);
-            this.AddTableSqlForNode(node, map, tableSql);
+            var map = queryNode.GetMapForNode();
+            this.AddTableSqlForNode(queryNode, map, tableSql, aliasProvider);
 
             // add the columns
-            var splitOns = new List<string>();
-            if (node.IsFetched) {
-                var columns = GetColumnsWithIncludesAndExcludes(node.IncludedColumns, node.ExcludedColumns, map, selectQueryFetchAllProperties, isProjectedQuery);
+            if (queryNode.IsFetched) {
+                var columns = queryNode.GetSelectedColumns();
                 columns = columns.Where(
-                    c => !node.Children.ContainsKey(c.Name) || !node.Children[c.Name]
+                    c => !queryNode.Children.ContainsKey(c.Name) || !queryNode.Children[c.Name]
                                                                     .IsFetched);
                 foreach (var columnEntry in columns.AsSmartEnumerable()) {
                     columnSql.Append(", ");
-                    this.AddColumn(columnSql, columnEntry.Value, node.Alias);
-                    if (columnEntry.IsFirst) {
-                        splitOns.Add(columnEntry.Value.Name);
-                    }
+                    this.AddColumn(columnSql, columnEntry.Value, aliasProvider.GetAlias(queryNode));
                 }
             }
 
             // add its children
-            var signatureBuilder = new StringBuilder();
-            foreach (var child in node.Children) {
-                var signature = this.AddNode(child.Value, tableSql, columnSql, selectQueryFetchAllProperties, isProjectedQuery);
-                if (child.Value.IsFetched) {
-                    signatureBuilder.Append(signature.Signature);
-                    splitOns.AddRange(signature.SplitOn);
-                }
+            foreach (var child in queryNode.Children) {
+                this.AddNode(child.Value, tableSql, columnSql, aliasProvider, selectQueryFetchAllProperties, isProjectedQuery);
             }
-
-            var actualSignature = signatureBuilder.ToString();
-            if (node.IsFetched) {
-                actualSignature = node.Column.FetchId + "S" + actualSignature + "E";
-            }
-
-            return new AddNodeResult {
-                                         Signature = actualSignature,
-                                         SplitOn = splitOns
-                                     };
         }
 
-        private void AddTableSqlForNode(FetchNode node, IMap map, StringBuilder tableSql) {
-            // if this is a non-nullable relationship and we've not already done a left join on the way to this node
+        private void AddTableSqlForNode(QueryNode queryNode, IMap map, StringBuilder tableSql, IAliasProvider aliasProvider) {
+            // if this is a non-nullable relationship and we've not already done a left join on the way to this queryNode
             // we can do an inner join
             tableSql.Append(
-                node.InferredInnerJoin || (!node.Column.IsNullable && node.Column.Relationship != RelationshipType.OneToMany && !this.HasAnyNullableAncestor(node.Parent))
+                queryNode.InferredInnerJoin 
+                || (!queryNode.Column.IsNullable 
+                    && queryNode.Column.Relationship != RelationshipType.OneToMany 
+                    && (!(queryNode.Parent is QueryNode parentQueryNode) || !parentQueryNode.HasAnyNullableAncestor()))
                     ? " inner join "
                     : " left join ");
             this.Dialect.AppendQuotedTableName(tableSql, map);
-            tableSql.Append(" as " + node.Alias);
+            tableSql.Append(" as " + aliasProvider.GetAlias(queryNode));
 
-            if (node.Column.Relationship == RelationshipType.ManyToOne || node.Column.Relationship == RelationshipType.OneToOne) {
-                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.DbName + " = " + node.Alias + "." + map.PrimaryKey.DbName);
+            if (queryNode.Column.Relationship == RelationshipType.ManyToOne || queryNode.Column.Relationship == RelationshipType.OneToOne) {
+                tableSql.Append(" on " + aliasProvider.GetAlias(queryNode.Parent) + "." + queryNode.Column.DbName + " = " + aliasProvider.GetAlias(queryNode) + "." + map.PrimaryKey.DbName);
             }
-            else if (node.Column.Relationship == RelationshipType.OneToMany) {
-                tableSql.Append(" on " + node.Parent.Alias + "." + node.Column.Map.PrimaryKey.DbName + " = " + node.Alias + "." + node.Column.ChildColumn.DbName);
+            else if (queryNode.Column.Relationship == RelationshipType.OneToMany) {
+                tableSql.Append(" on " + aliasProvider.GetAlias(queryNode.Parent) + "." + queryNode.Column.Map.PrimaryKey.DbName + " = " + aliasProvider.GetAlias(queryNode) + "." + queryNode.Column.ChildColumn.DbName);
             }
         }
-
-        private IMap GetMapForNode(FetchNode node) {
-            IMap map;
-            if (node.Column.Relationship == RelationshipType.OneToMany) {
-                map = this.Configuration.GetMap(node.Column.Type.GetGenericArguments()[0]);
-            }
-            else if (node.Column.Relationship == RelationshipType.ManyToOne || node.Column.Relationship == RelationshipType.OneToOne) {
-                map = this.Configuration.GetMap(node.Column.Type);
-            }
-            else {
-                throw new NotSupportedException();
-            }
-
-            return map;
-        }
-
-        private bool HasAnyNullableAncestor(FetchNode node) {
-            if (node.Column == null) {
-                return false;
-            }
-
-            if (node.Column.IsNullable && !node.InferredInnerJoin) {
-                return true;
-            }
-
-            return this.HasAnyNullableAncestor(node.Parent);
-        }
-
+        
         protected void AddColumn(StringBuilder sql, IColumn column, string tableAlias = null, string columnAlias = null) {
             // add the table alias
             if (tableAlias != null) {
@@ -135,39 +92,18 @@
                 this.Dialect.AppendQuotedName(sql, column.Name);
             }
         }
-
-        protected static IEnumerable<IColumn> GetColumnsWithIncludesAndExcludes(IList<IColumn> includes, IList<IColumn> excludes, IMap map, bool fetchAllProperties, bool isProjectedQuery) {
-            if (isProjectedQuery) {
-                if (includes != null) {
-                    return includes;
-                }
-
-                return map.OwnedColumns(fetchAllProperties);
-            }
-
-            var columns = map.OwnedColumns(fetchAllProperties);
-            if (includes != null) {
-                columns = columns.Union(includes);
-            }
-
-            if (excludes != null) {
-                columns = columns.Where(c => !excludes.Contains(c));
-            }
-
-            return columns;
-        }
-
-        internal void AddWhereClause<T>(IList<Expression<Func<T, bool>>> whereClauses, StringBuilder sql, AutoNamingDynamicParameters parameters, ref FetchNode rootNode) {
+        
+        internal void AddWhereClause<T>(IList<Expression<Func<T, bool>>> whereClauses, StringBuilder sql, AutoNamingDynamicParameters parameters, IAliasProvider aliasProvider, ref QueryTree queryTree) {
             var whereClauseWriter = new WhereClauseWriter(this.Dialect, this.Configuration);
-            var result = whereClauseWriter.GenerateSql(whereClauses, rootNode, parameters);
+            var result = whereClauseWriter.GenerateSql(whereClauses, queryTree, parameters, aliasProvider);
             if (result.Sql.Length > 0) {
                 sql.Append(result.Sql);
             }
 
-            rootNode = result.FetchTree;
+            queryTree = result.MapQueryTree;
         }
 
-        protected bool AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql, FetchNode rootNode, Func<IColumn, FetchNode, string> aliasRewriter = null, Func<IColumn, FetchNode, string> nameRewriter = null) {
+        protected bool AddOrderByClause<T>(Queue<OrderClause<T>> orderClauses, StringBuilder sql, QueryTree queryTree, IAliasProvider aliasProvider, Func<IColumn, BaseQueryNode, string> aliasRewriter = null, Func<IColumn, BaseQueryNode, string> nameRewriter = null) {
             if (orderClauses.Count == 0) {
                 return false;
             }
@@ -178,10 +114,10 @@
             while (orderClauses.Count > 0) {
                 var isRootPrimaryKeyClause = false;
                 if (aliasRewriter == null && nameRewriter == null) {
-                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode, out isRootPrimaryKeyClause));
+                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), queryTree, aliasProvider, out isRootPrimaryKeyClause));
                 }
                 else {
-                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), rootNode, aliasRewriter, nameRewriter, out isRootPrimaryKeyClause));
+                    sql.Append(orderClauseWriter.GetOrderClause(orderClauses.Dequeue(), queryTree, aliasProvider, aliasRewriter, nameRewriter, out isRootPrimaryKeyClause));
                 }
 
                 if (orderClauses.Count > 0) {
@@ -215,12 +151,6 @@
                 default:
                     throw new NotImplementedException($"Unexpected column relationship {mappedColumn.Relationship} on entity {mappedColumn.Type.Name}.{mappedColumn.Name} in UpdateWriter");
             }
-        }
-
-        protected class AddNodeResult {
-            public string Signature { get; set; }
-
-            public IList<string> SplitOn { get; set; }
         }
     }
 }

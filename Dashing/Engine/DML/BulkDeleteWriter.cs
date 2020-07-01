@@ -18,21 +18,21 @@
             // add where clause
             var whereSql = new StringBuilder();
             var parameters = new AutoNamingDynamicParameters();
-            FetchNode rootNode = null;
+            QueryTree rootQueryNode = null;
             if (predicateArray != null) {
-                this.AddWhereClause(predicateArray, whereSql, parameters, ref rootNode);
+                this.AddWhereClause(predicateArray, whereSql, parameters, new DefaultAliasProvider(), ref rootQueryNode);
             }
 
-            if (rootNode == null) {
+            if (rootQueryNode == null) {
                 // the where clauses were all on the root table
                 return new SqlWriterResult(this.GetSimpleDeleteQuery<T>(whereSql), parameters);
             }
 
             // cross table where clause
-            return new SqlWriterResult(this.GetMultiTableDeleteQuery<T>(whereSql, rootNode), parameters);
+            return new SqlWriterResult(this.GetMultiTableDeleteQuery<T>(whereSql, rootQueryNode, new DefaultAliasProvider()), parameters);
         }
 
-        private string GetMultiTableDeleteQuery<T>(StringBuilder whereSql, FetchNode rootNode) {
+        private string GetMultiTableDeleteQuery<T>(StringBuilder whereSql, QueryTree rootQueryNode, IAliasProvider aliasProvider) {
             var map = this.Configuration.GetMap<T>();
             var sql = new StringBuilder();
 
@@ -40,8 +40,8 @@
             this.Dialect.AppendQuotedTableName(sql, map);
             sql.Append(" as t");
 
-            foreach (var node in rootNode.Children) {
-                this.AddNode(node.Value, sql);
+            foreach (var node in rootQueryNode.Children) {
+                this.AddNode(node.Value, sql, aliasProvider);
             }
 
             sql.Append(whereSql);

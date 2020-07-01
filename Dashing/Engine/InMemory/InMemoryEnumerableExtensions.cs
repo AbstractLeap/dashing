@@ -12,14 +12,14 @@
     using Dashing.Engine.DML;
 
     public static class InMemoryEnumerableExtensions {
-        public static IEnumerable<T> Fetch<T>(this IEnumerable<T> enumerable, FetchNode fetchNode, Dictionary<Type, object> tables) {
+        public static IEnumerable<T> Fetch<T>(this IEnumerable<T> enumerable, QueryTree mapQueryNode, Dictionary<Type, object> tables) {
             foreach (var entity in enumerable) {
-                yield return (T)Expand(entity, fetchNode, tables);
+                yield return (T)Expand(entity, mapQueryNode, tables);
             }
         }
 
-        private static object Expand(object entity, FetchNode fetchNode, Dictionary<Type, object> tables) {
-            foreach (var node in fetchNode.Children) {
+        private static object Expand(object entity, BaseQueryNode mapQueryNode, Dictionary<Type, object> tables) {
+            foreach (var node in mapQueryNode.Children) {
                 var prop = entity.GetType().GetProperty(node.Key);
                 if (node.Value.Column.Relationship == RelationshipType.ManyToOne || node.Value.Column.Relationship == RelationshipType.OneToOne) {
                     // this value should just contain the pk, so we fetch the entity from its table, expand all it's properties and then set

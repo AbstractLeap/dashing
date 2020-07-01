@@ -27,7 +27,7 @@
         public void NullLeftHandSideGetsGoodSql() {
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => null == c.Content;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where ([Content] is @l_1)", result.Sql);
         }
 
@@ -35,7 +35,7 @@
         public void NullLeftHandSideGetsGoodParams() {
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => null == c.Content;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Null(result.Parameters.GetValue("l_1"));
         }
 
@@ -43,7 +43,7 @@
         public void NullValueGetsGoodSql() {
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.Content == null;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where ([Content] is null)", result.Sql);
         }
 
@@ -51,7 +51,7 @@
         public void NullValueGetsGoodParams() {
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.Content == null;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Empty(result.Parameters.ParameterNames);
         }
 
@@ -59,7 +59,7 @@
         public void NotNullValueGetsGoodSql() {
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.Content != null;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where ([Content] is not null)", result.Sql);
         }
 
@@ -67,7 +67,7 @@
         public void NotNullValueGetsGoodParams() {
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.Content != null;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Empty(result.Parameters.ParameterNames);
         }
 
@@ -76,7 +76,7 @@
             var target = MakeTarget();
             var c1 = new Comment();
             Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where ([Content] is null)", result.Sql);
         }
 
@@ -85,7 +85,7 @@
             var target = MakeTarget();
             var c1 = new Comment();
             Expression<Func<Comment, bool>> pred = c => c.Content == c1.Content;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Empty(result.Parameters.ParameterNames);
         }
 
@@ -94,7 +94,7 @@
             var target = MakeTarget();
             var author = new User { UserId = 1 };
             Expression<Func<Comment, bool>> pred = c => c.Post.Author.UserId == author.UserId && c.Post.Author.IsEnabled;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where ((t_100.[AuthorId] = @l_1) and t_101.[IsEnabled] = 1)", result.Sql);
         }
 
@@ -103,7 +103,7 @@
             var target = MakeTarget();
             var author = new User { UserId = 1 };
             Expression<Func<Comment, bool>> pred = c => c.Post.Author.UserId == author.UserId && c.User.IsEnabled;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where ((t_100.[AuthorId] = @l_1) and t_101.[IsEnabled] = 1)", result.Sql);
         }
 
@@ -111,7 +111,7 @@
         public void UnaryBoolGetsEqualsOne() {
             var target = MakeTarget();
             Expression<Func<BoolClass, bool>> pred = b => b.IsFoo;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where [IsFoo] = 1", result.Sql);
         }
 
@@ -119,7 +119,7 @@
         public void BinaryBoolDoesNotGetExtraOne() {
             var target = MakeTarget();
             Expression<Func<BoolClass, bool>> pred = b => b.IsFoo;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where [IsFoo] = 1", result.Sql);
         }
 
@@ -128,7 +128,7 @@
             var target = MakeTarget();
             var boolClass = new BoolClass { IsFoo = true };
             Expression<Func<BoolClass, bool>> pred = b => b.IsFoo == boolClass.IsFoo;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where ([IsFoo] = @l_1)", result.Sql);
         }
 
@@ -136,7 +136,7 @@
         public void NegatedUnaryBoolGetsNotEqualOne() {
             var target = MakeTarget();
             Expression<Func<BoolClass, bool>> pred = b => !b.IsFoo;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where [IsFoo] = 0", result.Sql);
         }
 
@@ -144,7 +144,7 @@
         public void UnaryWithinBinaryWorks() {
             var target = MakeTarget();
             Expression<Func<BoolClass, bool>> pred = b => b.IsFoo && b.BoolClassId == 1;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where ([IsFoo] = 1 and ([BoolClassId] = @l_1))", result.Sql);
         }
 
@@ -152,7 +152,7 @@
         public void NotBracketsWorks() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !(p.Author.EmailAddress == "Foo" && p.Rating > 3);
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where not ((t_100.[EmailAddress] = @l_1) and (t.[Rating] > @l_2))", result.Sql);
         }
 
@@ -160,7 +160,7 @@
         public void NotSingleBracketWorks() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !(p.Rating > 3);
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             Assert.Equal(" where not ([Rating] > @l_1)", result.Sql);
         }
 
@@ -169,7 +169,7 @@
             var start = DateTime.UtcNow;
             var target = MakeTarget();
             Expression<Func<Comment, bool>> pred = c => c.CommentDate < DateTime.UtcNow;
-            var result = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, pred);
             var end = DateTime.UtcNow;
             var param = (DateTime)result.Parameters.GetValue("l_1");
             Assert.Equal(" where ([CommentDate] < @l_1)", result.Sql);
@@ -184,7 +184,7 @@
             Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
             // act
-            var result = target.GenerateSql(new List<Expression<Func<Post, bool>>> { whereClause1, whereClause2 }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, new List<Expression<Func<Post, bool>>> { whereClause1, whereClause2 });
 
             // assert
             Debug.Write(result.Sql);
@@ -199,7 +199,7 @@
             Expression<Func<Post, bool>> whereClause2 = p => p.PostId < 2;
 
             // act
-            var result = target.GenerateSql(new List<Expression<Func<Post, bool>>> { whereClause1, whereClause2 }, null, new AutoNamingDynamicParameters());
+            var result = GenerateSql(target, new List<Expression<Func<Post, bool>>> { whereClause1, whereClause2 });
 
             // assert
             Debug.Write(result.Sql);
@@ -215,7 +215,7 @@
             Expression<Func<User, bool>> whereClause = u => u == user;
 
             // act
-            var actual = target.GenerateSql(new[] { whereClause }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, whereClause);
 
             // assert
             Assert.Equal(" where ([UserId] = @l_1)", actual.Sql);
@@ -231,7 +231,7 @@
             Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
-            var actual = target.GenerateSql(new[] { whereClause }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, whereClause);
 
             // assert
             Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
@@ -247,7 +247,7 @@
             Expression<Func<Post, bool>> whereClause = p => p == post;
 
             // act
-            var actual = target.GenerateSql(new[] { whereClause }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, whereClause);
 
             // assert
             Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
@@ -269,7 +269,7 @@
             }
 
             public SelectWriterResult Execute() {
-                return this.writer.GenerateSql(this.whereClauses, null, new AutoNamingDynamicParameters());
+                return this.writer.GenerateSql(this.whereClauses, null, new AutoNamingDynamicParameters(), new DefaultAliasProvider());
             }
         }
 
@@ -319,7 +319,7 @@
         public void WhereStringContains() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.Contains("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] like @l_1", actual.Sql);
         }
 
@@ -328,7 +328,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => p.Title.Contains(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] like @l_1", actual.Sql);
         }
 
@@ -337,7 +337,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => p.Title.Contains(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("%Foo%", actual.Parameters.GetValue("l_1"));
         }
 
@@ -346,7 +346,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => p.Title.StartsWith(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] like @l_1", actual.Sql);
         }
 
@@ -355,7 +355,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => p.Title.StartsWith(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("Foo%", actual.Parameters.GetValue("l_1"));
         }
 
@@ -364,7 +364,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => p.Title.EndsWith(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] like @l_1", actual.Sql);
         }
 
@@ -373,7 +373,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => p.Title.EndsWith(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
         }
 
@@ -381,7 +381,7 @@
         public void WhereStringContainsParamsGood() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.Contains("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("%Foo%", actual.Parameters.GetValue("l_1"));
         }
 
@@ -389,7 +389,7 @@
         public void WhereStringStartsWith() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.StartsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] like @l_1", actual.Sql);
         }
 
@@ -397,7 +397,7 @@
         public void WhereStringStartsWithParamsGood() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.StartsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("Foo%", actual.Parameters.GetValue("l_1"));
         }
 
@@ -405,7 +405,7 @@
         public void WhereStringEndsWith() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.EndsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] like @l_1", actual.Sql);
         }
 
@@ -413,7 +413,7 @@
         public void WhereStringEndsWithParamsGood() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.EndsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
         }
 
@@ -422,7 +422,7 @@
             var target = MakeTarget();
             var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
             Expression<Func<Blog, bool>> pred = b => blogs.Contains(b);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [BlogId] in @l_1", actual.Sql);
             Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
@@ -437,7 +437,7 @@
                 Expression.Constant(blogs),
                 param);
             Expression<Func<Blog, bool>> pred = Expression.Lambda<Func<Blog, bool>>(body, param);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [BlogId] in @l_1", actual.Sql);
             Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
@@ -447,7 +447,7 @@
             var target = MakeTarget();
             var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
             Expression<Func<Post, bool>> pred = p => blogs.Contains(p.Blog);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [BlogId] in @l_1", actual.Sql);
             Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
@@ -457,7 +457,7 @@
             var target = MakeTarget();
             var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
             Expression<Func<Blog, bool>> pred = b => !blogs.Contains(b);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [BlogId] not in @l_1", actual.Sql);
             Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
@@ -467,7 +467,7 @@
             var target = MakeTarget();
             var blogs = new[] { new Blog { BlogId = 1 }, new Blog { BlogId = 2 } };
             Expression<Func<Post, bool>> pred = p => !blogs.Contains(p.Blog);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [BlogId] not in @l_1", actual.Sql);
             Assert.Equal(new[] { 1, 2 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
@@ -477,7 +477,7 @@
             var target = MakeTarget();
             var values = new[] { "Foo", "Bar" };
             Expression<Func<Post, bool>> pred = p => values.Contains(p.Title);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] in @l_1", actual.Sql);
             Assert.Equal(new[] { "Foo", "Bar" }, actual.Parameters.GetValue("l_1") as IEnumerable<string>);
         }
@@ -488,7 +488,7 @@
         public void WhereContainsStringStatic() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => WhereContainsStringStaticValues.Contains(p.Title);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] in @l_1", actual.Sql);
             Assert.Equal(new[] { "Foo", "Bar" }, actual.Parameters.GetValue("l_1") as IEnumerable<string>);
         }
@@ -498,7 +498,7 @@
             var target = MakeTarget();
             var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             Expression<Func<Post, bool>> pred = p => ints.Where(i => i % 2 == 0).Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [PostId] in @l_1", actual.Sql);
         }
 
@@ -507,7 +507,7 @@
             var target = MakeTarget();
             var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             Expression<Func<Post, bool>> pred = p => ints.Where(i => i % 2 == 0).Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(new[] { 2, 4, 6, 8 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
@@ -516,7 +516,7 @@
             var target = MakeTarget();
             var ints = new HashSet<int>(new[] { 1, 2, 3, 4, 5 });
             Expression<Func<Post, bool>> pred = p => ints.Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [PostId] in @l_1", actual.Sql);
         }
 
@@ -525,7 +525,7 @@
             var target = MakeTarget();
             var ints = new HashSet<int>(new[] { 1, 2, 3, 4, 5 });
             Expression<Func<Post, bool>> pred = p => ints.Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(new[] { 1, 2, 3, 4, 5 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
@@ -534,7 +534,7 @@
             var target = MakeTarget();
             var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             Expression<Func<Post, bool>> pred = p => !ints.Where(i => i % 2 == 0).Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [PostId] not in @l_1", actual.Sql);
         }
 
@@ -543,7 +543,7 @@
             var target = MakeTarget();
             var ints = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             Expression<Func<Post, bool>> pred = p => !ints.Where(i => i % 2 == 0).Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(new[] { 2, 4, 6, 8 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
@@ -552,7 +552,7 @@
             var target = MakeTarget();
             var ints = new HashSet<int>(new[] { 1, 2, 3, 4, 5 });
             Expression<Func<Post, bool>> pred = p => !ints.Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [PostId] not in @l_1", actual.Sql);
         }
 
@@ -561,7 +561,7 @@
             var target = MakeTarget();
             var ints = new HashSet<int>(new[] { 1, 2, 3, 4, 5 });
             Expression<Func<Post, bool>> pred = p => !ints.Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(new[] { 1, 2, 3, 4, 5 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
@@ -570,7 +570,7 @@
             var target = MakeTarget();
             var ints = new[] { 1, 2, 3, 4, 5 };
             Expression<Func<Post, bool>> pred = p => !ints.Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [PostId] not in @l_1", actual.Sql);
         }
 
@@ -579,7 +579,7 @@
             var target = MakeTarget();
             var ints = new[] { 1, 2, 3, 4, 5 };
             Expression<Func<Post, bool>> pred = p => !ints.Contains(p.PostId);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(new[] { 1, 2, 3, 4, 5 }, actual.Parameters.GetValue("l_1") as IEnumerable<int>);
         }
 
@@ -587,7 +587,7 @@
         public void WhereStringNotContains() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !p.Title.Contains("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] not like @l_1", actual.Sql);
         }
 
@@ -596,7 +596,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => !p.Title.Contains(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] not like @l_1", actual.Sql);
         }
 
@@ -605,7 +605,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => !p.Title.Contains(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("%Foo%", actual.Parameters.GetValue("l_1"));
         }
 
@@ -614,7 +614,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => !p.Title.StartsWith(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] not like @l_1", actual.Sql);
         }
 
@@ -623,7 +623,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => !p.Title.StartsWith(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("Foo%", actual.Parameters.GetValue("l_1"));
         }
 
@@ -632,7 +632,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => !p.Title.EndsWith(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] not like @l_1", actual.Sql);
         }
 
@@ -641,7 +641,7 @@
             var target = MakeTarget();
             var c = new Comment { Content = "Foo" };
             Expression<Func<Post, bool>> pred = p => !p.Title.EndsWith(c.Content);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
         }
 
@@ -649,7 +649,7 @@
         public void WhereStringNotContainsParamsGood() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !p.Title.Contains("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("%Foo%", actual.Parameters.GetValue("l_1"));
         }
 
@@ -657,7 +657,7 @@
         public void WhereStringNotStartsWith() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !p.Title.StartsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] not like @l_1", actual.Sql);
         }
 
@@ -665,7 +665,7 @@
         public void WhereStringNotStartsWithParamsGood() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !p.Title.StartsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("Foo%", actual.Parameters.GetValue("l_1"));
         }
 
@@ -673,7 +673,7 @@
         public void WhereStringNotEndsWith() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !p.Title.EndsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where [Title] not like @l_1", actual.Sql);
         }
 
@@ -681,7 +681,7 @@
         public void WhereStringNotEndsWithParamsGood() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !p.Title.EndsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("%Foo", actual.Parameters.GetValue("l_1"));
         }
 
@@ -689,7 +689,7 @@
         public void WhereAnyGetsGoodSql() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Comments.Any(c => c.Content == "foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             this.outputHelper.WriteLine(actual.Sql);
             Assert.Equal(" where exists (select 1 from [Comments] as i where (i.[Content] = @l_1) and t.[PostId] = i.[PostId])", actual.Sql);
         }
@@ -698,7 +698,7 @@
         public void WhereNotAnyGetsGoodSql() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => !p.Comments.Any(c => c.Content == "foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             this.outputHelper.WriteLine(actual.Sql);
             Assert.Equal(" where not exists (select 1 from [Comments] as i where (i.[Content] = @l_1) and t.[PostId] = i.[PostId])", actual.Sql);
         }
@@ -707,7 +707,7 @@
         public void WhereAnyRelatedGetsGoodSql() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Comments.Any(c => c.User.EmailAddress == "foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             this.outputHelper.WriteLine(actual.Sql);
             Assert.Equal(" where exists (select 1 from [Comments] as i inner join [Users] as i_100 on i.UserId = i_100.UserId where (i_100.[EmailAddress] = @l_1) and t.[PostId] = i.[PostId])", actual.Sql);
         }
@@ -716,7 +716,7 @@
         public void WhereAnyAndGetsGoodSql() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Comments.Any(c => c.Content == "foo" && c.CommentDate > DateTime.UtcNow);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             this.outputHelper.WriteLine(actual.Sql);
             Assert.Equal(" where exists (select 1 from [Comments] as i where ((i.[Content] = @l_1) and (i.[CommentDate] > @l_2)) and t.[PostId] = i.[PostId])", actual.Sql);
         }
@@ -726,7 +726,7 @@
             var target = MakeTarget();
             var dict = new Dictionary<string, string> { { "Foo", "Bar" } };
             Expression<Func<Post, bool>> pred = p => p.Content == dict["Foo"];
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where ([Content] = @l_1)", actual.Sql);
         }
 
@@ -735,7 +735,7 @@
             var target = MakeTarget();
             var dict = new Dictionary<string, string> { { "Foo", "Bar" } };
             Expression<Func<Post, bool>> pred = p => p.Content == dict["Foo"];
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("Bar", actual.Parameters.GetValue("l_1"));
         }
 
@@ -744,7 +744,7 @@
             var target = MakeTarget();
             var dict = new { A = new Dictionary<string, string> { { "Foo", "Bar" } } };
             Expression<Func<Post, bool>> pred = p => p.Content == dict.A["Foo"];
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("Bar", actual.Parameters.GetValue("l_1"));
         }
 
@@ -753,7 +753,7 @@
             var target = MakeTarget();
             var dict = new Dictionary<string, Post> { { "Foo", new Post { Content = "Bar" } } };
             Expression<Func<Post, bool>> pred = p => p.Content == dict["Foo"].Content;
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal("Bar", actual.Parameters.GetValue("l_1"));
         }
 
@@ -762,7 +762,7 @@
             var target = MakeTarget();
             var blog = new Blog { BlogId = 1 };
             Expression<Func<Post, bool>> pred = p => p.Blog.Equals(blog);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where ([BlogId] = @l_1)", actual.Sql);
         }
 
@@ -770,7 +770,7 @@
         public void WhereEqualsIntWorks() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.PostId.Equals(1);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where ([PostId] = @l_1)", actual.Sql);
         }
 
@@ -778,7 +778,7 @@
         public void WhereEqualsStringWorks() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Title.Equals("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where ([Title] = @l_1)", actual.Sql);
         }
 
@@ -786,7 +786,7 @@
         public void WhereEqualsAcrossJoinWorks() {
             var target = MakeTarget();
             Expression<Func<Post, bool>> pred = p => p.Blog.CreateDate.Equals(DateTime.UtcNow);
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where (t_100.[CreateDate] = @l_1)", actual.Sql);
         }
 
@@ -794,7 +794,7 @@
         public void WhereHasNullableHasValue() {
             var target = MakeTarget();
             Expression<Func<ThingWithNullable, bool>> pred = p => p.Nullable.HasValue;
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where ([Nullable] is not null)", actual.Sql);
         }
 
@@ -802,7 +802,7 @@
         public void WhereHasNullableDoesNotHasValue() {
             var target = MakeTarget();
             Expression<Func<ThingWithNullable, bool>> pred = p => !p.Nullable.HasValue;
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where ([Nullable] is null)", actual.Sql);
         }
 
@@ -811,7 +811,7 @@
             var target = MakeTarget();
             var val = new int?(1);
             Expression<Func<ThingWithNullable, bool>> pred = p => p.Nullable == val.Value;
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where ([Nullable] = @l_1)", actual.Sql);
         }
 
@@ -819,8 +819,16 @@
         public void WhereContainsNullableCheck() {
             var target = MakeTarget();
             Expression<Func<ReferencesThingWithNullable, bool>> pred = p => p.Thing.Nullable.HasValue && p.Thing.Name.StartsWith("Foo");
-            var actual = target.GenerateSql(new[] { pred }, null, new AutoNamingDynamicParameters());
+            var actual = GenerateSql(target, pred);
             Assert.Equal(" where ((t_100.[Nullable] is not null) and t_100.[Name] like @l_1)", actual.Sql);
+        }
+
+        private static SelectWriterResult GenerateSql<T>(WhereClauseWriter target, Expression<Func<T, bool>> whereClause, QueryTree queryTree = null) {
+            return GenerateSql(target, new[] { whereClause }, queryTree);
+        }
+
+        private static SelectWriterResult GenerateSql<T>(WhereClauseWriter target, IEnumerable<Expression<Func<T, bool>>> whereClauses, QueryTree queryTree = null) {
+            return target.GenerateSql(whereClauses, queryTree, new AutoNamingDynamicParameters(), new DefaultAliasProvider());
         }
 
         private static WhereClauseWriter MakeTarget() {
