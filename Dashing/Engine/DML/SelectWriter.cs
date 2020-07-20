@@ -199,8 +199,6 @@
             where T : class, new() {
             var alias = aliasProvider.GetAlias(rootQueryNode);
             var columns = rootQueryNode.GetSelectedColumns();
-            columns = columns.Where(
-                c => !rootQueryNode.Children.ContainsKey(c.Name) || !rootQueryNode.Children[c.Name].IsFetched);
             foreach (var columnEntry in columns.AsSmartEnumerable()) {
                 this.AddColumn(columnSql, columnEntry.Value, alias);
                 if (!columnEntry.IsLast) {

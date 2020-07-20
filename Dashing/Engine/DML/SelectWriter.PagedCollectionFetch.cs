@@ -190,7 +190,7 @@
             // add the columns
             if (queryNode.IsFetched) {
                 var columns = queryNode.GetSelectedColumns();
-                foreach (var columnEntry in columns.Where(c => !queryNode.Children.ContainsKey(c.Name) || !queryNode.Children[c.Name].IsFetched).AsSmartEnumerable()) {
+                foreach (var columnEntry in columns.AsSmartEnumerable()) {
                     var column = columnEntry.Value;
                     if (isNowAlongCollectionBranch) {
                         outerColumnSql.Append(", ");

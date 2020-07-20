@@ -37,9 +37,6 @@
             // add the columns
             if (queryNode.IsFetched) {
                 var columns = queryNode.GetSelectedColumns();
-                columns = columns.Where(
-                    c => !queryNode.Children.ContainsKey(c.Name) || !queryNode.Children[c.Name]
-                                                                    .IsFetched);
                 foreach (var columnEntry in columns.AsSmartEnumerable()) {
                     columnSql.Append(", ");
                     this.AddColumn(columnSql, columnEntry.Value, aliasProvider.GetAlias(queryNode));

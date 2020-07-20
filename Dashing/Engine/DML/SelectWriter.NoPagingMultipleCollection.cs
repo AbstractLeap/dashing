@@ -24,10 +24,7 @@
             var outerQueryColumnSql = new StringBuilder();
 
             // add root columns
-            foreach (var column in rootQueryNode.GetSelectedColumns()
-                .Where(
-                    c => !rootQueryNode.Children.ContainsKey(c.Name) || !rootQueryNode.Children[c.Name]
-                                                                            .IsFetched)) {
+            foreach (var column in rootQueryNode.GetSelectedColumns()) {
                 foreach (var subQuery in subQueryColumnSqls) {
                     this.AddColumn(subQuery, column, aliasProvider.GetAlias(rootQueryNode), column.DbName + aliasProvider.GetAlias(rootQueryNode));
                     subQuery.Append(", ");
@@ -158,10 +155,7 @@
             if (queryNode.IsFetched) {
                 if (isNowInsideCollection) {
                     // add columns to subquery, nulls to others and cols to outer
-                    foreach (var column in queryNode.GetSelectedColumns()
-                        .Where(
-                            c => !queryNode.Children.ContainsKey(c.Name) || !queryNode.Children[c.Name]
-                                                                            .IsFetched)) {
+                    foreach (var column in queryNode.GetSelectedColumns()) {
                         for (var i = 0; i < subQueryColumnSqls.Length; i++) {
                             var subQuery = subQueryColumnSqls[i];
                             subQuery.Append(", ");
@@ -189,7 +183,6 @@
                 else {
                     // add columns to all queries
                     foreach (var columnEntry in queryNode.GetSelectedColumns()
-                                                .Where(c => !queryNode.Children.ContainsKey(c.Name) || !queryNode.Children[c.Name].IsFetched)
                                                 .AsSmartEnumerable()) {
                         var column = columnEntry.Value;
 

@@ -104,11 +104,11 @@
             {
                 if (this.includedColumns != null)
                 {
-                    return this.includedColumns;
+                    return ExcludeFetchedForeignKeys(this.includedColumns);
                 }
 
                 // TODO cope with root node (need to add the map somehow
-                return GetOwnedColumns();
+                return ExcludeFetchedForeignKeys(GetOwnedColumns());
             }
 
             var columns = GetOwnedColumns();
@@ -122,7 +122,11 @@
                 columns = columns.Where(c => !this.excludedColumns.Contains(c));
             }
 
-            return columns;
+            return ExcludeFetchedForeignKeys(columns);
+
+            IEnumerable<IColumn> ExcludeFetchedForeignKeys(IEnumerable<IColumn> returnColumns) {
+                return returnColumns.Where(c => !this.Children.TryGetValue(c.Name, out var child) || !child.IsFetched);
+            }
 
             IEnumerable<IColumn> GetOwnedColumns()
             {
