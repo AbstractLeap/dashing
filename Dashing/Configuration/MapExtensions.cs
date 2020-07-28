@@ -121,8 +121,10 @@
                 map.Columns.Values.Where(
                     c =>
                     !c.IsIgnored && (includeExcludedByDefault || !c.IsExcludedByDefault)
-                    && (c.Relationship == RelationshipType.None || c.Relationship == RelationshipType.ManyToOne
-                        || c.Relationship == RelationshipType.OneToOne));
+                    && (c.Relationship == RelationshipType.None 
+                        || c.Relationship == RelationshipType.ManyToOne
+                        || c.Relationship == RelationshipType.OneToOne
+                        || c.Relationship == RelationshipType.Owned));
         }
     }
 }

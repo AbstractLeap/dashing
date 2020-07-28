@@ -78,7 +78,8 @@
 
                         // handle other maps, strings, valuetype, valuetype?
                         var oldValuePropType = propertyDefinition.PropertyType;
-                        if (columnDefinition.Relationship == RelationshipType.None && propertyDefinition.PropertyType.IsValueType
+                        if (columnDefinition.Relationship == RelationshipType.None 
+                            && propertyDefinition.PropertyType.IsValueType
                             && propertyDefinition.PropertyType.Name != "Nullable`1") {
                             oldValuePropType = typeDef.Module.ImportReference(typeof(Nullable<>)).MakeGenericInstanceType(oldValuePropType);
                             // use nullable value types
@@ -104,6 +105,8 @@
                         var setIl = setter.Body.Instructions;
                         var setIntructions = new List<Instruction>();
                         setIntructions.Add(Instruction.Create(OpCodes.Nop));
+
+                        // check to see that we have isTracking true
                         setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                         setIntructions.Add(Instruction.Create(OpCodes.Ldfld, isTrackingField));
                         setIntructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
@@ -113,6 +116,8 @@
                         var endNopInstr = Instruction.Create(OpCodes.Nop);
                         var endLdArgInstr = setIl.First();
                         setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endLdArgInstr));
+
+                        // check to see we're not dirty yet
                         setIntructions.Add(Instruction.Create(OpCodes.Nop));
                         setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
                         setIntructions.Add(
@@ -192,7 +197,8 @@
                             var hmmInstr = Instruction.Create(OpCodes.Ldc_I4_0);
                             var hmmInstr2 = Instruction.Create(OpCodes.Ldc_I4_1);
 
-                            if (propertyDefinition.PropertyType.Name.ToLowerInvariant() == "string") {
+                            if (propertyDefinition.PropertyType.Name.ToLowerInvariant() == "string"
+                                || columnDefinition.Relationship == RelationshipType.Owned) {
                                 var orInstr = Instruction.Create(OpCodes.Ldarg_0);
                                 setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr));
                                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));

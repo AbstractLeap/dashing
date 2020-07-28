@@ -28,13 +28,29 @@ namespace Dashing.Engine.DDL {
             this.dialect.AppendColumnSpecification(sql, map.PrimaryKey);
 
             foreach (var column in map.OwnedColumns(true).Where(c => !c.IsPrimaryKey)) {
-                sql.Append(", ");
-                this.dialect.AppendColumnSpecification(sql, column);
+                if (column.Relationship == RelationshipType.Owned) {
+                    var ownedMap = map.Configuration.GetMap(column.Type);
+                    if (ownedMap == null) {
+                        throw new Exception($"Could not locate map for {column.Type}. It might need adding to the configuration");
+                    }
+
+                    foreach (var ownedColumn in ownedMap.OwnedColumns(true)) {
+                        AddColumn(ownedColumn);
+                    }
+                }
+                else {
+                    AddColumn(column);
+                }
             }
 
             sql.Append(")");
             this.dialect.AppendCreateTableSuffix(sql, map);
             return sql.ToString();
+
+            void AddColumn(IColumn column) {
+                sql.Append(", ");
+                this.dialect.AppendColumnSpecification(sql, column);
+            }
         }
 
         public IEnumerable<string> CreateForeignKeys(IMap map) {

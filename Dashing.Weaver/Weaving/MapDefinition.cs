@@ -8,5 +8,7 @@ namespace Dashing.Weaver.Weaving {
         public string TypeFullName { get; set; }
 
         public IList<ColumnDefinition> ColumnDefinitions { get; set; }
+
+        public bool IsOwned { get; set; }
     }
 }

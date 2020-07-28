@@ -66,5 +66,13 @@ namespace Dashing.Configuration {
         /// <param name="entity"></param>
         /// <returns></returns>
         object GetPrimaryKeyValue(object entity);
+
+        /// <summary>
+        /// Gets the value of a particular column in the object
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        object GetColumnValue(object entity, IColumn column);
     }
 }

@@ -7,10 +7,6 @@ namespace Dashing.Configuration {
     using Dashing.Extensions;
 
     public class Map : IMap {
-        private MethodInfo nonGenericPrimaryKeyGetter;
-
-        private readonly object nonGenericPrimaryKeyGetterLock = new object();
-
         private IList<Index> indexes;
 
         private IList<ForeignKey> foreignKeys;
@@ -45,7 +41,7 @@ namespace Dashing.Configuration {
                 if (value) {
                     // update all columns of this type of be owned relationship type
                     foreach (var map in this.Configuration.Maps) {
-                        foreach (var mappedColumns in map.Columns.Where(c => c.Value.Map == this)) {
+                        foreach (var mappedColumns in map.Columns.Where(c => c.Value.Type == this.Type)) {
                             mappedColumns.Value.Relationship = RelationshipType.Owned;
                         }
                     }
@@ -53,7 +49,7 @@ namespace Dashing.Configuration {
                 else {
                     // update all columns of this type 
                     foreach (var map in this.Configuration.Maps) {
-                        foreach (var mappedColumns in map.Columns.Where(c => c.Value.Map == this)) {
+                        foreach (var mappedColumns in map.Columns.Where(c => c.Value.Type == this.Type)) {
                             // TODO dry up this logic
                             mappedColumns.Value.Relationship = RelationshipType.ManyToOne;
                             mappedColumns.Value.DbName = mappedColumns.Value.Name + "Id";
@@ -157,6 +153,10 @@ namespace Dashing.Configuration {
             }
         }
 
+        private MethodInfo nonGenericPrimaryKeyGetter;
+
+        private readonly object nonGenericPrimaryKeyGetterLock = new object();
+
         public object GetPrimaryKeyValue(object entity) {
             if (this.nonGenericPrimaryKeyGetter == null) {
                 lock (this.nonGenericPrimaryKeyGetterLock) {
@@ -170,6 +170,26 @@ namespace Dashing.Configuration {
             }
 
             return this.nonGenericPrimaryKeyGetter.Invoke(this, new[] { entity });
+        }
+
+        private MethodInfo nonGenericColumnValueGetter;
+
+        private readonly object nonGenericColumnValueGetterLock = new object();
+
+        public object GetColumnValue(object entity, IColumn column) {
+            if (this.nonGenericColumnValueGetter == null) {
+                lock (this.nonGenericColumnValueGetterLock) {
+                    if (this.nonGenericColumnValueGetter == null) {
+                        this.nonGenericColumnValueGetter =
+                            typeof(Map<>).MakeGenericType(this.Type)
+                                         .GetMethods()
+                                         .First(m => m.Name == nameof(Map<object>.GetColumnValue) 
+                                                     && m.GetParameters().Any(p => p.ParameterType == this.Type));
+                    }
+                }
+            }
+
+            return this.nonGenericColumnValueGetter.Invoke(this, new[] { entity, column });
         }
     }
 }
