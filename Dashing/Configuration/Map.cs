@@ -23,6 +23,8 @@ namespace Dashing.Configuration {
 
         private bool hasSetIndexes;
 
+        private bool isOwned;
+
         public Map(Type type) {
             this.Type = type;
             this.Columns = new OrderedDictionary<string, IColumn>();
@@ -30,6 +32,38 @@ namespace Dashing.Configuration {
         }
 
         public IConfiguration Configuration { get; set; }
+
+        public bool IsOwned
+        {
+            get => this.isOwned;
+            set
+            {
+                if (this.isOwned == value) {
+                    return;
+                }
+
+                if (value) {
+                    // update all columns of this type of be owned relationship type
+                    foreach (var map in this.Configuration.Maps) {
+                        foreach (var mappedColumns in map.Columns.Where(c => c.Value.Map == this)) {
+                            mappedColumns.Value.Relationship = RelationshipType.Owned;
+                        }
+                    }
+                }
+                else {
+                    // update all columns of this type 
+                    foreach (var map in this.Configuration.Maps) {
+                        foreach (var mappedColumns in map.Columns.Where(c => c.Value.Map == this)) {
+                            // TODO dry up this logic
+                            mappedColumns.Value.Relationship = RelationshipType.ManyToOne;
+                            mappedColumns.Value.DbName = mappedColumns.Value.Name + "Id";
+                        }
+                    }
+                }
+
+                this.isOwned = value;
+            }
+        }
 
         /// <summary>
         ///     Gets the type.

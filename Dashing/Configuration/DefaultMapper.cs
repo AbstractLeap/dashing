@@ -63,6 +63,10 @@
 
         private void Build(Type entityType, IMap map, IConfiguration configuration) {
             map.Configuration = configuration;
+            map.IsOwned = this.convention.IsOwned(entityType);
+
+            // if it's owned then table, schema and historytable don't really apply but we let this happen anyway
+            // as the ownership may get overwritten manually
             map.Table = this.convention.TableFor(entityType);
             map.Schema = this.convention.SchemaFor(entityType);
             if (entityType.IsVersionedEntity()) {
@@ -146,34 +150,40 @@
                 // we have a reference to the referenced type
                 // note, that at this point (in general) we may have not mapped the opposite type yet
                 // find a property with our type
-                var candidateColumns =
-                    configuration.GetMap(column.Type)
-                                 .Columns.Where(
-                                     c =>
-                                     (c.Value.Type == column.Map.Type
-                                      || (c.Value.Type.IsCollection() && c.Value.Type.GetGenericArguments().First() == column.Map.Type))
-                                     && !c.Value.IsIgnored)
-                                 .ToArray();
-                if (candidateColumns.Length == 0) {
-                    // assume many to one
-                    this.ResolveManyToOneColumn(column, propertyName);
-                }
-                else if (candidateColumns.Length == 1) {
-                    if (candidateColumns[0].Value.Type.IsCollection()) {
-                        this.ResolveManyToOneColumn(column, propertyName);
-                    }
-                    else {
-                        // assume one to one
-                        this.ResolveOneToOneColumn(column, propertyName);
-
-                        // now fix the other side
-                        candidateColumns[0].Value.Relationship = RelationshipType.OneToOne;
-                        candidateColumns[0].Value.IsNullable = true; // we match up what ResolveOneToOneColumn does
-                    }
+                var columnMap = configuration.GetMap(column.Type);
+                if (columnMap.IsOwned) {
+                    this.ResolveOwnedColumn(column, propertyName);
                 }
                 else {
-                    // ambiguous column reference, go for many to one and assume it gets sorted by further config later
-                    this.ResolveManyToOneColumn(column, propertyName);
+                    var candidateColumns = columnMap
+                                                        .Columns.Where(
+                                                            c => (c.Value.Type == column.Map.Type || (c.Value.Type.IsCollection() && c.Value.Type.GetGenericArguments()
+                                                                                                                                      .First() == column.Map.Type)) && !c.Value.IsIgnored)
+                                                        .ToArray();
+                    if (candidateColumns.Length == 0) {
+                        // assume many to one
+                        this.ResolveManyToOneColumn(column, propertyName);
+                    }
+                    else if (candidateColumns.Length == 1) {
+                        if (candidateColumns[0]
+                            .Value.Type.IsCollection()) {
+                            this.ResolveManyToOneColumn(column, propertyName);
+                        }
+                        else {
+                            // assume one to one
+                            this.ResolveOneToOneColumn(column, propertyName);
+
+                            // now fix the other side
+                            candidateColumns[0]
+                                .Value.Relationship = RelationshipType.OneToOne;
+                            candidateColumns[0]
+                                .Value.IsNullable = true; // we match up what ResolveOneToOneColumn does
+                        }
+                    }
+                    else {
+                        // ambiguous column reference, go for many to one and assume it gets sorted by further config later
+                        this.ResolveManyToOneColumn(column, propertyName);
+                    }
                 }
             }
             else {
@@ -204,6 +214,11 @@
             column.Relationship = RelationshipType.ManyToOne;
             column.DbName = propertyName + "Id";
             column.IsNullable = this.convention.IsManyToOneNullable(column.Map.Type, propertyName);
+        }
+
+        private void ResolveOwnedColumn(IColumn column, string propertyName) {
+            column.Relationship = RelationshipType.Owned;
+            column.IsNullable = this.convention.IsOwnedPropertyNullable(column.Map.Type, propertyName);
         }
 
         private void ResolveOneToManyColumn(IColumn column) {

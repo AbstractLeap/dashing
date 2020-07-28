@@ -47,6 +47,16 @@
             this.isCollectionInstantiationAutomatic = isCollectionInstantiationAutomatic;
         }
 
+        /// <inheritdoc />
+        public virtual bool IsOwned(Type entityType) {
+            // by default we treat entities without primary keys as owned
+            return !this.GetPrimaryKeyCandidates(
+                           entityType,
+                           entityType.GetProperties()
+                                     .Select(p => p.Name))
+                       .Any();
+        }
+
         /// <summary>
         ///     The table for.
         /// </summary>
@@ -95,12 +105,16 @@
         ///     The <see cref="string" />.
         /// </returns>
         public virtual string PrimaryKeyFor(Type entity, IEnumerable<string> propertyNames) {
-            return
-                propertyNames.Select(pn => this.ScorePrimaryKeyCandidate(pn, entity.Name + "Id", "Id"))
-                             .Where(c => c.Score > 0)
-                             .OrderBy(c => c.Score)
-                             .FirstOrDefault()
-                             .PropertyName;
+            return this.GetPrimaryKeyCandidates(entity, propertyNames)
+                       .OrderBy(c => c.Score)
+                       .FirstOrDefault()
+                       .PropertyName;
+        }
+
+        private IEnumerable<PrimaryKeyCandidate> GetPrimaryKeyCandidates(Type entity, IEnumerable<string> propertyNames) {
+            var primaryKeyCandidates = propertyNames.Select(pn => this.ScorePrimaryKeyCandidate(pn, entity.Name + "Id", "Id"))
+                                                    .Where(c => c.Score > 0);
+            return primaryKeyCandidates;
         }
 
         private PrimaryKeyCandidate ScorePrimaryKeyCandidate(string propertyName, params string[] orderedMatches) {
@@ -226,6 +240,11 @@
         /// <param name="propertyName"></param>
         /// <returns></returns>
         public bool IsManyToOneNullable(Type entity, string propertyName) {
+            return true;
+        }
+
+        /// <inheritdoc />
+        public bool IsOwnedPropertyNullable(Type entityType, string propertyName) {
             return true;
         }
     }

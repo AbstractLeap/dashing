@@ -26,6 +26,11 @@
         /// <summary>
         ///     One to One
         /// </summary>
-        OneToOne
+        OneToOne,
+
+        /// <summary>
+        /// Entity is persisted inside it's owner
+        /// </summary>
+        Owned 
     }
 }
