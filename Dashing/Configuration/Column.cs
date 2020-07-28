@@ -218,7 +218,17 @@
 
         private readonly object oppositeColumnLock = new object();
 
-        internal string OppositeColumnName { get; set; }
+        private string oppositeColumnName;
+
+        internal string OppositeColumnName
+        {
+            get => this.oppositeColumnName;
+            set
+            {
+                this.Relationship = RelationshipType.OneToOne;
+                this.oppositeColumnName = value;
+            }
+        }
 
         public IColumn OppositeColumn
         {
@@ -261,6 +271,10 @@
             set
             {
                 this.oppositeColumn = value;
+                this.Relationship = RelationshipType.OneToOne;
+                if (value.OppositeColumn != this) {
+                    value.OppositeColumn = this;
+                }
             }
         }
 
