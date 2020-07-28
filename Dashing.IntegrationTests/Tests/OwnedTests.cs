@@ -71,6 +71,7 @@
                 await session.InsertAsync(owner);
                 var ownerSelected = await session.Query<Owner>()
                                                  .SingleAsync(o => o.Id == owner.Id);
+                Assert.Equal("Foo", ownerSelected.Name);
                 Assert.Equal(3, ownerSelected.Owned.X);
             }
         }
