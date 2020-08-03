@@ -96,7 +96,7 @@
                 if (column.Relationship == RelationshipType.Owned) {
                     var ownedMap = GetOwnedMap(map, column);
                     foreach (var ownedColumn in ownedMap.OwnedColumns(true)) {
-                        GenerateColumnValueSpec(sql, parameters, ownedColumn, map.GetColumnValue(entity, column), generateSql, fillParams, paramIdx++);
+                        GenerateColumnValueSpec(sql, parameters, ownedColumn, map.GetColumnValue(entity, column), generateSql, fillParams, ++paramIdx);
                     }
                 }
                 else {

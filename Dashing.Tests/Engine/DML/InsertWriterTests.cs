@@ -5,17 +5,25 @@
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
     using Dashing.Tests.TestDomain;
+    using Dashing.Tests.TestDomain.Owned;
     using Dashing.Tests.TestDomain.Versioning;
 
     using Xunit;
+    using Xunit.Abstractions;
 
     public class InsertWriterTests {
+        private readonly ITestOutputHelper outputHelper;
+
+        public InsertWriterTests(ITestOutputHelper outputHelper) {
+            this.outputHelper = outputHelper;
+        }
+
         [Fact]
         public void SimpleInsertWorks() {
             var insertWriter = new InsertWriter(new SqlServerDialect(), MakeConfig());
             var post = new Post { PostId = 1, Title = "Boo", Rating = 11 };
             var result = insertWriter.GenerateSql(post);
-            Debug.Write(result.Sql);
+            this.outputHelper.WriteLine(result.Sql);
             Assert.Equal(
                 "insert into [Posts] ([AuthorId], [BlogId], [Content], [DoNotMap], [Rating], [Title]) output inserted.[PostId] values (@p_1, @p_2, @p_3, @p_4, @p_5, @p_6)",
                 result.Sql);
@@ -31,6 +39,17 @@
             Assert.DoesNotContain(nameof(VersionedEntity.SysStartTime), result.Sql);
             Assert.DoesNotContain(nameof(VersionedEntity.SessionUser), result.Sql);
             Assert.DoesNotContain(nameof(VersionedEntity.CreatedBy), result.Sql);
+        }
+
+        [Fact]
+        public void OwnedColumnInsertWorks() {
+            var insertWriter = new InsertWriter(new SqlServerDialect(), new OwnedConfig());
+            var post = new Owner { Name = "Bob", Owned = new Owned { X = 3, Y = 4 }};
+            var result = insertWriter.GenerateSql(post);
+            this.outputHelper.WriteLine(result.Sql);
+            Assert.Equal(
+                "insert into [Owners] ([Name], [X], [Y]) output inserted.[Id] values (@p_1, @p_2, @p_3)",
+                result.Sql);
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {
