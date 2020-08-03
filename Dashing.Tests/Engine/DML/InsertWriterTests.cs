@@ -4,6 +4,7 @@
     using Dashing.Configuration;
     using Dashing.Engine.Dialects;
     using Dashing.Engine.DML;
+    using Dashing.Extensions;
     using Dashing.Tests.TestDomain;
     using Dashing.Tests.TestDomain.Owned;
     using Dashing.Tests.TestDomain.Versioning;
@@ -50,6 +51,9 @@
             Assert.Equal(
                 "insert into [Owners] ([Name], [X], [Y]) output inserted.[Id] values (@p_1, @p_2, @p_3)",
                 result.Sql);
+            Assert.Equal("Bob", result.Parameters.GetValue("p_1"));
+            Assert.Equal(3, result.Parameters.GetValue("p_2"));
+            Assert.Equal(4, result.Parameters.GetValue("p_3"));
         }
 
         private static IConfiguration MakeConfig(bool withIgnore = false) {
