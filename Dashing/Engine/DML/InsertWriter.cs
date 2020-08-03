@@ -100,7 +100,7 @@
                     }
                 }
                 else {
-                    GenerateColumnValueSpec(sql, parameters, column, entity, generateSql, fillParams, paramIdx++);
+                    GenerateColumnValueSpec(sql, parameters, column, entity, generateSql, fillParams, ++paramIdx);
                 }
             }
 
