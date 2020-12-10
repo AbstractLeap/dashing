@@ -30,28 +30,28 @@
 
         private void UpdateListeners(IEnumerable<IEventListener> listeners) {
             foreach (var listener in listeners) {
-                if (listener is IOnPreInsertEventListener) {
-                    this.PreInsertListeners.Add(listener as IOnPreInsertEventListener);
+                if (listener is IOnPreInsertEventListener preInsertEventListener && !this.PreInsertListeners.Contains(preInsertEventListener)) {
+                    this.PreInsertListeners.Add(preInsertEventListener);
                 }
 
-                if (listener is IOnPreSaveEventListener) {
-                    this.PreSaveListeners.Add(listener as IOnPreSaveEventListener);
+                if (listener is IOnPreSaveEventListener preSaveEventListener && !this.PreSaveListeners.Contains(preSaveEventListener)) {
+                    this.PreSaveListeners.Add(preSaveEventListener);
                 }
 
-                if (listener is IOnPreDeleteEventListener) {
-                    this.PreDeleteListeners.Add(listener as IOnPreDeleteEventListener);
+                if (listener is IOnPreDeleteEventListener preDeleteEventListener && !this.PreDeleteListeners.Contains(preDeleteEventListener)) {
+                    this.PreDeleteListeners.Add(preDeleteEventListener);
                 }
 
-                if (listener is IOnPostInsertEventListener) {
-                    this.PostInsertListeners.Add(listener as IOnPostInsertEventListener);
+                if (listener is IOnPostInsertEventListener postInsertEventListener && !this.PostInsertListeners.Contains(postInsertEventListener)) {
+                    this.PostInsertListeners.Add(postInsertEventListener);
                 }
 
-                if (listener is IOnPostSaveEventListener) {
-                    this.PostSaveListeners.Add(listener as IOnPostSaveEventListener);
+                if (listener is IOnPostSaveEventListener postSaveEventListener && !this.PostSaveListeners.Contains(postSaveEventListener)) {
+                    this.PostSaveListeners.Add(postSaveEventListener);
                 }
 
-                if (listener is IOnPostDeleteEventListener) {
-                    this.PostDeleteListeners.Add(listener as IOnPostDeleteEventListener);
+                if (listener is IOnPostDeleteEventListener postDeleteEventListener && !this.PostDeleteListeners.Contains(postDeleteEventListener)) {
+                    this.PostDeleteListeners.Add(postDeleteEventListener);
                 }
             }
         }
