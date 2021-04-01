@@ -176,6 +176,22 @@
             Assert.Equal(4, thirdFourthComments.Items.ElementAt(1).CommentId);
         }
 
+        [Fact]
+        public void DeleteSameWorks() {
+            var session = this.GetSession();
+            var blog1 = new Blog();
+            var blog2 = new Blog();
+            session.Insert(blog1);
+            session.Insert(blog2);
+            var pair = new Pair { Left = blog1, Right = blog2 };
+            session.Insert(pair);
+            var samePair = new Pair { Left = blog1, Right = blog1 };
+            session.Insert(samePair);
+            Assert.Equal(2, session.Query<Pair>().Count());
+            session.Delete<Pair>(p => p.Left == p.Right);
+            Assert.Single(session.Query<Pair>());
+        }
+
         private ISession GetSession() {
             var engine = new InMemoryEngine() { Configuration = new TestConfiguration() };
             var session = new Session(engine, new Mock<ISessionState>().Object);

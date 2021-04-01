@@ -83,6 +83,7 @@
     <Compile Include="TestDomain\OneToOne\Category.cs" />
     <Compile Include="TestDomain\OneToOne\OneToOneLeft.cs" />
     <Compile Include="TestDomain\OneToOne\OneToOneRight.cs" />
+    <Compile Include="TestDomain\Pair.cs" />
     <Compile Include="TestDomain\Post.cs" />
     <Compile Include="TestDomain\PostTag.cs" />
     <Compile Include="TestDomain\Tag.cs" />

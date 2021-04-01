@@ -192,6 +192,15 @@
             Assert.Equal(expectedResult.ToDebugString(), rewrittenClause.ToDebugString());
         }
 
+        [Fact]
+        public void BinaryComparisonParametersBothSides() {
+            Expression<Func<Pair, bool>> exp = c => c.Left == c.Right;
+            Expression<Func<Pair, bool>> expectedResult = c => c.Left != null && c.Right != null && c.Left == c.Right;
+            var rewriter = new WhereClauseNullCheckRewriter();
+            var rewrittenClause = rewriter.Rewrite(exp);
+            Assert.Equal(expectedResult.ToDebugString(), rewrittenClause.ToDebugString());
+        }
+
         public class CourseType {
             public virtual int CourseTypeId { get; set; }
         }

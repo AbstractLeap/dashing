@@ -42,12 +42,13 @@
                     this.Visit(node.Left);
                 }
 
-                // visit right hand side
                 var leftHandSideIsNull = this.isNullCheck;
                 var leftHandSideContainsNullable = this.containsNullable;
-                this.treeHasParameter = false;
-                this.isNullCheck = false;
-                this.containsNullable = false;
+                var leftHandSideNullCheckExpressions = this.nullCheckExpressions;
+                var leftHandSideHasParameter = this.treeHasParameter;
+                this.ResetVariables();
+
+                // visit right hand side
                 if (node.Right.NodeType == ExpressionType.Convert) {
                     this.Visit(((UnaryExpression)node.Right).Operand);
                 }
@@ -55,14 +56,25 @@
                     this.Visit(node.Right);
                 }
 
-                if ((leftHandSideIsNull || this.isNullCheck) && !leftHandSideContainsNullable && !this.containsNullable) {
-                    // we're checking null somewhere (e.g. e.Post == null) so we should remove that last null check (unless it's got a nullable inside
-                    if (this.nullCheckExpressions.Count > 0) {
-                        this.nullCheckExpressions.RemoveAt(this.nullCheckExpressions.Count - 1);
-                    }
+                var rightHandSideIsNull = this.isNullCheck;
+                var rightHandSideContainsNullable = this.containsNullable;
+                var rightHandSideNullCheckExpressions = this.nullCheckExpressions;
+                var rightHandSideHasParameter = this.treeHasParameter;
+
+                if (leftHandSideIsNull && !rightHandSideContainsNullable && rightHandSideNullCheckExpressions.Count > 0) {
+                    rightHandSideNullCheckExpressions.RemoveAt(
+                        rightHandSideNullCheckExpressions.Count - 1);
                 }
 
-                return this.CombineExpressions(node);
+                if (rightHandSideIsNull && !leftHandSideContainsNullable && leftHandSideNullCheckExpressions.Count > 0) {
+                    leftHandSideNullCheckExpressions.RemoveAt(
+                        leftHandSideNullCheckExpressions.Count - 1);
+                }
+                
+
+                var combined = CombineExpressions(node, leftHandSideNullCheckExpressions.Union(rightHandSideNullCheckExpressions));
+                this.nullCheckExpressions.Clear();
+                return combined;
             }
 
             if (isInAndOrOrExpression) {
@@ -208,24 +220,30 @@
             }
         }
 
-        private Expression CombineExpressions(Expression exp) {
-            if (!this.nullCheckExpressions.Any()) {
+        private static Expression CombineExpressions(
+            Expression exp,
+            IEnumerable<Expression> expressions) {
+            if (!expressions.Any()) {
                 return exp;
             }
 
-            if (this.nullCheckExpressions.Count == 1) {
-                var expr = Expression.AndAlso(this.nullCheckExpressions.First(), exp);
-                this.nullCheckExpressions.Clear();
+            if (expressions.Count() == 1) {
+                var expr = Expression.AndAlso(expressions.First(), exp);
                 return expr;
             }
 
-            var combinedExpr = Expression.AndAlso(this.nullCheckExpressions.First(), this.nullCheckExpressions.ElementAt(1));
-            for (var i = 2; i < this.nullCheckExpressions.Count; i++) {
-                combinedExpr = Expression.AndAlso(combinedExpr, this.nullCheckExpressions.ElementAt(i));
+            var combinedExpr = Expression.AndAlso(expressions.First(), expressions.ElementAt(1));
+            for (var i = 2; i < expressions.Count(); i++) {
+                combinedExpr = Expression.AndAlso(combinedExpr, expressions.ElementAt(i));
             }
 
-            this.nullCheckExpressions.Clear();
             return Expression.AndAlso(combinedExpr, exp);
+        }
+
+        private Expression CombineExpressions(Expression exp) {
+            var combined = CombineExpressions(exp, this.nullCheckExpressions);
+            this.nullCheckExpressions.Clear();
+            return combined;
         }
 
         private bool IsInBinaryComparisonExpression(ExpressionType nodeType) {
