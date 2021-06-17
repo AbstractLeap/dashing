@@ -23,5 +23,8 @@
     <file src="Weave.targets" target="tools/" />
     <file src="$publishdir$\net46\**\*" target="tools/net46/" />
     <file src="$publishdir$\netcoreapp1.1\**\*" target="tools/netcoreapp1.1/" />
+    <file src="$publishdir$\netcoreapp2.0\**\*" target="tools/netcoreapp2.0/" />
+    <file src="$publishdir$\netcoreapp3.0\**\*" target="tools/netcoreapp3.0/" />
+    <file src="$publishdir$\net5.0\**\*" target="tools/net5.0/" />
   </files>
 </package>
