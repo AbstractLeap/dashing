@@ -8,6 +8,14 @@
   </PropertyGroup>
   
   <Target Condition="$(WeaveArguments) != ''" Name="Weave" AfterTargets="AfterBuild">
-	<Exec Command="$(WeaveFileExe) weave $(WeaveArguments)" />
+	  <Exec Command="$(WeaveFileExe) weave $(WeaveArguments)" />
+  </Target>
+
+  <Target Condition="@(WeaveConfiguration->Count()) > 0" Name="WeaveBuild" AfterTargets="AfterBuild">
+	  <Exec Command="$(WeaveFileExe) weave -p &quot;%(WeaveConfiguration.ProjectPath)$(OutputPath)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
+  </Target>
+
+  <Target Condition="@(WeaveConfiguration->Count()) > 0" Name="WeavePublish" AfterTargets="AfterPublish">
+	  <Exec Command="$(WeaveFileExe) weave -p &quot;$(PublishDir)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
   </Target>
 </Project>
