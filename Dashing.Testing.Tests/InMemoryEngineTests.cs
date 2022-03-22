@@ -35,6 +35,14 @@
         }
 
         [Fact]
+        public void CollectionsWithNullLinkWork() {
+            var session = this.GetSession();
+            var blogs = session.Query<Blog>().Fetch(b => b.Posts).ToArray();
+            Assert.Equal(1, blogs.Length);
+            Assert.Equal(2, blogs.First().Posts.Count);
+        }
+
+        [Fact]
         public void WhereNotFetchedWorks() {
             var session = this.GetSession();
             var comments = session.Query<Comment>().Fetch(c => c.Post).Where(c => c.Post.Author.UserId == 1);
