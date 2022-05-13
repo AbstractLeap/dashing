@@ -26,5 +26,6 @@
     <file src="$publishdir$\netcoreapp2.0\**\*" target="tools/netcoreapp2.0/" />
     <file src="$publishdir$\netcoreapp3.0\**\*" target="tools/netcoreapp3.0/" />
     <file src="$publishdir$\net5.0\**\*" target="tools/net5.0/" />
+    <file src="$publishdir$\net6.0\**\*" target="tools/net6.0/" />
   </files>
 </package>
