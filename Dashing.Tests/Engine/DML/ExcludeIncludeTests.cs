@@ -145,6 +145,39 @@
         }
 
         [Fact]
+        public void DontIncludeExcludedFetchedDeepParentReaddsColumn()
+        {
+            var query = (SelectQuery<Post>)this.GetSelectQuery<Post>()
+                                               .Fetch(p => p.Blog.Owner);
+            var config = new MutableConfiguration();
+            config.AddNamespaceOf<Post>();
+            config.Setup<User>()
+                  .Property(b => b.EmailAddress)
+                  .ExcludeByDefault();
+            var writer = new SelectWriter(new SqlServerDialect(), config);
+            var sql = writer.GenerateSql(query, new AutoNamingDynamicParameters());
+            this.output.WriteLine(sql.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[DoNotMap], t_1.[BlogId], t_1.[Title], t_1.[CreateDate], t_1.[Description], t_2.[UserId], t_2.[Username], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters] from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [Users] as t_2 on t_1.OwnerId = t_2.UserId", sql.Sql);
+        }
+
+        [Fact]
+        public void IncludeExcludedFetchedDeepParentReaddsColumn()
+        {
+            var query = (SelectQuery<Post>)this.GetSelectQuery<Post>()
+                                               .Fetch(p => p.Blog.Owner)
+                                               .Include(p => p.Blog.Owner.EmailAddress);
+            var config = new MutableConfiguration();
+            config.AddNamespaceOf<Post>();
+            config.Setup<User>()
+                  .Property(b => b.EmailAddress)
+                  .ExcludeByDefault();
+            var writer = new SelectWriter(new SqlServerDialect(), config);
+            var sql = writer.GenerateSql(query, new AutoNamingDynamicParameters());
+            this.output.WriteLine(sql.Sql);
+            Assert.Equal("select t.[PostId], t.[Title], t.[Content], t.[Rating], t.[AuthorId], t.[DoNotMap], t_1.[BlogId], t_1.[Title], t_1.[CreateDate], t_1.[Description], t_2.[UserId], t_2.[Username], t_2.[Password], t_2.[IsEnabled], t_2.[HeightInMeters], t_2.[EmailAddress] from [Posts] as t left join [Blogs] as t_1 on t.BlogId = t_1.BlogId left join [Users] as t_2 on t_1.OwnerId = t_2.UserId", sql.Sql);
+        }
+
+        [Fact]
         public void IncludeAllReaddsColumn() {
             var query = (SelectQuery<Post>)this.GetSelectQuery<Post>()
                                                .Fetch(p => p.Blog)
