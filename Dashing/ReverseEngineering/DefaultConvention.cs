@@ -14,7 +14,7 @@
         ///     in the form Singular1,Plural1|Singular2,Plural2|Singular3,Plural3 ...
         /// </param>
         public DefaultConvention(IEnumerable<KeyValuePair<string, string>> extraPluralizationWords) {
-            this.extraWords = (extraPluralizationWords ?? new Dictionary<string, string>()).ToDictionary(k => k.Key.ToLowerInvariant(), k => k.Value);
+            this.extraWords = (extraPluralizationWords ?? new Dictionary<string, string>()).ToDictionary(k => k.Value.ToLowerInvariant(), k => k.Key);
         }
 
         public string PropertyNameForManyToOneColumnName(string columnName) {
