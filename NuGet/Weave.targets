@@ -1,11 +1,9 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <WeaveFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)/net46/dashing-weaver.exe"</WeaveFileExe>
-    <WeaveFileExe Condition="$(TargetFramework.StartsWith('netcoreapp1')) OR $(TargetFramework.StartsWith('netstandard1'))">dotnet "$(MSBuildThisFileDirectory)/netcoreapp1.1/dashing-weaver.dll"</WeaveFileExe>
-    <WeaveFileExe Condition="$(TargetFramework.StartsWith('netcoreapp2')) OR $(TargetFramework.StartsWith('netstandard2.0'))">dotnet "$(MSBuildThisFileDirectory)/netcoreapp2.0/dashing-weaver.dll"</WeaveFileExe>
-    <WeaveFileExe Condition="$(TargetFramework.StartsWith('netcoreapp3')) OR $(TargetFramework.StartsWith('netstandard2.1'))">dotnet "$(MSBuildThisFileDirectory)/netcoreapp3.1/dashing-weaver.dll"</WeaveFileExe>
     <WeaveFileExe Condition="$(TargetFramework.StartsWith('net5'))">dotnet "$(MSBuildThisFileDirectory)/net5.0/dashing-weaver.dll"</WeaveFileExe>
     <WeaveFileExe Condition="$(TargetFramework.StartsWith('net6'))">dotnet "$(MSBuildThisFileDirectory)/net6.0/dashing-weaver.dll"</WeaveFileExe>
+    <WeaveFileExe Condition="$(TargetFramework.StartsWith('net7'))">dotnet "$(MSBuildThisFileDirectory)/net7.0/dashing-weaver.dll"</WeaveFileExe>
   </PropertyGroup>
   
   <Target Condition="$(WeaveArguments) != ''" Name="Weave" AfterTargets="AfterBuild">
