@@ -52,6 +52,15 @@
         }
 
         [Fact]
+        public void WhereComparisonWithNoConstantWorks() {
+            var session = this.GetSession();
+            var commentsByAuthor = session.Query<Comment>()
+                                                         .Where(c => c.User == c.Post.Author)
+                                                         .ToArray();
+            Assert.Equal(2, commentsByAuthor.Length);
+        }
+
+        [Fact]
         public void TestConfigWorks() {
             var config = new TestConfiguration();
             using (var session = new InMemoryDatabase(config).BeginSession()) {
@@ -183,6 +192,22 @@
             Assert.Equal(2, thirdFourthComments.Skipped);
             Assert.Equal(3, thirdFourthComments.Items.ElementAt(0).CommentId);
             Assert.Equal(4, thirdFourthComments.Items.ElementAt(1).CommentId);
+        }
+
+        [Fact]
+        public void DeleteSameWorks() {
+            var session = this.GetSession();
+            var blog1 = new Blog();
+            var blog2 = new Blog();
+            session.Insert(blog1);
+            session.Insert(blog2);
+            var pair = new Pair { Left = blog1, Right = blog2 };
+            session.Insert(pair);
+            var samePair = new Pair { Left = blog1, Right = blog1 };
+            session.Insert(samePair);
+            Assert.Equal(2, session.Query<Pair>().Count());
+            session.Delete<Pair>(p => p.Left == p.Right);
+            Assert.Single(session.Query<Pair>());
         }
 
         private ISession GetSession() {
