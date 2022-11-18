@@ -31,7 +31,7 @@
                     c.OnExecute(
                         () => {
                             c.EnableLogging();
-                            var assemblyDir = Path.GetDirectoryName(assemblyPath.Value());
+                            var assemblyDir = Path.GetDirectoryName(Path.GetFullPath(assemblyPath.Value()));
                             Program.AssemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             ScriptExtensions.DisplayMigrationHeader(assemblyPath.Value(), configurationType.Value(), connectionString.Value());
                             try {
