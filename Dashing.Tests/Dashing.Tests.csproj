@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dashing.Cli\Dashing.Cli.csproj" />
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
   </ItemGroup>
   

@@ -19,8 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Dashing.Cli\Dashing.Cli.csproj" />
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
+    <ProjectReference Condition=" '$(TargetFramework)' == 'net6.0' " Include="..\Dashing.Cli\Dashing.Tool.csproj" />
+    <ProjectReference Condition=" '$(TargetFramework)' == 'net46' " Include="..\Dashing.Cli\Dashing.Cli.csproj" />
   </ItemGroup>
 
   <ItemGroup>

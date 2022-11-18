@@ -12,12 +12,21 @@
     <Language>en-GB</Language>
     <Tags>dashing dapper orm sql mini-orm</Tags>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;</TargetFrameworks>
+    <TargetFrameworks>net46</TargetFrameworks>
     <AssemblyName>dash</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\Dashing.CommandLine\*.cs" LinkBase="CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="toolbin\**" />
+    <Compile Remove="toolobj\**" />
+    <EmbeddedResource Remove="toolbin\**" />
+    <EmbeddedResource Remove="toolobj\**" />
+    <None Remove="toolbin\**" />
+    <None Remove="toolobj\**" />
   </ItemGroup>
 
   <ItemGroup>

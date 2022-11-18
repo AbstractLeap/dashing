@@ -1,5 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+  <PropertyGroup>
+    <BaseOutputPath>toolbin\</BaseOutputPath>
+    <BaseIntermediateOutputPath>toolobj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
 
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk"/>
   <PropertyGroup>
     <PackageId>dotnet-dashing</PackageId>
     <Description>dotnet-dashing provides the functionality for migrating databases with Dashing</Description>
@@ -27,6 +32,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="bin\**" />
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="bin\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="bin\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
   </ItemGroup>
 
@@ -48,4 +62,5 @@
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
   </PropertyGroup>
 
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk"/>
 </Project>
