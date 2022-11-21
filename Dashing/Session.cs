@@ -80,7 +80,7 @@
             this.shouldCommitAndDisposeTransaction = commitAndDisposeTransaction;
             this.isTransactionLess = isTransactionLess;
             this.completeFailsSilentlyIfRejected = completeFailsSilentlyIfRejected;
-            this.Dapper = new DapperWrapper(this);
+            this.Dapper = engine.CreateDapperWrapper(this);
         }
 
         public IConfiguration Configuration

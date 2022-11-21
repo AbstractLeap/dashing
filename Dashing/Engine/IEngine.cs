@@ -62,5 +62,7 @@ namespace Dashing.Engine {
             where T : class, new();
 
         Task<int> ExecuteBulkDeleteAsync<T>(IDbConnection connection, IDbTransaction transaction, IEnumerable<Expression<Func<T, bool>>> predicates) where T : class, new();
+
+        IDapper CreateDapperWrapper(ISession session);
     }
 }

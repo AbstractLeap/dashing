@@ -253,6 +253,10 @@
             return Task.FromResult(this.ExecuteBulkDelete(connection, transaction, predicates));
         }
 
+        public IDapper CreateDapperWrapper(ISession session) {
+            return new MockDapper();
+        }
+
         private void AssertConfigured() {
             if (this.configuration == null) {
                 throw new Exception("Configuration has not been set");

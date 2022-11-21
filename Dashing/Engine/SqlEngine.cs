@@ -398,5 +398,13 @@ namespace Dashing.Engine {
             var sqlQuery = this.bulkDeleteWriter.GenerateBulkSql(predicates);
             return await connection.ExecuteAsync(sqlQuery.Sql, sqlQuery.Parameters, transaction);
         }
+
+        public IDapper CreateDapperWrapper(ISession session) {
+            if (session is Session theSession) {
+                return new DapperWrapper(theSession);
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(session), "SqlEngine expects ISession to be implemented by Session");
+        }
     }
 }
