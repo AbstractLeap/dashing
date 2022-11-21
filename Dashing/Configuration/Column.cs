@@ -272,9 +272,7 @@
             {
                 this.oppositeColumn = value;
                 this.Relationship = RelationshipType.OneToOne;
-                if (value.OppositeColumn != this) {
-                    value.OppositeColumn = this;
-                }
+                value.Relationship = RelationshipType.OneToOne;
             }
         }
 
