@@ -3,28 +3,30 @@
   <PropertyGroup>
     <PackageId>Dashing.Cli</PackageId>
     <Description>Dashing.Cli provides the functionality for migrating databases</Description>
-    <VersionPrefix>2.0.7</VersionPrefix>
     <Authors>Polylytics</Authors>
     <Owners>Polylytics</Owners>
-	<ProjectUrl>https://github.com/Polylytics/dashing</ProjectUrl>
-	<IconUrl>http://polylytics.com/dashing/dashing-icon.png</IconUrl>
-	<RequireLicenseAcceptance>false</RequireLicenseAcceptance>
-	<Copyright>© Polylytics Limited, 2018</Copyright>
-	<Language>en-GB</Language>
-	<Tags>dashing dapper orm sql mini-orm</Tags>
+    <ProjectUrl>https://github.com/Polylytics/dashing</ProjectUrl>
+    <IconUrl>http://polylytics.com/dashing/dashing-icon.png</IconUrl>
+    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <Copyright>© Polylytics Limited, 2018</Copyright>
+    <Language>en-GB</Language>
+    <Tags>dashing dapper orm sql mini-orm</Tags>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;netcoreapp1.1;netcoreapp2.0;netcoreapp3.0</TargetFrameworks>
-	<AssemblyName>dash</AssemblyName>
-    <AssemblyName Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' Or '$(TargetFramework)' == 'netcoreapp3.0' ">dotnet-dash</AssemblyName>
-	<PackageType Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' Or '$(TargetFramework)' == 'netcoreapp3.0' ">DotNetCliTool</PackageType>
+    <TargetFrameworks>net46</TargetFrameworks>
+    <AssemblyName>dash</AssemblyName>
   </PropertyGroup>
-  
-  <ItemGroup>
-	<Compile Remove="app.config" Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' Or '$(TargetFramework)' == 'netcoreapp3.0'  " />
-  </ItemGroup>
-  
+
   <ItemGroup>
     <Compile Include="..\Dashing.CommandLine\*.cs" LinkBase="CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="toolbin\**" />
+    <Compile Remove="toolobj\**" />
+    <EmbeddedResource Remove="toolbin\**" />
+    <EmbeddedResource Remove="toolobj\**" />
+    <None Remove="toolbin\**" />
+    <None Remove="toolobj\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,30 +42,21 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.4.2" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' Or '$(TargetFramework)' == 'netcoreapp3.0'  ">
-	<PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
-	<PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
-  </ItemGroup>
-  
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' Or '$(TargetFramework)' == 'netcoreapp2.0' Or '$(TargetFramework)' == 'netcoreapp3.0'  ">
-    <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
-  </PropertyGroup>
-  
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System.Data.Linq" />
   </ItemGroup>
-  
+
   <!-- Pack settings -->
   <PropertyGroup>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <NuspecFile>../NuGet/dashing-cli.nuspec</NuspecFile>
     <IntermediatePackDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/publish/</IntermediatePackDir>
     <PublishDir>$(IntermediatePackDir)$(TargetFramework)/</PublishDir>
-	<OutputDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/</OutputDir>
+    <OutputDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/</OutputDir>
     <NuspecProperties>publishDir=$([MSBuild]::NormalizeDirectory($(IntermediatePackDir)));outputDir=$([MSBuild]::NormalizeDirectory($(OutputDir)));version=$(PackageVersion)</NuspecProperties>
   </PropertyGroup>
-  
-   <!-- Executes /t:Publish for all target frameworks before packing-->
+
+  <!-- Executes /t:Publish for all target frameworks before packing-->
   <Target Name="PublishAll" BeforeTargets="GenerateNuspec">
     <ItemGroup>
       <_TargetFramework Include="$(TargetFrameworks)" />

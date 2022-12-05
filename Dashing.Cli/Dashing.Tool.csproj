@@ -1,0 +1,66 @@
+﻿<Project>
+  <PropertyGroup>
+    <BaseOutputPath>toolbin\</BaseOutputPath>
+    <BaseIntermediateOutputPath>toolobj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk"/>
+  <PropertyGroup>
+    <PackageId>dotnet-dashing</PackageId>
+    <Description>dotnet-dashing provides the functionality for migrating databases with Dashing</Description>
+    <Authors>Polylytics</Authors>
+    <Owners>Polylytics</Owners>
+    <ProjectUrl>https://github.com/Polylytics/dashing</ProjectUrl>
+    <IconUrl>http://polylytics.com/dashing/dashing-icon.png</IconUrl>
+    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <Copyright>© Polylytics Limited, 2018</Copyright>
+    <Language>en-GB</Language>
+    <Tags>dashing dapper orm sql mini-orm</Tags>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+    <PackAsTool>true</PackAsTool>
+    <AssemblyName>dotnet-dashing</AssemblyName>
+    <ToolCommandName>dashing</ToolCommandName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="app.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Dashing.CommandLine\*.cs" LinkBase="CommandLine" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="bin\**" />
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="bin\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="bin\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dashing\Dashing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="2.2.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
+    <PackageReference Include="MySql.Data" Version="6.10.7" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
+  </PropertyGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk"/>
+</Project>

@@ -52,6 +52,15 @@
         }
 
         [Fact]
+        public void InsertDoesNotAutoGenerateNonDefaultPrimaryKeys() {
+            var table = new InMemoryTable<Post, int>(new TestConfiguration());
+            var post  = new Post { PostId = 10, Title = "Foo" };
+
+            table.Insert(post);
+            Assert.Equal(10, post.PostId);
+        }
+
+        [Fact]
         public void GetReturnsNull() {
             var table = new InMemoryTable<Post, int>(new TestConfiguration());
             Assert.Null(table.Get(1));

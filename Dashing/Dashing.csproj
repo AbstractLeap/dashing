@@ -3,7 +3,6 @@
   <PropertyGroup>
     <PackageId>Dashing</PackageId>
     <Description>Dashing is a simple to use mini ORM built on top of Dapper. It aims to provide fantastic productivity whilst not sacrificing (too much) performance.</Description>
-    <VersionPrefix>2.0.8.1</VersionPrefix>
     <Authors>Polylytics</Authors>
     <Owners>Polylytics</Owners>
     <PackageProjectUrl>https://github.com/Polylytics/dashing</PackageProjectUrl>
@@ -15,7 +14,14 @@
     <PackageTags>dashing dapper orm sql mini-orm</PackageTags>
     <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
     <AssemblyName>Dashing</AssemblyName>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\dashing-icon.png" Pack="true" PackagePath="\"/>

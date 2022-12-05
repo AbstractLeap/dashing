@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
+    <TargetFrameworks>net46;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +25,7 @@
   <Target Name="Weave" AfterTargets="AfterBuild">
     <PropertyGroup>
 	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net46/dashing-weaver.exe</Weave>
-	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/netcoreapp1.1/dashing-weaver.dll"</Weave>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net6.0/dashing-weaver.dll"</Weave>
 	</PropertyGroup>
 	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName)$(TargetExt)&quot; -t &quot;Dashing.PerformanceTests.Tests.Dashing.DashingConfiguration&quot;" />
   </Target> 

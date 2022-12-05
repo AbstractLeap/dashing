@@ -14,6 +14,8 @@ project.lock.json
 [Dd]ebug/
 [Rr]elease/
 x64/
+toolbin/
+toolobj/
 [Bb]in/
 [Oo]bj/
 

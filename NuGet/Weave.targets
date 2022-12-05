@@ -1,10 +1,20 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <WeaveFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">"$(MSBuildThisFileDirectory)/net46/dashing-weaver.exe"</WeaveFileExe>
-    <WeaveFileExe Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)/netcoreapp1.1/dashing-weaver.dll"</WeaveFileExe>
+    <WeaveFileExe Condition="$(TargetFramework.StartsWith('net5'))">dotnet "$(MSBuildThisFileDirectory)/net5.0/dashing-weaver.dll"</WeaveFileExe>
+    <WeaveFileExe Condition="$(TargetFramework.StartsWith('net6'))">dotnet "$(MSBuildThisFileDirectory)/net6.0/dashing-weaver.dll"</WeaveFileExe>
+    <WeaveFileExe Condition="$(TargetFramework.StartsWith('net7'))">dotnet "$(MSBuildThisFileDirectory)/net7.0/dashing-weaver.dll"</WeaveFileExe>
   </PropertyGroup>
   
   <Target Condition="$(WeaveArguments) != ''" Name="Weave" AfterTargets="AfterBuild">
-	<Exec Command="$(WeaveFileExe) weave $(WeaveArguments)" />
+	  <Exec Command="$(WeaveFileExe) weave $(WeaveArguments)" />
+  </Target>
+
+  <Target Condition="@(WeaveConfiguration->Count()) > 0" Name="WeaveBuild" AfterTargets="AfterBuild">
+	  <Exec Command="$(WeaveFileExe) weave -p &quot;%(WeaveConfiguration.ProjectPath)$(OutputPath)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
+  </Target>
+
+  <Target Condition="@(WeaveConfiguration->Count()) > 0" Name="WeavePublish" AfterTargets="AfterPublish">
+	  <Exec Command="$(WeaveFileExe) weave -p &quot;$(PublishDir)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
   </Target>
 </Project>

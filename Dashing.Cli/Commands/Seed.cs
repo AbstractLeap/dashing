@@ -31,7 +31,7 @@
                     c.OnExecute(
                         () => {
                             c.EnableLogging();
-                            var assemblyDir = Path.GetDirectoryName(configurationAssemblyPath.Value());
+                            var assemblyDir = Path.GetDirectoryName(Path.GetFullPath(configurationAssemblyPath.Value()));
                             Program.AssemblySearchDirectories.Insert(0, assemblyDir); // favour user code over dashing code
                             try {
                                 ExecuteSeed(seederAssemblyPath, seederType, configurationAssemblyPath, configurationType, connectionString, provider);

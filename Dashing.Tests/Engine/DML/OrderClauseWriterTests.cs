@@ -11,6 +11,10 @@
 
     using Xunit;
 
+#if NETCOREAPP || NET5_0_OR_GREATER
+    using ListSortDirection = Dashing.ListSortDirection;
+#endif
+
     public class OrderClauseWriterTests {
         [Fact]
         public void OrderByPrimaryKeyContainsPrimaryKeyClause() {

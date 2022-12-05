@@ -4,10 +4,10 @@ Installing Dashing is done via Nuget. There are 3 libraries that you will need:
 
 - **Dashing** <https://www.nuget.org/packages/Dashing>  
  The core library, it contains all of the code that you will use to query the database.
-- **Dashing.Cli** <https://www.nuget.org/packages/Dashing.Cli>  
- A library that provides a console application for performing updates to your databases e.g. schema migrations as you change your domain model.
 - **Dashing.Weaver** <https://www.nuget.org/packages/Dashing.Weaver>  
  A tool library that is used during the compilation of your projects to inject extra behaviour in to your domain model.
+- **dotnet-dashing** (**Dashing.Cli** for .Net Framework) <https://www.nuget.org/packages/dotnet-dashing>  
+ A library that provides a console application for performing updates to your databases e.g. schema migrations as you change your domain model.
 
 In many of the projects that we run we have multiple applications accessing the same database through Dashing. 
 As a result our standard setup is to have a separate "class library" project (e.g. MyProject.Domain) which will contain your 
@@ -30,15 +30,11 @@ dotnet add package Dashing
 dotnet add package Dashing.Weaver
 ```
 
-To install the Cli tool on .Net core we have to add it to the csproj file manually (see https://github.com/NuGet/Home/issues/4901). To do this open your csproj file and add the following node underneath the top root project node:
+The `dotnet-dashing` package is installed as a .Net tool (either globally or locally)
 
 ```
-<ItemGroup>
-    <DotNetCliToolReference Include="Dashing.Cli" Version="2.0.6" />
-</ItemGroup>
+dotnet tool install -g dotnet-dashing
 ```
-
-Then `dotnet restore` and you're good to carry on (you don't have to do this with the 2.x cli tools).
 
 ## Your Domain Model
 
