@@ -17,4 +17,8 @@
   <Target Condition="@(WeaveConfiguration->Count()) > 0" Name="WeavePublish" AfterTargets="AfterPublish">
 	  <Exec Command="$(WeaveFileExe) weave -p &quot;$(PublishDir)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
   </Target>
+
+  <Target Condition="@(WeaveConfiguration->Count()) > 0" Name="WeaveWebFileSystemPublish" BeforeTargets="WebFileSystemPublish">
+      <Exec Command="$(WeaveFileExe) weave -p &quot;%(WeaveConfiguration.ProjectPath)$(WPPAllFilesInSingleFolder)\$(OutputPath)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
+  </Target>
 </Project>
