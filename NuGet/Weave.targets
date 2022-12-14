@@ -15,6 +15,26 @@
   </Target>
 
   <Target Condition="@(WeaveConfiguration->Count()) > 0" Name="WeavePublish" AfterTargets="AfterPublish">
-	  <Exec Command="$(WeaveFileExe) weave -p &quot;$(PublishDir)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
+	  <Exec Command="$(WeaveFileExe) weave -p &quot;%(WeaveConfiguration.ProjectPath)$(PublishUrl)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
+  </Target>
+
+  <!-- Support Web App Publishing -->
+  <Target Condition="@(WeaveConfiguration->Count()) > 0 AND '$(TargetFrameworkIdentifier)' == '.NETFramework'" Name="DashingDomainPublishExtension" AfterTargets="CopyAllFilesToSingleFolderForPackage">
+      <PropertyGroup>
+        <DashingPublishTempDirectory>$(MSBuildProjectDirectory)\$(OutputPath)\</DashingPublishTempDirectory>
+      </PropertyGroup>
+      <Message Condition="Exists('$(MSBuildProjectDirectory)\obj\$(Configuration)\Package\PackageTmp\bin\')" Text="PackageTmp found with $(MSBuildProjectDirectory)\obj\$(Configuration)\Package\PackageTmp\bin\\" />
+      <PropertyGroup>
+        <DashingPublishTempDirectory Condition="Exists('$(MSBuildProjectDirectory)\obj\$(Configuration)\Package\PackageTmp\bin\')">$(MSBuildProjectDirectory)\obj\$(Configuration)\Package\PackageTmp\bin\\</DashingPublishTempDirectory>
+      </PropertyGroup>
+      <Message Condition="'$(_PackageTempDir)'!='' AND Exists('$(MSBuildProjectDirectory)\$(_PackageTempDir)')" Text="_PackageTempDir found with $(MSBuildProjectDirectory)\$(_PackageTempDir)" />
+      <Message Condition="'$(_PackageTempDir)'!='' AND !Exists('$(MSBuildProjectDirectory)\$(_PackageTempDir)')" Text="_PackageTempDir found with $(_PackageTempDir)" />
+      <PropertyGroup>
+        <DashingPublishTempDirectory Condition="'$(_PackageTempDir)'!='' AND Exists('$(MSBuildProjectDirectory)\$(_PackageTempDir)')">$(MSBuildProjectDirectory)\$(_PackageTempDir)\bin\\</DashingPublishTempDirectory>
+      </PropertyGroup>
+      <PropertyGroup>
+        <DashingPublishTempDirectory Condition="'$(_PackageTempDir)'!='' AND !Exists('$(MSBuildProjectDirectory)\$(_PackageTempDir)')">$(_PackageTempDir)\bin\\</DashingPublishTempDirectory>
+      </PropertyGroup>
+      <Exec Command="$(WeaveFileExe) weave -p &quot;$(DashingPublishTempDirectory)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
   </Target>
 </Project>
