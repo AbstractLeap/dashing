@@ -15,7 +15,7 @@
   </Target>
 
   <Target Condition="@(WeaveConfiguration->Count()) > 0" Name="WeavePublish" AfterTargets="AfterPublish">
-	  <Exec Command="$(WeaveFileExe) weave -p &quot;%(WeaveConfiguration.ProjectPath)$(PublishUrl)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
+	  <Exec Command="$(WeaveFileExe) weave -p &quot;$(PublishDir)%(WeaveConfiguration.AssemblyName)&quot; -t &quot;%(WeaveConfiguration.ConfigurationTypeFullName)&quot;" />
   </Target>
 
   <!-- Support Web App Publishing -->
