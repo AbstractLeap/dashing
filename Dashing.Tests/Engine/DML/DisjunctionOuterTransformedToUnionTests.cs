@@ -199,6 +199,15 @@
         }
 
         [Fact]
+        public void AnyDoesntParticipateInDisjunction()
+        {
+            Expression<Func<Blog, bool>> pred = b => b.Posts.Any(p => p.Author.Username == "bob" || p.Author.Username == "Dave");
+            var outerJoinDisjunctionTransformer = new OuterJoinDisjunctionTransformer(new CustomConfig());
+            var result = outerJoinDisjunctionTransformer.AttemptGetOuterJoinDisjunctions(pred);
+            Assert.False(result.ContainsOuterJoinDisjunction);
+        }
+
+        [Fact]
         public void RootForeignKeyEntityJoinDisjunctionDoesnt() {
             var author = new User {
                                       UserId = 1
@@ -414,6 +423,25 @@
 
             this.outputHelper.WriteLine(result.Sql);
             Assert.Equal(@"select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t inner join [Posts] as t_1 on t.PostId = t_1.PostId inner join [Blogs] as t_100 on t_1.BlogId = t_100.BlogId inner join [Users] as t_101 on t.UserId = t_101.UserId where ((t_100.[Title] = @l_1) and (t_101.[HeightInMeters] > @l_2)) union select t.[CommentId], t.[Content], t.[UserId], t.[CommentDate], t_1.[PostId], t_1.[Title], t_1.[Content], t_1.[Rating], t_1.[AuthorId], t_1.[BlogId], t_1.[DoNotMap] from [Comments] as t inner join [Posts] as t_1 on t.PostId = t_1.PostId inner join [Blogs] as t_100 on t_1.BlogId = t_100.BlogId inner join [Users] as t_101 on t.UserId = t_101.UserId where ((t_100.[Title] = @l_3) and (t_101.[EmailAddress] = @l_4))", result.Sql);
+        }
+
+        [Fact]
+        public void AnyDoesntParticipateInDisjunctionSql()
+        {
+            var query = GetSelectQuery<Blog>()
+                        .Where(b => b.CreateDate > DateTime.Now)
+                        .Where(b => b.Owner.IsEnabled)
+                            .Where(b => b.Posts.Any(p => p.Author.Username == "bob" || p.Author.Username == "Dave")) as SelectQuery<Blog>;
+            var config = new CustomConfig();
+            var selectResult = this.GetSql2012Writer(config)
+                             .GenerateSql(query, new AutoNamingDynamicParameters());
+
+            this.outputHelper.WriteLine(selectResult.Sql);
+            Assert.Equal(@"select t.[BlogId], t.[Title], t.[CreateDate], t.[Description], t.[OwnerId] from [Blogs] as t inner join [Users] as t_100 on t.OwnerId = t_100.UserId where (t.[CreateDate] > @l_1) and t_100.[IsEnabled] = 1 and exists (select 1 from [Posts] as i inner join [Users] as i_100 on i.AuthorId = i_100.UserId where (i_100.[Username] = @l_2)  and t.[BlogId] = i.[BlogId] union select 1 from [Posts] as i inner join [Users] as i_100 on i.AuthorId = i_100.UserId where (i_100.[Username] = @l_3) and t.[BlogId] = i.[BlogId])", selectResult.Sql);
+            
+            var countResult = new CountWriter(new SqlServer2012Dialect(), config).GenerateCountSql(query);
+            this.outputHelper.WriteLine(countResult.Sql);
+            Assert.Equal("select count(1) from [Blogs] as t inner join [Users] as t_100 on t.OwnerId = t_100.UserId where (t.[CreateDate] > @l_1) and t_100.[IsEnabled] = 1 and exists (select 1 from [Posts] as i inner join [Users] as i_100 on i.AuthorId = i_100.UserId where (i_100.[Username] = @l_2)  and t.[BlogId] = i.[BlogId] union select 1 from [Posts] as i inner join [Users] as i_100 on i.AuthorId = i_100.UserId where (i_100.[Username] = @l_3) and t.[BlogId] = i.[BlogId])", countResult.Sql);
         }
 
         private SelectWriter GetSql2012Writer(IConfiguration configuration = null) {

@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
 
     using Dashing.Configuration;
     using Dashing.Extensions;
@@ -52,6 +53,15 @@
             }
 
             return new OuterJoinDisjunctionResult<T>(expressions);
+        }
+
+        protected override Expression VisitMethodCall(MethodCallExpression node) {
+            if (node.Method.Name == "Any") {
+                // predicates inside an Any clause are effectively a new context (they're inside an exists (select ...) clause so shouldn't be taken in to account here
+                return node;
+            }
+
+            return base.VisitMethodCall(node);
         }
 
         protected override Expression VisitBinary(BinaryExpression node) {

@@ -4,17 +4,23 @@
 
     using Dashing.Extensions;
 
-    public interface IAliasProvider {
-        string GetAlias(BaseQueryNode queryNode);
-    }
-
     public class DefaultAliasProvider : IAliasProvider {
         private Dictionary<BaseQueryNode, string> aliases;
 
         private int fetchedAliasCounter = 1;
 
         private int nonFetchedAliasCounter = 100;
-        
+
+        private readonly string prefix;
+
+        private const string DefaultAlias = "t";
+
+        public DefaultAliasProvider() : this(DefaultAlias) { }
+
+        public DefaultAliasProvider(string prefix) {
+            this.prefix = prefix;
+        }
+
         public string GetAlias(BaseQueryNode queryNode)
         {
             // TODO make this far simpler and far more performant. Works like this 
@@ -39,7 +45,7 @@
         }
 
         private void CollectAliases(QueryTree queryTree) {
-            this.aliases.Add(queryTree, "t");
+            this.aliases.Add(queryTree, this.prefix);
             foreach (var queryTreeChild in queryTree.Children) {
                 CollectAliases(queryTreeChild.Value);
             }
@@ -55,8 +61,8 @@
 
         private string GetNextAlias(QueryNode queryNode) {
             return queryNode.IsFetched
-                            ? $"t_{this.fetchedAliasCounter++}"
-                            : $"t_{this.nonFetchedAliasCounter++}";
+                            ? $"{this.prefix}_{this.fetchedAliasCounter++}"
+                            : $"{this.prefix}_{this.nonFetchedAliasCounter++}";
         }
 
         private QueryTree FindRoot(BaseQueryNode baseQueryNode) {

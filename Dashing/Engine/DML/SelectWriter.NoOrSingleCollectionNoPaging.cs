@@ -17,7 +17,12 @@
             this.AddWhereClause(selectQuery.WhereClauses, whereSql, parameters, aliasProvider, ref rootQueryNode);
 
             // add select columns
-            this.AddRootColumns(selectQuery, columnSql, rootQueryNode, aliasProvider); // do columns second as we may not be fetching but need joins for the where clause
+            if (!this.inExistsContext) {
+                this.AddRootColumns(selectQuery, columnSql, rootQueryNode, aliasProvider); // do columns second as we may not be fetching but need joins for the where clause
+            }
+            else {
+                columnSql.Append("1");
+            }
 
             // add in the tables
             this.AddTables(selectQuery, tableSql, columnSql, rootQueryNode, aliasProvider, isProjectedQuery);

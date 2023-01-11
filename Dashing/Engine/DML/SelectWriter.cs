@@ -14,8 +14,14 @@
     using Dashing.Extensions;
 
     internal partial class SelectWriter : BaseWriter, ISelectWriter {
-        public SelectWriter(ISqlDialect dialect, IConfiguration config)
+        private readonly bool inExistsContext;
+
+        private readonly IAliasProviderFactory aliasProviderFactory;
+
+        public SelectWriter(ISqlDialect dialect, IConfiguration config, bool inExistsContext = false, IAliasProviderFactory aliasProviderFactory = null)
             : base(dialect, config) {
+            this.inExistsContext = inExistsContext;
+            this.aliasProviderFactory = aliasProviderFactory;
             this.fetchTreeParser = new FetchTreeParser(config);
         }
 
@@ -31,7 +37,7 @@
             var selectProjectionParser = new SelectProjectionParser<TBase>(this.Configuration);
             selectProjectionParser.ParseExpression(projectedSelectQuery.ProjectionExpression, rootNode);
 
-            return this.InnerGenerateSql(projectedSelectQuery.BaseSelectQuery, new AutoNamingDynamicParameters(), new DefaultAliasProvider(), false, rootNode, numberCollectionFetches, new StringBuilder(), true);
+            return this.InnerGenerateSql(projectedSelectQuery.BaseSelectQuery, new AutoNamingDynamicParameters(), this.aliasProviderFactory?.GetAliasProvider() ?? new DefaultAliasProvider(), false, rootNode, numberCollectionFetches, new StringBuilder(), true);
         }
 
         public SelectWriterResult GenerateSql<T>(SelectQuery<T> selectQuery, AutoNamingDynamicParameters parameters = null, bool enforceAlias = false)
@@ -40,7 +46,7 @@
             var rootNode = this.fetchTreeParser.GetFetchTree(selectQuery, out _, out var numberCollectionFetches)
                 ?? new QueryTree(false, selectQuery.FetchAllProperties, this.Configuration.GetMap<T>());
 
-            return this.InnerGenerateSql(selectQuery, parameters ?? new AutoNamingDynamicParameters(), new DefaultAliasProvider(), enforceAlias, rootNode, numberCollectionFetches, new StringBuilder(), false);
+            return this.InnerGenerateSql(selectQuery, parameters ?? new AutoNamingDynamicParameters(), this.aliasProviderFactory?.GetAliasProvider() ?? new DefaultAliasProvider(), enforceAlias, rootNode, numberCollectionFetches, new StringBuilder(), false);
         }
 
         private SelectWriterResult InnerGenerateSql<T>(SelectQuery<T> selectQuery, AutoNamingDynamicParameters parameters, IAliasProvider aliasProvider, bool enforceAlias, QueryTree rootQueryNode, int numberCollectionFetches, StringBuilder sql, bool isProjectedQuery)
@@ -115,9 +121,14 @@
                             selectQuery.WhereClauses.RemoveAt(substitutedWhereClauseIndex);
                             selectQuery.WhereClauses.Insert(substitutedWhereClauseIndex, substitution.Value);
                             var substitutionRootNode = originalRootNode.Clone();
-                            rootQueryNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, substitutionRootNode, sql, numberCollectionFetches, parameters, new DefaultAliasProvider(), isProjectedQuery);
+                            rootQueryNode = this.GenerateNoPagingSql(selectQuery, enforceAlias, substitutionRootNode, sql, numberCollectionFetches, parameters, this.aliasProviderFactory?.GetAliasProvider() ?? new DefaultAliasProvider(), isProjectedQuery);
                             if (!substitution.IsLast) {
                                 sql.Append(" union ");
+                            }
+
+                            if (substitution.IsLast) { // put it back the way it was
+                                selectQuery.WhereClauses.RemoveAt(substitutedWhereClauseIndex);
+                                selectQuery.WhereClauses.Insert(substitutedWhereClauseIndex, substitutedWhereClause);
                             }
                         }
 
@@ -176,7 +187,7 @@
             this.Dialect.AppendQuotedTableName(tableSql, this.Configuration.GetMap<T>());
 
             if (rootQueryNode != null) {
-                tableSql.Append(" as t");
+                tableSql.Append($" as {aliasProvider.GetAlias(rootQueryNode)}");
                 if (selectQuery.IsForUpdate) {
                     this.Dialect.AppendForUpdateUsingTableHint(tableSql);
                 }

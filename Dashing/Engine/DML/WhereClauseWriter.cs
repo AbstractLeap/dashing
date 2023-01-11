@@ -5,6 +5,7 @@
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Text;
+    using System.Text.RegularExpressions;
 
     using Dapper;
 
@@ -127,6 +128,8 @@
             this.isEntityFetch = false;
             this.currentFetchStack = new List<PropertyInfo>();
         }
+
+        private static readonly Regex Union = new Regex(" union ", RegexOptions.Compiled);
 
         private ISqlElement VisitMethodCall(MethodCallExpression exp) {
             Expression memberExpr = null;
@@ -311,7 +314,7 @@
                         var columnType = columnWithAnyExpression.Type.GenericTypeArguments.First();
 
                         // we use a new whereclausewriter to generate the inner statement
-                        var innerSelectWriter = new SelectWriter(this.dialect, this.config);
+                        var innerSelectWriter = new SelectWriter(this.dialect, this.config, inExistsContext: true, new AnyAliasProviderFactory());
                         var selectQuery = Activator.CreateInstance(
                             typeof(SelectQuery<>).MakeGenericType(columnType),
                             new NonExecutingSelectQueryExecutor());
@@ -319,17 +322,8 @@
                         whereMethod.Invoke(selectQuery, new object[] { memberExpr });
                         var generateSqlMethod = innerSelectWriter.GetType().GetMethods().Single(m => m.Name == nameof(SelectWriter.GenerateSql) && m.GetGenericArguments().Length == 1).MakeGenericMethod(columnType);
                         var innerStatement = (SelectWriterResult)generateSqlMethod.Invoke(innerSelectWriter, new[] { selectQuery, this.autoNamingDynamicParameters, true });
-
-                        // remove the columns from the expression
-                        // TODO tell the select writer to not do this in the first place
-                        var fromIdx = innerStatement.Sql.IndexOf(" from ");
-                        innerStatement.Sql = "select 1" + innerStatement.Sql.Substring(fromIdx);
-
-                        // re-write the aliases to not use t_ as that's probably in the outer query
-                        // TODO speed this up
+                        
                         // TODO Support nested anys!
-                        innerStatement.Sql = innerStatement.Sql.Replace(" t ", " i ").Replace("t_", "i_").Replace("t.", "i.");
-                        //innerStatement.Sql = innerStatement.Sql.Replace("t_", "i_");
 
                         // add the column sql
                         this.EnsureRootNodeExists(); // we need everything to have an alias now
@@ -354,9 +348,9 @@
                             thisTinyBitOfSql,
                             this.config.GetMap(columnWithAnyExpression.Expression.Type).Columns[columnWithAnyExpression.Member.Name].ChildColumn
                                                                                                                                     .DbName);
-                        
-                        // finish off the sql
-                        this.sqlElements.Enqueue(new StringElement(innerStatement.Sql + thisTinyBitOfSql));
+
+                        // finish off the sql - where clause can be unioned by root disjunction thing so we need to add in to each query (and then at the end)
+                        this.sqlElements.Enqueue(new StringElement(Union.Replace(innerStatement.Sql, " "+ thisTinyBitOfSql + " union ") + thisTinyBitOfSql));
                         this.sqlElements.Enqueue(new StringElement(")"));
 
                         return null;
@@ -815,6 +809,12 @@
                 //    return this.VisitListInit((ListInitExpression)exp);
                 default:
                     throw new Exception(string.Format("Unhandled expression type: '{0}'", exp.NodeType));
+            }
+        }
+
+        class AnyAliasProviderFactory : IAliasProviderFactory {
+            public IAliasProvider GetAliasProvider() {
+                return new DefaultAliasProvider("i");
             }
         }
     }
