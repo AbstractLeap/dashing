@@ -217,6 +217,14 @@
         }
 
         [Fact]
+        public void DateTimeDoesntPreventDisjunction() {
+            Expression<Func<Comment, bool>> pred = c => c.Post.Blog.CreateDate < DateTime.UtcNow || c.Post.Title == "Foo";
+            var outerJoinDisjunctionTransformer = new OuterJoinDisjunctionTransformer(new CustomConfig());
+            var result = outerJoinDisjunctionTransformer.AttemptGetOuterJoinDisjunctions(pred);
+            Assert.True(result.ContainsOuterJoinDisjunction);
+        }
+
+        [Fact]
         public void RootForeignKeyEntityJoinDisjunctionDoesnt() {
             var author = new User {
                                       UserId = 1
