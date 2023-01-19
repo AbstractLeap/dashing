@@ -208,6 +208,15 @@
         }
 
         [Fact]
+        public void DateTimeDoesntParticipateInDisjunction()
+        {
+            Expression<Func<Comment, bool>> pred = c => c.CommentDate < DateTime.UtcNow || c.CommentDate == DateTime.UtcNow;
+            var outerJoinDisjunctionTransformer = new OuterJoinDisjunctionTransformer(new CustomConfig());
+            var result = outerJoinDisjunctionTransformer.AttemptGetOuterJoinDisjunctions(pred);
+            Assert.False(result.ContainsOuterJoinDisjunction);
+        }
+
+        [Fact]
         public void RootForeignKeyEntityJoinDisjunctionDoesnt() {
             var author = new User {
                                       UserId = 1

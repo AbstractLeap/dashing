@@ -159,6 +159,10 @@
             }
 
             if (expression is MemberExpression memberExpression) {
+                if (memberExpression.Expression == null) {
+                    return false; // this is a static property accesor
+                }
+
                 if (memberExpression.Expression.NodeType == ExpressionType.Parameter) {
                     return false; // this is a root where clause
                 }
