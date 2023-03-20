@@ -102,24 +102,24 @@
                         setter.Body.Variables.Add(new VariableDefinition(boolTypeDef)); // we need a local bool
                         setter.Body.InitLocals = true;
                         var setIl = setter.Body.Instructions;
-                        var setIntructions = new List<Instruction>();
-                        setIntructions.Add(Instruction.Create(OpCodes.Nop));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldfld, isTrackingField));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ceq));
-                        setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));
-                        var endNopInstr = Instruction.Create(OpCodes.Nop);
-                        var endLdArgInstr = setIl.First();
-                        setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endLdArgInstr));
-                        setIntructions.Add(Instruction.Create(OpCodes.Nop));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-                        setIntructions.Add(
-                            Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == $"__{columnDefinition.Name}_IsDirty")));
-                        setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
-                        setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));
-                        setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr));
+                        var setIntructions = new List<Instruction>();                                               // -
+                        setIntructions.Add(Instruction.Create(OpCodes.Nop));                                   // 
+                        setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));                               // 
+                        setIntructions.Add(Instruction.Create(OpCodes.Ldfld, isTrackingField));          // 
+                        setIntructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));                              // 
+                        setIntructions.Add(Instruction.Create(OpCodes.Ceq));                                   // if (!this.isTracking) go to end instruction (although this is written as an IF statement in C# as if (this.isTracking)
+                        setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));                               // 
+                        setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));                               // 
+                        var endNopInstr = Instruction.Create(OpCodes.Nop);                                          //
+                        var endLdArgInstr = setIl.First();                                                //
+                        setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endLdArgInstr));           // -
+                        setIntructions.Add(Instruction.Create(OpCodes.Nop));                                                                                              // -
+                        setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));                                                                                          //
+                        setIntructions.Add(                                                                                                                                    //
+                            Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == $"__{columnDefinition.Name}_IsDirty")));      // if (__field_IsDirty) go to end (as we're already dirty)
+                        setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));                                                                                          //
+                        setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));                                                                                          //
+                        setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr));                                                                        // -
                         setIntructions.Add(Instruction.Create(OpCodes.Nop));
                         setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
 
@@ -202,12 +202,85 @@
                             else {
                                 var orInstr = Instruction.Create(OpCodes.Ldarg_1);
                                 var orInstr2 = Instruction.Create(OpCodes.Ldarg_0);
-                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr));
+                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr)); // k__BackingField != null
                                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
-                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
-                                setIntructions.Add(orInstr);
-                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr2));
+                                setIntructions.Add(Instruction.Create(OpCodes.Brfalse, orInstr)); // value != null (k__BackingField == null
+
                                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                                if (fkPkType.IsValueType())
+                                {
+                                    // need to call HasValue
+                                    setIntructions.Add(
+                                        Instruction.Create(OpCodes.Ldflda, typeDef.Fields.Single(f => f.Name == columnDefinition.DbName)));
+                                    setIntructions.Add(
+                                        Instruction.Create(
+                                            OpCodes.Call,
+                                            MakeGeneric(
+                                                typeDef.Module.ImportReference(
+                                                    fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
+                                                typeDef.Module.ImportReference(fkPkType))));
+                                }
+                                else
+                                {
+                                    // check for null
+                                    setIntructions.Add(
+                                        Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == columnDefinition.DbName)));
+                                }
+
+                                setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr));
+
+                                // load the value of the Field
+                                if (fkPkType.IsValueType())
+                                {
+                                    setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                                    setIntructions.Add(
+                                        Instruction.Create(OpCodes.Ldflda, typeDef.Fields.Single(f => f.Name == columnDefinition.DbName)));
+                                    setIntructions.Add(
+                                        Instruction.Create(
+                                            OpCodes.Call,
+                                            MakeGeneric(
+                                                typeDef.Module.ImportReference(
+                                                    fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_Value")),
+                                                typeDef.Module.ImportReference(fkPkType))));
+                                }
+                                else
+                                {
+                                    setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                                    setIntructions.Add(
+                                        Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == columnDefinition.DbName)));
+                                }
+
+                                // load the value of the primary key from the value
+
+                                var pkPropDef = this.GetProperty(
+                                    typeDef.Module.ImportReference(propertyDefinition.PropertyType.Resolve())
+                                           .Resolve(),
+                                    columnDefinition.RelatedTypePrimarykeyName);
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+                                setIntructions.Add(
+                                    Instruction.Create(OpCodes.Callvirt, typeDef.Module.ImportReference(pkPropDef.GetMethod))); // value.PK
+
+                                if (pkPropDef.PropertyType.IsPrimitive) {
+                                    setIntructions.Add(Instruction.Create(OpCodes.Bne_Un, hmmInstr));
+                                }
+                                else if (string.Equals(pkPropDef.PropertyType.Name, "string", StringComparison.InvariantCultureIgnoreCase)) {
+                                    setIntructions.Add(Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(pkPropDef.PropertyType.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.IsStatic && m.Parameters.Count == 2))));
+                                    setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr));
+                                }
+                                else {
+                                    setIntructions.Add(Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(objectTypeDef.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.IsStatic && m.Parameters.Count == 2))));
+                                    setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr));
+                                }
+
+                                //setIntructions.Add(
+                                //    Instruction.Create(
+                                //        OpCodes.Newobj,
+                                //        typeDef.Module.ImportReference(propertyDefinition.PropertyType.Resolve().GetConstructors().First())))
+
+
+                                setIntructions.Add(orInstr);
+                                setIntructions.Add(Instruction.Create(OpCodes.Brtrue, orInstr2)); // value != null
+                                setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0)); 
 
                                 if (fkPkType.IsValueType()) {
                                     // need to call HasValue
@@ -220,22 +293,22 @@
                                                 typeDef.Module.ImportReference(
                                                     fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_HasValue")),
                                                 typeDef.Module.ImportReference(fkPkType))));
-                                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
+                                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr)); // FieldId.HasValue
                                 }
                                 else {
                                     // check for null
                                     setIntructions.Add(
                                         Instruction.Create(OpCodes.Ldfld, typeDef.Fields.Single(f => f.Name == columnDefinition.DbName)));
-                                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr));
+                                    setIntructions.Add(Instruction.Create(OpCodes.Brtrue, hmmInstr)); // FieldId != null
                                 }
 
                                 setIntructions.Add(orInstr2);
                             }
 
                             setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
-                            setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr2));
+                            setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr2)); // this.k__BackingField == null
                             setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
-                            setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField));
+                            setIntructions.Add(Instruction.Create(OpCodes.Ldfld, backingField)); 
                             setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
                             if (propertyDefinition.PropertyType.Name.ToLowerInvariant() == "string") {
                                 setIntructions.Add(
@@ -247,7 +320,7 @@
                                                               .Single(
                                                                   m => m.Name == "Equals" && m.Parameters.Count == 1
                                                                        && m.Parameters.First().ParameterType.Name.ToLowerInvariant()
-                                                                       == "string"))));
+                                                                       == "string")))); 
                             }
                             else {
                                 setIntructions.Add(
@@ -263,16 +336,16 @@
                             }
 
                             var nopInstr = Instruction.Create(OpCodes.Nop);
-                            setIntructions.Add(Instruction.Create(OpCodes.Br, nopInstr));
+                            setIntructions.Add(Instruction.Create(OpCodes.Br, nopInstr)); // // this.k_BackingField (== | Equals) value
                             setIntructions.Add(hmmInstr2);
                             setIntructions.Add(nopInstr);
                             var nopInstr2 = Instruction.Create(OpCodes.Nop);
-                            setIntructions.Add(Instruction.Create(OpCodes.Br, nopInstr2));
+                            setIntructions.Add(Instruction.Create(OpCodes.Br, nopInstr2)); // 
                             setIntructions.Add(hmmInstr);
                             setIntructions.Add(nopInstr2);
                             setIntructions.Add(Instruction.Create(OpCodes.Stloc_0));
                             setIntructions.Add(Instruction.Create(OpCodes.Ldloc_0));
-                            setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr));
+                            setIntructions.Add(Instruction.Create(OpCodes.Brtrue, endNopInstr)); // if line above equals jump to end, not dirty
                             setIntructions.Add(Instruction.Create(OpCodes.Nop));
                         }
 

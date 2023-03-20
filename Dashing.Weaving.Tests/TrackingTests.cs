@@ -191,5 +191,18 @@ namespace Dashing.Weaving.Tests {
             Assert.True(tingAsTracked.GetDirtyProperties().First() == "EntityWithStringPrimaryKey");
             Assert.Equal("Foo", ((EntityWithStringPrimaryKey)tingAsTracked.GetOldValue("EntityWithStringPrimaryKey")).Id);
         }
+
+        [Fact]
+        public void SetToNonNullOnNonFetchedButNotNullStringPkProperty()
+        {
+            var ting = new EntityReferencingEntityWithPrimaryKey();
+            var tingAsTracked = (ITrackedEntity)ting;
+            ting.GetType().GetField("EntityWithStringPrimaryKeyId").SetValue(ting, "Foo");
+            tingAsTracked.EnableTracking();
+            ting.EntityWithStringPrimaryKey = new EntityWithStringPrimaryKey { Id = "Bar" };
+            Assert.Single(tingAsTracked.GetDirtyProperties());
+            Assert.True(tingAsTracked.GetDirtyProperties().First() == "EntityWithStringPrimaryKey");
+            Assert.Equal("Foo", ((EntityWithStringPrimaryKey)tingAsTracked.GetOldValue("EntityWithStringPrimaryKey")).Id);
+        }
     }
 }
