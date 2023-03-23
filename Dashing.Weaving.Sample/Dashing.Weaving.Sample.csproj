@@ -12,4 +12,8 @@
     <ProjectReference Include="..\Dashing\Dashing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Domain\Tracking\Target\" />
+  </ItemGroup>
+
 </Project>

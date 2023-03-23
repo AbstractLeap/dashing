@@ -230,6 +230,10 @@
                                 setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr));
 
                                 // load the value of the Field
+                                var pkPropDef = this.GetProperty(
+                                    typeDef.Module.ImportReference(propertyDefinition.PropertyType.Resolve())
+                                           .Resolve(),
+                                    columnDefinition.RelatedTypePrimarykeyName);
                                 if (fkPkType.IsValueType())
                                 {
                                     setIntructions.Add(Instruction.Create(OpCodes.Ldarg_0));
@@ -242,6 +246,13 @@
                                                 typeDef.Module.ImportReference(
                                                     fkTypeReference.Resolve().GetMethods().Single(m => m.Name == "get_Value")),
                                                 typeDef.Module.ImportReference(fkPkType))));
+                                    if (string.Equals(pkPropDef.PropertyType.Name, "guid", StringComparison.InvariantCultureIgnoreCase)) {
+                                        // we're calling an instance method for Equals so we have to store the value and use the address
+                                        var guidPkVar = new VariableDefinition(pkPropDef.PropertyType);
+                                        setter.Body.Variables.Add(guidPkVar);
+                                        setIntructions.Add(Instruction.Create(OpCodes.Stloc, guidPkVar));
+                                        setIntructions.Add(Instruction.Create(OpCodes.Ldloca, guidPkVar));
+                                    }
                                 }
                                 else
                                 {
@@ -252,10 +263,6 @@
 
                                 // load the value of the primary key from the value
 
-                                var pkPropDef = this.GetProperty(
-                                    typeDef.Module.ImportReference(propertyDefinition.PropertyType.Resolve())
-                                           .Resolve(),
-                                    columnDefinition.RelatedTypePrimarykeyName);
                                 setIntructions.Add(Instruction.Create(OpCodes.Ldarg_1));
                                 setIntructions.Add(
                                     Instruction.Create(OpCodes.Callvirt, typeDef.Module.ImportReference(pkPropDef.GetMethod))); // value.PK
@@ -265,6 +272,9 @@
                                 }
                                 else if (string.Equals(pkPropDef.PropertyType.Name, "string", StringComparison.InvariantCultureIgnoreCase)) {
                                     setIntructions.Add(Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(pkPropDef.PropertyType.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.IsStatic && m.Parameters.Count == 2))));
+                                    setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr));
+                                } else if (string.Equals(pkPropDef.PropertyType.Name, "guid", StringComparison.InvariantCultureIgnoreCase)) {
+                                    setIntructions.Add(Instruction.Create(OpCodes.Call, typeDef.Module.ImportReference(pkPropDef.PropertyType.Resolve().GetMethods().Single(m => m.Name == "Equals" && m.IsPublic && m.Parameters.Count == 1 && m.Parameters[0].ParameterType.FullName != objectTypeDef.FullName)))); // we want the .Equals(Guid)
                                     setIntructions.Add(Instruction.Create(OpCodes.Brfalse, hmmInstr));
                                 }
                                 else {
