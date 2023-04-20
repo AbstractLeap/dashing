@@ -17,7 +17,7 @@
             this.engine = new InMemoryEngine(configuration);
         }
 
-        public ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {
+        public virtual ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {
             return new Session(this.engine,
                 new System.Lazy<IDbConnection>(() => new InMemoryDbConnection()),
                 null,
@@ -27,7 +27,7 @@
                 this.CompleteFailsSilentlyIfRejected);
         }
 
-        public ISession BeginTransactionLessSession(IDbConnection connection = null) {
+        public virtual ISession BeginTransactionLessSession(IDbConnection connection = null) {
             return new Session(this.engine,
                 new System.Lazy<IDbConnection>(() => new InMemoryDbConnection()),
                 null,
