@@ -6,9 +6,9 @@
     using Dashing.Engine.InMemory;
 
     public class InMemoryDatabase : IDatabase {
-        private readonly IConfiguration configuration;
+        protected readonly IConfiguration configuration;
 
-        private InMemoryEngine engine;
+        protected InMemoryEngine engine;
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 

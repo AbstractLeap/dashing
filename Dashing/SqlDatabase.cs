@@ -8,13 +8,13 @@ namespace Dashing {
     using Dashing.Engine.Dialects;
 
     public class SqlDatabase : IDatabase {
-        private readonly IConfiguration configuration;
+        protected readonly IConfiguration configuration;
 
-        private readonly DbProviderFactory dbProviderFactory;
+        protected readonly DbProviderFactory dbProviderFactory;
 
-        private readonly string connectionString;
+        protected readonly string connectionString;
 
-        private IEngine engine;
+        protected IEngine engine;
 
         public bool CompleteFailsSilentlyIfRejected { get; set; }
 
@@ -32,12 +32,12 @@ namespace Dashing {
 
         }
 
-        private static ISqlDialect GetDialect(string providerName, string connectionString) {
+        protected static ISqlDialect GetDialect(string providerName, string connectionString) {
             var dialectFactory = new DialectFactory();
             return dialectFactory.Create(providerName, connectionString);
         }
 
-        private static DbProviderFactory GetDbProviderFactory(string providerName) {
+        protected static DbProviderFactory GetDbProviderFactory(string providerName) {
             return DbProviderFactories.GetFactory(providerName);
         }
 #endif
@@ -62,7 +62,7 @@ namespace Dashing {
                 this.CompleteFailsSilentlyIfRejected);
         }
 
-        private IDbConnection CreateConnection() {
+        protected IDbConnection CreateConnection() {
             var connection = this.dbProviderFactory.CreateConnection();
             connection.ConnectionString = this.connectionString;
             return connection;
