@@ -6,6 +6,11 @@ namespace Dashing {
 
     public partial interface ISession {
         /// <summary>
+        ///     Completes the session, effectively calling commit on the underlying transaction
+        /// </summary>
+        Task CompleteAsync();
+
+        /// <summary>
         ///     Get an entity by primary key
         /// </summary>
         /// <typeparam name="T">The type of entity</typeparam>

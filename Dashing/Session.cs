@@ -14,7 +14,7 @@
     using Dashing.Engine;
     using Dashing.Extensions;
 
-    public sealed partial class Session : ISession, IProjectedSelectQueryExecutor {
+    public partial class Session : ISession, IProjectedSelectQueryExecutor {
         private static readonly Type TypeIEnumerable = typeof(IEnumerable);
 
         public IDapper Dapper { get; private set; }
@@ -170,7 +170,7 @@
             return this.transaction;
         }
 
-        public void Dispose() {
+        public virtual void Dispose() {
             if (this.isDisposed) {
                 return;
             }
@@ -190,7 +190,7 @@
             this.isDisposed = true;
         }
 
-        public void Complete() {
+        public virtual void Complete() {
             if (this.isComplete) {
                 throw new InvalidOperationException("Transaction is already complete");
             }
@@ -208,7 +208,7 @@
             }
         }
 
-        public void Reject() {
+        public virtual void Reject() {
             this.isRejected = true;
         }
     }

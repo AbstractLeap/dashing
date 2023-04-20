@@ -42,7 +42,7 @@ namespace Dashing {
         }
 #endif
 
-        public ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {
+        public virtual ISession BeginSession(IDbConnection connection = null, IDbTransaction transaction = null) {
             return new Session(this.engine, 
                 new Lazy<IDbConnection>(() => connection ?? this.CreateConnection()),
                 transaction,
@@ -52,7 +52,7 @@ namespace Dashing {
                 this.CompleteFailsSilentlyIfRejected);
         }
 
-        public ISession BeginTransactionLessSession(IDbConnection connection = null) {
+        public virtual ISession BeginTransactionLessSession(IDbConnection connection = null) {
             return new Session(this.engine,
                 new Lazy<IDbConnection>(() => connection ?? this.CreateConnection()),
                 null,

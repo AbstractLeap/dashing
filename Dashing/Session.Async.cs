@@ -9,7 +9,12 @@
 
     using Dashing.Extensions;
 
-    public sealed partial class Session {
+    public partial class Session {
+        public virtual Task CompleteAsync() {
+            this.Complete(); 
+            return Task.CompletedTask;
+        }
+
         public async Task<T> GetAsync<T, TPrimaryKey>(TPrimaryKey id)
             where T : class, new() {
             return await this.engine.QueryAsync<T, TPrimaryKey>(await this.MaybeOpenConnectionAsync(), await this.GetTransactionAsync(), id);

@@ -8,7 +8,7 @@
     using Dashing.CodeGeneration;
     using Dashing.Configuration;
 
-    public sealed partial class Session {
+    public partial class Session {
         /// <summary>
         ///     Get an entity by Int64 primary key
         /// </summary>

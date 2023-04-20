@@ -8,7 +8,7 @@
 
     using Dashing.Extensions;
 
-    public sealed partial class Session {
+    public partial class Session {
 
         public T Get<T, TPrimaryKey>(TPrimaryKey id)
             where T : class, new() {
