@@ -11,7 +11,7 @@
 
     public partial class Session {
         public virtual Task CompleteAsync() {
-            this.Complete(); 
+            this.InnerComplete(); 
             return Task.CompletedTask;
         }
 

@@ -191,6 +191,10 @@
         }
 
         public virtual void Complete() {
+            this.InnerComplete();
+        }
+
+        private void InnerComplete() {
             if (this.isComplete) {
                 throw new InvalidOperationException("Transaction is already complete");
             }
