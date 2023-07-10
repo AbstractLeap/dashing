@@ -449,9 +449,9 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
-        public abstract void AppendForUpdateUsingTableHint(StringBuilder tableSql);
+        public abstract void AppendForUpdateUsingTableHint(StringBuilder tableSql, bool skipLocked);
 
-        public abstract void AppendForUpdateOnQueryFinish(StringBuilder sql);
+        public abstract void AppendForUpdateOnQueryFinish(StringBuilder sql, bool skipLocked);
 
         public virtual void AppendCreateTableSuffix(StringBuilder sql, IMap map) {
             

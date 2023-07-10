@@ -66,7 +66,7 @@
             }
 
             if (selectQuery.IsForUpdate) {
-                this.Dialect.AppendForUpdateOnQueryFinish(innerSql);
+                this.Dialect.AppendForUpdateOnQueryFinish(innerSql, selectQuery.SkipLocked);
             }
 
             // now construct the outer query
@@ -98,7 +98,7 @@
             innerTableSql.Append(" as t");
 
             if (selectQuery.IsForUpdate) {
-                this.Dialect.AppendForUpdateUsingTableHint(innerTableSql);
+                this.Dialect.AppendForUpdateUsingTableHint(innerTableSql, selectQuery.SkipLocked);
             }
 
             // go through the tree and generate the sql

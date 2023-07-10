@@ -61,7 +61,7 @@
             }
 
             if (selectQuery.IsForUpdate) {
-                this.Dialect.AppendForUpdateOnQueryFinish(sql);
+                this.Dialect.AppendForUpdateOnQueryFinish(sql, selectQuery.SkipLocked);
             }
 
             return rootQueryNode;

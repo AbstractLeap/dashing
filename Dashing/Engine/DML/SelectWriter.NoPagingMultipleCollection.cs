@@ -83,7 +83,7 @@
                 }
 
                 if (selectQuery.IsForUpdate) {
-                    this.Dialect.AppendForUpdateOnQueryFinish(sql);
+                    this.Dialect.AppendForUpdateOnQueryFinish(sql, selectQuery.SkipLocked);
                 }
 
                 if (i < numQueries - 1) {
@@ -104,7 +104,7 @@
                 subQuery.Append(" as t");
 
                 if (selectQuery.IsForUpdate) {
-                    this.Dialect.AppendForUpdateUsingTableHint(subQuery);
+                    this.Dialect.AppendForUpdateUsingTableHint(subQuery, selectQuery.SkipLocked);
                 }
             }
 

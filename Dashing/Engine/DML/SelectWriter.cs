@@ -189,7 +189,7 @@
             if (rootQueryNode != null) {
                 tableSql.Append($" as {aliasProvider.GetAlias(rootQueryNode)}");
                 if (selectQuery.IsForUpdate) {
-                    this.Dialect.AppendForUpdateUsingTableHint(tableSql);
+                    this.Dialect.AppendForUpdateUsingTableHint(tableSql, selectQuery.SkipLocked);
                 }
 
                 if (rootQueryNode.Children.Any()) {
@@ -201,7 +201,7 @@
             }
             else {
                 if (selectQuery.IsForUpdate) {
-                    this.Dialect.AppendForUpdateUsingTableHint(tableSql);
+                    this.Dialect.AppendForUpdateUsingTableHint(tableSql, selectQuery.SkipLocked);
                 }
             }
         }

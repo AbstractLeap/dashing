@@ -250,11 +250,16 @@ namespace Dashing.Engine.Dialects {
                .Append(this.EndQuoteCharacter);
         }
 
-        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
-            tableSql.Append(" with (rowlock, xlock)");
+        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql, bool skipLocked) {
+            tableSql.Append(" with (rowlock, xlock");
+            if (skipLocked) {
+                tableSql.Append(", readpast");
+            }   
+            
+            tableSql.Append(")");
         }
 
-        public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
+        public override void AppendForUpdateOnQueryFinish(StringBuilder sql, bool skipLocked) {
         }
 
         public override string OnBeforeDropColumn(IColumn column) {

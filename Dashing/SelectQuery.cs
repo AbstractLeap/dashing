@@ -39,6 +39,8 @@ namespace Dashing {
 
         public bool IsForUpdate { get; private set; }
 
+        public bool SkipLocked { get; private set; }
+
         public bool FetchAllProperties { get; private set; }
 
         public bool HasFetches() {
@@ -77,8 +79,9 @@ namespace Dashing {
             return this;
         }
 
-        public ISelectQuery<T> ForUpdate() {
+        public ISelectQuery<T> ForUpdate(bool skipLocked = false) {
             this.IsForUpdate = true;
+            this.SkipLocked = skipLocked;
             return this;
         }
 

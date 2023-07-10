@@ -67,11 +67,11 @@ namespace Dashing.Engine.Dialects {
             throw new InvalidOperationException("There is no Ansi-SQL way of dropping an index.");
         }
 
-        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
+        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql, bool skipLocked) {
             throw new NotImplementedException();
         }
 
-        public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
+        public override void AppendForUpdateOnQueryFinish(StringBuilder sql, bool skipLocked) {
             throw new NotImplementedException();
         }
 

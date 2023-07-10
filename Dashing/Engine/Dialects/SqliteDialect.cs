@@ -53,12 +53,12 @@
             throw new System.NotImplementedException();
         }
 
-        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
+        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql, bool skipLocked) {
             // sqlite doesn't support FOR UPDATE type locks
             throw new NotSupportedException();
         }
 
-        public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
+        public override void AppendForUpdateOnQueryFinish(StringBuilder sql, bool skipLocked) {
             // sqlite doesn't support FOR UPDATE type locks
             throw new NotSupportedException();
         }

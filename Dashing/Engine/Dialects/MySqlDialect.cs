@@ -55,11 +55,14 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
-        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
+        public override void AppendForUpdateUsingTableHint(StringBuilder tableSql, bool skipLocked) {
         }
 
-        public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
+        public override void AppendForUpdateOnQueryFinish(StringBuilder sql, bool skipLocked) {
             sql.Append(" for update");
+            if (skipLocked) {
+                sql.Append(" skip locked");
+            }
         }
 
         protected override void AppendDefault(StringBuilder sql, IColumn column) {

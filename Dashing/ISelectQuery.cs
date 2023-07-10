@@ -74,7 +74,7 @@ namespace Dashing {
         /// <returns>
         ///     The <see cref="SelectQuery{T}" />.
         /// </returns>
-        ISelectQuery<T> ForUpdate();
+        ISelectQuery<T> ForUpdate(bool skipLocked = false);
 
         /// <summary>
         ///     The skip.

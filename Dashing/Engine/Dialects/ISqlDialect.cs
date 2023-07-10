@@ -84,13 +84,13 @@ namespace Dashing.Engine.Dialects {
         ///     Applies "for update" sql using table hints i.e. like SQL Server
         /// </summary>
         /// <param name="tableSql"></param>
-        void AppendForUpdateUsingTableHint(StringBuilder tableSql);
+        void AppendForUpdateUsingTableHint(StringBuilder tableSql, bool skipLocked);
 
         /// <summary>
         ///     Applies "for update" sql using a query modifier at the end of the query i.e. like MySql
         /// </summary>
         /// <param name="sql"></param>
-        void AppendForUpdateOnQueryFinish(StringBuilder sql);
+        void AppendForUpdateOnQueryFinish(StringBuilder sql, bool skipLocked);
 
         /// <summary>
         ///  Enables the ability to apply some text to the end of a create table statement

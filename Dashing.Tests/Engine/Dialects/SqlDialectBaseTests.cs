@@ -132,11 +132,11 @@
                 throw new NotImplementedException();
             }
 
-            public override void AppendForUpdateUsingTableHint(StringBuilder tableSql) {
+            public override void AppendForUpdateUsingTableHint(StringBuilder tableSql, bool skipLocked) {
                 throw new NotImplementedException();
             }
 
-            public override void AppendForUpdateOnQueryFinish(StringBuilder sql) {
+            public override void AppendForUpdateOnQueryFinish(StringBuilder sql, bool skipLocked) {
                 throw new NotImplementedException();
             }
 
