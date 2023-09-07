@@ -153,9 +153,12 @@
         public int InsertOrUpdate<T>(T entity, Expression<Func<T, bool>> equalityComparer = null)
             where T : class, new() {
             if (equalityComparer == null) {
-                // if the equality comparer is null then they should be passing us a valid PK value in the entity so call update
-                var updated = this.Save(entity);
-                return updated == 0 ? this.Insert(entity) : updated;
+                // if the entity has previously come from the DB tracking will be enabled
+                if (((ITrackedEntity)entity).IsTrackingEnabled()) {
+                    return this.Save(entity);
+                }
+
+                return this.Insert(entity);
             }
 
             // we support different equalityComparers so we can cope with e.g. username 
@@ -317,9 +320,12 @@
         public async Task<int> InsertOrUpdateAsync<T>(T entity, Expression<Func<T, bool>> equalityComparer = null)
             where T : class, new() {
             if (equalityComparer == null) {
-                // if the equality comparer is null then they should be passing us a valid PK value in the entity so call update
-                var updated = await this.SaveAsync(entity);
-                return updated == 0 ? await this.InsertAsync(entity) : updated;
+                // if the entity has previously come from the DB tracking will be enabled
+                if (((ITrackedEntity)entity).IsTrackingEnabled()) {
+                    return await this.SaveAsync(entity);
+                }
+
+                return await this.InsertAsync(entity);
             }
 
             // we support different equalityComparers so we can cope with e.g. username 
