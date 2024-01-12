@@ -13,19 +13,13 @@
 
     public class FetchCloner {
         private readonly IConfiguration configuration;
-
-        private readonly FetchTreeParser fetchTreeParser;
-
+        
         public FetchCloner(IConfiguration configuration) {
             this.configuration = configuration;
-            this.fetchTreeParser = new FetchTreeParser(configuration);
         }
 
-        public T Clone<T>(SelectQuery<T> query, T entity) where T : class, new() {
+        public T Clone<T>(QueryTree fetchTree, T entity) where T : class, new() {
             var result = new T();
-            int aliasCounter;
-            int numberCollectionFetches;
-            var fetchTree = this.fetchTreeParser.GetFetchTree(query, out aliasCounter, out numberCollectionFetches);
             this.Clone(entity, result, fetchTree);
             return result;
         }

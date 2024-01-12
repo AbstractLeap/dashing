@@ -2,6 +2,7 @@
     using System.Collections.Generic;
 
     using Dashing.Engine;
+    using Dashing.Engine.DML;
     using Dashing.Engine.InMemory;
     using Dashing.Tests.Engine.InMemory.TestDomain;
 
@@ -10,10 +11,14 @@
     public class FetchClonerTests {
         [Fact]
         public void NoFetchReturnsEntityWithOnlyPrimaryKey() {
-            var cloner = new FetchCloner(new TestConfiguration());
+            var configuration = new TestConfiguration();
+            var cloner = new FetchCloner(configuration);
             var query = (new SelectQuery<Post>(new NonExecutingSelectQueryExecutor()));
+            var fetchTreeParser = new FetchTreeParser(configuration);
+            var fetchTree = fetchTreeParser.GetFetchTree(query, out _, out _);
+
             var post = new Post { PostId = 1, Title = "Bar", Blog = new Blog { BlogId = 2, Description = "Foo" } };
-            var clone = cloner.Clone(query, post);
+            var clone = cloner.Clone(fetchTree, post);
 
             Assert.False(ReferenceEquals(post, clone));
             Assert.False(ReferenceEquals(post.Blog, clone.Blog));
@@ -25,11 +30,16 @@
         }
 
         [Fact]
-        public void FetchedEntityIsReturned() {
-            var cloner = new FetchCloner(new TestConfiguration());
+        public void FetchedEntityIsReturned()
+        {
+            var configuration = new TestConfiguration();
+            var cloner = new FetchCloner(configuration);
             var query = new SelectQuery<Post>(new NonExecutingSelectQueryExecutor()).Fetch(p => p.Blog) as SelectQuery<Post>;
+            var fetchTreeParser = new FetchTreeParser(configuration);
+            var fetchTree = fetchTreeParser.GetFetchTree(query, out _, out _);
+
             var post = new Post { PostId = 1, Title = "Bar", Blog = new Blog { BlogId = 2, Description = "Foo" } };
-            var clone = cloner.Clone(query, post);
+            var clone = cloner.Clone(fetchTree, post);
 
             Assert.False(ReferenceEquals(post, clone));
             Assert.False(ReferenceEquals(post.Blog, clone.Blog));
@@ -42,15 +52,20 @@
         }
 
         [Fact]
-        public void ParentOfParentNotReturnedIfNotFetched() {
-            var cloner = new FetchCloner(new TestConfiguration());
+        public void ParentOfParentNotReturnedIfNotFetched()
+        {
+            var configuration = new TestConfiguration();
+            var cloner = new FetchCloner(configuration);
             var query = new SelectQuery<Post>(new NonExecutingSelectQueryExecutor()).Fetch(p => p.Blog) as SelectQuery<Post>;
+            var fetchTreeParser = new FetchTreeParser(configuration);
+            var fetchTree = fetchTreeParser.GetFetchTree(query, out _, out _);
+
             var post = new Post {
                                     PostId = 1,
                                     Title = "Bar",
                                     Blog = new Blog { BlogId = 2, Description = "Foo", Owner = new User { UserId = 4, Username = "joe" } }
                                 };
-            var clone = cloner.Clone(query, post);
+            var clone = cloner.Clone(fetchTree, post);
 
             Assert.False(ReferenceEquals(post, clone));
             Assert.False(ReferenceEquals(post.Blog, clone.Blog));
@@ -66,14 +81,19 @@
         }
 
         [Fact]
-        public void FetchedCollectionWorks() {
-            var cloner = new FetchCloner(new TestConfiguration());
+        public void FetchedCollectionWorks()
+        {
+            var configuration = new TestConfiguration();
+            var cloner = new FetchCloner(configuration);
             var query = new SelectQuery<Blog>(new NonExecutingSelectQueryExecutor()).Fetch(p => p.Posts) as SelectQuery<Blog>;
+            var fetchTreeParser = new FetchTreeParser(configuration);
+            var fetchTree = fetchTreeParser.GetFetchTree(query, out _, out _);
+
             var blog = new Blog {
                                     BlogId = 1,
                                     Posts = new List<Post> { new Post { PostId = 2, Title = "Foo" }, new Post { PostId = 3, Title = "Boo" } }
                                 };
-            var clone = cloner.Clone(query, blog);
+            var clone = cloner.Clone(fetchTree, blog);
 
             Assert.False(ReferenceEquals(blog, clone));
             Assert.False(ReferenceEquals(blog.Posts, clone.Posts));
@@ -84,10 +104,15 @@
         }
 
         [Fact]
-        public void FetchedCollectionThenFetchWorks() {
-            var cloner = new FetchCloner(new TestConfiguration());
+        public void FetchedCollectionThenFetchWorks()
+        {
+            var configuration = new TestConfiguration();
+            var cloner = new FetchCloner(configuration);
             var query =
                 new SelectQuery<Blog>(new NonExecutingSelectQueryExecutor()).FetchMany(p => p.Posts).ThenFetch(p => p.Author) as SelectQuery<Blog>;
+            var fetchTreeParser = new FetchTreeParser(configuration);
+            var fetchTree = fetchTreeParser.GetFetchTree(query, out _, out _);
+
             var blog = new Blog {
                                     BlogId = 1,
                                     Posts =
@@ -96,7 +121,7 @@
                                                            new Post { PostId = 3, Title = "Boo", Author = new User { UserId = 7, Username = "mark" } }
                                                        }
                                 };
-            var clone = cloner.Clone(query, blog);
+            var clone = cloner.Clone(fetchTree, blog);
 
             Assert.False(ReferenceEquals(blog, clone));
             Assert.False(ReferenceEquals(blog.Posts, clone.Posts));
@@ -111,9 +136,14 @@
         }
 
         [Fact]
-        public void FetchedCollectionNoThenFetchWorks() {
-            var cloner = new FetchCloner(new TestConfiguration());
+        public void FetchedCollectionNoThenFetchWorks()
+        {
+            var configuration = new TestConfiguration();
+            var cloner = new FetchCloner(configuration);
             var query = new SelectQuery<Blog>(new NonExecutingSelectQueryExecutor()).Fetch(p => p.Posts) as SelectQuery<Blog>;
+            var fetchTreeParser = new FetchTreeParser(configuration);
+            var fetchTree = fetchTreeParser.GetFetchTree(query, out _, out _);
+
             var blog = new Blog {
                                     BlogId = 1,
                                     Posts =
@@ -122,7 +152,7 @@
                                                            new Post { PostId = 3, Title = "Boo", Author = new User { UserId = 7, Username = "mark" } }
                                                        }
                                 };
-            var clone = cloner.Clone(query, blog);
+            var clone = cloner.Clone(fetchTree, blog);
 
             Assert.False(ReferenceEquals(blog, clone));
             Assert.False(ReferenceEquals(blog.Posts, clone.Posts));

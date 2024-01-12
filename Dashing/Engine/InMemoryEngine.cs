@@ -47,18 +47,31 @@
         }
 
         public IEnumerable<T> Query<T>(IDbConnection connection, IDbTransaction transaction, SelectQuery<T> query) where T : class, new() {
+            return this.Query<T, T>(connection, transaction, query, x => x);
+        }
+
+        private IEnumerable<TResult> Query<TBase, TResult>(IDbConnection connection, IDbTransaction transaction, SelectQuery<TBase> query, Func<TBase, TResult> resultMapper, ProjectedSelectQuery<TBase, TResult> projectionQuery = null) where TBase : class, new() {
             this.AssertConfigured();
-            var table = this.tables[typeof(T)];
+            var table = this.tables[typeof(TBase)];
             var whereClauseNullCheckRewriter = new WhereClauseNullCheckRewriter();
             var whereClauseOpEqualityRewriter = new WhereClauseOpEqualityRewriter();
             var fetchCloner = new FetchCloner(this.Configuration);
             var enumerable =
-                typeof(InMemoryTable<,>).MakeGenericType(typeof(T), this.Configuration.GetMap(typeof(T)).PrimaryKey.Type)
+                typeof(InMemoryTable<,>).MakeGenericType(typeof(TBase), this.Configuration.GetMap(typeof(TBase)).PrimaryKey.Type)
                                         .GetMethod("Query")
-                                        .Invoke(table, new object[0]) as IEnumerable<T>;
+                                        .Invoke(table, new object[0]) as IEnumerable<TBase>;
 
             var fetchParser = new FetchTreeParser(this.Configuration);
             var fetchTree = fetchParser.GetFetchTree(query, out _, out _);
+
+            if (projectionQuery != null) {
+                if (fetchTree == null) {
+                    fetchTree = new QueryTree(false, query.FetchAllProperties, this.Configuration.GetMap<TBase>());
+                }
+
+                var selectProjectionParser = new SelectProjectionParser<TBase>(this.Configuration);
+                selectProjectionParser.ParseExpression(projectionQuery.ProjectionExpression, fetchTree);
+            }
 
             // we may have to query across non-fetched stuff
             var baseWriter = new BaseWriter(new SqlServer2012Dialect(), this.configuration);
@@ -79,15 +92,18 @@
             foreach (var orderClause in query.OrderClauses) {
                 var expr = ((LambdaExpression)orderClause.Expression).Compile();
                 var funcName = firstOrderClause
-                                   ? (orderClause.Direction == ListSortDirection.Ascending ? "OrderBy" : "OrderByDescending")
-                                   : (orderClause.Direction == ListSortDirection.Ascending ? "ThenBy" : "ThenByDescending");
-                var orderBy =
-                    typeof(Enumerable).GetMethods()
-                                      .Single(
-                                          m =>
-                                          m.GetParameters().Count() == 2
-                                          && m.Name == funcName).MakeGenericMethod(typeof(T), ((LambdaExpression)orderClause.Expression).ReturnType);
-                enumerable = (IEnumerable<T>)orderBy.Invoke(null, new object[] {enumerable, expr });
+                                   ? (orderClause.Direction == ListSortDirection.Ascending
+                                          ? "OrderBy"
+                                          : "OrderByDescending")
+                                   : (orderClause.Direction == ListSortDirection.Ascending
+                                          ? "ThenBy"
+                                          : "ThenByDescending");
+                var orderBy = typeof(Enumerable).GetMethods()
+                                                .Single(
+                                                    m => m.GetParameters()
+                                                          .Count() == 2 && m.Name == funcName)
+                                                .MakeGenericMethod(typeof(TBase), ((LambdaExpression)orderClause.Expression).ReturnType);
+                enumerable = (IEnumerable<TBase>)orderBy.Invoke(null, new object[] { enumerable, expr });
                 firstOrderClause = false;
             }
 
@@ -100,7 +116,7 @@
             }
 
             foreach (var entity in enumerable) {
-                yield return fetchCloner.Clone(query, entity);
+                yield return resultMapper(fetchCloner.Clone<TBase>(fetchTree, entity));
             }
         }
 
@@ -121,7 +137,7 @@
 
         public IEnumerable<TProjection> Query<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)
             where TBase : class, new() {
-            return this.Query(connection, transaction, query.BaseSelectQuery).Select(query.ProjectionExpression.Compile());
+            return this.Query(connection, transaction, query.BaseSelectQuery, query.ProjectionExpression.Compile(), query);
         }
 
         public Page<TProjection> QueryPaged<TBase, TProjection>(IDbConnection connection, IDbTransaction transaction, ProjectedSelectQuery<TBase, TProjection> query)

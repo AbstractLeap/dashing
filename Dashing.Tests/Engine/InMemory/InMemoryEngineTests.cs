@@ -25,6 +25,20 @@
         }
 
         [Fact]
+        public void ProjectionAcrossRelationshipsWorks() {
+            var session = this.GetSession();
+            var comment = session.Query<Comment>()
+                                 .Select(
+                                     c => new {
+                                                  c.Post.Author.Username,
+                                                  c.CommentId
+                                              })
+                                 .First();
+            Assert.Equal("Bob", comment.Username);
+            Assert.Equal(1, comment.CommentId);
+        }
+
+        [Fact]
         public void CollectionsWork() {
             var session = this.GetSession();
             var posts = session.Query<Post>().FetchMany(p => p.Comments).ThenFetch(c => c.User).ToArray();
