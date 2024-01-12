@@ -122,9 +122,6 @@
                     memberExpr = node.Arguments[0] as MemberExpression;
                     valuesExpr = node.Arguments[1];
                     break;
-
-                default:
-                    throw new NotImplementedException();
             }
 
             this.ResetVariables();
