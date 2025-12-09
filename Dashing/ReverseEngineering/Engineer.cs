@@ -163,10 +163,10 @@
             map.ForeignKeys = foreignKeys;
 
             // try to find indexes
-            var indexes = new List<Index>();
+            var indexes = new List<Dashing.Configuration.Index>();
             foreach (var index in schema.GetIndexesForTable(map.Table).GroupBy(i => i.Name)) {
                 indexes.Add(
-                    new Index(
+                    new Dashing.Configuration.Index(
                         map,
                         index.OrderBy(i => i.ColumnId).Select(
                             c =>

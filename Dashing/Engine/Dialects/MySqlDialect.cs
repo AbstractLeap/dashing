@@ -155,7 +155,7 @@ namespace Dashing.Engine.Dialects {
             return name;
         }
 
-        public override string GetIndexName(Index index) {
+        public override string GetIndexName(Dashing.Configuration.Index index) {
             var name = base.GetIndexName(index);
             if (name.Length > 64) {
                 return name.Substring(0, 64);

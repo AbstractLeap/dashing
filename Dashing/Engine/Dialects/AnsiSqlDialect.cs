@@ -63,7 +63,7 @@ namespace Dashing.Engine.Dialects {
             throw new InvalidOperationException("There is no Ansi-SQL way of dropping a foreign key.");
         }
 
-        public override string DropIndex(Index index) {
+        public override string DropIndex(Dashing.Configuration.Index index) {
             throw new InvalidOperationException("There is no Ansi-SQL way of dropping an index.");
         }
 

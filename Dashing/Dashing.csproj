@@ -12,7 +12,7 @@
     <Copyright>© Polylytics Limited, 2018</Copyright>
     <Language>en-GB</Language>
     <PackageTags>dashing dapper orm sql mini-orm</PackageTags>
-    <TargetFrameworks>net46;netstandard1.5</TargetFrameworks>
+    <TargetFrameworks>net46;netstandard2.1</TargetFrameworks>
     <AssemblyName>Dashing</AssemblyName>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
@@ -27,7 +27,7 @@
     <None Include="..\dashing-icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
     <DefineConstants>$(DefineConstants);COREFX</DefineConstants>
   </PropertyGroup>
 

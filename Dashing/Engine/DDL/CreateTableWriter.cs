@@ -63,7 +63,7 @@ namespace Dashing.Engine.DDL {
             return this.CreateIndexes(map.Indexes);
         }
 
-        public IEnumerable<string> CreateIndexes(IEnumerable<Index> indexes) {
+        public IEnumerable<string> CreateIndexes(IEnumerable<Dashing.Configuration.Index> indexes) {
             foreach (var index in indexes) {
                 yield return this.dialect.CreateIndex(index);
             }

@@ -181,7 +181,7 @@ namespace Dashing.Engine.Dialects {
             return sql.ToString();
         }
 
-        public override string DropIndex(Index index) {
+        public override string DropIndex(Dashing.Configuration.Index index) {
             var sql = new StringBuilder("drop index ");
             this.AppendQuotedName(sql, this.GetIndexName(index));
             sql.Append(" on ");
@@ -206,7 +206,7 @@ namespace Dashing.Engine.Dialects {
                 + " order by pagetable.RowNum");
         }
 
-        public override string CreateIndex(Index index) {
+        public override string CreateIndex(Dashing.Configuration.Index index) {
             var statement = base.CreateIndex(index);
             if (index.IsUnique && index.Columns.Any(c => c.IsNullable)) {
                 var whereClause = new StringBuilder();

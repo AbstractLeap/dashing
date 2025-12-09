@@ -5,11 +5,11 @@
     },
     "TestExtractConfigs": {
       "commandName": "Project",
-      "commandLineArgs": "extractconfigs -p \"C:\\Repos\\dashing\\Dashing.IntegrationTests\\bin\\Debug\\net46\\Dashing.IntegrationTests.dll\" -t \"Dashing.IntegrationTests.TestDomain.Versioned.VersionedConfiguration\""
+      "commandLineArgs": "extractconfigs -p \"C:\\Users\\MarkJerzykowski\\source\\repos\\ConsoleApp3\\ConsoleApp3\\bin\\Debug\\net9.0\\ConsoleApp3.dll\" -t \"DashingConfiguration\""
     },
     "TestWeave": {
       "commandName": "Project",
-      "commandLineArgs": "weave -p \"C:\\Users\\markj_000\\Documents\\Visual Studio 2017\\Projects\\ConsoleApp3\\ConsoleApp3\\bin\\Debug\\netcoreapp2.0\\ConsoleApp3.dll\" -t \"ConsoleApp3.Config\""
+      "commandLineArgs": "weave -p \"C:\\Users\\MarkJerzykowski\\source\\repos\\ConsoleApp3\\ConsoleApp3\\bin\\Debug\\net9.0\\ConsoleApp3.dll\" -t \"ConsoleApp3.Domain.DashingConfiguration\""
     },
     "weave versioned": {
       "commandName": "Project",

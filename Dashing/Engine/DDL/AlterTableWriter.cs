@@ -58,7 +58,7 @@
             return this.dialect.DropForeignKey(foreignKey);
         }
 
-        public string DropIndex(Index index) {
+        public string DropIndex(Dashing.Configuration.Index index) {
             return this.dialect.DropIndex(index);
         }
 

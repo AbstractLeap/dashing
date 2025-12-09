@@ -392,7 +392,7 @@ namespace Dashing.Engine.Dialects {
             return name;
         }
 
-        public virtual string GetIndexName(Index index) {
+        public virtual string GetIndexName(Dashing.Configuration.Index index) {
             var name = index.Name;
             if (string.IsNullOrWhiteSpace(name)) {
                 name = "idx_" + index.Map.Type.Name + "_" + string.Join("_", index.Columns.Select(c => c.Name));
@@ -411,9 +411,9 @@ namespace Dashing.Engine.Dialects {
 
         public abstract string DropForeignKey(ForeignKey foreignKey);
 
-        public abstract string DropIndex(Index index);
+        public abstract string DropIndex(Dashing.Configuration.Index index);
 
-        public virtual string CreateIndex(Index index) {
+        public virtual string CreateIndex(Dashing.Configuration.Index index) {
             var sql = new StringBuilder(128);
             sql.Append("create ");
             if (index.IsUnique) {
