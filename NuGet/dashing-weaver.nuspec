@@ -15,9 +15,9 @@
 	<tags>dashing dapper orm sql mini-orm</tags>
   </metadata>
   <files>
-    <file src="_._" target="lib/netstandard1.5/" />
+    <file src="_._" target="lib/netstandard2.1/" />
     <file src="_._" target="lib/net46/" />
-    <file src="Dashing.Weaver.targets" target="build/netstandard1.5/Dashing.Weaver.targets" />
+    <file src="Dashing.Weaver.targets" target="build/netstandard2.1/Dashing.Weaver.targets" />
     <file src="Dashing.Weaver.targets" target="build/net46/Dashing.Weaver.targets" />
 
     <file src="Weave.targets" target="tools/" />
