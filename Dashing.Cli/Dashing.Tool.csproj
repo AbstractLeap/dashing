@@ -17,7 +17,7 @@
     <Language>en-GB</Language>
     <Tags>dashing dapper orm sql mini-orm</Tags>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <PackAsTool>true</PackAsTool>
     <AssemblyName>dotnet-dashing</AssemblyName>
     <ToolCommandName>dashing</ToolCommandName>

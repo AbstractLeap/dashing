@@ -4,6 +4,8 @@
     <WeaveFileExe Condition="$(TargetFramework.StartsWith('net5'))">dotnet "$(MSBuildThisFileDirectory)/net5.0/dashing-weaver.dll"</WeaveFileExe>
     <WeaveFileExe Condition="$(TargetFramework.StartsWith('net6'))">dotnet "$(MSBuildThisFileDirectory)/net6.0/dashing-weaver.dll"</WeaveFileExe>
     <WeaveFileExe Condition="$(TargetFramework.StartsWith('net7'))">dotnet "$(MSBuildThisFileDirectory)/net7.0/dashing-weaver.dll"</WeaveFileExe>
+    <WeaveFileExe Condition="$(TargetFramework.StartsWith('net8'))">dotnet "$(MSBuildThisFileDirectory)/net8.0/dashing-weaver.dll"</WeaveFileExe>
+    <WeaveFileExe Condition="$(TargetFramework.StartsWith('net9'))">dotnet "$(MSBuildThisFileDirectory)/net9.0/dashing-weaver.dll"</WeaveFileExe>
   </PropertyGroup>
   
   <Target Condition="$(WeaveArguments) != ''" Name="Weave" AfterTargets="AfterBuild">
