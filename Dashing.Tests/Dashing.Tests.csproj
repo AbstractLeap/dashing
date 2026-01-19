@@ -1,10 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net46;net9.0</TargetFrameworks>
+    <TargetFrameworks>net48;net9.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.0" />
     <PackageReference Include="Moq" Version="4.8.2" />
@@ -21,7 +22,7 @@
   
   <Target Name="Weave" AfterTargets="AfterBuild">
     <PropertyGroup>
-	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net46/dashing-weaver.exe</Weave>
+	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net48/dashing-weaver.exe</Weave>
 	  <Weave Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">dotnet "$(MSBuildThisFileDirectory)../Dashing.Weaver/bin/$(Configuration)/net9.0/dashing-weaver.dll"</Weave>
 	</PropertyGroup>
 	<Exec Command="$(Weave) weave -p &quot;$(MSBuildThisFileDirectory)$(OutputPath)$(AssemblyName)$(TargetExt)&quot; -t &quot;Dashing.Tools.Tests.CustomConfig&quot; -t &quot;Dashing.Tools.Tests.ClassWithConstructorConfig&quot; -t &quot;Dashing.Tests.Engine.DapperMapperGeneration.CollectionTests+CustomConfig&quot; -t &quot;Dashing.Tests.Engine.InMemory.TestConfiguration&quot;" />

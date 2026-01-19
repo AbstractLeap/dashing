@@ -13,7 +13,7 @@
     },
     "weave versioned": {
       "commandName": "Project",
-      "commandLineArgs": "weave -p \"C:\\Repos\\dashing\\Dashing.IntegrationTests\\bin\\Debug\\net46\\Dashing.IntegrationTests.dll\" -t \"Dashing.IntegrationTests.TestDomain.Versioned.VersionedConfiguration\""
+      "commandLineArgs": "weave -p \"C:\\Repos\\dashing\\Dashing.IntegrationTests\\bin\\Debug\\net48\\Dashing.IntegrationTests.dll\" -t \"Dashing.IntegrationTests.TestDomain.Versioned.VersionedConfiguration\""
     }
   }
 }

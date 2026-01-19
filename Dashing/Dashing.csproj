@@ -12,7 +12,7 @@
     <Copyright>© Polylytics Limited, 2018</Copyright>
     <Language>en-GB</Language>
     <PackageTags>dashing dapper orm sql mini-orm</PackageTags>
-    <TargetFrameworks>net46;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net48;netstandard2.1</TargetFrameworks>
     <AssemblyName>Dashing</AssemblyName>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
@@ -20,11 +20,11 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\dashing-icon.png" Pack="true" PackagePath="\"/>
+    <None Include="..\dashing-icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
@@ -32,10 +32,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.60.6" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net48' ">
     <Reference Include="System.Data.Linq" />
   </ItemGroup>
 

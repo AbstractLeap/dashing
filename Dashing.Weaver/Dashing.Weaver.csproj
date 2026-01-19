@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net46;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net48;net8.0;net9.0</TargetFrameworks>
     <AssemblyName>dashing-weaver</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
     <NetCore Condition="$(TargetFramework.StartsWith('net5')) OR $(TargetFramework.StartsWith('net6')) OR $(TargetFramework.StartsWith('net7')) OR $(TargetFramework.StartsWith('net8')) OR $(TargetFramework.StartsWith('net9')) OR $(TargetFramework.StartsWith('net10')) ">true</NetCore>
-    <NetCore Condition="$(TargetFramework.StartsWith('net46')) ">false</NetCore>
+    <NetCore Condition="$(TargetFramework.StartsWith('net48')) ">false</NetCore>
   </PropertyGroup>
   
   <PropertyGroup Condition="$(NetCore) == 'true'">

@@ -1,8 +1,9 @@
 ﻿namespace Dashing.Tools.Tests.Migration {
     using System;
-    using System.Data.SqlClient;
 
     using Dashing.Migration;
+
+    using Microsoft.Data.SqlClient;
 
     using Xunit;
 

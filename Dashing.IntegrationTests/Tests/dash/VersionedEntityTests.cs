@@ -1,7 +1,6 @@
 ﻿namespace Dashing.IntegrationTests.Tests.dash {
     using System;
     using System.Collections.Generic;
-    using System.Data.SqlClient;
     using System.Linq;
 
     using Dapper;
@@ -9,6 +8,8 @@
     using Dashing.Cli;
     using Dashing.IntegrationTests.TestDomain.Versioned;
     using Dashing.IntegrationTests.TestDomain.Versioned.NonVersioned;
+
+    using Microsoft.Data.SqlClient;
 
     using Moq;
 
@@ -18,7 +19,7 @@
     public class VersionedEntityTests : IDisposable {
         private readonly ITestOutputHelper output;
 
-        private static string connectionString = "Server=localhost;Database=versionedentitytests;Trusted_Connection=True;MultipleActiveResultSets=True";
+        private static string connectionString = "Server=localhost;Database=versionedentitytests;Trusted_Connection=True;MultipleActiveResultSets=True;TrustServerCertificate=Yes";
 
         public VersionedEntityTests(ITestOutputHelper output) {
             this.output = output;

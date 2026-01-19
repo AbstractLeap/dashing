@@ -10,7 +10,7 @@
     },
     "migrate": {
       "commandName": "Project",
-      "commandLineArgs": "migrate -a \"C:\\Repos\\dashing\\Dashing.Tests\\bin\\Debug\\net46\\Dashing.Tests.dll\" -t \"Dashing.Tools.Tests.CustomConfig\" -c \"Data Source=.;Initial Catalog=dashingclitest;Integrated Security=True;\""
+      "commandLineArgs": "migrate -a \"C:\\Repos\\dashing\\Dashing.Tests\\bin\\Debug\\net48\\Dashing.Tests.dll\" -t \"Dashing.Tools.Tests.CustomConfig\" -c \"Data Source=.;Initial Catalog=dashingclitest;Integrated Security=True;\""
     }
   }
 }

@@ -2,10 +2,9 @@
     using System;
     using System.Collections.Generic;
     using System.Data.Common;
-#if NET46
+#if NET48
     using System.Data.Entity;
 #endif
-    using System.Data.SqlClient;
     using System.Diagnostics;
     using System.Linq;
 
@@ -19,6 +18,8 @@
     using Dashing.PerformanceTests.Domain;
     using Dashing.PerformanceTests.Tests.Dashing;
     using Dashing.PerformanceTests.Tests.EntityFramework;
+
+    using Microsoft.Data.SqlClient;
 
     //using LightSpeed.Domain;
 
@@ -137,7 +138,7 @@
                     "without Transaction"));
 
             // add EF
-#if NET46
+#if NET48
             tests.Add(
                 new Test(
                     Providers.EntityFramework,
@@ -188,7 +189,7 @@
                     "without Transaction"));
 
             // add EF
-#if NET46
+#if NET48
             tests.Add(
                 new Test(
                     Providers.EntityFramework,
@@ -241,7 +242,7 @@
                     }));
 
             // add EF
-#if NET46
+#if NET48
             tests.Add(
                 new Test(
                     Providers.EntityFramework,
@@ -372,7 +373,7 @@ select * from Comments where PostId = @id";
                     "without transaction"));
 
             // add EF
-#if NET46
+#if NET48
             tests.Add(
                 new Test(
                     Providers.EntityFramework,
@@ -511,7 +512,7 @@ select * from Comments where PostId = @id";
                     "By Id without transaction"));
 
             // add ef
-#if NET46
+#if NET48
             tests.Add(
                 new Test(
                     Providers.EntityFramework,
@@ -689,7 +690,7 @@ select * from Comments where PostId = @id";
                     "Without transaction"));
 
             // add ef
-#if NET46
+#if NET48
             tests.Add(
                 new Test(
                     Providers.EntityFramework,
@@ -785,7 +786,7 @@ select * from Comments where PostId = @id";
                     "By Id"));
 
             // add ef
-#if NET46
+#if NET48
             tests.Add(
                 new Test(
                     Providers.EntityFramework,

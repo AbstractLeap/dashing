@@ -1,5 +1,5 @@
 namespace Dashing.PerformanceTests.Tests.EntityFramework {
-#if NET46
+#if NET48
     using System.Data.Entity;
 
     using global::Dashing.PerformanceTests.Domain;
