@@ -1,6 +1,5 @@
 ﻿namespace Dashing.Engine.Dialects {
     using System;
-    using System.Data.SqlClient;
 
     public class DialectFactory {
         public ISqlDialect Create(string providerName, string connectionString) {
@@ -19,13 +18,6 @@
 
             switch (providerName) {
                 case "System.Data.SqlClient":
-                    var connectionStringBuilder = new SqlConnectionStringBuilder(connectionString);
-                    if (connectionStringBuilder.TypeSystemVersion.StartsWith("SQL Server 200")) {
-                        // this is the default for 2000, 2005, 2008
-                        return new SqlServerDialect();
-                    }
-
-                    // 2012 has nice paging!
                     return new SqlServer2012Dialect();
 
                 case "MySql.Data.MySqlClient":

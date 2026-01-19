@@ -23,15 +23,5 @@
             Assert.IsType<SqlServer2012Dialect>(
                 new DialectFactory().Create("System.Data.SqlClient", "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;Type System Version=SQL Server 2012;"));
         }
-
-        [Fact]
-        public void OldSqlDialect() {
-            Assert.IsType<SqlServerDialect>(
-                new DialectFactory().Create("System.Data.SqlClient", "Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;Type System Version=SQL Server 2000;"));
-            Assert.IsType<SqlServerDialect>(
-                new DialectFactory().Create("System.Data.SqlClient","Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;Type System Version=SQL Server 2005;"));
-            Assert.IsType<SqlServerDialect>(
-                new DialectFactory().Create("System.Data.SqlClient","Server=myServerAddress;Database=myDataBase;User Id=myUsername;Password=myPassword;Type System Version=SQL Server 2008;"));
-        }
     }
 }
