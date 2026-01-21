@@ -36,5 +36,16 @@
             await wrapper.Session.InsertAsync(comment);
             Assert.NotEqual(0, comment.CommentId);
         }
+
+        [Theory]
+        [MemberData(nameof(SessionDataGenerator.GetSessions), MemberType = typeof(SessionDataGenerator))]
+        public async Task InsertOrUpdateWorks(TestSessionWrapper wrapper) {
+            const string CommentContent = "Foo InsertOrUpdate";
+            var comment = new Comment { Content = CommentContent };
+            await wrapper.Session.InsertOrUpdateAsync(comment);
+            await wrapper.Session.InsertOrUpdateAsync(comment);
+            var comments = await wrapper.Session.Query<Comment>().Where(c => c.Content == CommentContent).ToListAsync();
+            Assert.Equal(1, comments.Count);
+        }
     }
 }
